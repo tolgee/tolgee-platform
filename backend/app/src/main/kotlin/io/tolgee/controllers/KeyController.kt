@@ -98,7 +98,7 @@ class KeyController(
   @Transactional
   @Operation(summary = "Deletes multiple keys by their IDs")
   fun delete(@RequestBody ids: Set<Long>?) {
-    for (key in keyService.findOptional(ids!!)) {
+    for (key in keyService.findAllWithProjectsAndMetas(ids!!)) {
       securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
     }
     keyService.deleteMultiple(ids)

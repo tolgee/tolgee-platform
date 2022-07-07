@@ -248,6 +248,7 @@
   "login_email_label" : "Email",
   "login_github_login_button" : "GitHub-Anmeldung",
   "login_google_login_button" : "Google-Anmeldung",
+  "login_oauth2_login_button": "OAuth2-Anmeldung",
   "login_login_button" : "Anmelden",
   "login_password_label" : "Passwort",
   "login_reset_password_button" : "Passwort zurücksetzen",

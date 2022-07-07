@@ -14,7 +14,7 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
     name = "sequenceGenerator",
     sequenceName = "hibernate_sequence",
     initialValue = 1000000000,
-    allocationSize = 100
+    allocationSize = 1000
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,

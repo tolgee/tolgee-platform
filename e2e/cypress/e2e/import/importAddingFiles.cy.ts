@@ -44,7 +44,7 @@ describe('Import Adding files', () => {
         'import/xliff/error_example.xliff',
       ]);
 
-      gcy('import-result-total-count-cell', { timeout: 10000 }).should('exist');
+      gcy('import-result-total-count-cell', { timeout: 60000 }).should('exist');
       getLanguageRow('larger.xlf (en)').should('contain.text', '1151');
       getLanguageRow('larger.xlf (cs)').should('contain.text', '1151');
       getLanguageRow('example.xliff (en)')

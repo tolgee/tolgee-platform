@@ -1968,4 +1968,7 @@
     <changeSet author="jenik (generated)" id="1655898263795-3">
         <addForeignKeyConstraint baseColumnNames="preferred_organization_id" baseTableName="user_preferences" constraintName="FKhypy4dq2btwfhsifbvr1nvjt0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1652252690925-1">
+        <alterSequence incrementBy="1000" sequenceName="hibernate_sequence"/>
+    </changeSet>
 </databaseChangeLog>

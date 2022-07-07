@@ -18,13 +18,11 @@ const StyledWrapper = styled('div')<{
   minheight: string | number;
   background: string | undefined;
 }>`
-  display: flex;
-  flex-grow: 1;
-  align-items: stretch;
+  display: grid;
   & .react-codemirror2 {
-    display: flex;
-    flex-grow: 1;
+    display: grid;
     position: relative;
+    align-self: stretch;
   }
 
   & .CodeMirror *::selection {
@@ -61,6 +59,7 @@ const StyledWrapper = styled('div')<{
       border: 0px;
       background: transparent;
     }
+
     .CodeMirror-lint-marker-error {
       width: 4px;
       background: red;

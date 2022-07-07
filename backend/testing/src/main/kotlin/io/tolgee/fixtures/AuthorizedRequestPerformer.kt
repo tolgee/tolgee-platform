@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Component
 @Scope("prototype")
-class SignedInRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
+class AuthorizedRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
 
   override fun performAuthPut(url: String, content: Any?): ResultActions {
     return mvc.perform(AuthorizedRequestFactory.loggedPut(url).withJsonContent(content))

@@ -15,6 +15,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.PrePersist
@@ -41,7 +42,7 @@ class Translation(
   @ActivityDescribingProp
   var text: String? = null
 ) : StandardAuditModel() {
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @field:NotNull
   lateinit var key: Key
 

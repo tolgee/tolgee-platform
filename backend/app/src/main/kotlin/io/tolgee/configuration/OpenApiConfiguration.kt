@@ -35,7 +35,7 @@ class OpenApiConfiguration {
       .externalDocs(
         ExternalDocumentation()
           .description("Tolgee documentation")
-          .url("https://toolkit.tolgee.io")
+          .url("https://tolgee.io")
       )
   }
 
@@ -170,7 +170,11 @@ class OpenApiConfiguration {
               }
             }
 
-            operation.parameters?.removeIf { it.name == "ak" && it.`in` == "query" }
+            operation.parameters?.removeIf {
+              val isQueryApiKey = it.name == "ak" && it.`in` == "query"
+              val isHeaderApiKey = it.name == "X-API-Key" && it.`in` == "header"
+              isQueryApiKey || isHeaderApiKey
+            }
           }
 
           operations.forEach { operation ->

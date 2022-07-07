@@ -14,6 +14,7 @@ open class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  var chatwootToken: String? = null,
   var openReplayApiKey: String? = null,
   var internal: InternalProperties = InternalProperties(),
   var fileStorageUrl: String = "",

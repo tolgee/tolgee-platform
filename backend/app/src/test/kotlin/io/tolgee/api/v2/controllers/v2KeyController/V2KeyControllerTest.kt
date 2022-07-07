@@ -331,6 +331,17 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `deletes multiple keys via post`() {
+    projectSupplier = { testData.project }
+    performProjectAuthDelete(
+      "keys", mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id))
+    ).andIsOk
+    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `does not delete multiple if not in project`() {
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.secondKey.id},${testData.firstKey.id}", null)

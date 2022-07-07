@@ -13,7 +13,7 @@ def getE2eTestsToRun() {
     def jobIndex = System.getenv("E2E_JOB_INDEX")
     def list = []
 
-    def dir = new File("$E2E_DIR/cypress/integration")
+    def dir = new File("$E2E_DIR/cypress/e2e")
     dir.eachFileRecurse(FileType.FILES) { file ->
         if (file.path.matches("^.*\\.tsx?${'$'}")) {
             list.add(file.path.replace("$E2E_DIR/", ""))

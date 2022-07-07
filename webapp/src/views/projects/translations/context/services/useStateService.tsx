@@ -1,5 +1,5 @@
 import { container } from 'tsyringe';
-import { useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 import { usePutTranslationState } from 'tg.service/TranslationHooks';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -17,8 +17,6 @@ type Props = {
 
 export const useStateService = ({ translations }: Props) => {
   const putTranslationState = usePutTranslationState();
-  const t = useTranslate();
-
   const project = useProject();
 
   const changeState = (data: SetTranslationState) =>
@@ -36,7 +34,7 @@ export const useStateService = ({ translations }: Props) => {
         },
         onError(e) {
           const parsed = parseErrorResponse(e);
-          parsed.forEach((error) => messaging.error(t(error)));
+          parsed.forEach((error) => messaging.error(<T>{error}</T>));
         },
       }
     );

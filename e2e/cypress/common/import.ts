@@ -19,7 +19,10 @@ export const assertInResultDialog = (text: string) => {
 };
 
 export const assertInResolutionDialog = (text: string) => {
-  getResolutionDialog().contains(text).scrollIntoView().should('be.visible');
+  getResolutionDialog()
+    .contains(text, { timeout: 20000 })
+    .scrollIntoView()
+    .should('be.visible');
 };
 
 export const findResolutionRow = (key: string) => {

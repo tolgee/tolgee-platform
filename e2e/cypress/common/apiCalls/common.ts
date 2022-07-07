@@ -7,7 +7,7 @@ import Chainable = Cypress.Chainable;
 
 let token = null;
 
-const v2apiFetch = (
+export const v2apiFetch = (
   input: string,
   init?: ArgumentTypes<typeof cy.request>[0],
   headers = {}
@@ -16,7 +16,7 @@ const v2apiFetch = (
     url: API_URL + '/v2/' + input,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
+      Authorization: token ? 'Bearer ' + token : undefined,
       ...headers,
     },
     ...init,
@@ -32,7 +32,7 @@ const apiFetch = (
     url: API_URL + '/api/' + input,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
+      Authorization: token ? 'Bearer ' + token : undefined,
       ...headers,
     },
     ...init,
@@ -71,6 +71,10 @@ export const login = (username = USERNAME, password = PASSWORD) => {
     });
 };
 
+export const logout = () => {
+  window.localStorage.removeItem('jwtToken');
+};
+
 export const getDefaultOrganization = () => {
   return v2apiFetch('organizations').then((res) => {
     const organizations =
@@ -86,7 +90,7 @@ export const getDefaultOrganization = () => {
 export const createProject = (createProjectDto: {
   name: string;
   languages: Partial<components['schemas']['LanguageDto']>[];
-}): Chainable<Cypress.Response> => {
+}): Chainable<Cypress.Response<any>> => {
   const create = () => {
     return getDefaultOrganization().then((org) => {
       return v2apiFetch('projects', {
@@ -104,7 +108,7 @@ export const createProject = (createProjectDto: {
     if (deletePromises) {
       return Cypress.Promise.all(deletePromises).then(() =>
         create()
-      ) as any as Chainable<Cypress.Response>;
+      ) as any as Chainable<Cypress.Response<any>>;
     }
     return create();
   });
@@ -243,7 +247,8 @@ export const getParsedEmailVerification = () =>
 
 export const getParsedEmailInvitationLink = () =>
   getAllEmails().then(
-    (r) => r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+    (emails) =>
+      emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
   );
 
 export const getAllEmails = () =>

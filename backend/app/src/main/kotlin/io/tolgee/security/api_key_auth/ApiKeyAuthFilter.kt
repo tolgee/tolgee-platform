@@ -24,11 +24,6 @@ class ApiKeyAuthFilter(
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
-
-  companion object {
-    val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/[a-zA-Z]+([a-zA-Z0-9]?)/?.*".toRegex()
-  }
-
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -59,7 +54,10 @@ class ApiKeyAuthFilter(
     filterChain.doFilter(request, response)
   }
 
-  private fun getApiKey(request: HttpServletRequest) = request.getParameter("ak")
+  private fun getApiKey(request: HttpServletRequest): String? {
+    return request.getHeader("X-API-Key")
+      ?: request.getParameter("ak")
+  }
 
   private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
     return this.getAccessAllowedAnnotation(request) != null

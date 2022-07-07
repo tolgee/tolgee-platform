@@ -37,10 +37,24 @@ class PublicConfigurationDTO(
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val openReplayApiKey = properties.openReplayApiKey
+  val chatwootToken = properties.chatwootToken
 
-  class AuthMethodsDTO(val github: OAuthPublicConfigDTO, val google: OAuthPublicConfigDTO)
+  class AuthMethodsDTO(
+    val github: OAuthPublicConfigDTO,
+    val google: OAuthPublicConfigDTO,
+    val oauth2: OAuthPublicExtendsConfigDTO
+  )
+
   data class OAuthPublicConfigDTO(val clientId: String?) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
+  }
+
+  data class OAuthPublicExtendsConfigDTO(
+    val clientId: String?,
+    val authorizationUrl: String?,
+    val scopes: List<String>?
+  ) {
+    val enabled: Boolean = !clientId.isNullOrEmpty()
   }
 
   data class MtServicesDTO(
@@ -61,7 +75,12 @@ class PublicConfigurationDTO(
         OAuthPublicConfigDTO(
           properties.authentication.github.clientId
         ),
-        OAuthPublicConfigDTO(properties.authentication.google.clientId)
+        OAuthPublicConfigDTO(properties.authentication.google.clientId),
+        OAuthPublicExtendsConfigDTO(
+          properties.authentication.oauth2.clientId,
+          properties.authentication.oauth2.authorizationUrl,
+          properties.authentication.oauth2.scopes
+        )
       )
     }
     passwordResettable = properties.authentication.nativeEnabled

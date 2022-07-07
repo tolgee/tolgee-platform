@@ -23,6 +23,7 @@ import ConfirmationDialog from './common/ConfirmationDialog';
 import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
+import { Chatwoot } from './Chatwoot';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -192,6 +193,7 @@ export class App extends React.Component {
         <Head />
         <BrowserRouter>
           <Redirection />
+          <Chatwoot />
           <MandatoryDataProvider>
             <Switch>
               <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
