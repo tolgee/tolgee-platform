@@ -24,8 +24,6 @@ import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import type API from '@openreplay/tracker';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')

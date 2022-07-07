@@ -8,8 +8,11 @@ export interface paths {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
   };
+  "/v2/user-preferences/set-language/{languageTag}": {
+    put: operations["setLanguage"];
+  };
   "/v2/projects/{projectId}": {
-    get: operations["get"];
+    get: operations["get_2"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
@@ -49,45 +52,59 @@ export interface paths {
     put: operations["setAutoTranslationSettings"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    /** Resolves translation conflict. The old translation will be overridden. */
     put: operations["resolveTranslationSetOverride"];
   };
   "/v2/projects/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    /** Resolves translation conflict. The old translation will be overridden. */
     put: operations["resolveTranslationSetOverride_1"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    /** Resolves translation conflict. The old translation will be kept. */
     put: operations["resolveTranslationSetKeepExisting"];
   };
   "/v2/projects/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    /** Resolves translation conflict. The old translation will be kept. */
     put: operations["resolveTranslationSetKeepExisting_1"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
+    /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
     put: operations["resolveTranslationSetOverride_2"];
   };
   "/v2/projects/import/result/languages/{languageId}/resolve-all/set-override": {
+    /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
     put: operations["resolveTranslationSetOverride_3"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    /** Resolves all translation conflicts for provided language. The old translations will be kept. */
     put: operations["resolveTranslationSetKeepExisting_2"];
   };
   "/v2/projects/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    /** Resolves all translation conflicts for provided language. The old translations will be kept. */
     put: operations["resolveTranslationSetKeepExisting_3"];
   };
   "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
     put: operations["selectExistingLanguage"];
   };
   "/v2/projects/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
     put: operations["selectExistingLanguage_1"];
   };
   "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
+    /** Resets existing language paired with language to import. */
     put: operations["resetExistingLanguage"];
   };
   "/v2/projects/import/result/languages/{importLanguageId}/reset-existing": {
+    /** Resets existing language paired with language to import. */
     put: operations["resetExistingLanguage_1"];
   };
   "/v2/projects/{projectId}/import/apply": {
+    /** Imports the data prepared in previous step */
     put: operations["applyImport"];
   };
   "/v2/projects/import/apply": {
+    /** Imports the data prepared in previous step */
     put: operations["applyImport_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
@@ -103,14 +120,14 @@ export interface paths {
     put: operations["setState_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_1"];
+    get: operations["get_3"];
     put: operations["update"];
-    delete: operations["delete_2"];
+    delete: operations["delete_4"];
   };
   "/v2/projects/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_2"];
+    get: operations["get_4"];
     put: operations["update_1"];
-    delete: operations["delete_3"];
+    delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
     put: operations["dismissAutoTranslatedState"];
@@ -135,12 +152,12 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_3"];
+    get: operations["get_5"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
   "/v2/projects/languages/{languageId}": {
-    get: operations["get_4"];
+    get: operations["get_6"];
     put: operations["editLanguage_1"];
     delete: operations["deleteLanguage_3"];
   };
@@ -191,26 +208,26 @@ export interface paths {
     delete: operations["removeAvatar_3"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_7"];
+    get: operations["get_9"];
     put: operations["update_2"];
-    delete: operations["delete_4"];
+    delete: operations["delete_6"];
   };
   "/api/organizations/{id}": {
-    get: operations["get_8"];
+    get: operations["get_10"];
     put: operations["update_3"];
-    delete: operations["delete_5"];
+    delete: operations["delete_7"];
   };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_4"];
-    delete: operations["delete_7"];
+    delete: operations["delete_9"];
   };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
     post: operations["create_12"];
-    delete: operations["delete_10"];
+    delete: operations["delete_12"];
   };
   "/api/project/keys": {
-    delete: operations["delete_11"];
+    delete: operations["delete_13"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
@@ -248,26 +265,42 @@ export interface paths {
   };
   "/v2/projects/{projectId}/keys": {
     post: operations["create_1"];
+    delete: operations["delete_2"];
   };
   "/v2/projects/keys/create": {
     post: operations["create_2"];
   };
   "/v2/projects/keys": {
     post: operations["create_3"];
+    delete: operations["delete_3"];
   };
   "/v2/projects/{projectId}/import/with-streaming-response": {
+    /** Prepares provided files to import, streams operation progress */
     post: operations["addFilesStreaming"];
   };
   "/v2/projects/import/with-streaming-response": {
+    /** Prepares provided files to import, streams operation progress */
     post: operations["addFilesStreaming_1"];
   };
   "/v2/projects/{projectId}/import": {
+    /** Prepares provided files to import. */
     post: operations["addFiles"];
+    /** Deletes prepared import data. */
     delete: operations["cancelImport"];
   };
   "/v2/projects/import": {
+    /** Prepares provided files to import. */
     post: operations["addFiles_1"];
+    /** Deletes prepared import data. */
     delete: operations["cancelImport_1"];
+  };
+  "/v2/projects/{projectId}/export": {
+    get: operations["export"];
+    post: operations["exportPost"];
+  };
+  "/v2/projects/export": {
+    get: operations["export_1"];
+    post: operations["exportPost_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     get: operations["getAll_3"];
@@ -298,10 +331,6 @@ export interface paths {
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
     post: operations["createLanguage"];
-  };
-  "/v2/projects/{projectId}/export": {
-    get: operations["export"];
-    post: operations["exportPost"];
   };
   "/v2/projects/keys/{keyId}/screenshots": {
     get: operations["getKeyScreenshots_2"];
@@ -380,6 +409,9 @@ export interface paths {
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
   };
+  "/v2/user-preferences": {
+    get: operations["get"];
+  };
   "/v2/slug/validate-project/{slug}": {
     get: operations["validateProjectSlug"];
   };
@@ -391,6 +423,10 @@ export interface paths {
   };
   "/api/address-part/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug_1"];
+  };
+  "/v2/public/initial-data": {
+    /** Returns initial data always required by frontend */
+    get: operations["get_1"];
   };
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
@@ -417,26 +453,35 @@ export interface paths {
     get: operations["getActivity_1"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
+    /** Returns translations prepared to import. */
     get: operations["getImportTranslations"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}": {
+    /** Returns language prepared to import. */
     get: operations["getImportLanguage"];
+    /** Deletes language prepared to import. */
     delete: operations["deleteLanguage"];
   };
   "/v2/projects/import/result/languages/{languageId}": {
+    /** Returns language prepared to import. */
     get: operations["getImportLanguage_1"];
+    /** Deletes language prepared to import. */
     delete: operations["deleteLanguage_1"];
   };
   "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
+    /** Returns issues for uploaded file. */
     get: operations["getImportFileIssues"];
   };
   "/v2/projects/import/result/files/{importFileId}/issues": {
+    /** Returns issues for uploaded file. */
     get: operations["getImportFileIssues_1"];
   };
   "/v2/projects/{projectId}/import/result": {
+    /** Returns the result of preparation. */
     get: operations["getImportResult"];
   };
   "/v2/projects/import/result": {
+    /** Returns the result of preparation. */
     get: operations["getImportResult_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
@@ -469,6 +514,15 @@ export interface paths {
   "/v2/projects/with-stats": {
     get: operations["getAllWithStatistics"];
   };
+  "/v2/preferred-organization": {
+    get: operations["getPreferred"];
+  };
+  "/v2/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_1"];
+  };
+  "/api/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_2"];
+  };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
   };
@@ -476,10 +530,10 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_5"];
+    get: operations["get_7"];
   };
   "/api/organizations/{slug}": {
-    get: operations["get_6"];
+    get: operations["get_8"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -497,6 +551,12 @@ export interface paths {
   "/api/organizations/{organizationId}/usage": {
     /** Returns current organization usage */
     get: operations["getUsage_1"];
+  };
+  "/v2/organizations/{organizationId}/projects-with-stats": {
+    get: operations["getAllWithStatistics_3"];
+  };
+  "/api/organizations/{organizationId}/projects-with-stats": {
+    get: operations["getAllWithStatistics_4"];
   };
   "/v2/organizations/{organizationId}/billing/plans": {
     get: operations["getPlans"];
@@ -539,7 +599,7 @@ export interface paths {
     get: operations["getMtCreditPrices"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_9"];
+    get: operations["get_11"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent"];
@@ -561,11 +621,11 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_8"];
+    delete: operations["delete_10"];
   };
   "/api/project/keys/{id}": {
     get: operations["getDeprecated_1"];
-    delete: operations["delete_9"];
+    delete: operations["delete_11"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -625,7 +685,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_6"];
+    delete: operations["delete_8"];
   };
   "/api/project/screenshots/{ids}": {
     delete: operations["deleteScreenshots_2"];
@@ -637,7 +697,7 @@ export interface paths {
     delete: operations["deleteInvitation_1"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_12"];
+    delete: operations["delete_14"];
   };
 }
 
@@ -938,7 +998,12 @@ export interface components {
       slug: string;
       description?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      currentUserRole: "MEMBER" | "OWNER";
+      /**
+       * The role of currently authorized user.
+       *
+       * Can be null when user has direct access to one of the projects owned by the organization.
+       */
+      currentUserRole?: "MEMBER" | "OWNER";
       avatar?: components["schemas"]["Avatar"];
     };
     OrganizationDto: {
@@ -986,7 +1051,7 @@ export interface components {
       languages: components["schemas"]["LanguageDto"][];
       /** Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
       slug?: string;
-      /** If not provided, project will be created in user scope */
+      /** Organization to create the project in */
       organizationId: number;
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
@@ -1034,6 +1099,19 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    ExportParams: {
+      languages?: string[];
+      format: "JSON" | "XLIFF";
+      splitByScope: boolean;
+      splitByScopeDelimiter: string;
+      splitByScopeDepth: number;
+      filterKeyId?: number[];
+      filterKeyIdNot?: number[];
+      filterTag?: string;
+      filterKeyPrefix?: string;
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
+      zip: boolean;
+    };
     TranslationCommentWithLangKeyDto: {
       keyId: number;
       languageId: number;
@@ -1073,19 +1151,6 @@ export interface components {
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
-    ExportParams: {
-      languages?: string[];
-      format: "JSON" | "XLIFF";
-      splitByScope: boolean;
-      splitByScopeDelimiter: string;
-      splitByScopeDepth: number;
-      filterKeyId?: number[];
-      filterKeyIdNot?: number[];
-      filterTag?: string;
-      filterKeyPrefix?: string;
-      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
-      zip: boolean;
-    };
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
@@ -1116,6 +1181,7 @@ export interface components {
     SignUpDto: {
       name: string;
       email: string;
+      organizationName?: string;
       password: string;
       invitationCode?: string;
       callbackUrl?: string;
@@ -1165,6 +1231,69 @@ export interface components {
     EditApiKeyDTO: {
       id: number;
       scopes: string[];
+    };
+    UserPreferencesModel: {
+      language?: string;
+      preferredOrganizationId?: number;
+    };
+    AuthMethodsDTO: {
+      github: components["schemas"]["OAuthPublicConfigDTO"];
+      google: components["schemas"]["OAuthPublicConfigDTO"];
+      oauth2: components["schemas"]["OAuthPublicExtendsConfigDTO"];
+    };
+    InitialDataModel: {
+      serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
+      userInfo?: components["schemas"]["UserAccountModel"];
+      preferredOrganization?: components["schemas"]["OrganizationModel"];
+    };
+    MtServiceDTO: {
+      enabled: boolean;
+      defaultEnabledForProject: boolean;
+    };
+    MtServicesDTO: {
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
+    };
+    OAuthPublicConfigDTO: {
+      clientId?: string;
+      enabled: boolean;
+    };
+    OAuthPublicExtendsConfigDTO: {
+      clientId?: string;
+      authorizationUrl?: string;
+      scopes?: string[];
+      enabled: boolean;
+    };
+    PublicBillingConfigurationDTO: {
+      enabled: boolean;
+    };
+    PublicConfigurationDTO: {
+      machineTranslationServices: components["schemas"]["MtServicesDTO"];
+      billing: components["schemas"]["PublicBillingConfigurationDTO"];
+      authentication: boolean;
+      authMethods?: components["schemas"]["AuthMethodsDTO"];
+      passwordResettable: boolean;
+      allowRegistrations: boolean;
+      screenshotsUrl: string;
+      maxUploadFileSize: number;
+      clientSentryDsn?: string;
+      needsEmailVerification: boolean;
+      userCanCreateProjects: boolean;
+      userCanCreateOrganizations: boolean;
+      socket: components["schemas"]["SocketIo"];
+      appName: string;
+      version: string;
+      showVersion: boolean;
+      maxTranslationTextLength: number;
+      recaptchaSiteKey?: string;
+      openReplayApiKey?: string;
+      chatwootToken?: string;
+    };
+    SocketIo: {
+      enabled: boolean;
+      port: number;
+      serverUrl?: string;
+      allowedTransports: string[];
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1601,52 +1730,6 @@ export interface components {
       username?: string;
       emailAwaitingVerification?: string;
     };
-    AuthMethodsDTO: {
-      github: components["schemas"]["OAuthPublicConfigDTO"];
-      google: components["schemas"]["OAuthPublicConfigDTO"];
-    };
-    MtServiceDTO: {
-      enabled: boolean;
-      defaultEnabledForProject: boolean;
-    };
-    MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
-      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
-    };
-    OAuthPublicConfigDTO: {
-      clientId?: string;
-      enabled: boolean;
-    };
-    PublicBillingConfigurationDTO: {
-      enabled: boolean;
-    };
-    PublicConfigurationDTO: {
-      machineTranslationServices: components["schemas"]["MtServicesDTO"];
-      billing: components["schemas"]["PublicBillingConfigurationDTO"];
-      authentication: boolean;
-      authMethods?: components["schemas"]["AuthMethodsDTO"];
-      passwordResettable: boolean;
-      allowRegistrations: boolean;
-      screenshotsUrl: string;
-      maxUploadFileSize: number;
-      clientSentryDsn?: string;
-      needsEmailVerification: boolean;
-      userCanCreateProjects: boolean;
-      userCanCreateOrganizations: boolean;
-      socket: components["schemas"]["SocketIo"];
-      appName: string;
-      version: string;
-      showVersion: boolean;
-      maxTranslationTextLength: number;
-      recaptchaSiteKey?: string;
-      openReplayApiKey?: string;
-    };
-    SocketIo: {
-      enabled: boolean;
-      port: number;
-      serverUrl?: string;
-      allowedTransports: string[];
-    };
     DeprecatedKeyDto: {
       /** This means name of key. Will be renamed in v2 */
       fullPathString: string;
@@ -1673,6 +1756,10 @@ export interface components {
       id?: number;
       code?: string;
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    };
+    DeleteKeysDto: {
+      /** IDs of keys to delete */
+      ids: number[];
     };
   };
 }
@@ -1729,7 +1816,30 @@ export interface operations {
       };
     };
   };
-  get: {
+  setLanguage: {
+    parameters: {
+      path: {
+        languageTag: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_2: {
     parameters: {
       path: {
         projectId: number;
@@ -2208,6 +2318,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves translation conflict. The old translation will be overridden. */
   resolveTranslationSetOverride: {
     parameters: {
       path: {
@@ -2233,6 +2344,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves translation conflict. The old translation will be overridden. */
   resolveTranslationSetOverride_1: {
     parameters: {
       path: {
@@ -2257,6 +2369,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves translation conflict. The old translation will be kept. */
   resolveTranslationSetKeepExisting: {
     parameters: {
       path: {
@@ -2282,6 +2395,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves translation conflict. The old translation will be kept. */
   resolveTranslationSetKeepExisting_1: {
     parameters: {
       path: {
@@ -2306,6 +2420,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
   resolveTranslationSetOverride_2: {
     parameters: {
       path: {
@@ -2330,6 +2445,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
   resolveTranslationSetOverride_3: {
     parameters: {
       path: {
@@ -2353,6 +2469,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves all translation conflicts for provided language. The old translations will be kept. */
   resolveTranslationSetKeepExisting_2: {
     parameters: {
       path: {
@@ -2377,6 +2494,7 @@ export interface operations {
       };
     };
   };
+  /** Resolves all translation conflicts for provided language. The old translations will be kept. */
   resolveTranslationSetKeepExisting_3: {
     parameters: {
       path: {
@@ -2400,6 +2518,7 @@ export interface operations {
       };
     };
   };
+  /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
   selectExistingLanguage: {
     parameters: {
       path: {
@@ -2425,6 +2544,7 @@ export interface operations {
       };
     };
   };
+  /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
   selectExistingLanguage_1: {
     parameters: {
       path: {
@@ -2449,6 +2569,7 @@ export interface operations {
       };
     };
   };
+  /** Resets existing language paired with language to import. */
   resetExistingLanguage: {
     parameters: {
       path: {
@@ -2473,6 +2594,7 @@ export interface operations {
       };
     };
   };
+  /** Resets existing language paired with language to import. */
   resetExistingLanguage_1: {
     parameters: {
       path: {
@@ -2496,6 +2618,7 @@ export interface operations {
       };
     };
   };
+  /** Imports the data prepared in previous step */
   applyImport: {
     parameters: {
       query: {
@@ -2522,6 +2645,7 @@ export interface operations {
       };
     };
   };
+  /** Imports the data prepared in previous step */
   applyImport_1: {
     parameters: {
       query: {
@@ -2659,7 +2783,7 @@ export interface operations {
       };
     };
   };
-  get_1: {
+  get_3: {
     parameters: {
       path: {
         translationId: number;
@@ -2721,7 +2845,7 @@ export interface operations {
       };
     };
   };
-  delete_2: {
+  delete_4: {
     parameters: {
       path: {
         commentId: number;
@@ -2745,7 +2869,7 @@ export interface operations {
       };
     };
   };
-  get_2: {
+  get_4: {
     parameters: {
       path: {
         translationId: number;
@@ -2805,7 +2929,7 @@ export interface operations {
       };
     };
   };
-  delete_3: {
+  delete_5: {
     parameters: {
       path: {
         commentId: number;
@@ -3189,7 +3313,7 @@ export interface operations {
       };
     };
   };
-  get_3: {
+  get_5: {
     parameters: {
       path: {
         languageId: number;
@@ -3274,7 +3398,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_6: {
     parameters: {
       path: {
         languageId: number;
@@ -3821,7 +3945,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_9: {
     parameters: {
       path: {
         id: number;
@@ -3880,7 +4004,7 @@ export interface operations {
       };
     };
   };
-  delete_4: {
+  delete_6: {
     parameters: {
       path: {
         id: number;
@@ -3903,7 +4027,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_10: {
     parameters: {
       path: {
         id: number;
@@ -3962,7 +4086,7 @@ export interface operations {
       };
     };
   };
-  delete_5: {
+  delete_7: {
     parameters: {
       path: {
         id: number;
@@ -4017,7 +4141,7 @@ export interface operations {
       };
     };
   };
-  delete_7: {
+  delete_9: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -4096,7 +4220,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_12: {
     parameters: {
       path: {
         projectId: number;
@@ -4124,7 +4248,7 @@ export interface operations {
       };
     };
   };
-  delete_11: {
+  delete_13: {
     responses: {
       /** OK */
       200: unknown;
@@ -4564,6 +4688,34 @@ export interface operations {
       };
     };
   };
+  delete_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysDto"];
+      };
+    };
+  };
   create_2: {
     parameters: {};
     responses: {
@@ -4620,6 +4772,31 @@ export interface operations {
       };
     };
   };
+  delete_3: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysDto"];
+      };
+    };
+  };
+  /** Prepares provided files to import, streams operation progress */
   addFilesStreaming: {
     parameters: {
       path: {
@@ -4654,6 +4831,7 @@ export interface operations {
       };
     };
   };
+  /** Prepares provided files to import, streams operation progress */
   addFilesStreaming_1: {
     responses: {
       /** OK */
@@ -4683,6 +4861,7 @@ export interface operations {
       };
     };
   };
+  /** Prepares provided files to import. */
   addFiles: {
     parameters: {
       path: {
@@ -4717,6 +4896,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes prepared import data. */
   cancelImport: {
     parameters: {
       path: {
@@ -4740,6 +4920,7 @@ export interface operations {
       };
     };
   };
+  /** Prepares provided files to import. */
   addFiles_1: {
     parameters: {};
     responses: {
@@ -4770,6 +4951,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes prepared import data. */
   cancelImport_1: {
     parameters: {};
     responses: {
@@ -4786,6 +4968,201 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  export: {
+    parameters: {
+      query: {
+        /**
+         * Languages to be contained in export.
+         *
+         * If null, all languages are exported
+         */
+        languages?: string[];
+        /** Format to export to */
+        format?: "JSON" | "XLIFF";
+        /** When true translations are split to directories by scopes */
+        splitByScope?: boolean;
+        /**
+         * Scope delimiter.
+         *
+         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+         */
+        splitByScopeDelimiter?: string;
+        /**
+         * Maximum depth of scoping.
+         *
+         * e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
+         *
+         * For depth 2, resulting scopes are  "home" -> "header".
+         */
+        splitByScopeDepth?: number;
+        /** Filter key IDs to be contained in export */
+        filterKeyId?: number[];
+        /** Filter key IDs not to be contained in export */
+        filterKeyIdNot?: number[];
+        /** Filter keys tagged by */
+        filterTag?: string;
+        /** Filter keys with prefix */
+        filterKeyPrefix?: string;
+        /** Filter translations with state. By default, everything except untranslated is exported. */
+        filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
+        /**
+         * If false, it doesn't return zip of files, but it returns single file.
+         *
+         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
+         */
+        zip?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  exportPost: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportParams"];
+      };
+    };
+  };
+  export_1: {
+    parameters: {
+      query: {
+        /**
+         * Languages to be contained in export.
+         *
+         * If null, all languages are exported
+         */
+        languages?: string[];
+        /** Format to export to */
+        format?: "JSON" | "XLIFF";
+        /** When true translations are split to directories by scopes */
+        splitByScope?: boolean;
+        /**
+         * Scope delimiter.
+         *
+         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+         */
+        splitByScopeDelimiter?: string;
+        /**
+         * Maximum depth of scoping.
+         *
+         * e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
+         *
+         * For depth 2, resulting scopes are  "home" -> "header".
+         */
+        splitByScopeDepth?: number;
+        /** Filter key IDs to be contained in export */
+        filterKeyId?: number[];
+        /** Filter key IDs not to be contained in export */
+        filterKeyIdNot?: number[];
+        /** Filter keys tagged by */
+        filterTag?: string;
+        /** Filter keys with prefix */
+        filterKeyPrefix?: string;
+        /** Filter translations with state. By default, everything except untranslated is exported. */
+        filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
+        /**
+         * If false, it doesn't return zip of files, but it returns single file.
+         *
+         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
+         */
+        zip?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  exportPost_1: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportParams"];
       };
     };
   };
@@ -5186,107 +5563,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LanguageDto"];
-      };
-    };
-  };
-  export: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        /**
-         * Languages to be contained in export.
-         *
-         * If null, all languages are exported
-         */
-        languages?: string[];
-        /** Format to export to */
-        format?: "JSON" | "XLIFF";
-        /** When true translations are split to directories by scopes */
-        splitByScope?: boolean;
-        /**
-         * Scope delimiter.
-         *
-         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
-         */
-        splitByScopeDelimiter?: string;
-        /**
-         * Maximum depth of scoping.
-         *
-         * e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
-         *
-         * For depth 2, resulting scopes are  "home" -> "header".
-         */
-        splitByScopeDepth?: number;
-        /** Filter key IDs to be contained in export */
-        filterKeyId?: number[];
-        /** Filter key IDs not to be contained in export */
-        filterKeyIdNot?: number[];
-        /** Filter keys tagged by */
-        filterTag?: string;
-        /** Filter keys with prefix */
-        filterKeyPrefix?: string;
-        /** Filter translations with state. By default, everything except untranslated is exported. */
-        filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
-        /**
-         * If false, it doesn't return zip of files, but it returns single file.
-         *
-         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
-         */
-        zip?: boolean;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  exportPost: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExportParams"];
       };
     };
   };
@@ -6121,6 +6397,28 @@ export interface operations {
       };
     };
   };
+  get: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserPreferencesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   validateProjectSlug: {
     parameters: {
       path: {
@@ -6213,6 +6511,29 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns initial data always required by frontend */
+  get_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["InitialDataModel"];
         };
       };
       /** Bad Request */
@@ -6482,6 +6803,7 @@ export interface operations {
       };
     };
   };
+  /** Returns translations prepared to import. */
   getImportTranslations: {
     parameters: {
       path: {
@@ -6521,6 +6843,7 @@ export interface operations {
       };
     };
   };
+  /** Returns language prepared to import. */
   getImportLanguage: {
     parameters: {
       path: {
@@ -6549,6 +6872,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes language prepared to import. */
   deleteLanguage: {
     parameters: {
       path: {
@@ -6573,6 +6897,7 @@ export interface operations {
       };
     };
   };
+  /** Returns language prepared to import. */
   getImportLanguage_1: {
     parameters: {
       path: {
@@ -6600,6 +6925,7 @@ export interface operations {
       };
     };
   };
+  /** Deletes language prepared to import. */
   deleteLanguage_1: {
     parameters: {
       path: {
@@ -6623,6 +6949,7 @@ export interface operations {
       };
     };
   };
+  /** Returns issues for uploaded file. */
   getImportFileIssues: {
     parameters: {
       path: {
@@ -6659,6 +6986,7 @@ export interface operations {
       };
     };
   };
+  /** Returns issues for uploaded file. */
   getImportFileIssues_1: {
     parameters: {
       path: {
@@ -6694,6 +7022,7 @@ export interface operations {
       };
     };
   };
+  /** Returns the result of preparation. */
   getImportResult: {
     parameters: {
       query: {
@@ -6729,6 +7058,7 @@ export interface operations {
       };
     };
   };
+  /** Returns the result of preparation. */
   getImportResult_1: {
     parameters: {
       query: {
@@ -7130,6 +7460,100 @@ export interface operations {
       };
     };
   };
+  getPreferred: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_2: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllProjects: {
     parameters: {
       path: {
@@ -7202,7 +7626,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_7: {
     parameters: {
       path: {
         slug: string;
@@ -7229,7 +7653,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_8: {
     parameters: {
       path: {
         slug: string;
@@ -7377,6 +7801,78 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["UsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_3: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_4: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -7752,7 +8248,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_11: {
     parameters: {
       path: {
         keyId: number;
@@ -7958,7 +8454,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_10: {
     parameters: {
       path: {
         id: number;
@@ -8009,7 +8505,7 @@ export interface operations {
       };
     };
   };
-  delete_9: {
+  delete_11: {
     parameters: {
       path: {
         id: number;
@@ -8510,7 +9006,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_8: {
     parameters: {
       path: {
         ids: number[];
@@ -8603,7 +9099,7 @@ export interface operations {
       };
     };
   };
-  delete_12: {
+  delete_14: {
     parameters: {
       path: {
         key: string;
