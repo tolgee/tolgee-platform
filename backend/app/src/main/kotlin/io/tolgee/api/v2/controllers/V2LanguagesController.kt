@@ -94,7 +94,7 @@ class V2LanguagesController(
   @GetMapping(value = [""])
   @AccessWithApiKey
   @AccessWithAnyProjectPermission
-  @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
+  @Operation(summary = "Returns all project languages", tags = ["Languages"])
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
     @ParameterObject pageable: Pageable
