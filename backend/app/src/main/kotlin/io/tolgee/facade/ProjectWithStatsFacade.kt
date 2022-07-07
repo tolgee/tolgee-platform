@@ -20,13 +20,19 @@ class ProjectWithStatsFacade(
   private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
   private val projectService: ProjectService
 ) {
-
-  fun getPagedModelWithStats(projects: Page<ProjectWithLanguagesView>): PagedModel<ProjectWithStatsModel> {
+  fun getPagedModelWithStats(
+    projects: Page<ProjectWithLanguagesView>,
+  ): PagedModel<ProjectWithStatsModel> {
     val projectIds = projects.content.map { it.id }
     val stats = projectStatsService.getProjectsTotals(projectIds).associateBy { it.projectId }
     val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
-      .associate { it.id to it.languages.toList() }
-    val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
+      .associateTo(linkedMapOf()) { it.id to it.languages.toList() }
+    val projectsWithStatsContent = projects.content.map { project ->
+      val projectLanguages = (languages[project.id] ?: listOf())
+        .sortedBy { it.name }
+        .sortedBy { it.id != project.baseLanguage?.id }
+      ProjectWithStatsView(project, stats[project.id]!!, projectLanguages)
+    }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
   }
