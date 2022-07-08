@@ -159,7 +159,7 @@ dependencies {
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
     implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
-    implementation "com.vladmihalcea:hibernate-types-55:2.14.1"
+    implementation "com.vladmihalcea:hibernate-types-55:2.16.3"
     liquibaseRuntime "com.vladmihalcea:hibernate-types-55:2.14.1"
 
     /**
