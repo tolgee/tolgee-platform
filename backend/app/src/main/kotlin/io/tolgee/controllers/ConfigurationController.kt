@@ -2,6 +2,7 @@ package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PublicConfigurationDTO
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.MtServiceType
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Public configuration controller")
 class ConfigurationController @Autowired constructor(
   private val configuration: TolgeeProperties,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val publicBillingConfProvider: PublicBillingConfProvider
 ) : IController {
 
   @GetMapping(value = ["configuration"])
@@ -26,9 +28,13 @@ class ConfigurationController @Autowired constructor(
   fun getPublicConfiguration(): PublicConfigurationDTO {
     val machineTranslationServices = PublicConfigurationDTO.MtServicesDTO(
       defaultPrimaryService = getPrimaryMtService(),
-      getMtServices()
+      services = getMtServices()
     )
-    return PublicConfigurationDTO(configuration, machineTranslationServices)
+    return PublicConfigurationDTO(
+      properties = configuration,
+      machineTranslationServices = machineTranslationServices,
+      billing = publicBillingConfProvider()
+    )
   }
 
   private fun getPrimaryMtService(): MtServiceType? {

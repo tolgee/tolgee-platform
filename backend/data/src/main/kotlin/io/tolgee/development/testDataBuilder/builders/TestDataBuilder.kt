@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.builders
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 
 class TestDataBuilder {
   class DATA {
@@ -10,23 +11,44 @@ class TestDataBuilder {
     val projects = mutableListOf<ProjectBuilder>()
     val organizations = mutableListOf<OrganizationBuilder>()
     val mtCreditBuckets = mutableListOf<MtCreditBucketBuilder>()
+
+    /**
+     * These data are populated by external modules and saved via one of the
+     * AdditionalTestDataSavers
+     */
+    var additionalData = mutableMapOf<String, Any>()
   }
 
   val data = DATA()
 
-  fun addUserAccount(ft: UserAccount.() -> Unit): UserAccountBuilder {
+  fun addUserAccountWithoutOrganization(ft: UserAccount.() -> Unit): UserAccountBuilder {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)
     ft(builder.self)
     return builder
   }
 
+  fun addUserAccount(ft: UserAccount.() -> Unit): UserAccountBuilder {
+    val builder = UserAccountBuilder(this)
+    data.userAccounts.add(builder)
+    ft(builder.self)
+    val organizationBuilder = addOrganization {
+      name = if (builder.self.name.isNotBlank()) builder.self.name else builder.self.username
+    }.build {
+      addRole {
+        user = builder.self
+        type = OrganizationRoleType.OWNER
+      }
+    }
+    builder.defaultOrganizationBuilder = organizationBuilder
+    return builder
+  }
+
   fun addProject(
-    userOwner: UserAccount? = null,
     organizationOwner: Organization? = null,
     ft: Project.() -> Unit
   ): ProjectBuilder {
-    val projectBuilder = ProjectBuilder(userOwner, organizationOwner, testDataBuilder = this)
+    val projectBuilder = ProjectBuilder(organizationOwner, testDataBuilder = this)
     data.projects.add(projectBuilder)
     ft(projectBuilder.self)
     return projectBuilder

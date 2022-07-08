@@ -21,4 +21,16 @@ class SuggestResultModel(
   val machineTranslations: Map<MtServiceType, String?>?,
   val translationCreditsBalanceBefore: Long,
   val translationCreditsBalanceAfter: Long,
+
+  @Schema(
+    description = "Extra credits are neither refilled nor reset every period." +
+      " User's can refill them on Tolgee cloud."
+  )
+  val translationExtraCreditsBalanceBefore: Long,
+
+  @Schema(
+    description = "Extra credits are neither refilled nor reset every period." +
+      " User's can refill them on Tolgee cloud."
+  )
+  val translationExtraCreditsBalanceAfter: Long,
 ) : RepresentationModel<KeyModel>(), Serializable

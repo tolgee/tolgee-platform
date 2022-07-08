@@ -47,7 +47,6 @@ class LanguageService(
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByLanguage(language.id)
-    mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
   }
@@ -106,8 +105,14 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
-  fun deleteAllByProject(projectId: Long?) {
-    languageRepository.deleteAllByProjectId(projectId)
+  fun deleteAllByProject(projectId: Long) {
+    findAll(projectId).forEach {
+      deleteLanguage(it.id)
+    }
+  }
+
+  fun save(language: Language): Language {
+    return this.languageRepository.save(language)
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {

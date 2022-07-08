@@ -11,7 +11,7 @@ import javax.validation.constraints.Size
 data class OrganizationDto(
   @field:NotBlank @field:Size(min = 3, max = 50)
   @Schema(example = "Beautiful organization")
-  var name: String? = null,
+  var name: String = "",
 
   @Schema(example = "This is a beautiful organization full of beautiful and clever people")
   var description: String? = null,

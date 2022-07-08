@@ -23,10 +23,10 @@ class ProjectsTestData : BaseTestData() {
       projectBuilder.addKey {
         name = "Untranslated key"
       }
-      addProject(user) {
+      addProject {
         project2 = this
         name = "Project 2"
-      }.build {
+      }.build buildProject@{
 
         addPermission {
           user = this@ProjectsTestData.user
@@ -36,6 +36,7 @@ class ProjectsTestData : BaseTestData() {
         project2English = addLanguage {
           name = "English"
           tag = "en"
+          this@buildProject.self.baseLanguage = this
         }.self
 
         project2Deutsch = addLanguage {

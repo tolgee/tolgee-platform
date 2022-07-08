@@ -32,10 +32,10 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   }
 
   private fun doCreate(username: String): ApiKeyDTO {
-    return doCreate(dbPopulator.createBase(generateUniqueString(), username))
+    return doCreate(dbPopulator.createBase(generateUniqueString(), username).project)
   }
 
-  private fun doCreate(project: Project = dbPopulator.createBase(generateUniqueString())): ApiKeyDTO {
+  private fun doCreate(project: Project = dbPopulator.createBase(generateUniqueString()).project): ApiKeyDTO {
     val requestDto = CreateApiKeyDto(
       projectId = project.id,
       scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.KEYS_EDIT)
@@ -48,7 +48,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   @Test
   fun create_failure_no_scopes() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val requestDto = CreateApiKeyDto(base.id, setOf())
+    val requestDto = CreateApiKeyDto(base.project.id, setOf())
     val mvcResult = performAuthPost("/api/apiKeys", requestDto)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
     assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
@@ -89,17 +89,17 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
 
   @Test
   fun getAllByUser() {
-    val project = dbPopulator.createBase(generateUniqueString(), "ben")
+    val base = dbPopulator.createBase(generateUniqueString(), "ben")
     loginAsUser("ben")
-    val apiKey1 = apiKeyService.create(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
-    val project2 = dbPopulator.createBase(generateUniqueString(), "ben")
+    val apiKey1 = apiKeyService.create(base.userAccount, setOf(ApiScope.KEYS_EDIT), base.project)
+    val base2 = dbPopulator.createBase(generateUniqueString(), "ben")
     val apiKey2 = apiKeyService.create(
-      userAccount = project2.permissions.first().user!!,
+      userAccount = base2.userAccount,
       scopes = setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW),
-      project = project
+      project = base.project
     )
     val testUser = dbPopulator.createUserIfNotExists("testUser")
-    val user2Key = apiKeyService.create(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
+    val user2Key = apiKeyService.create(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), base.project)
     val apiKeyDTO = doCreate("ben")
     var mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
     var set = mvcResult.mapResponseTo<Set<ApiKeyDTO?>>()
@@ -112,12 +112,17 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
 
   @Test
   fun allByProject() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val apiKeyDTO = doCreate(project)
-    val apiKey1 = apiKeyService.create(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
-    val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername)
+    val apiKey1 = apiKeyService.create(
+      base.userAccount,
+      setOf(ApiScope.KEYS_EDIT),
+      project
+    )
+    val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername).project
     val apiKey2 = apiKeyService.create(
-      project2.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project
+      base.userAccount, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project
     )
     val testUser = dbPopulator.createUserIfNotExists("testUser")
     val user2Key = apiKeyService.create(

@@ -1,14 +1,14 @@
 import {
   createUser,
   deleteAllEmails,
-  deleteUserWithEmailVerification,
+  deleteUser,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
-import { assertMessage, gcy } from '../../common/shared';
+import { assertMessage } from '../../common/shared';
 
 describe('User profile', () => {
   const INITIAL_EMAIL = 'honza@honza.com';
@@ -18,13 +18,13 @@ describe('User profile', () => {
   const NEW_EMAIL = 'pavel@honza.com';
 
   function visit() {
-    cy.visit(HOST + '/user');
+    cy.visit(HOST + '/account/profile');
   }
 
   beforeEach(() => {
     enableEmailVerification();
-    deleteUserWithEmailVerification(INITIAL_EMAIL);
-    deleteUserWithEmailVerification(NEW_EMAIL);
+    deleteUser(INITIAL_EMAIL);
+    deleteUser(NEW_EMAIL);
     createUser(INITIAL_EMAIL, INITIAL_PASSWORD);
     login(INITIAL_EMAIL, INITIAL_PASSWORD);
     deleteAllEmails();
@@ -63,21 +63,21 @@ describe('User profile', () => {
   });
 
   it('will change user settings', () => {
-    cy.visit(`${HOST}/user`);
+    cy.visit(`${HOST}/account/profile`);
     cy.contains('User profile').should('be.visible');
     cy.xpath("//*[@name='name']").clear().type('New name');
     cy.xpath("//*[@name='email']").clear().type('honza@honza.com');
     cy.contains('Save').click();
     cy.contains('User data updated').should('be.visible');
     cy.reload();
-    cy.contains('New name').should('be.visible');
+    cy.contains('User profile').should('be.visible');
+    cy.xpath("//*[@name='name']").should('have.value', 'New name');
     cy.xpath("//*[@name='email']").should('have.value', 'honza@honza.com');
-    gcy('global-base-view-title').should('contain', 'New name');
   });
 
   it('will fail when user exists', () => {
     createUser(NEW_EMAIL);
-    cy.visit(`${HOST}/user`);
+    cy.visit(`${HOST}/account/profile`);
     cy.contains('User profile').should('be.visible');
     cy.xpath("//*[@name='name']").clear().type('New name');
     cy.xpath("//*[@name='email']").clear().type(NEW_EMAIL);
@@ -88,7 +88,7 @@ describe('User profile', () => {
   });
 
   it('changes password', () => {
-    cy.visit(`${HOST}/user`);
+    cy.visit(`${HOST}/account/profile`);
     const superNewPassword = 'super_new_password';
     cy.xpath("//*[@name='password']").clear().type(superNewPassword);
     cy.xpath("//*[@name='passwordRepeat']").clear().type(superNewPassword);

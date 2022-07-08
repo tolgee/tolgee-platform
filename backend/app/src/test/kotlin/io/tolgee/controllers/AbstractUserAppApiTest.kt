@@ -28,6 +28,6 @@ abstract class AbstractUserAppApiTest : AbstractControllerTest() {
       scopesSet = ApiScope.values().toSet()
     }
     val base = dbPopulator.createBase(generateUniqueString())
-    return ApiKeyDTO.fromEntity(apiKeyService.create(base.permissions.first().user!!, scopesSet, base))
+    return ApiKeyDTO.fromEntity(apiKeyService.create(base.userAccount, scopesSet, base.project))
   }
 }

@@ -16,8 +16,12 @@ describe('Project stats', () => {
     cy.visit(HOST);
   });
 
+  afterEach(() => {
+    projectsDashboardData.clean();
+  });
+
   it('Activity', () => {
-    createProject('Project with activity', 'Test User');
+    createProject('Project with activity', 'test_username');
     enterProject('Project with activity');
     createTranslation('new translation', 'english translation');
     createTag('new tag');

@@ -12,7 +12,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'org.springframework.boot'
     id 'java'
-    id 'org.liquibase.gradle' version '2.0.4'
+    id 'org.liquibase.gradle' version "${liquibaseGradleVersion}"
     id 'org.jetbrains.kotlin.jvm'
     id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
     id "org.jetbrains.kotlin.kapt"
@@ -67,47 +67,9 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
-def liveDb = [
-        url         : 'jdbc:postgresql://localhost:55432/postgres',
-        referenceUrl: 'hibernate:spring:io.tolgee' +
-                '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
-                '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
-                '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
-        username    : 'postgres',
-        password    : 'postgres',
-        driver      : "org.postgresql.Driver"
-]
+apply from: "$rootDir/gradle/liquibase.gradle"
 
-liquibase {
-    activities {
-        //noinspection GroovyAssignabilityCheck
-        main {
-            changeLogFile 'src/main/resources/db/changelog/schema.xml'
-            url liveDb.url
-            referenceUrl liveDb.referenceUrl
-            if (liveDb.username) {
-                username liveDb.username
-            }
-            if (liveDb.password) {
-                password liveDb.password
-            }
-
-            driver liveDb.driver
-            excludeObjects "table:batch_job_execution_context," +
-                    "batch_step_execution_seq," +
-                    "batch_job_seq," +
-                    "batch_job_execution_seq," +
-                    "batch_step_execution_context," +
-                    "batch_step_execution," +
-                    "batch_job_instance," +
-                    "table:batch_job_execution," +
-                    "table:batch_job_execution_params," +
-                    "hibernate_sequence," +
-                    "revision_sequence_generator," +
-                    "activity_sequence"
-        }
-    }
-}
+configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
 
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
@@ -122,10 +84,6 @@ compileKotlin {
  */
 def JJWT_VERSION = findProperty("jjwtVersion")
 def SPRING_DOC_VERSION = findProperty("springDocVersion")
-
-
-def LIQUIBASE_VERSION = "4.7.1"
-def LIQUIBASE_HIBERNATE_VERSION = "4.7.1"
 
 dependencies {
     /**
@@ -154,11 +112,11 @@ dependencies {
     /**
      * Liquibase
      */
-    implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
-    liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
+    implementation("org.liquibase:liquibase-core:$liquibaseVersion")
+    liquibaseRuntime("org.liquibase:liquibase-core:$liquibaseVersion")
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
-    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
+    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$liquibaseHibernateVersion")
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -196,10 +154,10 @@ dependencies {
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+    implementation libs.jacksonModuleKotlin
     implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'jaxen:jaxen:1.2.0'
-    compile "com.sendinblue:sib-api-v3-sdk:5.3.0"
+    implementation libs.sendInBlue
     implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
     implementation "com.vladmihalcea:hibernate-types-55:2.14.1"
     liquibaseRuntime "com.vladmihalcea:hibernate-types-55:2.14.1"

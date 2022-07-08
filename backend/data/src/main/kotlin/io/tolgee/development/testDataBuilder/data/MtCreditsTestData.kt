@@ -27,12 +27,7 @@ class MtCreditsTestData : BaseTestData() {
     root.addProject {
       name = "Organization project"
       organizationOwner = organization
-      userOwner = null
       organizationProject = this
-    }
-
-    root.data.userAccounts[0].addMtCreditBucket {
-      credits = 15000
     }
   }
 }

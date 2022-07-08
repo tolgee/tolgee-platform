@@ -1,5 +1,6 @@
 package io.tolgee.component.lockingProvider
 
+import io.tolgee.component.LockingProvider
 import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock

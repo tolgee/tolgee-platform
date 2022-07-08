@@ -16,6 +16,16 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('stripe', 'com.stripe', 'stripe-java').version('20.88.0')
+            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
+            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4')
+        }
+    }
+}
+
 include ':server-app'
 project(':server-app').projectDir = new File('backend/app')
 
@@ -23,10 +33,10 @@ include ':data'
 project(':data').projectDir = new File('backend/data')
 
 include ':billing-app'
-project(':billing-app').projectDir = new File('../billing_/app')
+project(':billing-app').projectDir = new File('../billing/app')
 
-include ':billing-integration-tests'
-project(':billing-integration-tests').projectDir = new File('../billing_/integration-tests')
+include ':billing-test'
+project(':billing-test').projectDir = new File('../billing/tests')
 
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')

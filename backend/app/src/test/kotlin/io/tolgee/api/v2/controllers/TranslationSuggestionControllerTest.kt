@@ -6,6 +6,7 @@ import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
+import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.time.DateUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -43,6 +45,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var mtBucketSizeProvider: MtBucketSizeProvider
+
+  @Autowired
+  @MockBean
   lateinit var googleTranslate: Translate
 
   @Autowired
@@ -56,6 +62,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Autowired
   @MockBean
   lateinit var cacheManager: CacheManager
+
   lateinit var cacheMock: Cache
 
   @BeforeEach
@@ -64,10 +71,17 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
     mockCurrentDate { Date() }
+    mockDefaultMtBucketSize(1000)
     cacheMock = mock()
     val rateLimitsCacheMock = mock<Cache>()
     whenever(cacheManager.getCache(eq(Caches.RATE_LIMITS))).thenReturn(rateLimitsCacheMock)
     whenever(cacheManager.getCache(eq(Caches.MACHINE_TRANSLATIONS))).thenReturn(cacheMock)
+  }
+
+  private fun mockDefaultMtBucketSize(size: Long) {
+    whenever(mtBucketSizeProvider.getSize(anyOrNull())).thenAnswer {
+      size
+    }
   }
 
   private fun initMachineTranslationMocks() {
@@ -206,7 +220,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (Google, AWS, DeepL)`() {
-    machineTranslationProperties.freeCreditsAmount = 3000
+    mockDefaultMtBucketSize(3000)
     testData.enableAll()
     testDataService.saveTestData(testData.root)
 
@@ -265,14 +279,26 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
-    val expectedCreditTaken = "Beautiful".length * 100
-    testMtCreditConsumption(expectedCreditTaken)
+    testMtCreditConsumption()
 
     mockCurrentDate { DateUtils.addMonths(Date(), 1) }
-    testMtCreditConsumption(expectedCreditTaken)
+    testMtCreditConsumption()
 
     mockCurrentDate { DateUtils.addMonths(Date(), 2) }
-    testMtCreditConsumption(expectedCreditTaken)
+    testMtCreditConsumption()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it consumes extra credits`() {
+    testData.addBucketWithExtraCredits()
+    testDataService.saveTestData(testData.root)
+    performMtRequestAndExpectAfterBalance(100, 1000)
+    performMtRequestAndExpectAfterBalance(0, 200)
+    performMtRequestAndExpectBadRequest().andAssertThatJson {
+      node("params[0]").isEqualTo("0")
+      node("params[1]").isEqualTo("200")
+    }
   }
 
   @Test
@@ -284,23 +310,24 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     performMtRequestAndExpectAfterBalance(1000)
   }
 
-  private fun testMtCreditConsumption(expectedCreditTaken: Int) {
-    performMtRequestAndExpectAfterBalance(1000 - expectedCreditTaken)
-    performMtRequestAndExpecBadRequest()
+  private fun testMtCreditConsumption() {
+    performMtRequestAndExpectAfterBalance(100)
+    performMtRequestAndExpectBadRequest()
   }
 
   private fun mockCurrentDate(dateProvider: () -> Date) {
     whenever(currentDateProvider.getDate()).thenAnswer { dateProvider() }
   }
 
-  private fun performMtRequestAndExpectAfterBalance(balance: Int) {
+  private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {
     performMtRequest().andIsOk.andAssertThatJson {
-      node("translationCreditsBalanceAfter").isEqualTo(balance)
+      node("translationCreditsBalanceAfter").isEqualTo(creditBalance)
+      node("translationExtraCreditsBalanceAfter").isEqualTo(extraCreditBalance)
     }
   }
 
-  private fun performMtRequestAndExpecBadRequest() {
-    performMtRequest().andIsBadRequest
+  private fun performMtRequestAndExpectBadRequest(): ResultActions {
+    return performMtRequest().andIsBadRequest
   }
 
   private fun performMtRequest(): ResultActions {

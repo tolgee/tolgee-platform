@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
@@ -34,6 +35,8 @@ class UserAccountService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
+  @Lazy
+  private val organizationService: OrganizationService
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -50,14 +53,18 @@ class UserAccountService(
     return userAccountRepository.findByUsername(username).orElse(null)
   }
 
-  fun get(username: String): UserAccount {
+  operator fun get(username: String): UserAccount {
     return userAccountRepository
       .findByUsername(username)
       .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
-  operator fun get(id: Long): Optional<UserAccount> {
+  fun find(id: Long): Optional<UserAccount> {
     return userAccountRepository.findById(id)
+  }
+
+  fun get(id: Long): UserAccount {
+    return userAccountRepository.findById(id).orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
@@ -98,6 +105,7 @@ class UserAccountService(
       return userAccountRepository.findByUsername(username).orElseGet {
         val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
         this.createUser(account)
+        this.organizationService.create(OrganizationDto(name = account.name), account)
         account
       }
     }

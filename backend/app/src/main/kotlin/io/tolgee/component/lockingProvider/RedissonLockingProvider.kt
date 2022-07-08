@@ -1,5 +1,6 @@
 package io.tolgee.component.lockingProvider
 
+import io.tolgee.component.LockingProvider
 import org.redisson.api.RedissonClient
 import java.util.concurrent.locks.Lock
 

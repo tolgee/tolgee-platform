@@ -33,7 +33,7 @@ class SecurityService @Autowired constructor(
   @Transactional
   fun grantFullAccessToRepo(project: Project, userId: Long = activeUser.id) {
     permissionService.grantFullAccessToProject(
-      userAccountService[userId]
+      userAccountService.find(userId)
         .orElseThrow { InvalidStateException() }!!,
       project
     )

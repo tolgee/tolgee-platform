@@ -12,20 +12,21 @@ class KeysTestData {
   lateinit var keyWithReferences: Key
   lateinit var project: Project
   var project2: Project
-  var user: UserAccount
+  lateinit var user: UserAccount
   lateinit var firstKey: Key
   lateinit var secondKey: Key
   lateinit var english: Language
   lateinit var german: Language
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    user = addUserAccount {
+    val userAccountBuilder = addUserAccount {
       username = "Peter"
-    }.self
+      user = this
+    }
 
     project2 = addProject {
       name = "Other project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
     }.build {
       addPermission {
         user = this@KeysTestData.user
@@ -35,7 +36,7 @@ class KeysTestData {
 
     addProject {
       name = "Peter's project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
       project = this
     }.build {
       english = addLanguage {

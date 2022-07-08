@@ -34,9 +34,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(3)
-      it.node("[0].userOwner.name").isEqualTo("kim")
-      it.node("[0].directPermissions").isEqualTo("MANAGE")
-      it.node("[2].userOwner").isEqualTo("null")
+      it.node("[0].organizationOwner.name").isEqualTo("kim")
       it.node("[2].organizationOwnerName").isEqualTo("cool")
       it.node("[2].organizationOwnerSlug").isEqualTo("cool")
     }
@@ -70,7 +68,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performAuthGet("/v2/projects/with-stats?sort=id")
       .andIsOk.andAssertThatJson.node("_embedded.projects").let {
         it.isArray.hasSize(2)
-        it.node("[0].userOwner.username").isEqualTo("test_username")
+        it.node("[0].organizationOwner.name").isEqualTo("test_username")
         it.node("[0].directPermissions").isEqualTo("MANAGE")
         it.node("[1].stats.translationStateCounts").isEqualTo(
           """
@@ -112,18 +110,21 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   }
 
   @Test
-  fun get() {
+  fun `get single returns permissions`() {
     val base = dbPopulator.createBase("one")
+    userAccount = dbPopulator.createUserIfNotExists("another-user")
+    permissionService.create(
+      Permission(
+        project = base.project,
+        user = userAccount,
+        type = Permission.ProjectPermissionType.TRANSLATE,
+      ).apply { languages = mutableSetOf(base.project.languages.first()) }
+    )
 
-    val permission = base.permissions.first()
-    permission.languages = mutableSetOf(base.languages.first())
-
-    permissionService.saveAll(listOf(permission))
-
-    performAuthGet("/v2/projects/${base.id}").andPrettyPrint.andAssertThatJson.let {
-      it.node("userOwner.name").isEqualTo("admin")
-      it.node("directPermissions").isEqualTo("MANAGE")
-      it.node("computedPermissions.permittedLanguageIds").isArray.hasSize(1).contains(base.languages.first().id)
+    performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
+      it.node("organizationOwner.name").isEqualTo("admin")
+      it.node("directPermissions").isEqualTo("TRANSLATE")
+      it.node("computedPermissions.permittedLanguageIds").isArray.hasSize(1).contains(base.project.languages.first().id)
     }
   }
 
@@ -134,7 +135,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     val account = dbPopulator.createUserIfNotExists("peter")
     loginAsUser(account.name)
 
-    performAuthGet("/v2/projects/${base.id}").andIsForbidden
+    performAuthGet("/v2/projects/${base.project.id}").andIsForbidden
   }
 
   @Test
@@ -311,11 +312,11 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
   @Test
   fun revokeUsersAccessOwn() {
-    val repo = dbPopulator.createBase("base", "jirina")
+    val base = dbPopulator.createBase("base", "jirina")
 
     loginAsUser("jirina")
 
-    performAuthPut("/v2/projects/${repo.id}/users/${repo.userOwner!!.id}/revoke-access", null)
+    performAuthPut("/v2/projects/${base.project.id}/users/${base.userAccount.id}/revoke-access", null)
       .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
   }
 
@@ -325,7 +326,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")
 
-    organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
+    organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner)
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
@@ -335,8 +336,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun deleteProject() {
     val base = dbPopulator.createBase(generateUniqueString())
-    performAuthDelete("/v2/projects/${base.id}", null).andIsOk
-    val project = projectService.find(base.id)
+    performAuthDelete("/v2/projects/${base.project.id}", null).andIsOk
+    val project = projectService.find(base.project.id)
     Assertions.assertThat(project).isNull()
   }
 }

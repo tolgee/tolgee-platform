@@ -1,4 +1,4 @@
-package io.tolgee.component.lockingProvider
+package io.tolgee.component
 
 import java.util.concurrent.locks.Lock
 

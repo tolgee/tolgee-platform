@@ -47,8 +47,6 @@ class ProjectStatsTestData : BaseTestData() {
         type = Permission.ProjectPermissionType.MANAGE
         user = organizationMember
       }
-
-      self.userOwner = null
     }
   }
 

@@ -29,12 +29,10 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun exportZipJson() {
-    projectSupplier = {
-      dbPopulator.populate(generateUniqueString()).also {
-        commitTransaction()
-      }
-    }
-    userAccount = project.userOwner
+    val base = dbPopulator.populate(generateUniqueString())
+    commitTransaction()
+    projectSupplier = { base.project }
+    userAccount = base.userAccount
     val mvcResult = performProjectAuthGet("export/jsonZip")
       .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     mvcResult.response
@@ -51,11 +49,9 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectApiKeyAuthTestMethod
   fun exportZipJsonWithApiKey() {
-    projectSupplier = {
-      dbPopulator.populate(generateUniqueString()).also {
-        commitTransaction()
-      }
-    }
+    val base = dbPopulator.populate(generateUniqueString())
+    commitTransaction()
+    projectSupplier = { base.project }
     val mvcResult = performProjectAuthGet("export/jsonZip")
       .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)

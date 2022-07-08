@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,63 +11,64 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class OrganizationControllerTest : AuthorizedControllerTest() {
-
-  lateinit var dummyDto: OrganizationDto
-  lateinit var dummyDto2: OrganizationDto
-
-  @BeforeEach
-  fun setup() {
-    resetDto()
-    this.userAccount = userAccountService.findOptional(username = userAccount!!.username).get()
-  }
-
-  private fun resetDto() {
-    dummyDto = OrganizationDto(
-      "Test org",
-      "This is description",
-      "test-org",
-      Permission.ProjectPermissionType.VIEW
-    )
-
-    dummyDto2 = OrganizationDto(
-      "Test org 2",
-      "This is description 2",
-      "test-org-2",
-      Permission.ProjectPermissionType.VIEW
-    )
-  }
-
+class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun testGetAll() {
     val users = dbPopulator.createUsersAndOrganizations()
-
     loginAsUser(users[1].name)
+
+    performAuthGet("/api/organizations?size=100")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(6)
+          node("[0].name").isEqualTo("user-2's organization 1")
+          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].currentUserRole").isEqualTo("OWNER")
+        }
+      }
+  }
+
+  @Test
+  fun `get all returns also organizations with project with direct permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    userAccount = testData.franta
 
     performAuthGet("/api/organizations?size=100")
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
-          it.isArray.hasSize(6)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
-          it.node("[0].currentUserRole").isEqualTo("OWNER")
+          it.isArray.hasSize(1)
+        }
+      }
+  }
+
+  @Test
+  fun `returns all project in organization without checking for permissions`() {
+    val testData = OrganizationTestData()
+
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.franta
+    val organization = testData.root.data.organizations.map { it.self }
+      .filter { it.name == "test_username" }
+      .single()
+
+    performAuthGet("/v2/organizations/${organization.slug}/projects?size=100")
+      .andPrettyPrint.andAssertThatJson.let {
+        it.node("_embedded.projects").let {
+          it.isArray.hasSize(1)
         }
       }
   }
@@ -82,7 +83,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
+          it.node("[0].name").isEqualTo("user-2's organization 1")
           it.node("[0].basePermissions").isEqualTo("VIEW")
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
@@ -98,7 +99,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
       .andPrettyPrint
       .andAssertThatJson
-      .node("_embedded.organizations").node("[0].name").isEqualTo("user 4's organization 3")
+      .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")
   }
 
   @Test
@@ -123,6 +124,24 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
         it.node("description").isEqualTo(dummyDto.description)
       }
     }
+  }
+
+  @Test
+  fun `returns one only with project base permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+    val organization = testData.userAccountBuilder.defaultOrganizationBuilder.self
+    userAccount = testData.pepa
+    performAuthGet("/v2/organizations/${organization.id}").andIsOk
+  }
+
+  @Test
+  fun `doesn't return without permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+    val organization = testData.jirinaOrg
+    userAccount = testData.pepa
+    performAuthGet("/v2/organizations/${organization.id}").andIsForbidden
   }
 
   @Test
@@ -274,39 +293,8 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun testLeaveOrganization() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isNotEmpty
-      }
-
-      organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), it)
-
-      performAuthPut("/v2/organizations/${it.id}/leave", null)
-
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isEmpty()
-      }
-    }
-  }
-
-  @Test
-  fun testLeaveOrganizationNoOtherOwner() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isNotEmpty
-      }
-
-      performAuthPut("/v2/organizations/${it.id}/leave", null)
-        .andIsBadRequest
-        .andAssertError
-        .isCustomValidation.hasMessage("organization_has_no_other_owner")
-    }
-  }
-
-  @Test
   @Transactional
-  open fun testSetUserRole() {
+  fun testSetUserRole() {
     withOwnerInOrganization { organization, owner, role ->
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
@@ -318,75 +306,13 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
 
   @Test
   @Transactional
-  open fun `cannot set own permission`() {
+  fun `cannot set own permission`() {
     withOwnerInOrganization { organization, owner, role ->
       loginAsUser(owner)
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
       ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
-    }
-  }
-
-  @Test
-  fun testRemoveUser() {
-    withOwnerInOrganization { organization, owner, role ->
-      organizationRoleRepository.save(role)
-      performAuthDelete("/v2/organizations/${organization.id}/users/${owner.id}", null).andIsOk
-      organizationRoleRepository.findByIdOrNull(role.id!!).let {
-        assertThat(it).isNull()
-      }
-    }
-  }
-
-  @Test
-  fun testGetAllProjects() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[1].username)
-    users[1].organizationRoles[0].organization.let { organization ->
-      performAuthGet("/v2/organizations/${organization!!.slug}/projects")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.projects").let { projectsNode ->
-            projectsNode.isArray.hasSize(3)
-            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
-            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
-          }
-        }
-    }
-  }
-
-  @Test
-  fun testGetAllProjectsWithId() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[1].username)
-    users[1].organizationRoles[0].organization.let { organization ->
-      performAuthGet("/v2/organizations/${organization!!.id}/projects")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.projects").let { projectsNode ->
-            projectsNode.isArray.hasSize(3)
-            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
-            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
-          }
-        }
-    }
-  }
-
-  private fun withOwnerInOrganization(
-    fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit
-  ) {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
-        OrganizationRole(
-          user = createdUser,
-          organization = organization,
-          type = OrganizationRoleType.OWNER
-        ).let { createdOwnerRole ->
-          organizationRoleRepository.save(createdOwnerRole)
-          fn(organization, createdUser, createdOwnerRole)
-        }
-      }
     }
   }
 }

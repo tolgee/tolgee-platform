@@ -16,16 +16,17 @@ class TranslationSingleTestData {
   lateinit var secondComment: TranslationComment
   var project: Project
   private lateinit var englishLanguage: Language
-  var user: UserAccount
+  lateinit var user: UserAccount
   var pepa: UserAccount
   lateinit var aKey: Key
   lateinit var projectBuilder: ProjectBuilder
   lateinit var translation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    user = addUserAccount {
+    val userAccountBuilder = addUserAccount {
       username = "franta"
-    }.self
+      user = this
+    }
 
     pepa = addUserAccount {
       username = "pepa"
@@ -42,7 +43,7 @@ class TranslationSingleTestData {
 
     project = addProject {
       name = "Franta's project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
     }.build {
       addPermission {
         user = this@TranslationSingleTestData.user

@@ -57,7 +57,7 @@ class TranslationSuggestionController(
     val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
 
-    val balanceBefore = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
+    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
     try {
       val resultMap = dto.baseText?.ifBlank { null }?.let {
         mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage)
@@ -67,15 +67,20 @@ class TranslationSuggestionController(
         mtService.getMachineTranslations(key, targetLanguage)
       }
 
-      val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
+      val balanceAfter = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
 
       return SuggestResultModel(
         machineTranslations = resultMap,
-        translationCreditsBalanceBefore = balanceBefore,
-        translationCreditsBalanceAfter = balanceAfter,
+        translationCreditsBalanceBefore = balanceBefore.creditBalance,
+        translationCreditsBalanceAfter = balanceAfter.creditBalance,
+        translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance,
+        translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance,
       )
     } catch (e: OutOfCreditsException) {
-      throw BadRequestException(Message.OUT_OF_CREDITS, listOf(balanceBefore))
+      throw BadRequestException(
+        Message.OUT_OF_CREDITS,
+        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance)
+      )
     }
   }
 

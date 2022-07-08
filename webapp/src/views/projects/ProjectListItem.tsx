@@ -20,7 +20,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
         <Chip
           data-cy="project-list-owner"
           size="small"
-          label={r.organizationOwnerName || r.userOwner?.name}
+          label={r.organizationOwnerName}
         />
       </ListItemText>
       {r.computedPermissions.type === ProjectPermissionType.MANAGE && (

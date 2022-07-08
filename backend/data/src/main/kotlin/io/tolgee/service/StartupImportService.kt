@@ -6,6 +6,9 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.model.ApiKey
+import io.tolgee.model.Organization
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
@@ -35,51 +38,80 @@ class StartupImportService(
         val fileDtos = projectDir.listFiles()?.map { it -> ImportFileDto(it.name, it.inputStream()) }?.toList()
 
         if (fileDtos != null) {
-          val userAccount = userAccountService
-            .findOptional(properties.authentication.initialUsername)
-            .orElseGet { null }
-
-          if (userAccount != null) {
-            val projectName = projectDir.nameWithoutExtension
-            val existingProjects = projectService.findAllByNameAndUserOwner(projectName, userAccount)
-            if (existingProjects.isEmpty()) {
-              val project = projectService.createProject(
-                CreateProjectDTO(
-                  name = projectName,
-                  languages = fileDtos.map { file ->
-                    // remove extension
-                    val name = file.name.replace(Regex("\\.[^.]*"), "")
-                    LanguageDto(name, name, name)
-                  }
-                ),
-                userAccount
-              )
-
-              if (properties.import.createImplicitApiKey) {
-                val apiKey = ApiKey(
-                  key = "${projectName.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
-                  scopesEnum = ApiScope.values().toMutableSet(),
-                  userAccount = userAccount,
-                  project = project
-                )
-                apiKeyService.save(apiKey)
-                project.apiKeys.add(apiKey)
-              }
-
-              projectService.save(project)
-              applicationContext.getBean(
-                "transactionProjectHolder",
-                ProjectHolder::class.java
-              ).project = ProjectDto.fromEntity(project)
-              importService.addFiles(fileDtos, null, project, userAccount)
-              val imports = importService.getAllByProject(project.id)
-              imports.forEach {
-                importService.import(it)
-              }
-            }
+          val userAccount = getInitialUserAccount()
+          val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
+          val projectName = projectDir.nameWithoutExtension
+          val existingProjects = projectService.findAllByNameAndOrganizationOwner(projectName, organization)
+          if (existingProjects.isEmpty()) {
+            val project = createProject(projectName, fileDtos, organization)
+            createImplicitApiKey(userAccount, project)
+            assignProjectHolder(project)
+            importData(fileDtos, project, userAccount)
           }
         }
       }
     }
+  }
+
+  private fun importData(
+    fileDtos: List<ImportFileDto>,
+    project: Project,
+    userAccount: UserAccount
+  ) {
+    importService.addFiles(fileDtos, null, project, userAccount)
+    val imports = importService.getAllByProject(project.id)
+    imports.forEach {
+      importService.import(it)
+    }
+  }
+
+  private fun assignProjectHolder(project: Project) {
+    applicationContext.getBean(
+      "transactionProjectHolder",
+      ProjectHolder::class.java
+    ).project = ProjectDto.fromEntity(project)
+  }
+
+  private fun createProject(
+    projectName: String,
+    fileDtos: List<ImportFileDto>,
+    organization: Organization
+  ): Project {
+    val project = projectService.createProject(
+      CreateProjectDTO(
+        name = projectName,
+        languages = fileDtos.map { file ->
+          // remove extension
+          val name = file.name.replace(Regex("\\.[^.]*"), "")
+          LanguageDto(name, name, name)
+        },
+        organizationId = organization.id
+      ),
+    )
+    projectService.save(project)
+    return project
+  }
+
+  private fun createImplicitApiKey(
+    userAccount: UserAccount,
+    project: Project
+  ) {
+    if (properties.import.createImplicitApiKey) {
+      val apiKey = ApiKey(
+        key = "${project.name.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
+        scopesEnum = ApiScope.values().toMutableSet(),
+        userAccount = userAccount,
+        project = project
+      )
+      apiKeyService.save(apiKey)
+      project.apiKeys.add(apiKey)
+    }
+  }
+
+  private fun getInitialUserAccount(): UserAccount? {
+    val userAccount = userAccountService
+      .findOptional(properties.authentication.initialUsername)
+      .orElseGet { null }
+    return userAccount
   }
 }

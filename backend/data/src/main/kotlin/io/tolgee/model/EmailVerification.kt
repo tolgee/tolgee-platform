@@ -11,7 +11,6 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(uniqueConstraints = [])
-
 data class EmailVerification(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

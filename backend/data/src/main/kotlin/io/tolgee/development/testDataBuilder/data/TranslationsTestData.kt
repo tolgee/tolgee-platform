@@ -23,13 +23,13 @@ class TranslationsTestData {
   lateinit var aKeyGermanTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    addUserAccount {
+    val userAccountBuilder = addUserAccount {
       username = "franta"
       user = this
     }
     addProject {
       name = "Franta's project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
       project = this
     }.build project@{
       addPermission {

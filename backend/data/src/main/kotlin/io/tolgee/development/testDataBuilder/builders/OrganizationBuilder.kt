@@ -4,9 +4,11 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
+import io.tolgee.model.UserAccount
 import org.springframework.core.io.ClassPathResource
 
-class OrganizationBuilder(
+class
+OrganizationBuilder(
   val testDataBuilder: TestDataBuilder
 ) : BaseEntityDataBuilder<Organization, OrganizationBuilder>() {
   class DATA {
@@ -14,9 +16,13 @@ class OrganizationBuilder(
     var avatarFile: ClassPathResource? = null
   }
 
+  var defaultOrganizationOfUser: UserAccount? = null
+
   val data = DATA()
 
-  fun addRole(ft: FT<OrganizationRole>) = addOperation(data.roles, ft)
+  fun addRole(ft: FT<OrganizationRole>) = addOperation(data.roles, ft).also {
+    this.self.memberRoles.add(it.self)
+  }
 
   fun addMtCreditBucket(ft: FT<MtCreditBucket>): MtCreditBucketBuilder {
     val builder = MtCreditBucketBuilder()

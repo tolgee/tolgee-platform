@@ -22,10 +22,6 @@ describe('Projects Basics', () => {
       .contains('Facebook itself');
   });
 
-  it('Creates project with user owner', () => {
-    createProject('I am a great project', 'Mark Cukrberg');
-  });
-
   it('Creates with organization owner', () => {
     createProject('I am a great project', 'Facebook');
   });

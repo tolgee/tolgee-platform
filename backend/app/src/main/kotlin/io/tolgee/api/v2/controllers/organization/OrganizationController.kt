@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -10,10 +10,10 @@ import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
+import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
-import io.tolgee.api.v2.hateoas.project.ProjectModel
-import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
+import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
@@ -25,18 +25,20 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.OrganizationStatsService
 import io.tolgee.service.UserAccountService
-import io.tolgee.service.project.ProjectService
+import io.tolgee.service.UserPreferencesService
+import io.tolgee.service.machineTranslation.MtCreditBucketService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -70,7 +72,6 @@ import javax.validation.Valid
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(
   private val organizationService: OrganizationService,
-  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
   private val organizationModelAssembler: OrganizationModelAssembler,
@@ -79,13 +80,14 @@ class OrganizationController(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
-  private val projectService: ProjectService,
-  private val projectModelAssembler: ProjectModelAssembler,
   private val invitationService: InvitationService,
   private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
-  private val imageUploadService: ImageUploadService
+  private val imageUploadService: ImageUploadService,
+  private val mtCreditBucketService: MtCreditBucketService,
+  private val organizationStatsService: OrganizationStatsService,
+  private val translationsLimitProvider: TranslationsLimitProvider,
+  private val userPreferencesService: UserPreferencesService
 ) {
-
   @PostMapping
   @Transactional
   @Operation(summary = "Creates organization")
@@ -106,22 +108,32 @@ class OrganizationController(
   @Operation(summary = "Returns organization by ID")
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
-    val roleType = organizationRoleService.getType(id)
+    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    setPreferredOrganization(organization)
+    val roleType = organizationRoleService.findType(id)
     return OrganizationView.of(organization, roleType).toModel()
+  }
+
+  private fun setPreferredOrganization(organization: Organization) {
+    if (!authenticationFacade.isApiKeyAuthentication) {
+      userPreferencesService.setPreferredOrganizationAsync(organization, authenticationFacade.userAccountEntity)
+    }
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
   @Operation(summary = "Returns organization by address part")
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
-    val roleType = organizationRoleService.getType(organization.id)
+    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    setPreferredOrganization(organization)
+    val roleType = organizationRoleService.findType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }
 
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @Operation(summary = "Returns all organizations, which is current user allowed to view")
   fun getAll(
-    @ParameterObject pageable: Pageable,
+    @ParameterObject @SortDefault(sort = ["id"]) pageable: Pageable,
     params: OrganizationRequestParamsDto
   ): PagedModel<OrganizationModel>? {
     val organizations = organizationService.findPermittedPaged(pageable, params)
@@ -159,7 +171,7 @@ class OrganizationController(
   fun leaveOrganization(@PathVariable("id") id: Long) {
     organizationService.find(id)?.let {
       if (!organizationService.isThereAnotherOwner(id)) {
-        throw ValidationException(io.tolgee.constants.Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+        throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
       organizationRoleService.checkUserIsMemberOrOwner(id)
       organizationRoleService.leave(id)
@@ -188,36 +200,6 @@ class OrganizationController(
   ) {
     organizationRoleService.checkUserIsOwner(organizationId)
     organizationRoleService.removeUser(organizationId, userId)
-  }
-
-  @GetMapping("/{id:[0-9]+}/projects")
-  @Operation(summary = "Returns all organization projects")
-  fun getAllProjects(
-    @PathVariable("id") id: Long,
-    @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(id)?.let {
-      organizationRoleService.checkUserIsMemberOrOwner(it.id)
-      projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
-        pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
-      }
-    } ?: throw NotFoundException()
-  }
-
-  @GetMapping("/{slug:.*[a-z].*}/projects")
-  @Operation(summary = "Returns all organization projects")
-  fun getAllProjects(
-    @PathVariable("slug") slug: String,
-    @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(slug)?.let {
-      organizationRoleService.checkUserIsMemberOrOwner(it.id)
-      projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
-        pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
-      }
-    } ?: throw NotFoundException()
   }
 
   @PutMapping("/{id:[0-9]+}/invite")
@@ -279,6 +261,26 @@ class OrganizationController(
     val roleType = organizationRoleService.getType(organization.id)
     organizationService.removeAvatar(organization)
     return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
+  }
+
+  @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
+  @Operation(description = "Returns current organization usage")
+  fun getUsage(
+    @PathVariable organizationId: Long
+  ): UsageModel {
+    val organization = organizationService.get(organizationId)
+    organizationRoleService.checkUserIsMemberOrOwner(organizationId)
+    val creditBalances = mtCreditBucketService.getCreditBalances(organization)
+    val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
+    return UsageModel(
+      organizationId = organizationId,
+      creditBalance = creditBalances.creditBalance,
+      includedMtCredits = creditBalances.bucketSize,
+      extraCreditBalance = creditBalances.extraCreditBalance,
+      creditBalanceRefilledAt = creditBalances.refilledAt.time,
+      currentTranslations = currentTranslations,
+      translationLimit = translationsLimitProvider.get(organization)
+    )
   }
 
   private fun OrganizationView.toModel(): OrganizationModel {

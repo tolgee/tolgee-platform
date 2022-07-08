@@ -75,15 +75,30 @@ export const logout = () => {
   window.localStorage.removeItem('jwtToken');
 };
 
+export const getDefaultOrganization = () => {
+  return v2apiFetch('organizations').then((res) => {
+    const organizations =
+      res.body as components['schemas']['PagedModelOrganizationModel'];
+    const org = organizations._embedded.organizations[0];
+    if (!org) {
+      throw Error('No default organization found!');
+    }
+    return org;
+  });
+};
+
 export const createProject = (createProjectDto: {
   name: string;
   languages: Partial<components['schemas']['LanguageDto']>[];
 }): Chainable<Cypress.Response<any>> => {
-  const create = () =>
-    v2apiFetch('projects', {
-      body: JSON.stringify(createProjectDto),
-      method: 'POST',
+  const create = () => {
+    return getDefaultOrganization().then((org) => {
+      return v2apiFetch('projects', {
+        body: JSON.stringify({ ...createProjectDto, organizationId: org.id }),
+        method: 'POST',
+      });
     });
+  };
   return v2apiFetch('projects').then((res) => {
     const projects = res.body?._embedded?.projects.filter(
       (i) => i.name === createProjectDto.name
@@ -136,19 +151,18 @@ export const createUser = (
 };
 
 export const deleteUser = (username: string) => {
-  const deleteUserSql = `delete
-                         from user_account
-                         where username = '${username}'`;
-  return internalFetch(`sql/execute`, { method: 'POST', body: deleteUserSql });
-};
-
-export const deleteUserWithEmailVerification = (username: string) => {
   const sql = `
       delete
       from permission
       where user_id in (select id from user_account where username = '${username}');
       delete
       from email_verification
+      where user_account_id in (select id from user_account where username = '${username}');
+      delete
+      from organization_role
+      where user_id in (select id from user_account where username = '${username}');
+      delete
+      from user_preferences
       where user_account_id in (select id from user_account where username = '${username}');
       delete
       from user_account

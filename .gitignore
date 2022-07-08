@@ -2,6 +2,7 @@ build
 *.iml
 **/application-dev.properties
 **/application-dev.yaml
+**/application-local.yaml
 **/application-postgres.yaml
 
 bin

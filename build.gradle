@@ -83,6 +83,7 @@ project(':server-app').afterEvaluate {
         dependsOn project(':server-app').tasks.findByName("check")
         dependsOn ktlint
     }
+
     task bootJar {
         dependsOn project(':server-app').tasks.findByName("bootJar")
     }
@@ -102,14 +103,28 @@ project(':server-app').afterEvaluate {
     }
 
     task diffChangeLog {
-        project(':data').tasks.findByName("diffChangeLog").mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
+        subprojects.forEach({
+            it.tasks.findByName("diffChangeLog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
+        })
+
         project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
+
+
         finalizedBy = [
                 startDbChangelogContainer,
                 project(':server-app').tasks.findByName("bootRun"),
                 project(':data').tasks.findByName("diffChangeLog"),
-                stopDbChangelogContainer
         ]
+
+        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangeLog")
+
+        if (billingDiffChangelog != null) {
+            finalizedBy.add(billingDiffChangelog)
+        }
+
+        finalizedBy.add(stopDbChangelogContainer)
+
+
         doFirst {
             project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
         }
@@ -120,14 +135,14 @@ task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "**/*.kt", "!**/data/PluralData.kt"
+    args "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "-F", "**/*.kt", "!**/data/PluralData.kt"
+    args "-F", "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
 }
 
 subprojects {

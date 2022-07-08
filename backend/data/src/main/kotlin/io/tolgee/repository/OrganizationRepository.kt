@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import org.springframework.data.domain.Page
@@ -14,11 +15,14 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   fun getOneBySlug(slug: String): Organization?
 
   @Query(
-    """select o.id as id, o.name as name, o.description as description, o.slug as slug,
+    """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
         o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
         from Organization o 
-        join OrganizationRole r on r.user.id = :userId 
+        left join OrganizationRole r on r.user.id = :userId
         and r.organization = o and (r.type = :roleType or :roleType is null)
+        left join o.projects p
+        left join p.permissions perm on perm.user.id = :userId
+        where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId))
         """
@@ -31,6 +35,46 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     exceptOrganizationId: Long? = null
   ): Page<OrganizationView>
 
+  @Query(
+    """
+    select o
+    from Organization o
+    left join o.memberRoles mr on mr.user.id = :userId
+    left join o.projects p
+    left join p.permissions perm on perm.user.id = :userId
+    where (perm is not null or mr is not null) and o.id <> :exceptOrganizationId
+    group by mr.id, o.id
+    order by mr.id asc nulls last
+  """
+  )
+  fun findPreferred(
+    userId: Long,
+    exceptOrganizationId: Long,
+    pageable: Pageable
+  ): Page<Organization>
+
+  @Query(
+    """
+    select count(o) > 0
+    from Organization o
+    left join o.memberRoles mr on mr.user.id = :userId
+    left join o.projects p
+    left join p.permissions perm on perm.user.id = :userId
+    where (perm is not null or mr is not null) and o.id = :organizationId
+  """
+  )
+  fun canUserView(userId: Long, organizationId: Long): Boolean
+
   fun countAllBySlug(slug: String): Long
   fun findAllByName(name: String): List<Organization>
+
+  @Query(
+    """
+    from Organization o 
+    join o.memberRoles mr on mr.user = :user
+    join mr.user u
+    where o.name = u.name and mr.type = 1
+  """
+  )
+  fun findUsersDefaultOrganization(user: UserAccount): Organization?
 }

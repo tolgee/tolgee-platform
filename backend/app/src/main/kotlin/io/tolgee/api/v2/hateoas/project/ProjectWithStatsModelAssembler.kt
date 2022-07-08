@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.hateoas.project
 
-import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
@@ -41,7 +41,6 @@ class ProjectWithStatsModelAssembler(
       organizationOwnerBasePermissions = view.organizationOwner?.basePermissions,
       organizationRole = view.organizationRole,
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
-      userOwner = view.userOwner?.let { userAccountModelAssembler.toModel(it) },
       organizationOwner = view.organizationOwner?.let { simpleOrganizationModelAssembler.toModel(it) },
       directPermissions = view.directPermissions,
       computedPermissions = UserPermissionModel(

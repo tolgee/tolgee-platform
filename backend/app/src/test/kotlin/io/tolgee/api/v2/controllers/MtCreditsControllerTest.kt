@@ -22,21 +22,6 @@ class MtCreditsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `returns user credit balance`() {
-    performAuthGet("/v2/machine-translation-credit-balance").andIsOk.andAssertThatJson {
-      node("creditBalance").isEqualTo(15000)
-    }
-  }
-
-  @Test
-  fun `returns user project credit balance`() {
-    performAuthGet("/v2/projects/${testData.projectBuilder.self.id}/machine-translation-credit-balance")
-      .andIsOk.andAssertThatJson {
-        node("creditBalance").isEqualTo(15000)
-      }
-  }
-
-  @Test
   fun `returns organization project credit balance`() {
     performAuthGet("/v2/projects/${testData.organizationProject.id}/machine-translation-credit-balance")
       .andIsOk.andAssertThatJson {

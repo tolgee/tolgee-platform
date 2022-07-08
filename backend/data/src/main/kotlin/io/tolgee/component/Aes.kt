@@ -4,7 +4,6 @@
 
 package io.tolgee.component
 
-import io.tolgee.security.JwtSecretProvider
 import org.springframework.stereotype.Component
 import java.security.MessageDigest
 import java.util.*
@@ -19,7 +18,7 @@ class Aes(jwtSecretProvider: JwtSecretProvider) {
     SecretKeySpec(key, "AES")
   }
 
-  fun encrypt(toEncrypt: ByteArray): ByteArray? {
+  fun encrypt(toEncrypt: ByteArray): ByteArray {
     val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
     cipher.init(Cipher.ENCRYPT_MODE, secretKey)
     return cipher.doFinal(toEncrypt)

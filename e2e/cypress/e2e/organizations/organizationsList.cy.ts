@@ -123,7 +123,9 @@ describe('Organization List', () => {
             gcy('organization-settings-button').click();
           });
       });
-      cy.gcy('global-base-view-title').contains('Tolgee').should('be.visible');
+      cy.gcy('user-organizations-settings-subtitle-link')
+        .contains('Tolgee')
+        .should('be.visible');
     });
   });
 

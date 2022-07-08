@@ -13,7 +13,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
-import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
 import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 
@@ -100,9 +100,11 @@ export const OrganizationProfileView: FunctionComponent = () => {
   return (
     <BaseOrganizationSettingsView
       windowTitle={t('edit_organization_title')}
+      link={LINKS.ORGANIZATION_PROFILE}
       title={t('edit_organization_title')}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
+      containerMaxWidth="md"
     >
       <Box data-cy="organization-profile">
         <StandardForm

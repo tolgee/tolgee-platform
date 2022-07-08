@@ -114,7 +114,7 @@ dependencies {
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+    implementation libs.jacksonModuleKotlin
 
     /**
      * DATA MODULE

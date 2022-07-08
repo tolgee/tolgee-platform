@@ -36,12 +36,12 @@ class ProjectTransferringE2eDataController(
   @Transactional
   fun cleanup() {
     val data = ProjectTransferringTestData()
-    listOf(data.organization, data.notOwnedOrganization).forEach {
-      organizationService.find(it.slug!!)?.let { found ->
+    listOf(data.organization, data.notOwnedOrganization, data.anotherOrganization).forEach {
+      organizationService.find(it.slug)?.let { found ->
         organizationService.delete(found.id)
       }
     }
-    listOf(data.user, data.user2, data.user3, data.vobtahlo).forEach { user ->
+    listOf(data.user, data.user2, data.user).forEach { user ->
       userAccountService.findOptional(user.username).orElse(null)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
