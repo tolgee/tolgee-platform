@@ -161,27 +161,27 @@ class V2ProjectsController(
     }
   }
 
-  @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     imageUploadService.validateIsImage(avatar)
     projectService.setAvatar(projectHolder.projectEntity, avatar.inputStream)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
-  @DeleteMapping("/{id:[0-9]+}/avatar")
+  @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
   fun removeAvatar(
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     projectService.removeAvatar(projectHolder.projectEntity)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")

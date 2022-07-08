@@ -41,7 +41,7 @@ class ExportController @Autowired constructor(
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
-  @Operation(summary = "Exports data as ZIP of jsons")
+  @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
     securityService.checkProjectPermission(projectHolder.project.id, Permission.ProjectPermissionType.VIEW)
     val languages = languageService.findAll(projectHolder.project.id)
