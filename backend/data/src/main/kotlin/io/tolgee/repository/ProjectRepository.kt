@@ -93,7 +93,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   @Query(
     """
-      from Project p left join fetch p.languages left join fetch p.baseLanguage where p.id in :projectIds
+      from Project p left join fetch p.languages l left join fetch p.baseLanguage where p.id in :projectIds
     """
   )
   fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
