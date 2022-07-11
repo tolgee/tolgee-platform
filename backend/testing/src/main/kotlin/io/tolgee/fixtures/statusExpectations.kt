@@ -39,8 +39,10 @@ val ResultActions.andIsForbidden: ResultActions
 val ResultActions.andAssertResponse: MvcResultAssert
   get() = assertThat(this.andReturn())
 
-val ResultActions.andAssertThatJson
-  get() = assertThatJson(this.andReturn().response.contentAsString)
+val ResultActions.andAssertThatJson: JsonAssert.ConfigurableJsonAssert
+  get() {
+    return assertThatJson(this.andReturn().response.contentAsString)
+  }
 
 fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit): ResultActions {
   tryPrettyPrinting {

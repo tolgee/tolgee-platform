@@ -1,6 +1,7 @@
 package io.tolgee.model.views.projectStats
 
 data class ProjectLanguageStatsResultView(
+  val projectId: Long,
   val languageId: Long?,
   val languageTag: String?,
   val languageName: String?,

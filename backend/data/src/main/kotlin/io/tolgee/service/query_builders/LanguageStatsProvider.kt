@@ -14,26 +14,29 @@ import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Expression
 import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.Selection
 import javax.persistence.criteria.SetJoin
 
 open class LanguageStatsProvider(
   val entityManager: EntityManager,
-  private val projectId: Long
+  private val projectIds: List<Long>
 ) {
 
-  val cb: CriteriaBuilder = entityManager.criteriaBuilder
+  private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ProjectLanguageStatsResultView> = cb.createQuery(ProjectLanguageStatsResultView::class.java)
 
   private var project: Root<Project> = query.from(Project::class.java)
   private val languageJoin = project.join(Project_.languages)
 
-  fun getResult(): MutableList<ProjectLanguageStatsResultView> {
+  fun getResultForSingleProject(): MutableList<ProjectLanguageStatsResultView> {
     initQuery()
     return entityManager.createQuery(query).resultList
+  }
+
+  fun getResultForMultipleProjects(): Map<Long, List<ProjectLanguageStatsResultView>> {
+    initQuery()
+    return entityManager.createQuery(query).resultList.groupBy { it.projectId }
   }
 
   private fun initQuery() {
@@ -41,8 +44,11 @@ open class LanguageStatsProvider(
       selectWordCount(state) to selectKeyCount(state)
     }
 
+    val projectId = project.get(Project_.id)
+    val languageId = languageJoin.get(Language_.id)
     val selection = mutableListOf<Selection<*>>(
-      languageJoin.get(Language_.id),
+      projectId,
+      languageId,
       languageJoin.get(Language_.tag),
       languageJoin.get(Language_.name),
       languageJoin.get(Language_.originalName),
@@ -56,9 +62,8 @@ open class LanguageStatsProvider(
 
     query.multiselect(selection)
 
-    query.groupBy(languageJoin.get(Language_.id))
-
-    query.where(cb.equal(project.get(Project_.id), projectId))
+    query.groupBy(languageId, projectId)
+    query.where(projectId.`in`(projectIds))
   }
 
   private fun selectKeyCount(state: TranslationState): Selection<Long> {
@@ -113,18 +118,5 @@ open class LanguageStatsProvider(
         )
       )
     }
-  }
-
-  fun CriteriaBuilder.translationInState(translation: Path<Translation>, state: TranslationState): Predicate {
-    val stateValueEquals = this.equal(
-      translation.get(
-        Translation_.state
-      ),
-      state
-    )
-    if (state == TranslationState.UNTRANSLATED) {
-      return cb.or(stateValueEquals, cb.isNull(translation.get(Translation_.text)))
-    }
-    return stateValueEquals
   }
 }

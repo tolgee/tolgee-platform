@@ -22,6 +22,7 @@ import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -34,6 +35,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
@@ -76,6 +78,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
@@ -130,10 +134,40 @@ class V2ProjectsController(
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
     val projectIds = projects.content.map { it.id }
-    val stats = projectStatsService.getProjectsTotals(projectIds).associateBy { it.projectId }
+    val totals = projectStatsService.getProjectsTotals(projectIds)
     val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
       .associate { it.id to it.languages.toList() }
-    val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
+
+    val languageStats = projectStatsService.getLanguageStats(projectIds)
+
+    val projectsWithStatsContent = projects.content.map {
+      val projectTotals = totals[it.id]
+      val baseLanguage = it.baseLanguage
+      val projectLanguageStats = languageStats[it.id]
+
+      var stateTotals: ProjectStatsService.ProjectStateTotals? = null
+      if (baseLanguage != null && projectLanguageStats != null) {
+        stateTotals = projectStatsService.computeProjectTotals(baseLanguage, projectLanguageStats)
+      }
+      val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
+      val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
+      val untranslatedPercent = (BigDecimal(100) - translatedPercent - reviewedPercent).setScale(
+        2,
+        RoundingMode.HALF_UP
+      )
+
+      val projectStatistics = ProjectStatistics(
+        projectId = it.id,
+        keyCount = projectTotals?.keyCount ?: 0,
+        languageCount = projectTotals?.languageCount ?: 0,
+        translationStatePercentages = mapOf(
+          TranslationState.TRANSLATED to translatedPercent,
+          TranslationState.REVIEWED to reviewedPercent,
+          TranslationState.UNTRANSLATED to untranslatedPercent
+        )
+      )
+      ProjectWithStatsView(it, projectStatistics, languages[it.id]!!)
+    }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return arrayWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
   }
@@ -406,5 +440,12 @@ class V2ProjectsController(
       usingTranslationMemory = config.usingTm,
       usingMachineTranslation = config.usingPrimaryMtService
     )
+  }
+
+  fun Double?.toPercentValue(): BigDecimal {
+    if (this == null || this.isNaN()) {
+      return BigDecimal(0)
+    }
+    return this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
   }
 }
