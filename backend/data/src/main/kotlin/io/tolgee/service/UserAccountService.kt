@@ -16,6 +16,7 @@ import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
@@ -36,7 +38,8 @@ class UserAccountService(
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
   @Lazy
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
+  private val transactionManager: PlatformTransactionManager
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -102,11 +105,13 @@ class UserAccountService(
   val implicitUser: UserAccount
     get() {
       val username = "___implicit_user"
-      return userAccountRepository.findByUsername(username).orElseGet {
-        val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
-        this.createUser(account)
-        this.organizationService.create(OrganizationDto(name = account.name), account)
-        account
+      return executeInNewTransaction(transactionManager) {
+        userAccountRepository.findByUsername(username).orElseGet {
+          val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
+          this.createUser(account)
+          this.organizationService.create(OrganizationDto(name = account.name), account)
+          account
+        }
       }
     }
 
