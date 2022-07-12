@@ -12,7 +12,7 @@ import { Box, Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 import {
   useConfig,
-  useCurrentOrganization,
+  usePreferredOrganization,
 } from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 import { Usage } from './dashboard/Usage';
@@ -40,12 +40,12 @@ export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const config = useConfig();
-  const organization = useCurrentOrganization();
+  const { preferredOrganization } = usePreferredOrganization();
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    path: { slug: organization.slug || '' },
+    path: { slug: preferredOrganization.slug || '' },
     query: {
       page,
       size: 20,
@@ -54,13 +54,13 @@ export const ProjectListView = () => {
     },
     options: {
       keepPreviousData: true,
-      enabled: Boolean(organization.slug),
+      enabled: Boolean(preferredOrganization.slug),
     },
   });
 
   const t = useTranslate();
 
-  const isOrganizationOwner = organization.currentUserRole === 'OWNER';
+  const isOrganizationOwner = preferredOrganization.currentUserRole === 'OWNER';
 
   const showStats = config.billing.enabled && isOrganizationOwner;
 
@@ -79,11 +79,11 @@ export const ProjectListView = () => {
           navigation={[[<OrganizationSwitch key={0} />]]}
           navigationRight={
             showStats &&
-            organization && (
+            preferredOrganization && (
               <StyledUsage>
                 <Usage
-                  organizationId={organization.id}
-                  slug={organization.slug}
+                  organizationId={preferredOrganization.id}
+                  slug={preferredOrganization.slug}
                 />
               </StyledUsage>
             )

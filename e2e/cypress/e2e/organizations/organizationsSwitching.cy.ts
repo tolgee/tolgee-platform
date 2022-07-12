@@ -12,6 +12,10 @@ describe('Organization Invitations', () => {
     visit();
   });
 
+  afterEach(() => {
+    organizationTestData.clean();
+  });
+
   it('stores preffered organization on BE', () => {
     switchToOrganization('Microsoft');
     visit();

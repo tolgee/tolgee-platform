@@ -1,6 +1,10 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { assertMessage, gcy } from '../../common/shared';
+import {
+  assertMessage,
+  assertSwitchedToOrganization,
+  gcy,
+} from '../../common/shared';
 import {
   getParsedEmailInvitationLink,
   login,
@@ -113,9 +117,7 @@ describe('Organization Invitations', () => {
 
       assertMessage('Invitation successfully accepted');
       cy.visit(`${HOST}/projects`);
-      cy.waitForDom();
-      // user should be automatically switched to the new organization
-      cy.gcy('organization-switch').contains('Tolgee');
+      assertSwitchedToOrganization('Tolgee');
     });
   };
 });

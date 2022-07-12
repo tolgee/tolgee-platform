@@ -12,7 +12,7 @@ import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSetti
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
 import {
   useConfig,
-  useCurrentOrganization,
+  usePreferredOrganization,
 } from 'tg.hooks/InitialDataProvider';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
@@ -33,7 +33,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
   const t = useTranslate();
   const history = useHistory();
-  const organization = useCurrentOrganization();
+  const { preferredOrganization } = usePreferredOrganization();
 
   const handleOrganizationSelect = (organization: OrganizationModel) => {
     const redirectLink =
@@ -55,7 +55,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     },
   ];
 
-  if (organization.currentUserRole === 'OWNER') {
+  if (preferredOrganization.currentUserRole === 'OWNER') {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,

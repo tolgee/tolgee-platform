@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { MenuItem, ListItemText, Menu, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useCurrentOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -25,7 +25,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
   onCreateNew,
 }) => {
   const [menuOpen, setMenuOpen] = useState<HTMLElement | null>(null);
-  const organization = useCurrentOrganization();
+  const { preferredOrganization } = usePreferredOrganization();
 
   const setOrganization = (organization: OrganizationModel) => () => {
     setMenuOpen(null);
@@ -89,7 +89,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
               data-cy="user-menu-organization-item"
               value={item.slug}
               onClick={setOrganization(item)}
-              selected={item.id === organization.id}
+              selected={item.id === preferredOrganization.id}
             >
               <AvatarImg
                 owner={{

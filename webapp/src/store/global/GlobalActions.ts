@@ -1,6 +1,4 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { InitialDataService } from 'tg.service/InitialDataService';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { SecurityService } from 'tg.service/SecurityService';
 import { singleton } from 'tsyringe';
@@ -28,11 +26,7 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
 
 @singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
-  constructor(
-    private initialDataService: InitialDataService,
-    private securityService: SecurityService,
-    private invitationCodeService: InvitationCodeService
-  ) {
+  constructor(private securityService: SecurityService) {
     super(new GlobalState());
   }
 
@@ -162,25 +156,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
   );
 
   readonly loadableDefinitions = {
-    initialData: this.createLoadableDefinition(
-      () => this.initialDataService.getConfiguration(),
-      (state, action) => {
-        const invitationCode = this.invitationCodeService.getCode();
-        return {
-          ...state,
-          security: {
-            ...state.security,
-            allowPrivate:
-              !action.payload?.serverConfiguration?.authentication ||
-              state.security.allowPrivate,
-            allowRegistration:
-              action.payload?.serverConfiguration.allowRegistrations ||
-              !!invitationCode, //if user has invitation code, registration is allowed
-          },
-        };
-      }
-    ),
-    resetPasswordRequest: this.createLoadableDefinition(
+    resetPasswordRequest: this.createLoadableDefinition<GlobalState, any>(
       this.securityService.resetPasswordRequest
     ),
   };

@@ -13,7 +13,7 @@ import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
 import {
   useConfig,
-  useCurrentOrganization,
+  usePreferredOrganization,
   useInitialDataContext,
 } from '../hooks/InitialDataProvider';
 import { useUser } from '../hooks/InitialDataProvider';
@@ -82,7 +82,7 @@ const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
   const isLoading = useInitialDataContext((v) => v.isLoading);
   const isFetching = useInitialDataContext((v) => v.isFetching);
-  const currentOrganization = useCurrentOrganization();
+  const currentOrganization = usePreferredOrganization();
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );

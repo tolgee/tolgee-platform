@@ -127,5 +127,10 @@ export const switchToOrganization = (name: string): Chainable => {
   cy.gcy('organization-switch').click();
   cy.waitForDom();
   cy.gcy('organization-switch-item').contains(name).click();
+  return assertSwitchedToOrganization(name);
+};
+
+export const assertSwitchedToOrganization = (name: string) => {
+  cy.waitForDom();
   return cy.gcy('organization-switch').contains(name).should('be.visible');
 };

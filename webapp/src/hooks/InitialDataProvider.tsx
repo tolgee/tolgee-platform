@@ -123,10 +123,17 @@ export const [
   return [contextData, dispatch];
 });
 
-export const useCurrentOrganization = () =>
-  useInitialDataContext((v) => v.currentOrganization!);
-
 export const useConfig = () =>
   useInitialDataContext((v) => v.serverConfiguration);
 
 export const useUser = () => useInitialDataContext((v) => v.userInfo);
+
+export const usePreferredOrganization = () => {
+  const initialDataDispatch = useInitialDataDispatch();
+  const preferredOrganization = useInitialDataContext(
+    (v) => v.currentOrganization!
+  );
+  const updatePreferredOrganization = (org: number | OrganizationModel) =>
+    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });
+  return { preferredOrganization, updatePreferredOrganization };
+};

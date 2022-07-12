@@ -11,10 +11,7 @@ import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
-import {
-  useCurrentOrganization,
-  useInitialDataDispatch,
-} from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -48,11 +45,11 @@ export const UserMenu: React.FC = () => {
   const userLogged = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );
-  const organization = useCurrentOrganization();
+  const { preferredOrganization, updatePreferredOrganization } =
+    usePreferredOrganization();
   const t = useTranslate();
   const config = useConfig();
   const location = useLocation();
-  const initialDataDispatch = useInitialDataDispatch();
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser();
@@ -68,7 +65,7 @@ export const UserMenu: React.FC = () => {
   };
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
-    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: organization });
+    updatePreferredOrganization(organization);
     setAnchorEl(null);
     history.push(LINKS.PROJECTS.build());
   };
@@ -78,23 +75,26 @@ export const UserMenu: React.FC = () => {
     history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
 
-  if (!config.authentication || !user || !organization) {
+  if (!config.authentication || !user || !preferredOrganization) {
     return null;
   }
 
   const organizationItems = [
     {
       link: LINKS.ORGANIZATION_PROFILE.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
       }),
       label: t('user_menu_organization_settings'),
     },
   ];
 
-  if (config.billing.enabled && organization.currentUserRole === 'OWNER') {
+  if (
+    config.billing.enabled &&
+    preferredOrganization.currentUserRole === 'OWNER'
+  ) {
     organizationItems.push({
       link: LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
       }),
       label: t('organization_menu_billing'),
     });
@@ -152,14 +152,14 @@ export const UserMenu: React.FC = () => {
             {item.label}
           </MenuItem>
         ))}
-        {organization && (
+        {preferredOrganization && (
           <>
             <StyledDivider />
             <MenuHeader
-              entity={organization}
+              entity={preferredOrganization}
               type="ORG"
-              title={organization.name}
-              subtitle={organization.description}
+              title={preferredOrganization.name}
+              subtitle={preferredOrganization.description}
             />
             {organizationMenuItems.map((item, index) => (
               <MenuItem

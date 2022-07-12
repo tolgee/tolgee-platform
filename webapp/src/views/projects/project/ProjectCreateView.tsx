@@ -16,10 +16,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
-import {
-  useCurrentOrganization,
-  useInitialDataDispatch,
-} from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const messageService = container.resolve(MessageService);
@@ -32,8 +29,8 @@ export const ProjectCreateView: FunctionComponent = () => {
     method: 'post',
   });
   const t = useTranslate();
-  const organization = useCurrentOrganization();
-  const initialDataDispatch = useInitialDataDispatch();
+  const { preferredOrganization, updatePreferredOrganization } =
+    usePreferredOrganization();
 
   const onSubmit = (values: CreateProjectValueType) => {
     values.languages = values.languages.filter((l) => !!l);
@@ -45,10 +42,7 @@ export const ProjectCreateView: FunctionComponent = () => {
       },
       {
         onSuccess() {
-          initialDataDispatch({
-            type: 'UPDATE_ORGANIZATION',
-            payload: values.organizationId,
-          });
+          updatePreferredOrganization(values.organizationId);
           messageService.success(<T>project_created_message</T>);
         },
       }
@@ -71,7 +65,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId: organization.id,
+    organizationId: preferredOrganization.id,
     baseLanguageTag: 'en',
   };
 

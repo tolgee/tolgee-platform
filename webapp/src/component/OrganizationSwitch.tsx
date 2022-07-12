@@ -8,10 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import {
-  useCurrentOrganization,
-  useInitialDataDispatch,
-} from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -37,8 +34,8 @@ export const OrganizationSwitch: React.FC<Props> = ({
 }) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const organization = useCurrentOrganization();
-  const initialDataDispatch = useInitialDataDispatch();
+  const { preferredOrganization } = usePreferredOrganization();
+  const { updatePreferredOrganization } = usePreferredOrganization();
   const history = useHistory();
 
   const handleClose = () => {
@@ -51,7 +48,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
     handleClose();
-    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: organization });
+    updatePreferredOrganization(organization);
     onSelect?.(organization);
   };
 
@@ -91,7 +88,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
   };
 
   const selected = organizationsLoadable.data?._embedded?.organizations?.find(
-    (org) => org.id === organization.id
+    (org) => org.id === preferredOrganization.id
   );
 
   const MenuItems = () => {
