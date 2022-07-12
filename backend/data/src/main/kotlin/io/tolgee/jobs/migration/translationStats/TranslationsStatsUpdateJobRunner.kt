@@ -1,6 +1,7 @@
 package io.tolgee.jobs.migration.translationStats
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.jobs.migration.MigrationJobRunner
 import io.tolgee.repository.TranslationRepository
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
@@ -22,11 +23,11 @@ class TranslationsStatsUpdateJobRunner(
   val jobLauncher: JobLauncher,
   val translationRepository: TranslationRepository,
   val jobRepository: JobRepository
-) {
+) : MigrationJobRunner {
 
   val log = LoggerFactory.getLogger(this::class.java)
 
-  fun run(): JobExecution? {
+  override fun run(): JobExecution? {
     val params = getJobParams()
 
     if (params != null) {

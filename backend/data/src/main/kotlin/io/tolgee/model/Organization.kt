@@ -43,7 +43,7 @@ class Organization(
 
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
-) : ModelWithAvatar {
+) : ModelWithAvatar, AuditModel() {
   constructor(
     name: String,
     description: String? = null,

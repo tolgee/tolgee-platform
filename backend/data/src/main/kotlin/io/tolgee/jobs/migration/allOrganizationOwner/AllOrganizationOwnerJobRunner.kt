@@ -2,6 +2,7 @@ package io.tolgee.jobs.migration.allOrganizationOwner
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.jobs.migration.MigrationJobRunner
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import org.apache.commons.codec.digest.DigestUtils
@@ -25,11 +26,11 @@ class AllOrganizationOwnerJobRunner(
   val projectRepository: ProjectRepository,
   val userAccountRepository: UserAccountRepository,
   val jobRepository: JobRepository
-) {
+) : MigrationJobRunner {
 
   val log = LoggerFactory.getLogger(this::class.java)
 
-  fun run(): JobExecution? {
+  override fun run(): JobExecution? {
     val params = getJobParams()
 
     if (params != null) {
