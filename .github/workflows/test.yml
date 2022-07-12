@@ -111,12 +111,14 @@ jobs:
   e2e:
     needs: [ frontend-build, backend-build, e2e-install-deps ]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node14.19.0-chrome100-ff99-edge
     name: E2E testing ‍🔎
     strategy:
       fail-fast: false
       matrix:
-        total_jobs: [ 10 ]
-        job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        containers: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+#        total_jobs: [ 10 ]
+#        job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
     steps:
       - uses: actions/checkout@v2
 
@@ -168,25 +170,39 @@ jobs:
         run: |
           tar -xzf ~/node_modules.tgz ./e2e/node_modules
 
-      - name: Create cache directory
-        run: |
-          mkdir -p ~/.cache
+#      - name: Run e2e test
+#        run: ./gradlew runE2e || ./gradlew runE2e
+#        env:
+#          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+#          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+#          SKIP_WEBAPP_BUILD: true
+#          SKIP_SERVER_BUILD: true
+#          SKIP_INSTALL_E2E_DEPS: true
+#          E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
+#          E2E_JOB_INDEX: ${{matrix.job_index}}
 
-      - name: Untar Cypress cache
-        run: |
-          tar -xzf ~/cypress_cache.tgz
-        working-directory: /home/runner/.cache/
-
-      - name: Run e2e test
-        run: ./gradlew runE2e || ./gradlew runE2e
+      - name: Run docker containers
+        run: ./gradlew runDockerE2e
         env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
           SKIP_WEBAPP_BUILD: true
           SKIP_SERVER_BUILD: true
           SKIP_INSTALL_E2E_DEPS: true
-          E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
-          E2E_JOB_INDEX: ${{matrix.job_index}}
+
+      - name: 'UI Tests - Chrome'
+        uses: cypress-io/github-action@v4
+        with:
+          # we have already installed all dependencies above
+          install: false
+          start: npm run cy:run
+          wait-on: 'http://localhost:8201'
+          wait-on-timeout: 120
+          browser: chrome
+          parallel: true
+          group: 'UI - Chrome'
+          spec: cypress/e2e/*
+          working-directory: e2e
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v2
         if: failure()
