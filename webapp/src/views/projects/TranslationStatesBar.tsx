@@ -43,11 +43,13 @@ const StyledContainer = styled('div')`
     display: flex;
     flex-wrap: wrap;
     margin: ${({ theme }) => theme.spacing(0, -1)};
+
     & > * {
       flex-shrink: 0;
       margin: ${({ theme }) => theme.spacing(0, 1)};
       margin-top: ${({ theme }) => theme.spacing(0.5)};
     }
+
     font-size: ${({ theme }) => theme.typography.body2.fontSize}px;
     justify-content: space-between;
   }
@@ -70,20 +72,12 @@ export function TranslationStatesBar(props: {
   stats: {
     keyCount: number;
     languageCount: number;
-    translationStateCounts: {
+    translationStatePercentages: {
       [state in State]: number;
     };
   };
 }) {
-  const translationsCount = props.stats.languageCount * props.stats.keyCount;
   const [loaded, setLoaded] = useState(false);
-  const percents = Object.entries(props.stats.translationStateCounts).reduce(
-    (acc, [state, count]) => ({
-      ...acc,
-      [state]: (count / translationsCount) * 100,
-    }),
-    {} as { [state in State]: number }
-  );
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 50);
@@ -91,8 +85,7 @@ export function TranslationStatesBar(props: {
 
   const LegendItem = (legendItemProps: { state: State }) => {
     const percent =
-      props.stats.translationStateCounts[legendItemProps.state] /
-      (props.stats.keyCount * props.stats.languageCount);
+      props.stats.translationStatePercentages[legendItemProps.state];
 
     return (
       <Box display="flex" alignItems="center" mr={2}>
@@ -105,10 +98,10 @@ export function TranslationStatesBar(props: {
           }}
         />
         <T>{translationStates[legendItemProps.state].translationKey}</T>:&nbsp;
-        {percent >= 0.01 ? (
+        {percent >= 1 ? (
           <T
             parameters={{
-              percent: percent.toString(),
+              percent: percent / 100,
             }}
           >
             project_dashboard_translations_percent
@@ -120,9 +113,9 @@ export function TranslationStatesBar(props: {
     );
   };
 
-  const visibleStates = STATES_ORDER.filter((state) => percents[state]).filter(
-    (state) => translationStates[state]
-  );
+  const visibleStates = STATES_ORDER.filter(
+    (state) => props.stats.translationStatePercentages[state]
+  ).filter((state) => translationStates[state]);
 
   return (
     <StyledContainer data-cy="project-states-bar-root">
@@ -141,7 +134,7 @@ export function TranslationStatesBar(props: {
               })}
               style={{
                 zIndex: 5 - idx,
-                width: `calc(max(${percents[state]}%, 8px) + ${BORDER_RADIUS}px)`,
+                width: `calc(max(${props.stats.translationStatePercentages[state]}%, 8px) + ${BORDER_RADIUS}px)`,
                 backgroundColor: translationStates[state].color,
               }}
             />

@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -28,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class OrganizationControllerTest : AuthorizedControllerTest() {
+class OrganizationControllerTest : AuthorizedControllerTest() {
 
   lateinit var dummyDto: OrganizationDto
   lateinit var dummyDto2: OrganizationDto
@@ -62,12 +63,12 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100")
-      .andPrettyPrint.andAssertThatJson.let {
-        it.node("_embedded.organizations").let {
-          it.isArray.hasSize(6)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
-          it.node("[0].currentUserRole").isEqualTo("OWNER")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(6)
+          node("[0].name").isEqualTo("user 2's organization 1")
+          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
   }
@@ -79,12 +80,12 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100&filterCurrentUserOwner=true")
-      .andPrettyPrint.andAssertThatJson.let {
-        it.node("_embedded.organizations").let {
-          it.isArray.hasSize(1)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
-          it.node("[0].currentUserRole").isEqualTo("OWNER")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("user 2's organization 1")
+          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
   }
@@ -97,8 +98,9 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
 
     performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
       .andPrettyPrint
-      .andAssertThatJson
-      .node("_embedded.organizations").node("[0].name").isEqualTo("user 4's organization 3")
+      .andAssertThatJson {
+        node("_embedded.organizations").node("[0].name").isEqualTo("user 4's organization 3")
+      }
   }
 
   @Test
@@ -108,19 +110,21 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     val organizationId = users[1].organizationRoles[0].organization!!.id
     performAuthGet("/v2/organizations/$organizationId/users").andIsOk
       .also { println(it.andReturn().response.contentAsString) }
-      .andAssertThatJson.node("_embedded.usersInOrganization").also {
-        it.isArray.hasSize(2)
-        it.node("[0].organizationRole").isEqualTo("MEMBER")
-        it.node("[1].organizationRole").isEqualTo("OWNER")
+      .andAssertThatJson {
+        node("_embedded.usersInOrganization") {
+          isArray.hasSize(2)
+          node("[0].organizationRole").isEqualTo("MEMBER")
+          node("[1].organizationRole").isEqualTo("OWNER")
+        }
       }
   }
 
   @Test
   fun testGetOneWithUrl() {
     this.organizationService.create(dummyDto, userAccount!!).let {
-      performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson.let {
-        it.node("name").isEqualTo(dummyDto.name)
-        it.node("description").isEqualTo(dummyDto.description)
+      performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson {
+        node("name").isEqualTo(dummyDto.name)
+        node("description").isEqualTo(dummyDto.description)
       }
     }
   }
@@ -128,12 +132,12 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetOneWithId() {
     this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson.let {
-        it.node("name").isEqualTo(dummyDto.name)
-        it.node("id").isEqualTo(organization.id)
-        it.node("description").isEqualTo(dummyDto.description)
-        it.node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
-        it.node("slug").isEqualTo(dummyDto.slug)
+      performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson {
+        node("name").isEqualTo(dummyDto.name)
+        node("id").isEqualTo(organization.id)
+        node("description").isEqualTo(dummyDto.description)
+        node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
+        node("slug").isEqualTo(dummyDto.slug)
       }
     }
   }
@@ -141,9 +145,9 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetOnePermissions() {
     this.organizationService.create(dummyDto, userAccount!!).let {
-      performAuthGet("/v2/organizations/${it.id}").andIsOk.andAssertThatJson.let {
-        it.node("name").isEqualTo(dummyDto.name)
-        it.node("description").isEqualTo(dummyDto.description)
+      performAuthGet("/v2/organizations/${it.id}").andIsOk.andAssertThatJson {
+        node("name").isEqualTo(dummyDto.name)
+        node("description").isEqualTo(dummyDto.description)
       }
     }
   }
@@ -160,11 +164,11 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     performAuthPost(
       "/v2/organizations",
       dummyDto
-    ).andIsCreated.andPrettyPrint.andAssertThatJson.let {
-      it.node("name").isEqualTo("Test org")
-      it.node("slug").isEqualTo("test-org")
-      it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
-      it.node("id").isNumber.satisfies {
+    ).andIsCreated.andPrettyPrint.andAssertThatJson {
+      node("name").isEqualTo("Test org")
+      node("slug").isEqualTo("test-org")
+      node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
+      node("id").isNumber.satisfies {
         organizationService.find(it.toLong()) is Organization
       }
     }
@@ -225,7 +229,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     performAuthPost(
       "/v2/organizations",
       dummyDto.also { it.slug = null }
-    ).andIsCreated.andAssertThatJson.node("slug").isEqualTo("test-org")
+    ).andIsCreated.andAssertThatJson { node("slug").isEqualTo("test-org") }
   }
 
   @Test
@@ -239,12 +243,12 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
           organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
           organization.description = "This is changed description"
         }
-      ).andIsOk.andPrettyPrint.andAssertThatJson.let {
-        it.node("name").isEqualTo("Hello")
-        it.node("slug").isEqualTo("hello-1")
-        it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-        it.node("basePermissions").isEqualTo("TRANSLATE")
-        it.node("description").isEqualTo("This is changed description")
+      ).andIsOk.andPrettyPrint.andAssertThatJson {
+        node("name").isEqualTo("Hello")
+        node("slug").isEqualTo("hello-1")
+        node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+        node("basePermissions").isEqualTo("TRANSLATE")
+        node("description").isEqualTo("This is changed description")
       }
     }
   }
@@ -345,8 +349,8 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.slug}/projects")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.projects").let { projectsNode ->
+        .andIsOk.andAssertThatJson {
+          node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
             projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
@@ -362,8 +366,8 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.id}/projects")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.projects").let { projectsNode ->
+        .andIsOk.andAssertThatJson {
+          node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
             projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
