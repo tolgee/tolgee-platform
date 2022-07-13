@@ -8,14 +8,11 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
-import { Box, Button, styled } from '@mui/material';
+import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import {
-  useConfig,
-  usePreferredOrganization,
-} from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
-import { Usage } from './dashboard/Usage';
+import { Usage } from 'tg.component/billing/Usage';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -26,26 +23,15 @@ const StyledWrapper = styled('div')`
   }
 `;
 
-const StyledUsage = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  font-size: 14px;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  width: 100%;
-  max-width: 200px;
-`;
-
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
-  const config = useConfig();
   const { preferredOrganization } = usePreferredOrganization();
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    path: { slug: preferredOrganization.slug || '' },
+    path: { slug: preferredOrganization?.slug || '' },
     query: {
       page,
       size: 20,
@@ -54,15 +40,14 @@ export const ProjectListView = () => {
     },
     options: {
       keepPreviousData: true,
-      enabled: Boolean(preferredOrganization.slug),
+      enabled: Boolean(preferredOrganization?.slug),
     },
   });
 
   const t = useTranslate();
 
-  const isOrganizationOwner = preferredOrganization.currentUserRole === 'OWNER';
-
-  const showStats = config.billing.enabled && isOrganizationOwner;
+  const isOrganizationOwner =
+    preferredOrganization?.currentUserRole === 'OWNER';
 
   return (
     <StyledWrapper>
@@ -77,17 +62,7 @@ export const ProjectListView = () => {
           }
           hideChildrenOnLoading={false}
           navigation={[[<OrganizationSwitch key={0} />]]}
-          navigationRight={
-            showStats &&
-            preferredOrganization && (
-              <StyledUsage>
-                <Usage
-                  organizationId={preferredOrganization.id}
-                  slug={preferredOrganization.slug}
-                />
-              </StyledUsage>
-            )
-          }
+          navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList

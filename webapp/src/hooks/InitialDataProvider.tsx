@@ -8,12 +8,13 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { useRef } from 'react';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 type InitialDataModel = components['schemas']['InitialDataModel'];
 
 type InitialDataContextType = InitialDataModel & {
-  currentOrganization?: OrganizationModel;
+  preferredOrganization?: OrganizationModel;
   isFetching?: boolean;
   isLoading?: boolean;
 };
@@ -75,7 +76,12 @@ export const [
     method: 'put',
   });
 
-  const updateCurrentOrganization = useCallback(
+  const preferredOrganization =
+    organization ?? initialData.data?.preferredOrganization;
+
+  const previousPreferred = useRef<number>();
+
+  const updatePreferredOrganization = useCallback(
     (newOrg: number | OrganizationModel) => {
       let organizationId: number | undefined;
       if (typeof newOrg === 'number') {
@@ -87,8 +93,15 @@ export const [
         setOrganization(newOrg as OrganizationModel);
         organizationId = newOrg.id;
       }
-      if (organizationId !== undefined && newOrg !== organization?.id) {
-        setPreferredOrganization.mutate({ path: { organizationId } });
+      if (
+        organizationId !== undefined &&
+        organizationId !==
+          (previousPreferred.current ?? preferredOrganization?.id)
+      ) {
+        previousPreferred.current = organizationId;
+        setPreferredOrganization.mutate({
+          path: { organizationId },
+        });
       }
     },
     [organization, setOrganization, organizationLoadable]
@@ -97,7 +110,7 @@ export const [
   const dispatch = async (action: ActionType) => {
     switch (action.type) {
       case 'UPDATE_ORGANIZATION':
-        return updateCurrentOrganization(action.payload);
+        return updatePreferredOrganization(action.payload);
       case 'REFETCH':
         setOrganization(undefined);
         return initialData.refetch();
@@ -106,8 +119,7 @@ export const [
 
   const contextData: InitialDataContextType = {
     ...initialData.data!,
-    currentOrganization:
-      organization || initialData.data?.preferredOrganization,
+    preferredOrganization: preferredOrganization,
     isFetching: initialData.isFetching || organizationLoadable.isLoading,
     isLoading: initialData.isLoading,
   };
@@ -131,7 +143,7 @@ export const useUser = () => useInitialDataContext((v) => v.userInfo);
 export const usePreferredOrganization = () => {
   const initialDataDispatch = useInitialDataDispatch();
   const preferredOrganization = useInitialDataContext(
-    (v) => v.currentOrganization!
+    (v) => v.preferredOrganization!
   );
   const updatePreferredOrganization = (org: number | OrganizationModel) =>
     initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });

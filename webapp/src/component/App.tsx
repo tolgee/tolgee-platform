@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { Redirect, Route, Switch, BrowserRouter } from 'react-router-dom';
@@ -28,6 +28,7 @@ import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
 import { useGlobalLoading } from './GlobalLoading';
+import { PlanLimitPopover } from './billing/PlanLimitPopover';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -82,7 +83,7 @@ const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
   const isLoading = useInitialDataContext((v) => v.isLoading);
   const isFetching = useInitialDataContext((v) => v.isFetching);
-  const currentOrganization = usePreferredOrganization();
+  const { preferredOrganization } = usePreferredOrganization();
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );
@@ -122,7 +123,7 @@ const MandatoryDataProvider = (props: any) => {
 
   useGlobalLoading(isFetching || isLoading);
 
-  if (isLoading || (allowPrivate && !currentOrganization)) {
+  if (isLoading || (allowPrivate && !preferredOrganization)) {
     return null;
   } else {
     return props.children;
@@ -164,6 +165,32 @@ const GlobalConfirmation = () => {
       onConfirm={onConfirm}
     />
   );
+};
+
+const GlobalLimitPopover = () => {
+  const planLimitErrors = useSelector(
+    (state: AppState) => state.global.planLimitErrors
+  );
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const firstRender = useRef(true);
+
+  const handleClose = () => setPopoverOpen(false);
+
+  useEffect(() => {
+    if (!firstRender.current && planLimitErrors) {
+      if (planLimitErrors <= 1) {
+        setPopoverOpen(true);
+      }
+    }
+    firstRender.current = false;
+  }, [planLimitErrors]);
+
+  const { preferredOrganization } = usePreferredOrganization();
+
+  return preferredOrganization ? (
+    <PlanLimitPopover open={popoverOpen} onClose={handleClose} />
+  ) : null;
 };
 
 const RecaptchaProvider: FC = (props) => {
@@ -236,6 +263,7 @@ export class App extends React.Component {
             </Switch>
             <SnackBar />
             <GlobalConfirmation />
+            <GlobalLimitPopover />
           </MandatoryDataProvider>
         </BrowserRouter>
       </>

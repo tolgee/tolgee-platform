@@ -1,4 +1,5 @@
 import { useHistory } from 'react-router-dom';
+import { Usage } from 'tg.component/billing/Usage';
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
@@ -34,6 +35,7 @@ export const BaseProjectView: React.FC<Props> = ({
     <BaseView
       {...otherProps}
       navigation={[...prefixNavigation, ...(navigation || [])]}
+      navigationRight={<Usage />}
     />
   );
 };
