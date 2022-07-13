@@ -59,7 +59,7 @@ class RateLimitsFilter(
             val timeToRefill = rateLimitsParamsProxy.getTimeToRefill(rateLimit.keyPrefix, rateLimit.timeToRefillInMs)
 
             // first request, create new UsageEntry
-            val time = currentDateProvider.getDate()
+            val time = currentDateProvider.date
             if (current == null) {
               current = UsageEntry(time, bucketSize)
             } else if (time.time - current.time.time > timeToRefill) {
@@ -85,7 +85,7 @@ class RateLimitsFilter(
   }
 
   private fun logDebugInfo(key: String, current: UsageEntry) {
-    val time = currentDateProvider.getDate()
+    val time = currentDateProvider.date
     logger.debug(
       "Accesses: " + key + " - " +
         (time.time - current.time.time).toDouble() / 1000 +

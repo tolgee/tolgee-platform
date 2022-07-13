@@ -316,7 +316,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   }
 
   private fun mockCurrentDate(dateProvider: () -> Date) {
-    whenever(currentDateProvider.getDate()).thenAnswer { dateProvider() }
+    whenever(currentDateProvider.date).thenAnswer { dateProvider() }
   }
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {
