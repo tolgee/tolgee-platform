@@ -72,8 +72,11 @@ export const OrganizationBillingView: FunctionComponent = () => {
   }, [success]);
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/billing/plans',
+    url: `/v2/organizations/{organizationId}/billing/plans`,
     method: 'get',
+    path: {
+      organizationId: organization!.id,
+    },
   });
 
   const activePlan = useBillingApiQuery({
