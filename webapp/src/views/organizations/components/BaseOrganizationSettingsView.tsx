@@ -1,35 +1,21 @@
-import { styled } from '@mui/material';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { BaseViewProps } from 'tg.component/layout/BaseView';
 import { Link, LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import UserOrganizationSettingsSubtitleLink from './UserOrganizationSettingsSubtitleLink';
-import { Navigation, NavigationItem } from 'tg.component/navigation/Navigation';
-import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { components } from 'tg.service/apiSchema.generated';
+import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import { useConfig } from 'tg.hooks/useConfig';
+import {
+  useConfig,
+  usePreferredOrganization,
+} from 'tg.hooks/InitialDataProvider';
 
-const StyledHeaderWrapper = styled('div')`
-  display: grid;
-  grid-auto-flow: column;
-  align-items: start;
-  margin-top: -4px;
-  margin-bottom: -4px;
-  min-height: 24px;
-  gap: 10px;
-`;
-
-const StyledNavigation = styled('div')``;
-
-const StyledOrganization = styled('div')`
-  display: flex;
-  justify-self: end;
-`;
+type OrganizationModel = components['schemas']['OrganizationModel'];
 
 type Props = BaseViewProps & {
   link: Link;
@@ -46,6 +32,19 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
   const t = useTranslate();
+  const history = useHistory();
+  const { preferredOrganization } = usePreferredOrganization();
+
+  const handleOrganizationSelect = (organization: OrganizationModel) => {
+    const redirectLink =
+      organization.currentUserRole === 'OWNER'
+        ? link
+        : LINKS.ORGANIZATION_PROFILE;
+
+    history.push(
+      redirectLink.build({ [PARAMS.ORGANIZATION_SLUG]: organization.slug })
+    );
+  };
 
   const menuItems: SettingsMenuItem[] = [
     {
@@ -54,76 +53,46 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_profile'),
     },
-    {
+  ];
+
+  if (preferredOrganization.currentUserRole === 'OWNER') {
+    menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_members'),
-    },
-    {
+    });
+    menuItems.push({
       link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_member_privileges'),
-    },
-  ];
-
-  if (config.billing.enabled) {
-    menuItems.push({
-      link: LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
-      }),
-      label: t('organization_menu_billing'),
     });
+    if (config.billing.enabled) {
+      menuItems.push({
+        link: LINKS.ORGANIZATION_BILLING.build({
+          [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+        }),
+        label: t('organization_menu_billing'),
+      });
+    }
   }
 
-  const organization = useApiQuery({
+  const organizationLoadable = useApiQuery({
     url: '/v2/organizations/{slug}',
     method: 'get',
     path: { slug: organizationSlug },
   });
 
-  const NavigationItem: NavigationItem[] = organization.data
-    ? [
-        [t('organizations_settings_title'), LINKS.ORGANIZATIONS.build()],
-        [
-          organization.data.name,
-          LINKS.ORGANIZATION_PROFILE.build({
-            [PARAMS.ORGANIZATION_SLUG]: organization.data.slug,
-          }),
-          <AvatarImg
-            key={0}
-            owner={{
-              name: organization.data.name,
-              avatar: organization.data.avatar,
-              type: 'ORG',
-              id: organization.data.id,
-            }}
-            size={18}
-          />,
-        ],
-      ]
+  const navigationPrefix: NavigationItem[] = organizationLoadable.data
+    ? [[<OrganizationSwitch key={0} onSelect={handleOrganizationSelect} />]]
     : [];
 
   return (
     <BaseSettingsView
       {...otherProps}
-      loading={organization.isLoading || loading}
-      customNavigation={
-        <SecondaryBar>
-          <StyledHeaderWrapper>
-            <StyledNavigation>
-              <Navigation path={[...NavigationItem, ...(navigation || [])]} />
-            </StyledNavigation>
-            <StyledOrganization>
-              <UserOrganizationSettingsSubtitleLink
-                link={link}
-                selectedId={organization.data?.id}
-              />
-            </StyledOrganization>
-          </StyledHeaderWrapper>
-        </SecondaryBar>
-      }
+      loading={organizationLoadable.isLoading || loading}
+      navigation={[...navigationPrefix, ...(navigation || [])]}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
     >

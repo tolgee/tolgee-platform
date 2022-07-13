@@ -1,32 +1,30 @@
-import { useRouteMatch } from 'react-router-dom';
+import { useTranslate } from '@tolgee/react';
+import { useLocation } from 'react-router-dom';
 
 import { LINKS } from '../constants/links';
 
 export class UserMenuItem {
   constructor(
     public link: string,
-    public nameTranslationKey: string,
+    public label: string,
     public isSelected: boolean
   ) {}
 }
 
 export const useUserMenuItems = (): UserMenuItem[] => {
-  const match = useRouteMatch();
+  const location = useLocation();
+  const t = useTranslate();
 
   return [
     {
       link: LINKS.USER_PROFILE.build(),
-      nameTranslationKey: 'user_menu_user_settings',
+      label: t('user_menu_user_settings'),
     },
     {
       link: LINKS.USER_API_KEYS.build(),
-      nameTranslationKey: 'user_menu_api_keys',
+      label: t('user_menu_api_keys'),
     },
-    {
-      link: LINKS.ORGANIZATIONS.build(),
-      nameTranslationKey: 'user_menu_organizations',
-    },
-  ].map(
-    (i) => new UserMenuItem(i.link, i.nameTranslationKey, match.url === i.link)
-  );
+  ].map((i) => {
+    return new UserMenuItem(i.link, i.label, location.pathname === i.link);
+  });
 };

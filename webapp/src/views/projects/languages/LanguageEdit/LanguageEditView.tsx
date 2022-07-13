@@ -3,10 +3,8 @@ import { T, useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyFields';
-import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -15,6 +13,8 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -96,19 +96,12 @@ export const LanguageEditView = () => {
   };
 
   return (
-    <BaseFormView
+    <BaseProjectView
       lg={6}
       md={8}
       xs={10}
       windowTitle={t('language_settings_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('project_menu_languages'),
           LINKS.PROJECT_LANGUAGES.build({
@@ -123,51 +116,54 @@ export const LanguageEditView = () => {
           }),
         ],
       ]}
-      initialValues={{
-        ...languageLoadable.data!,
-        flagEmoji: languageLoadable.data?.flagEmoji || '🏳️',
-        originalName: languageLoadable.data?.originalName || '',
-      }}
-      onSubmit={onSubmit}
       loading={
         languageLoadable.isFetching ||
         editLoadable.isLoading ||
         deleteLoadable.isLoading
       }
-      saveActionLoadable={editLoadable}
       hideChildrenOnLoading={languageLoadable.isLoading}
-      validationSchema={Validation.LANGUAGE(t)}
-      customActions={
-        <Button
-          variant="outlined"
-          color="secondary"
-          data-cy="language-delete-button"
-          onClick={() => {
-            if (languageLoadable.data?.base) {
-              return messageService.error(
-                <T>cannot_delete_base_language_message</T>
-              );
-            }
-            confirmationMessage({
-              message: (
-                <T parameters={{ name: languageLoadable.data!.name }}>
-                  delete_language_confirmation
-                </T>
-              ),
-              hardModeText: languageLoadable.data!.name.toUpperCase(),
-              confirmButtonText: <T>global_delete_button</T>,
-              confirmButtonColor: 'secondary',
-              onConfirm: onDelete,
-            });
-          }}
-        >
-          <T>delete_language_button</T>
-        </Button>
-      }
     >
-      <Box data-cy="language-modify-form">
-        <LanguageModifyFields />
-      </Box>
-    </BaseFormView>
+      <StandardForm
+        initialValues={{
+          ...languageLoadable.data!,
+          flagEmoji: languageLoadable.data?.flagEmoji || '🏳️',
+          originalName: languageLoadable.data?.originalName || '',
+        }}
+        onSubmit={onSubmit}
+        saveActionLoadable={editLoadable}
+        validationSchema={Validation.LANGUAGE(t)}
+        customActions={
+          <Button
+            variant="outlined"
+            color="secondary"
+            data-cy="language-delete-button"
+            onClick={() => {
+              if (languageLoadable.data?.base) {
+                return messageService.error(
+                  <T>cannot_delete_base_language_message</T>
+                );
+              }
+              confirmationMessage({
+                message: (
+                  <T parameters={{ name: languageLoadable.data!.name }}>
+                    delete_language_confirmation
+                  </T>
+                ),
+                hardModeText: languageLoadable.data!.name.toUpperCase(),
+                confirmButtonText: <T>global_delete_button</T>,
+                confirmButtonColor: 'secondary',
+                onConfirm: onDelete,
+              });
+            }}
+          >
+            <T>delete_language_button</T>
+          </Button>
+        }
+      >
+        <Box data-cy="language-modify-form">
+          <LanguageModifyFields />
+        </Box>
+      </StandardForm>
+    </BaseProjectView>
   );
 };

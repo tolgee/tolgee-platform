@@ -86,7 +86,8 @@ export function TranslationStatesBar(props: {
   );
 
   useEffect(() => {
-    setTimeout(() => setLoaded(true), 50);
+    const timer = setTimeout(() => setLoaded(true), 50);
+    return () => clearTimeout(timer);
   }, []);
 
   const LegendItem = (legendItemProps: { state: State }) => {

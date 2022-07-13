@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useConfig } from './useConfig';
+import { useConfig } from './InitialDataProvider';
 
 export const useWindowTitle = (title: string) => {
   const config = useConfig();

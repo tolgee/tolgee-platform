@@ -6,8 +6,9 @@ const StyledContainer = styled(Box)`
   height: 6px;
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.success.light}55;
+  overflow: hidden;
   &.critical {
-    background: ${({ theme }) => theme.palette.error.light}55;
+    background: ${({ theme }) => theme.palette.error.light}99;
   }
 `;
 
@@ -15,7 +16,7 @@ const StyledProgress = styled(Box)`
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.success.main};
   &.critical {
-    background: ${({ theme }) => theme.palette.error.main};
+    background: ${({ theme }) => theme.palette.error.dark};
   }
 `;
 

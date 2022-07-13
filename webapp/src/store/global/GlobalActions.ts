@@ -1,6 +1,4 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { RemoteConfigService } from 'tg.service/RemoteConfigService';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { SecurityService } from 'tg.service/SecurityService';
 import { singleton } from 'tsyringe';
@@ -22,17 +20,14 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   passwordResetSetValidated = false;
   passwordResetSetError = null;
   passwordResetSetSucceed = false;
+  planLimitErrors = 0;
   confirmationDialog: ConfirmationDialogProps | null = null;
   loading = false;
 }
 
 @singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
-  constructor(
-    private configService: RemoteConfigService,
-    private securityService: SecurityService,
-    private invitationCodeService: InvitationCodeService
-  ) {
+  constructor(private securityService: SecurityService) {
     super(new GlobalState());
   }
 
@@ -150,24 +145,24 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       }
   );
 
-  readonly loadableDefinitions = {
-    remoteConfig: this.createLoadableDefinition(
-      () => this.configService.getConfiguration(),
-      (state, action) => {
-        const invitationCode = this.invitationCodeService.getCode();
-        return {
-          ...state,
-          security: {
-            ...state.security,
-            allowPrivate:
-              !action.payload?.authentication || state.security.allowPrivate,
-            allowRegistration:
-              action.payload?.allowRegistrations || !!invitationCode, //if user has invitation code, registration is allowed
-          },
-        };
+  updateSecurity = this.createAction(
+    'UPDATE_SECURITY',
+    (options: Partial<SecurityDTO>) => options
+  ).build.on(
+    (state, action) =>
+      <GlobalState>{
+        ...state,
+        security: { ...state.security, ...action.payload },
       }
-    ),
-    resetPasswordRequest: this.createLoadableDefinition(
+  );
+
+  triggerPlanLimitError = this.createAction('PLAN_LIMIT_ERROR').build.on(
+    (state) =>
+      <GlobalState>{ ...state, planLimitErrors: state.planLimitErrors + 1 }
+  );
+
+  readonly loadableDefinitions = {
+    resetPasswordRequest: this.createLoadableDefinition<GlobalState, any>(
       this.securityService.resetPasswordRequest
     ),
   };

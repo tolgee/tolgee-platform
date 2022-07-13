@@ -1,7 +1,7 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, BrowserRouter } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
@@ -11,8 +11,12 @@ import type API from '@openreplay/tracker';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
-import { useConfig } from '../hooks/useConfig';
-import { useUser } from '../hooks/useUser';
+import {
+  useConfig,
+  usePreferredOrganization,
+  useInitialDataContext,
+} from '../hooks/InitialDataProvider';
+import { useUser } from '../hooks/InitialDataProvider';
 import { AppState } from '../store';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { GlobalActions } from '../store/global/GlobalActions';
@@ -20,10 +24,11 @@ import { RedirectionActions } from '../store/global/RedirectionActions';
 import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
 import { ProjectsRouter } from '../views/projects/ProjectsRouter';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
+import { useGlobalLoading } from './GlobalLoading';
+import { PlanLimitPopover } from './billing/PlanLimitPopover';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -72,7 +77,13 @@ const Redirection = () => {
 
 const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
+  const allowPrivate = useSelector(
+    (v: AppState) => v.global.security.allowPrivate
+  );
   const userData = useUser();
+  const isLoading = useInitialDataContext((v) => v.isLoading);
+  const isFetching = useInitialDataContext((v) => v.isFetching);
+  const { preferredOrganization } = usePreferredOrganization();
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );
@@ -110,12 +121,10 @@ const MandatoryDataProvider = (props: any) => {
     }
   }, [userData, openReplayTracker]);
 
-  const allowPrivate = useSelector(
-    (state: AppState) => state.global.security.allowPrivate
-  );
+  useGlobalLoading(isFetching || isLoading);
 
-  if (!config || (!userData && allowPrivate && config.authentication)) {
-    return <FullPageLoading />;
+  if (isLoading || (allowPrivate && !preferredOrganization)) {
+    return null;
   } else {
     return props.children;
   }
@@ -156,6 +165,32 @@ const GlobalConfirmation = () => {
       onConfirm={onConfirm}
     />
   );
+};
+
+const GlobalLimitPopover = () => {
+  const planLimitErrors = useSelector(
+    (state: AppState) => state.global.planLimitErrors
+  );
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const firstRender = useRef(true);
+
+  const handleClose = () => setPopoverOpen(false);
+
+  useEffect(() => {
+    if (!firstRender.current && planLimitErrors) {
+      if (planLimitErrors <= 1) {
+        setPopoverOpen(true);
+      }
+    }
+    firstRender.current = false;
+  }, [planLimitErrors]);
+
+  const { preferredOrganization } = usePreferredOrganization();
+
+  return preferredOrganization ? (
+    <PlanLimitPopover open={popoverOpen} onClose={handleClose} />
+  ) : null;
 };
 
 const RecaptchaProvider: FC = (props) => {
@@ -228,6 +263,7 @@ export class App extends React.Component {
             </Switch>
             <SnackBar />
             <GlobalConfirmation />
+            <GlobalLimitPopover />
           </MandatoryDataProvider>
         </BrowserRouter>
       </>

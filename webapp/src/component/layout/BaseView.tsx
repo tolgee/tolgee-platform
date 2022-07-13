@@ -26,6 +26,8 @@ export interface BaseViewProps {
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
   customHeader?: ReactNode;
+  navigationRight?: ReactNode;
+  switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   'data-cy'?: string;
@@ -54,12 +56,19 @@ export const BaseView = (props: BaseViewProps) => {
             <SecondaryBar
               height={49}
               display="flex"
-              alignItems="center"
+              flexDirection="column"
+              alignItems="stretch"
               justifyContent="center"
             >
-              <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
+              <Box
+                style={{ padding: 0, margin: 0 }}
+                display="flex"
+                align-items="center"
+                justifyContent="space-between"
+              >
                 <Navigation path={props.navigation} />
-              </Container>
+                {props.navigationRight}
+              </Box>
             </SecondaryBar>
           ))}
         {(props.title || props.customHeader) && (
@@ -89,7 +98,12 @@ export const BaseView = (props: BaseViewProps) => {
                           </Box>
                         )}
                       </Box>
-                      <Box display="flex">
+                      <Box display="flex" gap={2}>
+                        {props.switcher && (
+                          <Box display="flex" alignItems="center">
+                            {props.switcher}
+                          </Box>
+                        )}
                         {(props.onAdd || props.addLinkTo) && (
                           <Button
                             data-cy="global-plus-button"

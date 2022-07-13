@@ -28,11 +28,13 @@ interface FormProps<T> {
   customActions?: ReactNode;
   submitButtonInner?: ReactNode;
   saveActionLoadable?: LoadableType;
+  disabled?: boolean;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
   initialValues,
   validationSchema,
+  disabled,
   ...props
 }) => {
   const history = useHistory();
@@ -73,7 +75,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                     <Box display="flex" alignItems="flex-end" mb={2}>
                       <Button
                         data-cy="global-form-cancel-button"
-                        disabled={props.loading}
+                        disabled={props.loading || disabled}
                         onClick={onCancel}
                       >
                         <T>global_form_cancel</T>
@@ -84,7 +86,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                           loading={actionLoading}
                           color="primary"
                           variant="contained"
-                          disabled={props.loading}
+                          disabled={props.loading || disabled}
                           type="submit"
                         >
                           {props.submitButtonInner || <T>global_form_save</T>}

@@ -10,6 +10,9 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { Usage } from 'tg.component/billing/Usage';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -23,22 +26,28 @@ const StyledWrapper = styled('div')`
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const { preferredOrganization } = usePreferredOrganization();
 
   const listPermitted = useApiQuery({
-    url: '/v2/projects/with-stats',
+    url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    options: {
-      keepPreviousData: true,
-    },
+    path: { slug: preferredOrganization?.slug || '' },
     query: {
       page,
       size: 20,
       search,
       sort: ['id,desc'],
     },
+    options: {
+      keepPreviousData: true,
+      enabled: Boolean(preferredOrganization?.slug),
+    },
   });
 
   const t = useTranslate();
+
+  const isOrganizationOwner =
+    preferredOrganization?.currentUserRole === 'OWNER';
 
   return (
     <StyledWrapper>
@@ -48,8 +57,12 @@ export const ProjectListView = () => {
           windowTitle={t('projects_title')}
           onSearch={setSearch}
           containerMaxWidth="lg"
-          addLinkTo={LINKS.PROJECT_ADD.build()}
+          addLinkTo={
+            isOrganizationOwner ? LINKS.PROJECT_ADD.build() : undefined
+          }
           hideChildrenOnLoading={false}
+          navigation={[[<OrganizationSwitch key={0} />]]}
+          navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList
@@ -61,13 +74,15 @@ export const ProjectListView = () => {
               <EmptyListMessage
                 loading={listPermitted.isFetching}
                 hint={
-                  <Button
-                    component={Link}
-                    to={LINKS.PROJECT_ADD.build()}
-                    color="primary"
-                  >
-                    <T>projects_empty_action</T>
-                  </Button>
+                  isOrganizationOwner ? (
+                    <Button
+                      component={Link}
+                      to={LINKS.PROJECT_ADD.build()}
+                      color="primary"
+                    >
+                      <T>projects_empty_action</T>
+                    </Button>
+                  ) : undefined
                 }
               >
                 <T>projects_empty</T>

@@ -3,8 +3,6 @@ import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -22,6 +20,7 @@ import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { BaseProjectView } from '../BaseProjectView';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
@@ -127,16 +126,9 @@ export const ImportView: FunctionComponent = () => {
   }
 
   return (
-    <BaseView
+    <BaseProjectView
       windowTitle={t('import_translations_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('import_translations_title'),
           LINKS.PROJECT_IMPORT.build({
@@ -211,6 +203,6 @@ export const ImportView: FunctionComponent = () => {
         open={applyImportHelper.conflictNotResolvedDialogOpen}
         onClose={applyImportHelper.onDialogClose}
       />
-    </BaseView>
+    </BaseProjectView>
   );
 };

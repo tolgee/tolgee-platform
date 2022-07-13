@@ -23,7 +23,7 @@ describe('Project Permissions', () => {
   it('English can be edited', () => {
     login('en_only_user');
     visitList();
-    enterProject('Project');
+    enterProject('Project', 'Org');
     getCell('english_translation')
       .trigger('mouseover')
       .findDcy('translations-cell-edit-button')
@@ -35,7 +35,7 @@ describe('Project Permissions', () => {
   it('German cannot be edited', () => {
     login('en_only_user');
     visitList();
-    enterProject('Project');
+    enterProject('Project', 'Org');
     getCell('german_translation')
       .trigger('mouseover')
       .findDcy('translations-cell-edit-button')
@@ -47,7 +47,7 @@ describe('Project Permissions', () => {
   it('State cannot be changed for German', () => {
     login('en_only_user');
     visitList();
-    enterProject('Project');
+    enterProject('Project', 'Org');
     getCell('german_translation')
       .trigger('mouseover')
       .findDcy('translation-state-button')
@@ -59,7 +59,7 @@ describe('Project Permissions', () => {
   it('Shortcuts are restricted for german', () => {
     login('en_only_user');
     visitList();
-    enterProject('Project');
+    enterProject('Project', 'Org');
     selectFirst();
     assertAvailableCommands(['Move', 'Edit', 'Reviewed']);
     move('downarrow');

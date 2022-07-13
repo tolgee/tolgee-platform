@@ -127,6 +127,7 @@ function validateUploadedAvatar(
 }
 
 function selectFile() {
+  cy.wait(100);
   gcy('avatar-menu-open-button').click();
   gcy('avatar-upload-button').click();
   gcy('avatar-upload-file-input').attachFile('avatars/pepi.jpg');

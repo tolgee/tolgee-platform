@@ -4,30 +4,33 @@ import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
+import { Link, Typography } from '@mui/material';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 import { SignUpActions } from 'tg.store/global/SignUpActions';
 import { AppState } from 'tg.store/index';
+import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { CompactView } from 'tg.component/layout/CompactView';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { Alert } from '../common/Alert';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { CompactView } from 'tg.component/layout/CompactView';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { Link, Typography } from '@mui/material';
 
 const actions = container.resolve(SignUpActions);
+const invitationService = container.resolve(InvitationCodeService);
 
 export type SignUpType = {
   name: string;
   email: string;
   password: string;
   passwordRepeat?: string;
+  organizationName: string;
   invitationCode?: string;
 };
 
@@ -82,6 +85,8 @@ const SignUpView: FunctionComponent = () => {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
 
+  const orgRequired = !invitationService.getCode();
+
   const View = (props: { onSubmit: (v) => void }) => (
     <DashboardPage>
       <CompactView
@@ -102,9 +107,10 @@ const SignUpView: FunctionComponent = () => {
                   passwordRepeat: '',
                   name: '',
                   email: '',
+                  organizationName: orgRequired ? '' : undefined,
                 } as SignUpType
               }
-              validationSchema={Validation.SIGN_UP(t)}
+              validationSchema={Validation.SIGN_UP(t, orgRequired)}
               submitButtons={
                 <Box display="flex" justifyContent="flex-end">
                   <LoadingButton
@@ -130,6 +136,13 @@ const SignUpView: FunctionComponent = () => {
                 label={<T>sign_up_form_email</T>}
                 variant="standard"
               />
+              {orgRequired && (
+                <TextField
+                  name="organizationName"
+                  label={<T>sign_up_form_organization_name</T>}
+                  variant="standard"
+                />
+              )}
               <SetPasswordFields />
               <Box mt={2} mb={3}>
                 <Typography variant="body2">

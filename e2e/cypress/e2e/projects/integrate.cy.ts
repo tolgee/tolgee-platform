@@ -26,7 +26,7 @@ describe('Integrate view', () => {
 
   it('gets to integrate view', () => {
     loginAndCreateProjectAndVisit();
-    cy.gcy('integrate-navigation-title').should('be.visible');
+    cy.gcy('navigation-item').contains('Integrate').should('be.visible');
   });
 
   describe('Step 1 | Choose your weapon', () => {

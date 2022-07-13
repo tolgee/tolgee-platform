@@ -121,3 +121,16 @@ export const toggleInMultiselect = (
 export const getInputByName = (name: string): Chainable => {
   return cy.xpath(getInput(name));
 };
+
+export const switchToOrganization = (name: string): Chainable => {
+  cy.waitForDom();
+  cy.gcy('organization-switch').click();
+  cy.waitForDom();
+  cy.gcy('organization-switch-item').contains(name).click();
+  return assertSwitchedToOrganization(name);
+};
+
+export const assertSwitchedToOrganization = (name: string) => {
+  cy.waitForDom();
+  return cy.gcy('organization-switch').contains(name).should('be.visible');
+};

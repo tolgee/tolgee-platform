@@ -1,20 +1,17 @@
-import { Box, Chip, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { BaseView } from 'tg.component/layout/BaseView';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
+
 import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
-import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { Usage } from 'tg.views/projects/dashboard/Usage';
-import { useConfig } from 'tg.hooks/useConfig';
+import { BaseProjectView } from '../BaseProjectView';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -40,49 +37,16 @@ const StyledContainer = styled(Box)`
   }
 `;
 
-const StyledHeader = styled(Box)`
-  display: grid;
-  grid-template-columns: auto auto auto 1fr minmax(0px, 200px) auto;
-  gap: 8px;
-  align-items: center;
-  margin-top: -4px;
-  margin-bottom: -4px;
-`;
-
-const StyledProjectIcon = styled(Box)``;
-
-const StyledProjectName = styled(Box)`
-  margin-right: 4px;
-  font-size: 16px;
-`;
-
-const StyledProjectId = styled(Box)`
-  font-size: 14px;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  grid-column: -2;
-`;
-
-const StyledUsage = styled(Box)`
-  grid-column: -3;
+const StyledProjectId = styled('div')`
   display: flex;
-  flex-direction: column;
-  height: 15px;
-  justify-content: center;
+  align-items: center;
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
-  margin-right: 10px;
-  width: 100%;
 `;
 
 export const DashboardView = () => {
   const project = useProject();
-  const config = useConfig();
   const t = useTranslate();
-
-  const showStats =
-    project.organizationOwner &&
-    project.organizationRole &&
-    config.billing.enabled;
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'] };
@@ -141,33 +105,16 @@ export const DashboardView = () => {
 
   return (
     <ProjectLanguagesProvider>
-      <BaseView
+      <BaseProjectView
         windowTitle={t('project_dashboard_title')}
         containerMaxWidth="xl"
-        customNavigation={
-          <SecondaryBar>
-            <StyledHeader>
-              <StyledProjectIcon>
-                <SmallProjectAvatar project={project} />
-              </StyledProjectIcon>
-              <StyledProjectName>{project.name}</StyledProjectName>
-              <Chip size="small" label={project.organizationOwner?.name} />
-              {showStats && (
-                <StyledUsage>
-                  <Usage
-                    organizationId={project.organizationOwner!.id}
-                    slug={project.organizationOwner!.slug}
-                  />
-                </StyledUsage>
-              )}
-              <StyledProjectId>
-                <T
-                  keyName="project_dashboard_project_id"
-                  parameters={{ id: project.id }}
-                />
-              </StyledProjectId>
-            </StyledHeader>
-          </SecondaryBar>
+        navigationRight={
+          <StyledProjectId>
+            <T
+              keyName="project_dashboard_project_id"
+              parameters={{ id: project.id }}
+            />
+          </StyledProjectId>
         }
       >
         {anythingLoading ? (
@@ -191,7 +138,7 @@ export const DashboardView = () => {
             </Box>
           </StyledContainer>
         )}
-      </BaseView>
+      </BaseProjectView>
     </ProjectLanguagesProvider>
   );
 };

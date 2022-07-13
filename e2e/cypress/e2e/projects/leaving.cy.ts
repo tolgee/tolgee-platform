@@ -16,7 +16,7 @@ describe('Projects Basics', () => {
   it('cannot leave project with organization role', () => {
     login('pepik', 'admin');
     cy.visit(`${HOST}`);
-    leaveProject('Organization owned project');
+    leaveProject('Organization owned project', 'Owned organization');
     assertMessage(
       'Cannot leave project owned by the organization you are member of.'
     );
@@ -25,7 +25,7 @@ describe('Projects Basics', () => {
   it('can leave project', () => {
     login('vobtah', 'admin');
     cy.visit(`${HOST}`);
-    leaveProject('test_project');
+    leaveProject('test_project', 'test_username');
     assertMessage('Project left');
   });
 
@@ -34,7 +34,7 @@ describe('Projects Basics', () => {
   });
 });
 
-const leaveProject = (projectName: string) => {
-  selectInProjectMoreMenu(projectName, 'project-leave-button');
+const leaveProject = (projectName: string, organization?: string) => {
+  selectInProjectMoreMenu(projectName, 'project-leave-button', organization);
   confirmHardMode();
 };

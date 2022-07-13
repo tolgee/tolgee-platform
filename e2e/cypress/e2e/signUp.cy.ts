@@ -143,7 +143,7 @@ context('Sign up', () => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm();
+      fillAndSubmitForm(false);
       assertMessage('Thanks for your sign up!');
       cy.contains('Crazy project').should('be.visible');
     });
@@ -176,10 +176,13 @@ context('Sign up', () => {
   });
 });
 
-const fillAndSubmitForm = () => {
+const fillAndSubmitForm = (withOrganization = true) => {
   cy.waitForDom();
   cy.xpath(getInput('name')).should('be.visible').type('Test user');
   cy.xpath(getInput('email')).type(TEST_USERNAME);
+  if (withOrganization) {
+    cy.xpath(getInput('organizationName')).type('organization');
+  }
   cy.xpath(getInput('password')).type('password');
   cy.xpath(getInput('passwordRepeat')).type('password');
   gcy('sign-up-submit-button').click();

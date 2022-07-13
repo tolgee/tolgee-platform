@@ -71,7 +71,11 @@ class OrganizationService(
   }
 
   fun createPreferred(userAccount: UserAccount, name: String = userAccount.name): Organization {
-    return this.create(OrganizationDto(name = name), userAccount = userAccount)
+    val safeName = if (name.isNotEmpty() || name.length >= 3)
+      name
+    else
+      "${userAccount.username.take(3)} Organization"
+    return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
   }
 
   private fun generateSlug(name: String) =

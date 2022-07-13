@@ -6,8 +6,8 @@ import Typography from '@mui/material/Typography';
 import { LightMode, DarkMode } from '@mui/icons-material';
 
 import { LocaleMenu } from '../../LocaleMenu';
-import { UserMenu } from '../../security/UserMenu';
-import { useConfig } from 'tg.hooks/useConfig';
+import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
 import { useThemeContext } from '../../../ThemeProvider';

@@ -140,8 +140,6 @@ export class LINKS {
     'invitations'
   );
 
-  static ORGANIZATION_PROJECTS = Link.ofParent(LINKS.ORGANIZATION, 'projects');
-
   static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
   /**
