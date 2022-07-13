@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import {
   Box,
@@ -13,6 +13,7 @@ import { T } from '@tolgee/react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useUpgradePlan } from './BillingPlans/useUpgradePlan';
 import { useOrganization } from '../useOrganization';
+import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 
 type PrepareUpgradeDialogProps = {
   data: components['schemas']['SubscriptionUpdatePreviewModel'];
@@ -22,6 +23,14 @@ type PrepareUpgradeDialogProps = {
 const StyledAppliedCreditsBox = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
   font-size: 13px;
+`;
+
+const StyledItemDescription = styled(Box)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledItemPrice = styled(Box)`
+  padding: 4px 0px 16px 16px;
 `;
 
 export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
@@ -38,6 +47,9 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
     };
   }, [upgradeMutation.isSuccess]);
 
+  const formatMoney = useMoneyFormatter();
+  const formatNumber = useNumberFormatter();
+
   return (
     <Dialog open={true} onClose={props.onClose}>
       <DialogTitle>
@@ -50,9 +62,12 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
 
         <Box mt={2}>
           {props.data.items.map((item, idx) => (
-            <Box key={idx}>
-              {item.description} {item.amount} {item.taxRate}
-            </Box>
+            <React.Fragment key={idx}>
+              <StyledItemDescription>{item.description}:</StyledItemDescription>
+              <StyledItemPrice>
+                {formatMoney(item.amount)} ({formatNumber(item.taxRate)}% tax)
+              </StyledItemPrice>
+            </React.Fragment>
           ))}
         </Box>
 
