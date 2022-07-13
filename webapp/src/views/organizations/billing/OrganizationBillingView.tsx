@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, styled, Typography } from '@mui/material';
+import { styled, Typography } from '@mui/material';
 
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { LINKS } from 'tg.constants/links';
@@ -15,8 +15,8 @@ import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
 import { BillingPlans } from './BillingPlans/BillingPlans';
 import { Credits } from './Credits/Credits';
 import { CustomerPortal } from './CustomerPortal/CustomerPortal';
-import { BillingPeriodType, PeriodSelect } from './BillingPlans/PeriodSelect';
 import { CurrentUsage } from './CurrentUsage/CurrentUsage';
+import { BillingPeriodType } from './BillingPlans/PeriodSwitch';
 
 const StyledCurrent = styled('div')`
   display: grid;
@@ -53,7 +53,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
 
   const url = new URL(window.location.href);
 
-  const [period, setPeriod] = useState<BillingPeriodType>('MONTHLY');
+  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
 
   url.search = '';
 
@@ -137,21 +137,13 @@ export const OrganizationBillingView: FunctionComponent = () => {
               <CustomerPortal />
             </StyledCurrent>
             <Typography variant="h6">
-              <Box display="flex" gap={2} alignItems="center">
-                <T>organization_pricing_plans_title</T>
-                <PeriodSelect
-                  value={period}
-                  onChange={(e) =>
-                    setPeriod(e.target.value as BillingPeriodType)
-                  }
-                  size="small"
-                />
-              </Box>
+              <T>organization_pricing_plans_title</T>
             </Typography>
             <StyledShopping>
               <BillingPlans
                 plans={plansLoadable.data._embedded.plans}
                 activePlan={activePlan.data}
+                onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
 

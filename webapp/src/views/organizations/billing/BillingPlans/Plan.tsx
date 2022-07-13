@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { styled } from '@mui/material';
+import { styled, Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -9,6 +9,8 @@ import { PlanActionButton } from './PlanActionButton';
 import { PlanTitle } from './PlanTitle';
 import { PlanPrice } from './PlanPrice';
 import { PrepareUpgradeDialog } from '../PrepareUpgradeDialog';
+import { PeriodSwitch, BillingPeriodType } from './PeriodSwitch';
+import clsx from 'clsx';
 
 type PlanModel = components['schemas']['PlanModel'];
 type Period = components['schemas']['SubscribeRequest']['period'];
@@ -20,17 +22,23 @@ const StyledPlan = styled('div')`
   padding: 20px;
   display: grid;
   gap: 8px;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: 1fr auto auto auto;
   grid-template-areas:
-    'title    title'
-    'info     info'
-    'price    action';
+    'title '
+    'info  '
+    'switch'
+    'action';
+  border: 1px solid transparent;
+  &.active {
+    border: 1px solid ${({ theme }) => theme.palette.primary.main};
+  }
 `;
 
 type Props = {
   plan: PlanModel;
   isOrganizationSubscribed: boolean;
   period: Period;
+  onPeriodChange: (period: BillingPeriodType) => void;
   isActive: boolean;
   isEnded: boolean;
 };
@@ -39,6 +47,7 @@ export const Plan: FC<Props> = ({
   plan,
   isOrganizationSubscribed,
   period,
+  onPeriodChange,
   isActive,
   isEnded,
 }) => {
@@ -53,7 +62,7 @@ export const Plan: FC<Props> = ({
   } = usePlan({ planId: plan.id, period: period });
 
   return (
-    <StyledPlan>
+    <StyledPlan className={clsx({ active: isActive })}>
       <PlanTitle
         title={plan.name}
         subtitle={
@@ -66,19 +75,29 @@ export const Plan: FC<Props> = ({
       />
 
       <PlanInfo plan={plan} />
-      <PlanPrice
-        price={period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice}
-        period={period}
-      />
+      <Box gridArea="switch" minHeight={19}>
+        {!plan.free && (
+          <PeriodSwitch value={period} onChange={onPeriodChange} />
+        )}
+      </Box>
 
-      {prepareUpgradeMutation.data && (
-        <PrepareUpgradeDialog
-          data={prepareUpgradeMutation.data}
-          onClose={() => {
-            prepareUpgradeMutation.reset();
-          }}
+      <Box gridArea="action" display="flex" justifyItems="space-between">
+        <PlanPrice
+          price={
+            period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
+          }
+          period={period}
         />
-      )}
+
+        {prepareUpgradeMutation.data && (
+          <PrepareUpgradeDialog
+            data={prepareUpgradeMutation.data}
+            onClose={() => {
+              prepareUpgradeMutation.reset();
+            }}
+          />
+        )}
+      </Box>
 
       {!plan.free &&
         (isActive && !isEnded ? (

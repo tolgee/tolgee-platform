@@ -1,12 +1,7 @@
 import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
-import { BillingPeriodType } from './PeriodSelect';
-
-type Props = {
-  price: number;
-  period: BillingPeriodType;
-};
+import { BillingPeriodType } from './PeriodSwitch';
 
 const StyledWrapper = styled(Box)`
   grid-area: price;
@@ -25,17 +20,29 @@ const StyledPeriod = styled(Box)`
   font-size: 14px;
 `;
 
+type Props = {
+  price: number;
+  period: BillingPeriodType;
+};
+
 export const PlanPrice: React.FC<Props> = ({ price, period }) => {
   const formatter = useMoneyFormatter();
   const t = useTranslate();
-  const periodLabel =
-    period === 'MONTHLY'
-      ? t('billing_period_price_per_month')
-      : t('billing_period_price_per_year');
+
   return (
     <StyledWrapper>
-      <StyledPrice>{formatter(price)}</StyledPrice>
-      <StyledPeriod>{periodLabel}</StyledPeriod>
+      {price === 0 ? (
+        <StyledPrice>{formatter(price)}</StyledPrice>
+      ) : (
+        <>
+          <StyledPrice>
+            {t('billing_period_monthly_price', { price })}
+          </StyledPrice>
+          {period === 'YEARLY' && (
+            <StyledPeriod>{t('billing_period_annual')}</StyledPeriod>
+          )}
+        </>
+      )}
     </StyledWrapper>
   );
 };

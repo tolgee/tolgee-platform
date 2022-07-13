@@ -1,8 +1,8 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
+import { BillingPeriodType } from './PeriodSwitch';
 import { Plan } from './Plan';
-import { BillingPeriodType } from './PeriodSelect';
 
 type PlanModel = components['schemas']['PlanModel'];
 type ActivePlanModel = components['schemas']['ActivePlanModel'];
@@ -15,19 +15,23 @@ type BillingPlansProps = {
   plans: PlanModel[];
   activePlan: ActivePlanModel;
   period: BillingPeriodType;
+  onPeriodChange: (period: BillingPeriodType) => void;
 };
 
 export const BillingPlans: React.FC<BillingPlansProps> = ({
   plans,
   activePlan,
   period,
+  onPeriodChange,
 }) => {
   return (
     <>
       {plans.map((plan) => {
+        const planPeriod = plan.free ? undefined : period;
         const isActive =
           activePlan.id === plan.id &&
-          activePlan.currentBillingPeriod === period;
+          (activePlan.currentBillingPeriod === planPeriod ||
+            planPeriod === undefined);
         const isEnded = isActive && activePlan.cancelAtPeriodEnd;
 
         return (
@@ -38,6 +42,7 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
                 isActive={isActive}
                 isEnded={isEnded}
                 isOrganizationSubscribed={!activePlan.free}
+                onPeriodChange={onPeriodChange}
                 period={period}
               />
             )}
