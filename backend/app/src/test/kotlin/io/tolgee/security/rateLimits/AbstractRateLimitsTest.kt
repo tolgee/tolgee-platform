@@ -77,7 +77,7 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
     performAction: () -> ResultActions,
     expectedStatus: Int
   ) {
-    whenever(currentDateProvider.getDate()).thenReturn(Date(startDate.time + oneHour + 1))
+    whenever(currentDateProvider.date).thenReturn(Date(startDate.time + oneHour + 1))
     performAction().andExpect { status().`is`(expectedStatus) }
   }
 
@@ -113,7 +113,7 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
 
   private fun initMocks(bucketSize: Int, keyPrefix: String): Date {
     val startDate = Date()
-    whenever(currentDateProvider.getDate()).thenReturn(startDate)
+    whenever(currentDateProvider.date).thenReturn(startDate)
     // all other limits have to pass, so we have to set larger values
     whenever(rateLimitParamsProxy.getBucketSize(any(), any())).thenReturn(bucketSize + 20000)
     whenever(rateLimitParamsProxy.getTimeToRefill(any(), any())).thenReturn(oneHour + 20000)

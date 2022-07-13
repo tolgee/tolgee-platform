@@ -95,7 +95,8 @@ enum class Message {
   PRICE_NOT_FOUND,
   INVOICE_NOT_FROM_ORGANIZATION,
   INVOICE_NOT_FOUND,
-  PLAN_NOT_FOUND;
+  PLAN_NOT_FOUND,
+  PLAN_NOT_AVAILABLE_ANY_MORE;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

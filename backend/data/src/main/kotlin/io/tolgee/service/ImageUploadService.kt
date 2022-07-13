@@ -60,7 +60,7 @@ class ImageUploadService(
   @Scheduled(fixedRate = 60000)
   fun cleanOldImages() {
     logger.debug("Clearing images")
-    val time = dateProvider.getDate().toInstant().minus(2, ChronoUnit.HOURS)
+    val time = dateProvider.date.toInstant().minus(2, ChronoUnit.HOURS)
     uploadedImageRepository.findAllOlder(Date.from(time)).let { images ->
       images.forEach { delete(it) }
     }

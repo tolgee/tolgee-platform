@@ -121,7 +121,7 @@ class MtCreditBucketService(
 
   fun refillBucket(bucket: MtCreditBucket, bucketSize: Long) {
     bucket.credits = bucketSize
-    bucket.refilled = currentDateProvider.getDate()
+    bucket.refilled = currentDateProvider.date
     bucket.bucketSize = bucket.credits
   }
 
@@ -130,7 +130,7 @@ class MtCreditBucketService(
   }
 
   fun refillIfItsTime(bucket: MtCreditBucket) {
-    if (bucket.getNextRefillDate() <= currentDateProvider.getDate()) {
+    if (bucket.getNextRefillDate() <= currentDateProvider.date) {
       refillBucket(bucket)
     }
   }

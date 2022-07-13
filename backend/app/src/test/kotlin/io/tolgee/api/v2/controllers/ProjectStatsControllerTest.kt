@@ -108,7 +108,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun mockDate(stringDate: String) {
-    whenever(currentDateProvider.getDate()).thenReturn(format.parse(stringDate))
+    whenever(currentDateProvider.date).thenReturn(format.parse(stringDate))
   }
 
   private fun createActivity(times: Int) {
