@@ -151,7 +151,7 @@ class MtCreditBucketService(
   }
 
   private fun MtCreditBucket.initCredits() {
-    credits = getRefillAmount(null)
+    credits = getRefillAmount(this.organization)
     bucketSize = credits
   }
 
