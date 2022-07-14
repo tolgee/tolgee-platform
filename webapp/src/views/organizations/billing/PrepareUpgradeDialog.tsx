@@ -102,6 +102,7 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
           onClick={() => onUpgrade(organization!.id, props.data.updateToken)}
           color="primary"
           variant="contained"
+          data-cy="billing-upgrade-preview-confirm-button"
         >
           <T keyName="billing_upgrade_preview_confirm_button" />
         </LoadingButton>

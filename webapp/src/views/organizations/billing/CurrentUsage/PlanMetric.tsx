@@ -37,12 +37,14 @@ type Props = {
   currentAmount: number;
   totalAmount?: number;
   periodEnd?: number;
+  'data-cy'?: string;
 };
 
 export const PlanMetric: React.FC<Props> = ({
   name,
   currentAmount,
   totalAmount,
+  ...props
 }) => {
   const formatNumber = useNumberFormatter();
   const showProgress = totalAmount !== undefined;
@@ -52,7 +54,7 @@ export const PlanMetric: React.FC<Props> = ({
   return (
     <>
       <StyledName>{name}</StyledName>
-      <Box>
+      <Box data-cy={props['data-cy']}>
         <StyledValue className={clsx({ [valueClass]: showProgress })}>
           {formatNumber(currentAmount)}
         </StyledValue>

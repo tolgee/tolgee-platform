@@ -146,6 +146,7 @@ export const Credits: FC = () => {
                 size="small"
                 onClick={() => buy(priceId, itemQuantity)}
                 loading={buyMutation.isLoading}
+                data-cy="billing-extra-credits-buy"
               >
                 {t('billing_extra_credits_buy')}
               </LoadingButton>
