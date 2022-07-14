@@ -1,9 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.LockingProvider
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
@@ -20,19 +18,14 @@ import javax.transaction.Transactional
 @Service
 class MtCreditBucketService(
   private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
-  private val machineTranslationProperties: MachineTranslationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
   private val organizationService: OrganizationService,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val lockingProvider: LockingProvider
 ) {
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
-    if (machineTranslationProperties.freeCreditsAmount > -1) {
-      val bucket = findOrCreateBucket(project)
-      consumeCredits(bucket, amount)
-    }
+    val bucket = findOrCreateBucket(project)
+    consumeCredits(bucket, amount)
   }
 
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
