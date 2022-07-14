@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Box } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -12,6 +12,7 @@ import { PlanPrice } from './PlanPrice';
 import { PrepareUpgradeDialog } from '../PrepareUpgradeDialog';
 import { PeriodSwitch, BillingPeriodType } from './PeriodSwitch';
 import { StyledPlan, StyledSubtitle, StyledContent } from './StyledPlan';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type PlanModel = components['schemas']['PlanModel'];
 type Period = components['schemas']['SubscribeRequest']['period'];
@@ -43,10 +44,18 @@ export const Plan: FC<Props> = ({
     cancelMutation,
   } = usePlan({ planId: plan.id, period: period });
 
+  const handleCancel = () => {
+    confirmation({
+      title: <T keyName="billing_cancel_dialog_title" />,
+      message: <T keyName="billing_cancel_dialog_message" />,
+      onConfirm: onCancel,
+    });
+  };
+
   return (
-    <StyledPlan className={clsx({ active: isActive })}>
+    <StyledPlan className={clsx({ active: isActive })} data-cy="billing-plan">
       {isActive && (
-        <StyledSubtitle>
+        <StyledSubtitle data-cy="billing-plan-subtitle">
           {isEnded
             ? t('billing_subscription_cancelled')
             : t('billing_subscription_active')}
@@ -79,7 +88,7 @@ export const Plan: FC<Props> = ({
               (isActive && !isEnded ? (
                 <PlanActionButton
                   loading={cancelMutation.isLoading}
-                  onClick={() => onCancel()}
+                  onClick={handleCancel}
                 >
                   {t('billing_plan_cancel')}
                 </PlanActionButton>

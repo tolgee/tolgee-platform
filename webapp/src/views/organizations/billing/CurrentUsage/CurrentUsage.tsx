@@ -64,19 +64,20 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
+          data-cy="billing-actual-extra-credits"
           name={t('billing_actual_extra_credits', { hint: <MtHint /> })}
           currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (
           <>
             <Box gridColumn="1">{t('billing_actual_period')}</Box>
-            <Box gridColumn="2 / -1">
+            <Box gridColumn="2 / -1" data-cy="billing-actual-period">
               {activePlan.currentBillingPeriod === 'MONTHLY'
                 ? t('billing_monthly')
                 : t('billing_annual')}
             </Box>
             <Box gridColumn="1">{t('billing_actual_period_end')}</Box>
-            <Box gridColumn="2 / -1">
+            <Box gridColumn="2 / -1" data-cy="billing-actual-period-end">
               {formatDate(activePlan.currentPeriodEnd)} (
               {!activePlan.cancelAtPeriodEnd ? (
                 <StyledPositive>

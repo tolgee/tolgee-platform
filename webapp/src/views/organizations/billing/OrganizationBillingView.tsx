@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
 import { styled, Typography } from '@mui/material';
 
@@ -19,6 +19,7 @@ import { CurrentUsage } from './CurrentUsage/CurrentUsage';
 import { BillingPeriodType } from './BillingPlans/PeriodSwitch';
 import { EmailRecipient } from './EmailRecipient';
 import { Invoices } from './Invoices/Invoices';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 const StyledCurrent = styled('div')`
   display: grid;
@@ -50,10 +51,14 @@ const StyledShopping = styled('div')`
 `;
 
 export const OrganizationBillingView: FunctionComponent = () => {
-  const { search } = useLocation();
+  const { search, pathname } = useLocation();
   const params = new URLSearchParams(search);
+  const history = useHistory();
 
   const success = params.has('success');
+  const mtCreditsSuccess = params.has('buy-mt-credits-success');
+
+  const messaging = useMessage();
 
   const organization = useOrganization();
 
@@ -77,8 +82,19 @@ export const OrganizationBillingView: FunctionComponent = () => {
       refreshSubscription.mutate({
         path: { organizationId: organization!.id },
       });
+      messaging.success(<T keyName="billing_plan_update_success_message" />);
+      history.replace(pathname);
     }
   }, [success]);
+
+  useEffect(() => {
+    if (mtCreditsSuccess) {
+      messaging.success(
+        <T keyName="billing_mt_credit_purchase_success_message" />
+      );
+      history.replace(pathname);
+    }
+  }, [mtCreditsSuccess]);
 
   const plansLoadable = useBillingApiQuery({
     url: `/v2/organizations/{organizationId}/billing/plans`,

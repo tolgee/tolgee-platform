@@ -49,6 +49,9 @@ tolgee:
     aws:
       accessKey: mock
       secretKey: mock
+  billing:
+    enabled: true
+    mock-services: true
 server:
   port: 8201
   error:

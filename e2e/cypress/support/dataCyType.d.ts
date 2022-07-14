@@ -13,6 +13,16 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "billing-actual-extra-credits" |
+        "billing-actual-period" |
+        "billing-actual-period-end" |
+        "billing-extra-credits-buy" |
+        "billing-period-switch" |
+        "billing-plan" |
+        "billing-plan-action-button" |
+        "billing-plan-subtitle" |
+        "billing-plan-title" |
+        "billing-upgrade-preview-confirm-button" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |

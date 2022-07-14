@@ -19,7 +19,12 @@ type Props = {
 
 export const PeriodSwitch: React.FC<Props> = ({ value, onChange }) => {
   return (
-    <Box gridArea="switch" display="flex" justifyContent="center">
+    <Box
+      gridArea="switch"
+      display="flex"
+      justifyContent="center"
+      data-cy="billing-period-switch"
+    >
       {value === 'MONTHLY' ? (
         <StyledSwitchButton onClick={() => onChange('YEARLY')} role="button">
           <T keyName="billing_period_yearly_switch" />

@@ -15,7 +15,9 @@ type Props = {
 export const PlanTitle: React.FC<Props> = ({ title }) => {
   return (
     <StyledWrapper>
-      <StyledMainTitle variant="h4">{title}</StyledMainTitle>
+      <StyledMainTitle variant="h4" data-cy="billing-plan-title">
+        {title}
+      </StyledMainTitle>
     </StyledWrapper>
   );
 };

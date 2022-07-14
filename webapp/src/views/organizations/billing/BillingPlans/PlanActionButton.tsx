@@ -12,6 +12,7 @@ export const PlanActionButton: React.FC<Props> = (props) => {
   return (
     <StyledAction>
       <LoadingButton
+        data-cy="billing-plan-action-button"
         variant="outlined"
         color="primary"
         size="small"

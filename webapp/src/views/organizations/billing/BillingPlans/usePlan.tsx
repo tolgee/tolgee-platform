@@ -1,12 +1,9 @@
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-
-const messaging = container.resolve(MessageService);
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 type Period = components['schemas']['SubscribeRequest']['period'];
 
@@ -17,6 +14,7 @@ type Props = {
 
 export const usePlan = ({ planId, period }: Props) => {
   const organization = useOrganization();
+  const messaging = useMessage();
 
   const onPrepareUpgrade = () => {
     prepareUpgradeMutation.mutate({
@@ -77,7 +75,16 @@ export const usePlan = ({ planId, period }: Props) => {
   });
 
   const onCancel = () => {
-    cancelMutation.mutate({ path: { organizationId: organization!.id } });
+    cancelMutation.mutate(
+      { path: { organizationId: organization!.id } },
+      {
+        onSuccess() {
+          messaging.success(
+            <T keyName="billing_plan_cancel_success_message" />
+          );
+        },
+      }
+    );
   };
 
   return {
