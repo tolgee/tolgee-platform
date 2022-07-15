@@ -16,7 +16,7 @@ export const EmailRecipient = () => {
   const message = useMessage();
 
   const billingDataLoadable = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/get-billing-info',
+    url: '/v2/organizations/{organizationId}/billing/billing-info',
     method: 'get',
     path: {
       organizationId: organization!.id,
@@ -24,7 +24,7 @@ export const EmailRecipient = () => {
   });
 
   const updateMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/set-email-recipient',
+    url: '/v2/organizations/{organizationId}/billing/email-recipient',
     method: 'put',
     options: {
       onSuccess() {
