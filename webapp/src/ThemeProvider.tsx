@@ -143,6 +143,7 @@ const getTheme = (mode: PaletteMode) => {
       activity: c.activity,
       emphasis: c.emphasis,
       editor: c.editor,
+      billingProgress: c.billingProgress,
     },
     mixins: {
       toolbar: {

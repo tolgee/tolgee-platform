@@ -19,7 +19,7 @@ export const BaseUserSettingsView: React.FC<Props> = ({
     ? [
         {
           link: LINKS.USER_PROFILE.build(),
-          label: t('user_menu_user_settings'),
+          label: t('user_profile_title'),
         },
       ]
     : [];

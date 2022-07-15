@@ -62,6 +62,7 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
       disabled={!props.invoice.pdfReady}
       loading={pdfMutation.isLoading}
       onClick={onDownload}
+      size="small"
     >
       PDF
     </LoadingButton>

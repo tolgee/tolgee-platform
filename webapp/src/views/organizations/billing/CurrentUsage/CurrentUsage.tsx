@@ -4,9 +4,14 @@ import { Box, styled } from '@mui/material';
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
 import { components } from 'tg.service/apiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { BillingSection } from '../BillingSection';
+import {
+  StyledBillingSection,
+  StyledBillingSectionTitle,
+  StyledBillingSectionSubtitle,
+} from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
 import { FC } from 'react';
+import { MtHint } from 'tg.component/billing/MtHint';
 
 type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
 type UsageModel = components['schemas']['UsageModel'];
@@ -20,6 +25,12 @@ const StyledNegative = styled('span')`
   color: ${({ theme }) => theme.palette.error.main};
 `;
 
+const StyledHeader = styled('div')`
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+`;
+
 type Props = {
   activePlan: ActivePlanModel;
   usage: UsageModel;
@@ -30,10 +41,15 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
   const t = useTranslate();
   const formatDate = useDateFormatter();
   return (
-    <BillingSection
-      title={t('billing_actual_title')}
-      subtitle={`${activePlan.name}`}
-    >
+    <StyledBillingSection gridArea="usage">
+      <StyledHeader>
+        <StyledBillingSectionTitle>
+          {t('billing_actual_title')}
+        </StyledBillingSectionTitle>
+        <StyledBillingSectionSubtitle>
+          {activePlan.name}
+        </StyledBillingSectionSubtitle>
+      </StyledHeader>
       <StyledMetrics>
         <PlanMetric
           name={t('billing_actual_available_translations')}
@@ -42,17 +58,23 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
-          name={t('billing_actual_monthly_credits')}
-          currentAmount={usage.creditBalance / 100}
-          totalAmount={(usage.includedMtCredits || 0) / 100}
+          name={t('billing_actual_monthly_credits', { hint: <MtHint /> })}
+          currentAmount={Math.round(usage.creditBalance / 100)}
+          totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
-          name={t('billing_actual_extra_credits')}
-          currentAmount={usage.extraCreditBalance || 0}
+          name={t('billing_actual_extra_credits', { hint: <MtHint /> })}
+          currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (
           <>
+            <Box gridColumn="1">{t('billing_actual_period')}</Box>
+            <Box gridColumn="2 / -1">
+              {activePlan.currentBillingPeriod === 'MONTHLY'
+                ? t('billing_monthly')
+                : t('billing_annual')}
+            </Box>
             <Box gridColumn="1">{t('billing_actual_period_end')}</Box>
             <Box gridColumn="2 / -1">
               {formatDate(activePlan.currentPeriodEnd)} (
@@ -70,6 +92,6 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           </>
         )}
       </StyledMetrics>
-    </BillingSection>
+    </StyledBillingSection>
   );
 };

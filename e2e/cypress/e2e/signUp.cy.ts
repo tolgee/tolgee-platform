@@ -121,7 +121,7 @@ context('Sign up', () => {
     disableEmailVerification();
     fillAndSubmitForm();
     assertMessage('Thanks for your sign up!');
-    cy.gcy('global-base-view-title').contains('Projects');
+    cy.contains('Projects');
   });
 
   it('will sign up with project invitation code', () => {

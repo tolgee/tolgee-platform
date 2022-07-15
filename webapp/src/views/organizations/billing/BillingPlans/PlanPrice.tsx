@@ -5,19 +5,19 @@ import { BillingPeriodType } from './PeriodSwitch';
 
 const StyledWrapper = styled(Box)`
   grid-area: price;
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-  color: ${({ theme }) => theme.palette.primary.main};
-  align-self: center;
+  display: grid;
+  min-height: 45px;
+  align-items: end;
 `;
 
 const StyledPrice = styled(Box)`
   font-size: 18px;
+  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 const StyledPeriod = styled(Box)`
-  font-size: 14px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 type Props = {
@@ -26,13 +26,13 @@ type Props = {
 };
 
 export const PlanPrice: React.FC<Props> = ({ price, period }) => {
-  const formatter = useMoneyFormatter();
+  const formatMoney = useMoneyFormatter();
   const t = useTranslate();
 
   return (
     <StyledWrapper>
       {price === 0 ? (
-        <StyledPrice>{formatter(price)}</StyledPrice>
+        <StyledPrice>{formatMoney(price)}</StyledPrice>
       ) : (
         <>
           <StyledPrice>

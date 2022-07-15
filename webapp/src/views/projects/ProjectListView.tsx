@@ -61,7 +61,10 @@ export const ProjectListView = () => {
             isOrganizationOwner ? LINKS.PROJECT_ADD.build() : undefined
           }
           hideChildrenOnLoading={false}
-          navigation={[[<OrganizationSwitch key={0} />], [t('projects_title')]]}
+          navigation={[
+            [<OrganizationSwitch key={0} />],
+            [t('projects_title'), LINKS.PROJECTS.build()],
+          ]}
           navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >

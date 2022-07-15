@@ -9,10 +9,7 @@ const CIRCUIT = RADIUS * Math.PI * 2;
 const StyledCircleBackground = styled('circle')`
   fill: none;
   stroke-width: 17px;
-  stroke: ${({ theme }) => theme.palette.success.light}55;
-  &.critical {
-    stroke: ${({ theme }) => theme.palette.error.light}99;
-  }
+  stroke: ${({ theme }) => theme.palette.billingProgress.background};
 `;
 
 const StyledCircleContent = styled('circle')`
@@ -22,9 +19,9 @@ const StyledCircleContent = styled('circle')`
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
   stroke-dasharray: ${CIRCUIT};
-  stroke: ${({ theme }) => theme.palette.success.main};
+  stroke: ${({ theme }) => theme.palette.billingProgress.sufficient};
   &.critical {
-    stroke: ${({ theme }) => theme.palette.error.dark};
+    stroke: ${({ theme }) => theme.palette.billingProgress.low};
   }
 `;
 

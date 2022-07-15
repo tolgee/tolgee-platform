@@ -123,6 +123,14 @@ export const OrganizationProfileView: FunctionComponent = () => {
       windowTitle={t('edit_organization_title')}
       link={LINKS.ORGANIZATION_PROFILE}
       title={t('edit_organization_title')}
+      navigation={[
+        [
+          t('edit_organization_title'),
+          LINKS.ORGANIZATION_PROFILE.build({
+            [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+          }),
+        ],
+      ]}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
       containerMaxWidth="md"

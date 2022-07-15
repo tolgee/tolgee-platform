@@ -1,22 +1,24 @@
-import { Button, styled, Typography } from '@mui/material';
+import { Button, styled, Typography, Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { BillingSection } from '../BillingSection';
-import { Invoices } from './Invoices';
-
-const StyledHeader = styled('div')`
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
+import {
+  StyledBillingSection,
+  StyledBillingSectionTitle,
+  StyledBillingSectionHeader,
+} from '../BillingSection';
+import { ReactComponent as StripeLogoSvg } from 'tg.svgs/stripeLogo.svg';
 
 const StyledContainer = styled('div')`
   display: grid;
   gap: 10px;
   padding-top: 10px;
+`;
+
+const StyledStripeLogo = styled(StripeLogoSvg)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  height: 20px;
 `;
 
 export const CustomerPortal = () => {
@@ -34,10 +36,13 @@ export const CustomerPortal = () => {
   });
 
   return (
-    <BillingSection
-      title={
-        <StyledHeader>
-          <span>{t('billing_customer_portal_title')}</span>
+    <StyledBillingSection gridArea="customerPortal">
+      <StyledBillingSectionTitle>
+        <StyledBillingSectionHeader>
+          <Box display="flex" alignItems="center" gap={2}>
+            <span>{t('billing_customer_portal_title')}</span>
+            <StyledStripeLogo />
+          </Box>
           <Button
             size="small"
             color="primary"
@@ -52,13 +57,11 @@ export const CustomerPortal = () => {
           >
             {t('billing_customer_portal_button')}
           </Button>
-        </StyledHeader>
-      }
-    >
+        </StyledBillingSectionHeader>
+      </StyledBillingSectionTitle>
       <StyledContainer>
         <Typography>{t('billing_customer_portal_info')}</Typography>
-        <Invoices />
       </StyledContainer>
-    </BillingSection>
+    </StyledBillingSection>
   );
 };

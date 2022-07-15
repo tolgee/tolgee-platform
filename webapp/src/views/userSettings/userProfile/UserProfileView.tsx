@@ -16,6 +16,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { LINKS } from 'tg.constants/links';
 
 const messagesService = container.resolve(MessageService);
 
@@ -96,6 +97,7 @@ export const UserProfileView: FunctionComponent = () => {
     <BaseUserSettingsView
       windowTitle={t('user_profile_title')}
       title={t('user_profile_title')}
+      navigation={[[t('user_profile_title'), LINKS.USER_PROFILE.build()]]}
       containerMaxWidth="md"
     >
       {user && (

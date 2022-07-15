@@ -13,27 +13,35 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
 import { BillingPlans } from './BillingPlans/BillingPlans';
-import { Credits } from './Credits/Credits';
+import { Credits } from './BillingPlans/Credits/Credits';
 import { CustomerPortal } from './CustomerPortal/CustomerPortal';
 import { CurrentUsage } from './CurrentUsage/CurrentUsage';
 import { BillingPeriodType } from './BillingPlans/PeriodSwitch';
 import { EmailRecipient } from './EmailRecipient';
+import { Invoices } from './Invoices/Invoices';
 
 const StyledCurrent = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 16px;
-  margin: 16px 0px;
+  grid-template-areas:
+    'usage customerPortal'
+    'usage invoices';
+  grid-template-columns: 1fr 1fr;
   align-items: start;
-  @media (max-width: 600px) {
+  justify-content: space-between;
+  gap: 32px 24px;
+  margin-bottom: 32px;
+  @media (max-width: 1400px) {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'usage'
+      'customerPortal'
+      'invoices';
   }
 `;
 
 const StyledShopping = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 16px;
   margin: 16px 0px;
   @media (max-width: 600px) {
@@ -136,6 +144,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
                 balance={creditBalance.data}
               />
               <CustomerPortal />
+              <Invoices />
             </StyledCurrent>
             <Typography variant="h6">
               <T>organization_pricing_plans_title</T>
@@ -147,7 +156,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
-
               <Credits />
             </StyledShopping>
 

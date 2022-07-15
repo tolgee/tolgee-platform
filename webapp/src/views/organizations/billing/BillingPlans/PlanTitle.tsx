@@ -8,25 +8,14 @@ const StyledWrapper = styled('div')`
 
 const StyledMainTitle = styled(Typography)``;
 
-const StyledSecondaryTitle = styled(Typography)`
-  color: ${({ theme }) => theme.palette.primary.main};
-  font-size: 14px;
-`;
-
 type Props = {
-  title: string;
-  subtitle?: string;
+  title: string | React.ReactNode;
 };
 
-export const PlanTitle: React.FC<Props> = ({ title, subtitle }) => {
+export const PlanTitle: React.FC<Props> = ({ title }) => {
   return (
     <StyledWrapper>
       <StyledMainTitle variant="h4">{title}</StyledMainTitle>
-      {subtitle && (
-        <StyledSecondaryTitle variant="subtitle1">
-          {subtitle}
-        </StyledSecondaryTitle>
-      )}
     </StyledWrapper>
   );
 };

@@ -1,6 +1,7 @@
 import { FC } from 'react';
-import { styled, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanInfo } from './PlanInfo';
@@ -10,29 +11,10 @@ import { PlanTitle } from './PlanTitle';
 import { PlanPrice } from './PlanPrice';
 import { PrepareUpgradeDialog } from '../PrepareUpgradeDialog';
 import { PeriodSwitch, BillingPeriodType } from './PeriodSwitch';
-import clsx from 'clsx';
+import { StyledPlan, StyledSubtitle, StyledContent } from './StyledPlan';
 
 type PlanModel = components['schemas']['PlanModel'];
 type Period = components['schemas']['SubscribeRequest']['period'];
-
-const StyledPlan = styled('div')`
-  background: ${({ theme }) => theme.palette.emphasis[200]};
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
-  border-radius: 20px;
-  padding: 20px;
-  display: grid;
-  gap: 8px;
-  grid-template-rows: 1fr auto auto auto;
-  grid-template-areas:
-    'title '
-    'info  '
-    'switch'
-    'action';
-  border: 1px solid transparent;
-  &.active {
-    border: 1px solid ${({ theme }) => theme.palette.primary.main};
-  }
-`;
 
 type Props = {
   plan: PlanModel;
@@ -63,32 +45,68 @@ export const Plan: FC<Props> = ({
 
   return (
     <StyledPlan className={clsx({ active: isActive })}>
-      <PlanTitle
-        title={plan.name}
-        subtitle={
-          isActive
-            ? isEnded
-              ? t('billing_subscription_cancelled')
-              : t('billing_subscription_active')
-            : undefined
-        }
-      />
+      {isActive && (
+        <StyledSubtitle>
+          {isEnded
+            ? t('billing_subscription_cancelled')
+            : t('billing_subscription_active')}
+        </StyledSubtitle>
+      )}
+      <StyledContent>
+        <PlanTitle title={plan.name} />
 
-      <PlanInfo plan={plan} />
-      <Box gridArea="switch" minHeight={19}>
-        {!plan.free && (
-          <PeriodSwitch value={period} onChange={onPeriodChange} />
-        )}
-      </Box>
+        <PlanInfo plan={plan} />
 
-      <Box gridArea="action" display="flex" justifyItems="space-between">
-        <PlanPrice
-          price={
-            period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
-          }
-          period={period}
-        />
+        <Box gridArea="action" display="grid">
+          <Box minHeight="19px">
+            {!plan.free && (
+              <PeriodSwitch value={period} onChange={onPeriodChange} />
+            )}
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <PlanPrice
+              price={
+                period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
+              }
+              period={period}
+            />
 
+            {!plan.free &&
+              (isActive && !isEnded ? (
+                <PlanActionButton
+                  loading={cancelMutation.isLoading}
+                  onClick={() => onCancel()}
+                >
+                  {t('billing_plan_cancel')}
+                </PlanActionButton>
+              ) : isActive && isEnded ? (
+                <PlanActionButton
+                  loading={prepareUpgradeMutation.isLoading}
+                  onClick={() => onPrepareUpgrade()}
+                >
+                  {t('billing_plan_resubscribe')}
+                </PlanActionButton>
+              ) : isOrganizationSubscribed ? (
+                <PlanActionButton
+                  loading={prepareUpgradeMutation.isLoading}
+                  onClick={() => onPrepareUpgrade()}
+                >
+                  {t('billing_plan_subscribe')}
+                </PlanActionButton>
+              ) : (
+                <PlanActionButton
+                  loading={subscribeMutation.isLoading}
+                  onClick={() => onSubscribe()}
+                >
+                  {t('billing_plan_subscribe')}
+                </PlanActionButton>
+              ))}
+          </Box>
+        </Box>
         {prepareUpgradeMutation.data && (
           <PrepareUpgradeDialog
             data={prepareUpgradeMutation.data}
@@ -97,38 +115,7 @@ export const Plan: FC<Props> = ({
             }}
           />
         )}
-      </Box>
-
-      {!plan.free &&
-        (isActive && !isEnded ? (
-          <PlanActionButton
-            loading={cancelMutation.isLoading}
-            onClick={() => onCancel()}
-          >
-            {t('billing_plan_cancel')}
-          </PlanActionButton>
-        ) : isActive && isEnded ? (
-          <PlanActionButton
-            loading={prepareUpgradeMutation.isLoading}
-            onClick={() => onPrepareUpgrade()}
-          >
-            {t('billing_plan_resubscribe')}
-          </PlanActionButton>
-        ) : isOrganizationSubscribed ? (
-          <PlanActionButton
-            loading={prepareUpgradeMutation.isLoading}
-            onClick={() => onPrepareUpgrade()}
-          >
-            {t('billing_plan_subscribe')}
-          </PlanActionButton>
-        ) : (
-          <PlanActionButton
-            loading={subscribeMutation.isLoading}
-            onClick={() => onSubscribe()}
-          >
-            {t('billing_plan_subscribe')}
-          </PlanActionButton>
-        ))}
+      </StyledContent>
     </StyledPlan>
   );
 };

@@ -46,19 +46,15 @@ describe('Test no authentication mode', () => {
     gcy(globalUserMenuDataCy).should('not.exist');
   });
 
-  it('Has no link to Account settings', () => {
+  it('Has no link to User profile', () => {
     cy.visit(HOST + '/account/apiKeys');
     cy.contains('My API keys');
 
-    cy.gcy('settings-menu-item')
-      .contains('Account settings')
-      .should('be.visible');
+    cy.gcy('settings-menu-item').contains('User profile').should('be.visible');
     disableAuthentication();
     cy.reload();
     cy.contains('My API keys').should('be.visible');
-    cy.gcy('settings-menu-item')
-      .contains('Account settings')
-      .should('not.exist');
+    cy.gcy('settings-menu-item').contains('User profile').should('not.exist');
   });
 
   after(() => {
