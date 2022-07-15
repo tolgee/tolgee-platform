@@ -9,7 +9,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { SignUpActions } from 'tg.store/global/SignUpActions';
 import { AppState } from 'tg.store/index';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';

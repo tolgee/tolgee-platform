@@ -5,13 +5,15 @@ import { useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { useConfig } from 'tg.hooks/InitialDataProvider';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import {
+  useConfig,
+  useUser,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 

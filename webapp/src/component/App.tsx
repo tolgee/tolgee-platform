@@ -9,14 +9,15 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type API from '@openreplay/tracker';
 
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
-import { LINKS } from '../constants/links';
-import { GlobalError } from '../error/GlobalError';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import {
   useConfig,
+  useOrganizationUsage,
   usePreferredOrganization,
-  useInitialDataContext,
-} from '../hooks/InitialDataProvider';
-import { useUser } from '../hooks/InitialDataProvider';
+  useUser,
+} from 'tg.globalContext/helpers';
+import { LINKS } from '../constants/links';
+import { GlobalError } from '../error/GlobalError';
 import { AppState } from '../store';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { GlobalActions } from '../store/global/GlobalActions';
@@ -81,8 +82,8 @@ const MandatoryDataProvider = (props: any) => {
     (v: AppState) => v.global.security.allowPrivate
   );
   const userData = useUser();
-  const isLoading = useInitialDataContext((v) => v.isLoading);
-  const isFetching = useInitialDataContext((v) => v.isFetching);
+  const isLoading = useGlobalContext((v) => v.isLoading);
+  const isFetching = useGlobalContext((v) => v.isFetching);
   const { preferredOrganization } = usePreferredOrganization();
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
@@ -168,22 +169,14 @@ const GlobalConfirmation = () => {
 };
 
 const GlobalLimitPopover = () => {
-  const planLimitErrors = useSelector(
-    (state: AppState) => state.global.planLimitErrors
-  );
-
+  const { planLimitErrors } = useOrganizationUsage();
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const firstRender = useRef(true);
-
   const handleClose = () => setPopoverOpen(false);
 
   useEffect(() => {
-    if (!firstRender.current && planLimitErrors) {
-      if (planLimitErrors <= 1) {
-        setPopoverOpen(true);
-      }
+    if (planLimitErrors === 1) {
+      setPopoverOpen(true);
     }
-    firstRender.current = false;
   }, [planLimitErrors]);
 
   const { preferredOrganization } = usePreferredOrganization();

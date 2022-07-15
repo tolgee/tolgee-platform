@@ -3,7 +3,7 @@ import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { MessageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';

@@ -61,5 +61,6 @@ export const useApplyImportHelper = (
     conflictNotResolvedDialogOpen,
     error,
     loading: importApplyLoadable.loading,
+    loaded: importApplyLoadable.loaded,
   };
 };

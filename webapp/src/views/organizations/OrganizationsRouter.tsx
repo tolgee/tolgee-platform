@@ -5,7 +5,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';

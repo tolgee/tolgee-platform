@@ -1,9 +1,12 @@
-import { GlobalActions } from 'tg.store/global/GlobalActions';
-import { container } from 'tsyringe';
+import { globalDispatchRef } from 'tg.globalContext/globalActions';
 
-export const errorCapture = (r: Response, data: any) => {
-  const globalActions = container.resolve(GlobalActions);
-  if (r.status === 400 && data.code === 'plan_translation_limit_exceeded') {
-    globalActions.triggerPlanLimitError.dispatch();
+export const errorCapture = (code: string) => {
+  switch (code) {
+    case 'plan_translation_limit_exceeded':
+      globalDispatchRef.current?.({ type: 'INCREMENT_PLAN_LIMIT_ERRORS' });
+      break;
+    case 'out_of_credits':
+      globalDispatchRef.current?.({ type: 'INCREMENT_NO_CREDIT_ERRORS' });
+      break;
   }
 };

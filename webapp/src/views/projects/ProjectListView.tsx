@@ -10,7 +10,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 import { Usage } from 'tg.component/billing/Usage';
 
@@ -53,15 +53,15 @@ export const ProjectListView = () => {
     <StyledWrapper>
       <DashboardPage>
         <BaseView
-          title={<T>projects_title</T>}
           windowTitle={t('projects_title')}
           onSearch={setSearch}
           containerMaxWidth="lg"
+          allCentered
           addLinkTo={
             isOrganizationOwner ? LINKS.PROJECT_ADD.build() : undefined
           }
           hideChildrenOnLoading={false}
-          navigation={[[<OrganizationSwitch key={0} />]]}
+          navigation={[[<OrganizationSwitch key={0} />], [t('projects_title')]]}
           navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >

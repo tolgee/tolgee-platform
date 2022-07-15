@@ -30,6 +30,7 @@ export interface BaseViewProps {
   switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  allCentered?: boolean;
   'data-cy'?: string;
 }
 
@@ -43,7 +44,7 @@ export const BaseView = (props: BaseViewProps) => {
 
   return (
     <Container
-      maxWidth={false}
+      maxWidth={props.allCentered ? props.containerMaxWidth : false}
       style={{
         position: 'relative',
         padding: 0,

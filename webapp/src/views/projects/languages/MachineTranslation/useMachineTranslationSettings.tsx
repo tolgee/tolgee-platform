@@ -10,7 +10,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useQueryClient } from 'react-query';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
 
 type Props = {

@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
-import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -13,7 +13,7 @@ const messaging = container.resolve(MessageService);
 
 export const useLeaveProject = () => {
   const history = useHistory();
-  const initialDataDispatch = useInitialDataDispatch();
+  const initialDataDispatch = useGlobalDispatch();
   const [isLeaving, setIsLeaving] = useState(false);
 
   const leaveLoadable = useApiMutation({
@@ -21,7 +21,7 @@ export const useLeaveProject = () => {
     method: 'put',
     options: {
       onSuccess() {
-        initialDataDispatch({ type: 'REFETCH' });
+        initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
         messaging.success(<T>project_successfully_left</T>);
         history.push(LINKS.PROJECTS.build());
       },

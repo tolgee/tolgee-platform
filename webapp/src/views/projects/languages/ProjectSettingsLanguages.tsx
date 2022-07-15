@@ -14,7 +14,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { AutoTranslations } from './AutoTranslations/AutoTranslations';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import {
   StyledLanguageTable,
   TABLE_CENTERED,

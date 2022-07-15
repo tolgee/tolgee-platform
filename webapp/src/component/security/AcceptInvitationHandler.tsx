@@ -12,7 +12,7 @@ import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { FullPageLoading } from '../common/FullPageLoading';
-import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 
 interface AcceptInvitationHandlerProps {}
 
@@ -27,7 +27,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
     const match = useRouteMatch();
 
     const code = match.params[PARAMS.INVITATION_CODE];
-    const initialDataDispatch = useInitialDataDispatch();
+    const initialDataDispatch = useGlobalDispatch();
 
     const acceptCode = useApiMutation({
       url: '/api/invitation/accept/{code}',
@@ -45,7 +45,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
           { path: { code } },
           {
             onSuccess() {
-              initialDataDispatch({ type: 'REFETCH' });
+              initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
               messaging.success(<T>invitation_code_accepted</T>);
             },
             onError(e) {

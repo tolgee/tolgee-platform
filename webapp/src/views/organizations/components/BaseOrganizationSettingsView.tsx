@@ -10,10 +10,7 @@ import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import {
-  useConfig,
-  usePreferredOrganization,
-} from 'tg.hooks/InitialDataProvider';
+import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

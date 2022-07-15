@@ -13,7 +13,7 @@ import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { MessageService } from 'tg.service/MessageService';

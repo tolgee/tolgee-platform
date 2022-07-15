@@ -1,19 +1,17 @@
+import clsx from 'clsx';
 import React, { FC, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { styled, keyframes, Tooltip, Box } from '@mui/material';
-import { useSelector } from 'react-redux';
-import clsx from 'clsx';
 
-import { AppState } from 'tg.store/index';
-import { BillingProgress } from 'tg.component/billing/BillingProgress';
+import { CircularBillingProgress } from './CircularBillingProgress';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import {
-  useConfig,
+  useOrganizationUsage,
   usePreferredOrganization,
-} from 'tg.hooks/InitialDataProvider';
+} from 'tg.globalContext/helpers';
 import { UsageDetailed } from './UsageDetailed';
 import { getProgressData } from './utils';
-import { useBillingUsageData } from './useBillingUsageData';
+import { BILLING_CRITICAL_PERCENT } from './constants';
 
 export const USAGE_ELEMENT_ID = 'billing_organization_usage';
 
@@ -23,8 +21,7 @@ const StyledContainer = styled(Box)`
   justify-content: center;
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
-  width: 100%;
-  max-width: 200px;
+  margin-bottom: -4px;
 `;
 
 const shakeAnimation = keyframes`
@@ -63,10 +60,7 @@ const StyledTitle = styled('div')`
 
 export const Usage: FC = () => {
   const { preferredOrganization } = usePreferredOrganization();
-  const config = useConfig();
-  const planLimitErrors = useSelector(
-    (state: AppState) => state.global.planLimitErrors
-  );
+  const { planLimitErrors, noCreditErrors } = useOrganizationUsage();
 
   const previousShown = useRef(true);
   const firstRender = useRef(true);
@@ -75,7 +69,6 @@ export const Usage: FC = () => {
   useEffect(() => {
     if (!firstRender.current && planLimitErrors) {
       setTrigger(true);
-      usage.refetch();
       const timer = setTimeout(() => setTrigger(false), 1000);
       return () => {
         clearTimeout(timer);
@@ -83,24 +76,19 @@ export const Usage: FC = () => {
       };
     }
     firstRender.current = false;
-  }, [planLimitErrors]);
+  }, [planLimitErrors, noCreditErrors]);
 
-  const isOrganizationMember = Boolean(preferredOrganization.currentUserRole);
   const isOrganizationOwner = preferredOrganization.currentUserRole === 'OWNER';
-  const statsEnabled = config.billing.enabled && isOrganizationMember;
 
-  const usage = useBillingUsageData({
-    organizationId: preferredOrganization.id,
-    enabled: statsEnabled,
-  });
+  const { usage } = useOrganizationUsage();
 
-  const progressData = usage.data && getProgressData(usage.data);
+  const progressData = usage && getProgressData(usage);
 
   const showStats =
-    isOrganizationOwner ||
     planLimitErrors ||
-    Number(progressData?.creditProgress) < 10 ||
-    Number(progressData?.translationsProgress) < 10;
+    noCreditErrors ||
+    Number(progressData?.creditProgress) < BILLING_CRITICAL_PERCENT ||
+    Number(progressData?.translationsProgress) < BILLING_CRITICAL_PERCENT;
 
   previousShown.current = Boolean(showStats);
 
@@ -132,8 +120,12 @@ export const Usage: FC = () => {
             }
           >
             <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
-              <BillingProgress percent={progressData.translationsProgress} />
-              <BillingProgress percent={progressData.creditProgress} />
+              <CircularBillingProgress
+                percent={Math.min(
+                  progressData.translationsProgress,
+                  progressData.creditProgress
+                )}
+              />
             </StyledContent>
           </Tooltip>
         </OptionalLink>

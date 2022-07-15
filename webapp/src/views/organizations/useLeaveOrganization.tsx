@@ -7,7 +7,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 
 const messageService = container.resolve(MessageService);
 
@@ -17,7 +17,7 @@ export const useLeaveOrganization = () => {
     method: 'put',
   });
   const history = useHistory();
-  const initialDataDispatch = useInitialDataDispatch();
+  const initialDataDispatch = useGlobalDispatch();
 
   return (id: number) => {
     confirmation({
@@ -29,7 +29,7 @@ export const useLeaveOrganization = () => {
             onSuccess() {
               messageService.success(<T>organization_left_message</T>);
               history.push(LINKS.PROJECTS.build());
-              initialDataDispatch({ type: 'REFETCH' });
+              initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
             },
             onError(e) {
               const parsed = parseErrorResponse(e);

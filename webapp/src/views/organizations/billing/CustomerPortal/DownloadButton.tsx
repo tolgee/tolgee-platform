@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';

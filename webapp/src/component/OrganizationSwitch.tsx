@@ -8,7 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

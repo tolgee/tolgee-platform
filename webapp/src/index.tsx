@@ -15,7 +15,7 @@ import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
 import { TopBarProvider } from 'tg.component/layout/TopBar/TopBarContext';
-import { InitialDataProvider } from 'tg.hooks/InitialDataProvider';
+import { GlobalProvider } from 'tg.globalContext/GlobalContext';
 import { App } from './component/App';
 import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
@@ -71,7 +71,7 @@ const MainWrapper = () => {
                   <ErrorBoundary>
                     <SnackbarProvider data-cy="global-snackbars">
                       <LoadingProvider>
-                        <InitialDataProvider>
+                        <GlobalProvider>
                           <BottomPanelProvider>
                             <TopBarProvider>
                               <GlobalLoading />
@@ -79,7 +79,7 @@ const MainWrapper = () => {
                               <GlobalErrorModal />
                             </TopBarProvider>
                           </BottomPanelProvider>
-                        </InitialDataProvider>
+                        </GlobalProvider>
                       </LoadingProvider>
                     </SnackbarProvider>
                   </ErrorBoundary>

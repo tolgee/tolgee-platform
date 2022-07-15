@@ -7,7 +7,7 @@ import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 

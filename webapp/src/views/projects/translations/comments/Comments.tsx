@@ -6,7 +6,7 @@ import { Send } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import { useUser } from 'tg.globalContext/helpers';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Comment } from './Comment';

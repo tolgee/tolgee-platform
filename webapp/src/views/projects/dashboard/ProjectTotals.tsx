@@ -12,7 +12,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { PercentFormat } from './PercentFormat';
 
 const StyledTiles = styled(Box)`
