@@ -5,6 +5,7 @@ import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
@@ -61,6 +62,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var azureCognitiveApiService: AzureCognitiveApiService
+
+  @Autowired
+  @MockBean
   lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache
@@ -111,6 +116,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any() as String,
       )
     ).thenReturn("Translated with DeepL")
+
+    whenever(
+      azureCognitiveApiService.translate(
+        any() as String,
+        any() as String,
+        any() as String,
+      )
+    ).thenReturn("Translated with Azure Cognitive")
   }
 
   private fun initTestData() {
@@ -219,8 +232,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests using just enabled services (Google, AWS, DeepL)`() {
-    mockDefaultMtBucketSize(3000)
+  fun `it suggests using just enabled services (Google, AWS, DeepL, Azure)`() {
+    mockDefaultMtBucketSize(4000)
     testData.enableAll()
     testDataService.saveTestData(testData.root)
 
@@ -229,8 +242,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("AWS").isEqualTo("Translated with Amazon")
         node("GOOGLE").isEqualTo("Translated with Google")
         node("DEEPL").isEqualTo("Translated with DeepL")
+        node("AZURE").isEqualTo("Translated with Azure Cognitive")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(300)
+      node("translationCreditsBalanceAfter").isEqualTo(400)
     }
   }
 

@@ -104,7 +104,8 @@ class SuggestionTestData : BaseTestData() {
   fun enableAll() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
+      this.enabledServices =
+        mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE)
       this.primaryService = MtServiceType.AWS
     }
   }
@@ -112,7 +113,8 @@ class SuggestionTestData : BaseTestData() {
   fun enableAllGooglePrimary() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
+      this.enabledServices =
+        mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE)
       this.primaryService = MtServiceType.GOOGLE
     }
   }

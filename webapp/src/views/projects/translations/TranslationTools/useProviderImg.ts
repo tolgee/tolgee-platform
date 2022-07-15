@@ -11,6 +11,8 @@ export const useProviderImg = () => {
         return `/images/providers/aws-logo-${palette.mode}.svg`;
       case 'DEEPL':
         return `/images/providers/deepl-logo-${palette.mode}.svg`;
+      case 'AZURE':
+        return `/images/providers/azure-cognitive-logo.svg`;
       default:
         return null;
     }
