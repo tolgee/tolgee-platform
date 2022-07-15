@@ -19,7 +19,6 @@ export const useOrganizationUsageService = ({
     UsageModel | undefined
   >(undefined);
   const [planLimitErrors, setPlanLimitErrors] = useState(0);
-  const [noCreditErrors, setNoCreditErrors] = useState(0);
 
   const usageEnabled =
     organization?.id !== undefined && enabled && isOrganizationMember;
@@ -54,25 +53,25 @@ export const useOrganizationUsageService = ({
     setPlanLimitErrors((v) => v + 1);
   };
 
-  const incrementNoCreditErrors = () => {
-    setNoCreditErrors((v) => v + 1);
+  const refetch = () => {
+    if (usageEnabled) {
+      usageLoadable.refetch();
+    }
   };
 
   useEffect(() => {
-    if (planLimitErrors || noCreditErrors) {
-      usageLoadable.refetch();
+    if (planLimitErrors) {
+      refetch();
     }
-  }, [planLimitErrors, noCreditErrors]);
+  }, [planLimitErrors]);
 
   return {
     data: {
       usage: organizationUsage,
       planLimitErrors,
-      noCreditErrors,
     },
-    refetch: usageLoadable.refetch,
+    refetch,
     updateData,
-    incrementNoCreditErrors,
     incrementPlanLimitErrors,
   };
 };

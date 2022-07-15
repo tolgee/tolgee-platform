@@ -24,8 +24,6 @@ export const [GlobalProvider, useGlobalDispatch, useGlobalContext] =
           return organizationUsage.updateData(action.payload);
         case 'INCREMENT_PLAN_LIMIT_ERRORS':
           return organizationUsage.incrementPlanLimitErrors();
-        case 'INCREMENT_NO_CREDIT_ERRORS':
-          return organizationUsage.incrementNoCreditErrors();
       }
     };
 

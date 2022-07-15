@@ -21,7 +21,6 @@ const StyledContainer = styled(Box)`
   justify-content: center;
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
-  margin-bottom: -4px;
 `;
 
 const shakeAnimation = keyframes`
@@ -60,7 +59,7 @@ const StyledTitle = styled('div')`
 
 export const Usage: FC = () => {
   const { preferredOrganization } = usePreferredOrganization();
-  const { planLimitErrors, noCreditErrors } = useOrganizationUsage();
+  const { planLimitErrors } = useOrganizationUsage();
 
   const previousShown = useRef(true);
   const firstRender = useRef(true);
@@ -76,7 +75,7 @@ export const Usage: FC = () => {
       };
     }
     firstRender.current = false;
-  }, [planLimitErrors, noCreditErrors]);
+  }, [planLimitErrors]);
 
   const isOrganizationOwner = preferredOrganization.currentUserRole === 'OWNER';
 
@@ -86,7 +85,6 @@ export const Usage: FC = () => {
 
   const showStats =
     planLimitErrors ||
-    noCreditErrors ||
     Number(progressData?.creditProgress) < BILLING_CRITICAL_PERCENT ||
     Number(progressData?.translationsProgress) < BILLING_CRITICAL_PERCENT;
 

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, useRef } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { Redirect, Route, Switch, BrowserRouter } from 'react-router-dom';

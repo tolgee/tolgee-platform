@@ -9,6 +9,7 @@ const StyledContainer = styled(Box)`
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.success.light}55;
   overflow: hidden;
+  transition: all 0.5s ease-in-out;
   &.critical {
     background: ${({ theme }) => theme.palette.error.light}99;
   }
@@ -17,7 +18,7 @@ const StyledContainer = styled(Box)`
 const StyledProgress = styled(Box)`
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.success.main};
-  transition: width 1s linear;
+  transition: all 0.5s ease-in-out;
   &.critical {
     background: ${({ theme }) => theme.palette.error.dark};
   }

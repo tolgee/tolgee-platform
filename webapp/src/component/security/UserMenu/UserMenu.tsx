@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
+import { container } from 'tsyringe';
+import { IconButton, MenuItem, Popover, Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import {
   useConfig,
   useUser,
   usePreferredOrganization,
+  useOrganizationUsage,
 } from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
@@ -19,6 +20,8 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
+import { CircularBillingProgress } from 'tg.component/billing/CircularBillingProgress';
+import { getProgressData } from 'tg.component/billing/utils';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -56,6 +59,8 @@ export const UserMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser();
   const userMenuItems = useUserMenuItems();
+  const { usage } = useOrganizationUsage();
+  const progressData = usage && getProgressData(usage);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -90,17 +95,8 @@ export const UserMenu: React.FC = () => {
     },
   ];
 
-  if (
-    config.billing.enabled &&
-    preferredOrganization.currentUserRole === 'OWNER'
-  ) {
-    organizationItems.push({
-      link: LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-      }),
-      label: t('organization_menu_billing'),
-    });
-  }
+  const showBilling =
+    config.billing.enabled && preferredOrganization.currentUserRole === 'OWNER';
 
   const organizationMenuItems = organizationItems.map((i) => ({
     ...i,
@@ -175,6 +171,33 @@ export const UserMenu: React.FC = () => {
                 {item.label}
               </MenuItem>
             ))}
+
+            {showBilling && (
+              <MenuItem
+                component={Link}
+                to={LINKS.ORGANIZATION_BILLING.build({
+                  [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+                })}
+                onClick={handleClose}
+                data-cy="user-menu-organization-settings"
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  flexGrow="1"
+                  alignItems="center"
+                >
+                  <div>{t('organization_menu_billing')}</div>
+                  {progressData && (
+                    <CircularBillingProgress
+                      size={22}
+                      percent={progressData.smallerProgress}
+                    />
+                  )}
+                </Box>
+              </MenuItem>
+            )}
+
             <OrganizationSwitch
               onSelect={handleSelectOrganization}
               onCreateNew={handleCreateNewOrganization}

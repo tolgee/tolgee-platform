@@ -3,15 +3,8 @@ import { styled } from '@mui/material';
 
 import { BILLING_CRITICAL_PERCENT } from './constants';
 
-const StyledContainer = styled('div')``;
-
 const RADIUS = 45;
 const CIRCUIT = RADIUS * Math.PI * 2;
-
-const StyledSvg = styled('svg')`
-  width: 28px;
-  height: 28px;
-`;
 
 const StyledCircleBackground = styled('circle')`
   fill: none;
@@ -37,29 +30,28 @@ const StyledCircleContent = styled('circle')`
 
 type Props = {
   percent: number;
+  size?: number;
 };
 
-export const CircularBillingProgress = ({ percent }: Props) => {
+export const CircularBillingProgress = ({ percent, size = 28 }: Props) => {
   const normalized = percent > 100 ? 100 : percent < 0 ? 0 : percent;
   const critical = normalized < BILLING_CRITICAL_PERCENT;
   const strokeDashoffset = CIRCUIT - (normalized / 100) * CIRCUIT;
   return (
-    <StyledContainer>
-      <StyledSvg viewBox="0 0 114 114">
-        <StyledCircleBackground
-          className={clsx({ critical })}
-          cx="57"
-          cy="57"
-          r={RADIUS}
-        />
-        <StyledCircleContent
-          className={clsx({ critical })}
-          cx="57"
-          cy="57"
-          r={RADIUS}
-          sx={{ strokeDashoffset }}
-        />
-      </StyledSvg>
-    </StyledContainer>
+    <svg viewBox="0 0 114 114" style={{ width: size, height: size }}>
+      <StyledCircleBackground
+        className={clsx({ critical })}
+        cx="57"
+        cy="57"
+        r={RADIUS}
+      />
+      <StyledCircleContent
+        className={clsx({ critical })}
+        cx="57"
+        cy="57"
+        r={RADIUS}
+        sx={{ strokeDashoffset }}
+      />
+    </svg>
   );
 };

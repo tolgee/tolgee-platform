@@ -11,6 +11,7 @@ import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
 import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
+import { Usage } from 'tg.component/billing/Usage';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -90,6 +91,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       {...otherProps}
       loading={organizationLoadable.isLoading || loading}
       navigation={[...navigationPrefix, ...(navigation || [])]}
+      navigationRight={<Usage />}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
     >
