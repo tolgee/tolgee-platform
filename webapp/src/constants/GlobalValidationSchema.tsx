@@ -236,6 +236,10 @@ export class Validation {
           : Yup.string().required(t('Validation - required field'))
       ),
     });
+
+  static readonly BILLING_RECIPIENT_EMAIL = Yup.object({
+    emailRecipient: Yup.string().required().email(),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

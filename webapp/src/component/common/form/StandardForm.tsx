@@ -29,6 +29,7 @@ interface FormProps<T> {
   submitButtonInner?: ReactNode;
   saveActionLoadable?: LoadableType;
   disabled?: boolean;
+  children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
