@@ -7,14 +7,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/update-subscription": {
     put: operations["updateSubscription"];
   };
-  "/v2/organizations/{organizationId}/billing/set-email-recipient": {
-    put: operations["setEmailRecipient"];
-  };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
   };
   "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
     put: operations["prepareUpdateSubscription"];
+  };
+  "/v2/organizations/{organizationId}/billing/email-recipient": {
+    put: operations["setEmailRecipient"];
   };
   "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     put: operations["cancelSubscription"];
@@ -39,11 +39,11 @@ export interface paths {
     /** Returns organization invoices */
     get: operations["getInvoices"];
   };
-  "/v2/organizations/{organizationId}/billing/get-billing-info": {
-    get: operations["getBillingInfo"];
-  };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
+  };
+  "/v2/organizations/{organizationId}/billing/billing-info": {
+    get: operations["getBillingInfo"];
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     get: operations["getActivePlan"];
@@ -60,9 +60,6 @@ export interface components {
   schemas: {
     UpdateSubscriptionRequest: {
       token: string;
-    };
-    SetEmailRecipientRequest: {
-      email: string;
     };
     ActivePlanModel: {
       id: number;
@@ -93,6 +90,9 @@ export interface components {
       updateToken: string;
       prorationDate: number;
       endingBalance: number;
+    };
+    SetEmailRecipientRequest: {
+      email: string;
     };
     SubscribeRequest: {
       /** Id of the subscription plan */
@@ -145,6 +145,9 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    GoToCustomerPortalModel: {
+      url: string;
+    };
     BillingInfoModel: {
       name?: string;
       street?: string;
@@ -157,9 +160,6 @@ export interface components {
       vatNo?: string;
       email?: string;
       emailRecipient?: string;
-    };
-    GoToCustomerPortalModel: {
-      url: string;
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -200,34 +200,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateSubscriptionRequest"];
-      };
-    };
-  };
-  setEmailRecipient: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetEmailRecipientRequest"];
       };
     };
   };
@@ -287,6 +259,34 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateSubscriptionPrepareRequest"];
+      };
+    };
+  };
+  setEmailRecipient: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetEmailRecipientRequest"];
       };
     };
   };
@@ -501,7 +501,7 @@ export interface operations {
       };
     };
   };
-  getBillingInfo: {
+  goToCustomerPortal: {
     parameters: {
       path: {
         organizationId: number;
@@ -511,7 +511,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BillingInfoModel"];
+          "*/*": components["schemas"]["GoToCustomerPortalModel"];
         };
       };
       /** Bad Request */
@@ -528,7 +528,7 @@ export interface operations {
       };
     };
   };
-  goToCustomerPortal: {
+  getBillingInfo: {
     parameters: {
       path: {
         organizationId: number;
@@ -538,7 +538,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["GoToCustomerPortalModel"];
+          "*/*": components["schemas"]["BillingInfoModel"];
         };
       };
       /** Bad Request */

@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.component.TolgeeEmailSender
+import io.tolgee.component.email.InvitationEmailSender
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateInvitationParams
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
@@ -28,7 +28,7 @@ class InvitationService @Autowired constructor(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
-  private val tolgeeEmailSender: TolgeeEmailSender
+  private val invitationEmailSender: InvitationEmailSender
 ) {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -43,7 +43,7 @@ class InvitationService @Autowired constructor(
       languages = params.languages
     )
 
-    tolgeeEmailSender.sendInvitation(invitation)
+    invitationEmailSender.sendInvitation(invitation)
 
     return invitationRepository.save(invitation)
   }
@@ -61,7 +61,7 @@ class InvitationService @Autowired constructor(
     )
     invitationRepository.save(invitation)
 
-    tolgeeEmailSender.sendInvitation(invitation)
+    invitationEmailSender.sendInvitation(invitation)
 
     return invitation
   }
