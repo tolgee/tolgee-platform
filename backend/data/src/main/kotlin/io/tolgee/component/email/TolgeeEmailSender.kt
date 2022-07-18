@@ -4,23 +4,17 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailParams
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Component
-import java.nio.charset.StandardCharsets
 
 @Component
 class TolgeeEmailSender(
   private val tolgeeProperties: TolgeeProperties,
   private val mailSender: JavaMailSender,
+  private val mimeMessageHelperFactory: MimeMessageHelperFactory
 ) {
   fun sendEmail(params: EmailParams) {
     validateProps()
-    val message = mailSender.createMimeMessage()
-    val helper = MimeMessageHelper(
-      message,
-      MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-      StandardCharsets.UTF_8.name()
-    )
+    val helper = mimeMessageHelperFactory.create()
     helper.setFrom(tolgeeProperties.smtp.from!!)
     helper.setTo(params.to)
     helper.setSubject(params.subject)
@@ -44,7 +38,7 @@ class TolgeeEmailSender(
       "image/png"
     )
 
-    mailSender.send(message)
+    mailSender.send(helper.mimeMessage)
   }
 
   private fun validateProps() {
