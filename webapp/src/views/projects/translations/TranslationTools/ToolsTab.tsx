@@ -1,9 +1,13 @@
 import React from 'react';
-import { styled, Typography } from '@mui/material';
+import { styled, Typography, Link as MuiLink } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 
 import { TabMessage } from './TabMessage';
 import { UseQueryResult } from 'react-query';
+import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { MtHint } from 'tg.component/billing/MtHint';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -62,20 +66,38 @@ export const ToolsTab: React.FC<Props> = ({
   data,
 }) => {
   const t = useTranslate();
+  const { preferredOrganization } = usePreferredOrganization();
+  const config = useConfig();
 
-  const getErrorMessage = (code: string) => {
-    switch (code) {
-      case 'out_of_credits':
-        return t('translation_tools_no_credits');
-      default:
-        return code;
+  const getCreditHint = (code: string) => {
+    if (code === 'out_of_credits') {
+      if (
+        preferredOrganization.currentUserRole === 'OWNER' &&
+        config.billing.enabled
+      ) {
+        return t('translation_tools_no_credits_billing_link', {
+          link: (
+            <MuiLink
+              component={Link}
+              to={LINKS.ORGANIZATION_BILLING.build({
+                [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+              })}
+            />
+          ),
+          hint: <MtHint />,
+        });
+      } else {
+        return t('translation_tools_no_credits_message', {
+          hint: <MtHint />,
+        });
+      }
     }
   };
 
   const error = data?.error;
   const errorCode = error?.message || error?.code || error || 'Unknown error';
 
-  const errorMessage = getErrorMessage(errorCode);
+  const creditHint = getCreditHint(errorCode);
 
   return (
     <StyledContainer>
@@ -86,7 +108,10 @@ export const ToolsTab: React.FC<Props> = ({
       </StyledTab>
 
       {data?.isError ? (
-        <TabMessage type="error" message={errorMessage} />
+        <TabMessage
+          type={creditHint ? 'placeholder' : 'error'}
+          message={creditHint || errorCode}
+        />
       ) : (
         children
       )}

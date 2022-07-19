@@ -17,7 +17,7 @@ export const useLeaveOrganization = () => {
     method: 'put',
   });
   const history = useHistory();
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
 
   return (id: number) => {
     confirmation({
@@ -29,7 +29,7 @@ export const useLeaveOrganization = () => {
             onSuccess() {
               messageService.success(<T>organization_left_message</T>);
               history.push(LINKS.PROJECTS.build());
-              initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
+              globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
             },
             onError(e) {
               const parsed = parseErrorResponse(e);

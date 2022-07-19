@@ -27,7 +27,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
     const match = useRouteMatch();
 
     const code = match.params[PARAMS.INVITATION_CODE];
-    const initialDataDispatch = useGlobalDispatch();
+    const globalDispatch = useGlobalDispatch();
 
     const acceptCode = useApiMutation({
       url: '/api/invitation/accept/{code}',
@@ -45,7 +45,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
           { path: { code } },
           {
             onSuccess() {
-              initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
+              globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
               messaging.success(<T>invitation_code_accepted</T>);
             },
             onError(e) {

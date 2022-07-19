@@ -22,7 +22,7 @@ const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
   const t = useTranslate();
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
   const user = useUser();
 
   const updateUser = useApiMutation({
@@ -41,7 +41,7 @@ export const UserProfileView: FunctionComponent = () => {
       {
         onSuccess() {
           messagesService.success(<T>User data - Successfully updated!</T>);
-          initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
+          globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         },
       }
     );

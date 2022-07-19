@@ -29,7 +29,7 @@ const messageService = container.resolve(MessageService);
 export const OrganizationProfileView: FunctionComponent = () => {
   const t = useTranslate();
   const leaveOrganization = useLeaveOrganization();
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
   const history = useHistory();
 
   const match = useRouteMatch();
@@ -97,7 +97,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
           {
             onSuccess: async () => {
               messageService.success(<T>organization_deleted_message</T>);
-              await initialDataDispatch({
+              await globalDispatch({
                 type: 'REFETCH_INITIAL_DATA',
               });
               history.push(LINKS.PROJECTS.build());

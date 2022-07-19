@@ -45,8 +45,7 @@ export const enterProject = (projectName: string, organization?: string) => {
 };
 
 export const createProject = (name: string, owner: string) => {
-  gcy('organization-switch').click();
-  gcy('organization-switch-item').contains(owner).click();
+  switchToOrganization(owner);
   gcy('global-plus-button').click();
   gcy('project-name-field').find('input').type(name);
   gcy('global-form-save-button').click();

@@ -13,7 +13,7 @@ const messaging = container.resolve(MessageService);
 
 export const useLeaveProject = () => {
   const history = useHistory();
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
   const [isLeaving, setIsLeaving] = useState(false);
 
   const leaveLoadable = useApiMutation({
@@ -21,7 +21,7 @@ export const useLeaveProject = () => {
     method: 'put',
     options: {
       onSuccess() {
-        initialDataDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         messaging.success(<T>project_successfully_left</T>);
         history.push(LINKS.PROJECTS.build());
       },

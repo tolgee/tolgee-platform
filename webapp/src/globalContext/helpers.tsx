@@ -9,12 +9,12 @@ export const useConfig = () => useGlobalContext((v) => v.serverConfiguration);
 export const useUser = () => useGlobalContext((v) => v.userInfo);
 
 export const usePreferredOrganization = () => {
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
   const preferredOrganization = useGlobalContext(
     (v) => v.preferredOrganization!
   );
   const updatePreferredOrganization = (org: number | OrganizationModel) =>
-    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });
+    globalDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });
   return { preferredOrganization, updatePreferredOrganization };
 };
 
@@ -23,9 +23,9 @@ export const useOrganizationUsage = () => {
 };
 
 export const useOrganizationUsageMethods = () => {
-  const initialDataDispatch = useGlobalDispatch();
+  const globalDispatch = useGlobalDispatch();
   const updateUsage = (data: Partial<UsageModel>) =>
-    initialDataDispatch({ type: 'UPDATE_USAGE', payload: data });
-  const refetchUsage = () => initialDataDispatch({ type: 'REFETCH_USAGE' });
+    globalDispatch({ type: 'UPDATE_USAGE', payload: data });
+  const refetchUsage = () => globalDispatch({ type: 'REFETCH_USAGE' });
   return { updateUsage, refetchUsage };
 };
