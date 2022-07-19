@@ -21,6 +21,9 @@ open class UsageModel(
   @Schema(description = "Date when credits were refilled. (In epoch format.)")
   val creditBalanceRefilledAt: Long,
 
+  @Schema(description = "Date when credits will be refilled. (In epoch format.)")
+  val creditBalanceNextRefillAt: Long,
+
   @Schema(
     description = "Extra credits, which are neither refilled nor reset every month. These credits are " +
       "used when there are no standard credits."

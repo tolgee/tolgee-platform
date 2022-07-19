@@ -96,7 +96,8 @@ class MtCreditBucketService(
       creditBalance = bucket.credits,
       bucketSize = bucket.bucketSize,
       extraCreditBalance = bucket.extraCredits,
-      refilledAt = bucket.refilled
+      refilledAt = bucket.refilled,
+      nextRefillAt = bucket.getNextRefillDate()
     )
   }
 

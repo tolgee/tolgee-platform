@@ -269,6 +269,7 @@ class OrganizationController(
       includedMtCredits = creditBalances.bucketSize,
       extraCreditBalance = creditBalances.extraCreditBalance,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
+      creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentTranslations = currentTranslations,
       translationLimit = translationsLimitProvider.get(organization)
     )
