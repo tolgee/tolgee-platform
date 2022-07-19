@@ -6,6 +6,7 @@ import io.tolgee.api.v2.hateoas.InitialDataModel
 import io.tolgee.controllers.ConfigurationController
 import io.tolgee.controllers.IController
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -24,7 +25,8 @@ class InitialDataController(
   private val configurationController: ConfigurationController,
   private val authenticationFacade: AuthenticationFacade,
   private val userController: V2UserController,
-  private val organizationController: PreferredOrganizationController
+  private val organizationController: PreferredOrganizationController,
+  private val userPreferencesService: UserPreferencesService
 ) : IController {
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
@@ -34,9 +36,11 @@ class InitialDataController(
       serverConfiguration = configurationController.getPublicConfiguration()
     )
 
-    if (authenticationFacade.userAccountOrNull != null) {
+    val userAccount = authenticationFacade.userAccountOrNull
+    if (userAccount != null) {
       data.userInfo = userController.getInfo()
       data.preferredOrganization = organizationController.getPreferred()
+      data.languageTag = userPreferencesService.find(userAccount.id)?.language
     }
 
     return data
