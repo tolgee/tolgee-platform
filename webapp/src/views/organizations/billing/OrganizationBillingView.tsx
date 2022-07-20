@@ -17,7 +17,6 @@ import { Credits } from './BillingPlans/Credits/Credits';
 import { CustomerPortal } from './CustomerPortal/CustomerPortal';
 import { CurrentUsage } from './CurrentUsage/CurrentUsage';
 import { BillingPeriodType } from './BillingPlans/PeriodSwitch';
-import { EmailRecipient } from './EmailRecipient';
 import { Invoices } from './Invoices/Invoices';
 
 const StyledCurrent = styled('div')`
@@ -158,8 +157,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
               />
               <Credits />
             </StyledShopping>
-
-            <EmailRecipient />
           </>
         )}
     </BaseOrganizationSettingsView>
