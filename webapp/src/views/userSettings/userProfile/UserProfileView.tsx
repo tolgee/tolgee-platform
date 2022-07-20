@@ -9,22 +9,20 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import {
-  useConfig,
-  useInitialDataDispatch,
-  useUser,
-} from 'tg.hooks/InitialDataProvider';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { LINKS } from 'tg.constants/links';
 
 const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
   const t = useTranslate();
-  const initialDataDispatch = useInitialDataDispatch();
+  const globalDispatch = useGlobalDispatch();
   const user = useUser();
 
   const updateUser = useApiMutation({
@@ -43,7 +41,7 @@ export const UserProfileView: FunctionComponent = () => {
       {
         onSuccess() {
           messagesService.success(<T>User data - Successfully updated!</T>);
-          initialDataDispatch({ type: 'REFETCH' });
+          globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         },
       }
     );
@@ -99,6 +97,7 @@ export const UserProfileView: FunctionComponent = () => {
     <BaseUserSettingsView
       windowTitle={t('user_profile_title')}
       title={t('user_profile_title')}
+      navigation={[[t('user_profile_title'), LINKS.USER_PROFILE.build()]]}
       containerMaxWidth="md"
     >
       {user && (

@@ -8,9 +8,11 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { getPossibleValues } from './creditsUtil';
-import { BillingSection } from '../BillingSection';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
+import { getPossibleValues } from './creditsUtil';
+import { StyledPlan, StyledContent } from '../StyledPlan';
+import { PlanTitle } from '../PlanTitle';
+import { MtHint } from 'tg.component/billing/MtHint';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -29,6 +31,11 @@ const StyledBottomRow = styled('div')`
 
 const StyledPrice = styled('div')`
   display: grid;
+`;
+
+const StyledCreditAmount = styled(Box)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 20px;
 `;
 
 const StyledAmount = styled('div')`
@@ -104,41 +111,48 @@ export const Credits: FC = () => {
     sliderPossibleValues?.[sliderValue];
 
   return (
-    <BillingSection title={t('billing_extra_credits_title')}>
-      <StyledContainer>
-        <StyledSliderWrapper>
-          <Slider
-            value={sliderValue}
-            min={0}
-            step={1}
-            max={sliderPossibleValues.length - 1}
-            scale={(value) => sliderPossibleValues[value].totalAmount}
-            getAriaValueText={formatValue}
-            onChange={(_, value) => setSliderValue(value as number)}
-            aria-labelledby="non-linear-slider"
-          />
-          <Box marginTop="-4px">{formatNumber(totalAmount)}</Box>
-        </StyledSliderWrapper>
-        <StyledBottomRow>
-          <StyledPrice>
-            <StyledAmount>{formatPrice(totalPrice)}</StyledAmount>
-            <StyledFullAmount>
-              {regularPrice !== undefined && formatPrice(regularPrice)}
-            </StyledFullAmount>
-          </StyledPrice>
-          <Box>
-            <LoadingButton
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => buy(priceId, itemQuantity)}
-              loading={buyMutation.isLoading}
-            >
-              {t('billing_extra_credits_buy')}
-            </LoadingButton>
-          </Box>
-        </StyledBottomRow>
-      </StyledContainer>
-    </BillingSection>
+    <StyledPlan>
+      <StyledContent>
+        <PlanTitle
+          title={t('billing_extra_credits_title', { hint: <MtHint /> })}
+        />
+        <StyledContainer>
+          <StyledSliderWrapper>
+            <StyledCreditAmount>
+              {formatNumber(Math.round(totalAmount / 100))}
+            </StyledCreditAmount>
+            <Slider
+              value={sliderValue}
+              min={0}
+              step={1}
+              max={sliderPossibleValues.length - 1}
+              scale={(value) => sliderPossibleValues[value].totalAmount}
+              getAriaValueText={formatValue}
+              onChange={(_, value) => setSliderValue(value as number)}
+              aria-labelledby="non-linear-slider"
+            />
+          </StyledSliderWrapper>
+          <StyledBottomRow>
+            <StyledPrice>
+              <StyledAmount>{formatPrice(totalPrice)}</StyledAmount>
+              <StyledFullAmount>
+                {regularPrice !== undefined && formatPrice(regularPrice)}
+              </StyledFullAmount>
+            </StyledPrice>
+            <Box>
+              <LoadingButton
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => buy(priceId, itemQuantity)}
+                loading={buyMutation.isLoading}
+              >
+                {t('billing_extra_credits_buy')}
+              </LoadingButton>
+            </Box>
+          </StyledBottomRow>
+        </StyledContainer>
+      </StyledContent>
+    </StyledPlan>
   );
 };

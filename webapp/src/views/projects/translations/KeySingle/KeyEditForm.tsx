@@ -22,6 +22,7 @@ import { FieldLabel } from './FieldLabel';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 const messaging = container.resolve(MessageService);
 
@@ -88,6 +89,8 @@ export const KeyEditForm: React.FC = () => {
     });
   };
 
+  const { refetchUsage } = useOrganizationUsageMethods();
+
   const handleRemoveTag = (tagId: number) => {
     dispatch({
       type: 'REMOVE_TAG',
@@ -121,6 +124,7 @@ export const KeyEditForm: React.FC = () => {
                   [PARAMS.PROJECT_ID]: project.id,
                 })
               );
+              refetchUsage();
             },
             onError(e) {
               const parsed = parseErrorResponse(e);

@@ -7,7 +7,7 @@ import { Link, Redirect, useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { SecurityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
 

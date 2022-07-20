@@ -94,11 +94,15 @@ export const PaginatedHateoasList = <
       )}
       {items ? (
         <SimpleList
-          pagination={{
-            page,
-            onPageChange: handlePageChange,
-            pageCount,
-          }}
+          pagination={
+            props.onPageChange
+              ? {
+                  page,
+                  onPageChange: handlePageChange,
+                  pageCount,
+                }
+              : undefined
+          }
           data={items}
           renderItem={props.renderItem}
           wrapperComponent={props.wrapperComponent}

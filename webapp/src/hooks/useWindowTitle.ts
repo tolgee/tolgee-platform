@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useConfig } from './InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 
 export const useWindowTitle = (title: string) => {
   const config = useConfig();

@@ -21,6 +21,7 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
@@ -45,6 +46,7 @@ export const ImportView: FunctionComponent = () => {
   const [resolveRow, setResolveRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
   );
+  const { refetchUsage } = useOrganizationUsageMethods();
 
   const t = useTranslate();
 
@@ -117,13 +119,21 @@ export const ImportView: FunctionComponent = () => {
     }
   };
 
-  if (addFilesLoadable.error?.code === 'cannot_add_more_then_100_languages') {
-    messageService.error(
-      <T parameters={{ n: '100' }}>
-        import_error_cannot_add_more_then_n_languages
-      </T>
-    );
-  }
+  useEffect(() => {
+    if (addFilesLoadable.error?.code === 'cannot_add_more_then_100_languages') {
+      messageService.error(
+        <T parameters={{ n: '100' }}>
+          import_error_cannot_add_more_then_n_languages
+        </T>
+      );
+    }
+  }, [addFilesLoadable.error?.code]);
+
+  useEffect(() => {
+    if (!applyImportHelper.loading && applyImportHelper.loaded) {
+      refetchUsage();
+    }
+  }, [applyImportHelper.loading, applyImportHelper.loaded]);
 
   return (
     <BaseProjectView

@@ -1,7 +1,7 @@
 import { useRouteMatch } from 'react-router-dom';
 
 import { PARAMS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const useOrganization = () => {

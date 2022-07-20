@@ -11,7 +11,7 @@ import { useTranslationTools } from './useTranslationTools';
 import { TranslationMemory } from './TranslationMemory';
 import { MachineTranslation } from './MachineTranslation';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 

@@ -29,6 +29,12 @@ export type Activity = {
   addedHighlight: string;
 };
 
+export type BillingProgress = {
+  background: string;
+  low: string;
+  sufficient: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -55,6 +61,11 @@ export const colors = {
       other: '#002bff',
       main: '#000000',
     } as Editor,
+    billingProgress: {
+      background: '#C4C4C4',
+      low: '#E80000',
+      sufficient: '#17AD18',
+    } as BillingProgress,
   },
   dark: {
     white: '#dddddd',
@@ -74,9 +85,9 @@ export const colors = {
       50: '#233043',
       100: '#243245',
       200: '#2c3c52',
-      300: '#374961',
-      400: '#576d8a',
-      500: '#8f9eb1',
+      300: '#3e4651',
+      400: '#4f555c',
+      500: '#697079',
       600: '#b4bbc3',
       700: '#eeeeee',
       800: '#f5f5f5',
@@ -96,5 +107,10 @@ export const colors = {
       other: '#99aaff',
       main: '#eeeeee',
     } as Editor,
+    billingProgress: {
+      background: '#565656',
+      low: '#ca0000',
+      sufficient: '#1e991e',
+    } as BillingProgress,
   },
 } as const;

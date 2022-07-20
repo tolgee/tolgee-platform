@@ -6,7 +6,7 @@ import { container } from 'tsyringe';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import { useUser } from 'tg.globalContext/helpers';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';

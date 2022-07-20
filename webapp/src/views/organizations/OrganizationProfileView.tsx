@@ -13,7 +13,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
 import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
@@ -29,7 +29,7 @@ const messageService = container.resolve(MessageService);
 export const OrganizationProfileView: FunctionComponent = () => {
   const t = useTranslate();
   const leaveOrganization = useLeaveOrganization();
-  const initialDataDispatch = useInitialDataDispatch();
+  const globalDispatch = useGlobalDispatch();
   const history = useHistory();
 
   const match = useRouteMatch();
@@ -97,8 +97,8 @@ export const OrganizationProfileView: FunctionComponent = () => {
           {
             onSuccess: async () => {
               messageService.success(<T>organization_deleted_message</T>);
-              await initialDataDispatch({
-                type: 'REFETCH',
+              await globalDispatch({
+                type: 'REFETCH_INITIAL_DATA',
               });
               history.push(LINKS.PROJECTS.build());
             },
@@ -123,6 +123,14 @@ export const OrganizationProfileView: FunctionComponent = () => {
       windowTitle={t('edit_organization_title')}
       link={LINKS.ORGANIZATION_PROFILE}
       title={t('edit_organization_title')}
+      navigation={[
+        [
+          t('edit_organization_title'),
+          LINKS.ORGANIZATION_PROFILE.build({
+            [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+          }),
+        ],
+      ]}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
       containerMaxWidth="md"

@@ -16,7 +16,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const messageService = container.resolve(MessageService);

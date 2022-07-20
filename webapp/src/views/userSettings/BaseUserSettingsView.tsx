@@ -4,7 +4,7 @@ import { LINKS } from 'tg.constants/links';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 
 type Props = BaseViewProps;
 
@@ -19,7 +19,7 @@ export const BaseUserSettingsView: React.FC<Props> = ({
     ? [
         {
           link: LINKS.USER_PROFILE.build(),
-          label: t('user_menu_user_settings'),
+          label: t('user_profile_title'),
         },
       ]
     : [];

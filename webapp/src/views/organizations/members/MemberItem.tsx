@@ -1,7 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 import { IconButton, styled, Tooltip } from '@mui/material';
 import { Clear } from '@mui/icons-material';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import { useUser } from 'tg.globalContext/helpers';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from './RemoveUserButton';

@@ -105,7 +105,7 @@ export class ApiHttpService {
           }
           if (r.status >= 400 && r.status <= 500) {
             ApiHttpService.getResObject(r).then((b) => {
-              errorCapture(r, b);
+              errorCapture(b.code);
               reject(b);
             });
           } else {

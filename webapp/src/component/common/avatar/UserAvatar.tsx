@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import { useUser } from 'tg.globalContext/helpers';
 import { AvatarImg } from './AvatarImg';
 
 const SIZE = 24;

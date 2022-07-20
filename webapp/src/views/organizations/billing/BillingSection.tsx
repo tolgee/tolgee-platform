@@ -1,44 +1,22 @@
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
-const StyledContainer = styled('div')`
-  display: grid;
-  border: 1px solid ${({ theme }) => theme.palette.divider};
-  border-radius: 20px;
-  padding: 20px;
-`;
-
-const StyledHeader = styled('div')`
+export const StyledBillingSection = styled(Box)`
   display: grid;
 `;
 
-const StyledTitle = styled('div')`
+export const StyledBillingSectionTitle = styled('div')`
   font-size: 24px;
 `;
 
-const StyledSubtitle = styled('div')`
+export const StyledBillingSectionSubtitle = styled('div')`
   font-size: 14px;
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const StyledContent = styled('div')``;
-
-type Props = {
-  title: React.ReactNode;
-  subtitle?: string;
-};
-
-export const BillingSection: React.FC<Props> = ({
-  title,
-  subtitle,
-  children,
-}) => {
-  return (
-    <StyledContainer>
-      <StyledHeader>
-        <StyledTitle>{title}</StyledTitle>
-        <StyledSubtitle>{subtitle}</StyledSubtitle>
-      </StyledHeader>
-      <StyledContent>{children}</StyledContent>
-    </StyledContainer>
-  );
-};
+export const StyledBillingSectionHeader = styled('div')`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+`;

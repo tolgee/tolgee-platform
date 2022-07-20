@@ -1,39 +1,43 @@
 import { Box, BoxProps, styled } from '@mui/material';
 import clsx from 'clsx';
 
+import { BILLING_CRITICAL_PERCENT } from './constants';
+
 const StyledContainer = styled(Box)`
   display: grid;
-  height: 6px;
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.success.light}55;
+  background: ${({ theme }) => theme.palette.billingProgress.background};
   overflow: hidden;
-  &.critical {
-    background: ${({ theme }) => theme.palette.error.light}99;
-  }
+  transition: all 0.5s ease-in-out;
 `;
 
 const StyledProgress = styled(Box)`
   border-radius: 4px;
-  background: ${({ theme }) => theme.palette.success.main};
+  background: ${({ theme }) => theme.palette.billingProgress.sufficient};
+  transition: all 0.5s ease-in-out;
   &.critical {
-    background: ${({ theme }) => theme.palette.error.dark};
+    background: ${({ theme }) => theme.palette.billingProgress.low};
   }
 `;
 
 type Props = BoxProps & {
   percent: number;
-  treshold?: number;
+  height?: number;
 };
 
 export const BillingProgress: React.FC<Props> = ({
   percent,
-  treshold = 10,
+  height = 6,
   ...boxProps
 }) => {
   const normalized = percent > 100 ? 100 : percent < 0 ? 0 : percent;
-  const critical = normalized < treshold;
+  const critical = normalized < BILLING_CRITICAL_PERCENT;
   return (
-    <StyledContainer className={clsx({ critical })} {...boxProps}>
+    <StyledContainer
+      className={clsx({ critical })}
+      height={height}
+      {...boxProps}
+    >
       <StyledProgress width={`${normalized}%`} className={clsx({ critical })} />
     </StyledContainer>
   );

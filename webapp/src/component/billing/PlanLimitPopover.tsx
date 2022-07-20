@@ -11,10 +11,12 @@ import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import {
+  usePreferredOrganization,
+  useOrganizationUsage,
+} from 'tg.globalContext/helpers';
 import { USAGE_ELEMENT_ID } from './Usage';
 import { UsageDetailed } from './UsageDetailed';
-import { useBillingUsageData } from './useBillingUsageData';
 import { getProgressData } from './utils';
 
 const StyledDialogContent = styled(DialogContent)`
@@ -30,10 +32,7 @@ type Props = {
 
 export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
-  const usage = useBillingUsageData({
-    organizationId: preferredOrganization.id,
-    enabled: open,
-  });
+  const { usage } = useOrganizationUsage();
   const isOwner = preferredOrganization.currentUserRole === 'OWNER';
   const history = useHistory();
 
@@ -47,7 +46,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
   };
 
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
-  const progressData = usage.data && getProgressData(usage.data);
+  const progressData = usage && getProgressData(usage);
 
   return progressData ? (
     <Popover

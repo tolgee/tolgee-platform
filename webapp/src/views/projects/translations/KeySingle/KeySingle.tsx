@@ -3,11 +3,10 @@ import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { BaseView } from 'tg.component/layout/BaseView';
+import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { queryEncode } from 'tg.hooks/useUrlSearchState';
@@ -74,18 +73,11 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   useGlobalLoading(isFetching);
 
   return allLanguages && selectedLanguages && translations ? (
-    <BaseView
+    <BaseProjectView
       windowTitle={
         keyExists ? translation!.keyName : t('translation_single_create_title')
       }
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('translations_view_title'),
           LINKS.PROJECT_TRANSLATIONS.build({
@@ -142,6 +134,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
           />
         )}
       </StyledContainer>
-    </BaseView>
+    </BaseProjectView>
   ) : null;
 };

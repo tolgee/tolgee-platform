@@ -20,7 +20,6 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   passwordResetSetValidated = false;
   passwordResetSetError = null;
   passwordResetSetSucceed = false;
-  planLimitErrors = 0;
   confirmationDialog: ConfirmationDialogProps | null = null;
   loading = false;
 }
@@ -154,11 +153,6 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         ...state,
         security: { ...state.security, ...action.payload },
       }
-  );
-
-  triggerPlanLimitError = this.createAction('PLAN_LIMIT_ERROR').build.on(
-    (state) =>
-      <GlobalState>{ ...state, planLimitErrors: state.planLimitErrors + 1 }
   );
 
   readonly loadableDefinitions = {

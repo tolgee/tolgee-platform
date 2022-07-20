@@ -1,39 +1,19 @@
-import { useCallback, useState, useEffect } from 'react';
-import { container } from 'tsyringe';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { container } from 'tsyringe';
 
-import { createProvider } from 'tg.fixtures/createProvider';
-import { components } from 'tg.service/apiSchema.generated';
+import { AppState } from 'tg.store/index';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
-import { AppState } from 'tg.store/index';
+import { components } from 'tg.service/apiSchema.generated';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { useRef } from 'react';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type InitialDataModel = components['schemas']['InitialDataModel'];
 
-type InitialDataContextType = InitialDataModel & {
-  preferredOrganization?: OrganizationModel;
-  isFetching?: boolean;
-  isLoading?: boolean;
-};
+export const useInitialDataService = () => {
+  const actions = container.resolve(GlobalActions);
+  const invitationCodeService = container.resolve(InvitationCodeService);
 
-const actions = container.resolve(GlobalActions);
-const invitationCodeService = container.resolve(InvitationCodeService);
-
-type ActionType =
-  | {
-      type: 'UPDATE_ORGANIZATION';
-      payload: number | OrganizationModel;
-    }
-  | { type: 'REFETCH' };
-
-export const [
-  InitialDataProvider,
-  useInitialDataDispatch,
-  useInitialDataContext,
-] = createProvider(() => {
   const [organization, setOrganization] = useState<
     OrganizationModel | undefined
   >(undefined);
@@ -107,45 +87,28 @@ export const [
     [organization, setOrganization, organizationLoadable]
   );
 
-  const dispatch = async (action: ActionType) => {
-    switch (action.type) {
-      case 'UPDATE_ORGANIZATION':
-        return updatePreferredOrganization(action.payload);
-      case 'REFETCH':
-        setOrganization(undefined);
-        return initialData.refetch();
-    }
-  };
-
-  const contextData: InitialDataContextType = {
-    ...initialData.data!,
-    preferredOrganization: preferredOrganization,
-    isFetching: initialData.isFetching || organizationLoadable.isLoading,
-    isLoading: initialData.isLoading,
+  const refetchInitialData = () => {
+    setOrganization(undefined);
+    return initialData.refetch();
   };
 
   useEffect(() => {
-    dispatch({ type: 'REFETCH' });
+    refetchInitialData();
   }, [security.jwtToken]);
 
   if (initialData.error) {
     throw new Error(initialData.error.message || initialData.error);
   }
 
-  return [contextData, dispatch];
-});
+  return {
+    data: {
+      ...initialData.data!,
+      preferredOrganization,
+    },
+    isFetching: initialData.isFetching || organizationLoadable.isLoading,
+    isLoading: initialData.isLoading,
 
-export const useConfig = () =>
-  useInitialDataContext((v) => v.serverConfiguration);
-
-export const useUser = () => useInitialDataContext((v) => v.userInfo);
-
-export const usePreferredOrganization = () => {
-  const initialDataDispatch = useInitialDataDispatch();
-  const preferredOrganization = useInitialDataContext(
-    (v) => v.preferredOrganization!
-  );
-  const updatePreferredOrganization = (org: number | OrganizationModel) =>
-    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });
-  return { preferredOrganization, updatePreferredOrganization };
+    refetchInitialData,
+    updatePreferredOrganization,
+  };
 };

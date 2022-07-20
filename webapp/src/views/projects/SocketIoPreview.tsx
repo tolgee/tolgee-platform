@@ -1,5 +1,5 @@
 import { TranslationsClient } from '@tolgee/socketio-client';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';

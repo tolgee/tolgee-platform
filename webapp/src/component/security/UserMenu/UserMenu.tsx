@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
+import { container } from 'tsyringe';
 import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
-import { container } from 'tsyringe';
 
-import { useConfig } from 'tg.hooks/InitialDataProvider';
-import { useUser } from 'tg.hooks/InitialDataProvider';
+import {
+  useConfig,
+  useUser,
+  usePreferredOrganization,
+  useOrganizationUsage,
+} from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
+import { getProgressData } from 'tg.component/billing/utils';
 
 import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
+import { BillingItem } from './BillingItem';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -29,7 +34,6 @@ const StyledIconButton = styled(IconButton)`
 
 const StyledPopover = styled(Popover)`
   & .paper {
-    border: 1px solid #d3d4d5;
     margin-top: 5px;
     padding: 2px 0px;
     max-width: 300px;
@@ -38,7 +42,10 @@ const StyledPopover = styled(Popover)`
 
 const StyledDivider = styled('div')`
   height: 1px;
-  background: ${({ theme }) => theme.palette.emphasis[300]};
+  background: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[300]
+      : theme.palette.emphasis[400]};
 `;
 
 export const UserMenu: React.FC = () => {
@@ -54,6 +61,8 @@ export const UserMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser();
   const userMenuItems = useUserMenuItems();
+  const { usage } = useOrganizationUsage();
+  const progressData = usage && getProgressData(usage);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -88,17 +97,8 @@ export const UserMenu: React.FC = () => {
     },
   ];
 
-  if (
-    config.billing.enabled &&
-    preferredOrganization.currentUserRole === 'OWNER'
-  ) {
-    organizationItems.push({
-      link: LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-      }),
-      label: t('organization_menu_billing'),
-    });
-  }
+  const showBilling =
+    config.billing.enabled && preferredOrganization.currentUserRole === 'OWNER';
 
   const organizationMenuItems = organizationItems.map((i) => ({
     ...i,
@@ -123,7 +123,6 @@ export const UserMenu: React.FC = () => {
         open={!!anchorEl}
         anchorEl={anchorEl}
         onClose={handleClose}
-        elevation={0}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',
@@ -173,6 +172,15 @@ export const UserMenu: React.FC = () => {
                 {item.label}
               </MenuItem>
             ))}
+
+            {showBilling && (
+              <BillingItem
+                progressData={progressData}
+                onClose={handleClose}
+                organizationSlug={preferredOrganization.slug}
+              />
+            )}
+
             <OrganizationSwitch
               onSelect={handleSelectOrganization}
               onCreateNew={handleCreateNewOrganization}
@@ -183,7 +191,6 @@ export const UserMenu: React.FC = () => {
         <MenuItem
           onClick={() => globalActions.logout.dispatch()}
           data-cy="user-menu-logout"
-          divider
         >
           <T>user_menu_logout</T>
         </MenuItem>

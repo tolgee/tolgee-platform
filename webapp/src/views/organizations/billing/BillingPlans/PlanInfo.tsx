@@ -3,6 +3,7 @@ import { T } from '@tolgee/react';
 
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/billingApiSchema.generated';
+import { MtHint } from 'tg.component/billing/MtHint';
 
 type PlanModel = components['schemas']['PlanModel'];
 
@@ -54,7 +55,10 @@ export const PlanInfo: React.FC<Props> = ({ plan }) => {
           {formatNumber((plan.includedMtCredits || 0) / 100)}
         </StyledNumber>
         <StyledName>
-          <T keyName="billing_plan_credits_included" />
+          <T
+            keyName="billing_plan_credits_included"
+            parameters={{ hint: <MtHint /> }}
+          />
         </StyledName>
       </StyledItem>
     </StyledInfo>

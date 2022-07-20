@@ -8,7 +8,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { AvatarImg } from './AvatarImg';
 import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { components } from 'tg.service/apiSchema.generated';
 

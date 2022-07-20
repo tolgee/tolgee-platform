@@ -13,7 +13,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { OrganizationFields } from './components/OrganizationFields';
-import { usePreferredOrganization } from 'tg.hooks/InitialDataProvider';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 

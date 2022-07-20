@@ -9,7 +9,7 @@ import {
   TranslationIcon,
 } from 'tg.component/CustomIcons';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectPermissionType } from 'tg.service/response.types';
 
