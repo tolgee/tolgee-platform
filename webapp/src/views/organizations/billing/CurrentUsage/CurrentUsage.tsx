@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
@@ -8,9 +9,9 @@ import {
   StyledBillingSection,
   StyledBillingSectionTitle,
   StyledBillingSectionSubtitle,
+  StyledBillingSectionSubtitleSmall,
 } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
-import { FC } from 'react';
 import { MtHint } from 'tg.component/billing/MtHint';
 
 type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
@@ -28,7 +29,8 @@ const StyledNegative = styled('span')`
 const StyledHeader = styled('div')`
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 0px 24px;
+  flex-wrap: wrap;
 `;
 
 type Props = {
@@ -48,6 +50,12 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>
           {activePlan.name}
+          {Boolean(usage.extraCreditBalance) && (
+            <StyledBillingSectionSubtitleSmall>
+              {' '}
+              + {t('billing_actual_extra_credits', { hint: <MtHint /> })}
+            </StyledBillingSectionSubtitleSmall>
+          )}
         </StyledBillingSectionSubtitle>
       </StyledHeader>
       <StyledMetrics>

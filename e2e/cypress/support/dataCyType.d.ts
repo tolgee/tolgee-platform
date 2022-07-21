@@ -17,6 +17,8 @@ declare namespace DataCy {
         "billing-actual-period" |
         "billing-actual-period-end" |
         "billing-extra-credits-buy" |
+        "billing-invoice-number" |
+        "billing-limit-exceeded-popover" |
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |

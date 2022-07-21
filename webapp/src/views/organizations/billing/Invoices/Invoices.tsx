@@ -95,7 +95,9 @@ export const Invoices: FC = () => {
           }
           renderItem={(item) => (
             <>
-              <StyledItem>{item.number}</StyledItem>
+              <StyledItem data-cy="billing-invoice-number">
+                {item.number}
+              </StyledItem>
               <StyledItem>{formatDate(item.createdAt)}</StyledItem>
               <StyledItem>{formatPrice(item.total)}</StyledItem>
               <StyledItem>
