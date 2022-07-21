@@ -31,7 +31,7 @@ class TranslationsE2eDataController(
   @Transactional
   fun generateKeys(@PathVariable projectId: Long, @PathVariable number: Long) {
     val project = projectService.get(projectId)
-    (0..99).forEach { num ->
+    (0..(number - 1)).forEach { num ->
       val paddedNum = num.toString().padStart(2, '0')
       keyService.create(
         project,

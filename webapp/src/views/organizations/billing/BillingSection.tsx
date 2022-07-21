@@ -9,6 +9,11 @@ export const StyledBillingSectionTitle = styled('div')`
 `;
 
 export const StyledBillingSectionSubtitle = styled('div')`
+  font-size: 24px;
+  color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+export const StyledBillingSectionSubtitleSmall = styled('span')`
   font-size: 14px;
   color: ${({ theme }) => theme.palette.primary.main};
 `;

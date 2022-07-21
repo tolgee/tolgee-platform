@@ -18,7 +18,7 @@ const StyledInfo = styled(Box)`
 const StyledItem = styled('div')`
   display: grid;
   justify-items: center;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => theme.palette.emphasis[700]};
 `;
 
 const StyledSpacer = styled('div')`

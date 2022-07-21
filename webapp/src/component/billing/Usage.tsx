@@ -44,7 +44,6 @@ const shakeAnimation = keyframes`
 const StyledContent = styled('div')`
   display: grid;
   gap: 1px;
-  background: ${({ theme }) => theme.palette.background.default};
   &.triggered {
     animation: ${shakeAnimation} 700ms linear;
   }

@@ -55,6 +55,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
       anchorEl={open ? anchorEl : undefined}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      data-cy="billing-limit-exceeded-popover"
       {...(anchorEl
         ? {
             anchorOrigin: { horizontal: 'right', vertical: 'bottom' },
