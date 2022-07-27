@@ -1,13 +1,13 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { assertTooltip, gcy } from '../../common/shared';
-import { projectsDashboardData } from '../../common/apiCalls/testData/testData';
+import { projectListdData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
 describe('Projects Dashboard', () => {
   before(() => {
-    projectsDashboardData.clean();
-    projectsDashboardData.generate();
+    projectListdData.clean();
+    projectListdData.generate();
     login('projectListDashboardUser', 'admin');
     cy.visit(`${HOST}`);
   });
@@ -25,15 +25,15 @@ describe('Projects Dashboard', () => {
       .findDcy('project-states-bar-bar')
       .should('be.visible')
       .findDcy('project-states-bar-state-progress')
-      .should('have.length', 3)
+      .should('have.length', 2)
       //wait for animation
       .wait(500)
       .should('be.visible');
     getNthStateInProject(project2, 0).trigger('mouseover');
-    assertTooltip('Reviewed');
+    assertTooltip('Translated');
     getNthStateInProject(project2, 0).trigger('mouseout');
     getNthStateInProject(project2, 1).trigger('mouseover');
-    assertTooltip('Translated');
+    assertTooltip('Untranslated');
   });
 
   it('shows languages', () => {
@@ -46,7 +46,7 @@ describe('Projects Dashboard', () => {
   });
 
   after(() => {
-    projectsDashboardData.clean();
+    projectListdData.clean();
   });
 });
 

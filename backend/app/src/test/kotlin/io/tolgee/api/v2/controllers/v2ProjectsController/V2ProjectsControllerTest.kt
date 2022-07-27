@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -66,28 +67,30 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     userAccount = testData.user
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson.node("_embedded.projects").let {
-        it.isArray.hasSize(2)
-        it.node("[0].organizationOwner.name").isEqualTo("test_username")
-        it.node("[0].directPermissions").isEqualTo("MANAGE")
-        it.node("[1].stats.translationStateCounts").isEqualTo(
-          """
+      .andIsOk.andAssertThatJson {
+        node("_embedded.projects") {
+          isArray.hasSize(2)
+          node("[0].organizationOwner.name").isEqualTo("test_username")
+          node("[0].directPermissions").isEqualTo("MANAGE")
+          node("[0].stats.translationStatePercentages").isEqualTo(
+            """
         {
-          "UNTRANSLATED": 4,
-          "TRANSLATED": 5,
-          "REVIEWED": 1
-        }
-      """
-        )
-        it.node("[0].stats.translationStateCounts").isEqualTo(
-          """
-        {
-          "UNTRANSLATED": 1,
+          "UNTRANSLATED": 100.0,
           "TRANSLATED": 0,
           "REVIEWED": 0
         }
       """
-        )
+          )
+          node("[1].stats.translationStatePercentages").isEqualTo(
+            """
+        {
+          "UNTRANSLATED": 25.0,
+          "TRANSLATED": 75.0,
+          "REVIEWED": 0.0
+        }
+      """
+          )
+        }
       }
   }
 

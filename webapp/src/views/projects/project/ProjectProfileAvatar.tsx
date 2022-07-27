@@ -5,13 +5,13 @@ import { useProject } from 'tg.hooks/useProject';
 
 export const ProjectProfileAvatar = () => {
   const uploadLoadable = useApiMutation({
-    url: '/v2/projects/{id}/avatar',
+    url: '/v2/projects/{projectId}/avatar',
     method: 'put',
     invalidatePrefix: '/v2/projects',
   });
 
   const removeLoadable = useApiMutation({
-    url: '/v2/projects/{id}/avatar',
+    url: '/v2/projects/{projectId}/avatar',
     method: 'delete',
     invalidatePrefix: '/v2/projects',
   });
@@ -33,7 +33,7 @@ export const ProjectProfileAvatar = () => {
       onUpload={(blob: Blob) =>
         uploadLoadable.mutateAsync({
           path: {
-            id: project.id,
+            projectId: project.id,
           },
           content: {
             'multipart/form-data': {
@@ -45,7 +45,7 @@ export const ProjectProfileAvatar = () => {
       onRemove={() =>
         removeLoadable.mutateAsync({
           path: {
-            id: project.id,
+            projectId: project.id,
           },
         })
       }

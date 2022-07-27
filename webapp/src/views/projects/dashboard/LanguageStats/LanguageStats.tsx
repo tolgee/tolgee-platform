@@ -145,10 +145,10 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
                       stats={{
                         keyCount: wordCount,
                         languageCount: 1,
-                        translationStateCounts: {
-                          TRANSLATED: item.translatedWordCount,
-                          REVIEWED: item.reviewedWordCount,
-                          UNTRANSLATED: item.untranslatedWordCount,
+                        translationStatePercentages: {
+                          TRANSLATED: item.translatedPercentage,
+                          REVIEWED: item.reviewedPercentage,
+                          UNTRANSLATED: item.untranslatedPercentage,
                         },
                       }}
                     />

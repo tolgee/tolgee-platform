@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
+private const val API_REPOSITORY_EXCLUDE = "!/api/repository/**"
 private const val BILLING_EXCLUSION = "!/v2/**/billing/**"
 
 @Configuration
@@ -43,7 +44,7 @@ class OpenApiConfiguration {
   fun internalV1OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V1 Internal - for Tolgee Web application"
     )
   }
@@ -52,7 +53,7 @@ class OpenApiConfiguration {
   fun internalV2OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V2 Internal - for Tolgee Web application"
     )
   }
@@ -61,7 +62,7 @@ class OpenApiConfiguration {
   fun internalAllOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "All Internal - for Tolgee Web application"
     )
   }
@@ -70,7 +71,7 @@ class OpenApiConfiguration {
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "Accessible with API key"
     )
   }
@@ -79,7 +80,7 @@ class OpenApiConfiguration {
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V1 Accessible with API key"
     )
   }
@@ -88,7 +89,7 @@ class OpenApiConfiguration {
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(BILLING_EXCLUSION),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V2 Accessible with API key V2"
     )
   }

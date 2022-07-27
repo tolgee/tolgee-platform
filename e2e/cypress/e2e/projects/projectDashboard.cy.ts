@@ -1,5 +1,5 @@
 import { login } from '../../common/apiCalls/common';
-import { projectsDashboardData } from '../../common/apiCalls/testData/testData';
+import { projectListdData } from '../../common/apiCalls/testData/testData';
 import { createComment, resolveComment } from '../../common/comments';
 import { HOST } from '../../common/constants';
 import { createProject, enterProject } from '../../common/projects';
@@ -10,15 +10,15 @@ import { createTranslation } from '../../common/translations';
 
 describe('Project stats', () => {
   beforeEach(() => {
-    projectsDashboardData.clean();
-    projectsDashboardData.generate();
+    projectListdData.clean();
+    projectListdData.generate();
     login('projectListDashboardUser', 'admin');
     cy.visit(HOST);
     gcy('global-base-view-content').should('be.visible');
   });
 
   afterEach(() => {
-    projectsDashboardData.clean();
+    projectListdData.clean();
   });
 
   it('Activity', () => {
