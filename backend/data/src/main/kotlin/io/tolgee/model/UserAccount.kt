@@ -41,6 +41,7 @@ data class UserAccount(
   var password: String? = null,
 
   var name: String = "",
+
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER
 ) : AuditModel(), ModelWithAvatar {
@@ -75,7 +76,7 @@ data class UserAccount(
     password: String?,
     name: String?,
     permissions: MutableSet<Permission>?,
-    role: Role?,
+    role: Role = Role.USER,
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?

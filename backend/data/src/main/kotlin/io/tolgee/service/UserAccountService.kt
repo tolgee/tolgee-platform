@@ -74,8 +74,9 @@ class UserAccountService(
     return userAccount
   }
 
-  fun createUser(request: SignUpDto): UserAccount {
+  fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
     dtoToEntity(request).let {
+      it.role = role
       this.createUser(it)
       return it
     }
