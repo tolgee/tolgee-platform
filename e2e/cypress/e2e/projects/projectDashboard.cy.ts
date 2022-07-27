@@ -18,7 +18,7 @@ describe('Project stats', () => {
   });
 
   afterEach(() => {
-    projectsDashboardData.clean();
+    projectListdData.clean();
   });
 
   it('Activity', () => {

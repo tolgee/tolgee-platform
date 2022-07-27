@@ -16,13 +16,11 @@ import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.api.v2.hateoas.project.ProjectTransferOptionModel
 import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
-import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
-import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -35,9 +33,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -76,8 +72,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.math.BigDecimal
-import java.math.RoundingMode
 import javax.validation.Valid
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
@@ -107,7 +101,6 @@ class V2ProjectsController(
   private val autoTranslateService: AutoTranslationService,
   private val languageService: LanguageService,
   private val projectWithStatsFacade: ProjectWithStatsFacade
-
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
