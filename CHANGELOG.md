@@ -1,3 +1,17 @@
+## [2.32.4](https://github.com/tolgee/tolgee-platform/compare/v2.32.3...v2.32.4) (2022-07-12)
+
+
+### Bug Fixes
+
+* Stats on project list by word counts ([4516bc5](https://github.com/tolgee/tolgee-platform/commit/4516bc5dee17a5b0ab4cea0dae0e7a59de2ec4f4))
+
+## [2.32.3](https://github.com/tolgee/tolgee-platform/compare/v2.32.2...v2.32.3) (2022-07-08)
+
+
+### Bug Fixes
+
+* OpenApi docs ([a907741](https://github.com/tolgee/tolgee-platform/commit/a9077416bb9df6d91e9cf212603fdb2bc737b42d))
+
 ## [2.32.2](https://github.com/tolgee/tolgee-platform/compare/v2.32.1...v2.32.2) (2022-07-06)
 
 

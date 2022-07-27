@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModel
 import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -42,31 +40,19 @@ class ProjectStatsController(
   fun getProjectStats(@PathVariable projectId: Long): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectId)
     val languageStats = projectStatsService.getLanguageStats(projectId)
-
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
-    val baseStats = languageStats.find { it.languageId == baseLanguage?.id }
-      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
-
-    val nonBaseLanguages = languageStats.filter { it.languageId != baseStats.languageId }
-    val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
-
-    val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
-    val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
-    val allNonBaseTotalReviewedWords = nonBaseLanguages.sumOf { it.reviewedWords }
-
-    val translatedPercent = (allNonBaseTotalTranslatedWords.toDouble() / allNonBaseTotalBaseWords) * 100
-    val reviewedPercent = (allNonBaseTotalReviewedWords.toDouble() / allNonBaseTotalBaseWords) * 100
+    val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
     return ProjectStatsModel(
       projectId = projectStats.id,
       languageCount = languageStats.size,
       keyCount = projectStats.keyCount,
-      baseWordsCount = baseWordsCount,
-      translatedPercentage = translatedPercent,
-      reviewedPercentage = reviewedPercent,
+      baseWordsCount = totals.baseWordsCount,
+      translatedPercentage = totals.translatedPercent,
+      reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = getSortedLanguageStatModels(languageStats, baseStats, projectStats)
+      languageStats = getSortedLanguageStatModels(languageStats, totals.baseStats, projectStats)
     )
   }
 

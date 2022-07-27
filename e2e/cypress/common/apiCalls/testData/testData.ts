@@ -27,7 +27,7 @@ export const importTestData = {
     internalFetch('e2e-data/import/generate-with-long-text'),
 };
 
-export const projectsDashboardData = generateTestDataObject(
+export const projectListdData = generateTestDataObject(
   'projects-list-dashboard'
 );
 

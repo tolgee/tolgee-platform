@@ -22,6 +22,7 @@ import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -34,6 +35,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
@@ -74,6 +76,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.validation.Valid
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
@@ -88,8 +92,6 @@ class V2ProjectsController(
   private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectWithLanguagesView>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
-  private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
-  private val pagedWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
@@ -150,27 +152,27 @@ class V2ProjectsController(
     }
   }
 
-  @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     imageUploadService.validateIsImage(avatar)
     projectService.setAvatar(projectHolder.projectEntity, avatar.inputStream)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
-  @DeleteMapping("/{id:[0-9]+}/avatar")
+  @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
   fun removeAvatar(
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     projectService.removeAvatar(projectHolder.projectEntity)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")

@@ -72,8 +72,8 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
       )
       loginAsUser("hellouser")
       performAuthGet("/v2/organizations/${organization.id}/invitations")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.organizationInvitations").let { projectsNode ->
+        .andIsOk.andAssertThatJson {
+          node("_embedded.organizationInvitations").let { projectsNode ->
             projectsNode.isArray.hasSize(1)
             projectsNode.node("[0].id").isEqualTo(invitation.id)
           }
@@ -88,11 +88,11 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
       val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
-      performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson.let { it ->
-        it.node("code").isString.hasSize(50).satisfies {
+      performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson {
+        node("code").isString.hasSize(50).satisfies {
           invitationService.getInvitation(it) // it throws on not found
         }
-        it.node("type").isEqualTo("MEMBER")
+        node("type").isEqualTo("MEMBER")
       }
     }
   }
