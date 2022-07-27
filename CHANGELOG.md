@@ -1,3 +1,10 @@
+## [2.32.5](https://github.com/tolgee/tolgee-platform/compare/v2.32.4...v2.32.5) (2022-07-27)
+
+
+### Bug Fixes
+
+* Initial user should be admin, expose the user role ([39c38d3](https://github.com/tolgee/tolgee-platform/commit/39c38d3f86551ee09dcdf50d7ae44eabbb90a246))
+
 ## [2.32.4](https://github.com/tolgee/tolgee-platform/compare/v2.32.3...v2.32.4) (2022-07-12)
 
 

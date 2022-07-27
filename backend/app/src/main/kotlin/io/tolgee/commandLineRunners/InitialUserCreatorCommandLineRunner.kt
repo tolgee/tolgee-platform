@@ -2,6 +2,7 @@ package io.tolgee.commandLineRunners
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.model.UserAccount
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.UserAccountService
 import org.slf4j.LoggerFactory
@@ -27,7 +28,8 @@ class InitialUserCreatorCommandLineRunner(
       logger.info("Creating initial user...")
       val initialPassword = initialPasswordManager.initialPassword
       userAccountService.createUser(
-        SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
+        SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
+        UserAccount.Role.ADMIN
       )
     }
   }
