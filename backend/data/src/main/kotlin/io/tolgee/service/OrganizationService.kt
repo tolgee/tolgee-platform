@@ -84,21 +84,6 @@ class OrganizationService(
       this.validateSlugUniqueness(it)
     }
 
-  fun findPermittedPaged(
-    pageable: Pageable,
-    filterCurrentUserOwner: Boolean = false,
-    search: String? = null,
-    exceptOrganizationId: Long? = null
-  ): Page<OrganizationView> {
-    return organizationRepository.findAllPermitted(
-      userId = authenticationFacade.userAccount.id,
-      pageable = pageable,
-      roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
-      search = search,
-      exceptOrganizationId = exceptOrganizationId
-    )
-  }
-
   /**
    * Returns any organizations accessible by user.
    */
@@ -120,10 +105,29 @@ class OrganizationService(
   fun findPermittedPaged(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,
+    exceptOrganizationId: Long? = null
+  ): Page<OrganizationView> {
+    return findPermittedPaged(
+      pageable,
+      requestParamsDto.filterCurrentUserOwner,
+      requestParamsDto.search,
+      exceptOrganizationId
+    )
+  }
+
+  fun findPermittedPaged(
+    pageable: Pageable,
+    filterCurrentUserOwner: Boolean = false,
     search: String? = null,
     exceptOrganizationId: Long? = null
   ): Page<OrganizationView> {
-    return findPermittedPaged(pageable, requestParamsDto.filterCurrentUserOwner, search, exceptOrganizationId)
+    return organizationRepository.findAllPermitted(
+      userId = authenticationFacade.userAccount.id,
+      pageable = pageable,
+      roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
+      search = search,
+      exceptOrganizationId = exceptOrganizationId
+    )
   }
 
   fun get(id: Long): Organization {
