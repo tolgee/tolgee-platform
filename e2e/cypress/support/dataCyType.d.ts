@@ -150,6 +150,7 @@ declare namespace DataCy {
         "organization-switch" |
         "organization-switch-item" |
         "organization-switch-new" |
+        "organization-switch-search" |
         "permission-select-item" |
         "permissions-language-menu-button" |
         "permissions-languages-menu" |
@@ -258,7 +259,6 @@ declare namespace DataCy {
         "translations-view-table" |
         "translations-view-table-button" |
         "user-menu-logout" |
-        "user-menu-organization-item" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
         "user-menu-user-settings" |

@@ -11,7 +11,7 @@ import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { Usage } from 'tg.component/billing/Usage';
 
 const StyledWrapper = styled('div')`

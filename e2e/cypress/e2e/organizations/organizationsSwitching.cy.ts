@@ -47,7 +47,7 @@ describe('Organization Invitations', () => {
   it('switches organization correctly from user menu', () => {
     gcy('global-user-menu-button').click();
     gcy('user-menu-organization-switch').click();
-    gcy('user-menu-organization-item').contains('Microsoft').click();
+    gcy('organization-switch-item').contains('Microsoft').click();
 
     ensureOrganizationIsPreffered('Microsoft');
   });

@@ -1,26 +1,19 @@
 import { useRef, useState } from 'react';
-import { Box, Link, MenuItem, Popover, styled } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { OrganizationItem } from './OrganizationItem';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { OrganizationPopover } from './OrganizationPopover';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
 const StyledLink = styled(Link)`
   display: flex;
-`;
-
-const StyledOrgItem = styled('div')`
-  display: grid;
-  grid-auto-flow: column;
-  gap: 6px;
-  align-items: center;
 `;
 
 type Props = {
@@ -67,50 +60,9 @@ export const OrganizationSwitch: React.FC<Props> = ({
     },
   });
 
-  const OrganizationItem = ({ data }: { data: OrganizationModel }) => {
-    return (
-      <StyledOrgItem>
-        <Box>
-          <AvatarImg
-            key={0}
-            owner={{
-              name: data.name,
-              avatar: data.avatar,
-              type: 'ORG',
-              id: data.id,
-            }}
-            size={18}
-          />
-        </Box>
-        <Box>{data.name}</Box>
-      </StyledOrgItem>
-    );
-  };
-
   const selected = organizationsLoadable.data?._embedded?.organizations?.find(
     (org) => org.id === preferredOrganization.id
   );
-
-  const MenuItems = () => {
-    return (
-      <>
-        {organizationsLoadable.data?._embedded?.organizations
-          ?.filter((org) =>
-            ownedOnly ? org.currentUserRole === 'OWNER' : true
-          )
-          ?.map((item, idx) => (
-            <MenuItem
-              key={idx}
-              selected={item.id === selected?.id}
-              onClick={() => handleSelectOrganization(item)}
-              data-cy="organization-switch-item"
-            >
-              <OrganizationItem data={item} />
-            </MenuItem>
-          ))}
-      </>
-    );
-  };
 
   return (
     <>
@@ -126,34 +78,19 @@ export const OrganizationSwitch: React.FC<Props> = ({
           }}
           onClick={handleClick}
         >
-          {selected && <OrganizationItem data={selected} />}
+          {selected && <OrganizationItem data={selected} size={18} />}
           <ArrowDropDown fontSize={'small'} sx={{ marginRight: '-6px' }} />
         </StyledLink>
 
-        <Popover
-          elevation={1}
-          id="simple-menu"
-          anchorEl={anchorEl.current}
-          keepMounted
+        <OrganizationPopover
+          ownedOnly={ownedOnly}
           open={isOpen}
           onClose={handleClose}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-        >
-          <MenuItems />
-          <MenuItem
-            onClick={handleCreateNewOrg}
-            data-cy="organization-switch-new"
-          >
-            <T keyName="organizations_add_new" />
-          </MenuItem>
-        </Popover>
+          selected={preferredOrganization}
+          onSelect={handleSelectOrganization}
+          anchorEl={anchorEl.current!}
+          onAddNew={handleCreateNewOrg}
+        />
       </Box>
     </>
   );

@@ -126,7 +126,22 @@ export const switchToOrganization = (name: string): Chainable => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
-  cy.gcy('organization-switch-item').contains(name).click();
+  let found = false;
+
+  cy.gcy('organization-switch-item')
+    .each(($el) => {
+      if ($el.text().includes(name)) {
+        found = true;
+      }
+    })
+    .then(() => {
+      if (!found) {
+        cy.gcy('organization-switch-search').type(name);
+        waitForGlobalLoading();
+        return cy.waitForDom();
+      }
+    });
+  cy.gcy('organization-switch-item').contains(name).scrollIntoView().click();
   return assertSwitchedToOrganization(name);
 };
 
