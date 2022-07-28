@@ -41,7 +41,7 @@ class SecurityService @Autowired constructor(
       return
     }
     val usersPermission = getProjectPermission(projectId) ?: throw PermissionException()
-    if (requiredPermission.power > usersPermission.power || !isCurrentUserServerAdmin()) {
+    if (requiredPermission.power > usersPermission.power && !isCurrentUserServerAdmin()) {
       throw PermissionException()
     }
   }
