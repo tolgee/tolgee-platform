@@ -3,7 +3,7 @@ import { Box, IconButton, Slide, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { LightMode, DarkMode } from '@mui/icons-material';
+import { DarkMode, LightMode } from '@mui/icons-material';
 
 import { LocaleMenu } from '../../LocaleMenu';
 import { UserMenu } from '../../security/UserMenu/UserMenu';
@@ -11,6 +11,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
 import { useThemeContext } from '../../../ThemeProvider';
+import { T } from '@tolgee/react';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -54,11 +55,13 @@ const StyledTolgeeLink = styled(Link)`
   color: inherit;
   text-decoration: inherit;
   outline: 0;
+
   &:focus ${StyledLogoWrapper} {
     filter: brightness(95%);
   }
+
   ,
-  &:focus ${StyledLogoTitle} {
+&: focus ${StyledLogoTitle} {
     filter: brightness(95%);
   }
 `;
@@ -70,9 +73,13 @@ const StyledIconButton = styled(IconButton)`
 
 type Props = {
   autoHide?: boolean;
+  isAdminAccess?: boolean;
 };
 
-export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
+export const TopBar: React.FC<Props> = ({
+  autoHide = false,
+  isAdminAccess = false,
+}) => {
   const config = useConfig();
 
   const trigger = useTopBarHidden() && autoHide;
@@ -112,6 +119,18 @@ export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
                   )}
                 </Box>
               </StyledTolgeeLink>
+            </Box>
+            <Box
+              flexGrow={1}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              {isAdminAccess && (
+                <Box>
+                  <T>administration-access-message</T>
+                </Box>
+              )}
             </Box>
           </Box>
           <StyledIconButton onClick={toggleTheme} color="inherit">

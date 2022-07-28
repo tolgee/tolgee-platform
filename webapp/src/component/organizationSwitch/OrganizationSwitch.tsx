@@ -60,9 +60,13 @@ export const OrganizationSwitch: React.FC<Props> = ({
     },
   });
 
-  const selected = organizationsLoadable.data?._embedded?.organizations?.find(
-    (org) => org.id === preferredOrganization.id
-  );
+  const organizations = organizationsLoadable.data?._embedded?.organizations;
+  const organizationsContainPreferred =
+    organizations?.findIndex((o) => o.id === preferredOrganization.id) !== -1;
+
+  if (!organizationsContainPreferred) {
+    organizations.unshift(preferredOrganization);
+  }
 
   return (
     <>
@@ -78,7 +82,9 @@ export const OrganizationSwitch: React.FC<Props> = ({
           }}
           onClick={handleClick}
         >
-          {selected && <OrganizationItem data={selected} size={18} />}
+          {preferredOrganization && (
+            <OrganizationItem data={preferredOrganization} />
+          )}
           <ArrowDropDown fontSize={'small'} sx={{ marginRight: '-6px' }} />
         </StyledLink>
 

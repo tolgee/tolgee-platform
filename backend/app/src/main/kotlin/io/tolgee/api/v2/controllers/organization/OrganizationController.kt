@@ -36,7 +36,6 @@ import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.OrganizationStatsService
 import io.tolgee.service.UserAccountService
-import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -85,7 +84,6 @@ class OrganizationController(
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
-  private val userPreferencesService: UserPreferencesService
 ) {
   @PostMapping
   @Transactional
@@ -107,7 +105,7 @@ class OrganizationController(
   @Operation(summary = "Returns organization by ID")
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
-    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    organizationRoleService.checkUserCanView(organization.id)
     val roleType = organizationRoleService.findType(id)
     return OrganizationView.of(organization, roleType).toModel()
   }
@@ -116,7 +114,7 @@ class OrganizationController(
   @Operation(summary = "Returns organization by address part")
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
-    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    organizationRoleService.checkUserCanView(organization.id)
     val roleType = organizationRoleService.findType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }

@@ -10,7 +10,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { Usage } from 'tg.component/billing/Usage';
 
@@ -18,6 +18,7 @@ const StyledWrapper = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
   & .listWrapper > * > * + * {
     border-top: 1px solid ${({ theme }) => theme.palette.divider1.main};
   }
@@ -49,16 +50,22 @@ export const ProjectListView = () => {
   const isOrganizationOwner =
     preferredOrganization?.currentUserRole === 'OWNER';
 
+  const isAdmin = useIsAdmin();
+
+  const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
+
   return (
     <StyledWrapper>
-      <DashboardPage>
+      <DashboardPage isAdminAccess={isAdminAccess}>
         <BaseView
           windowTitle={t('projects_title')}
           onSearch={setSearch}
           containerMaxWidth="lg"
           allCentered
           addLinkTo={
-            isOrganizationOwner ? LINKS.PROJECT_ADD.build() : undefined
+            isOrganizationOwner || isAdminAccess
+              ? LINKS.PROJECT_ADD.build()
+              : undefined
           }
           hideChildrenOnLoading={false}
           navigation={[

@@ -20,6 +20,7 @@ import { BaseOrganizationSettingsView } from './components/BaseOrganizationSetti
 import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -51,7 +52,9 @@ export const OrganizationProfileView: FunctionComponent = () => {
     method: 'delete',
   });
 
-  const readOnly = organization.data?.currentUserRole !== 'OWNER';
+  const isAdmin = useIsAdmin();
+
+  const readOnly = organization.data?.currentUserRole !== 'OWNER' && !isAdmin;
   const notMember = !organization.data?.currentUserRole;
 
   const onSubmit = (values: OrganizationBody) => {

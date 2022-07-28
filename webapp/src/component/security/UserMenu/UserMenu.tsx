@@ -7,9 +7,9 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import {
   useConfig,
-  useUser,
-  usePreferredOrganization,
   useOrganizationUsage,
+  usePreferredOrganization,
+  useUser,
 } from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
@@ -188,6 +188,17 @@ export const UserMenu: React.FC = () => {
           </>
         )}
         <StyledDivider />
+
+        {user.globalServerRole == 'ADMIN' && (
+          <MenuItem
+            component={Link}
+            to={LINKS.ADMINISTRATION_ORGANIZATIONS.build()}
+            data-cy="user-menu-logout"
+          >
+            <T>user_menu_server_administration</T>
+          </MenuItem>
+        )}
+
         <MenuItem
           onClick={() => globalActions.logout.dispatch()}
           data-cy="user-menu-logout"

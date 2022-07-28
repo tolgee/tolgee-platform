@@ -46,7 +46,7 @@ class ProjectModelAssembler(
       computedPermissions = UserPermissionModel(
         type = permissionService.computeProjectPermissionType(
           view.organizationRole, view.organizationOwner?.basePermissions, view.directPermissions, null
-        ).type!!,
+        ).type,
         permittedLanguageIds = view.permittedLanguageIds
       )
     ).add(link).also { model ->

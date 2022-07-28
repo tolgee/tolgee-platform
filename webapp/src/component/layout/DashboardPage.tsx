@@ -9,30 +9,49 @@ const StyledAppBarSpacer = styled('div')(
 
 type Props = {
   topBarAutoHide?: boolean;
+  isAdminAccess?: boolean;
 };
 
 export const DashboardPage: FunctionComponent<Props> = ({
   children,
   topBarAutoHide,
+  isAdminAccess = false,
 }) => {
+  const AdminFrame = styled(Box)`
+    &:before {
+      content: '';
+      border: 5px solid rgba(255, 0, 0, 0.7);
+      position: fixed;
+      z-index: 1204;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+  `;
+
   return (
-    <Box
-      display="flex"
-      alignItems="stretch"
-      flexDirection="column"
-      flexGrow={1}
-    >
-      <TopBar autoHide={topBarAutoHide} />
-      <StyledAppBarSpacer />
+    <>
+      {isAdminAccess && <AdminFrame />}
       <Box
-        component="main"
-        position="relative"
         display="flex"
-        flexGrow="1"
-        justifyContent="stretch"
+        alignItems="stretch"
+        flexDirection="column"
+        flexGrow={1}
       >
-        {children}
+        <TopBar autoHide={topBarAutoHide} isAdminAccess={isAdminAccess} />
+        <StyledAppBarSpacer />
+        <Box
+          component="main"
+          position="relative"
+          display="flex"
+          flexGrow="1"
+          justifyContent="stretch"
+        >
+          {children}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };

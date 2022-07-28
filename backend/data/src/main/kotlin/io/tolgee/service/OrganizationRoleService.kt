@@ -26,18 +26,27 @@ class OrganizationRoleService(
   private val entityManager: EntityManager,
   private val organizationRepository: OrganizationRepository,
   @Lazy
-  private val userPreferencesService: UserPreferencesService
+  private val userPreferencesService: UserPreferencesService,
 ) {
 
-  fun checkUserCanView(userId: Long, organizationId: Long) {
-    if (canUserView(userId, organizationId)) return else throw PermissionException()
+  fun checkUserCanView(organizationId: Long) {
+    checkUserCanView(
+      authenticationFacade.userAccount.id,
+      organizationId,
+      authenticationFacade.userAccount.role == UserAccount.Role.ADMIN
+    )
+  }
+
+  private fun checkUserCanView(userId: Long, organizationId: Long, isAdmin: Boolean = false) {
+    if (canUserView(userId, organizationId) || isAdmin) return else throw PermissionException()
   }
 
   fun canUserView(userId: Long, organizationId: Long) =
     this.organizationRepository.canUserView(userId, organizationId)
 
   fun checkUserIsOwner(userId: Long, organizationId: Long) {
-    if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
+    val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
+    if (this.isUserOwner(userId, organizationId) || isServerAdmin) return else throw PermissionException()
   }
 
   fun checkUserIsOwner(organizationId: Long) {
@@ -45,7 +54,8 @@ class OrganizationRoleService(
   }
 
   fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
-    if (isUserMemberOrOwner(userId, organizationId)) {
+    val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
+    if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
       return
     }
     throw PermissionException()

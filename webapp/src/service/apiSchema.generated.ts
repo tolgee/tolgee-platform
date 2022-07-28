@@ -605,6 +605,9 @@ export interface paths {
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
   };
+  "/v2/administration/organizations": {
+    get: operations["getOrganizations"];
+  };
   "/api/public/verify_email/{userId}/{code}": {
     get: operations["verifyEmail"];
   };
@@ -766,7 +769,7 @@ export interface components {
       /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
       permittedLanguageIds?: number[];
       /** The type of permission. */
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
@@ -8361,6 +8364,39 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getOrganizations: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
       /** Bad Request */

@@ -17,6 +17,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.PermissionRepository
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -29,7 +30,8 @@ class PermissionService(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   @Lazy
-  private val userPreferencesService: UserPreferencesService
+  private val userPreferencesService: UserPreferencesService,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   @set:Autowired
   @set:Lazy

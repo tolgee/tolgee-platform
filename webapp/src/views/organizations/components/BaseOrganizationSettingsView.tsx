@@ -10,7 +10,11 @@ import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useIsAdmin,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { Usage } from 'tg.component/billing/Usage';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
@@ -32,6 +36,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   const t = useTranslate();
   const history = useHistory();
   const { preferredOrganization } = usePreferredOrganization();
+  const isAdmin = useIsAdmin();
 
   const handleOrganizationSelect = (organization: OrganizationModel) => {
     const redirectLink =
@@ -53,7 +58,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     },
   ];
 
-  if (preferredOrganization.currentUserRole === 'OWNER') {
+  if (preferredOrganization.currentUserRole === 'OWNER' || isAdmin) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
