@@ -52,4 +52,15 @@ For more information about configuration, visit
 
 ![integrate-server-loop](https://user-images.githubusercontent.com/18496315/137451291-1d59a8f5-ec2c-499c-960e-b4b811ce9858.gif)
 
+## Launching Tolgee Rewards
+ Contributed to Tolgee? Here is a big thank you from our community to you.
+ Claim your badge and showcase them with pride.
+ Let us inspire more folks !
+
+ ![Tolgee Badges](https://aviyel.com/assets/uploads/rewards/share/project/28/512/share.png)
+ ### **[Claim Now!](https://aviyel.com/projects/28/tolgee/rewards)**
+
+
+
+
 Let us know what you think! #feedbackwanted ❤️
