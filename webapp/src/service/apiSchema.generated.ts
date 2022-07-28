@@ -1706,6 +1706,7 @@ export interface components {
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
+      search?: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {

@@ -5,7 +5,7 @@ import { Link, LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';

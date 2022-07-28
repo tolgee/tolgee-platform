@@ -3,7 +3,7 @@ import { Usage } from 'tg.component/billing/Usage';
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 
