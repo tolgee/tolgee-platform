@@ -265,6 +265,10 @@ class UserAccountService(
     return userAccountRepository.findAllById(ids)
   }
 
+  fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {
+    return userAccountRepository.findAllPaged(search, pageable)
+  }
+
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
 }

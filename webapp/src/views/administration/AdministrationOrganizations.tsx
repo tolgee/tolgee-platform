@@ -5,6 +5,7 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import {
+  Box,
   Button,
   ListItem,
   ListItemSecondaryAction,
@@ -12,8 +13,9 @@ import {
 } from '@mui/material';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import ListItemText from '@mui/material/ListItemText';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { AdministrationNav } from './AdministrationNav';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -30,8 +32,6 @@ export const AdministrationOrganizations = () => {
   const [search, setSearch] = useState('');
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
-
-  const navigate = useLocation();
 
   const listPermitted = useApiQuery({
     url: '/v2/administration/organizations',
@@ -54,13 +54,15 @@ export const AdministrationOrganizations = () => {
     <StyledWrapper>
       <DashboardPage>
         <BaseView
-          windowTitle={t('projects_title')}
+          windowTitle={t('administration_organizations')}
           onSearch={setSearch}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
         >
+          <AdministrationNav />
+
           <PaginatedHateoasList
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}
@@ -69,22 +71,28 @@ export const AdministrationOrganizations = () => {
               <ListItem>
                 <ListItemText>{o.name}</ListItemText>
                 <ListItemSecondaryAction>
-                  <Button
-                    onClick={() => {
-                      updatePreferredOrganization(o);
-                      location.replace(LINKS.PROJECTS.build());
-                    }}
-                  >
-                    <T>administration_organization_projects</T>
-                  </Button>
-                  <Button
-                    component={Link}
-                    to={LINKS.ORGANIZATION_PROFILE.build({
-                      [PARAMS.ORGANIZATION_SLUG]: o.slug,
-                    })}
-                  >
-                    <T>administration_organizations_settings</T>
-                  </Button>
+                  <Box display="flex">
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        updatePreferredOrganization(o);
+                        location.replace(LINKS.PROJECTS.build());
+                      }}
+                    >
+                      <T>administration_organization_projects</T>
+                    </Button>
+                    <Box ml={1}>
+                      <Button
+                        variant="contained"
+                        component={Link}
+                        to={LINKS.ORGANIZATION_PROFILE.build({
+                          [PARAMS.ORGANIZATION_SLUG]: o.slug,
+                        })}
+                      >
+                        <T>administration_organizations_settings</T>
+                      </Button>
+                    </Box>
+                  </Box>
                 </ListItemSecondaryAction>
               </ListItem>
             )}

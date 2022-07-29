@@ -220,6 +220,9 @@ export interface paths {
     put: operations["update_4"];
     delete: operations["delete_9"];
   };
+  "/v2/administration/users/{userId}/set-role/{role}": {
+    put: operations["toggleAdmin"];
+  };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
     post: operations["create_12"];
@@ -604,6 +607,12 @@ export interface paths {
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
+  };
+  "/v2/administration/users": {
+    get: operations["getUsers"];
+  };
+  "/v2/administration/users/{userId}/generate-token": {
+    get: operations["generateUserToken"];
   };
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
@@ -1741,6 +1750,12 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+    };
+    PagedModelUserAccountModel: {
+      _embedded?: {
+        userAccountModels?: components["schemas"]["UserAccountModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     UserResponseDTO: {
       id?: number;
@@ -4182,6 +4197,30 @@ export interface operations {
     parameters: {
       path: {
         apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  toggleAdmin: {
+    parameters: {
+      path: {
+        userId: number;
+        role: "USER" | "ADMIN";
       };
     };
     responses: {
@@ -8364,6 +8403,66 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getUsers: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  generateUserToken: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
         };
       };
       /** Bad Request */

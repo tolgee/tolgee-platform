@@ -11,7 +11,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
 import { useThemeContext } from '../../../ThemeProvider';
-import { T } from '@tolgee/react';
+import { AdminInfo } from './AdminInfo';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -74,11 +74,13 @@ const StyledIconButton = styled(IconButton)`
 type Props = {
   autoHide?: boolean;
   isAdminAccess?: boolean;
+  isDebuggingCustomerAccount?: boolean;
 };
 
 export const TopBar: React.FC<Props> = ({
   autoHide = false,
   isAdminAccess = false,
+  isDebuggingCustomerAccount = false,
 }) => {
   const config = useConfig();
 
@@ -120,18 +122,10 @@ export const TopBar: React.FC<Props> = ({
                 </Box>
               </StyledTolgeeLink>
             </Box>
-            <Box
-              flexGrow={1}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              {isAdminAccess && (
-                <Box>
-                  <T>administration-access-message</T>
-                </Box>
-              )}
-            </Box>
+            <AdminInfo
+              adminAccess={isAdminAccess}
+              debuggingCustomerAccount={isDebuggingCustomerAccount}
+            />
           </Box>
           <StyledIconButton onClick={toggleTheme} color="inherit">
             {mode === 'dark' ? <LightMode /> : <DarkMode />}

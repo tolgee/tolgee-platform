@@ -2,6 +2,8 @@ import { FunctionComponent } from 'react';
 import { Box, styled } from '@mui/material';
 
 import { TopBar } from './TopBar/TopBar';
+import { useSelector } from 'react-redux';
+import { AppState } from 'tg.store/index';
 
 const StyledAppBarSpacer = styled('div')(
   ({ theme }) => theme.mixins.toolbar as any
@@ -31,16 +33,25 @@ export const DashboardPage: FunctionComponent<Props> = ({
     }
   `;
 
+  const security = useSelector((state: AppState) => state.global.security);
+
+  const isDebuggingCustomerAccount =
+    !!security.adminJwtToken && !!security.jwtToken;
+
   return (
     <>
-      {isAdminAccess && <AdminFrame />}
+      {(isAdminAccess || isDebuggingCustomerAccount) && <AdminFrame />}
       <Box
         display="flex"
         alignItems="stretch"
         flexDirection="column"
         flexGrow={1}
       >
-        <TopBar autoHide={topBarAutoHide} isAdminAccess={isAdminAccess} />
+        <TopBar
+          autoHide={topBarAutoHide}
+          isAdminAccess={isAdminAccess}
+          isDebuggingCustomerAccount={isDebuggingCustomerAccount}
+        />
         <StyledAppBarSpacer />
         <Box
           component="main"

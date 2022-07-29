@@ -119,10 +119,13 @@ export class LINKS {
    */
 
   static ADMINISTRATION = Link.ofRoot('administration');
+
   static ADMINISTRATION_ORGANIZATIONS = Link.ofParent(
     LINKS.ADMINISTRATION,
     'organizations'
   );
+
+  static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
   /**
    * Organizations
