@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
-private const val API_REPOSITORY_EXCLUDE = "!/api/repository/**"
-private const val BILLING_EXCLUSION = "!/v2/**/billing/**"
+private const val API_REPOSITORY_EXCLUDE = "/api/repository/**"
+private const val BILLING_EXCLUSION = "/v2/**/billing/**"
 
 @Configuration
 class OpenApiConfiguration {
@@ -97,7 +97,8 @@ class OpenApiConfiguration {
   @Bean
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
-      paths = arrayOf("/v2/**/billing/**", "!/v2/public/billing/webhook"),
+      paths = arrayOf("/v2/**/billing/**"),
+      excludedPaths = arrayOf("/v2/public/billing/webhook"),
       name = "V2 Billing"
     )
   }
@@ -115,7 +116,8 @@ class OpenApiConfiguration {
         operationHandlers[operation] = handlerMethod
         operation
       }
-      .pathsToMatch(*paths).pathsToExclude(*excludedPaths)
+      .pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
+      .pathsToMatch(*paths)
       .addOpenApiCustomiser { openApi ->
         openApi.paths.forEach { (path, value) ->
           value.readOperations().forEach { operation ->
@@ -188,7 +190,6 @@ class OpenApiConfiguration {
         }
         openApi.paths = newPaths
       }.handleLinks()
-      .pathsToExclude("/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
       .build()
   }
 
@@ -196,8 +197,8 @@ class OpenApiConfiguration {
     val operationHandlers = HashMap<Operation, HandlerMethod>()
 
     return GroupedOpenApi.builder().group(name)
-      .pathsToMatch(*paths)
       .pathsToExclude(*excludedPaths)
+      .pathsToMatch(*paths)
       .addOpenApiCustomiser { openApi ->
         val newPaths = Paths()
         openApi.paths.forEach { pathEntry ->

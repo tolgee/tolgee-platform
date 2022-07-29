@@ -10,7 +10,7 @@ import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { getPossibleValues } from './creditsUtil';
-import { StyledPlan, StyledContent } from '../StyledPlan';
+import { StyledContent, StyledPlan } from '../StyledPlan';
 import { PlanTitle } from '../PlanTitle';
 import { MtHint } from 'tg.component/billing/MtHint';
 
@@ -53,7 +53,7 @@ export const Credits: FC = () => {
   const organization = useOrganization();
 
   const pricesLoadable = useBillingApiQuery({
-    url: '/v2/billing/mt-credit-prices',
+    url: '/v2/public/billing/mt-credit-prices',
     method: 'get',
   });
 

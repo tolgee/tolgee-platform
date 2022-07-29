@@ -174,18 +174,6 @@ export interface paths {
   "/api/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole_1"];
   };
-  "/v2/organizations/{organizationId}/billing/update-subscription": {
-    put: operations["updateSubscription"];
-  };
-  "/v2/organizations/{organizationId}/billing/refresh-subscription": {
-    put: operations["refresh"];
-  };
-  "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
-    put: operations["prepareUpdateSubscription"];
-  };
-  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
-    put: operations["cancelSubscription"];
-  };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
   };
@@ -254,9 +242,6 @@ export interface paths {
   };
   "/api/address-part/generate-organization": {
     post: operations["generateOrganizationSlug_1"];
-  };
-  "/v2/public/billing/webhook": {
-    post: operations["webhook"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -341,12 +326,6 @@ export interface paths {
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
     get: operations["getKeyScreenshots_3"];
     post: operations["uploadScreenshot_1"];
-  };
-  "/v2/organizations/{organizationId}/billing/subscribe": {
-    post: operations["subscribe"];
-  };
-  "/v2/organizations/{organizationId}/billing/buy-more-credits": {
-    post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
   "/v2/organizations": {
     get: operations["getAll_7"];
@@ -558,26 +537,6 @@ export interface paths {
   "/api/organizations/{organizationId}/projects-with-stats": {
     get: operations["getAllWithStatistics_4"];
   };
-  "/v2/organizations/{organizationId}/billing/plans": {
-    get: operations["getPlans"];
-  };
-  "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
-    /** Returns organization invoices */
-    get: operations["getInvoicePdf"];
-  };
-  "/v2/organizations/{organizationId}/billing/invoices/": {
-    /** Returns organization invoices */
-    get: operations["getInvoices"];
-  };
-  "/v2/organizations/{organizationId}/billing/customer-portal": {
-    get: operations["goToCustomerPortal"];
-  };
-  "/v2/organizations/{organizationId}/billing/billing-info": {
-    get: operations["getBillingInfo"];
-  };
-  "/v2/organizations/{organizationId}/billing/active-plan": {
-    get: operations["getActivePlan"];
-  };
   "/v2/organizations/{id}/users": {
     get: operations["getAllUsers_1"];
   };
@@ -592,12 +551,6 @@ export interface paths {
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
-  };
-  "/v2/billing/plans": {
-    get: operations["getPlans_1"];
-  };
-  "/v2/billing/mt-credit-prices": {
-    get: operations["getMtCreditPrices"];
   };
   "/v2/api-keys/{keyId}": {
     get: operations["get_11"];
@@ -639,9 +592,6 @@ export interface paths {
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
-  };
-  "/api/repository/{projectId}/export/jsonZip": {
-    get: operations["doExportJsonZip_2"];
   };
   "/api/project/{projectId}/translations/{languages}": {
     get: operations["getTranslations_2"];
@@ -955,39 +905,6 @@ export interface components {
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
-    UpdateSubscriptionRequest: {
-      token: string;
-    };
-    ActivePlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      currentPeriodEnd?: number;
-      cancelAtPeriodEnd: boolean;
-      currentBillingPeriod?: "MONTHLY" | "YEARLY";
-      free: boolean;
-    };
-    UpdateSubscriptionPrepareRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-      period: "MONTHLY" | "YEARLY";
-    };
-    SubscriptionUpdatePreviewItem: {
-      description: string;
-      amount: number;
-      taxRate: number;
-    };
-    SubscriptionUpdatePreviewModel: {
-      items: components["schemas"]["SubscriptionUpdatePreviewItem"][];
-      total: number;
-      amountDue: number;
-      updateToken: string;
-      prorationDate: number;
-      endingBalance: number;
-    };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
       /** Name of invited user */
@@ -1162,21 +1079,6 @@ export interface components {
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
-    SubscribeRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-      period: "MONTHLY" | "YEARLY";
-    };
-    SubscribeModel: {
-      url: string;
-    };
-    BuyMoreCreditsRequest: {
-      priceId: number;
-      amount: number;
-    };
-    BuyMoreCreditsModel: {
-      url: string;
-    };
     UploadedImageModel: {
       id: number;
       filename: string;
@@ -1290,7 +1192,6 @@ export interface components {
       maxUploadFileSize: number;
       clientSentryDsn?: string;
       needsEmailVerification: boolean;
-      userCanCreateProjects: boolean;
       userCanCreateOrganizations: boolean;
       socket: components["schemas"]["SocketIo"];
       appName: string;
@@ -1659,51 +1560,6 @@ export interface components {
       /** How many translations are currently stored within your organization. */
       currentTranslations: number;
     };
-    CollectionModelPlanModel: {
-      _embedded?: {
-        plans?: components["schemas"]["PlanModel"][];
-      };
-    };
-    PlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      free: boolean;
-    };
-    InvoiceModel: {
-      id: number;
-      /** The number on the invoice */
-      number: string;
-      createdAt: number;
-      /** The Total amount with tax */
-      total: number;
-      /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
-      pdfReady: boolean;
-    };
-    PagedModelInvoiceModel: {
-      _embedded?: {
-        invoices?: components["schemas"]["InvoiceModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    GoToCustomerPortalModel: {
-      url: string;
-    };
-    BillingInfoModel: {
-      name?: string;
-      street?: string;
-      street2?: string;
-      city?: string;
-      zip?: string;
-      state?: string;
-      countryIso?: string;
-      registrationNo?: string;
-      vatNo?: string;
-      email?: string;
-    };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
         usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
@@ -1725,16 +1581,6 @@ export interface components {
         organizations?: components["schemas"]["OrganizationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelMtCreditsPriceModel: {
-      _embedded?: {
-        prices?: components["schemas"]["MtCreditsPriceModel"][];
-      };
-    };
-    MtCreditsPriceModel: {
-      id: number;
-      price: number;
-      amount: number;
     };
     ApiKeyWithLanguagesModel: {
       id: number;
@@ -3655,116 +3501,6 @@ export interface operations {
       };
     };
   };
-  updateSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
-      };
-    };
-  };
-  refresh: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  prepareUpdateSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SubscriptionUpdatePreviewModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionPrepareRequest"];
-      };
-    };
-  };
-  cancelSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   leaveOrganization: {
     parameters: {
       path: {
@@ -4605,38 +4341,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  webhook: {
-    parameters: {
-      header: {
-        "Stripe-Signature"?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
       };
     };
   };
@@ -5763,70 +5467,6 @@ export interface operations {
         "multipart/form-data": {
           screenshot: string;
         };
-      };
-    };
-  };
-  subscribe: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SubscribeModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SubscribeRequest"];
-      };
-    };
-  };
-  getBuyMoreCreditsCheckoutSessionUrl: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["BuyMoreCreditsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BuyMoreCreditsRequest"];
       };
     };
   };
@@ -7963,179 +7603,6 @@ export interface operations {
       };
     };
   };
-  getPlans: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Returns organization invoices */
-  getInvoicePdf: {
-    parameters: {
-      path: {
-        organizationId: number;
-        invoiceId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/pdf": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Returns organization invoices */
-  getInvoices: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelInvoiceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  goToCustomerPortal: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["GoToCustomerPortalModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getBillingInfo: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["BillingInfoModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getActivePlan: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   getAllUsers_1: {
     parameters: {
       path: {
@@ -8289,50 +7756,6 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getPlans_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getMtCreditPrices: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
-        };
-      };
       /** Bad Request */
       400: {
         content: {
@@ -8721,33 +8144,6 @@ export interface operations {
     };
   };
   doExportJsonZip: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/zip": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  doExportJsonZip_2: {
     parameters: {
       path: {
         projectId: number;
