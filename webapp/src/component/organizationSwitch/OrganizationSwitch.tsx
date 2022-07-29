@@ -65,7 +65,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
     organizations?.findIndex((o) => o.id === preferredOrganization.id) !== -1;
 
   if (!organizationsContainPreferred) {
-    organizations.unshift(preferredOrganization);
+    organizations?.unshift(preferredOrganization);
   }
 
   return (

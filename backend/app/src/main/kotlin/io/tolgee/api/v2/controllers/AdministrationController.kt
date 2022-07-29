@@ -71,7 +71,7 @@ class AdministrationController(
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])
   @Operation(summary = "")
-  fun toggleAdmin(
+  fun setRole(
     @PathVariable userId: Long,
     @PathVariable role: UserAccount.Role
   ) {
