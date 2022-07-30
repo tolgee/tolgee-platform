@@ -19,6 +19,7 @@ import { useDebounce } from 'use-debounce/lib';
 import { OrganizationItem } from './OrganizationItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -135,6 +136,10 @@ export const OrganizationPopover: React.FC<Props> = ({
     undefined
   );
 
+  const config = useConfig();
+  const canCreateOrganizations =
+    useIsAdmin() || config.userCanCreateOrganizations;
+
   useEffect(() => {
     if (organizationsLoadable.data && displaySearch === undefined) {
       setDisplaySearch(
@@ -225,16 +230,18 @@ export const OrganizationPopover: React.FC<Props> = ({
                   <StyledHeading>{t('organizations_title')}</StyledHeading>
                 )}
 
-                <Tooltip title={t('organizations_add_new')}>
-                  <IconButton
-                    size="small"
-                    onClick={onAddNew}
-                    sx={{ ml: 0.5 }}
-                    data-cy="organization-switch-new"
-                  >
-                    <Add />
-                  </IconButton>
-                </Tooltip>
+                {canCreateOrganizations && (
+                  <Tooltip title={t('organizations_add_new')}>
+                    <IconButton
+                      size="small"
+                      onClick={onAddNew}
+                      sx={{ ml: 0.5 }}
+                      data-cy="organization-switch-new"
+                    >
+                      <Add />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </StyledInputWrapper>
             )}
           />

@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import ListItemText from '@mui/material/ListItemText';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationNav } from './AdministrationNav';
 
@@ -48,6 +48,7 @@ export const AdministrationOrganizations = () => {
     },
   });
 
+  const history = useHistory();
   const t = useTranslate();
 
   return (
@@ -68,21 +69,23 @@ export const AdministrationOrganizations = () => {
             onPageChange={setPage}
             loadable={listPermitted}
             renderItem={(o) => (
-              <ListItem>
+              <ListItem data-cy="administration-organizations-list-item">
                 <ListItemText>{o.name}</ListItemText>
                 <ListItemSecondaryAction>
                   <Box display="flex">
                     <Button
+                      data-cy="administration-organizations-projects-button"
                       variant="contained"
                       onClick={() => {
                         updatePreferredOrganization(o);
-                        location.replace(LINKS.PROJECTS.build());
+                        history.push(LINKS.PROJECTS.build());
                       }}
                     >
                       <T>administration_organization_projects</T>
                     </Button>
                     <Box ml={1}>
                       <Button
+                        data-cy="administration-organizations-settings-button"
                         variant="contained"
                         component={Link}
                         to={LINKS.ORGANIZATION_PROFILE.build({

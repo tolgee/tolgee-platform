@@ -3,6 +3,18 @@ declare namespace DataCy {
         "activity-compact" |
         "activity-detail" |
         "add-box" |
+        "administration-access-message" |
+        "administration-debug-customer-account-message" |
+        "administration-debug-customer-exit-button" |
+        "administration-frame" |
+        "administration-organizations-list-item" |
+        "administration-organizations-projects-button" |
+        "administration-organizations-settings-button" |
+        "administration-tabs-organizations" |
+        "administration-tabs-users" |
+        "administration-user-debug-account" |
+        "administration-user-role-select" |
+        "administration-users-list-item" |
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
         "api-keys-project-select-item" |
@@ -261,6 +273,7 @@ declare namespace DataCy {
         "user-menu-logout" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
+        "user-menu-server-administration" |
         "user-menu-user-settings" |
         "user-profile"
 }

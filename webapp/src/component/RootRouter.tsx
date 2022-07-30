@@ -1,4 +1,4 @@
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { PrivateRoute } from './common/PrivateRoute';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
@@ -49,40 +49,38 @@ const RecaptchaProvider: FC = (props) => {
 };
 
 export const RootRouter = () => (
-  <BrowserRouter>
-    <Switch>
-      <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-        <PasswordResetView />
-      </Route>
-      <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-        <PasswordResetSetView />
-      </Route>
-      <Route exact path={LINKS.SIGN_UP.template}>
-        <RecaptchaProvider>
-          <SignUpView />
-        </RecaptchaProvider>
-      </Route>
-      <Route path={LINKS.LOGIN.template}>
-        <LoginRouter />
-      </Route>
-      <Route path={LINKS.ACCEPT_INVITATION.template}>
-        <AcceptInvitationHandler />
-      </Route>
-      <PrivateRoute exact path={LINKS.ROOT.template}>
-        <Redirect to={LINKS.PROJECTS.template} />
-      </PrivateRoute>
-      <PrivateRoute path={LINKS.PROJECTS.template}>
-        <ProjectsRouter />
-      </PrivateRoute>
-      <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-        <UserSettingsRouter />
-      </PrivateRoute>
-      <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-        <OrganizationsRouter />
-      </PrivateRoute>
-      <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
-        <Administration />
-      </PrivateRoute>
-    </Switch>
-  </BrowserRouter>
+  <Switch>
+    <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
+      <PasswordResetView />
+    </Route>
+    <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
+      <PasswordResetSetView />
+    </Route>
+    <Route exact path={LINKS.SIGN_UP.template}>
+      <RecaptchaProvider>
+        <SignUpView />
+      </RecaptchaProvider>
+    </Route>
+    <Route path={LINKS.LOGIN.template}>
+      <LoginRouter />
+    </Route>
+    <Route path={LINKS.ACCEPT_INVITATION.template}>
+      <AcceptInvitationHandler />
+    </Route>
+    <PrivateRoute exact path={LINKS.ROOT.template}>
+      <Redirect to={LINKS.PROJECTS.template} />
+    </PrivateRoute>
+    <PrivateRoute path={LINKS.PROJECTS.template}>
+      <ProjectsRouter />
+    </PrivateRoute>
+    <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+      <UserSettingsRouter />
+    </PrivateRoute>
+    <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+      <OrganizationsRouter />
+    </PrivateRoute>
+    <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
+      <Administration />
+    </PrivateRoute>
+  </Switch>
 );

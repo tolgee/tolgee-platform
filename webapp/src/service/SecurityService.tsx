@@ -49,6 +49,7 @@ export class SecurityService {
   logout() {
     this.removeAfterLoginLink();
     this.tokenService.disposeToken();
+    this.tokenService.disposeAdminToken();
   }
 
   async login(v: { username: string; password: string }): Promise<TokenDTO> {

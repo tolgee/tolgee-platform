@@ -109,13 +109,14 @@ export const AdministrationUsers = () => {
             onPageChange={setPage}
             loadable={listPermitted}
             renderItem={(u) => (
-              <ListItem>
+              <ListItem data-cy="administration-users-list-item">
                 <ListItemText>
                   {u.name} | {u.username}
                 </ListItemText>
                 <ListItemSecondaryAction>
                   <Box display="flex" justifyContent="center">
                     <Button
+                      data-cy="administration-user-debug-account"
                       size="small"
                       variant="contained"
                       color="error"
@@ -135,6 +136,7 @@ export const AdministrationUsers = () => {
                     </Button>
                     <Box display="flex" ml={1}>
                       <Select
+                        data-cy="administration-user-role-select"
                         disabled={currentUser?.id === u.id}
                         size="small"
                         value={u.globalServerRole}

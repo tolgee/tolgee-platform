@@ -237,5 +237,7 @@ const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
 const createNewApiKey = () => {
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
+  cy.waitForDom();
+  cy.screenshot();
   cy.gcy('global-form-save-button').click();
 };

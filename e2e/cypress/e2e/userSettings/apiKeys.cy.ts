@@ -37,14 +37,14 @@ describe('Api keys', () => {
       cy.wrap(null).then(() => deleteProject(project.id));
     });
 
-    it('Will add an api key', () => {
+    it('Adds an API key', () => {
       create('Test', ['translations.view', 'translations.edit']);
       assertMessage('API key successfully created');
       cy.contains('translations.view').should('be.visible');
       cy.contains('translations.edit').should('be.visible');
     });
 
-    it('Will delete an api key', () => {
+    it('Deletes an api key', () => {
       createApiKey({
         projectId: project.id,
         scopes: ['keys.edit', 'keys.edit', 'translations.view'],
@@ -56,7 +56,7 @@ describe('Api keys', () => {
       });
     });
 
-    it('Will edit an api key', () => {
+    it('Edits an api key', () => {
       createApiKey({
         projectId: project.id,
         scopes: ['keys.edit', 'keys.edit', 'translations.view'],
@@ -74,7 +74,7 @@ describe('Api keys', () => {
     });
   });
 
-  it('will create API Key for user with lower permissions', () => {
+  it('Creates API Key for user with lower permissions', () => {
     projectTestData.clean();
     projectTestData.generate();
     login('cukrberg@facebook.com', 'admin');
@@ -95,14 +95,18 @@ const visit = () => {
 
 const create = (project: string, scopes: Scope[]) => {
   clickAdd();
+  cy.waitForDom();
   cy.gcy('global-form-select').click();
+  cy.screenshot();
   getPopover().contains(project).click();
   const toRemove = new Set(allScopes);
   scopes.forEach((s) => toRemove.delete(s));
-  toRemove.forEach((s) =>
-    cy.contains('Generate API key').xpath(getClosestContainingText(s)).click()
-  );
+  toRemove.forEach((s) => {
+    cy.contains('Generate API key').xpath(getClosestContainingText(s)).click();
+  });
+  cy.screenshot();
   cy.xpath(getAnyContainingText('Save', 'button')).click();
+  cy.screenshot();
 };
 
 const del = (key) => {

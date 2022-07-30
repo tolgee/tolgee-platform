@@ -20,17 +20,14 @@ export const DashboardPage: FunctionComponent<Props> = ({
   isAdminAccess = false,
 }) => {
   const AdminFrame = styled(Box)`
-    &:before {
-      content: '';
-      border: 5px solid rgba(255, 0, 0, 0.7);
-      position: fixed;
-      z-index: 1204;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-    }
+    border: 5px solid rgba(255, 0, 0, 0.7);
+    position: fixed;
+    z-index: 1204;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
   `;
 
   const security = useSelector((state: AppState) => state.global.security);
@@ -40,7 +37,9 @@ export const DashboardPage: FunctionComponent<Props> = ({
 
   return (
     <>
-      {(isAdminAccess || isDebuggingCustomerAccount) && <AdminFrame />}
+      {(isAdminAccess || isDebuggingCustomerAccount) && (
+        <AdminFrame data-cy="administration-frame" />
+      )}
       <Box
         display="flex"
         alignItems="stretch"

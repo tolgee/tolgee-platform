@@ -26,7 +26,7 @@ export const AdminInfo = (props: {
       justifyContent="center"
     >
       {props.adminAccess && (
-        <Box>
+        <Box data-cy="administration-access-message">
           <T>administration-access-message</T>
         </Box>
       )}
@@ -36,12 +36,14 @@ export const AdminInfo = (props: {
           flexGrow={1}
           alignItems="center"
           justifyContent="center"
+          data-cy="administration-debug-customer-account-message"
         >
           <Box>
             <T>administration-debugging-customer-account-message</T>
           </Box>
           <Box ml={2}>
             <StyledExitDebugButton
+              data-cy="administration-debug-customer-exit-button"
               size="small"
               variant="outlined"
               onClick={() => {
