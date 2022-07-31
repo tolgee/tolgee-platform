@@ -37,7 +37,7 @@ describe('Api keys', () => {
       cy.wrap(null).then(() => deleteProject(project.id));
     });
 
-    it('Adds an API key', () => {
+    it('Adds an API key', { retries: { runMode: 10 } }, () => {
       create('Test', ['translations.view', 'translations.edit']);
       assertMessage('API key successfully created');
       cy.contains('translations.view').should('be.visible');
