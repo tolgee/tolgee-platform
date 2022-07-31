@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import { login } from '../../common/apiCalls/common';
+import { login, setProperty } from '../../common/apiCalls/common';
 import {
   assertMessage,
   confirmStandard,
@@ -25,6 +25,7 @@ describe('Administration', () => {
 
   afterEach(() => {
     administrationTestData.clean();
+    setProperty('authentication.userCanCreateOrganizations', true);
   });
 
   it('gets to the administration via menu', () => {
@@ -68,6 +69,20 @@ describe('Administration', () => {
       .find('div')
       .should('have.attr', 'aria-disabled', 'true');
   });
+
+  it('only admin can add organization when userCanCreateOrganizations = false', () => {
+    login('user@user.com');
+    setProperty('authentication.userCanCreateOrganizations', false);
+    visit();
+    assertOrganizationAddButtonNotVisible();
+    login('admin@admin.com');
+    visit();
+    assertOrganizationAddButtonVisible();
+    setProperty('authentication.userCanCreateOrganizations', true);
+    login('user@user.com');
+    visit();
+    assertOrganizationAddButtonVisible();
+  });
 });
 
 const visit = () => {
@@ -94,4 +109,14 @@ function changeUserRole(user: string, role: 'Admin' | 'User') {
   selectInSelect(getUserRoleSelect(user), role);
   confirmStandard();
   assertMessage('Role changed');
+}
+
+function assertOrganizationAddButtonVisible() {
+  gcy('organization-switch').click();
+  gcy('organization-switch-new').should('be.visible');
+}
+
+function assertOrganizationAddButtonNotVisible() {
+  gcy('organization-switch').click();
+  gcy('organization-switch-new').should('not.exist');
 }

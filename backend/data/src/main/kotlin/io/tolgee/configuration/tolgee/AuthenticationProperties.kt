@@ -28,8 +28,8 @@ class AuthenticationProperties(
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
   var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
+  @E2eRuntimeMutable
   var userCanCreateOrganizations: Boolean = true
-
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {
