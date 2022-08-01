@@ -128,7 +128,7 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
     implementation("com.corundumstudio.socketio:netty-socketio:$NETTY_SOCKET_IO_VERSION")
-    implementation("org.redisson:redisson-spring-boot-starter:3.16.1")
+    implementation("org.redisson:redisson-spring-boot-starter:3.17.5")
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
 
