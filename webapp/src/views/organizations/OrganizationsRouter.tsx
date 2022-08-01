@@ -18,7 +18,8 @@ const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
   const config = useConfig();
   const isAdmin = useIsAdmin();
-  const isAdminAccess = organization?.currentUserRole != 'OWNER' && isAdmin;
+  const isAdminAccess =
+    organization && organization?.currentUserRole !== 'OWNER' && isAdmin;
 
   return (
     <DashboardPage isAdminAccess={isAdminAccess}>
