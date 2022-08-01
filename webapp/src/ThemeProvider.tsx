@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
@@ -144,6 +144,7 @@ const getTheme = (mode: PaletteMode) => {
       emphasis: c.emphasis,
       editor: c.editor,
       billingProgress: c.billingProgress,
+      billingPlan: createColor(c.billingPlan),
     },
     mixins: {
       toolbar: {

@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 
 export const StyledPlan = styled('div')`
   position: relative;
-  background: ${({ theme }) => theme.palette.emphasis[50]};
+  background: ${({ theme }) => theme.palette.billingPlan.main};
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-radius: 20px;
   overflow: hidden;

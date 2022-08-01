@@ -66,6 +66,7 @@ export const colors = {
       low: '#E80000',
       sufficient: '#17AD18',
     } as BillingProgress,
+    billingPlan: '#F8F8F8',
   },
   dark: {
     white: '#dddddd',
@@ -112,5 +113,6 @@ export const colors = {
       low: '#ca0000',
       sufficient: '#1e991e',
     } as BillingProgress,
+    billingPlan: '#233043',
   },
 } as const;
