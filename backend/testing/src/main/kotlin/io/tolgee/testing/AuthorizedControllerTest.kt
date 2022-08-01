@@ -73,15 +73,15 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   }
 
   override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performGet(url)
+    return requestPerformer.performGet(url, httpHeaders)
   }
 
   override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performPost(url, content)
+    return requestPerformer.performPost(url, content, httpHeaders)
   }
 
   override fun performPut(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performPut(url, content)
+    return requestPerformer.performPut(url, content, httpHeaders)
   }
 
   override fun performAuthPut(url: String, content: Any?): ResultActions {

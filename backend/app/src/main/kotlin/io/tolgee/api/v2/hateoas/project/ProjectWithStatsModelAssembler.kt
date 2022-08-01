@@ -5,7 +5,6 @@ import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
-import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.service.AvatarService
 import io.tolgee.service.PermissionService
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProjectWithStatsModelAssembler(
-  private val userAccountModelAssembler: UserAccountModelAssembler,
   private val permissionService: PermissionService,
   private val projectService: ProjectService,
   private val languageModelAssembler: LanguageModelAssembler,
@@ -46,7 +44,7 @@ class ProjectWithStatsModelAssembler(
       computedPermissions = UserPermissionModel(
         type = permissionService.computeProjectPermissionType(
           view.organizationRole, view.organizationOwner?.basePermissions, view.directPermissions, null
-        ).type!!,
+        ).type,
         permittedLanguageIds = view.permittedLanguageIds
       ),
       stats = view.stats,

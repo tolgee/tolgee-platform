@@ -15,6 +15,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.UserAccount
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -61,8 +62,10 @@ class V2ApiKeyController(
   @Operation(summary = "Creates new API key with provided scopes")
   fun create(@RequestBody @Valid dto: CreateApiKeyDto): ApiKeyModel {
     val project = projectService.get(dto.projectId)
-    securityService.checkApiKeyScopes(dto.scopes, project)
-    return apiKeyService.create(authenticationFacade.userAccountEntity, dto.scopes, project!!).let {
+    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+      securityService.checkApiKeyScopes(dto.scopes, project)
+    }
+    return apiKeyService.create(authenticationFacade.userAccountEntity, dto.scopes, project).let {
       apiKeyModelAssembler.toModel(it)
     }
   }

@@ -23,7 +23,6 @@ class PublicConfigurationDTO(
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = properties.sentry.clientDsn
   val needsEmailVerification = properties.authentication.needsEmailVerification
-  val userCanCreateProjects = properties.authentication.userCanCreateProjects
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
   val socket = SocketIo(
     enabled = properties.socketIo.enabled,

@@ -122,25 +122,23 @@ export const getInputByName = (name: string): Chainable => {
   return cy.xpath(getInput(name));
 };
 
+export const switchToOrganizationWithSearch = (name: string): Chainable => {
+  cy.gcy('organization-switch').click();
+  cy.gcy('organization-switch-search').type(name);
+  cy.waitForDom();
+
+  gcy('organization-switch-item')
+    .should('have.length', 1)
+    .contains(name)
+    .scrollIntoView()
+    .click();
+  return assertSwitchedToOrganization(name);
+};
+
 export const switchToOrganization = (name: string): Chainable => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
-  let found = false;
-
-  cy.gcy('organization-switch-item')
-    .each(($el) => {
-      if ($el.text().includes(name)) {
-        found = true;
-      }
-    })
-    .then(() => {
-      if (!found) {
-        cy.gcy('organization-switch-search').type(name);
-        waitForGlobalLoading();
-        return cy.waitForDom();
-      }
-    });
   cy.gcy('organization-switch-item').contains(name).scrollIntoView().click();
   return assertSwitchedToOrganization(name);
 };

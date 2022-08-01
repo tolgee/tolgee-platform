@@ -238,4 +238,8 @@ class OrganizationService(
   fun saveAll(organizations: List<Organization>) {
     organizationRepository.saveAll(organizations)
   }
+
+  fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
+    return organizationRepository.findAllViews(pageable, search, userId)
+  }
 }

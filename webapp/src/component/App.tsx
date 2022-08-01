@@ -1,14 +1,11 @@
 import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
-import { Redirect, Route, Switch, BrowserRouter } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type API from '@openreplay/tracker';
-
-import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import {
   useConfig,
@@ -16,46 +13,17 @@ import {
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
-import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
 import { AppState } from '../store';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { GlobalActions } from '../store/global/GlobalActions';
 import { RedirectionActions } from '../store/global/RedirectionActions';
-import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
-import { ProjectsRouter } from '../views/projects/ProjectsRouter';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
 import { useGlobalLoading } from './GlobalLoading';
 import { PlanLimitPopover } from './billing/PlanLimitPopover';
-
-const LoginRouter = React.lazy(
-  () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
-);
-const SignUpView = React.lazy(
-  () => import(/* webpackChunkName: "sign-up-view" */ './security/SignUpView')
-);
-
-const PasswordResetSetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-set-view" */ './security/ResetPasswordSetView'
-    )
-);
-const PasswordResetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-view" */ './security/ResetPasswordView'
-    )
-);
-const AcceptInvitationHandler = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "accept-invitation-handler" */ './security/AcceptInvitationHandler'
-    )
-);
+import { RootRouter } from './RootRouter';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -186,19 +154,6 @@ const GlobalLimitPopover = () => {
   ) : null;
 };
 
-const RecaptchaProvider: FC = (props) => {
-  const config = useConfig();
-  if (!config.recaptchaSiteKey) {
-    return <>{props.children}</>;
-  }
-
-  return (
-    <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
-      {props.children}
-    </GoogleReCaptchaProvider>
-  );
-};
-
 const Head: FC = () => {
   const theme = useTheme();
 
@@ -219,46 +174,14 @@ export class App extends React.Component {
     return (
       <>
         <Head />
-        <BrowserRouter>
-          <Redirection />
-          <Chatwoot />
-          <MandatoryDataProvider>
-            <Switch>
-              <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-                <PasswordResetView />
-              </Route>
-              <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-                <PasswordResetSetView />
-              </Route>
-              <Route exact path={LINKS.SIGN_UP.template}>
-                <RecaptchaProvider>
-                  <SignUpView />
-                </RecaptchaProvider>
-              </Route>
-              <Route path={LINKS.LOGIN.template}>
-                <LoginRouter />
-              </Route>
-              <Route path={LINKS.ACCEPT_INVITATION.template}>
-                <AcceptInvitationHandler />
-              </Route>
-              <PrivateRoute exact path={LINKS.ROOT.template}>
-                <Redirect to={LINKS.PROJECTS.template} />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.PROJECTS.template}>
-                <ProjectsRouter />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-                <UserSettingsRouter />
-              </PrivateRoute>
-              <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-                <OrganizationsRouter />
-              </PrivateRoute>
-            </Switch>
-            <SnackBar />
-            <GlobalConfirmation />
-            <GlobalLimitPopover />
-          </MandatoryDataProvider>
-        </BrowserRouter>
+        <Redirection />
+        <Chatwoot />
+        <MandatoryDataProvider>
+          <RootRouter />
+          <SnackBar />
+          <GlobalConfirmation />
+          <GlobalLimitPopover />
+        </MandatoryDataProvider>
       </>
     );
   }

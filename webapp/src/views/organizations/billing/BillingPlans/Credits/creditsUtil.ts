@@ -37,8 +37,7 @@ export const getPossibleValues = (
     }
     const lowestTear = sortedPrices[0];
     const lowestTearUnitPrice = lowestTear.price / lowestTear.amount;
-    const priceWithLowerTear = getCurrentAmount() * lowestTearUnitPrice;
-    return priceWithLowerTear;
+    return getCurrentAmount() * lowestTearUnitPrice;
   };
 
   while (getCurrentAmount() <= max) {

@@ -67,3 +67,5 @@ export const projectTransferringTestData = generateTestDataObject(
 );
 
 export const avatarTestData = generateTestDataObject('avatars');
+
+export const administrationTestData = generateTestDataObject('administration');

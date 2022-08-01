@@ -72,4 +72,14 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """
   )
   fun findAllWithoutAnyOrganizationIds(): List<Long>
+
+  @Query(
+    """
+    from UserAccount userAccount
+    where ((lower(userAccount.name)
+      like lower(concat('%', cast(:search as text),'%')) 
+      or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+  """
+  )
+  fun findAllPaged(search: String?, pageable: Pageable): Page<UserAccount>
 }

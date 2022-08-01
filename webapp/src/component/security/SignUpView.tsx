@@ -146,11 +146,18 @@ const SignUpView: FunctionComponent = () => {
               <SetPasswordFields />
               <Box mt={2} mb={3}>
                 <Typography variant="body2">
-                  By clicking Submit, I agree that I have read and accepted the
-                  Tolgee{' '}
-                  <Link href="https://tolgee.io/docs/terms_of_use">
-                    Terms of Use
-                  </Link>
+                  <T
+                    parameters={{
+                      Link(content) {
+                        return (
+                          <Link href="https://tolgee.io/docs/terms_of_use">
+                            {content}
+                          </Link>
+                        );
+                      },
+                    }}
+                    keyName="sign-up-terms-and-conditions-message"
+                  />
                 </Typography>
               </Box>
             </StandardForm>

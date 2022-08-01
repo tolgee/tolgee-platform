@@ -115,6 +115,19 @@ export class LINKS {
   static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');
 
   /**
+   * Administration
+   */
+
+  static ADMINISTRATION = Link.ofRoot('administration');
+
+  static ADMINISTRATION_ORGANIZATIONS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'organizations'
+  );
+
+  static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
+
+  /**
    * Organizations
    */
   static ORGANIZATIONS = Link.ofRoot('organizations');

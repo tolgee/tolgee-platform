@@ -1,5 +1,6 @@
 import { ProjectPermissionType } from '../service/response.types';
 import { useProject } from './useProject';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 export class ProjectPermissions {
   private static readonly ORDERED_PERMISSIONS = [
@@ -11,7 +12,8 @@ export class ProjectPermissions {
 
   constructor(
     private activePermission: ProjectPermissionType,
-    private permittedLanguages: number[] | undefined
+    private permittedLanguages: number[] | undefined,
+    private isAdmin: boolean
   ) {}
 
   canEditLanguage(language: number | undefined) {
@@ -30,6 +32,9 @@ export class ProjectPermissions {
   }
 
   satisfiesPermission(type: ProjectPermissionType) {
+    if (this.isAdmin) {
+      return true;
+    }
     const requiredPower = ProjectPermissions.ORDERED_PERMISSIONS.findIndex(
       (p) => p === type
     );
@@ -42,6 +47,7 @@ export class ProjectPermissions {
 
 export const useProjectPermissions = (): ProjectPermissions => {
   const project = useProject();
+  const isAdmin = useIsAdmin();
   const type =
     ProjectPermissionType[
       project.computedPermissions.type as NonNullable<
@@ -50,6 +56,7 @@ export const useProjectPermissions = (): ProjectPermissions => {
     ];
   return new ProjectPermissions(
     type,
-    project.computedPermissions.permittedLanguageIds
+    project.computedPermissions.permittedLanguageIds,
+    isAdmin
   );
 };

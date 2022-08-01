@@ -4,8 +4,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
   styled,
+  Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
@@ -48,7 +48,7 @@ export const PermissionsMenu: FunctionComponent<{
 
   if (props.minPermissions) {
     types = types.filter((k) =>
-      new ProjectPermissions(k as any, undefined).satisfiesPermission(
+      new ProjectPermissions(k as any, undefined, false).satisfiesPermission(
         props.minPermissions as any
       )
     );

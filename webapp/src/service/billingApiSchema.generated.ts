@@ -48,10 +48,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/active-plan": {
     get: operations["getActivePlan"];
   };
-  "/v2/billing/plans": {
+  "/v2/public/billing/plans": {
     get: operations["getPlans_1"];
   };
-  "/v2/billing/mt-credit-prices": {
+  "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
 }

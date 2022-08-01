@@ -50,7 +50,7 @@ class UserPreferencesController(
     @PathVariable organizationId: Long
   ) {
     val organization = organizationService.get(organizationId)
-    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    organizationRoleService.checkUserCanView(organization.id)
     userPreferencesService.setPreferredOrganization(organization, authenticationFacade.userAccountEntity)
   }
 }

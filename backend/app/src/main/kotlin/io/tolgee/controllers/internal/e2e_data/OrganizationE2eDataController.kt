@@ -62,6 +62,11 @@ class OrganizationE2eDataController(
       organizationService.find(it.dto.slug!!)?.let { organization ->
         organizationService.delete(organization.id)
       }
+      userAccountService.find(it.owner.email)?.let { userAccount ->
+        if (userAccount.name != "admin") {
+          userAccountService.delete(userAccount)
+        }
+      }
     }
   }
 

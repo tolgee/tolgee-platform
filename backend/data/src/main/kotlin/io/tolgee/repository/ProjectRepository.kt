@@ -22,7 +22,6 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
-        where (p is not null or role is not null)
         """
   }
 
@@ -38,7 +37,9 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
   @Query(
-    """$BASE_VIEW_QUERY 
+    """$BASE_VIEW_QUERY        
+        left join UserAccount ua on ua.id = :userAccountId
+        where (p is not null or role is not null or ua.role = 'ADMIN')
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
@@ -53,11 +54,14 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     organizationId: Long? = null
   ): Page<ProjectView>
 
-  fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
+  fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 
   @Query(
     """
-      $BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
+      $BASE_VIEW_QUERY 
+      left join UserAccount ua on ua.id = :userAccountId
+      where (p is not null or role is not null or ua.role = 'ADMIN')
+      and o.id = :organizationOwnerId and o is not null
       and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
       or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
       or cast(:search as text) is null)
@@ -75,21 +79,13 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Suppress("SpringDataRepositoryMethodReturnTypeInspection")
   @Query(
     """
-    $BASE_VIEW_QUERY and r.id = :projectId
+    $BASE_VIEW_QUERY
+    where r.id = :projectId
   """
   )
   fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
 
   fun findAllByName(name: String): List<Project>
-
-  @Query(
-    """
-      from Project p 
-      left join fetch p.languages
-      where p.id in :ids
-    """
-  )
-  fun findAllWithLanguages(ids: Iterable<Long>): List<Project>
 
   @Query(
     """

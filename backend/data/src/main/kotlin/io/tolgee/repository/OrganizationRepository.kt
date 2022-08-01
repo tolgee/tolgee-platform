@@ -60,7 +60,8 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p
     left join p.permissions perm on perm.user.id = :userId
-    where (perm is not null or mr is not null) and o.id = :organizationId
+    join UserAccount ua on perm.user = ua or mr.user = ua
+    where ((perm is not null or mr is not null) or ua.role = 'ADMIN')  and o.id = :organizationId
   """
   )
   fun canUserView(userId: Long, organizationId: Long): Boolean
@@ -77,4 +78,16 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   """
   )
   fun findUsersDefaultOrganization(user: UserAccount): Organization?
+
+  @Query(
+    """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
+        o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
+        from Organization o 
+        left join OrganizationRole r on r.user.id = :userId and r.organization = o
+        left join o.projects p
+        left join p.permissions perm on perm.user.id = :userId
+        where (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        """
+  )
+  fun findAllViews(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView>
 }

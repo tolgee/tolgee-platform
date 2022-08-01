@@ -14,6 +14,7 @@ import { BaseUserSettingsView } from '../BaseUserSettingsView';
 
 export const ApiKeysView: FunctionComponent = () => {
   const t = useTranslate();
+
   const list = useApiQuery({
     url: '/v2/api-keys',
     query: {

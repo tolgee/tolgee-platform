@@ -5,7 +5,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
@@ -17,9 +17,11 @@ import { OrganizationBillingView } from './billing/OrganizationBillingView';
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
   const config = useConfig();
+  const isAdmin = useIsAdmin();
+  const isAdminAccess = organization?.currentUserRole != 'OWNER' && isAdmin;
 
   return (
-    <DashboardPage>
+    <DashboardPage isAdminAccess={isAdminAccess}>
       {organization ? (
         <>
           <PrivateRoute exact path={LINKS.ORGANIZATION_PROFILE.template}>

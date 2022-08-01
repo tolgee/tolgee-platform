@@ -88,25 +88,6 @@ describe('Organization List', () => {
       cy.contains('ZZZ Cool company 14').scrollIntoView().should('be.visible');
     });
 
-    it('admin cannot change microsoft settings', () => {
-      switchToOrganization('Microsoft');
-      cy.gcy('global-user-menu-button').click();
-      cy.gcy('user-menu-organization-settings')
-        .contains('Organization settings')
-        .click();
-      cy.gcy('global-form-save-button').should('be.disabled');
-      cy.gcy('organization-profile-delete-button').should('be.disabled');
-      cy.gcy('settings-menu-item')
-        .contains('Organization profile')
-        .should('be.visible');
-      cy.gcy('settings-menu-item')
-        .contains('Organization members')
-        .should('not.exist');
-      cy.gcy('settings-menu-item')
-        .contains('Member permissions')
-        .should('not.exist');
-    });
-
     it('admin leaves Microsoft', { scrollBehavior: 'center' }, () => {
       switchToOrganization('Microsoft');
       cy.gcy('global-user-menu-button').click();
@@ -144,6 +125,8 @@ describe('Organization List', () => {
       cy.gcy('organization-profile-delete-button').should('not.be.disabled');
     });
   });
+
+  it('', () => {});
 
   after(() => {
     organizationTestData.clean();

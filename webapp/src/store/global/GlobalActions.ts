@@ -1,18 +1,22 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { SecurityService } from 'tg.service/SecurityService';
-import { singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
 import { SecurityDTO } from './types';
+import { TokenService } from 'tg.service/TokenService';
+
+const tokenService = container.resolve(TokenService);
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
   authLoading = false;
   security: SecurityDTO = {
-    allowPrivate: !!localStorage.getItem('jwtToken'),
-    jwtToken: localStorage.getItem('jwtToken') || null,
+    allowPrivate: !!tokenService.getToken(),
+    jwtToken: tokenService.getToken() || null,
+    adminJwtToken: tokenService.getAdminToken() || null,
     loginErrorCode: null,
     allowRegistration: false,
   };
@@ -154,6 +158,42 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         security: { ...state.security, ...action.payload },
       }
   );
+
+  debugCustomerAccount = this.createAction(
+    'DEBUG_CUSTOMER_ACCOUNT',
+    (customerJwt: string) => customerJwt
+  ).build.on((state, action) => {
+    tokenService.setAdminToken(state.security.jwtToken!);
+    tokenService.setToken(action.payload);
+
+    return <GlobalState>{
+      ...state,
+      security: {
+        ...state.security,
+        adminJwtToken: state.security.jwtToken,
+        jwtToken: action.payload,
+      },
+    };
+  });
+
+  exitDebugCustomerAccount = this.createAction(
+    'EXIT_DEBUG_CUSTOMER_ACCOUNT',
+    () => {}
+  ).build.on((state, _) => {
+    const adminJwtToken = state.security.adminJwtToken;
+
+    tokenService.disposeAdminToken();
+    tokenService.setToken(adminJwtToken!);
+
+    return <GlobalState>{
+      ...state,
+      security: {
+        ...state.security,
+        adminJwtToken: null,
+        jwtToken: adminJwtToken,
+      },
+    };
+  });
 
   readonly loadableDefinitions = {
     resetPasswordRequest: this.createLoadableDefinition<GlobalState, any>(

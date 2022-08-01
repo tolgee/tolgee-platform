@@ -27,12 +27,10 @@ import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
@@ -226,15 +224,7 @@ class V2ProjectsController(
   @Operation(summary = "Creates project with specified languages")
   @RequestActivity(ActivityType.CREATE_PROJECT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
-    val userAccount = authenticationFacade.userAccount
-    if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
-      userAccount.role != UserAccount.Role.ADMIN
-    ) {
-      throw PermissionException()
-    }
-
     organizationRoleService.checkUserIsOwner(dto.organizationId)
-
     val project = projectService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
