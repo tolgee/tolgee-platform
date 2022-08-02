@@ -16,6 +16,7 @@
     "@sentry/browser": "^6.10.0",
     "@tolgee/react": "^4.6.0",
     "@tolgee/socketio-client": "^4.0.0",
+    "buffer": "^6.0.3",
     "clsx": "^1.1.1",
     "codemirror": "^5.62.0",
     "copy-to-clipboard": "^3.3.1",
@@ -121,6 +122,8 @@
     "redux-devtools-extension": "^2.13.9",
     "typescript": "^4.3.2",
     "vite": "^3.0.4",
+    "vite-plugin-mdx-react": "^1.0.1",
+    "vite-plugin-static-copy": "^0.7.0",
     "webpack": "4.44.2"
   }
 }

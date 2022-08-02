@@ -2,12 +2,28 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path/posix';
 import svgr from 'vite-plugin-svgr';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [svgr(), react()],
-  define: {
-    global: {},
+  plugins: [
+    svgr(),
+    react(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'node_modules/@tginternal/language-util/flags/*',
+          dest: 'static/flags',
+        },
+      ],
+    }),
+  ],
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+    },
   },
   resolve: {
     alias: {

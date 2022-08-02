@@ -44,7 +44,6 @@ export class ApiHttpService {
     init?: RequestInit,
     options: RequestOptions = new RequestOptions()
   ): Promise<Response> {
-    console.log(this.apiUrl);
     if (detectLoop(input)) {
       //if we get into loop, maybe something went wrong in login requests etc, rather start over
       this.tokenService.disposeToken();

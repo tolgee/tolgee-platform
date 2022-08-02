@@ -38,9 +38,6 @@ const EditButtonWrapper = styled(Box)`
 
 const StyledBox = styled(Box)`
   position: relative;
-  &:hover ${StyledEditButton} {
-    opacity: 1;
-  }
 `;
 
 const file2Base64 = (file: File): Promise<string> => {

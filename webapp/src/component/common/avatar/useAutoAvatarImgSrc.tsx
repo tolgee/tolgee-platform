@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AutoAvatarProps } from './AutoAvatar';
+import { Buffer } from 'buffer';
 
 function getInitialsAvatarSvg(ownerName: string, size: number, light: boolean) {
   return Promise.all([

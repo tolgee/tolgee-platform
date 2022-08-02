@@ -30,10 +30,6 @@ const StyledContainer = styled('div')`
   margin-left: -4px;
   border-radius: 10px;
 
-  &:hover ${StyledClearButton} {
-    display: block;
-  }
-
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.divider2.main};
     transition: all 0.1s;

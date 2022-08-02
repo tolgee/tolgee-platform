@@ -55,13 +55,6 @@ const StyledTolgeeLink = styled(Link)`
   color: inherit;
   text-decoration: inherit;
   outline: 0;
-
-  &:focus ${StyledLogoWrapper} {
-    filter: brightness(95%);
-  }
-  &:focus ${StyledLogoTitle} {
-    filter: brightness(95%);
-  }
 `;
 
 const StyledIconButton = styled(IconButton)`

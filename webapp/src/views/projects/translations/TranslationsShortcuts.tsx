@@ -95,10 +95,6 @@ const StyledContent = styled('div')`
     opacity: 1;
   }
 
-  &:hover ${StyledItems} {
-    opacity: 1;
-  }
-
   &:hover .hoverHidden {
     opacity: 1;
   }
