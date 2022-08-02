@@ -3,16 +3,15 @@ import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { container } from 'tsyringe';
 import { Link, Typography } from '@mui/material';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { SignUpActions } from 'tg.store/global/SignUpActions';
+import { signUpActions } from 'tg.store/global/SignUpActions';
 import { AppState } from 'tg.store/index';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { invitationCodeService } from 'tg.service/InvitationCodeService';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -21,9 +20,6 @@ import { Alert } from '../common/Alert';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
-
-const actions = container.resolve(SignUpActions);
-const invitationService = container.resolve(InvitationCodeService);
 
 export type SignUpType = {
   name: string;
@@ -56,7 +52,7 @@ const SignUpView: FunctionComponent = () => {
       <View
         onSubmit={async (v: SignUpType) => {
           const recaptchaToken = await handleReCaptchaVerify();
-          actions.loadableActions.signUp.dispatch({
+          signUpActions.loadableActions.signUp.dispatch({
             ...v,
             recaptchaToken: recaptchaToken,
           });
@@ -69,7 +65,7 @@ const SignUpView: FunctionComponent = () => {
     return (
       <View
         onSubmit={async (v: SignUpType) => {
-          actions.loadableActions.signUp.dispatch({
+          signUpActions.loadableActions.signUp.dispatch({
             ...v,
           });
         }}
@@ -85,7 +81,7 @@ const SignUpView: FunctionComponent = () => {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
 
-  const orgRequired = !invitationService.getCode();
+  const orgRequired = !invitationCodeService.getCode();
 
   const View = (props: { onSubmit: (v) => void }) => (
     <DashboardPage>

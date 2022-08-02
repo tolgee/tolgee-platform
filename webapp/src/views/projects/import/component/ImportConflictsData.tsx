@@ -2,36 +2,36 @@ import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { Pagination } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { ImportConflictTranslationsPair } from './ImportConflictTranslationsPair';
 import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
 import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
-const actions = container.resolve(ImportActions);
 export const ImportConflictsData: FunctionComponent<{
   row: components['schemas']['ImportLanguageModel'];
 }> = (props) => {
-  const conflictsLoadable = actions.useSelector((s) => s.loadables.conflicts);
+  const conflictsLoadable = importActions.useSelector(
+    (s) => s.loadables.conflicts
+  );
   const project = useProject();
   const languageId = props.row.id;
   const [showResolved, setShowResolved] = useState(true);
-  const setOverrideLoadable = actions.useSelector(
+  const setOverrideLoadable = importActions.useSelector(
     (s) => s.loadables.resolveTranslationConflictOverride
   );
-  const setKeepLoadable = actions.useSelector(
+  const setKeepLoadable = importActions.useSelector(
     (s) => s.loadables.resolveTranslationConflictKeep
   );
 
   const loadData = (page = 0) => {
-    actions.loadableActions.conflicts.dispatch({
+    importActions.loadableActions.conflicts.dispatch({
       path: {
         languageId: languageId,
         projectId: project.id,
@@ -43,7 +43,7 @@ export const ImportConflictsData: FunctionComponent<{
         size: 50,
       },
     });
-    actions.loadableActions.resolveConflictsLanguage.dispatch({
+    importActions.loadableActions.resolveConflictsLanguage.dispatch({
       path: {
         languageId: languageId,
         projectId: project.id,
@@ -55,17 +55,17 @@ export const ImportConflictsData: FunctionComponent<{
   const totalPages = conflictsLoadable.data?.page?.totalPages;
   const page = conflictsLoadable.data?.page?.number;
 
-  const keepAllExistingLoadable = actions.useSelector(
+  const keepAllExistingLoadable = importActions.useSelector(
     (s) => s.loadables.resolveAllKeepExisting
   );
-  const overrideAllLoadable = actions.useSelector(
+  const overrideAllLoadable = importActions.useSelector(
     (s) => s.loadables.resolveAllOverride
   );
 
   useEffect(() => {
     if (keepAllExistingLoadable.loaded || overrideAllLoadable.loaded) {
-      actions.loadableReset.resolveAllKeepExisting.dispatch();
-      actions.loadableReset.resolveAllOverride.dispatch();
+      importActions.loadableReset.resolveAllKeepExisting.dispatch();
+      importActions.loadableReset.resolveAllOverride.dispatch();
       loadData();
     }
   }, [keepAllExistingLoadable.loading, overrideAllLoadable.loading]);
@@ -84,8 +84,8 @@ export const ImportConflictsData: FunctionComponent<{
 
   useEffect(() => {
     return () => {
-      actions.loadableReset.conflicts.dispatch();
-      actions.loadableReset.resolveConflictsLanguage.dispatch();
+      importActions.loadableReset.conflicts.dispatch();
+      importActions.loadableReset.resolveConflictsLanguage.dispatch();
     };
   }, []);
 
@@ -93,8 +93,8 @@ export const ImportConflictsData: FunctionComponent<{
 
   useEffect(() => {
     if (!conflictsLoadable.loading) {
-      actions.loadableReset.resolveTranslationConflictKeep.dispatch();
-      actions.loadableReset.resolveTranslationConflictOverride.dispatch();
+      importActions.loadableReset.resolveTranslationConflictKeep.dispatch();
+      importActions.loadableReset.resolveTranslationConflictOverride.dispatch();
       return;
     }
   }, [conflictsLoadable.loading]);

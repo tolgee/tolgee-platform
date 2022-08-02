@@ -3,8 +3,7 @@ import React, { createRef, FC, useRef, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { AvatarImg } from './AvatarImg';
 import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
@@ -53,7 +52,6 @@ const file2Base64 = (file: File): Promise<string> => {
   });
 };
 
-const messageService = container.resolve(MessageService);
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ProfileAvatar: FC<{

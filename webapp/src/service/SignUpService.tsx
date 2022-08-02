@@ -1,15 +1,16 @@
 import { T } from '@tolgee/react';
-import { singleton } from 'tsyringe';
 
 import { SignUpType } from '../component/security/SignUpView';
-import { GlobalActions } from '../store/global/GlobalActions';
-import { InvitationCodeService } from './InvitationCodeService';
-import { MessageService } from './MessageService';
-import { TokenService } from './TokenService';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { globalActions, GlobalActions } from '../store/global/GlobalActions';
+import {
+  invitationCodeService,
+  InvitationCodeService,
+} from './InvitationCodeService';
+import { messageService, MessageService } from './MessageService';
+import { tokenService, TokenService } from './TokenService';
+import { apiV1HttpService, ApiV1HttpService } from './http/ApiV1HttpService';
 import { TokenDTO } from './response.types';
 
-@singleton()
 export class SignUpService {
   constructor(
     private http: ApiV1HttpService,
@@ -56,3 +57,11 @@ export class SignUpService {
     }
   }
 }
+
+export const signUpService = new SignUpService(
+  apiV1HttpService,
+  tokenService,
+  messageService,
+  globalActions,
+  invitationCodeService
+);

@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { InfiniteData } from 'react-query';
-import { container } from 'tsyringe';
 import { useDebouncedCallback } from 'use-debounce';
 
 import {
@@ -9,7 +8,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { ChangeScreenshotNum, UpdateTranslation } from '../types';
 
@@ -32,8 +31,6 @@ type FiltersType = Pick<
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
 >;
-
-const projectPreferences = container.resolve(ProjectPreferencesService);
 
 type Props = {
   projectId: number;
@@ -202,7 +199,7 @@ export const useTranslationsService = (props: Props) => {
       languages: newQuery.languages?.length ? newQuery.languages : undefined,
     };
     if (props.updateLocalStorageLanguages) {
-      projectPreferences.setForProject(
+      projectPreferencesService.setForProject(
         props.projectId,
         queryWithLanguages.languages
       );

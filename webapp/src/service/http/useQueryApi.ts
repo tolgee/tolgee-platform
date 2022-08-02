@@ -10,19 +10,16 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from 'react-query';
-import { container } from 'tsyringe';
 
 import { paths } from '../apiSchema.generated';
 import { paths as billingPaths } from '../billingApiSchema.generated';
 
 import { RequestOptions } from './ApiHttpService';
 import {
-  ApiSchemaHttpService,
+  apiSchemaHttpService,
   RequestParamsType,
   ResponseContent,
 } from './ApiSchemaHttpService';
-
-const apiHttpService = container.resolve(ApiSchemaHttpService);
 
 export type QueryProps<
   Url extends keyof Paths,
@@ -73,7 +70,7 @@ export const useApiInfiniteQuery = <
   return useInfiniteQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ pageParam }) => {
-      return apiHttpService.schemaRequest<Url, Method, Paths>(
+      return apiSchemaHttpService.schemaRequest<Url, Method, Paths>(
         url,
         method,
         fetchOptions
@@ -94,7 +91,7 @@ export const useApiQuery = <
   return useQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
     () =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(
+      apiSchemaHttpService.schemaRequest<Url, Method, Paths>(
         url,
         method,
         fetchOptions
@@ -118,7 +115,7 @@ export const useApiMutation = <
     RequestParamsType<Url, Method, Paths>
   >(
     (request) =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(
+      apiSchemaHttpService.schemaRequest<Url, Method, Paths>(
         url,
         method,
         fetchOptions

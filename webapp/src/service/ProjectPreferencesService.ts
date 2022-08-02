@@ -1,10 +1,7 @@
-import { singleton } from 'tsyringe';
-
 const LOCAL_STORAGE_KEY = 'selectedLanguages';
 
 type AllType = { [projectId: number]: string[] | undefined };
 
-@singleton()
 export class ProjectPreferencesService {
   getAll(): AllType {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string);
@@ -41,3 +38,5 @@ export class ProjectPreferencesService {
     return filtered;
   }
 }
+
+export const projectPreferencesService = new ProjectPreferencesService();

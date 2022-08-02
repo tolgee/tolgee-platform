@@ -1,16 +1,21 @@
 import { T } from '@tolgee/react';
-import { singleton } from 'tsyringe';
 
 import { API_LINKS } from '../constants/apiLinks';
 import { LINKS, PARAMS } from '../constants/links';
-import { InvitationCodeService } from './InvitationCodeService';
-import { MessageService } from './MessageService';
-import { TokenService } from './TokenService';
-import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
+import {
+  invitationCodeService,
+  InvitationCodeService,
+} from './InvitationCodeService';
+import { messageService, MessageService } from './MessageService';
+import { tokenService, TokenService } from './TokenService';
+import {
+  apiSchemaHttpService,
+  ApiSchemaHttpService,
+} from './http/ApiSchemaHttpService';
+import { apiV1HttpService, ApiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, TokenDTO } from './response.types';
 
-const API_URL = process.env.REACT_APP_API_URL + '/api/';
+const API_URL = import.meta.env.VITE_API_URL + '/api/';
 
 interface ResetPasswordPostRequest {
   email: string;
@@ -18,7 +23,6 @@ interface ResetPasswordPostRequest {
   password: string;
 }
 
-@singleton()
 export class SecurityService {
   constructor(
     private http: ApiV1HttpService,
@@ -153,3 +157,11 @@ export class SecurityService {
     return tokenDTO;
   }
 }
+
+export const securityService = new SecurityService(
+  apiV1HttpService,
+  tokenService,
+  messageService,
+  invitationCodeService,
+  apiSchemaHttpService
+);

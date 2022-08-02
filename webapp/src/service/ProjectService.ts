@@ -1,43 +1,39 @@
-import { container, singleton } from 'tsyringe';
-
 import { LINKS } from '../constants/links';
 import { redirect } from 'tg.hooks/redirect';
 import { components } from './apiSchema.generated';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ApiV2HttpService } from './http/ApiV2HttpService';
+import { apiV1HttpService } from './http/ApiV1HttpService';
+import { apiV2HttpService } from './http/ApiV2HttpService';
 import { PermissionDTO, PermissionEditDTO, ProjectDTO } from './response.types';
-
-const http = container.resolve(ApiV1HttpService);
-
-const httpV2 = container.resolve(ApiV2HttpService);
 
 interface Pageable {
   page: number;
   size: number;
 }
 
-@singleton()
 export class ProjectService {
   constructor() {}
 
   public getV2Projects = async (
     pageable: Pageable
   ): Promise<components['schemas']['PagedModelProjectModel']> =>
-    httpV2.get(`projects`, pageable);
+    apiV2HttpService.get(`projects`, pageable);
 
   public getV2Users = async (
     projectId,
     search,
     pageable: Pageable
   ): Promise<components['schemas']['PagedModelUserAccountInProjectModel']> =>
-    httpV2.get(`projects/${projectId}/users`, { ...pageable, search });
+    apiV2HttpService.get(`projects/${projectId}/users`, {
+      ...pageable,
+      search,
+    });
 
   public getProjects = async (): Promise<ProjectDTO[]> =>
-    await http.get(`projects`);
+    await apiV1HttpService.get(`projects`);
 
   public editProject = async (id: number, values: Record<string, unknown>) =>
     (
-      await http.postNoJson(`projects/edit`, {
+      await apiV1HttpService.postNoJson(`projects/edit`, {
         ...values,
         projectId: id,
       })
@@ -45,23 +41,25 @@ export class ProjectService {
 
   public createProject = async (
     values: components['schemas']['CreateProjectDTO']
-  ) => (await http.postNoJson(`projects`, values)).json();
+  ) => (await apiV1HttpService.postNoJson(`projects`, values)).json();
 
   public deleteProject = async (id) => {
-    await http.delete('projects/' + id);
+    await apiV1HttpService.delete('projects/' + id);
     redirect(LINKS.PROJECTS);
   };
 
   public getPermissions = async (projectId): Promise<PermissionDTO[]> =>
-    http.get('permission/list/' + projectId);
+    apiV1HttpService.get('permission/list/' + projectId);
 
   public deletePermission = async (invitationId): Promise<void> => {
-    await http.delete('permission/' + invitationId);
+    await apiV1HttpService.delete('permission/' + invitationId);
   };
 
   readonly editPermission = async (dto: PermissionEditDTO): Promise<void> =>
-    http.post('permission/edit', dto);
+    apiV1HttpService.post('permission/edit', dto);
 
   loadProject = (id): Promise<components['schemas']['ProjectModel']> =>
-    httpV2.get('projects/' + id);
+    apiV2HttpService.get('projects/' + id);
 }
+
+export const projectService = new ProjectService();

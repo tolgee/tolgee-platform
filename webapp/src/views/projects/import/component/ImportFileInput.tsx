@@ -1,10 +1,9 @@
 import React, { FunctionComponent, ReactNode } from 'react';
 import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { useConfig } from 'tg.globalContext/helpers';
-import { MessageActions } from 'tg.store/global/MessageActions';
+import { messageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
@@ -27,7 +26,6 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   border: `1px dashed ${theme.palette.emphasis[400]}`,
 }));
 
-const messageActions = container.resolve(MessageActions);
 const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();

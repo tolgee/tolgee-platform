@@ -22,7 +22,7 @@ import {
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 import { ControlsEditor } from './cell/ControlsEditor';
 import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';
@@ -62,11 +62,10 @@ const StyledContainer = styled(StyledCell)`
 `;
 
 const StyledCheckbox = styled(Checkbox)`
-    grid-area: checkbox;
-    width: 38px;
-    height: 38px;
-    margin: 3px -9px -9px 3px;
-  }
+  grid-area: checkbox;
+  width: 38px;
+  height: 38px;
+  margin: 3px -9px -9px 3px;
 `;
 
 const StyledKey = styled('div')`

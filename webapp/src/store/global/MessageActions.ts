@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { singleton } from 'tsyringe';
 
 import { AbstractActions } from '../AbstractActions';
 import { Message } from './types';
@@ -8,7 +7,6 @@ export class MessageState {
   messages: Message[] = [];
 }
 
-@singleton()
 export class MessageActions extends AbstractActions<MessageState> {
   showMessage = this.createAction('SHOW_MESSAGE', (m: ReactNode) => m).build.on(
     (state, action) => {
@@ -31,3 +29,5 @@ export class MessageActions extends AbstractActions<MessageState> {
     return 'MESSAGE';
   }
 }
+
+export const messageActions = new MessageActions();

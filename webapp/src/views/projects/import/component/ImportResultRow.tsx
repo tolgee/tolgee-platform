@@ -12,13 +12,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
-import { container } from 'tsyringe';
 
 import { ChipButton } from 'tg.component/common/buttons/ChipButton';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
@@ -57,7 +56,6 @@ const StyledTableRow = styled(TableRow)`
   }
 `;
 
-const actions = container.resolve(ImportActions);
 export const ImportResultRow = (props: {
   row: components['schemas']['ImportLanguageModel'];
   onResolveConflicts: () => void;
@@ -69,7 +67,7 @@ export const ImportResultRow = (props: {
   const deleteLanguage = () => {
     confirmation({
       onConfirm: () =>
-        actions.loadableActions.deleteLanguage.dispatch({
+        importActions.loadableActions.deleteLanguage.dispatch({
           path: {
             languageId: props.row.id,
             projectId: project.id,

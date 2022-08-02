@@ -1,17 +1,14 @@
 import { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import { connect } from 'react-redux';
-import { container } from 'tsyringe';
 
-import { MessageActions } from 'tg.store/global/MessageActions';
+import { messageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
 import { AppState } from 'tg.store/index';
 
 interface Props {
   messages: Message[];
 }
-
-const messageActions = container.resolve(MessageActions);
 
 function SnackBar(props: Props) {
   const { enqueueSnackbar } = useSnackbar();

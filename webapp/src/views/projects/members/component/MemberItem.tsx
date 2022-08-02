@@ -1,5 +1,4 @@
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 import { Chip, styled } from '@mui/material';
 
 import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
@@ -7,7 +6,7 @@ import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissio
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
@@ -16,8 +15,6 @@ import RevokePermissionsButton from './RevokePermissionsButton';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
-
-const messageService = container.resolve(MessageService);
 
 const StyledListItem = styled('div')`
   display: flex;

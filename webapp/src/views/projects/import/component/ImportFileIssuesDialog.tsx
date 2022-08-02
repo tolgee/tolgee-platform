@@ -1,16 +1,14 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { Alert } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
-const actions = container.resolve(ImportActions);
 export const ImportFileIssuesDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
@@ -37,7 +35,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
             </DialogTitle>
             <DialogContent>
               <SimplePaginatedHateoasList
-                actions={actions}
+                actions={importActions}
                 loadableName="getFileIssues"
                 dispatchParams={[
                   {

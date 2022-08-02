@@ -1,18 +1,17 @@
 import * as Sentry from '@sentry/browser';
 import { T } from '@tolgee/react';
-import { container, singleton } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
 import { GlobalError } from 'tg.error/GlobalError';
-import { ErrorActions } from 'tg.store/global/ErrorActions';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { errorActions } from 'tg.store/global/ErrorActions';
+import {
+  redirectionActions,
+  RedirectionActions,
+} from 'tg.store/global/RedirectionActions';
 
-import { MessageService } from '../MessageService';
-import { TokenService } from '../TokenService';
+import { messageService, MessageService } from '../MessageService';
+import { tokenService, TokenService } from '../TokenService';
 import { errorCapture } from './errorCapture';
-
-const errorActions = container.resolve(ErrorActions);
-const redirectionActions = container.resolve(RedirectionActions);
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
@@ -31,7 +30,6 @@ export class RequestOptions {
   asBlob? = false;
 }
 
-@singleton()
 export class ApiHttpService {
   constructor(
     private tokenService: TokenService,
@@ -39,13 +37,14 @@ export class ApiHttpService {
     private redirectionActions: RedirectionActions
   ) {}
 
-  apiUrl = process.env.REACT_APP_API_URL + '/api/';
+  apiUrl = import.meta.env.VITE_API_URL + '/api/';
 
   fetch(
     input: RequestInfo,
     init?: RequestInit,
     options: RequestOptions = new RequestOptions()
   ): Promise<Response> {
+    console.log(this.apiUrl);
     if (detectLoop(input)) {
       //if we get into loop, maybe something went wrong in login requests etc, rather start over
       this.tokenService.disposeToken();
@@ -216,3 +215,9 @@ export class ApiHttpService {
     }
   }
 }
+
+export const apiHttpService = new ApiHttpService(
+  tokenService,
+  messageService,
+  redirectionActions
+);

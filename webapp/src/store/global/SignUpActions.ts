@@ -1,6 +1,4 @@
-import { singleton } from 'tsyringe';
-
-import { SignUpService } from 'tg.service/SignUpService';
+import { signUpService, SignUpService } from 'tg.service/SignUpService';
 
 import {
   AbstractLoadableActions,
@@ -9,7 +7,6 @@ import {
 
 export class SignUpState extends StateWithLoadables<SignUpActions> {}
 
-@singleton()
 export class SignUpActions extends AbstractLoadableActions<SignUpState> {
   readonly loadableDefinitions = {
     signUp: this.createLoadableDefinition((v) => {
@@ -26,3 +23,6 @@ export class SignUpActions extends AbstractLoadableActions<SignUpState> {
     return 'SIGN_UP';
   }
 }
+
+export const signUpState = new SignUpState();
+export const signUpActions = new SignUpActions(signUpService);

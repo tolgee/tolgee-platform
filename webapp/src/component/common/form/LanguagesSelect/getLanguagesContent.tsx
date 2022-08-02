@@ -1,10 +1,9 @@
-import { container } from 'tsyringe';
 import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { components } from 'tg.service/apiSchema.generated';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -14,8 +13,6 @@ type Props = {
   value: string[];
 };
 
-const messaging = container.resolve(MessageService);
-
 export const getLanguagesContent = ({ languages, value, onChange }: Props) => {
   const handleLanguageChange = (lang: string) => () => {
     const baseLang = languages.find((l) => l.base)?.tag;
@@ -24,7 +21,7 @@ export const getLanguagesContent = ({ languages, value, onChange }: Props) => {
       : putBaseLangFirst([...value, lang], baseLang);
 
     if (!result?.length) {
-      messaging.error(<T>set_at_least_one_language_error</T>);
+      messageService.error(<T>set_at_least_one_language_error</T>);
       return;
     }
     onChange(result);

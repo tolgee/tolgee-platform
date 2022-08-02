@@ -1,6 +1,3 @@
-import { singleton } from 'tsyringe';
-
-@singleton()
 export class DispatchService {
   private _store;
 
@@ -23,3 +20,5 @@ export class DispatchService {
     );
   }
 }
+
+export const dispatchService = new DispatchService();

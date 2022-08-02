@@ -2,40 +2,29 @@ import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import thunkMiddleware from 'redux-thunk';
-import { container } from 'tsyringe';
 
-import { MessageService } from '../service/MessageService';
-import { SecurityService } from '../service/SecurityService';
-import { ImplicitReducer } from './ImplicitReducer';
-import { ErrorActions } from './global/ErrorActions';
-import { GlobalActions } from './global/GlobalActions';
-import { MessageActions } from './global/MessageActions';
-import { RedirectionActions } from './global/RedirectionActions';
-import { SignUpActions } from './global/SignUpActions';
-import { ImportActions } from './project/ImportActions';
-import { TranslationActions } from './project/TranslationActions';
-import { ProjectInvitationActions } from './project/invitations/ProjectInvitationActions';
-
-const implicitReducer = container.resolve(ImplicitReducer);
-const globalActions = container.resolve(GlobalActions);
-const errorActions = container.resolve(ErrorActions);
-const redirectionActions = container.resolve(RedirectionActions);
+import { messageService } from '../service/MessageService';
+import { securityService } from '../service/SecurityService';
+import { implicitReducer } from './ImplicitReducer';
+import { errorActions } from './global/ErrorActions';
+import { globalActions } from './global/GlobalActions';
+import { messageActions } from './global/MessageActions';
+import { redirectionActions } from './global/RedirectionActions';
+import { signUpActions } from './global/SignUpActions';
+import { importActions } from './project/ImportActions';
+import { translationActions } from './project/TranslationActions';
+import { projectInvitationActions } from './project/invitations/ProjectInvitationActions';
 
 const appReducer = (appState, action) =>
   combineReducers({
-    translations: implicitReducer.create(
-      container.resolve(TranslationActions),
-      appState
-    ),
+    translations: implicitReducer.create(translationActions, appState),
     global: implicitReducer.create(globalActions),
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
-    message: implicitReducer.create(container.resolve(MessageActions)),
-    signUp: implicitReducer.create(container.resolve(SignUpActions)),
-    projectInvitation: implicitReducer.create(
-      container.resolve(ProjectInvitationActions)
-    ),
-    import: implicitReducer.create(container.resolve(ImportActions)),
+    message: implicitReducer.create(messageActions),
+    signUp: implicitReducer.create(signUpActions),
+    projectInvitation: implicitReducer.create(projectInvitationActions),
+    import: implicitReducer.create(importActions),
   })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {
@@ -45,7 +34,7 @@ const rootReducer = (state, action): ReturnType<typeof appReducer> => {
   if (action.type === globalActions.logout.type) {
     state = undefined;
     //remove after login link to avoid buggy behaviour
-    container.resolve(SecurityService).setLogoutMark();
+    securityService.setLogoutMark();
   }
 
   return appReducer(state, action);
@@ -58,7 +47,7 @@ const successMessageMiddleware = (store) => (next) => (action) => {
     action.type.indexOf('_PENDING') <= -1 &&
     action.type.indexOf('_REJECTED') <= -1
   ) {
-    container.resolve(MessageService).success(action.meta.successMessage);
+    messageService.success(action.meta.successMessage);
   }
 
   next(action);

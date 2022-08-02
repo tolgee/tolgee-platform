@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 import { IconButton, styled, Tooltip } from '@mui/material';
 import { Link, Clear } from '@mui/icons-material';
 
@@ -8,13 +7,11 @@ import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-
-const messaging = container.resolve(MessageService);
 
 type UserAccountInProjectModel =
   components['schemas']['ProjectInvitationModel'];
@@ -83,7 +80,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
       { path: { invitationId: invitation.id } },
       {
         onError(e) {
-          messaging.error(parseErrorResponse(e));
+          messageService.error(parseErrorResponse(e));
         },
       }
     );
@@ -95,7 +92,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         [PARAMS.INVITATION_CODE]: invitation.code,
       })
     );
-    messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+    messageService.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
   const permission = invitation.type;

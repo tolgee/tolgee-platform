@@ -6,15 +6,12 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useConfig } from 'tg.globalContext/helpers';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 
 type DownloadButtonProps = {
   invoice: components['schemas']['InvoiceModel'];
 };
-
-const messaging = container.resolve(MessageService);
 
 export const DownloadButton: FC<DownloadButtonProps> = (props) => {
   const organization = useOrganization();
@@ -51,7 +48,7 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
           setTimeout(() => URL.revokeObjectURL(a.href), 7000);
         },
         onError(error) {
-          parseErrorResponse(error).map((e) => messaging.error(t(e)));
+          parseErrorResponse(error).map((e) => messageService.error(t(e)));
         },
       }
     );

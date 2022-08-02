@@ -3,14 +3,13 @@ import { Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { Redirect } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -18,8 +17,6 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
-
-const messageService = container.resolve(MessageService);
 
 export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
 

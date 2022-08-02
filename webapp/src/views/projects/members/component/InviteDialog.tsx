@@ -12,7 +12,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
 
@@ -24,10 +23,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-
-const messaging = container.resolve(MessageService);
 
 type PermissionType = NonNullable<
   components['schemas']['ProjectModel']['computedPermissions']['type']
@@ -97,11 +94,11 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       [PARAMS.INVITATION_CODE]: data.code,
                     })
                   );
-                  messaging.success(
+                  messageService.success(
                     <T keyName="invite_user_invitation_copy_success" />
                   );
                 } else {
-                  messaging.success(
+                  messageService.success(
                     <T keyName="invite_user_invitation_email_success" />
                   );
                 }
@@ -109,7 +106,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
               },
               onError(e) {
                 parseErrorResponse(e).forEach((e) =>
-                  messaging.error(<T>{e}</T>)
+                  messageService.error(<T>{e}</T>)
                 );
               },
             }

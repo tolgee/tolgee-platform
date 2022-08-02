@@ -3,8 +3,7 @@ import ReactList from 'react-list';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { container } from 'tsyringe';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
+import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useTranslationsService } from './services/useTranslationsService';
 import { useEditService } from './services/useEditService';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -58,8 +57,6 @@ type ActionType =
   | { type: 'REGISTER_LIST'; payload: ReactList }
   | { type: 'UNREGISTER_LIST'; payload: ReactList };
 
-const projectPreferences = container.resolve(ProjectPreferencesService);
-
 type Props = {
   projectId: number;
   baseLang: string | undefined;
@@ -83,7 +80,7 @@ export const [
 
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
-    : projectPreferences.getForProject(props.projectId);
+    : projectPreferencesService.getForProject(props.projectId);
 
   const languages = useApiQuery({
     url: '/v2/projects/{projectId}/languages',

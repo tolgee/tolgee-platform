@@ -86,8 +86,7 @@ export const IntegrateView: FunctionComponent = () => {
                         )
                         .replace(
                           '{{{apiUrl}}}',
-                          process.env.REACT_APP_API_URL ||
-                            window.location.origin
+                          import.meta.env.VITE_API_URL || window.location.origin
                         );
                     }}
                   >

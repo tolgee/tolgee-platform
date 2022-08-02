@@ -1,11 +1,8 @@
-import { singleton } from 'tsyringe';
-
-import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { apiV1HttpService, ApiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, ScreenshotDTO } from './response.types';
 
 type UploadResult = { stored: ScreenshotDTO[]; errors: ErrorResponseDto[] };
 
-@singleton()
 export class ScreenshotService {
   constructor(private http: ApiV1HttpService) {}
 
@@ -49,3 +46,5 @@ export class ScreenshotService {
     return id;
   }
 }
+
+export const screenshotService = new ScreenshotService(apiV1HttpService);

@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyFields';
@@ -9,7 +8,7 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { redirect } from 'tg.hooks/redirect';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
@@ -18,8 +17,6 @@ import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 type LanguageModel = components['schemas']['LanguageModel'];
-
-const messageService = container.resolve(MessageService);
 
 export const LanguageEditView = () => {
   const confirmationMessage = (options: ConfirmationDialogProps) =>

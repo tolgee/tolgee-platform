@@ -10,13 +10,12 @@ import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
 import { Skeleton } from '@mui/material';
 import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectPermissionType } from 'tg.service/response.types';
 
@@ -64,7 +63,6 @@ const StyledHintText = styled(Box)`
   text-align: justify;
 `;
 
-const messageService = container.resolve(MessageService);
 export const MAX_FILE_COUNT = 20;
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 

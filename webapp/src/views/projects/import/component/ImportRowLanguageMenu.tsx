@@ -11,18 +11,15 @@ import {
 import { Add, Clear } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
 
 import { useStateObject } from 'tg.fixtures/useStateObject';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
 import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
-
-const actions = container.resolve(ImportActions);
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
@@ -53,11 +50,11 @@ export const ImportRowLanguageMenu: React.FC<{
     .result!._embedded!.languages!.map((l) => l.existingLanguageId)
     .filter((l) => !!l);
   const project = useProject();
-  const applyTouched = actions.useSelector((s) => s.applyTouched);
+  const applyTouched = importActions.useSelector((s) => s.applyTouched);
   const state = useStateObject({ addNewLanguageDialogOpen: false });
 
   const dispatchChange = (value) => {
-    actions.loadableActions.selectLanguage.dispatch({
+    importActions.loadableActions.selectLanguage.dispatch({
       path: {
         projectId: project.id,
         importLanguageId: props.importLanguageId,
@@ -67,7 +64,7 @@ export const ImportRowLanguageMenu: React.FC<{
   };
 
   const onReset = () => {
-    actions.loadableActions.resetExistingLanguage.dispatch({
+    importActions.loadableActions.resetExistingLanguage.dispatch({
       path: {
         projectId: project.id,
         importLanguageId: props.importLanguageId,

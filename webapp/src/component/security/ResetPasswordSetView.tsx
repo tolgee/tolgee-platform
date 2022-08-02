@@ -3,12 +3,11 @@ import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -17,8 +16,6 @@ import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
-
-const globalActions = container.resolve(GlobalActions);
 
 type ValueType = {
   password: string;

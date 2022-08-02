@@ -1,4 +1,3 @@
-import { container } from 'tsyringe';
 import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
@@ -6,7 +5,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 
 import { CellKey } from '../CellKey';
 import {
@@ -23,8 +22,6 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
-
-const messaging = container.resolve(MessageService);
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -118,7 +115,7 @@ export const KeyEditForm: React.FC = () => {
           },
           {
             onSuccess() {
-              messaging.success(<T>translation_single_delete_success</T>);
+              messageService.success(<T>translation_single_delete_success</T>);
               history.push(
                 LINKS.PROJECT_TRANSLATIONS.build({
                   [PARAMS.PROJECT_ID]: project.id,
@@ -128,7 +125,7 @@ export const KeyEditForm: React.FC = () => {
             },
             onError(e) {
               const parsed = parseErrorResponse(e);
-              parsed.forEach((error) => messaging.error(<T>{error}</T>));
+              parsed.forEach((error) => messageService.error(<T>{error}</T>));
             },
           }
         );

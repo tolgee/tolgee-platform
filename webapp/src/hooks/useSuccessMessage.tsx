@@ -1,8 +1,4 @@
-import { container } from 'tsyringe';
-
-import { MessageService } from '../service/MessageService';
-
-const messageService = container.resolve(MessageService);
+import { messageService } from '../service/MessageService';
 
 export const useSuccessMessage = () =>
   messageService.success.bind(messageService);

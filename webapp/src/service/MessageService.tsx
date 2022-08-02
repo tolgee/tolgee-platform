@@ -1,11 +1,9 @@
 import { ReactNode } from 'react';
 import { VariantType } from 'notistack';
-import { singleton } from 'tsyringe';
 
-import { MessageActions } from '../store/global/MessageActions';
+import { messageActions, MessageActions } from '../store/global/MessageActions';
 import { Message } from '../store/global/types';
 
-@singleton()
 export class MessageService {
   constructor(private actions: MessageActions) {}
 
@@ -21,3 +19,5 @@ export class MessageService {
     this.yell(message, 'error');
   }
 }
+
+export const messageService = new MessageService(messageActions);

@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { useHistory } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -11,14 +10,12 @@ import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { LINKS } from 'tg.constants/links';
-
-const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
   const t = useTranslate();
@@ -40,7 +37,7 @@ export const UserProfileView: FunctionComponent = () => {
       { content: { 'application/json': v } },
       {
         onSuccess() {
-          messagesService.success(<T>User data - Successfully updated!</T>);
+          messageService.success(<T>User data - Successfully updated!</T>);
           globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         },
       }

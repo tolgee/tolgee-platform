@@ -8,19 +8,19 @@ import { Box, Button, Collapse, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Alert, AlertTitle } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
-const actions = container.resolve(ImportActions);
 export const ImportAlertError: FunctionComponent<{
   error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
 }> = (props) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  const addFilesLoadable = actions.useSelector((s) => s.loadables.addFiles);
+  const addFilesLoadable = importActions.useSelector(
+    (s) => s.loadables.addFiles
+  );
 
   let text = undefined as ReactNode | undefined;
   let params = [] as string[];

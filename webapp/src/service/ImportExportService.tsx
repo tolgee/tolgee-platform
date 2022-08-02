@@ -1,16 +1,11 @@
-import { container, singleton } from 'tsyringe';
+import { messageService, MessageService } from './MessageService';
+import { apiV1HttpService } from './http/ApiV1HttpService';
 
-import { MessageService } from './MessageService';
-import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-
-const http = container.resolve(ApiV1HttpService);
-container.resolve(ApiSchemaHttpService);
-
-@singleton()
 export class ImportExportService {
   constructor(private messaging: MessageService) {}
 
   readonly exportToJsons = async (projectId: number) =>
-    http.getFile('project/' + projectId + '/export/jsonZip');
+    apiV1HttpService.getFile('project/' + projectId + '/export/jsonZip');
 }
+
+export const importExportService = new ImportExportService(messageService);

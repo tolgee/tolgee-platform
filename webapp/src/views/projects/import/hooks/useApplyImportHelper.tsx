@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from './useImportDataHelper';
 
-const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
 ) => {
   const [conflictNotResolvedDialogOpen, setConflictNotResolvedDialogOpen] =
     useState(false);
 
-  const importApplyLoadable = actions.useSelector(
+  const importApplyLoadable = importActions.useSelector(
     (s) => s.loadables.applyImport
   );
   const project = useProject();
@@ -25,7 +23,7 @@ export const useApplyImportHelper = (
       0
     );
     if (unResolvedCount === 0) {
-      actions.loadableActions.applyImport.dispatch({
+      importActions.loadableActions.applyImport.dispatch({
         path: {
           projectId: project.id,
         },

@@ -1,10 +1,8 @@
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
-import { singleton } from 'tsyringe';
 
-import { ImportExportService } from 'tg.service/ImportExportService';
 import { components } from 'tg.service/apiSchema.generated';
-import { ApiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
+import { apiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 
 import {
   AbstractLoadableActions,
@@ -20,12 +18,8 @@ export class ImportState extends StateWithLoadables<ImportActions> {
   applyTouched?: boolean;
 }
 
-@singleton()
 export class ImportActions extends AbstractLoadableActions<ImportState> {
-  constructor(
-    private service: ImportExportService,
-    private schemaService: ApiSchemaHttpService
-  ) {
+  constructor() {
     super(new ImportState());
   }
 
@@ -39,31 +33,31 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
 
   loadableDefinitions = {
     cancelImport: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import',
         'delete'
       )
     ),
     conflicts: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
         'get'
       )
     ),
     translations: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
         'get'
       )
     ),
     resolveConflictsLanguage: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}',
         'get'
       )
     ),
     deleteLanguage: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}',
         'delete'
       ),
@@ -71,19 +65,19 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       <T>import_language_deleted</T>
     ),
     resolveTranslationConflictOverride: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override',
         'put'
       )
     ),
     resolveTranslationConflictKeep: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing',
         'put'
       )
     ),
     resolveAllOverride: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override',
         'put'
       ),
@@ -91,7 +85,7 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       <T>import_resolve_override_all_success</T>
     ),
     resolveAllKeepExisting: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing',
         'put'
       ),
@@ -99,7 +93,7 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       <T>import_resolve_keep_all_existing_success</T>
     ),
     applyImport: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/apply',
         'put'
       ),
@@ -107,19 +101,19 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       <T>import_successfully_applied_message</T>
     ),
     selectLanguage: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}',
         'put'
       )
     ),
     resetExistingLanguage: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing',
         'put'
       )
     ),
     addFiles: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import',
         'post'
       ),
@@ -128,7 +122,7 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       }
     ),
     getResult: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result',
         'get',
         {
@@ -140,7 +134,7 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
       }
     ),
     getFileIssues: this.createLoadableDefinition(
-      this.schemaService.schemaRequest(
+      apiSchemaHttpService.schemaRequest(
         '/v2/projects/{projectId}/import/result/files/{importFileId}/issues',
         'get'
       )
@@ -155,3 +149,5 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
     return useSelector((state: AppState) => selector(state.import));
   }
 }
+
+export const importActions = new ImportActions();

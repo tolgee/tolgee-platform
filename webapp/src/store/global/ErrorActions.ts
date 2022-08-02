@@ -1,5 +1,3 @@
-import { singleton } from 'tsyringe';
-
 import { GlobalError } from 'tg.error/GlobalError';
 
 import { AbstractActions } from '../AbstractActions';
@@ -8,7 +6,6 @@ export class ErrorState {
   error: GlobalError | null = null;
 }
 
-@singleton()
 export class ErrorActions extends AbstractActions<ErrorState> {
   constructor() {
     super(new ErrorState());
@@ -23,3 +20,5 @@ export class ErrorActions extends AbstractActions<ErrorState> {
     return 'ERROR';
   }
 }
+
+export const errorActions = new ErrorActions();

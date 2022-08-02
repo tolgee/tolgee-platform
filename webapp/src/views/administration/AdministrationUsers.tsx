@@ -18,8 +18,7 @@ import { AdministrationNav } from './AdministrationNav';
 import { components } from 'tg.service/apiSchema.generated';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
-import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -35,8 +34,6 @@ const StyledWrapper = styled('div')`
     border-top: 1px solid ${({ theme }) => theme.palette.divider1.main};
   }
 `;
-
-const globalActions = container.resolve(GlobalActions);
 
 export const AdministrationUsers = () => {
   const [page, setPage] = useState(0);

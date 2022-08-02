@@ -1,26 +1,19 @@
 import { FunctionComponent, useEffect } from 'react';
 import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { MessageService } from 'tg.service/MessageService';
-import { TokenService } from 'tg.service/TokenService';
+import { invitationCodeService } from 'tg.service/InvitationCodeService';
+import { messageService } from 'tg.service/MessageService';
+import { tokenService } from 'tg.service/TokenService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
+import { redirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { FullPageLoading } from '../common/FullPageLoading';
 import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 
 interface AcceptInvitationHandlerProps {}
-
-const globalActions = container.resolve(GlobalActions);
-const redirectActions = container.resolve(RedirectionActions);
-const messaging = container.resolve(MessageService);
-const invitationCodeService = container.resolve(InvitationCodeService);
-const tokenService = container.resolve(TokenService);
 
 const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
   () => {
@@ -38,21 +31,21 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
       if (!tokenService.getToken()) {
         invitationCodeService.setCode(code);
         globalActions.allowRegistration.dispatch();
-        redirectActions.redirect.dispatch(LINKS.LOGIN.build());
-        messaging.success(<T>invitation_log_in_first</T>);
+        redirectionActions.redirect.dispatch(LINKS.LOGIN.build());
+        messageService.success(<T>invitation_log_in_first</T>);
       } else {
         acceptCode.mutate(
           { path: { code } },
           {
             onSuccess() {
               globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
-              messaging.success(<T>invitation_code_accepted</T>);
+              messageService.success(<T>invitation_code_accepted</T>);
             },
             onError(e) {
-              messaging.error(<T>{e.code}</T>);
+              messageService.error(<T>{e.code}</T>);
             },
             onSettled() {
-              redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
+              redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
             },
           }
         );

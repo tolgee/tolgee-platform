@@ -1,16 +1,13 @@
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
 
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useDeleteTag, usePutTag } from 'tg.service/TranslationHooks';
 import { AddTag, RemoveTag } from '../types';
 import { useTranslationsService } from './useTranslationsService';
-
-const messaging = container.resolve(MessageService);
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
@@ -42,7 +39,7 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+        parsed.forEach((error) => messageService.error(<T>{error}</T>));
       });
 
   const addTag = (data: AddTag) =>
@@ -64,7 +61,7 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+        parsed.forEach((error) => messageService.error(<T>{error}</T>));
         // return never fullfilling promise to prevent after action
         return new Promise(() => {});
       });

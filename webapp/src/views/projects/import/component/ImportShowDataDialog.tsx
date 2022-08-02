@@ -10,16 +10,13 @@ import { useTheme } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
-
-const actions = container.resolve(ImportActions);
+import { importActions } from 'tg.store/project/ImportActions';
 
 const StyledAppBar = styled(AppBar)`
   position: relative;
@@ -77,7 +74,7 @@ export const ImportShowDataDialog: FunctionComponent<{
           <SimplePaginatedHateoasList
             wrapperComponent={Box}
             wrapperComponentProps={{ sx: { m: 2 } }}
-            actions={actions}
+            actions={importActions}
             loadableName="translations"
             searchText={search}
             sortBy={[]}

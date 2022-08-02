@@ -59,9 +59,7 @@ const StyledTolgeeLink = styled(Link)`
   &:focus ${StyledLogoWrapper} {
     filter: brightness(95%);
   }
-
-  ,
-&: focus ${StyledLogoTitle} {
+  &:focus ${StyledLogoTitle} {
     filter: brightness(95%);
   }
 `;

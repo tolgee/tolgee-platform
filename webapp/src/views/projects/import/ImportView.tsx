@@ -1,15 +1,14 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { ImportAlertError } from './ImportAlertError';
 import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
@@ -23,24 +22,27 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
-const actions = container.resolve(ImportActions);
-const messageService = container.resolve(MessageService);
-
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
   const project = useProject();
   const applyImportHelper = useApplyImportHelper(dataHelper);
-  const cancelLoadable = actions.useSelector((s) => s.loadables.cancelImport);
-  const deleteLanguageLoadable = actions.useSelector(
+  const cancelLoadable = importActions.useSelector(
+    (s) => s.loadables.cancelImport
+  );
+  const deleteLanguageLoadable = importActions.useSelector(
     (s) => s.loadables.deleteLanguage
   );
-  const addFilesLoadable = actions.useSelector((s) => s.loadables.addFiles);
-  const resultLoadable = actions.useSelector((s) => s.loadables.getResult);
+  const addFilesLoadable = importActions.useSelector(
+    (s) => s.loadables.addFiles
+  );
+  const resultLoadable = importActions.useSelector(
+    (s) => s.loadables.getResult
+  );
   const resultLoading = resultLoadable.loading || addFilesLoadable.loading;
-  const selectLanguageLoadable = actions.useSelector(
+  const selectLanguageLoadable = importActions.useSelector(
     (s) => s.loadables.selectLanguage
   );
-  const resetExistingLanguageLoadable = actions.useSelector(
+  const resetExistingLanguageLoadable = importActions.useSelector(
     (s) => s.loadables.resetExistingLanguage
   );
   const [resolveRow, setResolveRow] = useState(
@@ -108,12 +110,12 @@ export const ImportView: FunctionComponent = () => {
     if (applyImportHelper.error) {
       const parsed = parseErrorResponse(applyImportHelper.error);
       messageService.error(<T>{parsed[0]}</T>);
-      actions.loadableReset.applyImport.dispatch();
+      importActions.loadableReset.applyImport.dispatch();
     }
   }, [applyImportHelper.error]);
 
   const onApply = () => {
-    actions.touchApply.dispatch();
+    importActions.touchApply.dispatch();
     if (dataHelper.isValid) {
       applyImportHelper.onApplyImport();
     }
@@ -179,7 +181,7 @@ export const ImportView: FunctionComponent = () => {
               onClick={() => {
                 confirmation({
                   onConfirm: () =>
-                    actions.loadableActions.cancelImport.dispatch({
+                    importActions.loadableActions.cancelImport.dispatch({
                       path: {
                         projectId: project.id,
                       },

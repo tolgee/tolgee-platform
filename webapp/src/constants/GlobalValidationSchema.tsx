@@ -1,9 +1,8 @@
 import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
-import { OrganizationService } from '../service/OrganizationService';
-import { SignUpService } from '../service/SignUpService';
+import { organizationService } from '../service/OrganizationService';
+import { signUpService } from '../service/SignUpService';
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -60,7 +59,7 @@ export class Validation {
       } catch (e) {
         return false;
       }
-    }, container.resolve(SignUpService).validateEmail);
+    }, signUpService.validateEmail);
 
   static readonly SIGN_UP = (
     t: (key: string) => string,
@@ -196,7 +195,7 @@ export class Validation {
             return false;
           }
         },
-        (v) => container.resolve(OrganizationService).validateSlug(v)
+        (v) => organizationService.validateSlug(v)
       )(v);
     };
     return Yup.object().shape({

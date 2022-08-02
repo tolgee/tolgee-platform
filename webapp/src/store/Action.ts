@@ -1,6 +1,4 @@
-import { container } from 'tsyringe';
-
-import { DispatchService } from '../service/DispatchService';
+import { dispatchService } from '../service/DispatchService';
 
 export type ActionType<PayloadType> = {
   type: string;
@@ -26,7 +24,7 @@ export abstract class AbstractAction<
   ) {}
 
   dispatch(...params: DispatchParams) {
-    container.resolve(DispatchService).dispatch({
+    dispatchService.dispatch({
       type: this.type,
       meta: { ...this.meta, params: params },
       payload: this.payloadProvider && this.payloadProvider(...params),

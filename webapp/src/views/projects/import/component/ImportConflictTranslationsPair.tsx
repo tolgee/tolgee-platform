@@ -1,14 +1,12 @@
-import React, { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { Grid } from '@mui/material';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
 import { ImportConflictTranslation } from './ImportConflictTranslation';
 
-const actions = container.resolve(ImportActions);
 export const ImportConflictTranslationsPair: FunctionComponent<{
   translation: components['schemas']['ImportTranslationModel'];
   languageId: number;
@@ -19,7 +17,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
   const [rightExpandable, setRightExpandable] = useState(false);
 
   const setOverride = (translationId: number) => {
-    actions.loadableActions.resolveTranslationConflictOverride.dispatch({
+    importActions.loadableActions.resolveTranslationConflictOverride.dispatch({
       path: {
         projectId: project.id,
         languageId: languageId,
@@ -29,7 +27,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
   };
 
   const setKeepExisting = (translationId: number) => {
-    actions.loadableActions.resolveTranslationConflictKeep.dispatch({
+    importActions.loadableActions.resolveTranslationConflictKeep.dispatch({
       path: {
         projectId: project.id,
         languageId: languageId,
@@ -38,28 +36,28 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
     });
   };
 
-  const isKeepExistingLoading = actions.useSelector(
+  const isKeepExistingLoading = importActions.useSelector(
     (s) =>
       s.loadables.resolveTranslationConflictKeep.dispatchParams?.[0].path
         .translationId === translation.id &&
       s.loadables.resolveTranslationConflictKeep.loading
   );
 
-  const isKeepExistingLoaded = actions.useSelector(
+  const isKeepExistingLoaded = importActions.useSelector(
     (s) =>
       s.loadables.resolveTranslationConflictKeep.dispatchParams?.[0].path
         .translationId === translation.id &&
       s.loadables.resolveTranslationConflictKeep.loaded
   );
 
-  const isOverrideLoading = actions.useSelector(
+  const isOverrideLoading = importActions.useSelector(
     (s) =>
       s.loadables.resolveTranslationConflictOverride.dispatchParams?.[0].path
         .translationId === translation.id &&
       s.loadables.resolveTranslationConflictOverride.loading
   );
 
-  const isOverrideLoaded = actions.useSelector(
+  const isOverrideLoaded = importActions.useSelector(
     (s) =>
       s.loadables.resolveTranslationConflictOverride.dispatchParams?.[0].path
         .translationId === translation.id &&

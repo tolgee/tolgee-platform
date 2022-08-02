@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { container } from 'tsyringe';
 import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
@@ -12,7 +11,7 @@ import {
   useUser,
 } from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -24,8 +23,6 @@ import { OrganizationSwitch } from './OrganizationSwitch';
 import { BillingItem } from './BillingItem';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-
-const globalActions = container.resolve(GlobalActions);
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;

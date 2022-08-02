@@ -1,17 +1,13 @@
 import { FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { GlobalActions, GlobalState } from 'tg.store/global/GlobalActions';
+import { globalActions, GlobalState } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-
 import { FullPageLoading } from '../common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
-
-const actions = container.resolve(GlobalActions);
 
 export const OAuthRedirectionHandler: FunctionComponent<OAuthRedirectionHandlerProps> =
   (props) => {
@@ -24,7 +20,7 @@ export const OAuthRedirectionHandler: FunctionComponent<OAuthRedirectionHandlerP
     useEffect(() => {
       const code = new URLSearchParams(window.location.search).get('code');
       if (code && !security.allowPrivate) {
-        actions.oAuthSuccessful.dispatch(
+        globalActions.oAuthSuccessful.dispatch(
           match.params[PARAMS.SERVICE_TYPE],
           code
         );

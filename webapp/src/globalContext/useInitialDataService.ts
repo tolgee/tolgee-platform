@@ -1,19 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
 
 import { AppState } from 'tg.store/index';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import { components } from 'tg.service/apiSchema.generated';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { invitationCodeService } from 'tg.service/InvitationCodeService';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
 export const useInitialDataService = () => {
-  const actions = container.resolve(GlobalActions);
-  const invitationCodeService = container.resolve(InvitationCodeService);
-
   const [organization, setOrganization] = useState<
     OrganizationModel | undefined
   >(undefined);
@@ -26,12 +22,12 @@ export const useInitialDataService = () => {
         // set organization data only if missing
         setOrganization((org) => (org ? org : data.preferredOrganization));
         const invitationCode = invitationCodeService.getCode();
-        actions.updateSecurity.dispatch({
+        globalActions.updateSecurity.dispatch({
           allowPrivate:
             !data?.serverConfiguration?.authentication ||
             Boolean(data.userInfo),
           allowRegistration:
-            data.serverConfiguration.allowRegistrations ||
+            data.serverConfiguration?.allowRegistrations ||
             Boolean(invitationCode), // if user has invitation code, registration is allowed
         });
       },

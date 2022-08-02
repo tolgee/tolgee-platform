@@ -4,30 +4,26 @@ import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, Redirect, useHistory } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { SecurityService } from 'tg.service/SecurityService';
+import { securityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
-
-import LoadingButton from '../common/form/LoadingButton';
-import { StandardForm } from '../common/form/StandardForm';
-import { TextField } from '../common/form/fields/TextField';
-import { DashboardPage } from '../layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { globalActions } from 'tg.store/global/GlobalActions';
 import {
   gitHubService,
   googleService,
   oauth2Service,
   OAuthService,
 } from 'tg.component/security/OAuthService';
+import LoadingButton from '../common/form/LoadingButton';
+import { StandardForm } from '../common/form/StandardForm';
+import { TextField } from '../common/form/fields/TextField';
+import { DashboardPage } from '../layout/DashboardPage';
 
 interface LoginProps {}
 
-const globalActions = container.resolve(GlobalActions);
-const securityServiceIns = container.resolve(SecurityService);
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
   const t = useTranslate();
@@ -64,7 +60,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
   const history = useHistory();
   if (history.location.state && (history.location.state as any).from) {
-    securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
+    securityService.saveAfterLoginLink((history.location.state as any).from);
   }
 
   if (!remoteConfig.authentication || security.allowPrivate) {

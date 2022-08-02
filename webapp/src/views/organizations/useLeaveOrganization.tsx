@@ -1,15 +1,12 @@
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
-
-const messageService = container.resolve(MessageService);
 
 export const useLeaveOrganization = () => {
   const leaveLoadable = useApiMutation({

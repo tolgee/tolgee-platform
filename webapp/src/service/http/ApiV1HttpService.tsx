@@ -1,12 +1,12 @@
-import { singleton } from 'tsyringe';
+import {
+  redirectionActions,
+  RedirectionActions,
+} from 'tg.store/global/RedirectionActions';
 
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-
-import { MessageService } from '../MessageService';
-import { TokenService } from '../TokenService';
+import { messageService, MessageService } from '../MessageService';
+import { tokenService, TokenService } from '../TokenService';
 import { ApiHttpService } from './ApiHttpService';
 
-@singleton()
 export class ApiV1HttpService extends ApiHttpService {
   constructor(
     tokenService: TokenService,
@@ -15,5 +15,11 @@ export class ApiV1HttpService extends ApiHttpService {
   ) {
     super(tokenService, messageService, redirectionActions);
   }
-  apiUrl = process.env.REACT_APP_API_URL + '/api/';
+  apiUrl = import.meta.env.VITE_API_URL + '/api/';
 }
+
+export const apiV1HttpService = new ApiV1HttpService(
+  tokenService,
+  messageService,
+  redirectionActions
+);

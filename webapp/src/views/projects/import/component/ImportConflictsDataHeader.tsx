@@ -9,13 +9,11 @@ import {
 } from '@mui/material';
 import { DoneAll } from '@mui/icons-material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 
-const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{
   language: components['schemas']['ImportLanguageModel'];
 }> = (props) => {
@@ -25,7 +23,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
 
   const keepAllExisting = () => {
-    actions.loadableActions.resolveAllKeepExisting.dispatch({
+    importActions.loadableActions.resolveAllKeepExisting.dispatch({
       path: {
         projectId: project.id,
         languageId: props.language!.id,
@@ -34,7 +32,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   };
 
   const overrideAll = () => {
-    actions.loadableActions.resolveAllOverride.dispatch({
+    importActions.loadableActions.resolveAllOverride.dispatch({
       path: {
         projectId: project.id,
         languageId: props.language!.id,

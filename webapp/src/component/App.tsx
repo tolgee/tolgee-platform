@@ -2,7 +2,6 @@ import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
 import type API from '@openreplay/tracker';
@@ -15,18 +14,15 @@ import {
 } from 'tg.globalContext/helpers';
 import { GlobalError } from '../error/GlobalError';
 import { AppState } from '../store';
-import { ErrorActions } from '../store/global/ErrorActions';
-import { GlobalActions } from '../store/global/GlobalActions';
-import { RedirectionActions } from '../store/global/RedirectionActions';
+import { globalActions } from '../store/global/GlobalActions';
+import { errorActions } from '../store/global/ErrorActions';
+import { redirectionActions } from '../store/global/RedirectionActions';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
 import { useGlobalLoading } from './GlobalLoading';
 import { PlanLimitPopover } from './billing/PlanLimitPopover';
 import { RootRouter } from './RootRouter';
-
-const errorActions = container.resolve(ErrorActions);
-const redirectionActions = container.resolve(RedirectionActions);
 
 const Redirection = () => {
   const redirectionState = useSelector((state: AppState) => state.redirection);
@@ -106,16 +102,14 @@ const GlobalConfirmation = () => {
 
   const [wasDisplayed, setWasDisplayed] = useState(false);
 
-  const actions = container.resolve(GlobalActions);
-
   const onCancel = () => {
     state?.onCancel?.();
-    actions.closeConfirmation.dispatch();
+    globalActions.closeConfirmation.dispatch();
   };
 
   const onConfirm = () => {
     state?.onConfirm?.();
-    actions.closeConfirmation.dispatch();
+    globalActions.closeConfirmation.dispatch();
   };
 
   useEffect(() => {

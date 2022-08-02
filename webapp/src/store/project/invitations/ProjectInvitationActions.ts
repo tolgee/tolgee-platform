@@ -1,5 +1,3 @@
-import { singleton } from 'tsyringe';
-
 import {
   AbstractLoadableActions,
   StateWithLoadables,
@@ -9,7 +7,6 @@ export class ProjectInvitationState extends StateWithLoadables<ProjectInvitation
   invitationCode: string | null = null;
 }
 
-@singleton()
 export class ProjectInvitationActions extends AbstractLoadableActions<ProjectInvitationState> {
   constructor() {
     super(new ProjectInvitationState());
@@ -30,3 +27,5 @@ export class ProjectInvitationActions extends AbstractLoadableActions<ProjectInv
     return 'PROJECT_INVITATION';
   }
 }
+
+export const projectInvitationActions = new ProjectInvitationActions();

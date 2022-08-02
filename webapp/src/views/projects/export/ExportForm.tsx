@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
-import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, CircularProgress, styled } from '@mui/material';
 
@@ -8,14 +7,12 @@ import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { StateSelector } from './StateSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-
-const messaging = container.resolve(MessageService);
 
 export const exportableStates = Object.keys(translationStates);
 
@@ -164,7 +161,9 @@ export const ExportForm = () => {
               a.click();
             },
             onError(error) {
-              parseErrorResponse(error).map((e) => messaging.error(<T>{e}</T>));
+              parseErrorResponse(error).map((e) =>
+                messageService.error(<T>{e}</T>)
+              );
             },
             onSettled() {
               actions.setSubmitting(false);

@@ -1,21 +1,21 @@
-import { container } from 'tsyringe';
-
 import { useProject } from 'tg.hooks/useProject';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { importActions } from 'tg.store/project/ImportActions';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-
-const actions = container.resolve(ImportActions);
 
 export const useImportDataHelper = () => {
   const project = useProject();
-  const result = actions.useSelector((s) => s.result);
-  const addFilesLoadable = actions.useSelector((s) => s.loadables.addFiles);
-  const getResultLoadable = actions.useSelector((s) => s.loadables.getResult);
+  const result = importActions.useSelector((s) => s.result);
+  const addFilesLoadable = importActions.useSelector(
+    (s) => s.loadables.addFiles
+  );
+  const getResultLoadable = importActions.useSelector(
+    (s) => s.loadables.getResult
+  );
 
   useGlobalLoading(addFilesLoadable.loading || getResultLoadable.loading);
 
   const onNewFiles = async (files: File[]) => {
-    actions.loadableActions.addFiles.dispatch({
+    importActions.loadableActions.addFiles.dispatch({
       path: {
         projectId: project.id,
       },
@@ -28,7 +28,7 @@ export const useImportDataHelper = () => {
   };
 
   const loadData = () => {
-    actions.loadableActions.getResult.dispatch({
+    importActions.loadableActions.getResult.dispatch({
       path: {
         projectId: project.id,
       },
@@ -40,9 +40,9 @@ export const useImportDataHelper = () => {
   };
 
   const resetResult = () => {
-    actions.resetResult.dispatch();
-    actions.loadableReset.getResult.dispatch();
-    actions.loadableReset.addFiles.dispatch();
+    importActions.resetResult.dispatch();
+    importActions.loadableReset.getResult.dispatch();
+    importActions.loadableReset.addFiles.dispatch();
   };
 
   return {

@@ -17,12 +17,9 @@ import { T } from '@tolgee/react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 import { Warning } from '@mui/icons-material';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
-
-const messaging = container.resolve(MessageService);
+import { messageService } from 'tg.service/MessageService';
 
 export const ProjectTransferModal: FC<{
   open: boolean;
@@ -54,7 +51,7 @@ export const ProjectTransferModal: FC<{
       },
       {
         onSuccess() {
-          messaging.success(<T>project_transferred_message</T>);
+          messageService.success(<T>project_transferred_message</T>);
         },
         onError(e) {
           throw new Error(e);

@@ -7,9 +7,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
-import 'reflect-metadata';
-import 'regenerator-runtime/runtime';
-import { container } from 'tsyringe';
 
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
@@ -22,8 +19,8 @@ import { FullPageLoading } from './component/common/FullPageLoading';
 import { ThemeProvider } from './ThemeProvider';
 
 import reportWebVitals from './reportWebVitals';
-import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
+import { dispatchService } from 'tg.service/DispatchService';
 
 const store = configureStore();
 
@@ -33,7 +30,7 @@ const SnackbarProvider = React.lazy(() =>
   }))
 );
 
-container.resolve(DispatchService).store = store;
+dispatchService.store = store;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,8 +46,8 @@ const MainWrapper = () => {
   return (
     <React.Suspense fallback={<FullPageLoading />}>
       <TolgeeProvider
-        apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
-        apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
+        apiUrl={import.meta.env.VITE_TOLGEE_API_URL}
+        apiKey={import.meta.env.VITE_TOLGEE_API_KEY}
         staticData={{
           en: () => import('./i18n/en.json'),
           // @ts-ignore

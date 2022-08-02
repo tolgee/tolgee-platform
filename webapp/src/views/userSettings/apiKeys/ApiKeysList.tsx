@@ -2,13 +2,12 @@ import { FunctionComponent } from 'react';
 import { Box, Grid, Paper, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { container } from 'tsyringe';
 
 import { DeleteIconButton } from 'tg.component/common/buttons/DeleteIconButton';
 import { EditIconButton } from 'tg.component/common/buttons/EditIconButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
-import { MessageService } from 'tg.service/MessageService';
+import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
@@ -17,8 +16,6 @@ type ApiKeyModel = components['schemas']['ApiKeyModel'];
 interface ApiKeysListProps {
   data: ApiKeyModel[];
 }
-
-const messageService = container.resolve(MessageService);
 
 const StyledRoot = styled(Box)`
   border-bottom: 1px solid ${({ theme }) => theme.palette.emphasis.A100};
