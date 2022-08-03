@@ -7,10 +7,10 @@ import darkTheme from 'prism-react-renderer/themes/nightOwl';
 import { API_KEY_PLACEHOLDER } from 'tg.views/projects/integrate/IntegrateView';
 import { styled } from '@mui/material';
 
-(typeof global !== 'undefined' ? global : window).Prism = Prism;
-require('prismjs/components/prism-php');
-require('prismjs/components/prism-shell-session');
-require('prism-svelte');
+// (typeof global !== 'undefined' ? global : window).Prism = Prism;
+// require('prismjs/components/prism-php');
+// require('prismjs/components/prism-shell-session');
+// require('prism-svelte');
 
 const StyledCode = styled('pre')`
   border-radius: ${({ theme }) => theme.shape.borderRadius};

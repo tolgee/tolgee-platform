@@ -55,7 +55,7 @@
   "scripts": {
     "start": "vite",
     "startConcurrently": "concurrently \"craco start\"",
-    "build": "craco build",
+    "build": "tsc && vite build",
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.generated.ts",
     "billing-schema": "openapi-typescript http://localhost:8080/v3/api-docs/V2%20Billing --output ./src/service/billingApiSchema.generated.ts",
@@ -86,6 +86,7 @@
     "@babel/plugin-proposal-decorators": "^7.18.10",
     "@emotion/babel-plugin": "^11.10.0",
     "@mdx-js/loader": "1.6.22",
+    "@mdx-js/rollup": "^2.1.2",
     "@sentry/types": "^6.5.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
@@ -125,5 +126,6 @@
     "vite-plugin-mdx-react": "^1.0.1",
     "vite-plugin-static-copy": "^0.7.0",
     "webpack": "4.44.2"
-  }
+  },
+  "type": "module"
 }

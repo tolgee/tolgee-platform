@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path/posix';
 import svgr from 'vite-plugin-svgr';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import mdx from '@mdx-js/rollup';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -11,6 +12,7 @@ export default defineConfig(({ mode }) => {
     server: { host: env.HOST || 'localhost', port: Number(env.PORT) || 8080 },
     plugins: [
       svgr(),
+      mdx(),
       react(),
       viteStaticCopy({
         targets: [
