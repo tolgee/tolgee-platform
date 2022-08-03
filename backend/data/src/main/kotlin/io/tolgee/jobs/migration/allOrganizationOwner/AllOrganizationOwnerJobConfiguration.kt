@@ -82,9 +82,13 @@ class AllOrganizationOwnerJobConfiguration {
   val noOrgProjectWriter: ItemWriter<Project> = ItemWriter { items ->
     items.forEach { project ->
       val organization = organizationRepository.findUsersDefaultOrganization(project.userOwner!!)
-        ?: organizationService.create(
-          OrganizationDto(name = project.userOwner!!.name), project.userOwner!!
-        )
+        ?: let {
+          val ownerName = project.userOwner!!.name
+          val ownerNameSafe = if (ownerName.length >= 3) ownerName else "$ownerName Organization"
+          organizationService.create(
+            OrganizationDto(name = ownerNameSafe), project.userOwner!!
+          )
+        }
 
       val permission = permissionService.findOneByProjectIdAndUserId(
         projectId = project.id,
