@@ -20,7 +20,7 @@ export const guides = [
     icon: getTechnologyImgComponent('react'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/React.mdx')
+      () => import('./guides/React.mdx')
     ),
   },
   {
@@ -28,7 +28,7 @@ export const guides = [
     icon: getTechnologyImgComponent('angular'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Angular.mdx')
+      () => import('./guides/Angular.mdx')
     ),
   },
   {
@@ -36,7 +36,7 @@ export const guides = [
     icon: getTechnologyImgComponent('vue'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Vue.mdx')
+      () => import('./guides/Vue.mdx')
     ),
   },
   {
@@ -44,7 +44,7 @@ export const guides = [
     icon: getTechnologyImgComponent('next'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Next.mdx')
+      () => import('./guides/Next.mdx')
     ),
   },
   {
@@ -52,7 +52,7 @@ export const guides = [
     icon: getTechnologyImgComponent('gatsby'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Gatsby.mdx')
+      () => import('./guides/Gatsby.mdx')
     ),
   },
   {
@@ -60,7 +60,7 @@ export const guides = [
     icon: getTechnologyImgComponent('php'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Php.mdx')
+      () => import('./guides/Php.mdx')
     ),
   },
   {
@@ -68,7 +68,7 @@ export const guides = [
     icon: Code,
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Web.mdx')
+      () => import('./guides/Web.mdx')
     ),
   },
   {
@@ -76,7 +76,7 @@ export const guides = [
     icon: getTechnologyImgComponent('js'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Js.mdx')
+      () => import('./guides/Js.mdx')
     ),
   },
   {
@@ -84,7 +84,7 @@ export const guides = [
     icon: Settings,
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Rest.mdx')
+      () => import('./guides/Rest.mdx')
     ),
   },
   {
@@ -92,7 +92,7 @@ export const guides = [
     icon: getTechnologyImgComponent('svelte'),
     guide: React.lazy(
       // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Svelte.mdx')
+      () => import('./guides/Svelte.mdx')
     ),
   },
 ] as Guide[];

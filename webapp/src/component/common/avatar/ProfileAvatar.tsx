@@ -38,6 +38,9 @@ const EditButtonWrapper = styled(Box)`
 
 const StyledBox = styled(Box)`
   position: relative;
+  &:hover .button {
+    opacity: 1;
+  }
 `;
 
 const file2Base64 = (file: File): Promise<string> => {
@@ -130,6 +133,7 @@ export const ProfileAvatar: FC<{
               data-cy="avatar-menu-open-button"
               size="small"
               ref={editAvatarRef as any}
+              className="button"
             >
               <EditIcon />
             </StyledEditButton>

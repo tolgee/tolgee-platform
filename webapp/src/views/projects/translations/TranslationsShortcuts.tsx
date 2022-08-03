@@ -95,6 +95,10 @@ const StyledContent = styled('div')`
     opacity: 1;
   }
 
+  &:hover .styledItems {
+    opacity: 1;
+  }
+
   &:hover .hoverHidden {
     opacity: 1;
   }
@@ -260,7 +264,7 @@ export const TranslationsShortcuts = () => {
           contentEmpty: !collapsed && !items.length,
         })}
       >
-        <StyledItems>
+        <StyledItems className="styledItems">
           {!collapsed &&
             items.map((item, i) => {
               return (

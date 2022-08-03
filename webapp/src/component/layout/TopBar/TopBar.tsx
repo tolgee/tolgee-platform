@@ -55,6 +55,13 @@ const StyledTolgeeLink = styled(Link)`
   color: inherit;
   text-decoration: inherit;
   outline: 0;
+
+  &:focus .styledLogoWrapper {
+    filter: brightness(95%);
+  }
+  &:focus .styledLogoTitle {
+    filter: brightness(95%);
+  }
 `;
 
 const StyledIconButton = styled(IconButton)`
@@ -99,10 +106,15 @@ export const TopBar: React.FC<Props> = ({
                     pr={1}
                     display="flex"
                     justifyItems="center"
+                    className="styledLogoWrapper"
                   >
                     <TolgeeLogo fontSize="large" />
                   </StyledLogoWrapper>
-                  <StyledLogoTitle variant="h5" color="inherit">
+                  <StyledLogoTitle
+                    variant="h5"
+                    color="inherit"
+                    className="styledLogoTitle"
+                  >
                     {config.appName}
                   </StyledLogoTitle>
                   {config.showVersion && (
