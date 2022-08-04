@@ -71,6 +71,10 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
         />
+        <Box gridColumn="1">{t('billing_credits_refill')}</Box>
+        <Box gridColumn="2 / -1" data-cy="billing-actual-period">
+          {formatDate(usage.creditBalanceNextRefillAt)}
+        </Box>
         <PlanMetric
           data-cy="billing-actual-extra-credits"
           name={t('billing_actual_extra_credits', { hint: <MtHint /> })}
