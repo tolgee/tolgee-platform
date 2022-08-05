@@ -65,7 +65,10 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
             <React.Fragment key={idx}>
               <StyledItemDescription>{item.description}:</StyledItemDescription>
               <StyledItemPrice>
-                {formatMoney(item.amount)} ({formatNumber(item.taxRate)}% tax)
+                {formatMoney(item.amount)} (
+                {formatMoney(item.amount * (1 + item.taxRate / 100))}
+                {' with '}
+                {formatNumber(item.taxRate)}% tax)
               </StyledItemPrice>
             </React.Fragment>
           ))}
