@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Button, Box, styled } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -11,8 +11,8 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useTranslate } from '@tolgee/react';
 import {
   StyledBillingSection,
-  StyledBillingSectionTitle,
   StyledBillingSectionHeader,
+  StyledBillingSectionTitle,
 } from '../BillingSection';
 import { InvoicesModal } from './InvoicesModal';
 
@@ -99,7 +99,9 @@ export const Invoices: FC = () => {
                 {item.number}
               </StyledItem>
               <StyledItem>{formatDate(item.createdAt)}</StyledItem>
-              <StyledItem>{formatPrice(item.total)}</StyledItem>
+              <StyledItem>
+                {formatPrice(item.total, { maximumFractionDigits: 2 })}
+              </StyledItem>
               <StyledItem>
                 <Box>
                   <DownloadButton invoice={item} />
