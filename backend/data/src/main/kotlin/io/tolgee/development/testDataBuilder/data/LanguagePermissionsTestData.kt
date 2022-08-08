@@ -49,6 +49,8 @@ class LanguagePermissionsTestData {
       englishLanguage = addEnglish().self
       germanLanguage = addGerman().self
 
+      self.baseLanguage = englishLanguage
+
       addPermission {
         languages = mutableSetOf(englishLanguage)
         user = enOnlyUser

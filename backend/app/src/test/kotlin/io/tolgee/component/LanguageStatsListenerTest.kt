@@ -1,0 +1,55 @@
+package io.tolgee.component
+
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.executeInNewTransaction
+import org.junit.jupiter.api.Test
+import org.opentest4j.AssertionFailedError
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+
+class LanguageStatsListenerTest : AbstractControllerTest() {
+
+  @Autowired
+  private lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  private lateinit var platformTransactionManager: PlatformTransactionManager
+
+  @Test
+  fun `updates stats when added key`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+
+    val deutschStats =
+      executeInNewTransaction(platformTransactionManager) {
+        languageStatsService.getLanguageStats(projectId = testData.project.id)
+          .find { it.language.tag == "de" }
+      }
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
+      keyService.create(
+        testData.project,
+        SetTranslationsWithKeyDto(
+          key = "ho ho ho new key",
+          translations = mapOf("en" to "hello")
+        )
+      )
+    }
+
+    // it's async so lets wait until it passes
+    waitForNotThrowing(AssertionFailedError::class) {
+      executeInNewTransaction(platformTransactionManager) {
+        val newDeutschStats = languageStatsService.getLanguageStats(projectId = testData.project.id)
+          .find { it.language.tag == "de" }
+        assertThat(newDeutschStats!!.untranslatedWords - 1).isEqualTo(deutschStats?.untranslatedWords)
+      }
+    }
+  }
+}

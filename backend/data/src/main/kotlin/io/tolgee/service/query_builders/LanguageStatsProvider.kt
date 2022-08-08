@@ -34,11 +34,6 @@ open class LanguageStatsProvider(
     return entityManager.createQuery(query).resultList
   }
 
-  fun getResultForMultipleProjects(): Map<Long, List<ProjectLanguageStatsResultView>> {
-    initQuery()
-    return entityManager.createQuery(query).resultList.groupBy { it.projectId }
-  }
-
   private fun initQuery() {
     val counts = listOf(TranslationState.TRANSLATED, TranslationState.REVIEWED).map { state ->
       selectWordCount(state) to selectKeyCount(state)

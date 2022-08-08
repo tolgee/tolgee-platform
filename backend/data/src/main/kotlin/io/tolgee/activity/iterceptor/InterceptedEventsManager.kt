@@ -106,7 +106,7 @@ class InterceptedEventsManager(
 
   private fun getModifiedEntity(entity: EntityWithId): ActivityModifiedEntity {
     val activityModifiedEntity = activityHolder.modifiedEntities
-      .computeIfAbsent(entity::class.simpleName!!) { mutableMapOf() }
+      .computeIfAbsent(entity::class) { mutableMapOf() }
       .computeIfAbsent(
         entity.id
       ) {

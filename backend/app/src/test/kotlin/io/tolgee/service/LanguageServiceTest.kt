@@ -25,10 +25,10 @@ class LanguageServiceTest : AbstractSpringTest() {
 
     var foundImportLanguage = importService.findLanguages(testData.import).first()
     assertThat(foundImportLanguage.existingLanguage!!.id).isEqualTo(testData.english.id)
-    languageService.deleteLanguage(testData.english.id)
+    languageService.deleteLanguage(testData.german.id)
     entityManager.flush()
     entityManager.clear()
-    foundImportLanguage = importService.findLanguages(testData.import).first()
+    foundImportLanguage = importService.findLanguages(testData.import).find { it.name == "de" }!!
     assertThat(foundImportLanguage.existingLanguage).isEqualTo(null)
   }
 

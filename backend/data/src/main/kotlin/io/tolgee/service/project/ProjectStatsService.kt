@@ -3,12 +3,11 @@ package io.tolgee.service.project
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
+import io.tolgee.model.LanguageStats
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
-import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
-import io.tolgee.service.query_builders.LanguageStatsProvider
 import io.tolgee.service.query_builders.ProjectStatsProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,13 +21,6 @@ class ProjectStatsService(
   private val entityManager: EntityManager,
   private val activityRevisionRepository: ActivityRevisionRepository
 ) {
-  fun getLanguageStats(projectId: Long): List<ProjectLanguageStatsResultView> {
-    return LanguageStatsProvider(entityManager, listOf(projectId)).getResultForSingleProject()
-  }
-
-  fun getLanguageStats(projectIds: List<Long>): Map<Long, List<ProjectLanguageStatsResultView>> {
-    return LanguageStatsProvider(entityManager, projectIds).getResultForMultipleProjects()
-  }
 
   fun getProjectStats(projectId: Long): ProjectStatsView {
     return ProjectStatsProvider(entityManager, projectId).getResult()
@@ -63,14 +55,15 @@ class ProjectStatsService(
 
   fun computeProjectTotals(
     baseLanguage: Language?,
-    languageStats: List<ProjectLanguageStatsResultView>
+    languageStats: List<LanguageStats>
   ): ProjectStateTotals {
-    val baseStats = languageStats.find { it.languageId == baseLanguage?.id }
+    baseLanguage ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+    val baseStats = languageStats.find { it.language.id == baseLanguage.id }
       ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
+    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage.id }
 
-    val nonBaseLanguages = languageStats.filter { it.languageId != baseStats.languageId }
     val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
     val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
     val allNonBaseTotalReviewedWords = nonBaseLanguages.sumOf { it.reviewedWords }
@@ -87,7 +80,7 @@ class ProjectStatsService(
   }
 
   data class ProjectStateTotals(
-    val baseStats: ProjectLanguageStatsResultView,
+    val baseStats: LanguageStats,
     val baseWordsCount: Long,
     val translatedPercent: Double,
     val reviewedPercent: Double
