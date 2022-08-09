@@ -7,12 +7,14 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModel
+import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
 import org.springframework.hateoas.MediaTypes
@@ -31,7 +33,9 @@ import java.time.LocalDate
 class ProjectStatsController(
   private val projectStatsService: ProjectStatsService,
   private val projectHolder: ProjectHolder,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
+  private val languageStatsService: LanguageStatsService,
+  private val languageStatsModelAssembler: LanguageStatsModelAssembler
 ) {
   @Operation(summary = "Returns project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -39,8 +43,11 @@ class ProjectStatsController(
   @AccessWithApiKey
   fun getProjectStats(@PathVariable projectId: Long): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectId)
-    val languageStats = projectStatsService.getLanguageStats(projectId)
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
+    val languageStats = languageStatsService.getLanguageStats(projectId)
+      .sortedBy { it.language.name }
+      .sortedBy { it.language.id != baseLanguage?.id }
+
     val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
     return ProjectStatsModel(
@@ -52,7 +59,7 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = getSortedLanguageStatModels(languageStats, totals.baseStats, projectStats)
+      languageStats = languageStats.map { languageStatsModelAssembler.toModel(it) }
     )
   }
 

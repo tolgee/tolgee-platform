@@ -38,6 +38,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
@@ -172,6 +173,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var transactionTemplate: TransactionTemplate
+
+  @Autowired
+  lateinit var languageStatsService: LanguageStatsService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

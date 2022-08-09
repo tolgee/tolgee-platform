@@ -126,6 +126,7 @@ dependencies {
      * MISC
      */
     implementation(project(':misc'))
+    implementation 'org.postgresql:postgresql'
 }
 
 test {
