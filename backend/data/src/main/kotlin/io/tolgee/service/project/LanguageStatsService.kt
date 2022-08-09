@@ -81,7 +81,7 @@ class LanguageStatsService(
     val data = languageStatsRepository.getAllByProjectIds(projectIds).groupByProjects()
 
     val emptyProjects = data.filter { it.value.isEmpty() }
-    if (emptyProjects.isEmpty()) {
+    if (emptyProjects.isNotEmpty()) {
       return data
     }
 
