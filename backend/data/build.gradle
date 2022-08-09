@@ -12,9 +12,9 @@ plugins {
     id 'io.spring.dependency-management'
     id 'org.springframework.boot'
     id 'java'
-    id 'org.liquibase.gradle' version "${liquibaseGradleVersion}"
+    id 'org.liquibase.gradle'
     id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
+    id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
 }
@@ -79,12 +79,6 @@ compileKotlin {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-/**
- * Versions from properties
- */
-def JJWT_VERSION = findProperty("jjwtVersion")
-def SPRING_DOC_VERSION = findProperty("springDocVersion")
-
 dependencies {
     /**
      * SPRING
@@ -112,67 +106,65 @@ dependencies {
     /**
      * Liquibase
      */
-    implementation("org.liquibase:liquibase-core:$liquibaseVersion")
-    liquibaseRuntime("org.liquibase:liquibase-core:$liquibaseVersion")
+    implementation libs.liquibaseCore
+    liquibaseRuntime libs.liquibaseCore
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
-    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$liquibaseHibernateVersion")
-    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    liquibaseRuntime libs.liquibaseHibernate
+    liquibaseRuntime libs.kotlinReflect
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     /**
      * Testing
      */
-    implementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
-    implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
-    implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
+    implementation libs.assertJCore
+    implementation libs.springmockk
+    testImplementation libs.mockito
+    implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
 
     /**
      * Kotlin
      */
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-
+    implementation libs.kotlinReflect
+    liquibaseRuntime libs.kotlinReflect
+    implementation libs.kotlinCoroutines
 
     /**
      * SPRING DOC
      */
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
-    implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
-
+    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocOpenApiKotlin
 
     /**
      * MISC
      */
-    implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
+    implementation libs.commonsCodec
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-    implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
-    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
-    implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
-            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    implementation libs.icu4j
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
     implementation libs.jacksonModuleKotlin
     implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
-    implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
+    implementation libs.sentry
     implementation "com.vladmihalcea:hibernate-types-55:2.14.1"
     liquibaseRuntime "com.vladmihalcea:hibernate-types-55:2.14.1"
 
     /**
      * Google translation API
      */
-    implementation platform("com.google.cloud:libraries-bom:${findProperty("googleCloudVersion")}")
+    implementation platform(libs.googleCloud)
     implementation 'com.google.cloud:google-cloud-translate'
 
     /**
      * AWS
      */
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
+    implementation libs.amazonS3
+    implementation libs.amazonTranslate
 
     /**
      * MISC MODULE
