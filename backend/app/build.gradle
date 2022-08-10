@@ -9,11 +9,11 @@ buildscript {
 }
 
 plugins {
-    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
-    id 'org.springframework.boot' version "$springBootVersion"
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot'
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
+    id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
 }
@@ -69,8 +69,6 @@ compileKotlin {
 /**
  * Versions from properties
  */
-def JJWT_VERSION = findProperty("jjwtVersion")
-def SPRING_DOC_VERSION = findProperty("springDocVersion")
 
 def NETTY_SOCKET_IO_VERSION = "1.7.19"
 
@@ -96,58 +94,57 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
-
+    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocOpenApiUi
+    implementation libs.springDocOpenApiKotlin
+    implementation libs.springDocOpenApiDataRest
+    implementation libs.springDocOpenApiHateoas
 
     /**
      * TESTING
      */
-    testImplementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
+    testImplementation libs.assertJCore
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
-    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
-            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
-    implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
-    implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
-    testCompile("io.findify:s3mock_2.13:0.2.6")
-    testImplementation("io.socket:socket.io-client:1.0.1")
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
+    implementation libs.springmockk
+    implementation libs.jsonUnitAssert
+    testImplementation libs.mockito
+    testImplementation("io.findify:s3mock_2.13:0.2.6")
+    testImplementation("io.socket:socket.io-client:2.1.0")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
+    testImplementation libs.sendInBlue
 
     /**
      * MISC
      */
-    implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
-    implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
-    implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
+    implementation libs.sentry
+    implementation libs.commonsCodec
+    implementation libs.amazonS3
+    implementation libs.icu4j
     implementation("com.corundumstudio.socketio:netty-socketio:$NETTY_SOCKET_IO_VERSION")
     implementation("org.redisson:redisson-spring-boot-starter:3.16.1")
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+    implementation libs.jacksonModuleKotlin
 
     /**
      * KOTLIN
      */
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation libs.kotlinReflect
+    implementation libs.kotlinCoroutines
 
     /**
      * Google translation API
      */
-    implementation platform("com.google.cloud:libraries-bom:${findProperty("googleCloudVersion")}")
+    implementation platform(libs.googleCloud)
     implementation 'com.google.cloud:google-cloud-translate'
 
     /**
      * Aws translate
      */
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
+    implementation libs.amazonTranslate
 
     /**
      * Conditional billing module
