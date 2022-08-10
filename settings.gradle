@@ -12,6 +12,47 @@ pluginManagement {
             if (requested.id.id == 'kotlin-allopen') {
                 useModule("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
             }
+
+            if (requested.id.id == 'kotlin-jpa') {
+                useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
+            }
+
+            if (requested.id.id == 'org.liquibase.gradle') {
+                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.1.1')
+            }
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('stripe', 'com.stripe', 'stripe-java').version('20.88.0')
+            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
+            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4')
+            library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
+            library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
+            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.6.1')
+            library('springDocOpenApiWebMvcCore', 'org.springdoc', 'springdoc-openapi-webmvc-core').version(springDocVersion)
+            library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-ui').version(springDocVersion)
+            library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
+            library('springDocOpenApiDataRest', 'org.springdoc', 'springdoc-openapi-data-rest').version(springDocVersion)
+            library('springDocOpenApiHateoas', 'org.springdoc', 'springdoc-openapi-hateoas').version(springDocVersion)
+            library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
+            library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
+            library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
+            library('assertJCore', 'org.assertj:assertj-core:3.23.1')
+            library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
+            library('mockito', 'org.mockito.kotlin:mockito-kotlin:3.2.0')
+            library('commonsCodec', 'commons-codec:commons-codec:1.15')
+            library('icu4j', 'com.ibm.icu:icu4j:69.1')
+            library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')
+            library('amazonS3', "com.amazonaws:aws-java-sdk-s3:$amazonAwsSdkVersion")
+            library('amazonTranslate', "com.amazonaws:aws-java-sdk-translate:$amazonAwsSdkVersion")
+            library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
+            library('sentry', "io.sentry:sentry-spring-boot-starter:5.7.3")
+            library('liquibaseCore', "org.liquibase:liquibase-core:4.9.1")
+            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate5:4.9.1")
         }
     }
 }
@@ -23,10 +64,10 @@ include ':data'
 project(':data').projectDir = new File('backend/data')
 
 include ':billing-app'
-project(':billing-app').projectDir = new File('../billing_/app')
+project(':billing-app').projectDir = new File('../billing/app')
 
-include ':billing-integration-tests'
-project(':billing-integration-tests').projectDir = new File('../billing_/integration-tests')
+include ':billing-test'
+project(':billing-test').projectDir = new File('../billing/tests')
 
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')
