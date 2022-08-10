@@ -4,6 +4,7 @@
 
 package io.tolgee.model
 
+import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
@@ -19,6 +20,10 @@ class UploadedImage(
   var userAccount: UserAccount
 ) : StandardAuditModel() {
 
+  @ColumnDefault("jpg")
+  var extension: String? = null
+    get() = field ?: "jpg"
+
   val filenameWithExtension
-    get() = "$filename.jpg"
+    get() = "$filename.$extension"
 }

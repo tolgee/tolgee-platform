@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.MaxUploadedFilesByUserProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -24,7 +25,8 @@ import kotlin.streams.asSequence
 class ImageUploadService(
   val uploadedImageRepository: UploadedImageRepository,
   val fileStorage: FileStorage,
-  val dateProvider: CurrentDateProvider
+  val dateProvider: CurrentDateProvider,
+  val maxUploadedFilesByUserProvider: MaxUploadedFilesByUserProvider
 ) {
   val logger = LoggerFactory.getLogger(ImageUploadService::class.java)
 
@@ -34,14 +36,15 @@ class ImageUploadService(
 
   @Transactional
   fun store(image: InputStreamSource, userAccount: UserAccount): UploadedImage {
-    if (uploadedImageRepository.countAllByUserAccount(userAccount) > 100L) {
+    if (uploadedImageRepository.countAllByUserAccount(userAccount) > maxUploadedFilesByUserProvider()) {
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
 
     val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
+      .apply { extension = "png" }
 
     save(uploadedImageEntity)
-    val processedImage = ImageConverter(image.inputStream).prepareImage()
+    val processedImage = ImageConverter(image.inputStream).getImage()
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
     return uploadedImageEntity
   }

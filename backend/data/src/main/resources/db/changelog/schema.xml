@@ -2041,4 +2041,22 @@
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1660131948206-1">
+        <addColumn tableName="screenshot">
+            <column name="extension" type="varchar(255)" defaultValue="jpg"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1660131948206-2">
+        <addColumn tableName="uploaded_image">
+            <column name="extension" type="varchar(255)" defaultValue="jpg"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1660138859764-3">
+        <addColumn tableName="screenshot">
+            <column name="has_thumbnail" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1660139102933-1">
+        <addNotNullConstraint columnDataType="boolean" columnName="has_thumbnail" tableName="screenshot" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

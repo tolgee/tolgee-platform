@@ -10,43 +10,47 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.sqrt
 
 class ImageConverter(
-  private val imageStream: InputStream
+  private val imageStream: InputStream,
 ) {
-  lateinit var sourceBufferedImage: BufferedImage
-  lateinit var resultBufferedImage: BufferedImage
-  lateinit var resultingTargetDimension: Dimension
-  lateinit var imageWriter: ImageWriter
-
-  fun prepareImage(
-    compressionQuality: Float = 0.5f,
-    targetDimension: Dimension? = null,
-    format: String = "jpg"
-  ): ByteArrayOutputStream {
-    sourceBufferedImage = ImageIO.read(imageStream)
-    resultingTargetDimension = targetDimension ?: getTargetDimension()
-    imageWriter = getWriter(format)
-    val resizedImage = getScaledImage()
-    resultBufferedImage = getResultBufferedImage(format, resizedImage)
-    return writeImage(compressionQuality)
+  private val sourceBufferedImage: BufferedImage by lazy {
+    ImageIO.read(imageStream)
   }
 
-  private fun writeImage(compressionQuality: Float): ByteArrayOutputStream {
-    val writerParams = getWriterParams(compressionQuality)
+  fun getImage(compressionQuality: Float = 0.5f, targetDimension: Dimension? = null): ByteArrayOutputStream {
+    val resizedImage = getScaledImage(targetDimension)
+    val bufferedImage = convertToBufferedImage(resizedImage)
+    return writeImage(bufferedImage, compressionQuality)
+  }
+
+  fun getThumbNail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
+    val side = min(sourceBufferedImage.width, sourceBufferedImage.height)
+    val x = (sourceBufferedImage.width - side) / 2
+    val y = (sourceBufferedImage.height - side) / 2
+    val cropped = sourceBufferedImage.getSubimage(x, y, side, side)
+    val resizedImage = cropped.getScaledInstance(size, size, Image.SCALE_SMOOTH)
+    val bufferedImage = convertToBufferedImage(resizedImage)
+    return writeImage(bufferedImage, compressionQuality)
+  }
+
+  private fun writeImage(bufferedImage: BufferedImage, compressionQuality: Float): ByteArrayOutputStream {
+    val imageWriter = getWriter()
+    val writerParams = getWriterParams(imageWriter, compressionQuality)
     val outputStream = ByteArrayOutputStream()
     val imageOutputStream = ImageIO.createImageOutputStream(outputStream)
     imageWriter.output = imageOutputStream
-    imageWriter.write(null, IIOImage(resultBufferedImage, null, null), writerParams)
+    imageWriter.write(null, IIOImage(bufferedImage, null, null), writerParams)
     outputStream.close()
     imageOutputStream.close()
     imageWriter.dispose()
     return outputStream
   }
 
-  private fun getWriterParams(compressionQuality: Float): ImageWriteParam? {
-    val writerParams = imageWriter.defaultWriteParam
+  private fun getWriterParams(writer: ImageWriter, compressionQuality: Float): ImageWriteParam? {
+    val writerParams = writer.defaultWriteParam
     if (compressionQuality > 0) {
       writerParams.compressionMode = ImageWriteParam.MODE_EXPLICIT
       writerParams.compressionQuality = compressionQuality
@@ -54,21 +58,19 @@ class ImageConverter(
     return writerParams
   }
 
-  private fun getResultBufferedImage(format: String, resizedImage: Image): BufferedImage {
-    val colorSpace = if (format == "jpg") BufferedImage.TYPE_INT_RGB else BufferedImage.TYPE_INT_ARGB
-    val resultBufferedImage = convertToBufferedImage(resizedImage, colorSpace)
-    return resultBufferedImage
+  private fun getScaledImage(targetDimension: Dimension?): Image {
+    val resultingTargetDimension = targetDimension ?: getTargetDimension()
+    return sourceBufferedImage.getScaledInstance(
+      resultingTargetDimension.width,
+      resultingTargetDimension.height,
+      Image.SCALE_SMOOTH
+    )
   }
 
-  private fun getScaledImage() = sourceBufferedImage.getScaledInstance(
-    resultingTargetDimension.width,
-    resultingTargetDimension.height,
-    Image.SCALE_SMOOTH
-  )
-
-  private fun getWriter(format: String) = ImageIO.getImageWritersByFormatName(format).next() as ImageWriter
+  private fun getWriter() = ImageIO.getImageWritersByFormatName("png").next() as ImageWriter
 
   private fun getTargetDimension(): Dimension {
+
     val imagePxs = sourceBufferedImage.height * sourceBufferedImage.width
     val maxPxs = 3000000
     val newHeight = floor(sqrt(maxPxs.toDouble() * sourceBufferedImage.height / sourceBufferedImage.width)).toInt()
@@ -80,15 +82,13 @@ class ImageConverter(
     return Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
-  private fun convertToBufferedImage(img: Image, colorSpace: Int): BufferedImage {
+  private fun convertToBufferedImage(img: Image): BufferedImage {
     if (img is BufferedImage) {
       return img
     }
-
-    // Create a buffered image with transparency
     val bi = BufferedImage(
       img.getWidth(null), img.getHeight(null),
-      colorSpace
+      BufferedImage.TYPE_INT_ARGB
     )
     val graphics2D = bi.createGraphics()
     graphics2D.drawImage(img, 0, 0, null)

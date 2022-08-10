@@ -39,14 +39,20 @@ class ScreenshotService(
         listOf(tolgeeProperties.maxScreenshotsPerKey)
       )
     }
-    val image = ImageConverter(screenshotImage.inputStream).prepareImage()
-    return storeProcessed(image.toByteArray(), key)
+    val converter = ImageConverter(screenshotImage.inputStream)
+    val image = converter.getImage()
+    val thumbnail = converter.getThumbNail()
+    return storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
   }
 
-  fun storeProcessed(image: ByteArray, key: Key): Screenshot {
-    val screenshotEntity = Screenshot().also { it.key = key }
+  fun storeProcessed(image: ByteArray, thumbnail: ByteArray, key: Key): Screenshot {
+    val screenshotEntity = Screenshot().also {
+      it.key = key
+      it.extension = "png"
+    }
     key.screenshots.add(screenshotEntity)
     screenshotRepository.save(screenshotEntity)
+    fileStorage.storeFile(screenshotEntity.getThumbnailPath(), thumbnail)
     fileStorage.storeFile(screenshotEntity.getFilePath(), image)
     return screenshotEntity
   }
@@ -65,7 +71,8 @@ class ScreenshotService(
         .readFile(
           UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + uploadedImageEntity.filenameWithExtension
         )
-      storeProcessed(data, key)
+      val thumbnail = ImageConverter(data.inputStream()).getThumbNail()
+      storeProcessed(data, thumbnail.toByteArray(), key)
       imageUploadService.delete(uploadedImageEntity)
     }
   }
@@ -89,19 +96,19 @@ class ScreenshotService(
   fun deleteAllByProject(projectId: Long) {
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteInBatch(all)
+    screenshotRepository.deleteAllInBatch(all)
   }
 
   fun deleteAllByKeyId(keyId: Long) {
     val all = screenshotRepository.getAllByKeyId(keyId)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteInBatch(all)
+    screenshotRepository.deleteAllInBatch(all)
   }
 
   fun deleteAllByKeyId(keyIds: Collection<Long>) {
     val all = screenshotRepository.getAllByKeyIdIn(keyIds)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteInBatch(all)
+    screenshotRepository.deleteAllInBatch(all)
   }
 
   private fun deleteFile(screenshot: Screenshot) {
@@ -110,6 +117,10 @@ class ScreenshotService(
 
   private fun Screenshot.getFilePath(): String {
     return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.filename}"
+  }
+
+  private fun Screenshot.getThumbnailPath(): String {
+    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.thumbnailFilename}"
   }
 
   fun saveAll(screenshots: List<Screenshot>) {

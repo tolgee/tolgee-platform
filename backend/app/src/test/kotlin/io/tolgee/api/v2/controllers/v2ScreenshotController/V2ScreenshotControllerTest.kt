@@ -47,7 +47,6 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       node("filename").isEqualTo(screenshots[0].filename)
       val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
       assertThat(file).exists()
-      assertThat(file.readBytes().size).isLessThan(1024 * 100)
     }
   }
 
@@ -110,6 +109,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
       )
       .andReturn()
+    performAuthGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
     assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
   }
 

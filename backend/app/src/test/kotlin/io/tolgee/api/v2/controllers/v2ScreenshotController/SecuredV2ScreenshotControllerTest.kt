@@ -55,7 +55,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
-    val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
+    val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
 
     val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
       .andExpect(status().isBadRequest)
@@ -72,7 +72,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
-    val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
+    val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
 
     performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
       .andExpect(status().isOk)
@@ -89,9 +89,10 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       assertThat(screenshots).hasSize(1)
       val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
       assertThat(file).exists()
-      assertThat(file.readBytes().size).isLessThan(1024 * 100)
+      assertThat(file.readBytes().size).isEqualTo(138412)
       node("filename").isString.startsWith(screenshots[0].filename).satisfies {
-        timestampValidation.checkTimeStamp(it.split("timestamp=")[1])
+        val parts = it.split("?timestamp=")
+        timestampValidation.checkTimeStamp(parts[0], parts[1])
       }
     }
   }
@@ -103,7 +104,8 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     screenshotService.store(screenshotFile, key)
     performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
       node("_embedded.screenshots[0].filename").isString.satisfies {
-        timestampValidation.checkTimeStamp(it.split("timestamp=")[1])
+        val parts = it.split("?timestamp=")
+        timestampValidation.checkTimeStamp(parts[0], parts[1])
       }
     }
   }

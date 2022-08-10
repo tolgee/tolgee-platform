@@ -57,7 +57,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it exports to single xliff`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
-      .andDo { obj: MvcResult -> obj.asyncResult }
+      .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
     assertThat(response.andReturn().response.getHeaderValue("content-type"))
       .isEqualTo("application/x-xliff+xml")

@@ -5,10 +5,9 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
-import { Skeleton } from '@mui/material';
 import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -47,10 +46,12 @@ const StyledAddBox = styled('div')`
   border-color: ${({ theme }) => theme.palette.emphasis[200]};
   color: ${({ theme }) => theme.palette.emphasis[200]};
   border: 1px dashed ${({ theme }) => theme.palette.emphasis[200]};
+
   &:hover {
     border-color: ${({ theme }) => theme.palette.primary.main};
     color: ${({ theme }) => theme.palette.primary.main};
   }
+
   flex: '0 0 auto';
 `;
 
@@ -89,6 +90,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   });
 
   const [detailFileName, setDetailFileName] = useState(null as string | null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}',
@@ -273,7 +275,10 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
             {screenshotsLoadable.data?._embedded?.screenshots?.map((s) => (
               <ScreenshotThumbnail
                 key={s.id}
-                onClick={() => setDetailFileName(s.filename)}
+                onClick={() => {
+                  setDetailFileName(s.filename);
+                  setDetailOpen(true);
+                }}
                 screenshotData={s}
                 onDelete={onDelete}
               />
@@ -300,7 +305,8 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
       </ScreenshotDropzone>
       <ScreenshotDetail
         fileName={detailFileName as string}
-        onClose={() => setDetailFileName(null)}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
       />
     </>
   );

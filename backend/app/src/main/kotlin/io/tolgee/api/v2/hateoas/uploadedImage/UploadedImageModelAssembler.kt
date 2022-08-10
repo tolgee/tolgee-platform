@@ -20,7 +20,8 @@ class UploadedImageModelAssembler(
   override fun toModel(entity: UploadedImage): UploadedImageModel {
     var filename = entity.filenameWithExtension
     if (tolgeeProperties.authentication.securedImageRetrieval) {
-      filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
+      filename = filename + "?timestamp=" + timestampValidation
+        .encryptTimeStamp(entity.filenameWithExtension, Date().time)
     }
 
     var fileUrl = "${tolgeeProperties.fileStorageUrl}/${FileStoragePath.UPLOADED_IMAGES}/$filename"

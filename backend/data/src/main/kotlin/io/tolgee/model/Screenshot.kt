@@ -8,6 +8,7 @@ import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.model.key.Key
 import org.apache.commons.codec.digest.DigestUtils
+import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
@@ -20,10 +21,29 @@ class Screenshot : StandardAuditModel() {
 
   val filename: String
     get() {
-      val nameToHash = "${this.id}_${this.createdAt!!.toInstant().toEpochMilli()}"
-      val fileName = DigestUtils.sha256Hex(nameToHash.toByteArray())
-      return "${key.project.id}/${key.id}/$fileName.jpg"
+      return "${key.project.id}/${key.id}/$hash.$extension"
     }
+
+  val thumbnailFilename: String
+    get() {
+      if (!hasThumbnail) {
+        return filename
+      }
+      return "${key.project.id}/${key.id}/${hash}_thumbnail.$extension"
+    }
+
+  val hash: String
+    get() {
+      val nameToHash = "${this.id}_${this.createdAt!!.toInstant().toEpochMilli()}"
+      return DigestUtils.sha256Hex(nameToHash.toByteArray())
+    }
+
+  @ColumnDefault("jpg")
+  var extension: String? = null
+    get() = field ?: "jpg"
+
+  @ColumnDefault("false")
+  var hasThumbnail: Boolean = true
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
