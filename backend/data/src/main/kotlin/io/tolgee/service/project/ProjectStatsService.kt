@@ -1,7 +1,5 @@
 package io.tolgee.service.project
 
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.Project
@@ -57,12 +55,11 @@ class ProjectStatsService(
     baseLanguage: Language?,
     languageStats: List<LanguageStats>
   ): ProjectStateTotals {
-    baseLanguage ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
-    val baseStats = languageStats.find { it.language.id == baseLanguage.id }
-      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+    val baseStats = languageStats.find { it.language.id == baseLanguage?.id }
+      ?: return ProjectStateTotals(0, 0.0, 0.0)
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
-    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage.id }
+    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage?.id }
 
     val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
     val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
@@ -72,7 +69,6 @@ class ProjectStatsService(
     val reviewedPercent = (allNonBaseTotalReviewedWords.toDouble() / allNonBaseTotalBaseWords) * 100
 
     return ProjectStateTotals(
-      baseStats = baseStats,
       baseWordsCount = baseWordsCount,
       translatedPercent = translatedPercent,
       reviewedPercent = reviewedPercent
@@ -80,7 +76,6 @@ class ProjectStatsService(
   }
 
   data class ProjectStateTotals(
-    val baseStats: LanguageStats,
     val baseWordsCount: Long,
     val translatedPercent: Double,
     val reviewedPercent: Double

@@ -1,8 +1,6 @@
 package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
@@ -29,7 +27,7 @@ class LanguageStatsService(
       val allRawLanguageStats = getLanguageStatsRaw(projectId)
       val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
       val rawBaseLanguageStats = allRawLanguageStats.find { it.languageId == baseLanguage?.id }
-        ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+        ?: return@withLocking
       val projectStats = projectStatsService.getProjectStats(projectId)
       val languageStats = languageStatsRepository.getAllByProjectId(projectId)
         .associateBy { it.language.id }
@@ -80,13 +78,13 @@ class LanguageStatsService(
   fun getLanguageStats(projectIds: List<Long>): Map<Long, List<LanguageStats>> {
     val data = languageStatsRepository.getAllByProjectIds(projectIds).groupByProjects()
 
-    val emptyProjects = data.filter { it.value.isEmpty() }
-    if (emptyProjects.isNotEmpty()) {
+    val emptyProjectsIds = projectIds.filter { data[it].isNullOrEmpty() }
+    if (emptyProjectsIds.isEmpty()) {
       return data
     }
 
-    emptyProjects.forEach {
-      refreshLanguageStats(it.key)
+    emptyProjectsIds.forEach {
+      refreshLanguageStats(it)
     }
 
     return languageStatsRepository.getAllByProjectIds(projectIds).groupByProjects()
