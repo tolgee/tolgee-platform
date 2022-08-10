@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { Administration } from 'tg.views/administration/Administration';
+import { OrganizationRedirectHandler } from './security/OrganizationRedirectHandler';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -67,6 +68,9 @@ export const RootRouter = () => (
     <Route path={LINKS.ACCEPT_INVITATION.template}>
       <AcceptInvitationHandler />
     </Route>
+    <PrivateRoute path={LINKS.GO_TO_ORGANIZATION.template}>
+      <OrganizationRedirectHandler />
+    </PrivateRoute>
     <PrivateRoute exact path={LINKS.ROOT.template}>
       <Redirect to={LINKS.PROJECTS.template} />
     </PrivateRoute>
