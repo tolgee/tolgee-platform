@@ -1,3 +1,10 @@
+## [2.32.6](https://github.com/tolgee/tolgee-platform/compare/v2.32.5...v2.32.6) (2022-08-10)
+
+
+### Bug Fixes
+
+* Editor end button ([30ac376](https://github.com/tolgee/tolgee-platform/commit/30ac3760848b834ea08f79afad7758c6f0e13785))
+
 ## [2.32.5](https://github.com/tolgee/tolgee-platform/compare/v2.32.4...v2.32.5) (2022-07-27)
 
 
