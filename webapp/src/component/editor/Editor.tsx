@@ -172,6 +172,8 @@ export const Editor: React.FC<Props> = ({
       Esc: () => onCancel?.(),
       Tab: false,
       'Shift-Tab': false,
+      End: 'goLineRight',
+      Home: 'goLineLeft',
       ...shortcuts,
     },
     gutters: ['CodeMirror-lint-markers'],
