@@ -2,8 +2,6 @@ import { default as React, FunctionComponent } from 'react';
 import { Box, Step, StepContent, StepLabel, Stepper } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { WeaponSelector } from 'tg.views/projects/integrate/component/WeaponSelector';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -11,6 +9,7 @@ import { ApiKeySelector } from 'tg.views/projects/integrate/component/ApiKeySele
 import { MdxProvider } from 'tg.component/MdxProvider';
 import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState';
 import { useProject } from 'tg.hooks/useProject';
+import { BaseProjectView } from '../BaseProjectView';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
@@ -30,21 +29,12 @@ export const IntegrateView: FunctionComponent = () => {
   const t = useTranslate();
 
   return (
-    <BaseView
+    <BaseProjectView
       windowTitle={t('project_integrate_title')}
       navigation={[
         [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
-        [
-          <span key={''} data-cy={'integrate-navigation-title'}>
-            <T>project_integrate_title</T>
-          </span>,
-          LINKS.PROJECT_EXPORT.build({
+          t('project_integrate_title'),
+          LINKS.PROJECT_INTEGRATE.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
         ],
@@ -109,6 +99,6 @@ export const IntegrateView: FunctionComponent = () => {
           </StepContent>
         </Step>
       </Stepper>
-    </BaseView>
+    </BaseProjectView>
   );
 };

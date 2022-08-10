@@ -63,7 +63,7 @@ describe('Avatars', () => {
 
   describe('User avatar', () => {
     beforeEach(() => {
-      cy.visit(HOST + '/user');
+      cy.visit(HOST + '/account/profile');
     });
 
     it('shows the avatar in the user menu', () => {
@@ -127,6 +127,7 @@ function validateUploadedAvatar(
 }
 
 function selectFile() {
+  cy.wait(100);
   gcy('avatar-menu-open-button').click();
   gcy('avatar-upload-button').click();
   gcy('avatar-upload-file-input').attachFile('avatars/pepi.jpg');

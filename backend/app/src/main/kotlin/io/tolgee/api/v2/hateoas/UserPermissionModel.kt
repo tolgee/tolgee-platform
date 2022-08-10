@@ -15,5 +15,5 @@ class UserPermissionModel(
     description = "The type of permission.",
     example = "EDIT"
   )
-  val type: Permission.ProjectPermissionType
+  val type: Permission.ProjectPermissionType?
 )

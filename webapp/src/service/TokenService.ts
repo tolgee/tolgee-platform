@@ -1,19 +1,32 @@
 import { singleton } from 'tsyringe';
 
-const LOCAL_STORAGE_KEY = 'jwtToken';
+export const JWT_LOCAL_STORAGE_KEY = 'jwtToken';
+export const ADMIN_JWT_LOCAL_STORAGE_KEY = 'adminJwtToken';
 
 @singleton()
 export class TokenService {
   getToken() {
-    return localStorage.getItem(LOCAL_STORAGE_KEY);
+    return localStorage.getItem(JWT_LOCAL_STORAGE_KEY);
   }
 
   disposeToken() {
-    return localStorage.removeItem(LOCAL_STORAGE_KEY);
+    return localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
   }
 
   setToken(token: string) {
-    return localStorage.setItem(LOCAL_STORAGE_KEY, token);
+    return localStorage.setItem(JWT_LOCAL_STORAGE_KEY, token);
+  }
+
+  getAdminToken() {
+    return localStorage.getItem(ADMIN_JWT_LOCAL_STORAGE_KEY);
+  }
+
+  disposeAdminToken() {
+    return localStorage.removeItem(ADMIN_JWT_LOCAL_STORAGE_KEY);
+  }
+
+  setAdminToken(token: string) {
+    return localStorage.setItem(ADMIN_JWT_LOCAL_STORAGE_KEY, token);
   }
 
   getParsed() {

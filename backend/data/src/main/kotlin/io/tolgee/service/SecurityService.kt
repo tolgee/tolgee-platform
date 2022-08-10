@@ -1,7 +1,6 @@
 package io.tolgee.service
 
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
@@ -13,7 +12,6 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SecurityService @Autowired constructor(
@@ -30,32 +28,28 @@ class SecurityService @Autowired constructor(
   @set:Autowired
   lateinit var userAccountService: UserAccountService
 
-  @Transactional
-  fun grantFullAccessToRepo(project: Project, userId: Long = activeUser.id) {
-    permissionService.grantFullAccessToProject(
-      userAccountService[userId]
-        .orElseThrow { InvalidStateException() }!!,
-      project
-    )
-  }
-
-  fun checkAnyProjectPermission(projectId: Long): ProjectPermissionType {
-    return getProjectPermission(projectId) ?: throw PermissionException()
+  fun checkAnyProjectPermission(projectId: Long) {
+    if (getProjectPermission(projectId) == null && !isCurrentUserServerAdmin()) throw PermissionException()
   }
 
   fun checkAnyProjectPermission(projectId: Long, userId: Long): ProjectPermissionType {
     return getProjectPermission(projectId, userId) ?: throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
-    val usersPermission = checkAnyProjectPermission(projectId)
-    if (requiredPermission.power > usersPermission.power) {
+  fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType) {
+    if (isCurrentUserServerAdmin()) {
+      return
+    }
+    val usersPermission = getProjectPermission(projectId) ?: throw PermissionException()
+    if (requiredPermission.power > usersPermission.power && !isCurrentUserServerAdmin()) {
       throw PermissionException()
     }
-    return usersPermission
   }
 
   fun checkLanguageTranslatePermission(projectId: Long, languageIds: Collection<Long>) {
+    if (isCurrentUserServerAdmin()) {
+      return
+    }
     val usersPermission = permissionService.getProjectPermissionData(projectId, authenticationFacade.userAccount.id)
     val permittedLanguages = usersPermission.computedPermissions.languageIds
     if (usersPermission.computedPermissions.allLanguagesPermitted) {
@@ -101,8 +95,18 @@ class SecurityService @Autowired constructor(
     checkProjectPermission(projectId, ProjectPermissionType.TRANSLATE)
   }
 
+  fun checkUserIsServerAdmin() {
+    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+      throw PermissionException()
+    }
+  }
+
   private fun getProjectPermission(projectId: Long, userId: Long = activeUser.id): ProjectPermissionType? {
     return permissionService.getProjectPermissionType(projectId, userId)
+  }
+
+  private fun isCurrentUserServerAdmin(): Boolean {
+    return activeUser.role == UserAccount.Role.ADMIN
   }
 
   private val activeUser: UserAccountDto

@@ -9,7 +9,7 @@ import {
   TranslationIcon,
 } from 'tg.component/CustomIcons';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectPermissionType } from 'tg.service/response.types';
 
@@ -26,6 +26,12 @@ export const ProjectMenu = ({ id }) => {
   const t = useTranslate();
 
   const topBarHidden = useTopBarHidden();
+
+  const isAdmin = useIsAdmin();
+
+  const canManage =
+    projectDTO.computedPermissions.type === ProjectPermissionType.MANAGE ||
+    isAdmin;
 
   return (
     <SideMenu>
@@ -48,7 +54,7 @@ export const ProjectMenu = ({ id }) => {
         text={t('project_menu_translations')}
         matchAsPrefix
       />
-      {projectDTO.computedPermissions.type === ProjectPermissionType.MANAGE && (
+      {canManage && (
         <>
           <SideMenuItem
             linkTo={LINKS.PROJECT_EDIT.build({

@@ -13,14 +13,6 @@ internal class ProjectStatsServiceTest : AbstractSpringTest() {
   lateinit var projectStatsService: ProjectStatsService
 
   @Test
-  fun getLanguageStats() {
-    val testData = ProjectStatsTestData()
-    testDataService.saveTestData(testData.root)
-    val data = projectStatsService.getLanguageStats(testData.projectBuilder.self.id)
-    assertThat(data).hasSize(3)
-  }
-
-  @Test
   fun getProjectStats() {
     val testData = ProjectStatsTestData()
     testDataService.saveTestData(testData.root)

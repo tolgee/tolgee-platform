@@ -7,7 +7,6 @@ import { CircledLanguageIcon } from './languages/CircledLanguageIcon';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
-    border: 1px solid #d3d4d5;
     margin-top: 5px;
   }
 `;
@@ -84,7 +83,6 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
           open={!!anchorEl}
           anchorEl={anchorEl}
           onClose={handleClose}
-          elevation={0}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right',

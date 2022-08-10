@@ -12,7 +12,6 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.assertThatJson
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
@@ -23,15 +22,6 @@ import kotlin.system.measureTimeMillis
 @ContextRecreatingTest
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
-
-  @AfterEach
-  fun after() {
-    commitTransaction()
-    // cleanup
-    projectService.deleteProject(project.id)
-    userAccountService.delete(testData.user)
-    commitTransaction()
-  }
 
   @Test
   @Transactional

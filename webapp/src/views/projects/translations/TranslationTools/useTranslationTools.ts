@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type Props = {
@@ -18,6 +19,7 @@ export const useTranslationTools = ({
   onValueUpdate,
   enabled = true,
 }: Props) => {
+  const { updateUsage } = useOrganizationUsageMethods();
   const memory = useApiQuery({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
@@ -47,6 +49,14 @@ export const useTranslationTools = ({
     },
     options: {
       enabled,
+      onSettled(data) {
+        if (data) {
+          updateUsage({
+            creditBalance: data.translationCreditsBalanceAfter,
+            extraCreditBalance: data.translationExtraCreditsBalanceAfter,
+          });
+        }
+      },
     },
   });
 

@@ -1,6 +1,6 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { gcy } from '../../common/shared';
+import { gcy, switchToOrganization } from '../../common/shared';
 import { projectTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { createProject } from '../../common/projects';
@@ -14,16 +14,13 @@ describe('Projects Basics', () => {
   });
 
   it('Searches in list', () => {
-    gcy('global-list-search').find('input').type('Facebook');
+    switchToOrganization('Microsoft');
+    gcy('global-list-search').find('input').type('Microsoft Word');
     gcy('global-paginated-list')
       .within(() =>
         gcy('dashboard-projects-list-item').should('have.length', 1)
       )
-      .contains('Facebook itself');
-  });
-
-  it('Creates project with user owner', () => {
-    createProject('I am a great project', 'Mark Cukrberg');
+      .contains('Microsoft Word');
   });
 
   it('Creates with organization owner', () => {

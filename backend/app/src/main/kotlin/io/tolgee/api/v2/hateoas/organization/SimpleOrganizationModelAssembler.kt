@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.organization
 
-import io.tolgee.api.v2.controllers.OrganizationController
+import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.model.Organization
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport

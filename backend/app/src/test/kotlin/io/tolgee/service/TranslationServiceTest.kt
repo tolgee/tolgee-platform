@@ -21,7 +21,7 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Transactional
   @Test
   fun getTranslations() {
-    val id = dbPopulator.populate("App").id
+    val id = dbPopulator.populate("App").project.id
     val data = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), id)
     assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
   }
@@ -29,7 +29,7 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Transactional
   @Test
   fun `returns correct map when collision`() {
-    val project = dbPopulator.populate("App")
+    val project = dbPopulator.populate("App").project
     keyService.create(project, SetTranslationsWithKeyDto("folder.folder", mapOf("en" to "Ha")))
     keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", mapOf("en" to "Ha")))
 

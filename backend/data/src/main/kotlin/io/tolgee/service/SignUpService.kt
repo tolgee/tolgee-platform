@@ -16,7 +16,8 @@ class SignUpService(
   private val userAccountService: UserAccountService,
   private val tolgeeProperties: TolgeeProperties,
   private val tokenProvider: JwtTokenProvider,
-  private val emailVerificationService: EmailVerificationService
+  private val emailVerificationService: EmailVerificationService,
+  private val organizationService: OrganizationService
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
@@ -34,6 +35,11 @@ class SignUpService(
     val user = userAccountService.createUser(dto)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
+    }
+
+    if (invitation == null || !dto.organizationName.isNullOrBlank()) {
+      val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
+      organizationService.createPreferred(user, name)
     }
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {

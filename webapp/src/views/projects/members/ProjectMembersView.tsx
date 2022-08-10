@@ -2,9 +2,7 @@ import { FunctionComponent, useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { useProject } from 'tg.hooks/useProject';
@@ -15,6 +13,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
+import { BaseProjectView } from '../BaseProjectView';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
@@ -57,16 +56,9 @@ export const ProjectMembersView: FunctionComponent = () => {
   useGlobalLoading(invitationsLoadable.isFetching);
 
   return (
-    <BaseView
+    <BaseProjectView
       windowTitle={t('project_members_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('project_members_title'),
           LINKS.PROJECT_PERMISSIONS.build({
@@ -141,6 +133,6 @@ export const ProjectMembersView: FunctionComponent = () => {
           renderItem={(u) => <MemberItem user={u} />}
         />
       </ProjectLanguagesProvider>
-    </BaseView>
+    </BaseProjectView>
   );
 };

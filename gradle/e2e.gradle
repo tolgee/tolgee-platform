@@ -4,6 +4,7 @@ import java.time.Duration
 
 ext {
     E2E_DIR = "${project.projectDir}/e2e"
+    BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
 
@@ -95,6 +96,14 @@ task openE2eDev(type: Exec, group: "e2e") {
     environment "CYPRESS_HOST", "http://localhost:8081"
 
     workingDir E2E_DIR
+}
+
+task openBillingE2eDev(type: Exec, group: "e2e") {
+    commandLine "npm", "run", "cy:open"
+
+    environment "CYPRESS_HOST", "http://localhost:8081"
+
+    workingDir BILLING_E2E_DIR
 }
 
 task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {

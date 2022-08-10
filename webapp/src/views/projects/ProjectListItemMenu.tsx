@@ -4,15 +4,12 @@ import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { MoreVert } from '@mui/icons-material';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
+
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
-import { confirmation } from 'tg.hooks/confirmation';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-
-const messaging = container.resolve(MessageService);
+import { useLeaveProject } from './useLeaveProject';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const ProjectListItemMenu: FC<{
   projectId: number;
@@ -21,16 +18,13 @@ export const ProjectListItemMenu: FC<{
 }> = (props) => {
   const t = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { leave, isLeaving } = useLeaveProject();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const leaveLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/leave',
-    method: 'put',
-    invalidatePrefix: '/v2/projects',
-  });
+  useGlobalLoading(isLeaving);
 
   return (
     <>
@@ -77,47 +71,7 @@ export const ProjectListItemMenu: FC<{
         <MenuItem
           data-cy="project-leave-button"
           onClick={() => {
-            confirmation({
-              title: <T>leave_project_confirmation_title</T>,
-              message: <T>leave_project_confirmation_message</T>,
-              hardModeText: props.projectName.toUpperCase(),
-              onConfirm() {
-                leaveLoadable.mutate(
-                  {
-                    path: {
-                      projectId: props.projectId,
-                    },
-                  },
-                  {
-                    onSuccess() {
-                      messaging.success(<T>project_successfully_left</T>);
-                    },
-                    onError(e) {
-                      switch (e.code) {
-                        case 'cannot_leave_owning_project':
-                          messaging.error(
-                            <T>cannot_leave_owning_project_error_message</T>
-                          );
-                          break;
-                        case 'cannot_leave_project_with_organization_role':
-                          messaging.error(
-                            <T>
-                              cannot_leave_project_with_organization_role_error_message
-                            </T>
-                          );
-                          break;
-                        default:
-                          messaging.error(
-                            <T parameters={{ code: e.code }}>
-                              unexpected_error_message
-                            </T>
-                          );
-                      }
-                    },
-                  }
-                );
-              },
-            });
+            leave(props.projectName, props.projectId);
           }}
         >
           <T noWrap>project_leave_button</T>

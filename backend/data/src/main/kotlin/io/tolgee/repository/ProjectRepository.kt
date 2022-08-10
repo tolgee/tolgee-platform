@@ -1,7 +1,7 @@
 package io.tolgee.repository
 
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -15,16 +15,13 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
-        ua as userOwner,
         bl as baseLanguage, o as organizationOwner,
         role.type as organizationRole, p.type as directPermissions
         from Project r
         left join r.baseLanguage bl
-        left join UserAccount ua on ua.id = r.userOwner.id
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
-        where (p is not null or role is not null)
         """
   }
 
@@ -40,26 +37,34 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
   @Query(
-    """$BASE_VIEW_QUERY 
-        and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
-        or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-        or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
+    """$BASE_VIEW_QUERY        
+        left join UserAccount ua on ua.id = :userAccountId
+        where (p is not null or role is not null or ua.role = 'ADMIN')
+        and (
+            :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+            or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+        )
+        and (:organizationId is null or o.id = :organizationId)
     """
   )
   fun findAllPermitted(
     userAccountId: Long,
     pageable: Pageable,
-    @Param("search") search: String? = null
+    @Param("search") search: String? = null,
+    organizationId: Long? = null
   ): Page<ProjectView>
 
-  fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
+  fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 
   @Query(
     """
-      $BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
+      $BASE_VIEW_QUERY 
+      left join UserAccount ua on ua.id = :userAccountId
+      where (p is not null or role is not null or ua.role = 'ADMIN')
+      and o.id = :organizationOwnerId and o is not null
       and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
       or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-      or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
+      or cast(:search as text) is null)
         """
   )
   fun findAllPermittedInOrganization(
@@ -74,7 +79,8 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Suppress("SpringDataRepositoryMethodReturnTypeInspection")
   @Query(
     """
-    $BASE_VIEW_QUERY and r.id = :projectId
+    $BASE_VIEW_QUERY
+    where r.id = :projectId
   """
   )
   fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
@@ -83,19 +89,27 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   @Query(
     """
-      from Project p 
-      left join fetch p.languages
-      where p.id in :ids
-    """
-  )
-  fun findAllWithLanguages(ids: Iterable<Long>): List<Project>
-
-  @Query(
-    """
-      from Project p left join fetch p.languages left join fetch p.baseLanguage where p.id in :projectIds
+      from Project p left join fetch p.languages l left join fetch p.baseLanguage where p.id in :projectIds
     """
   )
   fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
 
-  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project>
+  fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project>
+
+  @Query(
+    """
+    from Project p 
+    where p.organizationOwner is null and p.userOwner is not null
+  """
+  )
+  fun findAllWithUserOwner(pageable: Pageable): Page<Project>
+
+  @Query(
+    """
+    select p.id
+    from Project p
+    where p.organizationOwner is null
+  """
+  )
+  fun findAllWithUserOwnerIds(): List<Long>
 }

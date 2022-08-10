@@ -3,7 +3,7 @@ import { getInput } from '../common/xPath';
 import {
   createProject,
   deleteAllEmails,
-  deleteUserWithEmailVerification,
+  deleteUser,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
@@ -19,6 +19,7 @@ import {
 import { assertMessage, gcy } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
+import { waitForGlobalLoading } from '../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
@@ -56,15 +57,15 @@ context('Sign up', () => {
     getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
     logout();
     visit();
-    deleteUserWithEmailVerification(TEST_USERNAME);
+    deleteUser(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
   });
 
-  afterEach(() => {
-    deleteUserWithEmailVerification(TEST_USERNAME);
-    setRecaptchaSiteKey(recaptchaSiteKey);
-  });
+  // afterEach(() => {
+  //   deleteUser(TEST_USERNAME);
+  //   setRecaptchaSiteKey(recaptchaSiteKey);
+  // });
 
   describe('without recaptcha', () => {
     beforeEach(() => {
@@ -85,7 +86,7 @@ context('Sign up', () => {
     });
   });
 
-  it('Will fail on recaptcha', () => {
+  it('Fails on recaptcha', () => {
     setRecaptchaSecretKey('negative_dummy_secret_key');
     cy.intercept('/**/sign_up', (req) => {
       expect(req.body.recaptchaToken).have.length.greaterThan(10);
@@ -96,7 +97,7 @@ context('Sign up', () => {
     cy.contains('You are robot').should('be.visible');
   });
 
-  it('Will sign up', () => {
+  it('Signs up', () => {
     cy.intercept('/**/sign_up', (req) => {
       expect(req.body.recaptchaToken).have.length.greaterThan(10);
     }).as('signUp');
@@ -117,14 +118,14 @@ context('Sign up', () => {
     });
   });
 
-  it('will sign up without email verification', () => {
+  it('Signs up without email verification', () => {
     disableEmailVerification();
     fillAndSubmitForm();
     assertMessage('Thanks for your sign up!');
-    cy.gcy('global-base-view-title').contains('Projects');
+    cy.contains('Projects');
   });
 
-  it('will sign up with project invitation code', () => {
+  it('Signs up with project invitation code', () => {
     disableEmailVerification();
     createProjectWithInvitation('Test').then(({ invitationLink }) => {
       logout();
@@ -143,7 +144,7 @@ context('Sign up', () => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm();
+      fillAndSubmitForm(false);
       assertMessage('Thanks for your sign up!');
       cy.contains('Crazy project').should('be.visible');
     });
@@ -155,7 +156,10 @@ context('Sign up', () => {
       cy.visit(HOST + '/login');
       loginWithFakeGithub();
       cy.contains('Projects').should('be.visible');
+      cy.log(invitationLink);
       cy.visit(invitationLink);
+      cy.waitForDom();
+      waitForGlobalLoading();
       cy.contains('Crazy project').should('be.visible');
     });
   });
@@ -176,10 +180,13 @@ context('Sign up', () => {
   });
 });
 
-const fillAndSubmitForm = () => {
+const fillAndSubmitForm = (withOrganization = true) => {
   cy.waitForDom();
   cy.xpath(getInput('name')).should('be.visible').type('Test user');
   cy.xpath(getInput('email')).type(TEST_USERNAME);
+  if (withOrganization) {
+    cy.xpath(getInput('organizationName')).type('organization');
+  }
   cy.xpath(getInput('password')).type('password');
   cy.xpath(getInput('passwordRepeat')).type('password');
   gcy('sign-up-submit-button').click();

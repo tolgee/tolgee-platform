@@ -1,9 +1,8 @@
-import { BaseView } from 'tg.component/layout/BaseView';
 import { useTranslate } from '@tolgee/react';
 import { ProjectSettingsLanguages } from 'tg.views/projects/languages/ProjectSettingsLanguages';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
+import { BaseProjectView } from '../BaseProjectView';
 
 export const ProjectLanguagesView = () => {
   const t = useTranslate();
@@ -11,19 +10,12 @@ export const ProjectLanguagesView = () => {
   const project = useProject();
 
   return (
-    <BaseView
+    <BaseProjectView
       lg={7}
       md={9}
       containerMaxWidth="lg"
       windowTitle={t('languages_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('languages_title'),
           LINKS.PROJECT_LANGUAGES.build({
@@ -33,6 +25,6 @@ export const ProjectLanguagesView = () => {
       ]}
     >
       <ProjectSettingsLanguages />
-    </BaseView>
+    </BaseProjectView>
   );
 };

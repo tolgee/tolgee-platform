@@ -2,6 +2,7 @@ package io.tolgee.component
 
 import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.SendInBlueProperties
+import io.tolgee.util.runSentryCatching
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import sibApi.ContactsApi
@@ -15,15 +16,12 @@ class MarketingEmailServiceManager(
 ) {
   @Async
   fun submitNewContact(name: String, email: String) {
-    try {
+    runSentryCatching {
       if (contactsApi == null) {
         return
       }
       val createContact = getCreateContactDto(email, name)
       contactsApi.createContact(createContact)
-    } catch (e: Exception) {
-      Sentry.captureException(e)
-      throw e
     }
   }
 

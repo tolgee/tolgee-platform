@@ -1,8 +1,9 @@
 import 'cypress-file-upload';
 import { enterProjectSettings, visitList } from '../../common/projects';
-import { assertMessage, gcy } from '../../common/shared';
+import { assertMessage, gcy, switchToOrganization } from '../../common/shared';
 import { projectTransferringTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Projects Basics', () => {
   beforeEach(() => {
@@ -12,7 +13,7 @@ describe('Projects Basics', () => {
 
   it('shows proper dialog content', () => {
     login('test_username', 'admin');
-    openTransferDialog('test_project');
+    openTransferDialog('Organization owned project', 'Owned organization');
     gcy('project-transfer-dialog').should(
       'contain',
       'This will transfer the project to another owner.'
@@ -22,27 +23,19 @@ describe('Projects Basics', () => {
 
   it('closes transfer dialog', () => {
     login('test_username', 'admin');
-    openTransferDialog('test_project');
+    openTransferDialog('Organization owned project', 'Owned organization');
     gcy('project-transfer-dialog').contains('Cancel').click();
     gcy('project-transfer-dialog').should('not.exist');
   });
 
-  it('transfers to other user', () => {
-    login('test_username', 'admin');
-    transferProject('test_project', 'Kajetan');
-    assertTransferred('test_project', 'Kajetan');
-  });
-
   it('transfers to organization', () => {
     login('test_username', 'admin');
-    transferProject('test_project', 'Owned organization');
-    assertTransferred('test_project', 'Owned organization');
-  });
-
-  it('transfers from organization to user', () => {
-    login('test_username', 'admin');
-    transferProject('Organization owned project', 'Kajetan');
-    assertTransferred('Organization owned project', 'Kajetan', true);
+    transferProject(
+      'Organization owned project',
+      'Owned organization',
+      'Another organization'
+    );
+    assertTransferred('Organization owned project', 'Another organization');
   });
 
   after(() => {
@@ -50,16 +43,20 @@ describe('Projects Basics', () => {
   });
 });
 
-const openTransferDialog = (projectName: string) => {
-  enterProjectSettings(projectName);
+const openTransferDialog = (projectName: string, organization: string) => {
+  enterProjectSettings(projectName, organization);
   gcy('project-settings-transfer-button')
     .should('contain', 'Transfer')
     .wait(100)
     .click();
 };
 
-const transferProject = (projectName: string, newOwner: string) => {
-  openTransferDialog(projectName);
+const transferProject = (
+  projectName: string,
+  organization: string,
+  newOwner: string
+) => {
+  openTransferDialog(projectName, organization);
   gcy('project-transfer-autocomplete-field').find('input').click();
   gcy('project-transfer-autocomplete-suggested-option')
     .contains(newOwner)
@@ -83,9 +80,7 @@ const assertTransferred = (
       .should('not.exist');
     return;
   }
-  gcy('dashboard-projects-list-item')
-    .contains(projectName)
-    .closestDcy('dashboard-projects-list-item')
-    .findDcy('project-list-owner')
-    .should('contain', newOwner);
+  switchToOrganization(newOwner);
+  waitForGlobalLoading();
+  gcy('dashboard-projects-list-item').contains(projectName);
 };

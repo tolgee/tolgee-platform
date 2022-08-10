@@ -8,12 +8,13 @@ import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
 import { ApiKeysList } from './ApiKeysList';
+import { BaseUserSettingsView } from '../BaseUserSettingsView';
 
 export const ApiKeysView: FunctionComponent = () => {
   const t = useTranslate();
+
   const list = useApiQuery({
     url: '/v2/api-keys',
     query: {
@@ -43,7 +44,9 @@ export const ApiKeysView: FunctionComponent = () => {
         windowTitle={t('api_keys_title')}
         title={t('api_keys_title')}
         loading={list.isFetching}
+        navigation={[[t('user_menu_api_keys'), LINKS.USER_API_KEYS.build()]]}
         hideChildrenOnLoading={false}
+        containerMaxWidth="md"
       >
         <>
           {!list.data?.page?.totalElements ? (

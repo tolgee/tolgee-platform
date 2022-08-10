@@ -7,6 +7,7 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -24,7 +25,9 @@ class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
+  @Lazy
+  private val languageStatsService: LanguageStatsService
 ) {
   @set:Autowired
   @set:Lazy
@@ -47,8 +50,8 @@ class LanguageService(
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByLanguage(language.id)
-    mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
     permissionService.onLanguageDeleted(language)
+    languageStatsService.deleteAllByLanguage(id)
     languageRepository.delete(language)
   }
 
@@ -106,8 +109,14 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
-  fun deleteAllByProject(projectId: Long?) {
-    languageRepository.deleteAllByProjectId(projectId)
+  fun deleteAllByProject(projectId: Long) {
+    findAll(projectId).forEach {
+      deleteLanguage(it.id)
+    }
+  }
+
+  fun save(language: Language): Language {
+    return this.languageRepository.save(language)
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {

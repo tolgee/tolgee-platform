@@ -26,7 +26,7 @@ describe('Integrate view', () => {
 
   it('gets to integrate view', () => {
     loginAndCreateProjectAndVisit();
-    cy.gcy('integrate-navigation-title').should('be.visible');
+    cy.gcy('navigation-item').contains('Integrate').should('be.visible');
   });
 
   describe('Step 1 | Choose your weapon', () => {
@@ -95,25 +95,33 @@ describe('Integrate view', () => {
         deleteAllProjectApiKeys(projectId);
       });
 
-      it('can create new API key when no API key exists', () => {
-        createNewApiKey();
-        getApiKeySelectValue().should('gt', 1000000);
-      });
+      it(
+        'can create new API key when no API key exists',
+        { retries: { runMode: 10 } },
+        () => {
+          createNewApiKey();
+          getApiKeySelectValue().should('gt', 1000000);
+        }
+      );
     });
 
-    it('can create new API key when some API keys exist', () => {
-      createApiKeysAndSelectOne(projectId).then(() => {
-        cy.intercept('POST', '/v2/api-keys').as('create');
-        createNewApiKey();
-        cy.wait('@create').then((i) => {
-          const created = i.response.body;
-          gcy('integrate-api-key-selector-select').contains(created.key);
-          getApiKeySelectValue().then(() => {
-            cy.wrap(created).its('id').should('eq', created.id);
+    it(
+      'can create new API key when some API keys exist',
+      { retries: { runMode: 10 } },
+      () => {
+        createApiKeysAndSelectOne(projectId).then(() => {
+          cy.intercept('POST', '/v2/api-keys').as('create');
+          createNewApiKey();
+          cy.wait('@create').then((i) => {
+            const created = i.response.body;
+            gcy('integrate-api-key-selector-select').contains(created.key);
+            getApiKeySelectValue().then(() => {
+              cy.wrap(created).its('id').should('eq', created.id);
+            });
           });
         });
-      });
-    });
+      }
+    );
 
     describe('existing API key', () => {
       let created: ApiKeyDTO;
@@ -237,5 +245,7 @@ const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
 const createNewApiKey = () => {
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
+  cy.waitForDom();
+  cy.screenshot();
   cy.gcy('global-form-save-button').click();
 };

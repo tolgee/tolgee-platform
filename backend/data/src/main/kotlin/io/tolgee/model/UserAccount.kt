@@ -29,7 +29,6 @@ import javax.validation.constraints.NotBlank
     )
   ]
 )
-
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,11 +61,11 @@ data class UserAccount(
   var resetPasswordCode: String? = null
 
   @OrderBy("id ASC")
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
-  @OneToOne(mappedBy = "userAccount", cascade = [CascadeType.REMOVE])
-  var mtCreditBucket: MtCreditBucket? = null
+  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+  var preferences: UserPreferences? = null
 
   override var avatarHash: String? = null
 

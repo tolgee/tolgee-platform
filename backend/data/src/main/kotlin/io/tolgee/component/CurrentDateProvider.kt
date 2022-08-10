@@ -5,7 +5,8 @@ import java.util.*
 
 @Component
 class CurrentDateProvider {
-  fun getDate(): Date {
-    return Date()
-  }
+  val date: Date
+    get() {
+      return Date()
+    }
 }

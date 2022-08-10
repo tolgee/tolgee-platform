@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.component.TolgeeEmailSender
+import io.tolgee.component.email.EmailVerificationSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.user.OnUserEmailVerifiedFirst
@@ -26,8 +26,8 @@ import kotlin.random.Random
 class EmailVerificationService(
   private val tolgeeProperties: TolgeeProperties,
   private val emailVerificationRepository: EmailVerificationRepository,
-  private val tolgeeEmailSender: TolgeeEmailSender,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val emailVerificationSender: EmailVerificationSender
 ) {
   @Lazy
   @Autowired
@@ -52,9 +52,9 @@ class EmailVerificationService(
       userAccount.emailVerification = emailVerification
 
       if (newEmail != null) {
-        tolgeeEmailSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
+        emailVerificationSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
       } else {
-        tolgeeEmailSender.sendEmailVerification(userAccount.id, userAccount.username, resultCallbackUrl, code)
+        emailVerificationSender.sendEmailVerification(userAccount.id, userAccount.username, resultCallbackUrl, code)
       }
       return emailVerification
     }
@@ -72,7 +72,7 @@ class EmailVerificationService(
 
   @Transactional
   fun verify(userId: Long, code: String) {
-    val user = userAccountService.get(userId).orElseThrow { NotFoundException() }
+    val user = userAccountService.find(userId).orElseThrow { NotFoundException() }
     val old = UserAccountDto.fromEntity(user)
     val emailVerification = user?.emailVerification
 

@@ -1,6 +1,10 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { assertMessage, gcy } from '../../common/shared';
+import {
+  assertMessage,
+  assertSwitchedToOrganization,
+  gcy,
+} from '../../common/shared';
 import {
   getParsedEmailInvitationLink,
   login,
@@ -112,16 +116,8 @@ describe('Organization Invitations', () => {
       cy.visit(code as string);
 
       assertMessage('Invitation successfully accepted');
-      cy.visit(`${HOST}/organizations`);
-      cy.gcy('global-paginated-list')
-        .contains('Tolgee')
-        .should('be.visible')
-        .closest('li')
-        .within(() => {
-          cy.gcy('organization-settings-button').should(
-            roleType === 'MEMBER' ? 'not.exist' : 'be.visible'
-          );
-        });
+      cy.visit(`${HOST}/projects`);
+      assertSwitchedToOrganization('Tolgee');
     });
   };
 });

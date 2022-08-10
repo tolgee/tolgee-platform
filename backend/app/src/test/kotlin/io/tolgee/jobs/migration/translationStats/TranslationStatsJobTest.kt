@@ -6,19 +6,13 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.batch.core.BatchStatus
-import org.springframework.batch.core.Job
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class TranslationStatsJobTest : AbstractSpringTest() {
-
-  @Autowired
-  @Qualifier("translationStatsJob")
-  lateinit var translationStatsJob: Job
 
   @Autowired
   lateinit var translationsStatsUpdateJobRunner: TranslationsStatsUpdateJobRunner
@@ -39,7 +33,7 @@ class TranslationStatsJobTest : AbstractSpringTest() {
 
   @Test
   @Transactional
-  fun `it does not run multiple times for same `() {
+  fun `it does not run multiple times for same params`() {
     prepareData()
 
     // first - it really runs

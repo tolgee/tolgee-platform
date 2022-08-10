@@ -16,7 +16,6 @@ import javax.validation.constraints.NotBlank
     UniqueConstraint(columnNames = ["code"], name = "invitation_code_unique")
   ]
 )
-
 class Invitation(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,7 +7,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.AbstractTransactionalTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,16 +45,6 @@ class DbPopulatorTest : AbstractTransactionalTest() {
   @Transactional
   fun createsUser() {
     Assertions.assertThat(userAccount.name).isEqualTo(tolgeeProperties.authentication.initialUsername)
-  }
-
-  @Test
-  @Transactional
-  fun createsProject() {
-    entityManager.refresh(userAccount)
-    val found = projectRepository.findAll().asSequence()
-      .flatMap { it!!.permissions.map { it.user } }
-      .find { it == userAccount }
-    assertThat(found).isNotNull
   }
 
   @Test

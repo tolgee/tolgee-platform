@@ -16,28 +16,22 @@ import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.api.v2.hateoas.project.ProjectTransferOptionModel
 import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
-import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
-import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
+import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
-import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -55,9 +49,7 @@ import io.tolgee.service.SecurityService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.project.ProjectStatsService
 import org.springdoc.api.annotations.ParameterObject
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -78,11 +70,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.math.BigDecimal
-import java.math.RoundingMode
 import javax.validation.Valid
 
-@Suppress("MVCPathVariableInspection")
+@Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
@@ -90,16 +80,10 @@ import javax.validation.Valid
 class V2ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectWithLanguagesView>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
-  private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val arrayWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
@@ -114,7 +98,7 @@ class V2ProjectsController(
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
   private val languageService: LanguageService,
-  private val projectStatsService: ProjectStatsService
+  private val projectWithStatsFacade: ProjectWithStatsFacade
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -133,43 +117,7 @@ class V2ProjectsController(
     @RequestParam("search") search: String?
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
-    val projectIds = projects.content.map { it.id }
-    val totals = projectStatsService.getProjectsTotals(projectIds)
-    val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
-      .associate { it.id to it.languages.toList() }
-
-    val languageStats = projectStatsService.getLanguageStats(projectIds)
-
-    val projectsWithStatsContent = projects.content.map {
-      val projectTotals = totals[it.id]
-      val baseLanguage = it.baseLanguage
-      val projectLanguageStats = languageStats[it.id]
-
-      var stateTotals: ProjectStatsService.ProjectStateTotals? = null
-      if (baseLanguage != null && projectLanguageStats != null) {
-        stateTotals = projectStatsService.computeProjectTotals(baseLanguage, projectLanguageStats)
-      }
-      val translatedPercent = stateTotals?.translatedPercent.toPercentValue()
-      val reviewedPercent = stateTotals?.reviewedPercent.toPercentValue()
-      val untranslatedPercent = (BigDecimal(100) - translatedPercent - reviewedPercent).setScale(
-        2,
-        RoundingMode.HALF_UP
-      )
-
-      val projectStatistics = ProjectStatistics(
-        projectId = it.id,
-        keyCount = projectTotals?.keyCount ?: 0,
-        languageCount = projectTotals?.languageCount ?: 0,
-        translationStatePercentages = mapOf(
-          TranslationState.TRANSLATED to translatedPercent,
-          TranslationState.REVIEWED to reviewedPercent,
-          TranslationState.UNTRANSLATED to untranslatedPercent
-        )
-      )
-      ProjectWithStatsView(it, projectStatistics, languages[it.id]!!)
-    }
-    val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
-    return arrayWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
+    return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
   @GetMapping("/{projectId}")
@@ -276,12 +224,7 @@ class V2ProjectsController(
   @Operation(summary = "Creates project with specified languages")
   @RequestActivity(ActivityType.CREATE_PROJECT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
-    val userAccount = authenticationFacade.userAccount
-    if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
-      userAccount.role != UserAccount.Role.ADMIN
-    ) {
-      throw PermissionException()
-    }
+    organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
@@ -310,34 +253,11 @@ class V2ProjectsController(
     projectService.transferToOrganization(projectId, organizationId)
   }
 
-  @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-user/{userId:[0-9]+}"])
-  @Operation(summary = "Transfers project's ownership to user")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
-  fun transferProjectToUser(@PathVariable projectId: Long, @PathVariable userId: Long) {
-    securityService.checkAnyProjectPermission(projectId, userId)
-    projectService.transferToUser(projectId, userId)
-  }
-
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
   @Operation(summary = "Leave project")
   @AccessWithProjectPermission(ProjectPermissionType.VIEW)
-  fun leaveProject(@PathVariable projectId: Long) {
-    val project = projectHolder.projectEntity
-    if (project.userOwner?.id == authenticationFacade.userAccount.id) {
-      throw BadRequestException(Message.CANNOT_LEAVE_OWNING_PROJECT)
-    }
-    val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
-    if (permissionData.organizationRole != null) {
-      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
-    }
-
-    val directPermissions = permissionData.directPermissions
-      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
-
-    val permissionEntity = permissionService.findById(directPermissions.id)
-      ?: throw NotFoundException()
-
-    permissionService.delete(permissionEntity)
+  fun leaveProject() {
+    permissionService.leave(projectHolder.projectEntity, authenticationFacade.userAccount.id)
   }
 
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
@@ -354,26 +274,10 @@ class V2ProjectsController(
     val options = organizations.content.map {
       ProjectTransferOptionModel(
         name = it.name,
+        slug = it.slug,
         id = it.id,
-        type = ProjectTransferOptionModel.TransferOptionType.ORGANIZATION
       )
     }.toMutableList()
-    val users = userAccountService.getAllInProject(
-      projectId = project.id,
-      PageRequest.of(0, 10),
-      search,
-      project.userOwnerId
-    )
-    options.addAll(
-      users.content.map {
-        ProjectTransferOptionModel(
-          name = it.name,
-          username = it.username,
-          id = it.id,
-          type = ProjectTransferOptionModel.TransferOptionType.USER
-        )
-      }
-    )
     options.sortBy { it.name }
     return CollectionModel.of(options)
   }
@@ -440,12 +344,5 @@ class V2ProjectsController(
       usingTranslationMemory = config.usingTm,
       usingMachineTranslation = config.usingPrimaryMtService
     )
-  }
-
-  fun Double?.toPercentValue(): BigDecimal {
-    if (this == null || this.isNaN()) {
-      return BigDecimal(0)
-    }
-    return this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
   }
 }

@@ -11,7 +11,11 @@ import { OrganizationService } from 'tg.service/OrganizationService';
 
 const organizationService = container.resolve(OrganizationService);
 
-export const OrganizationFields = () => {
+type Props = {
+  disabled?: boolean;
+};
+
+export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
   const [slugDisabled, setSlugDisabled] = useState(true);
 
   const formik = useFormikContext();
@@ -52,6 +56,7 @@ export const OrganizationFields = () => {
         label={<T>create_organization_name_label</T>}
         name="name"
         required={true}
+        disabled={disabled}
       />
       <Box
         onClick={() => setSlugDisabled(false)}
@@ -60,7 +65,7 @@ export const OrganizationFields = () => {
         <TextField
           variant="standard"
           data-cy={'organization-address-part-field'}
-          disabled={slugDisabled}
+          disabled={slugDisabled || disabled}
           fullWidth
           label={<T>create_organization_slug_label</T>}
           name="slug"
@@ -85,6 +90,7 @@ export const OrganizationFields = () => {
         fullWidth
         label={<T>create_organization_description_label</T>}
         name="description"
+        disabled={disabled}
       />
     </>
   );

@@ -24,7 +24,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    whenever(currentDateProvider.getDate()).then {
+    whenever(currentDateProvider.date).then {
       Date()
     }
   }
@@ -56,7 +56,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    whenever(currentDateProvider.getDate()).then {
+    whenever(currentDateProvider.date).then {
       DateUtils.addHours(Date(), 2)
     }
 

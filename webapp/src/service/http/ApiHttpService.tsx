@@ -9,6 +9,7 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { MessageService } from '../MessageService';
 import { TokenService } from '../TokenService';
+import { errorCapture } from './errorCapture';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -104,6 +105,7 @@ export class ApiHttpService {
           }
           if (r.status >= 400 && r.status <= 500) {
             ApiHttpService.getResObject(r).then((b) => {
+              errorCapture(b.code);
               reject(b);
             });
           } else {

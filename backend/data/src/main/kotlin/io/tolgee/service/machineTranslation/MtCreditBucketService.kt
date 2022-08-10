@@ -1,13 +1,15 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
+import io.tolgee.service.OrganizationService
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.apache.commons.lang3.time.DateUtils
 import org.springframework.stereotype.Service
 import java.util.*
@@ -16,26 +18,39 @@ import javax.transaction.Transactional
 @Service
 class MtCreditBucketService(
   private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
-  private val machineTranslationProperties: MachineTranslationProperties,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
+  private val organizationService: OrganizationService,
 ) {
-
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
-    if (machineTranslationProperties.freeCreditsAmount > -1) {
-      val bucket = findOrCreateBucket(project)
-      consumeCredits(bucket, amount)
-    }
+    val bucket = findOrCreateBucket(project)
+    consumeCredits(bucket, amount)
   }
 
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
-    if (getCreditBalance(bucket) - amount < 0) {
+    val balances = getCreditBalances(bucket)
+    val totalBalance = balances.creditBalance + balances.extraCreditBalance
+
+    if (totalBalance - amount < 0) {
       throw OutOfCreditsException()
     }
-    bucket.credits -= amount
+
+    bucket.consumeSufficientCredits(amount)
     save(bucket)
+  }
+
+  private fun MtCreditBucket.consumeSufficientCredits(amount: Int) {
+    if (this.credits >= amount) {
+      this.credits -= amount
+      return
+    }
+
+    val amountToConsumeFromExtraCredits = amount - this.credits
+    this.credits = 0
+    this.extraCredits -= amountToConsumeFromExtraCredits
   }
 
   @Transactional
@@ -51,6 +66,18 @@ class MtCreditBucketService(
     save(bucket)
   }
 
+  @Transactional
+  fun addExtraCredits(organization: Organization, amount: Long) {
+    val bucket = findOrCreateBucket(organization)
+    addExtraCredits(bucket, amount)
+  }
+
+  @Transactional
+  fun addExtraCredits(bucket: MtCreditBucket, amount: Long) {
+    bucket.extraCredits += amount
+    save(bucket)
+  }
+
   fun save(bucket: MtCreditBucket) {
     machineTranslationCreditBucketRepository.save(bucket)
   }
@@ -59,21 +86,23 @@ class MtCreditBucketService(
     machineTranslationCreditBucketRepository.saveAll(buckets)
   }
 
-  fun getCreditBalance(project: Project): Long {
-    return getCreditBalance(findOrCreateBucket(project))
+  fun getCreditBalances(project: Project): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucket(project))
   }
 
-  fun getCreditBalance(bucket: MtCreditBucket): Long {
+  fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
-    return bucket.credits
+    return MtCreditBalanceDto(
+      creditBalance = bucket.credits,
+      bucketSize = bucket.bucketSize,
+      extraCreditBalance = bucket.extraCredits,
+      refilledAt = bucket.refilled,
+      nextRefillAt = bucket.getNextRefillDate()
+    )
   }
 
-  fun getCreditBalance(userAccount: UserAccount): Long {
-    return getCreditBalance(findOrCreateBucket(userAccount))
-  }
-
-  fun getCreditBalance(organization: Organization): Long {
-    return getCreditBalance(findOrCreateBucket(organization))
+  fun getCreditBalances(organization: Organization): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucket(organization))
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
@@ -81,41 +110,51 @@ class MtCreditBucketService(
   }
 
   fun refillBucket(bucket: MtCreditBucket) {
-    bucket.credits = getRefillAmount()
-    bucket.refilled = currentDateProvider.getDate()
+    refillBucket(bucket, getRefillAmount(bucket.organization))
   }
 
-  private fun getRefillAmount(): Long {
-    return machineTranslationProperties.freeCreditsAmount
+  fun refillBucket(bucket: MtCreditBucket, bucketSize: Long) {
+    bucket.credits = bucketSize
+    bucket.refilled = currentDateProvider.date
+    bucket.bucketSize = bucket.credits
+  }
+
+  private fun getRefillAmount(organization: Organization?): Long {
+    return mtCreditBucketSizeProvider.getSize(organization)
   }
 
   fun refillIfItsTime(bucket: MtCreditBucket) {
-    if (bucket.getNextRefillDate() <= currentDateProvider.getDate()) {
+    if (bucket.getNextRefillDate() <= currentDateProvider.date) {
       refillBucket(bucket)
     }
   }
 
-  private fun findOrCreateBucket(userAccount: UserAccount): MtCreditBucket {
-    return machineTranslationCreditBucketRepository.findByUserAccount(userAccount)
-      ?: MtCreditBucket(userAccount = userAccount).apply {
-        credits = getRefillAmount()
-        save(this)
-      }
+  private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
+    return tryUntilItDoesntBreakConstraint {
+      machineTranslationCreditBucketRepository.findByOrganization(organization) ?: createBucket(
+        organization
+      )
+    }
   }
 
-  private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
-    return machineTranslationCreditBucketRepository.findByOrganization(organization)
-      ?: MtCreditBucket(organization = organization).apply {
-        credits = getRefillAmount()
-        save(this)
-      }
+  private fun createBucket(organization: Organization): MtCreditBucket {
+    return MtCreditBucket(organization = organization).apply {
+      this.initCredits()
+      save(this)
+    }
+  }
+
+  private fun MtCreditBucket.initCredits() {
+    credits = getRefillAmount(this.organization)
+    bucketSize = credits
+  }
+
+  fun findOrCreateBucketByOrganizationId(organizationId: Long): MtCreditBucket {
+    val organization = organizationService.get(organizationId)
+    return findOrCreateBucket(organization)
   }
 
   private fun findOrCreateBucket(project: Project): MtCreditBucket {
-    return project.userOwner?.let { userAccount ->
-      findOrCreateBucket(userAccount)
-    } ?: project.organizationOwner?.let { organization ->
-      findOrCreateBucket(organization)
-    } ?: throw RuntimeException("Project has no owner")
+    return findOrCreateBucket(project.organizationOwner)
   }
 }

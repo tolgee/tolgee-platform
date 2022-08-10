@@ -1,20 +1,22 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { RemoteConfigService } from 'tg.service/RemoteConfigService';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { SecurityService } from 'tg.service/SecurityService';
-import { singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
 import { SecurityDTO } from './types';
+import { TokenService } from 'tg.service/TokenService';
+
+const tokenService = container.resolve(TokenService);
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
   authLoading = false;
   security: SecurityDTO = {
-    allowPrivate: !!localStorage.getItem('jwtToken'),
-    jwtToken: localStorage.getItem('jwtToken') || null,
+    allowPrivate: !!tokenService.getToken(),
+    jwtToken: tokenService.getToken() || null,
+    adminJwtToken: tokenService.getAdminToken() || null,
     loginErrorCode: null,
     allowRegistration: false,
   };
@@ -28,11 +30,7 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
 
 @singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
-  constructor(
-    private configService: RemoteConfigService,
-    private securityService: SecurityService,
-    private invitationCodeService: InvitationCodeService
-  ) {
+  constructor(private securityService: SecurityService) {
     super(new GlobalState());
   }
 
@@ -150,24 +148,55 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       }
   );
 
-  readonly loadableDefinitions = {
-    remoteConfig: this.createLoadableDefinition(
-      () => this.configService.getConfiguration(),
-      (state, action) => {
-        const invitationCode = this.invitationCodeService.getCode();
-        return {
-          ...state,
-          security: {
-            ...state.security,
-            allowPrivate:
-              !action.payload?.authentication || state.security.allowPrivate,
-            allowRegistration:
-              action.payload?.allowRegistrations || !!invitationCode, //if user has invitation code, registration is allowed
-          },
-        };
+  updateSecurity = this.createAction(
+    'UPDATE_SECURITY',
+    (options: Partial<SecurityDTO>) => options
+  ).build.on(
+    (state, action) =>
+      <GlobalState>{
+        ...state,
+        security: { ...state.security, ...action.payload },
       }
-    ),
-    resetPasswordRequest: this.createLoadableDefinition(
+  );
+
+  debugCustomerAccount = this.createAction(
+    'DEBUG_CUSTOMER_ACCOUNT',
+    (customerJwt: string) => customerJwt
+  ).build.on((state, action) => {
+    tokenService.setAdminToken(state.security.jwtToken!);
+    tokenService.setToken(action.payload);
+
+    return <GlobalState>{
+      ...state,
+      security: {
+        ...state.security,
+        adminJwtToken: state.security.jwtToken,
+        jwtToken: action.payload,
+      },
+    };
+  });
+
+  exitDebugCustomerAccount = this.createAction(
+    'EXIT_DEBUG_CUSTOMER_ACCOUNT',
+    () => {}
+  ).build.on((state, _) => {
+    const adminJwtToken = state.security.adminJwtToken;
+
+    tokenService.disposeAdminToken();
+    tokenService.setToken(adminJwtToken!);
+
+    return <GlobalState>{
+      ...state,
+      security: {
+        ...state.security,
+        adminJwtToken: null,
+        jwtToken: adminJwtToken,
+      },
+    };
+  });
+
+  readonly loadableDefinitions = {
+    resetPasswordRequest: this.createLoadableDefinition<GlobalState, any>(
       this.securityService.resetPasswordRequest
     ),
   };

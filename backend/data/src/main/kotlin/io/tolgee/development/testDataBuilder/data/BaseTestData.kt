@@ -23,7 +23,7 @@ open class BaseTestData(
     user = userAccountBuilder.self
     projectBuilder = addProject {
       name = projectName
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
     }.build buildProject@{
       addPermission {
         project = this@buildProject.self

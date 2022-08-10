@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -63,10 +64,10 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it parses zip file and saves issues`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performStreamingImport(projectId = project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
+    performStreamingImport(projectId = base.project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
       .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
       .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
         node("errors[2].code").isEqualTo("cannot_parse_file")
@@ -75,28 +76,28 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it saves proper data and returns correct response `() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performImport(projectId = project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+    performImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
       .andPrettyPrint.andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(3)
       }
-    validateSavedJsonImportData(project)
+    validateSavedJsonImportData(base.project, base.userAccount)
   }
 
   @Test
   fun `it handles po file`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = project.id, mapOf(Pair("example.po", poFile)))
+    performImport(projectId = base.project.id, mapOf(Pair("example.po", poFile)))
       .andPrettyPrint.andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(1)
       }.andReturn()
 
     entityManager.clear()
 
-    importService.find(project.id, project.userOwner?.id!!)?.let {
+    importService.find(base.project.id, base.userAccount.id)?.let {
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].languages[0].translations).hasSize(8)
     }
@@ -104,9 +105,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it handles xliff file`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = project.id, mapOf(Pair("example.xliff", xliffFile)))
+    performImport(projectId = base.project.id, mapOf(Pair("example.xliff", xliffFile)))
       .andPrettyPrint.andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(2)
       }.andReturn()
@@ -114,9 +115,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it returns error when json could not be parsed`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
 
-    performImport(projectId = project.id, mapOf(Pair("error.json", errorJson)))
+    performImport(projectId = base.project.id, mapOf(Pair("error.json", errorJson)))
       .andIsOk.andAssertThatJson {
         node("errors[0].code").isEqualTo("cannot_parse_file")
         node("errors[0].params[0]").isEqualTo("error.json")
@@ -126,11 +127,11 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it throws when more then 100 languages`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
 
     val data = (1..101).associate { "simple$it.json" as String? to simpleJson }
 
-    performImport(projectId = project.id, data)
+    performImport(projectId = base.project.id, data)
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {
         node("code").isEqualTo("cannot_add_more_then_100_languages")
       }
@@ -138,26 +139,29 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `it saves proper data and returns correct response (streamed)`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performStreamingImport(projectId = project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+    performStreamingImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
       .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
       .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
         node("result._embedded.languages").isArray.hasSize(3)
       }
-    validateSavedJsonImportData(project)
+    validateSavedJsonImportData(base.project, base.userAccount)
   }
 
   @Test
   fun `it adds a file with long translation text and stores issues`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
-    performStreamingImport(projectId = project.id, mapOf(Pair("tooLongTranslation.json", tooLongTranslation))).andIsOk
+    performStreamingImport(
+      projectId = base.project.id,
+      mapOf(Pair("tooLongTranslation.json", tooLongTranslation))
+    ).andIsOk
 
-    importService.find(project.id, project.userOwner?.id!!)?.let {
+    importService.find(base.project.id, base.userAccount.id)?.let {
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].issues).hasSize(1)
       assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
@@ -167,15 +171,15 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores issue with too long value`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
     performStreamingImport(
-      projectId = project.id,
+      projectId = base.project.id,
       mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue))
     ).andIsOk
 
-    importService.find(project.id, project.userOwner?.id!!)!!.let {
+    importService.find(base.project.id, base.userAccount.id)!!.let {
       assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("not_string")
       assertThat(it.files[0].issues[0].params?.get(2)?.value).isEqualTo(
         "[Lorem ipsum dolor sit amet," +
@@ -185,8 +189,8 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     }
   }
 
-  private fun validateSavedJsonImportData(project: Project) {
-    importService.find(project.id, project.userOwner?.id!!)!!.let { importEntity ->
+  private fun validateSavedJsonImportData(project: Project, userAccount: UserAccount) {
+    importService.find(project.id, userAccount.id)!!.let { importEntity ->
       entityManager.refresh(importEntity)
       assertThat(importEntity.files.size).isEqualTo(3)
       assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json"))

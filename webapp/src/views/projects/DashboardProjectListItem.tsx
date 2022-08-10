@@ -1,6 +1,5 @@
 import {
   Box,
-  Chip,
   Grid,
   IconButton,
   styled,
@@ -10,13 +9,11 @@ import {
   useTheme,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { useConfig } from 'tg.hooks/useConfig';
 import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -122,7 +119,6 @@ const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
 const DashboardProjectListItem = (
   p: components['schemas']['ProjectWithStatsModel']
 ) => {
-  const config = useConfig();
   const t = useTranslate();
   const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: p.id,
@@ -155,15 +151,6 @@ const DashboardProjectListItem = (
       </StyledImage>
       <StyledTitle>
         <StyledProjectName variant="h3">{p.name}</StyledProjectName>
-        {config.authentication && (
-          <Box mt={0.5}>
-            <Chip
-              data-cy="project-list-owner"
-              size="small"
-              label={p.organizationOwnerName || p.userOwner?.name}
-            />
-          </Box>
-        )}
       </StyledTitle>
       <StyledKeyCount>
         <Typography variant="body1">

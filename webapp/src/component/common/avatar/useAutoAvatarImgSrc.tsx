@@ -32,6 +32,7 @@ export const useAutoAvatarImgSrc = (props: AutoAvatarProps) => {
   const [base64, setBase64] = useState(undefined as string | undefined);
 
   useEffect(() => {
+    let mounted = true;
     const svgStringPromise =
       props.ownerType === 'USER'
         ? getIdenticonAvatarSvg(props.entityId, props.size)
@@ -43,8 +44,13 @@ export const useAutoAvatarImgSrc = (props: AutoAvatarProps) => {
 
     svgStringPromise.then((svgString) => {
       const base64 = Buffer.from(svgString).toString('base64');
-      setBase64(base64);
+      if (mounted) {
+        setBase64(base64);
+      }
     });
+    return () => {
+      mounted = false;
+    };
   }, [props.size, props.entityId, props.ownerName, props.ownerType]);
 
   if (!base64) {

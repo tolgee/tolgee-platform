@@ -3,8 +3,6 @@ import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -22,6 +20,8 @@ import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { BaseProjectView } from '../BaseProjectView';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
@@ -46,6 +46,7 @@ export const ImportView: FunctionComponent = () => {
   const [resolveRow, setResolveRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
   );
+  const { refetchUsage } = useOrganizationUsageMethods();
 
   const t = useTranslate();
 
@@ -118,25 +119,26 @@ export const ImportView: FunctionComponent = () => {
     }
   };
 
-  if (addFilesLoadable.error?.code === 'cannot_add_more_then_100_languages') {
-    messageService.error(
-      <T parameters={{ n: '100' }}>
-        import_error_cannot_add_more_then_n_languages
-      </T>
-    );
-  }
+  useEffect(() => {
+    if (addFilesLoadable.error?.code === 'cannot_add_more_then_100_languages') {
+      messageService.error(
+        <T parameters={{ n: '100' }}>
+          import_error_cannot_add_more_then_n_languages
+        </T>
+      );
+    }
+  }, [addFilesLoadable.error?.code]);
+
+  useEffect(() => {
+    if (!applyImportHelper.loading && applyImportHelper.loaded) {
+      refetchUsage();
+    }
+  }, [applyImportHelper.loading, applyImportHelper.loaded]);
 
   return (
-    <BaseView
+    <BaseProjectView
       windowTitle={t('import_translations_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('import_translations_title'),
           LINKS.PROJECT_IMPORT.build({
@@ -211,6 +213,6 @@ export const ImportView: FunctionComponent = () => {
         open={applyImportHelper.conflictNotResolvedDialogOpen}
         onClose={applyImportHelper.onDialogClose}
       />
-    </BaseView>
+    </BaseProjectView>
   );
 };

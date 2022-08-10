@@ -26,8 +26,11 @@ export interface BaseViewProps {
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
   customHeader?: ReactNode;
+  navigationRight?: ReactNode;
+  switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  allCentered?: boolean;
   'data-cy'?: string;
 }
 
@@ -39,9 +42,14 @@ export const BaseView = (props: BaseViewProps) => {
 
   useWindowTitle(props.windowTitle);
 
+  const displayNavigation = props.customNavigation || props.navigation;
+
+  const displayHeader =
+    props.title || props.customHeader || props.onSearch || props.onAdd;
+
   return (
     <Container
-      maxWidth={false}
+      maxWidth={props.allCentered ? props.containerMaxWidth : false}
       style={{
         position: 'relative',
         padding: 0,
@@ -49,21 +57,27 @@ export const BaseView = (props: BaseViewProps) => {
       }}
     >
       <Box minHeight="100%" data-cy={props['data-cy']}>
-        {props.customNavigation ||
-          (props.navigation && (
-            <SecondaryBar
-              height={49}
+        {displayNavigation && (
+          <SecondaryBar
+            height={49}
+            display="flex"
+            flexDirection="column"
+            alignItems="stretch"
+            justifyContent="center"
+          >
+            <Box
+              style={{ padding: 0, margin: 0 }}
               display="flex"
-              alignItems="center"
-              justifyContent="center"
+              align-items="center"
+              justifyContent="space-between"
             >
-              <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
-                <Navigation path={props.navigation} />
-              </Container>
-            </SecondaryBar>
-          ))}
-        {(props.title || props.customHeader) && (
-          <SecondaryBar>
+              <Navigation path={props.navigation!} />
+              {props.navigationRight}
+            </Box>
+          </SecondaryBar>
+        )}
+        {displayHeader && (
+          <SecondaryBar noBorder={Boolean(displayNavigation)}>
             <Container
               maxWidth={props.containerMaxWidth || false}
               style={{ padding: 0 }}
@@ -79,17 +93,24 @@ export const BaseView = (props: BaseViewProps) => {
                 >
                   {props.customHeader || (
                     <Box display="flex" justifyContent="space-between">
-                      <Box display="flex" alignItems={'center'}>
-                        <Typography variant="h4">{props.title}</Typography>
+                      <Box display="flex" alignItems="center" gap="8px">
+                        {props.title && (
+                          <Typography variant="h4">{props.title}</Typography>
+                        )}
                         {typeof props.onSearch === 'function' && (
-                          <Box ml={2}>
+                          <Box>
                             <SecondaryBarSearchField
                               onSearch={props.onSearch}
                             />
                           </Box>
                         )}
                       </Box>
-                      <Box display="flex">
+                      <Box display="flex" gap={2}>
+                        {props.switcher && (
+                          <Box display="flex" alignItems="center">
+                            {props.switcher}
+                          </Box>
+                        )}
                         {(props.onAdd || props.addLinkTo) && (
                           <Button
                             data-cy="global-plus-button"

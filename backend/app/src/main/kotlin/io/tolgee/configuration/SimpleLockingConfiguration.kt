@@ -1,6 +1,6 @@
 package io.tolgee.configuration
 
-import io.tolgee.component.lockingProvider.LockingProvider
+import io.tolgee.component.LockingProvider
 import io.tolgee.component.lockingProvider.SimpleLockingProvider
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.annotation.Bean

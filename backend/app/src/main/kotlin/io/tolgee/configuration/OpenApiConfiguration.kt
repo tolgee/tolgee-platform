@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
-private const val API_REPOSITORY_EXCLUDE = "!/api/repository/**"
+private const val API_REPOSITORY_EXCLUDE = "/api/repository/**"
+private const val BILLING_EXCLUSION = "/v2/**/billing/**"
 
 @Configuration
 class OpenApiConfiguration {
@@ -43,7 +44,7 @@ class OpenApiConfiguration {
   fun internalV1OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V1 Internal - for Tolgee Web application"
     )
   }
@@ -52,7 +53,7 @@ class OpenApiConfiguration {
   fun internalV2OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V2 Internal - for Tolgee Web application"
     )
   }
@@ -61,7 +62,7 @@ class OpenApiConfiguration {
   fun internalAllOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "All Internal - for Tolgee Web application"
     )
   }
@@ -70,7 +71,7 @@ class OpenApiConfiguration {
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "Accessible with API key"
     )
   }
@@ -79,7 +80,7 @@ class OpenApiConfiguration {
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V1 Accessible with API key"
     )
   }
@@ -88,8 +89,17 @@ class OpenApiConfiguration {
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(BILLING_EXCLUSION, API_REPOSITORY_EXCLUDE),
       name = "V2 Accessible with API key V2"
+    )
+  }
+
+  @Bean
+  fun billingOpenApi(): GroupedOpenApi? {
+    return internalGroupForPaths(
+      paths = arrayOf("/v2/**/billing/**"),
+      excludedPaths = arrayOf("/v2/public/billing/webhook"),
+      name = "V2 Billing"
     )
   }
 
@@ -105,7 +115,23 @@ class OpenApiConfiguration {
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
         operationHandlers[operation] = handlerMethod
         operation
-      }.pathsToMatch(*paths).pathsToExclude(*excludedPaths)
+      }
+      .pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
+      .pathsToMatch(*paths)
+      .addOpenApiCustomiser { openApi ->
+        openApi.paths.forEach { (path, value) ->
+          value.readOperations().forEach { operation ->
+            operationHandlers[operation]?.method?.let { method ->
+              handlerPaths[method] = handlerPaths[method].let {
+                it?.run {
+                  add(path)
+                  this
+                } ?: mutableListOf(path)
+              }
+            }
+          }
+        }
+      }
       .addOpenApiCustomiser { openApi ->
         val newPaths = Paths()
         openApi.paths.forEach { pathEntry ->
@@ -163,22 +189,7 @@ class OpenApiConfiguration {
           }
         }
         openApi.paths = newPaths
-      }.addOpenApiCustomiser { openApi ->
-        openApi.paths.forEach { (path, value) ->
-          value.readOperations().forEach { operation ->
-            operationHandlers[operation]?.method?.let { method ->
-              handlerPaths[method] = handlerPaths[method].let {
-                it?.run {
-                  add(path)
-                  this
-                } ?: mutableListOf(path)
-              }
-            }
-          }
-        }
-      }
-      .handleLinks()
-      .pathsToExclude("/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
+      }.handleLinks()
       .build()
   }
 
@@ -186,8 +197,8 @@ class OpenApiConfiguration {
     val operationHandlers = HashMap<Operation, HandlerMethod>()
 
     return GroupedOpenApi.builder().group(name)
-      .pathsToMatch(*paths)
       .pathsToExclude(*excludedPaths)
+      .pathsToMatch(*paths)
       .addOpenApiCustomiser { openApi ->
         val newPaths = Paths()
         openApi.paths.forEach { pathEntry ->

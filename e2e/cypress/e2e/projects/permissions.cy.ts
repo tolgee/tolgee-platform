@@ -43,15 +43,18 @@ describe('Project Permissions', () => {
     });
 
     it('Has edit permissions on microsoft word (organization base)', () => {
-      validateEditPermissions('Microsoft Word');
+      validateEditPermissions('Microsoft Word', 'Microsoft');
     });
 
     it('Has manage permissions (direct manage permissions)', () => {
-      validateManagePermissions("Vaclav's funny project");
+      validateManagePermissions(
+        "Vaclav's funny project",
+        'Vaclav organization'
+      );
     });
 
     it('Has view permissions on facebook (direct view permissions)', () => {
-      validateViewPermissions("Vaclav's cool project");
+      validateViewPermissions("Vaclav's cool project", 'Vaclav organization');
     });
   });
 
@@ -66,11 +69,11 @@ describe('Project Permissions', () => {
     });
 
     it('Has edit permission on excel (direct) ', () => {
-      validateEditPermissions('Microsoft Excel');
+      validateEditPermissions('Microsoft Excel', 'Microsoft');
     });
 
     it('Has translate permission on Powerpoint (direct) ', () => {
-      validateTranslatePermissions('Microsoft Powerpoint');
+      validateTranslatePermissions('Microsoft Powerpoint', 'Microsoft');
     });
   });
 
@@ -87,7 +90,7 @@ describe('Project Permissions', () => {
 
       it('Can search in permissions', () => {
         visitList();
-        enterProjectSettings('Facebook itself');
+        enterProjectSettings('Facebook itself', 'Facebook');
         selectInProjectMenu('Members');
         gcy('global-list-search').find('input').type('Doe');
         gcy('global-paginated-list').within(() => {
@@ -100,7 +103,7 @@ describe('Project Permissions', () => {
       it('Can paginate', () => {
         visitList();
         login('gates@microsoft.com', 'admin');
-        enterProjectSettings('Microsoft Word');
+        enterProjectSettings('Microsoft Word', 'Microsoft');
         selectInProjectMenu('Members');
         goToPage(2);
         cy.contains('owner@zzzcool9.com (owner@zzzcool9.com)').should(
@@ -110,7 +113,7 @@ describe('Project Permissions', () => {
 
       it('Has enabled proper options for each user', () => {
         visitList();
-        enterProjectSettings('Facebook itself');
+        enterProjectSettings('Facebook itself', 'Facebook');
         selectInProjectMenu('Members');
         gcy('global-paginated-list').within(() => {
           gcy('project-member-item')
@@ -157,7 +160,7 @@ describe('Project Permissions', () => {
         confirmStandard();
         login('vaclav.novak@fake.com', 'admin');
         visitList();
-        validateManagePermissions('Facebook itself');
+        validateManagePermissions('Facebook itself', 'Facebook');
       });
 
       it('Can revoke permissions', () => {
@@ -232,15 +235,18 @@ const assertOtherMenuItemsVisible = () => {
   });
 };
 
-const validateManagePermissions = (projectName: string) => {
+const validateManagePermissions = (
+  projectName: string,
+  organization: string
+) => {
   visitList();
-  enterProjectSettings(projectName);
+  enterProjectSettings(projectName, organization);
   cy.gcy('global-form-save-button').wait(100).click();
   assertMessage('Project settings successfully saved');
   selectInProjectMenu('Project Dashboard');
   assertLanguageSettingsOnDashboard();
   assertUserSettingsOnDashboard();
-  enterProject(projectName);
+  enterProject(projectName, organization);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
     gcy('project-menu-items')
       .get(`[aria-label="${item}"]`)
@@ -249,9 +255,9 @@ const validateManagePermissions = (projectName: string) => {
   assertOtherMenuItemsVisible();
 };
 
-const validateEditPermissions = (projectName: string) => {
+const validateEditPermissions = (projectName: string, organization: string) => {
   visitList();
-  enterProject(projectName);
+  enterProject(projectName, organization);
   selectInProjectMenu('Project Dashboard');
   assertLanguageSettingsNotOnDashboard();
   assertUserSettingsNotOnDashboard();
@@ -271,9 +277,12 @@ const validateEditPermissions = (projectName: string) => {
   assertMessage('Translations deleted!');
 };
 
-const validateTranslatePermissions = (projectName: string) => {
+const validateTranslatePermissions = (
+  projectName: string,
+  organization: string
+) => {
   visitList();
-  enterProject(projectName);
+  enterProject(projectName, organization);
   selectInProjectMenu('Project Dashboard');
   assertLanguageSettingsNotOnDashboard();
   assertUserSettingsNotOnDashboard();
@@ -291,9 +300,9 @@ const validateTranslatePermissions = (projectName: string) => {
   getCellSaveButton().should('be.visible');
 };
 
-const validateViewPermissions = (projectName: string) => {
+const validateViewPermissions = (projectName: string, organization: string) => {
   visitList();
-  enterProject(projectName);
+  enterProject(projectName, organization);
   selectInProjectMenu('Project Dashboard');
   assertLanguageSettingsNotOnDashboard();
   assertUserSettingsNotOnDashboard();

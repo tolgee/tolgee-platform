@@ -8,6 +8,7 @@ import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.BigDecimalAssert
+import org.assertj.core.api.ListAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
@@ -87,3 +88,19 @@ val JsonAssert.isValidId: BigDecimalAssert
   get() {
     return this.asNumber().isGreaterThan(BigDecimal(10000000))
   }
+
+inline fun <T> ListAssert<T>.containsAny(crossinline fn: T.() -> Boolean) {
+  this.satisfies { list ->
+    assertThat(list.any { fn(it as T) })
+      .describedAs("List contains matching element!")
+      .isTrue
+  }
+}
+
+inline fun <T> ListAssert<T>.doesNotContainAny(crossinline fn: T.() -> Boolean) {
+  this.satisfies { list ->
+    assertThat(list.any { fn(it as T) })
+      .describedAs("List does not contains matching element!")
+      .isFalse
+  }
+}

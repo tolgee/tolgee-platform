@@ -24,7 +24,7 @@ class RemoveExpiredImportService(
       return null
     }
 
-    val minDate = DateUtils.addHours(currentDateProvider.getDate(), -2)
+    val minDate = DateUtils.addHours(currentDateProvider.date, -2)
     if (minDate > import.createdAt) {
       importService.deleteImport(import)
       return null

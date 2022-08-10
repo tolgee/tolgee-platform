@@ -32,8 +32,11 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
+    val base = dbPopulator.createBase("SomeProject", "user")
+    userAccount = base.userAccount
     createForLanguagesDto = CreateProjectDTO(
       name = "What a project",
+      organizationId = base.organization.id,
       languages = listOf(
         LanguageDto(
           name = "English",
@@ -104,7 +107,8 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   private fun testCreateCorrectRequest() {
-    val request = CreateProjectDTO("aaa", listOf(languageDTO))
+    val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
+    val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
     mvc.perform(
       AuthorizedRequestFactory.loggedPost("/v2/projects")
         .contentType(MediaType.APPLICATION_JSON).content(

@@ -98,7 +98,9 @@ export class LINKS {
    * Authenticated user stuff
    */
 
-  static USER_API_KEYS = Link.ofRoot('apiKeys');
+  static USER_SETTINGS = Link.ofRoot('account');
+
+  static USER_API_KEYS = Link.ofParent(LINKS.USER_SETTINGS, 'apiKeys');
 
   static USER_API_KEYS_GENERATE = Link.ofParent(
     LINKS.USER_API_KEYS,
@@ -110,7 +112,20 @@ export class LINKS {
     'edit/' + p(PARAMS.API_KEY_ID)
   );
 
-  static USER_SETTINGS = Link.ofRoot('user');
+  static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');
+
+  /**
+   * Administration
+   */
+
+  static ADMINISTRATION = Link.ofRoot('administration');
+
+  static ADMINISTRATION_ORGANIZATIONS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'organizations'
+  );
+
+  static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
   /**
    * Organizations
@@ -138,7 +153,7 @@ export class LINKS {
     'invitations'
   );
 
-  static ORGANIZATION_PROJECTS = Link.ofParent(LINKS.ORGANIZATION, 'projects');
+  static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
   /**
    * Project stuff

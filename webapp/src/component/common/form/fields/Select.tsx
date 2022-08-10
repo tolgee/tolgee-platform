@@ -29,9 +29,16 @@ export const Select: FunctionComponent<Props> = (props) => {
   const { renderValue, ...formControlProps } = props;
 
   return (
-    <StyledFormControl error={!!meta.error} {...formControlProps}>
+    <StyledFormControl
+      variant={props.variant}
+      error={!!meta.error}
+      {...formControlProps}
+    >
       {props.label && (
-        <InputLabel id={'select_' + field.name + '_label'}>
+        <InputLabel
+          variant={props.variant}
+          id={'select_' + field.name + '_label'}
+        >
           {props.label}
         </InputLabel>
       )}
@@ -39,6 +46,7 @@ export const Select: FunctionComponent<Props> = (props) => {
         data-cy="global-form-select"
         name={field.name}
         labelId={'select_' + field.name + '_label'}
+        label={props.label}
         value={field.value}
         onChange={(e) => helpers.setValue(e.target.value)}
         renderValue={

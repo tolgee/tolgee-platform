@@ -54,7 +54,7 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
   }
 
   private fun createBaseImport(): Import {
-    val base = dbPopulator.createBase("hello", "importUser")
-    return importService.save(Import(author = base.userOwner!!, project = base))
+    val base = dbPopulator.createBase("hello", "import-user")
+    return importService.save(Import(project = base.project).also { it.author = base.userAccount })
   }
 }

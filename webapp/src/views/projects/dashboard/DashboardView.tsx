@@ -1,18 +1,17 @@
-import { Box, Chip, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { BaseView } from 'tg.component/layout/BaseView';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
+
 import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
-import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { BaseProjectView } from '../BaseProjectView';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -38,26 +37,11 @@ const StyledContainer = styled(Box)`
   }
 `;
 
-const StyledHeader = styled(Box)`
-  display: grid;
-  grid-template-columns: auto auto auto 1fr auto;
-  gap: 8px;
+const StyledProjectId = styled('div')`
+  display: flex;
   align-items: center;
-  margin-top: -4px;
-  margin-bottom: -4px;
-`;
-
-const StyledProjectIcon = styled(Box)``;
-
-const StyledProjectName = styled(Box)`
-  margin-right: 4px;
-  font-size: 16px;
-`;
-
-const StyledProjectId = styled(Box)`
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
-  grid-column: -1;
 `;
 
 export const DashboardView = () => {
@@ -121,30 +105,16 @@ export const DashboardView = () => {
 
   return (
     <ProjectLanguagesProvider>
-      <BaseView
+      <BaseProjectView
         windowTitle={t('project_dashboard_title')}
         containerMaxWidth="xl"
-        customNavigation={
-          <SecondaryBar>
-            <StyledHeader>
-              <StyledProjectIcon>
-                <SmallProjectAvatar project={project} />
-              </StyledProjectIcon>
-              <StyledProjectName>{project.name}</StyledProjectName>
-              <Chip
-                size="small"
-                label={
-                  project.userOwner?.name || project.organizationOwner?.name
-                }
-              />
-              <StyledProjectId>
-                <T
-                  keyName="project_dashboard_project_id"
-                  parameters={{ id: project.id }}
-                />
-              </StyledProjectId>
-            </StyledHeader>
-          </SecondaryBar>
+        navigationRight={
+          <StyledProjectId>
+            <T
+              keyName="project_dashboard_project_id"
+              parameters={{ id: project.id }}
+            />
+          </StyledProjectId>
         }
       >
         {anythingLoading ? (
@@ -168,7 +138,7 @@ export const DashboardView = () => {
             </Box>
           </StyledContainer>
         )}
-      </BaseView>
+      </BaseProjectView>
     </ProjectLanguagesProvider>
   );
 };

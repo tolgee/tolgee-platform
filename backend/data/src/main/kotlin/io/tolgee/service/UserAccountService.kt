@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
@@ -15,6 +16,7 @@ import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
@@ -34,6 +37,9 @@ class UserAccountService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
+  @Lazy
+  private val organizationService: OrganizationService,
+  private val transactionManager: PlatformTransactionManager
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -50,14 +56,18 @@ class UserAccountService(
     return userAccountRepository.findByUsername(username).orElse(null)
   }
 
-  fun get(username: String): UserAccount {
+  operator fun get(username: String): UserAccount {
     return userAccountRepository
       .findByUsername(username)
       .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
-  operator fun get(id: Long): Optional<UserAccount> {
+  fun find(id: Long): Optional<UserAccount> {
     return userAccountRepository.findById(id)
+  }
+
+  fun get(id: Long): UserAccount {
+    return userAccountRepository.findById(id).orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
@@ -96,10 +106,13 @@ class UserAccountService(
   val implicitUser: UserAccount
     get() {
       val username = "___implicit_user"
-      return userAccountRepository.findByUsername(username).orElseGet {
-        val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
-        this.createUser(account)
-        account
+      return executeInNewTransaction(transactionManager) {
+        userAccountRepository.findByUsername(username).orElseGet {
+          val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
+          this.createUser(account)
+          this.organizationService.create(OrganizationDto(name = account.name), account)
+          account
+        }
       }
     }
 
@@ -250,6 +263,10 @@ class UserAccountService(
 
   fun getAllByIds(ids: Set<Long>): MutableList<UserAccount> {
     return userAccountRepository.findAllById(ids)
+  }
+
+  fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {
+    return userAccountRepository.findAllPaged(search, pageable)
   }
 
   val isAnyUserAccount: Boolean

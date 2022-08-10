@@ -23,7 +23,7 @@ class ProjectsTestData : BaseTestData() {
       projectBuilder.addKey {
         name = "Untranslated key"
       }
-      addProject(user) {
+      addProject {
         project2 = this
         name = "Project 2"
       }.build buildProject@{

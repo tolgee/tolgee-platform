@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
@@ -19,15 +20,15 @@ import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import javax.persistence.EntityManager
 
 @Service
@@ -51,6 +52,8 @@ class TestDataService(
   private val mtCreditBucketService: MtCreditBucketService,
   private val autoTranslateService: AutoTranslationService,
   private val transactionManager: PlatformTransactionManager,
+  private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
+  private val userPreferencesService: UserPreferencesService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -61,10 +64,16 @@ class TestDataService(
     //
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
-    executeInNewTransaction {
-      saveAllUsers(builder)
+    executeInNewTransaction(transactionManager) {
       saveOrganizationData(builder)
+      saveAllUsers(builder)
     }
+
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach { it.save(builder) }
+    }
+    entityManager.flush()
+    entityManager.clear()
 
     saveAllMtCreditBuckets(builder)
     saveProjectData(builder)
@@ -110,9 +119,9 @@ class TestDataService(
   }
 
   private fun saveAllProjectDependants(builder: ProjectBuilder) {
-    savePermissions(builder)
     saveApiKeys(builder)
     saveLanguages(builder)
+    savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveKeyData(builder)
     saveTranslationData(builder)
@@ -192,8 +201,8 @@ class TestDataService(
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
-    keyMetaService.saveAll(metas)
     tagService.saveAll(metas.flatMap { it.tags })
+    keyMetaService.saveAll(metas)
     screenshotService.saveAll(keyBuilders.flatMap { it.data.screenshots.map { it.self } }.toList())
   }
 
@@ -216,19 +225,10 @@ class TestDataService(
   private fun saveAllProjects(builder: TestDataBuilder) {
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
-      executeInNewTransaction {
+      executeInNewTransaction(transactionManager) {
         projectService.save(projectBuilder.self)
         saveAllProjectDependants(projectBuilder)
       }
-    }
-  }
-
-  private fun executeInNewTransaction(fn: () -> Unit) {
-    val tt = TransactionTemplate(transactionManager)
-    tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
-
-    tt.executeWithoutResult {
-      fn()
     }
   }
 
@@ -241,7 +241,7 @@ class TestDataService(
       builder.data.organizations.map {
         it.self.apply {
           val slug = this.slug
-          if (slug == null || slug.isEmpty()) {
+          if (slug.isEmpty()) {
             this.slug = organizationService.generateSlug(this.name!!)
           }
         }
@@ -258,6 +258,11 @@ class TestDataService(
       }
     )
     saveUserAvatars(userAccountBuilders)
+    saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
+  }
+
+  private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
+    data.forEach { userPreferencesService.save(it.self) }
   }
 
   private fun saveUserAvatars(userAccountBuilders: MutableList<UserAccountBuilder>) {

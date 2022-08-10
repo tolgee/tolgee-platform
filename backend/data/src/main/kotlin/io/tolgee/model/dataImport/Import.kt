@@ -15,12 +15,12 @@ import javax.validation.constraints.NotNull
 class Import(
   @field:NotNull
   @ManyToOne(optional = false)
-  val author: UserAccount,
+  val project: Project
+) : StandardAuditModel() {
 
   @field:NotNull
   @ManyToOne(optional = false)
-  val project: Project
-) : StandardAuditModel() {
+  lateinit var author: UserAccount
 
   @OneToMany(mappedBy = "import")
   var files = mutableListOf<ImportFile>()

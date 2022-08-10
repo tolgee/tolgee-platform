@@ -35,7 +35,7 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     Thread.sleep(1000)
     val storedNewer = imageUploadService.store(screenshotFile, user)
 
-    whenever(dateProvider.getDate())
+    whenever(dateProvider.date)
       .thenReturn(
         Date.from(
           Instant.now()

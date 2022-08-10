@@ -1,6 +1,10 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { clickGlobalSave, gcy, goToPage } from '../../common/shared';
+import {
+  clickGlobalSave,
+  gcy,
+  switchToOrganization,
+} from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
@@ -13,7 +17,7 @@ describe('Organization List', () => {
   });
 
   it('creates organization', () => {
-    gcy('global-plus-button').click();
+    goToNewOrganizationForm();
     gcy('organization-name-field').within(() =>
       cy.get('input').type('What a nice organization')
     );
@@ -24,14 +28,15 @@ describe('Organization List', () => {
       cy.get('input').type('Very nice organization! Which is nice to create!')
     );
     clickGlobalSave();
-    gcy('global-paginated-list').within(() =>
-      cy.contains('What a nice organization')
-    );
+    gcy('organization-switch').contains('What a nice organization');
     cy.contains('Organization created').should('be.visible');
+    gcy('organization-switch')
+      .contains('What a nice organization')
+      .should('be.visible');
   });
 
   it('creates organization without description', () => {
-    gcy('global-plus-button').click();
+    goToNewOrganizationForm();
     gcy('organization-name-field').within(() =>
       cy.get('input').type('What a nice organization')
     );
@@ -43,7 +48,7 @@ describe('Organization List', () => {
   });
 
   it('validates creation fields', () => {
-    gcy('global-plus-button').click();
+    goToNewOrganizationForm();
     gcy('organization-name-field').within(() => {
       cy.get('input').type('aaa').clear();
     });
@@ -71,67 +76,68 @@ describe('Organization List', () => {
 
   describe('list', () => {
     it('contains created data', () => {
-      gcy('global-paginated-list').within(() => {
-        cy.contains('Facebook').should('be.visible');
-        cy.contains('ZZZ Cool company 10')
-          .scrollIntoView()
-          .should('be.visible');
-        goToPage(2);
-        cy.contains('ZZZ Cool company 14');
-      });
-    });
+      cy.waitForDom();
+      cy.gcy('organization-switch').click();
+      cy.gcy('organization-switch-item')
+        .contains('Facebook')
+        .should('be.visible');
 
-    it('admin cannot see microsoft settings button', () => {
-      gcy('global-paginated-list').within(() => {
-        cy.contains('Microsoft')
-          .closest('li')
-          .within(() => {
-            gcy('organization-settings-button').should('not.exist');
-          });
-      });
+      cy.gcy('organization-switch-item')
+        .contains('ZZZ Cool company 10')
+        .should('be.visible');
+      cy.contains('ZZZ Cool company 14').scrollIntoView().should('be.visible');
     });
 
     it('admin leaves Microsoft', { scrollBehavior: 'center' }, () => {
-      gcy('global-paginated-list').within(() => {
-        cy.contains('Microsoft')
-          .closest('li')
-          .within(($li) => {
-            gcy('leave-organization-button').click();
-          });
-      });
+      switchToOrganization('Microsoft');
+      cy.gcy('global-user-menu-button').click();
+      cy.gcy('user-menu-organization-settings')
+        .contains('Organization settings')
+        .click();
+
+      gcy('organization-profile-leave-button').click();
+
       gcy('global-confirmation-confirm').click();
       cy.contains('Organization left').should('be.visible');
     });
 
     it('admin cannot leave Techfides', { scrollBehavior: 'center' }, () => {
-      gcy('global-paginated-list').within(() => {
-        cy.contains('Techfides')
-          .closest('li')
-          .within(($li) => {
-            gcy('leave-organization-button').click();
-          });
-      });
+      switchToOrganization('Techfides');
+      cy.gcy('global-user-menu-button').click();
+      cy.gcy('user-menu-organization-settings')
+        .contains('Organization settings')
+        .click();
+
+      gcy('organization-profile-leave-button').click();
+
       gcy('global-confirmation-confirm').click();
       cy.contains('Organization has no other owner.').should('be.visible');
     });
 
-    it('admin can access Tolgee settings', { scrollBehavior: 'center' }, () => {
-      gcy('global-paginated-list').within(() => {
-        cy.contains('Tolgee')
-          .closest('li')
-          .within(($li) => {
-            gcy('organization-settings-button').click();
-          });
-      });
-      cy.gcy('global-base-view-title').contains('Tolgee').should('be.visible');
+    it('admin can change Tolgee settings', { scrollBehavior: 'center' }, () => {
+      switchToOrganization('Tolgee');
+      cy.gcy('global-user-menu-button').click();
+      cy.gcy('user-menu-organization-settings')
+        .contains('Organization settings')
+        .click();
+
+      cy.gcy('global-form-save-button').should('not.be.disabled');
+      cy.gcy('organization-profile-delete-button').should('not.be.disabled');
     });
   });
+
+  it('', () => {});
 
   after(() => {
     organizationTestData.clean();
   });
 
+  const goToNewOrganizationForm = () => {
+    gcy('organization-switch').click();
+    gcy('organization-switch-new').click();
+  };
+
   const visit = () => {
-    cy.visit(`${HOST}/organizations`);
+    cy.visit(`${HOST}/projects`);
   };
 });

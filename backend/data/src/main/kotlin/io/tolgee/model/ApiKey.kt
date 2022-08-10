@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull
 @Suppress("JoinDeclarationAndAssignment")
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["key"], name = "api_key_unique")])
-
 class ApiKey(
   @field:NotEmpty
   @field:NotNull

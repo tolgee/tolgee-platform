@@ -3,7 +3,7 @@ import { projectListdData } from '../../common/apiCalls/testData/testData';
 import { createComment, resolveComment } from '../../common/comments';
 import { HOST } from '../../common/constants';
 import { createProject, enterProject } from '../../common/projects';
-import { selectInProjectMenu } from '../../common/shared';
+import { gcy, selectInProjectMenu } from '../../common/shared';
 import { getCell } from '../../common/state';
 import { createTag } from '../../common/tags';
 import { createTranslation } from '../../common/translations';
@@ -14,10 +14,15 @@ describe('Project stats', () => {
     projectListdData.generate();
     login('projectListDashboardUser', 'admin');
     cy.visit(HOST);
+    gcy('global-base-view-content').should('be.visible');
+  });
+
+  afterEach(() => {
+    projectListdData.clean();
   });
 
   it('Activity', () => {
-    createProject('Project with activity', 'Test User');
+    createProject('Project with activity', 'test_username');
     enterProject('Project with activity');
     createTranslation('new translation', 'english translation');
     createTag('new tag');
