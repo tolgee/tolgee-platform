@@ -1,3 +1,10 @@
+# [2.34.0](https://github.com/tolgee/tolgee-platform/compare/v2.33.0...v2.34.0) (2022-08-10)
+
+
+### Features
+
+* add organization billing redirect ([d0fa13f](https://github.com/tolgee/tolgee-platform/commit/d0fa13fa36f45064d6894e33036b461ad1a01fdc))
+
 # [2.33.0](https://github.com/tolgee/tolgee-platform/compare/v2.32.6...v2.33.0) (2022-08-10)
 
 
