@@ -49,9 +49,11 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
+    // language is cached for some reason (even after clearing entity manager in tests), so we need to refresh it
+    // to get the current languageStats, which would otherwise fail on constraint violation
+    entityManager.refresh(language)
     translationService.deleteAllByLanguage(language.id)
     permissionService.onLanguageDeleted(language)
-    languageStatsService.deleteAllByLanguage(id)
     languageRepository.delete(language)
   }
 

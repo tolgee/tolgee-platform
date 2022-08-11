@@ -66,14 +66,14 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
       )
     ).andIsOk.andAssertThatJson {
       node("_embedded.languageConfigs") {
-        node("[0]") {
+        node("[1]") {
           node("targetLanguageId").isValidId
           node("targetLanguageTag").isEqualTo("en")
           node("targetLanguageName").isEqualTo("English")
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
         }
-        node("[1]") {
+        node("[0]") {
           node("targetLanguageId").isNull()
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
@@ -108,7 +108,7 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
       node("_embedded.languageConfigs") {
         node("[0]") {
           node("targetLanguageId").isNull()
-          node("primaryService").isEqualTo("GOOGLE")
+          node("primaryService").isEqualTo("AWS")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
         }
         node("[1]") {

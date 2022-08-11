@@ -82,8 +82,11 @@ class Language : StandardAuditModel() {
   @ActivityDescribingProp
   var flagEmoji: String? = null
 
-  @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true)
+  @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
   var mtServiceConfig: MtServiceConfig? = null
+
+  @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var stats: LanguageStats? = null
 
   fun updateByDTO(dto: LanguageDto) {
     name = dto.name

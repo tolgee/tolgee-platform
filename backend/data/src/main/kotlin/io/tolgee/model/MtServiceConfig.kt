@@ -5,11 +5,12 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 
 @Entity
 class MtServiceConfig : StandardAuditModel() {
-  @OneToOne
+  @ManyToOne
   lateinit var project: Project
 
   /**

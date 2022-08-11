@@ -67,11 +67,13 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun deleteLanguage() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
-    performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
-    Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      val project = base.project
+      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
+      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+    }
   }
 
   @Test

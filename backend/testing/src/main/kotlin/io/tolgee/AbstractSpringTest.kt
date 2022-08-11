@@ -45,6 +45,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -178,6 +179,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var languageStatsService: LanguageStatsService
 
   @Autowired
+  lateinit var platformTransactionManager: PlatformTransactionManager
+
+  @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
     initialUsername = authenticationProperties.initialUsername
     initialPassword = initialPasswordManager.initialPassword
@@ -193,5 +197,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     deeplMachineTranslationProperties.defaultEnabled = false
     deeplMachineTranslationProperties.authKey = "dummy"
     internalProperties.fakeMtProviders = false
+  }
+
+  fun <T> executeInNewTransaction(fn: () -> T): T {
+    return io.tolgee.util.executeInNewTransaction(platformTransactionManager, fn)
   }
 }

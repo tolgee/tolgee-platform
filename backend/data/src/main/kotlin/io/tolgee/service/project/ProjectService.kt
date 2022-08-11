@@ -25,13 +25,11 @@ import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
-import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.util.SlugGenerator
@@ -54,10 +52,8 @@ class ProjectService constructor(
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
-  private val organizationRoleService: OrganizationRoleService,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
-  private val userAccountService: UserAccountService,
   private val avatarService: AvatarService,
   private val activityHolder: ActivityHolder,
   @Lazy
