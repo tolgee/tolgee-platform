@@ -43,7 +43,7 @@ const messageService = container.resolve(MessageService);
 const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
-export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
+export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const onDialogClose = () => {
     if (props.onClose) {
       props.onClose();
@@ -56,7 +56,11 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     url: '/v2/projects',
     method: 'get',
     query: { size: 1000 },
+    options: {
+      enabled: !props.project,
+    },
   });
+
   const scopes = useApiQuery({
     url: '/v2/api-keys/availableScopes',
     method: 'get',
@@ -73,9 +77,9 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   });
 
   const getAvailableScopes = (projectId?: number): Set<string> => {
-    const userPermissionType = projects?.data?._embedded?.projects?.find(
-      (r) => r.id === projectId
-    )?.computedPermissions.type;
+    const userPermissionType =
+      projects?.data?._embedded?.projects?.find((r) => r.id === projectId)
+        ?.computedPermissions.type || props.project?.computedPermissions.type;
     if (!userPermissionType || !scopes?.data) {
       return new Set();
     }
@@ -95,7 +99,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
         },
       },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           messageService.success(<T>api_key_successfully_edited</T>);
           redirect(LINKS.USER_API_KEYS);
         },
@@ -137,7 +141,8 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       };
     }
 
-    const projectId = projects.data?._embedded?.projects?.[0]?.id;
+    const projectId =
+      projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
 
     return {
       projectId: projectId,
@@ -166,12 +171,12 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
         )}
       </DialogTitle>
       <DialogContent>
-        {(projects.data && projects.data?._embedded?.projects?.length === 0 && (
+        {(projects.data && projects.data?._embedded === undefined && (
           <T>cannot_add_api_key_without_project_message</T>
         )) || (
           <>
             {props.loading && <BoxLoading />}
-            {projects.data && scopes.data && (
+            {(projects.data || props.project) && scopes.data && (
               <StandardForm
                 onSubmit={props.editKey ? handleEdit : handleAdd}
                 saveActionLoadable={

@@ -5,7 +5,7 @@ import { Add } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { AddApiKeyFormDialog } from 'tg.views/userSettings/apiKeys/AddApiKeyFormDialog';
+import { ApiKeyFormDialog } from '../../../userSettings/apiKeys/ApiKeyFormDialog';
 import { useProject } from 'tg.hooks/useProject';
 
 const StyledItemWrapper = styled('div')`
@@ -97,7 +97,7 @@ export const ApiKeySelector: FC<{
         <BoxLoading p={1} />
       )}
       {addDialogOpen && (
-        <AddApiKeyFormDialog
+        <ApiKeyFormDialog
           project={project}
           onClose={() => {
             setAddDialogOpen(false);

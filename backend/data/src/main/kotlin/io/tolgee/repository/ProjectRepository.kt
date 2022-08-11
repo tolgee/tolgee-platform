@@ -36,10 +36,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   )
   fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
+  // it makes sense to give all projects to admin only when organizationId is provided
   @Query(
     """$BASE_VIEW_QUERY        
         left join UserAccount ua on ua.id = :userAccountId
-        where (p is not null or role is not null or ua.role = 'ADMIN')
+        where (p is not null or role is not null or (ua.role = 'ADMIN' and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))

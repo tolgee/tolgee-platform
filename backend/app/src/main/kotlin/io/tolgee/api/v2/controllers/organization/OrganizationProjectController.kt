@@ -72,7 +72,7 @@ class OrganizationProjectController(
     @RequestParam("search") search: String?,
     @PathVariable organizationId: Long
   ): PagedModel<ProjectWithStatsModel> {
-    val projects = projectService.findPermittedPaged(pageable, search, organizationId)
+    val projects = projectService.findPermittedPaged(pageable, search, organizationId = organizationId)
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
