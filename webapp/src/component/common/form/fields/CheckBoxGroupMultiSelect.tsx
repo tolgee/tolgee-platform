@@ -14,8 +14,6 @@ interface CheckBoxGroupMultiSelectProps {
   name: string;
   label?: string;
   color?: 'primary' | 'secondary' | 'default';
-  mt?: number;
-  mb?: number;
   options: Set<string>;
 }
 
@@ -44,8 +42,8 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
             key={index}
             error={!!meta.error}
             sx={{
-              mt: props.mt !== undefined ? props.mt : 2,
-              mb: props.mb !== undefined ? props.mb : 2,
+              mt: 0.5,
+              mb: 0.5,
             }}
           >
             <FormControlLabel
