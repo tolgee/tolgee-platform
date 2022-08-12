@@ -75,6 +75,9 @@ class Project(
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
   var autoTranslationConfig: AutoTranslationConfig? = null
 
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
+  var mtServiceConfig: MutableList<MtServiceConfig> = mutableListOf()
+
   @ActivityLoggedProp
   override var avatarHash: String? = null
 

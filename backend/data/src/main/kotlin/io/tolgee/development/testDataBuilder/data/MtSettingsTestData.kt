@@ -32,5 +32,10 @@ class MtSettingsTestData : BaseTestData() {
       enabledServices = mutableSetOf(MtServiceType.AWS, MtServiceType.GOOGLE)
       primaryService = MtServiceType.AWS
     }
+    projectBuilder.addMtServiceConfig {
+      targetLanguage = null
+      enabledServices = mutableSetOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+      primaryService = MtServiceType.AWS
+    }
   }
 }

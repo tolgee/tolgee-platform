@@ -271,12 +271,6 @@ class TranslationService(
     translationRepository.deleteByIdIn(ids)
   }
 
-  fun deleteAllByProject(projectId: Long) {
-    val ids = translationRepository.selectIdsByProject(projectId)
-    deleteByIdIn(ids)
-    entityManager.flush()
-  }
-
   fun deleteAllByLanguage(languageId: Long) {
     val translations = translationRepository.getAllByLanguageId(languageId)
     val ids = translations.map { it.id }

@@ -11,15 +11,11 @@ import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
 import org.opentest4j.AssertionFailedError
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.PlatformTransactionManager
 
 class LanguageStatsListenerTest : AbstractControllerTest() {
 
   @Autowired
   private lateinit var projectHolder: ProjectHolder
-
-  @Autowired
-  private lateinit var platformTransactionManager: PlatformTransactionManager
 
   @Test
   fun `updates stats when added key`() {
