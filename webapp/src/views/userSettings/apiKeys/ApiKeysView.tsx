@@ -8,7 +8,7 @@ import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
+import { ApiKeyFormDialog } from './ApiKeyFormDialog';
 import { ApiKeysList } from './ApiKeysList';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 
@@ -28,7 +28,7 @@ export const ApiKeysView: FunctionComponent = () => {
   const EditForm = () => (
     <>
       {list.isSuccess && (
-        <AddApiKeyFormDialog
+        <ApiKeyFormDialog
           editKey={list.data?._embedded?.apiKeys?.find(
             (key) =>
               key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID])
@@ -72,7 +72,7 @@ export const ApiKeysView: FunctionComponent = () => {
           <EditForm />
         </Route>
         <Route exact path={LINKS.USER_API_KEYS_GENERATE.template}>
-          <AddApiKeyFormDialog />
+          <ApiKeyFormDialog />
         </Route>
       </Switch>
     </>

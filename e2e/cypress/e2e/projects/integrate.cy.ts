@@ -95,33 +95,25 @@ describe('Integrate view', () => {
         deleteAllProjectApiKeys(projectId);
       });
 
-      it(
-        'can create new API key when no API key exists',
-        { retries: { runMode: 10 } },
-        () => {
-          createNewApiKey();
-          getApiKeySelectValue().should('gt', 1000000);
-        }
-      );
+      it('can create new API key when no API key exists', () => {
+        createNewApiKey();
+        getApiKeySelectValue().should('gt', 1000000);
+      });
     });
 
-    it(
-      'can create new API key when some API keys exist',
-      { retries: { runMode: 10 } },
-      () => {
-        createApiKeysAndSelectOne(projectId).then(() => {
-          cy.intercept('POST', '/v2/api-keys').as('create');
-          createNewApiKey();
-          cy.wait('@create').then((i) => {
-            const created = i.response.body;
-            gcy('integrate-api-key-selector-select').contains(created.key);
-            getApiKeySelectValue().then(() => {
-              cy.wrap(created).its('id').should('eq', created.id);
-            });
+    it('can create new API key when some API keys exist', () => {
+      createApiKeysAndSelectOne(projectId).then(() => {
+        cy.intercept('POST', '/v2/api-keys').as('create');
+        createNewApiKey();
+        cy.wait('@create').then((i) => {
+          const created = i.response.body;
+          gcy('integrate-api-key-selector-select').contains(created.key);
+          getApiKeySelectValue().then(() => {
+            cy.wrap(created).its('id').should('eq', created.id);
           });
         });
-      }
-    );
+      });
+    });
 
     describe('existing API key', () => {
       let created: ApiKeyDTO;
