@@ -7,6 +7,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
+import io.tolgee.fixtures.waitFor
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
@@ -75,10 +76,30 @@ class TestDataService(
     entityManager.flush()
     entityManager.clear()
 
-    saveAllMtCreditBuckets(builder)
-    saveProjectData(builder)
+    executeInNewTransaction(transactionManager) {
+      saveAllMtCreditBuckets(builder)
+      saveProjectData(builder)
 
-    finalize()
+      finalize()
+    }
+
+    executeInNewTransaction(transactionManager) {
+      waitForStatsCreated(builder.data.projects)
+    }
+  }
+
+  private fun waitForStatsCreated(projects: MutableList<ProjectBuilder>) {
+    waitFor {
+      var allHasStats = true
+      projects.flatMap { it.data.languages }.forEach {
+        val lang = languageService.findById(it.self.id).get()
+        entityManager.refresh(lang)
+        if (lang.stats == null) {
+          allHasStats = false
+        }
+      }
+      allHasStats
+    }
   }
 
   private fun saveOrganizationData(builder: TestDataBuilder) {
@@ -187,7 +208,10 @@ class TestDataService(
   }
 
   private fun saveLanguages(builder: ProjectBuilder) {
-    val languages = builder.data.languages.map { it.self }
+    val languages = builder.data.languages.map {
+      // refresh entity if updating to get new stats
+      if (it.self.id != 0L) languageService.get(it.self.id) else it.self
+    }
     languageService.saveAll(languages)
   }
 
