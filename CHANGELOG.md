@@ -1,3 +1,10 @@
+## [2.35.1](https://github.com/tolgee/tolgee-platform/compare/v2.35.0...v2.35.1) (2022-08-12)
+
+
+### Bug Fixes
+
+* Languages store in localstorage only when changed ([a05efcf](https://github.com/tolgee/tolgee-platform/commit/a05efcfdf3490f0629e71e8a9413e9f492edf77a))
+
 # [2.35.0](https://github.com/tolgee/tolgee-platform/compare/v2.34.0...v2.35.0) (2022-08-12)
 
 
