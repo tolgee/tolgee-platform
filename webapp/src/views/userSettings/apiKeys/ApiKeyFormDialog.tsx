@@ -133,21 +133,29 @@ export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   };
 
   const getInitialValues = () => {
+    const projectId =
+      projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
+
+    const availableScopes = getAvailableScopes(projectId);
+
     if (props.editKey) {
+      const currentScopes = props.editKey.scopes.filter((currentScope) =>
+        availableScopes.has(currentScope)
+      );
+
+      const currentScopesSet = new Set(currentScopes);
+
       return {
         projectId: props.editKey.projectId,
         //check all scopes by default
-        scopes: new Set(props.editKey.scopes),
+        scopes: currentScopesSet,
       };
     }
-
-    const projectId =
-      projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
 
     return {
       projectId: projectId,
       //check all scopes checked by default
-      scopes: getAvailableScopes(projectId),
+      scopes: availableScopes,
     };
   };
 

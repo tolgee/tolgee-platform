@@ -11,7 +11,8 @@ enum class ApiScope(var value: String) {
   SCREENSHOTS_DELETE("screenshots.delete"),
   SCREENSHOTS_VIEW("screenshots.view"),
   ACTIVITY_VIEW("activity.view"),
-  IMPORT("import");
+  IMPORT("import"),
+  LANGUAGES_EDIT("languages.edit");
 
   companion object {
     fun fromValue(value: String): ApiScope {

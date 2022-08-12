@@ -80,7 +80,8 @@ class Permission(
         ApiScope.SCREENSHOTS_UPLOAD,
         ApiScope.SCREENSHOTS_DELETE,
         ApiScope.ACTIVITY_VIEW,
-        ApiScope.IMPORT
+        ApiScope.IMPORT,
+        ApiScope.LANGUAGES_EDIT
       )
     );
   }

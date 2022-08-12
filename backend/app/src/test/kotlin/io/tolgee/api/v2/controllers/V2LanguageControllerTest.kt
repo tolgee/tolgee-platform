@@ -5,10 +5,12 @@ import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -73,6 +75,32 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
       performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.LANGUAGES_EDIT])
+  fun `deletes language with API key`() {
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      this.userAccount = base.userAccount
+      this.projectSupplier = { base.project }
+      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      performProjectAuthDelete("languages/${deutsch.id}", null)
+        .andExpect(MockMvcResultMatchers.status().isOk)
+      Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  fun `does not deletes language with API key (permissions)`() {
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      this.userAccount = base.userAccount
+      this.projectSupplier = { base.project }
+      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      performProjectAuthDelete("languages/${deutsch.id}", null).andIsForbidden
     }
   }
 
