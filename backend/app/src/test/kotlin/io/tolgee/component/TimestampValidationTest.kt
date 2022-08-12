@@ -22,32 +22,37 @@ class TimestampValidationTest {
 
   @Test
   fun testCheckTimeStamp() {
-    val encrypted = timestampValidation.encryptTimeStamp(Date().time - 10000)
+    val encrypted = timestampValidation.encryptTimeStamp("hello", Date().time - 10000)
     assertThatThrownBy {
-      timestampValidation.checkTimeStamp(encrypted, 9500)
+      timestampValidation.checkTimeStamp("hello", encrypted, 9500)
     }.isInstanceOf(ValidationException::class.java)
-    timestampValidation.checkTimeStamp(encrypted, 10500)
+    assertThatThrownBy {
+      timestampValidation.checkTimeStamp("helloo", encrypted, 30000)
+    }.isInstanceOf(ValidationException::class.java)
+    timestampValidation.checkTimeStamp("hello", encrypted, 10500)
   }
 
   @Test
   fun isTimeStampValid() {
-    val encrypted = timestampValidation.encryptTimeStamp(Date().time - 10000)
-    assertThat(timestampValidation.isTimeStampValid(encrypted, 10500)).isTrue
-    assertThat(timestampValidation.isTimeStampValid(encrypted, 20500)).isTrue
-    assertThat(timestampValidation.isTimeStampValid(encrypted, 9500)).isFalse
-    assertThat(timestampValidation.isTimeStampValid(encrypted, 1000)).isFalse
-    assertThat(timestampValidation.isTimeStampValid(encrypted, 1000)).isFalse
+    val encrypted = timestampValidation.encryptTimeStamp("hello", Date().time - 10000)
+    assertThat(timestampValidation.isTimeStampValid("hello", encrypted, 10500)).isTrue
+    assertThat(timestampValidation.isTimeStampValid("hello", encrypted, 20500)).isTrue
+    assertThat(timestampValidation.isTimeStampValid("hello", encrypted, 9500)).isFalse
+    assertThat(timestampValidation.isTimeStampValid("hello", encrypted, 1000)).isFalse
+    assertThat(timestampValidation.isTimeStampValid("hello", encrypted, 1000)).isFalse
   }
 
   @Test
   fun testEncryptTimeStamp() {
-    val encrypted = timestampValidation.encryptTimeStamp(1608300796)
-    assertThat(encrypted).isEqualTo("e725d2ccb479cf3af6ce94017bd7ad52")
+    val encrypted = timestampValidation.encryptTimeStamp("hello", 1608300796)
+    assertThat(encrypted).isEqualTo("9095807353c7e00bfb1e001f1027e5e0be9cb6029aafdf231023a072887f8be5")
   }
 
   @Test
   fun testDecryptTimeStamp() {
-    val timestamp = timestampValidation.decryptTimeStamp("e725d2ccb479cf3af6ce94017bd7ad52")
-    assertThat(timestamp).isEqualTo(1608300796)
+    val timestamp = timestampValidation
+      .decryptTimeStamp("9095807353c7e00bfb1e001f1027e5e0be9cb6029aafdf231023a072887f8be5")
+    assertThat(timestamp?.timestamp).isEqualTo(1608300796)
+    assertThat(timestamp?.entityUnique).isEqualTo("hello")
   }
 }

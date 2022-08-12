@@ -6,6 +6,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 interface ScreenshotDetailProps {
   onClose: () => void;
   fileName: string;
+  open: boolean;
 }
 
 export const ScreenshotDetail: React.FunctionComponent<ScreenshotDetailProps> =
@@ -16,7 +17,7 @@ export const ScreenshotDetail: React.FunctionComponent<ScreenshotDetailProps> =
       <Dialog
         onClose={props.onClose}
         aria-labelledby="simple-dialog-title"
-        open={!!props.fileName}
+        open={props.open}
         maxWidth={'xl'}
       >
         <img

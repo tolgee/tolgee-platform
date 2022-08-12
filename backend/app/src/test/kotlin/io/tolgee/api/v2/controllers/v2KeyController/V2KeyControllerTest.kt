@@ -125,7 +125,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         isArray.hasSize(3)
         node("[1]") {
           node("id").isNumber.isGreaterThan(BigDecimal(0))
-          node("filename").isString.endsWith(".jpg").hasSizeGreaterThan(20)
+          node("filename").isString.endsWith(".png").hasSizeGreaterThan(20)
         }
       }
     }
@@ -206,7 +206,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         isArray.hasSize(4)
         node("[1]") {
           node("id").isNumber.isGreaterThan(BigDecimal(0))
-          node("filename").isString.endsWith(".jpg").hasSizeGreaterThan(20)
+          node("filename").isString.endsWith(".png").hasSizeGreaterThan(20)
         }
       }
     }

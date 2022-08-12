@@ -48,7 +48,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
     val image = imageUploadService.store(screenshotFile, userAccount!!)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
-    val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
+    val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
 
     val result = performAuthGet("/uploaded-images/${image.filename}.jpg?timestamp=$timestamp")
       .andExpect(status().isBadRequest)
@@ -62,11 +62,11 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
     val image = imageUploadService.store(screenshotFile, userAccount!!)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
-    val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
+    val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
 
-    val storedImage = performAuthGet("/uploaded-images/${image.filename}.jpg?timestamp=$timestamp")
+    val storedImage = performAuthGet("/uploaded-images/${image.filename}.png?timestamp=$timestamp")
       .andIsOk.andReturn().response.contentAsByteArray
-    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + image.filename + ".jpg")
+    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + image.filename + ".png")
     assertThat(storedImage).isEqualTo(file.readBytes())
   }
 
@@ -75,12 +75,13 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   fun upload() {
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
       node("filename").isString.satisfies {
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it + ".jpg")
+        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it + ".png")
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isLessThan(1024 * 100)
+        assertThat(file.readBytes().size).isEqualTo(138412)
       }
       node("requestFilename").isString.satisfies {
-        timestampValidation.checkTimeStamp(it.split("timestamp=")[1])
+        val parts = it.split("?timestamp=")
+        timestampValidation.checkTimeStamp(parts[0], parts[1])
       }
     }
   }

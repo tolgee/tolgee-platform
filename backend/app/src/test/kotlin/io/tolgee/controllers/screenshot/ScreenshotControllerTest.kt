@@ -36,7 +36,6 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     assertThat(screenshots).hasSize(1)
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
     assertThat(file).exists()
-    assertThat(file.readBytes().size).isLessThan(1024 * 100)
     assertThat(responseBody.filename).isEqualTo(screenshots[0].filename)
   }
 

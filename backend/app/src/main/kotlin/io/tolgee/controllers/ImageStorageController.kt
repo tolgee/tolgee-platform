@@ -8,7 +8,6 @@ import io.tolgee.component.TimestampValidation
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.service.ScreenshotService.Companion.SCREENSHOTS_STORAGE_FOLDER_NAME
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -34,7 +33,7 @@ class ImageStorageController(
     response: HttpServletResponse
   ): ByteArray {
     return getFile(
-      urlPathPrefix = "screenshots",
+      urlPathPrefix = FileStoragePath.SCREENSHOTS,
       storageFolderName = SCREENSHOTS_STORAGE_FOLDER_NAME,
       timestamp,
       request,
@@ -62,10 +61,11 @@ class ImageStorageController(
     request: HttpServletRequest,
     response: HttpServletResponse
   ): ByteArray {
+    val fileName = getFileName(request, urlPathPrefix = "avatars")
+
     return getFile(
-      urlPathPrefix = "avatars",
+      fileName = fileName,
       storageFolderName = FileStoragePath.AVATARS,
-      request,
       response
     )
   }
@@ -77,32 +77,29 @@ class ImageStorageController(
     request: HttpServletRequest,
     response: HttpServletResponse
   ): ByteArray {
+    val fileName = getFileName(request, urlPathPrefix)
+
     if (tolgeeProperties.authentication.securedImageRetrieval) {
-      if (timestamp == null) {
-        throw ValidationException(io.tolgee.constants.Message.INVALID_TIMESTAMP)
-      }
-      timestampValidation.checkTimeStamp(timestamp)
+      timestampValidation.checkTimeStamp(fileName, timestamp)
     }
 
     return getFile(
+      fileName = fileName,
       response = response,
-      request = request,
-      urlPathPrefix = urlPathPrefix,
       storageFolderName = storageFolderName
     )
   }
 
   private fun getFile(
-    urlPathPrefix: String,
+    fileName: String,
     storageFolderName: String,
-    request: HttpServletRequest,
     response: HttpServletResponse,
   ): ByteArray {
     response.addHeader("Cache-Control", "max-age=365, must-revalidate, no-transform")
+    return fileStorage.readFile("$storageFolderName/$fileName")
+  }
 
-    // since there is a "." character in the URL, we have to parse like this
-    val name = request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
-
-    return fileStorage.readFile("$storageFolderName/$name")
+  private fun getFileName(request: HttpServletRequest, urlPathPrefix: String): String {
+    return request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
   }
 }
