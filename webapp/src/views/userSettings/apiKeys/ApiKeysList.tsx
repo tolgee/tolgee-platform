@@ -58,7 +58,6 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
         ),
     });
   };
-
   return (
     <StyledRoot p={2}>
       <Grid container justifyContent="space-between">
