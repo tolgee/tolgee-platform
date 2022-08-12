@@ -72,10 +72,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @BeforeEach
   fun setup() {
+    mockCurrentDate { Date() }
     initTestData()
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
-    mockCurrentDate { Date() }
     mockDefaultMtBucketSize(1000)
     cacheMock = mock()
     val rateLimitsCacheMock = mock<Cache>()
@@ -90,7 +90,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   }
 
   private fun initMachineTranslationMocks() {
-    mockCurrentDate { Date() }
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult = mock() as TranslateTextResult
 

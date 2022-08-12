@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -49,12 +50,10 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    // language is cached for some reason (even after clearing entity manager in tests), so we need to refresh it
-    // to get the current languageStats, which would otherwise fail on constraint violation
-    entityManager.refresh(language)
     translationService.deleteAllByLanguage(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
+    entityManager.flush()
   }
 
   @Transactional
@@ -78,6 +77,15 @@ class LanguageService(
     return languageRepository.findAllByProjectId(projectId).toSet()
   }
 
+  fun get(id: Long): Language {
+    return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  fun find(id: Long): Language? {
+    return languageRepository.findById(id).orElse(null)
+  }
+
+  @Deprecated("use find method", replaceWith = ReplaceWith("find"))
   fun findById(id: Long): Optional<Language> {
     return languageRepository.findById(id)
   }

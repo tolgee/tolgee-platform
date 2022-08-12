@@ -19,14 +19,15 @@ class LanguageStatsListener(
   @Async
   fun onActivity(event: OnProjectActivityEvent) {
     runSentryCatching {
-      val projectId = event.source.activityRevision?.projectId
+      val projectId = event.source.activityRevision?.projectId ?: return
+
       val modifiedEntityClasses = event.source.modifiedEntities.keys.toSet()
       val isStatsModified = modifiedEntityClasses.contains(Language::class) ||
         modifiedEntityClasses.contains(Translation::class) ||
         modifiedEntityClasses.contains(Key::class) ||
         modifiedEntityClasses.contains(Project::class)
 
-      if (isStatsModified && projectId != null) {
+      if (isStatsModified) {
         languageStatsService.refreshLanguageStats(projectId)
       }
     }

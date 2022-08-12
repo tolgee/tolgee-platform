@@ -6,7 +6,9 @@ import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.query_builders.LanguageStatsProvider
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.TimeUnit
 import javax.persistence.EntityManager
@@ -19,46 +21,52 @@ class LanguageStatsService(
   private val languageStatsRepository: LanguageStatsRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
-  private val lockingProvider: LockingProvider
+  private val lockingProvider: LockingProvider,
+  private val platformTransactionManager: PlatformTransactionManager
 ) {
   fun refreshLanguageStats(projectId: Long) {
     withLocking(projectId) {
-      val languages = languageService.findAll(projectId)
-      val allRawLanguageStats = getLanguageStatsRaw(projectId)
-      val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
-      val rawBaseLanguageStats = allRawLanguageStats.find { it.languageId == baseLanguage?.id }
-        ?: return@withLocking
-      val projectStats = projectStatsService.getProjectStats(projectId)
-      val languageStats = languageStatsRepository.getAllByProjectId(projectId)
-        .associateBy { it.language.id }
-        .toMutableMap()
+      executeInNewTransaction(platformTransactionManager) {
+        val languages = languageService.findAll(projectId)
+        val allRawLanguageStats = getLanguageStatsRaw(projectId)
+        val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
+        val rawBaseLanguageStats = allRawLanguageStats.find { it.languageId == baseLanguage?.id }
+          ?: return@executeInNewTransaction
+        val projectStats = projectStatsService.getProjectStats(projectId)
+        val languageStats = languageStatsRepository.getAllByProjectId(projectId)
+          .associateBy { it.language.id }
+          .toMutableMap()
 
-      allRawLanguageStats
-        .sortedBy { it.languageName }
-        .sortedBy { it.languageId != rawBaseLanguageStats.languageId }
-        .forEach { rawLanguageStats ->
-          val baseWords = rawBaseLanguageStats.translatedWords + rawBaseLanguageStats.reviewedWords
-          val translatedOrReviewedKeys = rawLanguageStats.translatedKeys + rawLanguageStats.reviewedKeys
-          val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
-          val untranslatedWords = baseWords - translatedOrReviewedWords
-          val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@withLocking
-          val stats = languageStats.computeIfAbsent(language.id) {
-            LanguageStats(language)
+        allRawLanguageStats
+          .sortedBy { it.languageName }
+          .sortedBy { it.languageId != rawBaseLanguageStats.languageId }
+          .forEach { rawLanguageStats ->
+            val baseWords = rawBaseLanguageStats.translatedWords + rawBaseLanguageStats.reviewedWords
+            val translatedOrReviewedKeys = rawLanguageStats.translatedKeys + rawLanguageStats.reviewedKeys
+            val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
+            val untranslatedWords = baseWords - translatedOrReviewedWords
+            val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@executeInNewTransaction
+            val stats = languageStats.computeIfAbsent(language.id) {
+              LanguageStats(language)
+            }
+            stats.apply {
+              translatedKeys = rawLanguageStats.translatedKeys
+              translatedWords = rawLanguageStats.translatedWords
+              translatedPercentage = rawLanguageStats.translatedWords.toDouble() / baseWords * 100
+              reviewedKeys = rawLanguageStats.reviewedKeys
+              reviewedWords = rawLanguageStats.reviewedWords
+              reviewedPercentage = rawLanguageStats.reviewedWords.toDouble() / baseWords * 100
+              untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
+              this.untranslatedWords = baseWords - translatedOrReviewedWords
+              untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
+            }
           }
-          stats.apply {
-            translatedKeys = rawLanguageStats.translatedKeys
-            translatedWords = rawLanguageStats.translatedWords
-            translatedPercentage = rawLanguageStats.translatedWords.toDouble() / baseWords * 100
-            reviewedKeys = rawLanguageStats.reviewedKeys
-            reviewedWords = rawLanguageStats.reviewedWords
-            reviewedPercentage = rawLanguageStats.reviewedWords.toDouble() / baseWords * 100
-            untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
-            this.untranslatedWords = baseWords - translatedOrReviewedWords
-            untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
-          }
+
+        languageStats.values.forEach {
+          it.language.stats = it
+          languageStatsRepository.save(it)
         }
-
-      languageStats.values.forEach { languageStatsRepository.save(it) }
+      }
     }
   }
 
