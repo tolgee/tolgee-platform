@@ -7,10 +7,7 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.*
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.EmailVerificationRepository
@@ -143,6 +140,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var deeplMachineTranslationProperties: DeeplMachineTranslationProperties
 
   @Autowired
+  lateinit var azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties
+
+  @Autowired
   lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -196,6 +196,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     googleMachineTranslationProperties.defaultEnabled = true
     deeplMachineTranslationProperties.defaultEnabled = false
     deeplMachineTranslationProperties.authKey = "dummy"
+    azureCognitiveTranslationProperties.defaultEnabled = false
+    azureCognitiveTranslationProperties.authKey = "dummy"
     internalProperties.fakeMtProviders = false
   }
 
