@@ -1,3 +1,15 @@
+# [2.35.0](https://github.com/tolgee/tolgee-platform/compare/v2.34.0...v2.35.0) (2022-08-12)
+
+
+### Bug Fixes
+
+* API keys dialog & Creating API key as Admin ([8714e5d](https://github.com/tolgee/tolgee-platform/commit/8714e5d31625ab7a2da2644e54030617ef6fc45a))
+
+
+### Features
+
+* Better screenshot quality, thumbnails generated, timestamp validation improved ([8ad61ca](https://github.com/tolgee/tolgee-platform/commit/8ad61ca32b304080bacf6c0c450776d8048ca66d))
+
 # [2.34.0](https://github.com/tolgee/tolgee-platform/compare/v2.33.0...v2.34.0) (2022-08-10)
 
 
