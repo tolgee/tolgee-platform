@@ -1,3 +1,12 @@
+# [2.36.0](https://github.com/tolgee/tolgee-platform/compare/v2.35.1...v2.36.0) (2022-08-13)
+
+
+### Features
+
+* Azure Cognitive Translation ([c5daa08](https://github.com/tolgee/tolgee-platform/commit/c5daa080ab7bc994f5af3970f04f83f82a120843))
+* Better screenshot quality, thumbnails generated, timestamp validation improved ([2b950c9](https://github.com/tolgee/tolgee-platform/commit/2b950c9530b7f050c450bbc6532e997df886542e))
+* Language endpoints accessible via API ([2bc365d](https://github.com/tolgee/tolgee-platform/commit/2bc365d4982bd7f17e1bc61d9f434555cd1899b9))
+
 ## [2.35.1](https://github.com/tolgee/tolgee-platform/compare/v2.35.0...v2.35.1) (2022-08-12)
 
 
