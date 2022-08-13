@@ -7,7 +7,6 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
-import io.tolgee.fixtures.waitFor
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
@@ -25,8 +24,12 @@ import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
@@ -54,8 +57,9 @@ class TestDataService(
   private val autoTranslateService: AutoTranslationService,
   private val transactionManager: PlatformTransactionManager,
   private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
-  private val userPreferencesService: UserPreferencesService
-) {
+  private val userPreferencesService: UserPreferencesService,
+  private val languageStatsService: LanguageStatsService
+) : Logging {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     prepare()
@@ -83,22 +87,19 @@ class TestDataService(
       finalize()
     }
 
-    executeInNewTransaction(transactionManager) {
-      waitForStatsCreated(builder.data.projects)
-    }
+    updateLanguageStats(builder)
   }
 
-  private fun waitForStatsCreated(projects: MutableList<ProjectBuilder>) {
-    waitFor {
-      var allHasStats = true
-      projects.flatMap { it.data.languages }.forEach {
-        val lang = languageService.findById(it.self.id).get()
-        entityManager.refresh(lang)
-        if (lang.stats == null) {
-          allHasStats = false
+  private fun updateLanguageStats(builder: TestDataBuilder) {
+    builder.data.projects.forEach {
+      try {
+        executeInNewTransaction(transactionManager) {
+          languageStatsService.refreshLanguageStats(it.self.id)
+          entityManager.flush()
         }
+      } catch (e: DataIntegrityViolationException) {
+        logger.info(e.stackTraceToString())
       }
-      allHasStats
     }
   }
 
