@@ -102,3 +102,13 @@ jobs:
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
             ./build/reports/**/*
+
+      - name: Trigger EE test & deploy
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: |
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
+            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
+            -d '{"ref":"main","inputs":{"releaseVersion":"${{ steps.version.outputs.VERSION }}"}}'
