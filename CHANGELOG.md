@@ -1,3 +1,10 @@
+## [2.36.1](https://github.com/tolgee/tolgee-platform/compare/v2.36.0...v2.36.1) (2022-08-16)
+
+
+### Bug Fixes
+
+* don't crash when invalid flag ([14ed09b](https://github.com/tolgee/tolgee-platform/commit/14ed09b7792f3e0e7e55270cd7f6f501bb0e772b))
+
 # [2.36.0](https://github.com/tolgee/tolgee-platform/compare/v2.35.1...v2.36.0) (2022-08-13)
 
 
