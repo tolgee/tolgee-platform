@@ -22,6 +22,7 @@ import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.MfaService
 import io.tolgee.service.SignUpService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.security.ReCaptchaValidationService
@@ -57,7 +58,8 @@ class PublicController(
   private val emailVerificationService: EmailVerificationService,
   private val dbPopulatorReal: DbPopulatorReal,
   private val reCaptchaValidationService: ReCaptchaValidationService,
-  private val signUpService: SignUpService
+  private val signUpService: SignUpService,
+  private val mfaService: MfaService
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
@@ -194,6 +196,17 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
     emailVerificationService.check(userAccount)
+
+    if (userAccount.totpKey?.isNotEmpty() == true) {
+      if (loginRequest.otp?.isEmpty() != false) {
+        throw AuthenticationException(Message.MFA_ENABLED)
+      }
+
+      if (!mfaService.validateOtpCode(loginRequest.otp, userAccount)) {
+        throw AuthenticationException(Message.INVALID_OTP_CODE)
+      }
+    }
+
     return tokenProvider.generateToken(userAccount.id).toString()
   }
 

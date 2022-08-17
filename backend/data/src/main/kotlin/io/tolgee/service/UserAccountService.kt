@@ -150,6 +150,36 @@ class UserAccountService(
   }
 
   @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun enableMfaTotp(userAccount: UserAccount, key: ByteArray): UserAccount {
+    userAccount.totpKey = key
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun disableMfaTotp(userAccount: UserAccount): UserAccount {
+    userAccount.totpKey = null
+    // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
+    userAccount.totpRecoveryCodes = emptyList()
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun consumeMfaRecoveryCode(userAccount: UserAccount, token: String): UserAccount {
+    userAccount.totpRecoveryCodes = userAccount.totpRecoveryCodes.minus(token)
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun regenerateMfaRecoveryCodes(userAccount: UserAccount, codes: List<String>): UserAccount {
+    userAccount.totpRecoveryCodes = codes
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun removeAvatar(userAccount: UserAccount) {
     avatarService.removeAvatar(userAccount)
@@ -220,7 +250,7 @@ class UserAccountService(
 
   private fun updatePassword(dto: UserUpdateRequestDto, userAccount: UserAccount) {
     dto.password?.let {
-      if (!it.isEmpty()) {
+      if (it.isNotEmpty()) {
         userAccount.password = encodePassword(it)
       }
     }

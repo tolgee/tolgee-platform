@@ -2059,4 +2059,14 @@
     <changeSet author="jenik (generated)" id="1660139102933-1">
         <addNotNullConstraint columnDataType="boolean" columnName="has_thumbnail" tableName="screenshot" validate="true"/>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1660576021025-1">
+        <addColumn tableName="user_account">
+            <column name="totp_key" type="bytea"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1660576021025-2">
+        <addColumn tableName="user_account">
+            <column name="totp_recovery_codes" type="text[]"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

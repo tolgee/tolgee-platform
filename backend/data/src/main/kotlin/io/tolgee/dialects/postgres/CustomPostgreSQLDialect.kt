@@ -1,5 +1,6 @@
 package io.tolgee.dialects.postgres
 
+import com.vladmihalcea.hibernate.type.array.StringArrayType
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import org.hibernate.NullPrecedence
 import org.hibernate.dialect.PostgreSQL10Dialect
@@ -12,6 +13,9 @@ import java.sql.Types
 
 @Suppress("unused")
 class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
+  init {
+    registerHibernateType(2003, StringArrayType::class.java.name)
+  }
 
   override fun renderOrderByElement(
     expression: String?,

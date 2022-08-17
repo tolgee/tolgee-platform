@@ -1,19 +1,9 @@
 package io.tolgee.model
 
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
+import com.vladmihalcea.hibernate.type.array.ListArrayType
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
 @Entity
@@ -29,6 +19,7 @@ import javax.validation.constraints.NotBlank
     )
   ]
 )
+@TypeDef(name = "string-array", typeClass = ListArrayType::class)
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +29,13 @@ data class UserAccount(
   var username: String = "",
 
   var password: String? = null,
+
+  @Column(name = "totp_key", columnDefinition = "bytea")
+  var totpKey: ByteArray? = null,
+
+  @Type(type = "string-array")
+  @Column(name = "totp_recovery_codes", columnDefinition = "text[]")
+  var totpRecoveryCodes: List<String> = emptyList(),
 
   var name: String = "",
 
