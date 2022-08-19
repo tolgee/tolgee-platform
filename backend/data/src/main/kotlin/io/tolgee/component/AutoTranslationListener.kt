@@ -14,7 +14,9 @@ class AutoTranslationListener(
     val wasUntranslatedBefore = event.oldValues[baseLanguage.tag].isNullOrEmpty()
     val isTranslatedAfter = !event.translations.find { it.language == baseLanguage }?.text.isNullOrEmpty()
     if (wasUntranslatedBefore && isTranslatedAfter) {
-      autoTranslationService.autoTranslate(key = event.key)
+      autoTranslationService.autoTranslate(
+        key = event.key,
+      )
     }
   }
 }
