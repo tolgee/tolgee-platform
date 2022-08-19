@@ -1,3 +1,10 @@
+# [2.37.0](https://github.com/tolgee/tolgee-platform/compare/v2.36.1...v2.37.0) (2022-08-19)
+
+
+### Features
+
+* Auto translation endpoint ([114b865](https://github.com/tolgee/tolgee-platform/commit/114b865b5f86942f262cc8b622896b5e70519021))
+
 ## [2.36.1](https://github.com/tolgee/tolgee-platform/compare/v2.36.0...v2.36.1) (2022-08-16)
 
 
