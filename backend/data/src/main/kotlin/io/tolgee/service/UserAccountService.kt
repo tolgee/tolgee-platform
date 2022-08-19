@@ -162,21 +162,21 @@ class UserAccountService(
   fun disableMfaTotp(userAccount: UserAccount): UserAccount {
     userAccount.totpKey = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
-    userAccount.totpRecoveryCodes = emptyList()
+    userAccount.mfaRecoveryCodes = emptyList()
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun consumeMfaRecoveryCode(userAccount: UserAccount, token: String): UserAccount {
-    userAccount.totpRecoveryCodes = userAccount.totpRecoveryCodes.minus(token)
+    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(token)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun regenerateMfaRecoveryCodes(userAccount: UserAccount, codes: List<String>): UserAccount {
-    userAccount.totpRecoveryCodes = codes
+  fun setMfaRecoveryCodes(userAccount: UserAccount, codes: List<String>): UserAccount {
+    userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
   }
 

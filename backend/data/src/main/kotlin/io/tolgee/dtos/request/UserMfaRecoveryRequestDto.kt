@@ -7,6 +7,6 @@ import javax.validation.constraints.Size
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserMfaRecoveryRequestDto(
   @field:NotBlank
-  @field:Size(min = 6, max = 6)
-  var otp: String = "",
+  @field:Size(min = 8, max = 100)
+  var password: String = ""
 )

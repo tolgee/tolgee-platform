@@ -2066,7 +2066,7 @@
     </changeSet>
     <changeSet author="cynthia (generated)" id="1660576021025-2">
         <addColumn tableName="user_account">
-            <column name="totp_recovery_codes" type="text[]"/>
+            <column name="mfa_recovery_codes" type="text[]"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

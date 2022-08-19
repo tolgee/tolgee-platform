@@ -202,7 +202,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
         throw AuthenticationException(Message.MFA_ENABLED)
       }
 
-      if (!mfaService.validateOtpCode(loginRequest.otp, userAccount)) {
+      if (!mfaService.validateTotpCode(userAccount, loginRequest.otp)) {
         throw AuthenticationException(Message.INVALID_OTP_CODE)
       }
     }

@@ -34,8 +34,8 @@ data class UserAccount(
   var totpKey: ByteArray? = null,
 
   @Type(type = "string-array")
-  @Column(name = "totp_recovery_codes", columnDefinition = "text[]")
-  var totpRecoveryCodes: List<String> = emptyList(),
+  @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
+  var mfaRecoveryCodes: List<String> = emptyList(),
 
   var name: String = "",
 
