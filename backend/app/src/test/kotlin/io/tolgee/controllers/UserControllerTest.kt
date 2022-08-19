@@ -45,7 +45,8 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     val requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "super new password",
-      name = "Ben's new name"
+      name = "Ben's new name",
+      currentPassword = initialPassword
     )
     performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findOptional(requestDTO.email)
@@ -61,7 +62,8 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     var requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "",
-      name = ""
+      name = "",
+      currentPassword = initialPassword
     )
     var mvcResult = performAuthPost("/api/user", requestDTO)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
@@ -72,7 +74,8 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "aksjhd  dasdsa",
-      name = "a"
+      name = "a",
+      currentPassword = initialPassword
     )
     dbPopulator.createUserIfNotExists(requestDTO.email)
     mvcResult = performAuthPost("/api/user", requestDTO)
@@ -86,10 +89,10 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     val oldNeedsVerification = tolgeeProperties.authentication.needsEmailVerification
     tolgeeProperties.authentication.needsEmailVerification = true
 
-    dbPopulator.createUserIfNotExists("ben@ben.aa")
     val requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aaa",
-      name = "Ben Ben"
+      name = "Ben Ben",
+      currentPassword = initialPassword
     )
     performAuthPost("/api/user", requestDTO).andIsOk
 
@@ -98,5 +101,26 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       .contains(tolgeeProperties.frontEndUrl.toString())
 
     tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification
+  }
+
+  @Test
+  fun updateEmailWithoutPassword() {
+    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
+    val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.zz")
+    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+  }
+
+  @Test
+  fun updatePasswordWithoutPassword() {
+    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
+    val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.aa", password = "super new password")
+    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+  }
+
+  @Test
+  fun updateNameWithoutPassword() {
+    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
+    val requestDTO = UserUpdateRequestDto(name = "zzz", email = "ben@ben.aa")
+    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
   }
 }

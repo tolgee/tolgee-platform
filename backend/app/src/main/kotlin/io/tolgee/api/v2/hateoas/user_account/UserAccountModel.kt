@@ -11,6 +11,7 @@ data class UserAccountModel(
   val username: String,
   var name: String?,
   var emailAwaitingVerification: String?,
+  var mfaEnabled: Boolean,
   var avatar: Avatar?,
   var globalServerRole: UserAccount.Role
 ) : RepresentationModel<UserAccountModel>()

@@ -18,6 +18,9 @@ data class UserUpdateRequestDto(
   @field:Size(min = 8, max = 100)
   var password: String? = null,
 
+  @field:Size(min = 8, max = 100)
+  var currentPassword: String? = null,
+
   @Schema(
     description = "Callback url for link sent in e-mail." +
       " This may be omitted, when server has set frontEndUrl in properties."

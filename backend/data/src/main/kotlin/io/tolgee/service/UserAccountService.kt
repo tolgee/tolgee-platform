@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
@@ -240,10 +241,19 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
+    // Current password required to change email or password
+    if (dto.email != userAccount.username || dto.password != null) {
+      if (dto.currentPassword == null) throw AuthenticationException(Message.BAD_CREDENTIALS)
+      val bCryptPasswordEncoder = BCryptPasswordEncoder()
+      val matches = bCryptPasswordEncoder.matches(dto.currentPassword, userAccount.password)
+      if (!matches) throw AuthenticationException(Message.BAD_CREDENTIALS)
+    }
+
     val old = UserAccountDto.fromEntity(userAccount)
     updateUserEmail(userAccount, dto)
     updatePassword(dto, userAccount)
     userAccount.name = dto.name
+
     publishUserInfoUpdatedEvent(old, userAccount)
     return userAccountRepository.save(userAccount)
   }

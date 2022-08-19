@@ -34,7 +34,7 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user")
-@Tag(name = "User", description = "Manipulates currentntly authorized user")
+@Tag(name = "User", description = "Manipulates currently authorized user")
 class V2UserController(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
@@ -121,7 +121,7 @@ class V2UserController(
   }
 
   @PostMapping("/mfa/recovery")
-  @Operation(summary = "Regenerates two-factor authentication recovery keys")
+  @Operation(summary = "Regenerates multi-factor authentication recovery keys")
   fun regenerateRecoveryKeys(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): ResponseEntity<List<String>> {
     // note: if support for more MFA methods is added, this check should be reworked to account for them.
     if (authenticationFacade.userAccountEntity.totpKey?.isNotEmpty() != true) {

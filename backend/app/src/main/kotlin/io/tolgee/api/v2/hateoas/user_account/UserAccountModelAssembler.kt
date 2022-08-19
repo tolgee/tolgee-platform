@@ -20,6 +20,8 @@ class UserAccountModelAssembler(
       username = entity.username,
       name = entity.name,
       emailAwaitingVerification = entity.emailVerification?.newEmail,
+      // note: if support for more MFA methods is added, this check should be reworked to account for them.
+      mfaEnabled = entity.totpKey?.isNotEmpty() == true,
       avatar = avatar,
       globalServerRole = entity.role ?: UserAccount.Role.USER
     )
