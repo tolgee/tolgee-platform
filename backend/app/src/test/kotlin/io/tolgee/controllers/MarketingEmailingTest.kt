@@ -65,7 +65,8 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   val updateRequestDto = UserUpdateRequestDto(
     name = "New Name",
-    email = "newemail@test.com"
+    email = "newemail@test.com",
+    currentPassword = initialPassword
   )
 
   @BeforeEach

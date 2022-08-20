@@ -1,7 +1,7 @@
 package io.tolgee.service
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator
-import io.tolgee.configuration.MfaConfiguration
+import io.tolgee.configuration.SecurityConfiguration
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
@@ -9,7 +9,7 @@ import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import org.apache.commons.codec.binary.Base32
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -17,8 +17,9 @@ import javax.crypto.spec.SecretKeySpec
 
 @Service
 class MfaService(
-  private val userAccountService: UserAccountService,
-  private val totpGenerator: TimeBasedOneTimePasswordGenerator
+  private val passwordEncoder: PasswordEncoder,
+  private val totpGenerator: TimeBasedOneTimePasswordGenerator,
+  private val userAccountService: UserAccountService
 ) {
   private val base32 = Base32()
 
@@ -27,8 +28,7 @@ class MfaService(
       throw AuthenticationException(Message.MFA_ENABLED)
     }
 
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    val matches = bCryptPasswordEncoder.matches(dto.password, user.password)
+    val matches = passwordEncoder.matches(dto.password, user.password)
     if (!matches) {
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
@@ -46,8 +46,7 @@ class MfaService(
       throw AuthenticationException(Message.MFA_NOT_ENABLED)
     }
 
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    val matches = bCryptPasswordEncoder.matches(dto.password, user.password)
+    val matches = passwordEncoder.matches(dto.password, user.password)
     if (!matches) {
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
@@ -60,8 +59,7 @@ class MfaService(
       throw AuthenticationException(Message.MFA_NOT_ENABLED)
     }
 
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    val matches = bCryptPasswordEncoder.matches(dto.password, user.password)
+    val matches = passwordEncoder.matches(dto.password, user.password)
     if (!matches) {
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
@@ -93,6 +91,6 @@ class MfaService(
   }
 
   private fun generateCode(key: ByteArray): Number {
-    return totpGenerator.generateOneTimePassword(SecretKeySpec(key, MfaConfiguration.OTP_ALGORITHM), Instant.now())
+    return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
   }
 }

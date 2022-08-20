@@ -35,7 +35,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -53,6 +53,7 @@ class PublicController(
   private val googleOAuthDelegate: GoogleOAuthDelegate,
   private val oauth2Delegate: OAuth2Delegate,
   private val properties: TolgeeProperties,
+  private val passwordEncoder: PasswordEncoder,
   private val userAccountService: UserAccountService,
   private val mailSender: JavaMailSender,
   private val emailVerificationService: EmailVerificationService,
@@ -190,8 +191,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     val userAccount = userAccountService.findOptional(loginRequest.username).orElseThrow {
       AuthenticationException(Message.BAD_CREDENTIALS)
     }
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    val matches = bCryptPasswordEncoder.matches(loginRequest.password, userAccount.password)
+    val matches = passwordEncoder.matches(loginRequest.password, userAccount.password)
     if (!matches) {
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }

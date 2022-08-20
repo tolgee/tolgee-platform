@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
@@ -38,6 +38,7 @@ class UserAccountService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
+  private val passwordEncoder: PasswordEncoder,
   @Lazy
   private val organizationService: OrganizationService,
   private val transactionManager: PlatformTransactionManager
@@ -99,7 +100,7 @@ class UserAccountService(
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
-    val encodedPassword = encodePassword(request.password!!)
+    val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
 
@@ -124,23 +125,20 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setResetPasswordCode(userAccount: UserAccount, code: String?): UserAccount {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    userAccount.resetPasswordCode = bCryptPasswordEncoder.encode(code)
+    userAccount.resetPasswordCode = passwordEncoder.encode(code)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setUserPassword(userAccount: UserAccount, password: String?): UserAccount {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    userAccount.password = bCryptPasswordEncoder.encode(password)
+    userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   fun isResetCodeValid(userAccount: UserAccount, code: String?): Boolean {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    return bCryptPasswordEncoder.matches(code, userAccount.resetPasswordCode)
+    return passwordEncoder.matches(code, userAccount.resetPasswordCode)
   }
 
   @Transactional
@@ -233,19 +231,13 @@ class UserAccountService(
     }
   }
 
-  fun encodePassword(rawPassword: String): String {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    return bCryptPasswordEncoder.encode(rawPassword)
-  }
-
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username || dto.password != null) {
       if (dto.currentPassword == null) throw AuthenticationException(Message.BAD_CREDENTIALS)
-      val bCryptPasswordEncoder = BCryptPasswordEncoder()
-      val matches = bCryptPasswordEncoder.matches(dto.currentPassword, userAccount.password)
+      val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
       if (!matches) throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
@@ -261,7 +253,7 @@ class UserAccountService(
   private fun updatePassword(dto: UserUpdateRequestDto, userAccount: UserAccount) {
     dto.password?.let {
       if (it.isNotEmpty()) {
-        userAccount.password = encodePassword(it)
+        userAccount.password = passwordEncoder.encode(it)
       }
     }
   }

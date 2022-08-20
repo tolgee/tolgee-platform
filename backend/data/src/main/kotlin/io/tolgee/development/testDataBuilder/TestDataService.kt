@@ -30,6 +30,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
@@ -37,6 +38,7 @@ import javax.persistence.EntityManager
 
 @Service
 class TestDataService(
+  private val passwordEncoder: PasswordEncoder,
   private val userAccountService: UserAccountService,
   private val projectService: ProjectService,
   private val languageService: LanguageService,
@@ -278,7 +280,7 @@ class TestDataService(
     val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
       userAccountBuilders.map {
-        it.self.password = userAccountService.encodePassword(it.rawPassword)
+        it.self.password = passwordEncoder.encode(it.rawPassword)
         it.self
       }
     )
