@@ -32,7 +32,7 @@ class ApiKeyAuthFilter(
     if (this.isApiAccessAllowed(request)) {
       val apiKey = getApiKey(request)
 
-      if (apiKey != null && apiKey.isNotEmpty()) {
+      if (!apiKey.isNullOrEmpty()) {
         val ak = apiKeyService.getApiKey(apiKey)
         if (ak.isPresent) {
           val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(ak.get())

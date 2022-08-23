@@ -21,10 +21,7 @@ import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
-import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.MfaService
-import io.tolgee.service.SignUpService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.*
 import io.tolgee.service.security.ReCaptchaValidationService
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
@@ -32,11 +29,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -47,20 +39,20 @@ import javax.validation.constraints.NotBlank
 @RequestMapping("/api/public")
 @Tag(name = "Authentication")
 class PublicController(
-  private val authenticationManager: AuthenticationManager,
   private val tokenProvider: JwtTokenProviderImpl,
   private val githubOAuthDelegate: GithubOAuthDelegate,
   private val googleOAuthDelegate: GoogleOAuthDelegate,
   private val oauth2Delegate: OAuth2Delegate,
   private val properties: TolgeeProperties,
-  private val passwordEncoder: PasswordEncoder,
   private val userAccountService: UserAccountService,
   private val mailSender: JavaMailSender,
   private val emailVerificationService: EmailVerificationService,
   private val dbPopulatorReal: DbPopulatorReal,
   private val reCaptchaValidationService: ReCaptchaValidationService,
   private val signUpService: SignUpService,
-  private val mfaService: MfaService
+  private val mfaService: MfaService,
+  private val securityService: SecurityService,
+  private val userCredentialsService: UserCredentialsService
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
@@ -75,17 +67,26 @@ class PublicController(
       // todo: validate properties
       throw RuntimeException("Can not use native auth and ldap auth in the same time")
     }
-    var jwt: String? = null
-    if (properties.authentication.ldap.enabled) {
-      jwt = doLdapAuthorization(loginRequest)
-    }
-    if (properties.authentication.nativeEnabled) {
-      jwt = doNativeAuth(loginRequest)
-    }
-    if (jwt == null) {
+    if (!properties.authentication.ldap.enabled && !properties.authentication.nativeEnabled) {
       // todo: validate properties
       throw RuntimeException("Authentication method not configured")
     }
+
+    val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
+    emailVerificationService.check(userAccount)
+
+    // xxx: this needs to be improved
+    if (userAccount.totpKey?.isNotEmpty() == true) {
+      if (loginRequest.otp?.isEmpty() != false) {
+        throw AuthenticationException(Message.MFA_ENABLED)
+      }
+
+      if (!mfaService.validateTotpCode(userAccount, loginRequest.otp)) {
+        throw AuthenticationException(Message.INVALID_OTP_CODE)
+      }
+    }
+
+    val jwt = tokenProvider.generateToken(userAccount.id).toString()
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 
@@ -184,50 +185,6 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       else -> {
         throw NotFoundException(Message.SERVICE_NOT_FOUND)
       }
-    }
-  }
-
-  private fun doNativeAuth(loginRequest: LoginRequest): String {
-    val userAccount = userAccountService.findOptional(loginRequest.username).orElseThrow {
-      AuthenticationException(Message.BAD_CREDENTIALS)
-    }
-    val matches = passwordEncoder.matches(loginRequest.password, userAccount.password)
-    if (!matches) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
-    }
-    emailVerificationService.check(userAccount)
-
-    if (userAccount.totpKey?.isNotEmpty() == true) {
-      if (loginRequest.otp?.isEmpty() != false) {
-        throw AuthenticationException(Message.MFA_ENABLED)
-      }
-
-      if (!mfaService.validateTotpCode(userAccount, loginRequest.otp)) {
-        throw AuthenticationException(Message.INVALID_OTP_CODE)
-      }
-    }
-
-    return tokenProvider.generateToken(userAccount.id).toString()
-  }
-
-  private fun doLdapAuthorization(loginRequest: LoginRequest): String {
-    return try {
-      val authentication = authenticationManager.authenticate(
-        UsernamePasswordAuthenticationToken(
-          loginRequest.username,
-          loginRequest.password
-        )
-      )
-      val userPrincipal = authentication.principal as LdapUserDetailsImpl
-      val userAccountEntity = userAccountService.findOptional(userPrincipal.username).orElseGet {
-        val userAccount = UserAccount()
-        userAccount.username = userPrincipal.username
-        userAccountService.createUser(userAccount)
-        userAccount
-      }
-      tokenProvider.generateToken(userAccountEntity.id).toString()
-    } catch (e: BadCredentialsException) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
   }
 

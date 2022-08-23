@@ -10,6 +10,7 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.GitHubAuthUtil
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
@@ -63,12 +64,16 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
 
-  val updateRequestDto = UserUpdateRequestDto(
-    name = "New Name",
-    email = "newemail@test.com",
-    currentPassword = initialPassword
-  )
+  lateinit var updateRequestDto: UserUpdateRequestDto
 
+  @BeforeAll
+  fun initDto() {
+    updateRequestDto = UserUpdateRequestDto(
+      name = "New Name",
+      email = "newemail@test.com",
+      currentPassword = initialPassword
+    )
+  }
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(contactsApi)
