@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
@@ -14,6 +15,7 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.PatService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
@@ -58,7 +60,8 @@ class TestDataService(
   private val transactionManager: PlatformTransactionManager,
   private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
   private val userPreferencesService: UserPreferencesService,
-  private val languageStatsService: LanguageStatsService
+  private val languageStatsService: LanguageStatsService,
+  private val patService: PatService
 ) : Logging {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -284,6 +287,11 @@ class TestDataService(
     )
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
+    saveUserPats(userAccountBuilders.flatMap { it.data.pats })
+  }
+
+  private fun saveUserPats(data: List<PatBuilder>) {
+    data.forEach { patService.save(it.self) }
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {

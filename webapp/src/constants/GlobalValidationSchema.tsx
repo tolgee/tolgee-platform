@@ -99,6 +99,11 @@ export class Validation {
 
   static readonly EDIT_API_KEY = Yup.object().shape({
     scopes: Validation.API_KEY_SCOPES,
+    description: Yup.string().required().min(1).max(250),
+  });
+
+  static readonly REGENERATE_API_KEY = Yup.object().shape({
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
   });
 
   static readonly CREATE_API_KEY = Yup.object().shape({
@@ -108,6 +113,13 @@ export class Validation {
       'Set at least one scope',
       (v) => !!(v as Set<string>).size
     ),
+    description: Yup.string().required().min(1).max(250),
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
+  });
+
+  static readonly CREATE_PAT = Yup.object().shape({
+    description: Yup.string().required().min(1).max(250),
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
   });
 
   static readonly TRANSLATION_KEY = Yup.string().required();

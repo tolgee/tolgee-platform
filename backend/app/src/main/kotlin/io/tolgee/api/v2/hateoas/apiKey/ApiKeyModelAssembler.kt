@@ -11,11 +11,13 @@ class ApiKeyModelAssembler : RepresentationModelAssemblerSupport<ApiKey, ApiKeyM
 ) {
   override fun toModel(entity: ApiKey) = ApiKeyModel(
     id = entity.id,
-    key = entity.key,
+    description = entity.description,
     username = entity.userAccount.username,
     userFullName = entity.userAccount.name,
     projectId = entity.project.id,
     projectName = entity.project.name,
-    scopes = entity.scopesEnum.map { it.value }.toSet()
+    scopes = entity.scopesEnum.map { it.value }.toSet(),
+    expiresAt = entity.expiresAt?.time,
+    lastUsedAt = entity.lastUsedAt?.time
   )
 }

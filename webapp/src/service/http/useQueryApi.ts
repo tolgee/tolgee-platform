@@ -91,6 +91,7 @@ export const useApiQuery = <
   props: QueryProps<Url, Method, Paths>
 ) => {
   const { url, method, fetchOptions, options, ...request } = props;
+
   return useQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
     () =>

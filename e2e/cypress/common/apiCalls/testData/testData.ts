@@ -33,6 +33,10 @@ export const projectListdData = generateTestDataObject(
 
 export const projectTestData = generateTestDataObject('projects');
 
+export const apiKeysTestData = generateTestDataObject('api-keys');
+
+export const patsTestData = generateTestDataObject('pat');
+
 export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
 );

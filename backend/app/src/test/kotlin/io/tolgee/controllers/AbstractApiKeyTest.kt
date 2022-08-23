@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @Deprecated("This is too complicated")
-abstract class AbstractUserAppApiTest : AbstractControllerTest() {
+abstract class AbstractApiKeyTest : AbstractControllerTest() {
   fun performAction(action: UserApiAppAction): MvcResult {
     return try {
       var resultActions = mvc.perform(action.requestBuilder)

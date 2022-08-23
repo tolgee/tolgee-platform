@@ -55,6 +55,7 @@ export enum PARAMS {
   PROJECT_ID = 'projectId',
   LANGUAGE_ID = 'languageId',
   API_KEY_ID = 'languageId',
+  PAT_ID = 'patId',
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
@@ -112,6 +113,28 @@ export class LINKS {
   static USER_API_KEYS_EDIT = Link.ofParent(
     LINKS.USER_API_KEYS,
     'edit/' + p(PARAMS.API_KEY_ID)
+  );
+
+  static USER_API_KEYS_REGENERATE = Link.ofParent(
+    LINKS.USER_API_KEYS,
+    `regenerate/${p(PARAMS.API_KEY_ID)}`
+  );
+
+  static USER_PATS = Link.ofParent(
+    LINKS.USER_SETTINGS,
+    'personal-access-tokens'
+  );
+
+  static USER_PATS_GENERATE = Link.ofParent(LINKS.USER_PATS, 'generate');
+
+  static USER_PATS_REGENERATE = Link.ofParent(
+    LINKS.USER_PATS,
+    `regenerate/${p(PARAMS.PAT_ID)}`
+  );
+
+  static USER_PATS_EDIT = Link.ofParent(
+    LINKS.USER_PATS,
+    `edit/${p(PARAMS.PAT_ID)}`
   );
 
   static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');

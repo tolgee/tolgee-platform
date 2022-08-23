@@ -2,7 +2,7 @@
 import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import { createTestProject, login } from '../../common/apiCalls/common';
-import { getPopover } from '../../common/shared';
+import { gcy, getPopover } from '../../common/shared';
 
 describe('User settings', () => {
   beforeEach(() => {
@@ -10,13 +10,13 @@ describe('User settings', () => {
     cy.visit(HOST);
   });
 
-  it('Will access api keys', () => {
+  it('Accesses api keys', () => {
     cy.xpath("//*[@aria-controls='user-menu']").click();
     cy.wait(50);
     cy.xpath(getAnyContainingText('Api keys')).click();
   });
 
-  it('will open user menu from projects', () => {
+  it('Opens user menu from projects', () => {
     createTestProject().then((r) => {
       cy.visit(`${HOST}/projects/${r.body.id}`);
       cy.xpath("//*[@aria-controls='user-menu']").click();
@@ -25,8 +25,15 @@ describe('User settings', () => {
     });
   });
 
-  it('will access user settings', () => {
+  it('Accesses user settings', () => {
     cy.xpath("//*[@aria-controls='user-menu']").click();
     cy.get('#user-menu').contains('Account settings').click();
+  });
+
+  it('Accesses personal access tokens', () => {
+    cy.xpath("//*[@aria-controls='user-menu']").click();
+    cy.get('#user-menu').contains('Personal Access Tokens').click();
+    cy.get('h6').contains('Personal Access Tokens').should('be.visible');
+    gcy('global-empty-list').should('be.visible');
   });
 });

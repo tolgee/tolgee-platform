@@ -13,12 +13,14 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
+import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,13 +36,32 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `creates API key (without description and expiration)`() {
+    performAuthPost(
+      "/v2/api-keys",
+      mapOf(
+        "projectId" to testData.projectBuilder.self.id,
+        "scopes" to setOf(ApiScope.TRANSLATIONS_VIEW.value, ApiScope.SCREENSHOTS_UPLOAD.value)
+      )
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("key").isString.hasSizeGreaterThan(10)
+      node("username").isEqualTo("test_username")
+      node("userFullName").isEqualTo("")
+      node("projectId").isNumber.isGreaterThan(BigDecimal(0))
+      node("id").isValidId
+      node("projectName").isEqualTo("test_project")
+      node("scopes").isArray.isEqualTo("""[ "screenshots.upload", "translations.view" ]""")
+    }
+  }
+
+  @Test
   fun `creates API key`() {
     performAuthPost(
       "/v2/api-keys",
-      CreateApiKeyDto().apply {
-        projectId = testData.projectBuilder.self.id
-        scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_UPLOAD)
-      }
+      mapOf(
+        "projectId" to testData.projectBuilder.self.id,
+        "scopes" to setOf(ApiScope.TRANSLATIONS_VIEW.value, ApiScope.SCREENSHOTS_UPLOAD.value)
+      )
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
       node("username").isEqualTo("test_username")
@@ -108,7 +129,8 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
       node("_embedded.apiKeys") {
         isArray.hasSize(20)
         node("[0]") {
-          node("key").isEqualTo("test_api_key_franta_39")
+          node("key").isAbsent()
+          node("description").isEqualTo("test_......ta_39")
           node("username").isEqualTo("franta")
           node("userFullName").isEqualTo("Franta Dobrota")
           node("projectId").isNumber.isGreaterThan(BigDecimal(0))
@@ -128,7 +150,7 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
         node("_embedded.apiKeys") {
           isArray.hasSize(1)
           node("[0]") {
-            node("key").isEqualTo("test_api_key_1")
+            node("key").isAbsent()
             node("username").isEqualTo("franta")
             node("userFullName").isEqualTo("Franta Dobrota")
             node("projectId").isNumber.isGreaterThan(BigDecimal(0))
@@ -177,7 +199,7 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `returns correct with get (keyId)`() {
     performAuthGet("/v2/api-keys/${testData.usersKey.id}").andPrettyPrint.andAssertThatJson {
       node("id").isValidId
-      node("key").isEqualTo("test_api_key_2")
+      node("key").isAbsent()
     }
   }
 
@@ -191,14 +213,14 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `returns correct with get (current)`() {
     performAuthGet("/v2/api-keys/current?ak=${testData.usersKey.key}").andPrettyPrint.andAssertThatJson {
       node("id").isValidId
-      node("key").isEqualTo("test_api_key_2")
+      node("key").isAbsent()
     }
   }
 
   @Test
   fun `deletes key`() {
     performAuthDelete("/v2/api-keys/${testData.usersKey.id}", null).andIsOk
-    assertThat(apiKeyService.getApiKey(testData.usersKey.id)).isEmpty
+    assertThat(apiKeyService.findOptional(testData.usersKey.id)).isEmpty
   }
 
   @Test
@@ -226,5 +248,22 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
           .contains(testData.germanLanguage.id)
           .contains(testData.englishLanguage.id)
       }
+  }
+
+  @Test
+  fun `regenerate works`() {
+    val oldKey = testData.expiredKey.key
+    val expiresAt = Date().time + 10000
+    performAuthPut(
+      "/v2/api-keys/${testData.expiredKey.id}/regenerate",
+      mapOf(
+        "expiresAt" to expiresAt
+      )
+    ).andIsOk.andAssertThatJson {
+      node("key").isString.startsWith("tgpak_").hasSizeGreaterThan(20)
+      node("expiresAt").isEqualTo(expiresAt)
+    }
+
+    apiKeyService.get(testData.expiredKey.id).key.assert.isNotEqualTo(oldKey)
   }
 }

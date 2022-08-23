@@ -107,7 +107,11 @@ describe('Integrate view', () => {
         createNewApiKey();
         cy.wait('@create').then((i) => {
           const created = i.response.body;
-          gcy('integrate-api-key-selector-select').contains(created.key);
+          cy.waitForDom();
+          gcy('integrate-api-key-selector-select').should(
+            'contain.text',
+            created.description
+          );
           getApiKeySelectValue().then(() => {
             cy.wrap(created).its('id').should('eq', created.id);
           });
@@ -144,7 +148,7 @@ describe('Integrate view', () => {
         gcy('integrate-weapon-selector-button').contains('React').click();
         createApiKeysAndSelectOne(projectId).then((k) => {
           cy.wait(200);
-          gcy('integrate-guide').contains(k.key);
+          gcy('integrate-guide').contains('<Only new');
         });
       });
     });
@@ -227,9 +231,10 @@ const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
     cy
       .reload()
       .then(() =>
-        selectInSelect(cy.gcy('integrate-api-key-selector-select'), v.key).then(
-          () => v
-        )
+        selectInSelect(
+          cy.gcy('integrate-api-key-selector-select'),
+          v.description
+        ).then(() => v)
       )
   ) as Promise<ApiKeyDTO>;
 };
@@ -238,6 +243,8 @@ const createNewApiKey = () => {
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
   cy.waitForDom();
-  cy.screenshot();
+  cy.gcy('generate-api-key-dialog-description-input')
+    .clear()
+    .type('For integration');
   cy.gcy('global-form-save-button').click();
 };

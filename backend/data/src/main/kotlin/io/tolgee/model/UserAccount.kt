@@ -45,8 +45,8 @@ data class UserAccount(
   var role: Role? = Role.USER
 ) : AuditModel(), ModelWithAvatar {
 
-  @OneToMany(mappedBy = "user")
-  var permissions: MutableSet<Permission>? = null
+  @OneToMany(mappedBy = "user", orphanRemoval = true)
+  var permissions: MutableSet<Permission> = mutableSetOf()
 
   @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, optional = true)
   var emailVerification: EmailVerification? = null
@@ -67,6 +67,12 @@ data class UserAccount(
   @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
   var preferences: UserPreferences? = null
 
+  @OneToMany(mappedBy = "userAccount", orphanRemoval = true)
+  var pats: MutableList<Pat>? = mutableListOf()
+
+  @OneToMany(mappedBy = "userAccount", orphanRemoval = true)
+  var apiKeys: MutableList<ApiKey>? = mutableListOf()
+
   override var avatarHash: String? = null
 
   constructor(
@@ -74,7 +80,7 @@ data class UserAccount(
     username: String?,
     password: String?,
     name: String?,
-    permissions: MutableSet<Permission>?,
+    permissions: MutableSet<Permission>,
     role: Role = Role.USER,
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,

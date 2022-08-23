@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.project.LanguageStatsService

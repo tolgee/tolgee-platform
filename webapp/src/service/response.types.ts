@@ -77,14 +77,7 @@ export interface UserUpdateDTO {
   password?: string;
 }
 
-export interface ApiKeyDTO {
-  id: number;
-  key: string;
-  userName: string;
-  scopes: string[];
-  projectId: number;
-  projectName: string;
-}
+export type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
 
 export interface PermissionEditDTO {
   permissionId: number;

@@ -103,9 +103,26 @@ export interface paths {
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
+  "/v2/projects/{projectId}/keys/{keyId}/auto-translate": {
+    /**
+     * Uses enabled auto-translation methods.
+     * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
+     *
+     * This will replace the the existing translation with the result obtained from specified source!
+     */
+    put: operations["autoTranslate"];
+  };
   "/v2/projects/{projectId}/avatar": {
     put: operations["uploadAvatar_1"];
     delete: operations["removeAvatar_1"];
+  };
+  "/v2/pats/{id}": {
+    get: operations["get_7"];
+    put: operations["update_2"];
+    delete: operations["delete_6"];
+  };
+  "/v2/pats/{id}/regenerate": {
+    put: operations["regenerate"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
@@ -134,26 +151,29 @@ export interface paths {
     delete: operations["removeAvatar_3"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_9"];
-    put: operations["update_2"];
-    delete: operations["delete_6"];
-  };
-  "/api/organizations/{id}": {
     get: operations["get_10"];
     put: operations["update_3"];
     delete: operations["delete_7"];
   };
-  "/v2/api-keys/{apiKeyId}": {
+  "/api/organizations/{id}": {
+    get: operations["get_11"];
     put: operations["update_4"];
-    delete: operations["delete_9"];
+    delete: operations["delete_8"];
+  };
+  "/v2/api-keys/{apiKeyId}": {
+    put: operations["update_5"];
+    delete: operations["delete_10"];
+  };
+  "/v2/api-keys/{apiKeyId}/regenerate": {
+    put: operations["regenerate_1"];
   };
   "/v2/administration/users/{userId}/set-role/{role}": {
     put: operations["setRole"];
   };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
-    post: operations["create_12"];
-    delete: operations["delete_12"];
+    post: operations["create_13"];
+    delete: operations["delete_13"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
@@ -221,20 +241,24 @@ export interface paths {
     get: operations["getKeyScreenshots_3"];
     post: operations["uploadScreenshot_1"];
   };
-  "/v2/organizations": {
+  "/v2/pats": {
     get: operations["getAll_7"];
     post: operations["create_8"];
   };
-  "/api/organizations": {
+  "/v2/organizations": {
     get: operations["getAll_8"];
     post: operations["create_9"];
+  };
+  "/api/organizations": {
+    get: operations["getAll_9"];
+    post: operations["create_10"];
   };
   "/v2/image-upload": {
     post: operations["upload"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
-    post: operations["create_10"];
+    post: operations["create_11"];
   };
   "/api/user": {
     get: operations["getInfo_1"];
@@ -263,7 +287,7 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/project/{projectId}/keys/create": {
-    post: operations["create_11"];
+    post: operations["create_12"];
   };
   "/api/project/{projectId}/screenshots/get": {
     post: operations["getKeyScreenshots_1"];
@@ -273,7 +297,7 @@ export interface paths {
   };
   "/api/apiKeys": {
     get: operations["allByUser_1"];
-    post: operations["create_15"];
+    post: operations["create_16"];
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
@@ -370,10 +394,10 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_7"];
+    get: operations["get_8"];
   };
   "/api/organizations/{slug}": {
-    get: operations["get_8"];
+    get: operations["get_9"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -414,7 +438,7 @@ export interface paths {
     get: operations["acceptInvitation"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_11"];
+    get: operations["get_12"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent"];
@@ -445,7 +469,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_10"];
+    delete: operations["delete_11"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -490,7 +514,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_8"];
+    delete: operations["delete_9"];
   };
   "/api/project/{projectId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_3"];
@@ -499,7 +523,7 @@ export interface paths {
     delete: operations["deleteInvitation_1"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_14"];
+    delete: operations["delete_15"];
   };
 }
 
@@ -576,9 +600,9 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -596,9 +620,9 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
     };
     TagKeyDto: {
       name: string;
@@ -663,7 +687,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
     };
     EditKeyDto: {
       name: string;
@@ -751,6 +775,31 @@ export interface components {
       /** Language flag emoji as UTF-8 emoji */
       flagEmoji?: string;
     };
+    UpdatePatDto: {
+      /** New description of the PAT */
+      description: string;
+    };
+    PatModel: {
+      id: number;
+      description: string;
+      expiresAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      lastUsedAt?: number;
+    };
+    RegeneratePatDto: {
+      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      expiresAt?: number;
+    };
+    RevealedPatModel: {
+      token: string;
+      createdAt: number;
+      updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      id: number;
+      description: string;
+    };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
@@ -795,8 +844,8 @@ export interface components {
     ApiKeyModel: {
       /** ID of the API key */
       id: number;
-      /** Resulting user's api key */
-      key: string;
+      /** Description */
+      description: string;
       /** Username of user owner */
       username?: string;
       /** Full name of user owner */
@@ -805,8 +854,29 @@ export interface components {
       projectId: number;
       /** Api key's project name */
       projectName: string;
+      /** Timestamp of API key expiraion */
+      expiresAt?: number;
+      /** Timestamp of API key last usage */
+      lastUsedAt?: number;
       /** Api key's permission scopes */
       scopes: string[];
+    };
+    RegenerateApiKeyDto: {
+      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      expiresAt?: number;
+    };
+    RevealedApiKeyModel: {
+      /** Resulting user's api key */
+      key: string;
+      projectId: number;
+      lastUsedAt?: number;
+      username?: string;
+      expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      id: number;
+      description: string;
     };
     OldEditKeyDto: {
       currentName: string;
@@ -928,6 +998,12 @@ export interface components {
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
+    CreatePatDto: {
+      /** Description of the PAT */
+      description: string;
+      /** Expiration date in epoch format (milliseconds). When null, token never expires. */
+      expiresAt?: number;
+    };
     UploadedImageModel: {
       id: number;
       filename: string;
@@ -938,6 +1014,10 @@ export interface components {
     CreateApiKeyDto: {
       projectId: number;
       scopes: string[];
+      /** Description of the project API key */
+      description?: string;
+      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      expiresAt?: number;
     };
     TextNode: { [key: string]: unknown };
     SignUpDto: {
@@ -983,16 +1063,18 @@ export interface components {
     };
     ApiKeyDTO: {
       id: number;
-      /** Resulting user's api key */
-      key: string;
+      /** Resulting user's api key. Is is hidden when is not response to creation or regeneration. */
+      key?: string;
+      description: string;
       userName?: string;
       projectId: number;
       projectName: string;
       scopes: string[];
     };
-    EditApiKeyDTO: {
+    EditApiKeyDto: {
       id: number;
       scopes: string[];
+      description?: string;
     };
     UserPreferencesModel: {
       language?: string;
@@ -1014,7 +1096,7 @@ export interface components {
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     OAuthPublicConfigDTO: {
@@ -1206,6 +1288,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1217,7 +1300,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1305,7 +1387,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1387,6 +1469,12 @@ export interface components {
         screenshots?: components["schemas"]["ScreenshotModel"][];
       };
     };
+    PagedModelPatModel: {
+      _embedded?: {
+        pats?: components["schemas"]["PatModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
@@ -1432,19 +1520,21 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     ApiKeyWithLanguagesModel: {
-      id: number;
-      key: string;
-      username?: string;
-      userFullName?: string;
-      projectId: number;
-      projectName: string;
-      scopes: string[];
       /**
        * Languages for which user has translate permission.
        *
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+      projectId: number;
+      lastUsedAt?: number;
+      username?: string;
+      expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2592,6 +2682,45 @@ export interface operations {
       };
     };
   };
+  /**
+   * Uses enabled auto-translation methods.
+   * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
+   *
+   * This will replace the the existing translation with the result obtained from specified source!
+   */
+  autoTranslate: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+      query: {
+        /**
+         * Tags of languages to auto-translate.
+         * When no languages provided, it translates only untranslated languages.
+         */
+        languages?: string[];
+        useMachineTranslation?: boolean;
+        useTranslationMemory?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   uploadAvatar_1: {
     parameters: {
       path: {
@@ -2650,6 +2779,120 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  get_7: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePatDto"];
+      };
+    };
+  };
+  delete_6: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  regenerate: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["RevealedPatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegeneratePatDto"];
       };
     };
   };
@@ -2943,88 +3186,6 @@ export interface operations {
       };
     };
   };
-  get_9: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  update_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_6: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   get_10: {
     parameters: {
       path: {
@@ -3107,7 +3268,89 @@ export interface operations {
       };
     };
   };
+  get_11: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   update_4: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  delete_8: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_5: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3139,7 +3382,7 @@ export interface operations {
       };
     };
   };
-  delete_9: {
+  delete_10: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3159,6 +3402,38 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  regenerate_1: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["RevealedApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegenerateApiKeyDto"];
       };
     };
   };
@@ -3214,7 +3489,7 @@ export interface operations {
       };
     };
   };
-  create_12: {
+  create_13: {
     parameters: {
       path: {
         projectId: number;
@@ -3242,7 +3517,7 @@ export interface operations {
       };
     };
   };
-  delete_12: {
+  delete_13: {
     parameters: {
       path: {
         projectId: number;
@@ -4142,14 +4417,13 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+          "*/*": components["schemas"]["PagedModelPatModel"];
         };
       };
       /** Bad Request */
@@ -4168,10 +4442,10 @@ export interface operations {
   };
   create_8: {
     responses: {
-      /** OK */
-      200: {
+      /** Created */
+      201: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "*/*": components["schemas"]["RevealedPatModel"];
         };
       };
       /** Bad Request */
@@ -4189,7 +4463,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        "application/json": components["schemas"]["CreatePatDto"];
       };
     };
   };
@@ -4227,6 +4501,66 @@ export interface operations {
     };
   };
   create_9: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  getAll_9: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        params: components["schemas"]["OrganizationRequestParamsDto"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_10: {
     responses: {
       /** OK */
       200: {
@@ -4311,12 +4645,12 @@ export interface operations {
       };
     };
   };
-  create_10: {
+  create_11: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyModel"];
+          "*/*": components["schemas"]["RevealedApiKeyModel"];
         };
       };
       /** Bad Request */
@@ -4572,7 +4906,7 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create_12: {
     parameters: {
       path: {
         projectId: number;
@@ -4691,7 +5025,7 @@ export interface operations {
       };
     };
   };
-  create_15: {
+  create_16: {
     responses: {
       /** OK */
       200: {
@@ -4737,7 +5071,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditApiKeyDTO"];
+        "application/json": components["schemas"]["EditApiKeyDto"];
       };
     };
   };
@@ -5662,7 +5996,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_8: {
     parameters: {
       path: {
         slug: string;
@@ -5689,7 +6023,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_9: {
     parameters: {
       path: {
         slug: string;
@@ -6092,7 +6426,7 @@ export interface operations {
       };
     };
   };
-  get_11: {
+  get_12: {
     parameters: {
       path: {
         keyId: number;
@@ -6391,7 +6725,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_11: {
     parameters: {
       path: {
         id: number;
@@ -6769,7 +7103,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_9: {
     parameters: {
       path: {
         ids: number[];
@@ -6839,7 +7173,7 @@ export interface operations {
       };
     };
   };
-  delete_14: {
+  delete_15: {
     parameters: {
       path: {
         key: string;

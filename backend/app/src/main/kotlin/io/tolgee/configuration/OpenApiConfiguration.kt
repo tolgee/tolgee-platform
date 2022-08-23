@@ -8,7 +8,8 @@ import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.API_KEY_HEADER_NAME
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -175,7 +176,7 @@ class OpenApiConfiguration {
 
             operation.parameters?.removeIf {
               val isQueryApiKey = it.name == "ak" && it.`in` == "query"
-              val isHeaderApiKey = it.name == "X-API-Key" && it.`in` == "header"
+              val isHeaderApiKey = it.name == API_KEY_HEADER_NAME && it.`in` == "header"
               isQueryApiKey || isHeaderApiKey
             }
           }

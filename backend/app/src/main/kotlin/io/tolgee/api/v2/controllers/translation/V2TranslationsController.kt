@@ -36,7 +36,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder

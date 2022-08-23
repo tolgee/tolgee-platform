@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService

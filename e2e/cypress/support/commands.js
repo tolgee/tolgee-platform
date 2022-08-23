@@ -138,3 +138,26 @@ Cypress.Commands.add('waitForDom', () => {
     });
   });
 });
+
+Cypress.Commands.add('chooseDatePicker', (selector, value) => {
+  cy.get('body').then(($body) => {
+    const mobilePickerSelector = `${selector} input[readonly]`;
+    const isMobile = $body.find(mobilePickerSelector).length > 0;
+    if (isMobile) {
+      // The MobileDatePicker component has readonly inputs and needs to
+      // be opened and clicked on edit so its inputs can be edited
+      cy.get(mobilePickerSelector).click();
+      cy.get(
+        '[role="dialog"] [aria-label="calendar view is open, go to text input view"]'
+      ).click();
+      cy.contains('[role="dialog"] button', 'OK')
+        .closest('[role="dialog"]')
+        .find('input')
+        .clear()
+        .type(value);
+      cy.contains('[role="dialog"] button', 'OK').click();
+    } else {
+      cy.get(selector).find('input').clear().type(value);
+    }
+  });
+});

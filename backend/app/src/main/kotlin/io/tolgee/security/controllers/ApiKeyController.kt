@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
-import io.tolgee.dtos.request.apiKey.EditApiKeyDTO
+import io.tolgee.dtos.request.apiKey.EditApiKeyDto
+import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -12,7 +13,7 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.service.SecurityService
 import io.tolgee.service.project.ProjectService
@@ -68,18 +69,17 @@ class ApiKeyController(
 
   @PostMapping(path = ["/edit"])
   @Operation(summary = "Edits existing API key")
-  fun edit(@RequestBody @Valid dto: EditApiKeyDTO) {
-    val apiKey = apiKeyService.getApiKey(dto.id)
+  fun edit(@RequestBody @Valid dto: EditApiKeyDto) {
+    val apiKey = apiKeyService.findOptional(dto.id)
       .orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
-    apiKey.scopesEnum = dto.scopes.toMutableSet()
-    apiKeyService.editApiKey(apiKey)
+    apiKeyService.editApiKey(apiKey, V2EditApiKeyDto(dto.scopes, dto.description))
   }
 
-  @DeleteMapping(path = ["/{key}"])
+  @DeleteMapping(path = ["/{key:[0-9A-Za-z]*[a-z]+[0-9A-Za-z]*]}"])
   @Operation(summary = "Deletes API key")
   fun delete(@PathVariable("key") key: String) {
-    val apiKey = apiKeyService.getApiKey(key)
+    val apiKey = apiKeyService.findOptional(apiKeyService.hashKey(key))
       .orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     try {
       securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)

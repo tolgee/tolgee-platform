@@ -98,7 +98,8 @@ enum class Message {
   PLAN_NOT_FOUND,
   PLAN_NOT_AVAILABLE_ANY_MORE,
   NO_AUTO_TRANSLATION_METHOD,
-  CANNOT_TRANSLATE_BASE_LANGUAGE;
+  CANNOT_TRANSLATE_BASE_LANGUAGE,
+  PAT_NOT_FOUND;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

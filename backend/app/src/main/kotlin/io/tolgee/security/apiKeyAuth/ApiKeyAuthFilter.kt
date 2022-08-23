@@ -1,5 +1,7 @@
-package io.tolgee.security.api_key_auth
+package io.tolgee.security.apiKeyAuth
 
+import io.tolgee.API_KEY_HEADER_NAME
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
@@ -23,6 +25,7 @@ class ApiKeyAuthFilter(
   private val projectHolder: ProjectHolder,
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
+  private val currentDateProvider: CurrentDateProvider
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -30,22 +33,27 @@ class ApiKeyAuthFilter(
     filterChain: FilterChain
   ) {
     if (this.isApiAccessAllowed(request)) {
-      val apiKey = getApiKey(request)
+      val rawApiKey = getApiKey(request)
 
-      if (apiKey != null && apiKey.isNotEmpty()) {
-        val ak = apiKeyService.getApiKey(apiKey)
-        if (ak.isPresent) {
-          val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(ak.get())
-          SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
+      if (!rawApiKey.isNullOrEmpty()) {
+        val apiKeyEntity = apiKeyService.find(apiKeyService.hashKey(rawApiKey))
+        val urlProjectId = getRequestProjectId(request)
+        val isAuthorizedForProject = apiKeyEntity?.project?.id == urlProjectId || urlProjectId == null
+        if (apiKeyEntity != null && isAuthorizedForProject) {
+          val isExpired = apiKeyEntity.expiresAt?.let { it < currentDateProvider.date } ?: false
+          if (!isExpired) {
+            val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(apiKeyEntity)
+            SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
 
-          val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
-          try {
-            val key = ak.get()
-            securityService.checkApiKeyScopes(setOf(*apiScopes), key)
-            projectHolder.project = ProjectDto.fromEntity(key.project)
-          } catch (e: PermissionException) {
-            resolver.resolveException(request, response, null, e)
-            return
+            val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
+            try {
+              securityService.checkApiKeyScopes(setOf(*apiScopes), apiKeyEntity)
+              projectHolder.project = ProjectDto.fromEntity(apiKeyEntity.project)
+              apiKeyService.updateLastUsedAsync(apiKeyEntity)
+            } catch (e: PermissionException) {
+              resolver.resolveException(request, response, null, e)
+              return
+            }
           }
         }
       }
@@ -55,8 +63,10 @@ class ApiKeyAuthFilter(
   }
 
   private fun getApiKey(request: HttpServletRequest): String? {
-    return request.getHeader("X-API-Key")
+    val rawWithPossiblePrefix = request.getHeader(API_KEY_HEADER_NAME)
       ?: request.getParameter("ak")
+
+    return apiKeyService.parseApiKey(rawWithPossiblePrefix)
   }
 
   private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
@@ -66,5 +76,10 @@ class ApiKeyAuthFilter(
   private fun getAccessAllowedAnnotation(request: HttpServletRequest): AccessWithApiKey? {
     return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
       ?.getMethodAnnotation(AccessWithApiKey::class.java) ?: return null
+  }
+
+  private fun getRequestProjectId(request: HttpServletRequest): Long? {
+    val requestURI = request.requestURI
+    return "/projects?/([0-9]+)".toRegex().find(requestURI)?.groupValues?.getOrNull(1)?.toLong()
   }
 }
