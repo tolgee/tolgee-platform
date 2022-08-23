@@ -5,7 +5,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
-import io.tolgee.security.api_key_auth.ApiKeyAuthenticationToken
+import io.tolgee.security.apiKeyAuth.ApiKeyAuthenticationToken
 import io.tolgee.service.UserAccountService
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder

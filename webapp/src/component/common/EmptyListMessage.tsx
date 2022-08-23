@@ -1,5 +1,5 @@
 import { default as React, FunctionComponent } from 'react';
-import { Box, Fade, CircularProgress, styled } from '@mui/material';
+import { Box, CircularProgress, Fade, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage } from './SadEmotionMessage';
@@ -29,7 +29,7 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
 }) => {
   useLoadingRegister(loading);
   return (
-    <Box py={8} data-cy="global-empty-list" position="relative" height={500}>
+    <Box py={8} data-cy="global-empty-list">
       <Fade in={!loading} mountOnEnter unmountOnExit>
         <div>
           <SadEmotionMessage hint={hint}>

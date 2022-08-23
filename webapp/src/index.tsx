@@ -24,6 +24,7 @@ import { ThemeProvider } from './ThemeProvider';
 import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
+import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 
 const store = configureStore();
 
@@ -57,7 +58,7 @@ const MainWrapper = () => {
           es: () => import('./i18n/es.json'),
           cs: () => import('./i18n/cs.json'),
           fr: () => import('./i18n/fr.json'),
-          de: () => import('./i18n/de.json'),
+          de: () => import('./i18n/de.json') as any,
         }}
         loadingFallback={<FullPageLoading />}
       >
@@ -75,7 +76,9 @@ const MainWrapper = () => {
                           <BottomPanelProvider>
                             <TopBarProvider>
                               <GlobalLoading />
-                              <App />
+                              <MuiLocalizationProvider>
+                                <App />
+                              </MuiLocalizationProvider>
                               <GlobalErrorModal />
                             </TopBarProvider>
                           </BottomPanelProvider>

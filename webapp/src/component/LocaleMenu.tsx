@@ -4,6 +4,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useCurrentLanguage, useSetLanguage } from '@tolgee/react';
 import { CircledLanguageIcon } from './languages/CircledLanguageIcon';
+import { locales } from '../locales';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -36,29 +37,6 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
   const setLanguage = useSetLanguage();
   const getCurrentLanguage = useCurrentLanguage();
 
-  const languages = {
-    en: {
-      name: 'English',
-      flag: '🇬🇧',
-    },
-    cs: {
-      name: 'Česky',
-      flag: '🇨🇿',
-    },
-    fr: {
-      name: 'Français',
-      flag: '🇫🇷',
-    },
-    es: {
-      name: 'Español',
-      flag: '🇪🇸',
-    },
-    de: {
-      name: 'Deutsch',
-      flag: '🇩🇪',
-    },
-  };
-
   const language = getCurrentLanguage();
 
   return (
@@ -72,7 +50,7 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
           size="large"
         >
           <CircledLanguageIcon
-            flag={languages[language]?.flag}
+            flag={locales[language]?.flag}
             size={24}
             draggable="false"
           />
@@ -92,7 +70,7 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
             horizontal: 'right',
           }}
         >
-          {Object.entries(languages).map(([abbr, lang]) => (
+          {Object.entries(locales).map(([abbr, lang]) => (
             <MenuItem
               selected={getCurrentLanguage() === abbr}
               value={abbr}

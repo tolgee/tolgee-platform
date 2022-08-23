@@ -1,8 +1,5 @@
 import { ReactNode } from 'react';
-import { Add } from '@mui/icons-material';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
+import { Box, Container, Grid, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { Navigation } from 'tg.component/navigation/Navigation';
@@ -10,6 +7,7 @@ import { Navigation } from 'tg.component/navigation/Navigation';
 import { SecondaryBar } from './SecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
+import { BaseViewAddButton } from './BaseViewAddButton';
 
 export interface BaseViewProps {
   windowTitle: string;
@@ -45,7 +43,11 @@ export const BaseView = (props: BaseViewProps) => {
   const displayNavigation = props.customNavigation || props.navigation;
 
   const displayHeader =
-    props.title || props.customHeader || props.onSearch || props.onAdd;
+    props.title ||
+    props.customHeader ||
+    props.onSearch ||
+    props.onAdd ||
+    props.addLinkTo;
 
   return (
     <Container
@@ -112,19 +114,10 @@ export const BaseView = (props: BaseViewProps) => {
                           </Box>
                         )}
                         {(props.onAdd || props.addLinkTo) && (
-                          <Button
-                            data-cy="global-plus-button"
-                            component={props.addLinkTo ? Link : Button}
-                            to={props.addLinkTo}
-                            startIcon={<Add />}
-                            color="primary"
-                            size="small"
-                            variant="contained"
-                            aria-label="add"
+                          <BaseViewAddButton
+                            addLinkTo={props.addLinkTo}
                             onClick={props.onAdd}
-                          >
-                            <T>global_add_button</T>
-                          </Button>
+                          />
                         )}
                       </Box>
                     </Box>

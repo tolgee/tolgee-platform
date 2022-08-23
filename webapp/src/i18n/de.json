@@ -432,6 +432,7 @@
   "project_languages_base_language" : "Basissprache",
   "project_languages_credit_balance" : "Guthaben: {balance, number}",
   "project_languages_credit_balance_help" : "Das Guthaben wird für die maschinellen Übersetzungen bei externen Anbietern genutzt (1 Guthaben = 1 übersetzter Buchstabe).",
+  "project_languages_credit_balance_help_no_billing" : null,
   "project_languages_credit_balance_hint" : "Das Guthaben wird für maschinelle Übersetzungen bei externen Anbietern verwendet (1 Guthaben = 1 übersetztes Zeichen). Das Guthaben wird monatlich aufgestockt. Wenden Sie sich an unseren Support, wenn es aufgebraucht ist.",
   "project_languages_default_providers" : "Standardanbieter",
   "project_languages_default_provider_short" : "Standard",

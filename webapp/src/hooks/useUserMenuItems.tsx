@@ -24,6 +24,10 @@ export const useUserMenuItems = (): UserMenuItem[] => {
       link: LINKS.USER_API_KEYS.build(),
       label: t('user_menu_api_keys'),
     },
+    {
+      link: LINKS.USER_PATS.build(),
+      label: t('user_menu_pats'),
+    },
   ].map((i) => {
     return new UserMenuItem(i.link, i.label, location.pathname === i.link);
   });

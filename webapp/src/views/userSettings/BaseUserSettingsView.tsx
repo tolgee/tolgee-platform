@@ -29,6 +29,11 @@ export const BaseUserSettingsView: React.FC<Props> = ({
     label: t('user_menu_api_keys'),
   });
 
+  menuItems.push({
+    link: LINKS.USER_PATS.build(),
+    label: t('user_menu_pats'),
+  });
+
   return (
     <BaseSettingsView
       {...otherProps}

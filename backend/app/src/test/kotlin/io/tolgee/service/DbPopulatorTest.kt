@@ -52,6 +52,6 @@ class DbPopulatorTest : AbstractTransactionalTest() {
   fun createsApiKey() {
     val key = apiKeyService.getAllByUser(userAccount.id).stream().findFirst()
     Assertions.assertThat(key).isPresent
-    Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")
+    Assertions.assertThat(key.get().key).isEqualTo(null)
   }
 }

@@ -14,10 +14,10 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.ApiKeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
@@ -38,7 +38,6 @@ class DbPopulatorReal(
   private val userAccountRepository: UserAccountRepository,
   private val userAccountService: UserAccountService,
   private val languageService: LanguageService,
-  private val apiKeyRepository: ApiKeyRepository,
   private val tolgeeProperties: TolgeeProperties,
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationRepository: OrganizationRepository,
@@ -46,6 +45,7 @@ class DbPopulatorReal(
   private val organizationRoleService: OrganizationRoleService,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
+  private val apiKeyService: ApiKeyService,
   private val languageStatsService: LanguageStatsService,
   private val platformTransactionManager: PlatformTransactionManager
 ) {
@@ -217,7 +217,7 @@ class DbPopulatorReal(
 
   private fun createApiKey(project: Project) {
     val user = project.organizationOwner.memberRoles[0].user
-    if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
+    if (apiKeyService.findOptional(apiKeyService.hashKey(API_KEY)).isEmpty) {
       val apiKey = ApiKey(
         project = project,
         key = API_KEY,
@@ -225,7 +225,7 @@ class DbPopulatorReal(
         scopesEnum = ApiScope.values().toSet()
       )
       project.apiKeys.add(apiKey)
-      apiKeyRepository.save(apiKey)
+      apiKeyService.save(apiKey)
     }
   }
 

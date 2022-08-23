@@ -18,11 +18,13 @@ class SocketIoProjectProvider(
 ) {
 
   fun getProject(handshakeData: HandshakeData): Project {
-    handshakeData.urlParams["apiKey"]?.get(0)?.let {
-      val apiKey = apiKeyService.getApiKey(it).orElse(null)
-      securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
-      return apiKey.project
-    }
+    handshakeData.urlParams["apiKey"]?.get(0)
+      ?.let { apiKeyService.parseApiKey(it) }
+      ?.let {
+        val apiKey = apiKeyService.findOptional(apiKeyService.hashKey(it)).orElse(null)
+        securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
+        return apiKey.project
+      }
 
     handshakeData.urlParams["jwtToken"]?.get(0)?.let { jwtTokenString ->
       handshakeData.urlParams["projectId"]?.get(0)?.let { projectIdString ->

@@ -7,7 +7,11 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.EmailVerificationRepository
@@ -24,6 +28,7 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.PatService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
@@ -180,6 +185,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var platformTransactionManager: PlatformTransactionManager
+
+  @Autowired
+  lateinit var patService: PatService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

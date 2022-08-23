@@ -23,7 +23,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
-type EditApiKeyDTO = components['schemas']['EditApiKeyDTO'];
+type EditApiKeyDTO = components['schemas']['EditApiKeyDto'];
 
 interface Value {
   scopes: string[];
@@ -65,11 +65,13 @@ export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     url: '/v2/api-keys/availableScopes',
     method: 'get',
   });
+
   const editLoadable = useApiMutation({
     url: '/v2/api-keys/{apiKeyId}',
     method: 'put',
     invalidatePrefix: '/v2/api-keys',
   });
+
   const generateLoadable = useApiMutation({
     url: '/v2/api-keys',
     method: 'post',

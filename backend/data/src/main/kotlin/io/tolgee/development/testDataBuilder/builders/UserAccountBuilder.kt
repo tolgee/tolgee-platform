@@ -1,13 +1,14 @@
 package io.tolgee.development.testDataBuilder.builders
 
-import io.tolgee.development.testDataBuilder.EntityDataBuilder
+import io.tolgee.development.testDataBuilder.FT
+import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
 import org.springframework.core.io.ClassPathResource
 
 class UserAccountBuilder(
   val testDataBuilder: TestDataBuilder
-) : EntityDataBuilder<UserAccount, UserAccountBuilder> {
+) : BaseEntityDataBuilder<UserAccount, UserAccountBuilder>() {
   var rawPassword = "admin"
   override var self: UserAccount = UserAccount()
   lateinit var defaultOrganizationBuilder: OrganizationBuilder
@@ -15,6 +16,7 @@ class UserAccountBuilder(
   class DATA {
     var avatarFile: ClassPathResource? = null
     var userPreferences: UserPreferencesBuilder? = null
+    var pats: MutableList<PatBuilder> = mutableListOf()
   }
 
   var data = DATA()
@@ -27,4 +29,6 @@ class UserAccountBuilder(
     data.userPreferences = UserPreferencesBuilder(this)
       .also { ft(it.self) }
   }
+
+  fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
 }

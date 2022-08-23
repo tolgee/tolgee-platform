@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.translation.GetKeyTranslationsReqDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.SecurityService

@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { styled } from '@mui/material';
 import clsx from 'clsx';
 
 const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
   height: 4px;
-  background: ${({ theme }) => theme.palette.primary.light};
+  background: ${({ theme }) => theme.palette.globalLoading.main};
   width: 0px;
+
   &.loading {
     transition: width 30s cubic-bezier(0.15, 0.735, 0.095, 1);
   }
+
   &.finish {
     height: 0px;
     transition: width 0.2s ease-in-out,
@@ -28,7 +30,7 @@ export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     setStateLoading(Boolean(loading));
-    if (loading === true) {
+    if (loading) {
       setProgress(0);
     }
   }, [loading]);

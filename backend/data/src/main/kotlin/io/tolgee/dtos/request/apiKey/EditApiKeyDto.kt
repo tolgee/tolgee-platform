@@ -7,11 +7,12 @@ import java.util.stream.Collectors
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
-data class EditApiKeyDTO(
+data class EditApiKeyDto(
   @field:NotNull
   var id: Long = 0,
   @field:NotEmpty
-  var scopes: Set<ApiScope> = setOf()
+  var scopes: Set<ApiScope> = setOf(),
+  var description: String? = null
 ) {
   @Suppress("unused")
   @JsonSetter("scopes")

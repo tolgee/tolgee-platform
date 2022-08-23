@@ -9,17 +9,24 @@ import java.io.Serializable
 @Relation(collectionRelation = "apiKeys", itemRelation = "apiKey")
 open class ApiKeyModel(
   @Schema(description = "ID of the API key")
-  val id: Long,
-  @Schema(description = "Resulting user's api key")
-  var key: String = "",
+  override val id: Long,
+  @Schema(description = "Description")
+  override val description: String,
   @Schema(description = "Username of user owner")
-  var username: String? = null,
+  override var username: String? = null,
   @Schema(description = "Full name of user owner")
-  var userFullName: String? = null,
+  override var userFullName: String? = null,
   @Schema(description = "Api key's project ID")
-  var projectId: Long = 0,
+  override var projectId: Long = 0,
   @Schema(description = "Api key's project name")
-  var projectName: String = "",
+  override var projectName: String = "",
+
+  @Schema(description = "Timestamp of API key expiraion")
+  override val expiresAt: Long? = null,
+
+  @Schema(description = "Timestamp of API key last usage")
+  override val lastUsedAt: Long? = null,
+
   @Schema(
     description = "Api key's permission scopes",
     example =
@@ -34,5 +41,5 @@ open class ApiKeyModel(
         ]
   """
   )
-  var scopes: Set<String> = setOf()
-) : RepresentationModel<ApiKeyModel>(), Serializable
+  override var scopes: Set<String> = setOf()
+) : RepresentationModel<ApiKeyModel>(), Serializable, IApiKeyModel

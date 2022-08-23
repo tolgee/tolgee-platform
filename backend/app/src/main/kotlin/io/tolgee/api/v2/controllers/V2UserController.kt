@@ -24,7 +24,7 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user")
-@Tag(name = "User", description = "Manipulates currentntly authorized user")
+@Tag(name = "User", description = "Manipulates currently authenticated user")
 class V2UserController(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
