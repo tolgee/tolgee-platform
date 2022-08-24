@@ -49,7 +49,7 @@ dependencyResolutionManagement {
             library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')
             library('amazonS3', "com.amazonaws:aws-java-sdk-s3:$amazonAwsSdkVersion")
             library('amazonTranslate', "com.amazonaws:aws-java-sdk-translate:$amazonAwsSdkVersion")
-            library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
+            library('googleCloud', "com.google.cloud:libraries-bom:26.1.0")
             library('sentry', "io.sentry:sentry-spring-boot-starter:5.7.3")
             library('liquibaseCore', "org.liquibase:liquibase-core:4.9.1")
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate5:4.9.1")
