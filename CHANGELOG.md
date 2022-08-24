@@ -1,3 +1,10 @@
+## [2.37.1](https://github.com/tolgee/tolgee-platform/compare/v2.37.0...v2.37.1) (2022-08-24)
+
+
+### Bug Fixes
+
+* Update dependencies ([8555515](https://github.com/tolgee/tolgee-platform/commit/85555150a3b7a3b9830be231d0f3afcab1e11e86))
+
 # [2.37.0](https://github.com/tolgee/tolgee-platform/compare/v2.36.1...v2.37.0) (2022-08-19)
 
 
