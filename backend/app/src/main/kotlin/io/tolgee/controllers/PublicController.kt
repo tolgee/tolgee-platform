@@ -10,7 +10,6 @@ import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
@@ -74,17 +73,7 @@ class PublicController(
 
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
-
-    // xxx: this needs to be improved
-    if (userAccount.totpKey?.isNotEmpty() == true) {
-      if (loginRequest.otp?.isEmpty() != false) {
-        throw AuthenticationException(Message.MFA_ENABLED)
-      }
-
-      if (!mfaService.validateTotpCode(userAccount, loginRequest.otp)) {
-        throw AuthenticationException(Message.INVALID_OTP_CODE)
-      }
-    }
+    mfaService.checkMfa(userAccount, loginRequest)
 
     val jwt = tokenProvider.generateToken(userAccount.id).toString()
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
