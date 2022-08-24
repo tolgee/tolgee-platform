@@ -3,12 +3,14 @@ package io.tolgee.api.v2.hateoas.user_account
 import io.tolgee.model.UserAccount
 import io.tolgee.security.controllers.UserController
 import io.tolgee.service.AvatarService
+import io.tolgee.service.MfaService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class UserAccountModelAssembler(
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
+  private val mfaService: MfaService
 ) : RepresentationModelAssemblerSupport<UserAccount, UserAccountModel>(
   UserController::class.java, UserAccountModel::class.java
 ) {
@@ -20,9 +22,9 @@ class UserAccountModelAssembler(
       username = entity.username,
       name = entity.name,
       emailAwaitingVerification = entity.emailVerification?.newEmail,
-      // note: if support for more MFA methods is added, this check should be reworked to account for them.
-      mfaEnabled = entity.totpKey?.isNotEmpty() == true,
+      mfaEnabled = mfaService.hasMfaEnabled(entity),
       avatar = avatar,
+      accountType = entity.accountType ?: UserAccount.AccountType.LOCAL,
       globalServerRole = entity.role ?: UserAccount.Role.USER
     )
   }

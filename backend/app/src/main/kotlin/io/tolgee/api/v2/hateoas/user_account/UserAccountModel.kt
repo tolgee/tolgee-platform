@@ -13,5 +13,6 @@ data class UserAccountModel(
   var emailAwaitingVerification: String?,
   var mfaEnabled: Boolean,
   var avatar: Avatar?,
+  var accountType: UserAccount.AccountType,
   var globalServerRole: UserAccount.Role
 ) : RepresentationModel<UserAccountModel>()

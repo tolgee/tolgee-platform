@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import javax.mail.internet.MimeMessage
 
@@ -38,6 +38,9 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   @Autowired
   lateinit var authenticationProperties: AuthenticationProperties
 
+  @Autowired
+  lateinit var passwordEncoder: PasswordEncoder
+
   override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
 
   @Test
@@ -51,8 +54,7 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findOptional(requestDTO.email)
     Assertions.assertThat(fromDb).isNotEmpty
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    Assertions.assertThat(bCryptPasswordEncoder.matches(requestDTO.password, fromDb.get().password))
+    Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb.get().password))
       .describedAs("Password is changed").isTrue
     Assertions.assertThat(fromDb.get().name).isEqualTo(requestDTO.name)
   }

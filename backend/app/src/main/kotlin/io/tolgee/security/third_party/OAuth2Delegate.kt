@@ -116,6 +116,7 @@ class OAuth2Delegate(
           newUserAccount.name = name
           newUserAccount.thirdPartyAuthId = userResponse.sub
           newUserAccount.thirdPartyAuthType = "oauth2"
+          newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
           userAccountService.createUser(newUserAccount)
           if (invitation != null) {
             invitationService.accept(invitation.code, newUserAccount)

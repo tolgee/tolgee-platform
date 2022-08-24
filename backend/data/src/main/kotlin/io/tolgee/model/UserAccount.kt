@@ -30,18 +30,21 @@ data class UserAccount(
 
   var password: String? = null,
 
-  @Column(name = "totp_key", columnDefinition = "bytea")
-  var totpKey: ByteArray? = null,
-
-  @Type(type = "string-array")
-  @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
-  var mfaRecoveryCodes: List<String> = emptyList(),
-
   var name: String = "",
 
   @Enumerated(EnumType.STRING)
-  var role: Role? = Role.USER
+  var role: Role? = Role.USER,
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "account_type")
+  var accountType: AccountType? = AccountType.LOCAL,
 ) : AuditModel(), ModelWithAvatar {
+  @Column(name = "totp_key", columnDefinition = "bytea")
+  var totpKey: ByteArray? = null
+
+  @Type(type = "string-array")
+  @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
+  var mfaRecoveryCodes: List<String> = emptyList()
 
   @OneToMany(mappedBy = "user")
   var permissions: MutableSet<Permission>? = null
@@ -74,12 +77,14 @@ data class UserAccount(
     name: String?,
     permissions: MutableSet<Permission>?,
     role: Role = Role.USER,
+    accountType: AccountType = AccountType.LOCAL,
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?
   ) : this(id = 0L, username = "", password, name = "") {
     this.permissions = permissions
     this.role = role
+    this.accountType = accountType
     this.thirdPartyAuthType = thirdPartyAuthType
     this.thirdPartyAuthId = thirdPartyAuthId
     this.resetPasswordCode = resetPasswordCode
@@ -87,5 +92,9 @@ data class UserAccount(
 
   enum class Role {
     USER, ADMIN
+  }
+
+  enum class AccountType {
+    LOCAL, LDAP, THIRD_PARTY
   }
 }

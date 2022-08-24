@@ -17,13 +17,6 @@ class UserCredentialsService @Autowired constructor(
   private val passwordEncoder: PasswordEncoder,
   private val configuration: TolgeeProperties
 ) {
-
-  @set:Autowired
-  lateinit var apiKeyService: ApiKeyService
-
-  @set:Autowired
-  lateinit var permissionService: PermissionService
-
   @set:Autowired
   lateinit var userAccountService: UserAccountService
 
@@ -34,8 +27,10 @@ class UserCredentialsService @Autowired constructor(
     if (configuration.authentication.ldap.enabled) {
       val details = checkLdapUserCredentials(username, password)
       return userAccountService.findOptional(details.username).orElseGet {
-        val userAccount = UserAccount()
-        userAccount.username = details.username
+        val userAccount = UserAccount(
+          username = details.username,
+          accountType = UserAccount.AccountType.LDAP
+        )
         userAccountService.createUser(userAccount)
         userAccount
       }

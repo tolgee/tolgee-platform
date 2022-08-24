@@ -51,7 +51,6 @@ class PublicController(
   private val reCaptchaValidationService: ReCaptchaValidationService,
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
-  private val securityService: SecurityService,
   private val userCredentialsService: UserCredentialsService
 ) {
   @Operation(summary = "Generates JWT token")
@@ -63,12 +62,13 @@ class PublicController(
         HttpStatus.BAD_REQUEST
       )
     }
+
+    // note: These checks are left to keep the behavior of this legacy endpoint untouched;
+    // v2 endpoint will allow for hybrid authentication between platform accounts and ldap accounts
     if (properties.authentication.ldap.enabled && properties.authentication.nativeEnabled) {
-      // todo: validate properties
       throw RuntimeException("Can not use native auth and ldap auth in the same time")
     }
     if (!properties.authentication.ldap.enabled && !properties.authentication.nativeEnabled) {
-      // todo: validate properties
       throw RuntimeException("Authentication method not configured")
     }
 

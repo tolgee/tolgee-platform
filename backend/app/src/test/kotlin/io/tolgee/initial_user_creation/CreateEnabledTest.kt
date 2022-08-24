@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 
@@ -41,6 +41,9 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @set:Autowired
   lateinit var userAccountService: UserAccountService
 
+  @set:Autowired
+  lateinit var passwordEncoder: PasswordEncoder
+
   private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
 
   @Autowired
@@ -60,8 +63,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @Test
   fun passwordStoredInDb() {
     val johny = userAccountService.findOptional("johny").orElseGet(null)
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
+    assertThat(passwordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
   }
 
   @AfterAll

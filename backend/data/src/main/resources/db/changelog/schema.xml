@@ -2069,4 +2069,16 @@
             <column name="mfa_recovery_codes" type="text[]"/>
         </addColumn>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1661345119881-1">
+        <addColumn tableName="user_account">
+            <column name="account_type" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia" id="1661345119881-2">
+        <sql dbms="postgresql">
+            UPDATE user_account SET account_type = 'LOCAL';
+            UPDATE user_account SET account_type = 'THIRD_PARTY' WHERE password IS NULL;
+            UPDATE user_account SET account_type = 'LDAP' WHERE password IS NULL AND third_party_auth_type IS NULL;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
