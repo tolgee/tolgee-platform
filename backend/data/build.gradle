@@ -151,7 +151,7 @@ dependencies {
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
     implementation libs.sentry
-    implementation "com.vladmihalcea:hibernate-types-55:2.14.1"
+    implementation "com.vladmihalcea:hibernate-types-55:2.18.0"
     liquibaseRuntime "com.vladmihalcea:hibernate-types-55:2.14.1"
 
     /**
