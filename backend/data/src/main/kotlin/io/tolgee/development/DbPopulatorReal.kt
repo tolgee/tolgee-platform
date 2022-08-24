@@ -21,11 +21,13 @@ import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.PermissionService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.persistence.EntityManager
@@ -34,7 +36,6 @@ import javax.persistence.EntityManager
 class DbPopulatorReal(
   private val entityManager: EntityManager,
   private val userAccountRepository: UserAccountRepository,
-  private val permissionService: PermissionService,
   private val userAccountService: UserAccountService,
   private val languageService: LanguageService,
   private val apiKeyRepository: ApiKeyRepository,
@@ -44,7 +45,9 @@ class DbPopulatorReal(
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val projectService: ProjectService,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
+  private val languageStatsService: LanguageStatsService,
+  private val platformTransactionManager: PlatformTransactionManager
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -154,9 +157,12 @@ class DbPopulatorReal(
     return createBase(projectName, tolgeeProperties.authentication.initialUsername)
   }
 
-  @Transactional
   fun populate(projectName: String): Base {
-    return populate(projectName, tolgeeProperties.authentication.initialUsername)
+    return executeInNewTransaction(platformTransactionManager) {
+      populate(projectName, tolgeeProperties.authentication.initialUsername)
+    }.also {
+      languageStatsService.refreshLanguageStats(it.project.id)
+    }
   }
 
   @Transactional

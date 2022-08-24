@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
-import com.github.javafaker.Faker
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import net.datafaker.Faker
 import java.util.*
 
 class SuggestionTestData : BaseTestData() {
