@@ -4,7 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
-import { Link, Typography } from '@mui/material';
+import { Button, Link, Typography } from '@mui/material';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
@@ -21,6 +21,7 @@ import { Alert } from '../common/Alert';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
+import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 
 const actions = container.resolve(SignUpActions);
 const invitationService = container.resolve(InvitationCodeService);
@@ -40,6 +41,7 @@ const SignUpView: FunctionComponent = () => {
   const config = useConfig();
   const remoteConfig = useConfig();
   const { t } = useTranslate();
+  const oAuthServices = useOAuthServices();
 
   const WithRecaptcha = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
@@ -112,16 +114,40 @@ const SignUpView: FunctionComponent = () => {
               }
               validationSchema={Validation.SIGN_UP(t, orgRequired)}
               submitButtons={
-                <Box display="flex" justifyContent="flex-end">
-                  <LoadingButton
-                    data-cy="sign-up-submit-button"
-                    color="primary"
-                    type="submit"
-                    variant="contained"
-                    loading={state.loading}
-                  >
-                    <T>sign_up_submit_button</T>
-                  </LoadingButton>
+                <Box display="flex" flexDirection="column" alignItems="stretch">
+                  <Box display="flex" justifyContent="flex-end">
+                    <LoadingButton
+                      data-cy="sign-up-submit-button"
+                      color="primary"
+                      type="submit"
+                      variant="contained"
+                      loading={state.loading}
+                    >
+                      <T>sign_up_submit_button</T>
+                    </LoadingButton>
+                  </Box>
+
+                  {oAuthServices.length > 0 && (
+                    <Box
+                      height="1px"
+                      bgcolor="lightgray"
+                      marginY={4}
+                      marginX={-1}
+                    />
+                  )}
+                  {oAuthServices.map((provider, i) => (
+                    <Button
+                      key={i}
+                      component="a"
+                      href={provider.authenticationUrl}
+                      size="medium"
+                      endIcon={provider.buttonIcon}
+                      variant="outlined"
+                      style={{ marginBottom: '0.5rem' }}
+                    >
+                      <T>{provider.buttonLabelTranslationKey}</T>
+                    </Button>
+                  ))}
                 </Box>
               }
               onSubmit={props.onSubmit}
