@@ -9,7 +9,6 @@ import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import org.apache.commons.codec.binary.Base32
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -17,20 +16,16 @@ import javax.crypto.spec.SecretKeySpec
 
 @Service
 class MfaService(
-  private val passwordEncoder: PasswordEncoder,
   private val totpGenerator: TimeBasedOneTimePasswordGenerator,
-  private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService,
+  private val userCredentialsService: UserCredentialsService
 ) {
   private val base32 = Base32()
 
   fun enableTotpFor(user: UserAccount, dto: UserTotpEnableRequestDto) {
+    userCredentialsService.checkUserCredentials(user, dto.password)
     if (user.totpKey?.isNotEmpty() == true) {
       throw AuthenticationException(Message.MFA_ENABLED)
-    }
-
-    val matches = passwordEncoder.matches(dto.password, user.password)
-    if (!matches) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
     val key = base32.decode(dto.totpKey)
@@ -42,26 +37,18 @@ class MfaService(
   }
 
   fun disableTotpFor(user: UserAccount, dto: UserTotpDisableRequestDto) {
+    userCredentialsService.checkUserCredentials(user, dto.password)
     if (user.totpKey?.isNotEmpty() != true) {
       throw AuthenticationException(Message.MFA_NOT_ENABLED)
-    }
-
-    val matches = passwordEncoder.matches(dto.password, user.password)
-    if (!matches) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
     userAccountService.disableMfaTotp(user)
   }
 
   fun regenerateRecoveryCodes(user: UserAccount, dto: UserMfaRecoveryRequestDto): List<String> {
+    userCredentialsService.checkUserCredentials(user, dto.password)
     if (!hasMfaEnabled(user)) {
       throw AuthenticationException(Message.MFA_NOT_ENABLED)
-    }
-
-    val matches = passwordEncoder.matches(dto.password, user.password)
-    if (!matches) {
-      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
     val codes = List(10) { UUID.randomUUID().toString() }

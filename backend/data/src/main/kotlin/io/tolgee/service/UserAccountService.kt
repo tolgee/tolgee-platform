@@ -11,6 +11,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
@@ -234,6 +235,10 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
+    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+    }
+
     // Current password required to change email or password
     if (dto.email != userAccount.username || dto.password != null) {
       if (dto.currentPassword == null) throw AuthenticationException(Message.BAD_CREDENTIALS)
