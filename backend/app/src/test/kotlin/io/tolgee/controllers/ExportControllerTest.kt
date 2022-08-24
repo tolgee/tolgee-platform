@@ -34,7 +34,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     projectSupplier = { base.project }
     userAccount = base.userAccount
     val mvcResult = performProjectAuthGet("export/jsonZip")
-      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
     mvcResult.response
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
     project.languages.forEach(
