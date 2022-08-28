@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import javax.mail.internet.MimeMessage
 
@@ -38,24 +37,18 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   @Autowired
   lateinit var authenticationProperties: AuthenticationProperties
 
-  @Autowired
-  lateinit var passwordEncoder: PasswordEncoder
-
   override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
 
   @Test
   fun updateUser() {
     val requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
-      password = "super new password",
       name = "Ben's new name",
       currentPassword = initialPassword
     )
     performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findOptional(requestDTO.email)
     Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb.get().password))
-      .describedAs("Password is changed").isTrue
     Assertions.assertThat(fromDb.get().name).isEqualTo(requestDTO.name)
   }
 
@@ -63,19 +56,16 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   fun updateUserValidation() {
     var requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
-      password = "",
       name = "",
       currentPassword = initialPassword
     )
     var mvcResult = performAuthPost("/api/user", requestDTO)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
-    standardValidation.onField("password")
     standardValidation.onField("name")
 
     requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
-      password = "aksjhd  dasdsa",
       name = "a",
       currentPassword = initialPassword
     )
@@ -103,26 +93,5 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       .contains(tolgeeProperties.frontEndUrl.toString())
 
     tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification
-  }
-
-  @Test
-  fun updateEmailWithoutPassword() {
-    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
-    val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.zz")
-    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isUnauthorized)
-  }
-
-  @Test
-  fun updatePasswordWithoutPassword() {
-    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
-    val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.aa", password = "super new password")
-    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isUnauthorized)
-  }
-
-  @Test
-  fun updateNameWithoutPassword() {
-    loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
-    val requestDTO = UserUpdateRequestDto(name = "zzz", email = "ben@ben.aa")
-    performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
   }
 }

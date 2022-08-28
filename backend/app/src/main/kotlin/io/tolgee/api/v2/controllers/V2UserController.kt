@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
+import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -39,9 +40,20 @@ class V2UserController(
   }
 
   @PostMapping("")
+  @Operation(summary = "Updates current user's data", deprecated = true)
+  fun updateUserOld(@RequestBody @Valid dto: UserUpdateRequestDto?): UserAccountModel = updateUser(dto)
+
+  @PutMapping("")
   @Operation(summary = "Updates current user's data")
   fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDto?): UserAccountModel {
     val userAccount = userAccountService.update(authenticationFacade.userAccountEntity, dto!!)
+    return userAccountModelAssembler.toModel(userAccount)
+  }
+
+  @PutMapping("/password")
+  @Operation(summary = "Updates current user's password")
+  fun updateUserPassword(@RequestBody @Valid dto: UserUpdatePasswordRequestDto?): UserAccountModel {
+    val userAccount = userAccountService.updatePassword(authenticationFacade.userAccountEntity, dto!!)
     return userAccountModelAssembler.toModel(userAccount)
   }
 

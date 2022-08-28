@@ -21,6 +21,10 @@ export const BaseUserSettingsView: React.FC<Props> = ({
           link: LINKS.USER_PROFILE.build(),
           label: t('user_profile_title'),
         },
+        {
+          link: LINKS.USER_ACCOUNT_SECURITY.build(),
+          label: t('user-account-security-title'),
+        },
       ]
     : [];
 

@@ -2,7 +2,6 @@ package io.tolgee.dtos.request
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.swagger.v3.oas.annotations.media.Schema
-import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
@@ -12,13 +11,9 @@ data class UserUpdateRequestDto(
   var name: String = "",
 
   @field:NotBlank
-  @field:Email
   var email: String = "",
 
-  @field:Size(min = 8, max = 100)
-  var password: String? = null,
-
-  @field:Size(min = 8, max = 100)
+  @field:Size(min = 8, max = 50)
   var currentPassword: String? = null,
 
   @Schema(

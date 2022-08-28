@@ -1,5 +1,5 @@
-import { FunctionComponent } from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { FunctionComponent } from 'react';
+import { Alert, Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -7,7 +7,6 @@ import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
@@ -26,14 +25,15 @@ export const UserProfileView: FunctionComponent = () => {
   const user = useUser();
 
   const updateUser = useApiMutation({
-    url: '/api/user',
-    method: 'post',
+    url: '/v2/user',
+    method: 'put',
   });
 
   const handleSubmit = (v: UserUpdateDTO) => {
-    if (!v.password) {
-      delete v.password;
+    if (!v.currentPassword) {
+      delete v.currentPassword;
     }
+
     // @ts-ignore
     v.callbackUrl = window.location.protocol + '//' + window.location.host;
     updateUser.mutate(
@@ -49,6 +49,7 @@ export const UserProfileView: FunctionComponent = () => {
 
   const history = useHistory();
   const config = useConfig();
+  const isManaged = user?.accountType === 'LDAP';
 
   const Fields = () => {
     const formik = useFormikContext();
@@ -58,37 +59,53 @@ export const UserProfileView: FunctionComponent = () => {
 
     return (
       <Box data-cy="user-profile">
-        <UserProfileAvatar />
-        <TextField
-          variant="standard"
-          name="name"
-          label={<T>User settings - Full name</T>}
-        />
-        <TextField
-          variant="standard"
-          name="email"
-          label={<T>User settings - E-mail</T>}
-        />
-        {user?.emailAwaitingVerification && (
-          <Box>
-            <Typography variant="body1">
-              <T
-                parameters={{
-                  email: user.emailAwaitingVerification!,
-                }}
-              >
-                email_waiting_for_verification
-              </T>
-            </Typography>
-          </Box>
-        )}
+        <Grid container spacing={8}>
+          <Grid item xs="auto">
+            <UserProfileAvatar />
+          </Grid>
+          <Grid item xs={12} sm>
+            <TextField
+              variant="standard"
+              name="name"
+              label={<T>User settings - Full name</T>}
+            />
+            <TextField
+              variant="standard"
+              name="email"
+              disabled={isManaged}
+              helperText={isManaged ? t('managed-account-field-hint') : void 0}
+              label={<T>User settings - E-mail</T>}
+            />
+            {user?.emailAwaitingVerification && (
+              <Box>
+                <Typography variant="body1">
+                  <T
+                    parameters={{
+                      email: user.emailAwaitingVerification!,
+                    }}
+                  >
+                    email_waiting_for_verification
+                  </T>
+                </Typography>
+              </Box>
+            )}
 
-        {emailChanged && config.needsEmailVerification && (
-          <Typography variant="body1">
-            <T>your_email_was_changed_verification_message</T>
-          </Typography>
+            {emailChanged && config.needsEmailVerification && (
+              <Typography variant="body1">
+                <T>your_email_was_changed_verification_message</T>
+              </Typography>
+            )}
+          </Grid>
+        </Grid>
+
+        {emailChanged && (
+          <TextField
+            name="currentPassword"
+            type="password"
+            label={<T>current-password</T>}
+            variant="standard"
+          />
         )}
-        <SetPasswordFields />
       </Box>
     );
   };
@@ -100,18 +117,25 @@ export const UserProfileView: FunctionComponent = () => {
       navigation={[[t('user_profile_title'), LINKS.USER_PROFILE.build()]]}
       containerMaxWidth="md"
     >
+      {isManaged && (
+        <Alert severity="info" sx={{ mb: 4 }}>
+          <T>managed-account-notice</T>
+        </Alert>
+      )}
       {user && (
         <StandardForm
           saveActionLoadable={updateUser}
           initialValues={
             {
-              password: '',
-              passwordRepeat: '',
               name: user.name,
               email: user.username,
+              currentPassword: '',
             } as UserUpdateDTO
           }
-          validationSchema={Validation.USER_SETTINGS}
+          validationSchema={Validation.USER_SETTINGS(
+            user.accountType,
+            user.username
+          )}
           onCancel={() => history.goBack()}
           onSubmit={handleSubmit}
         >

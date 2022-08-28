@@ -6,6 +6,8 @@ import {
   deleteAllEmails,
   getParsedResetPasswordEmail,
   login,
+  userDisableMfa,
+  userEnableMfa,
 } from '../common/apiCalls/common';
 import { assertMessage, getPopover } from '../common/shared';
 import { loginWithFakeGithub, loginWithFakeOAuth2 } from '../common/login';
@@ -76,5 +78,35 @@ context('Login', () => {
     cy.contains('Save new password').click();
     assertMessage('Password successfully reset');
     login(username, newPassword);
+  });
+
+  context('MFA', () => {
+    const TOTP_KEY = [
+      0x61, 0x1d, 0x66, 0x11, 0xd6, 0x61, 0x1d, 0x66, 0x11, 0xd6,
+    ];
+
+    before(() => {
+      userEnableMfa(USERNAME, TOTP_KEY, ['meow']);
+    });
+
+    after(() => {
+      userDisableMfa(USERNAME);
+    });
+
+    beforeEach(() => {
+      cy.visit(HOST);
+    });
+
+    it('Will ask for MFA', () => {
+      cy.xpath('//input[@name="username"]')
+        .type(USERNAME)
+        .should('have.value', USERNAME);
+      cy.xpath('//input[@name="password"]')
+        .type(PASSWORD)
+        .should('have.value', PASSWORD);
+      cy.gcy('login-button').click();
+      waitForGlobalLoading();
+      // cy.pause();
+    });
   });
 });

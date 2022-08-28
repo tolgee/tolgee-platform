@@ -182,6 +182,31 @@ export const getUser = (username: string) => {
   });
 };
 
+export const userEnableMfa = (
+  username: string,
+  key: number[],
+  recoveryCodes: string[] = []
+) => {
+  const encodedKey = key
+    .map((byte) => byte.toString(16).toUpperCase())
+    .join('');
+  const joinedCodes = recoveryCodes.join(',');
+
+  const sql = `UPDATE user_account
+                 SET totp_key           = '\\x${encodedKey}',
+                     mfa_recovery_codes = '{${joinedCodes}}'
+                 WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const userDisableMfa = (username: string) => {
+  const sql = `UPDATE user_account
+                 SET totp_key           = NULL,
+                     mfa_recovery_codes = '{}'
+                 WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
@@ -194,14 +219,14 @@ export const getAllProjectApiKeys = (projectId: number) =>
   // so we need to wrap the whole fn with another promise to actually
   // resolve empty array
   // thanks Cypress!
-  new Promise((resolve) =>
+  new Promise<components['schemas']['ApiKeyModel'][]>((resolve) =>
     v2apiFetch(`api-keys`, {
       method: 'GET',
       qs: {
         filterProjectId: projectId,
       },
     }).then((r) => resolve(r.body?._embedded?.apiKeys || []))
-  ) as any as Promise<components['schemas']['ApiKeyModel'][]>;
+  );
 
 export const deleteAllProjectApiKeys = (projectId: number) =>
   getAllProjectApiKeys(projectId).then((keys) => {

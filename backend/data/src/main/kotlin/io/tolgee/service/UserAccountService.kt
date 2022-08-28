@@ -4,15 +4,16 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
@@ -235,32 +236,35 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
-    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
-      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
-    }
-
     // Current password required to change email or password
-    if (dto.email != userAccount.username || dto.password != null) {
-      if (dto.currentPassword == null) throw AuthenticationException(Message.BAD_CREDENTIALS)
+    if (dto.email != userAccount.username) {
+      if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+        throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+      }
+
+      if (dto.currentPassword?.isNotEmpty() != true) throw BadRequestException(Message.CURRENT_PASSWORD_REQUIRED)
       val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
-      if (!matches) throw AuthenticationException(Message.BAD_CREDENTIALS)
+      if (!matches) throw PermissionException()
     }
 
     val old = UserAccountDto.fromEntity(userAccount)
     updateUserEmail(userAccount, dto)
-    updatePassword(dto, userAccount)
     userAccount.name = dto.name
 
     publishUserInfoUpdatedEvent(old, userAccount)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun updatePassword(dto: UserUpdateRequestDto, userAccount: UserAccount) {
-    dto.password?.let {
-      if (it.isNotEmpty()) {
-        userAccount.password = passwordEncoder.encode(it)
-      }
+  fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
+    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
+
+    val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
+    if (!matches) throw PermissionException()
+
+    userAccount.password = passwordEncoder.encode(dto.password)
+    return userAccountRepository.save(userAccount)
   }
 
   private fun updateUserEmail(
@@ -268,6 +272,11 @@ class UserAccountService(
     dto: UserUpdateRequestDto
   ) {
     if (userAccount.username != dto.email) {
+      if (!Regex("[^@]+@[^@]+").matches(dto.email)) {
+        // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
+        throw ValidationException(Message.MALFORMED_EMAIL)
+      }
+
       findOptional(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)

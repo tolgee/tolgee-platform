@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Box, FormHelperText } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { container } from 'tsyringe';
@@ -70,18 +70,18 @@ export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
           label={<T>create_organization_slug_label</T>}
           name="slug"
           required={true}
+          helperText={
+            <T
+              parameters={{
+                address: LINKS.ORGANIZATION.buildWithOrigin({
+                  [PARAMS.ORGANIZATION_SLUG]: slugValue,
+                }),
+              }}
+            >
+              organization_your_address_to_access_organization
+            </T>
+          }
         />
-        <FormHelperText>
-          <T
-            parameters={{
-              address: LINKS.ORGANIZATION.buildWithOrigin({
-                [PARAMS.ORGANIZATION_SLUG]: slugValue,
-              }),
-            }}
-          >
-            organization_your_address_to_access_organization
-          </T>
-        </FormHelperText>
       </Box>
 
       <TextField

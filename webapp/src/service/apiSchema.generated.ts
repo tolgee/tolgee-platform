@@ -4,6 +4,21 @@
  */
 
 export interface paths {
+  "/v2/user": {
+    get: operations["getInfo"];
+    put: operations["updateUser"];
+    post: operations["updateUserOld"];
+  };
+  "/v2/user/password": {
+    put: operations["updateUserPassword"];
+  };
+  "/v2/user/mfa/mfa/totp": {
+    put: operations["enableMfa"];
+    delete: operations["disableMfa"];
+  };
+  "/v2/user/mfa/mfa/recovery": {
+    put: operations["regenerateRecoveryCodes"];
+  };
   "/v2/user/avatar": {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
@@ -158,10 +173,6 @@ export interface paths {
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
-  };
-  "/v2/user": {
-    get: operations["getInfo"];
-    post: operations["updateUser"];
   };
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
@@ -505,6 +516,13 @@ export interface paths {
 
 export interface components {
   schemas: {
+    UserUpdateRequestDto: {
+      name: string;
+      email: string;
+      currentPassword?: string;
+      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      callbackUrl?: string;
+    };
     Avatar: {
       large: string;
       thumbnail: string;
@@ -514,8 +532,22 @@ export interface components {
       username: string;
       name?: string;
       emailAwaitingVerification?: string;
+      mfaEnabled: boolean;
       avatar?: components["schemas"]["Avatar"];
+      accountType: "LOCAL" | "LDAP" | "THIRD_PARTY";
       globalServerRole: "USER" | "ADMIN";
+    };
+    UserUpdatePasswordRequestDto: {
+      currentPassword: string;
+      password: string;
+    };
+    UserTotpEnableRequestDto: {
+      totpKey: string;
+      otp: string;
+      password: string;
+    };
+    UserMfaRecoveryRequestDto: {
+      password: string;
     };
     EditProjectDTO: {
       name: string;
@@ -576,9 +608,9 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -596,9 +628,9 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
     };
     TagKeyDto: {
       name: string;
@@ -663,7 +695,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
     };
     EditKeyDto: {
       name: string;
@@ -812,13 +844,6 @@ export interface components {
       currentName: string;
       newName: string;
     };
-    UserUpdateRequestDto: {
-      name: string;
-      email: string;
-      password?: string;
-      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
-      callbackUrl?: string;
-    };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
@@ -965,6 +990,7 @@ export interface components {
     LoginRequest: {
       username?: string;
       password?: string;
+      otp?: string;
     };
     GetKeyTranslationsReqDto: {
       key?: string;
@@ -1014,7 +1040,7 @@ export interface components {
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     OAuthPublicConfigDTO: {
@@ -1206,6 +1232,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1217,7 +1244,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1305,7 +1331,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1485,6 +1511,9 @@ export interface components {
       code?: string;
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    UserTotpDisableRequestDto: {
+      password: string;
+    };
     DeleteKeysDto: {
       /** IDs of keys to delete */
       ids: number[];
@@ -1493,6 +1522,190 @@ export interface components {
 }
 
 export interface operations {
+  getInfo: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  updateUserOld: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  updateUserPassword: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdatePasswordRequestDto"];
+      };
+    };
+  };
+  enableMfa: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpEnableRequestDto"];
+      };
+    };
+  };
+  disableMfa: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpDisableRequestDto"];
+      };
+    };
+  };
+  regenerateRecoveryCodes: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMfaRecoveryRequestDto"];
+      };
+    };
+  };
   uploadAvatar: {
     responses: {
       /** OK */
@@ -3323,55 +3536,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
-  getInfo: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updateUser: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };

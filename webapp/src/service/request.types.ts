@@ -11,5 +11,10 @@ export interface ImportDto {
 export interface UserUpdateDTO {
   email: string;
   name: string;
-  password?: string;
+  currentPassword?: string;
+}
+
+export interface UserUpdatePasswordDTO {
+  currentPassword: string;
+  password: string;
 }
