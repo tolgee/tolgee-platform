@@ -1,3 +1,10 @@
+# [2.38.0](https://github.com/tolgee/tolgee-platform/compare/v2.37.1...v2.38.0) (2022-08-29)
+
+
+### Features
+
+* Personal Access Tokens & API key improvements ([3312746](https://github.com/tolgee/tolgee-platform/commit/3312746f5d2bcaf1ef0f73fcafaff54677a62d41))
+
 ## [2.37.1](https://github.com/tolgee/tolgee-platform/compare/v2.37.0...v2.37.1) (2022-08-24)
 
 
