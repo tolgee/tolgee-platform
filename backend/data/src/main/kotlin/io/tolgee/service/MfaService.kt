@@ -6,7 +6,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.security.payload.LoginRequest
 import org.apache.commons.codec.binary.Base32
@@ -24,30 +27,48 @@ class MfaService(
   private val base32 = Base32()
 
   fun enableTotpFor(user: UserAccount, dto: UserTotpEnableRequestDto) {
-    userCredentialsService.checkUserCredentials(user, dto.password)
+    try {
+      userCredentialsService.checkUserCredentials(user, dto.password)
+    } catch (e: AuthenticationException) {
+      // Re-throw as a permission exception to set status to 403 instead of 401
+      throw PermissionException()
+    }
+
     if (user.totpKey?.isNotEmpty() == true) {
-      throw AuthenticationException(Message.MFA_ENABLED)
+      throw BadRequestException(Message.MFA_ENABLED)
     }
 
     val key = base32.decode(dto.totpKey)
     if (!validateTotpCode(key, dto.otp)) {
-      throw AuthenticationException(Message.INVALID_OTP_CODE)
+      throw ValidationException(Message.INVALID_OTP_CODE)
     }
 
     userAccountService.enableMfaTotp(user, key)
   }
 
   fun disableTotpFor(user: UserAccount, dto: UserTotpDisableRequestDto) {
-    userCredentialsService.checkUserCredentials(user, dto.password)
+    try {
+      userCredentialsService.checkUserCredentials(user, dto.password)
+    } catch (e: AuthenticationException) {
+      // Re-throw as a permission exception to set status to 403 instead of 401
+      throw PermissionException()
+    }
+
     if (user.totpKey?.isNotEmpty() != true) {
-      throw AuthenticationException(Message.MFA_NOT_ENABLED)
+      throw BadRequestException(Message.MFA_NOT_ENABLED)
     }
 
     userAccountService.disableMfaTotp(user)
   }
 
   fun regenerateRecoveryCodes(user: UserAccount, dto: UserMfaRecoveryRequestDto): List<String> {
-    userCredentialsService.checkUserCredentials(user, dto.password)
+    try {
+      userCredentialsService.checkUserCredentials(user, dto.password)
+    } catch (e: AuthenticationException) {
+      // Re-throw as a permission exception to set status to 403 instead of 401
+      throw PermissionException()
+    }
+
     if (!hasMfaEnabled(user)) {
       throw AuthenticationException(Message.MFA_NOT_ENABLED)
     }
@@ -99,7 +120,7 @@ class MfaService(
     }
   }
 
-  private fun generateCode(key: ByteArray): Number {
+  fun generateCode(key: ByteArray): Int {
     return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
   }
 }

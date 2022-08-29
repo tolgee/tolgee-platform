@@ -7,13 +7,7 @@ import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.MfaService
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
@@ -23,24 +17,21 @@ class UserMfaController(
   private val authenticationFacade: AuthenticationFacade,
   private val mfaService: MfaService
 ) {
-  @PutMapping("/mfa/totp")
+  @PutMapping("/totp")
   @Operation(summary = "Enables TOTP-based two-factor authentication")
-  fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto): ResponseEntity<String> {
+  fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto) {
     mfaService.enableTotpFor(authenticationFacade.userAccountEntity, dto)
-    return ResponseEntity.noContent().build()
   }
 
-  @DeleteMapping("/mfa/totp")
+  @DeleteMapping("/totp")
   @Operation(summary = "Disables TOTP-based two-factor authentication")
-  fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto): ResponseEntity<String> {
+  fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto) {
     mfaService.disableTotpFor(authenticationFacade.userAccountEntity, dto)
-    return ResponseEntity.noContent().build()
   }
 
-  @PutMapping("/mfa/recovery")
+  @PutMapping("/recovery")
   @Operation(summary = "Regenerates multi-factor authentication recovery codes")
-  fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): ResponseEntity<List<String>> {
-    val codes = mfaService.regenerateRecoveryCodes(authenticationFacade.userAccountEntity, dto)
-    return ResponseEntity(codes, HttpStatus.OK)
+  fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): List<String> {
+    return mfaService.regenerateRecoveryCodes(authenticationFacade.userAccountEntity, dto)
   }
 }
