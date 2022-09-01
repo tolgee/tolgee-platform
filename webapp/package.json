@@ -5,7 +5,7 @@
   "dependencies": {
     "@dicebear/avatars": "4.10.2",
     "@dicebear/avatars-identicon-sprites": "4.10.2",
-    "@dicebear/avatars-initials-sprites": "4.10.2",
+    "@dicebear/avatars-initials-sprites": "4.10.3",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
     "@formatjs/icu-messageformat-parser": "^2.0.8",
