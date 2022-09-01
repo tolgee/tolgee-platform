@@ -1,3 +1,10 @@
+## [2.38.1](https://github.com/tolgee/tolgee-platform/compare/v2.38.0...v2.38.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* update tolgee-js ([a9432ca](https://github.com/tolgee/tolgee-platform/commit/a9432caf53f8cc046d2c9f649b34a89a753d28ec))
+
 # [2.38.0](https://github.com/tolgee/tolgee-platform/compare/v2.37.1...v2.38.0) (2022-08-29)
 
 
