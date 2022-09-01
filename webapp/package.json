@@ -7,7 +7,7 @@
     "@dicebear/avatars-identicon-sprites": "4.10.2",
     "@dicebear/avatars-initials-sprites": "4.10.2",
     "@emotion/react": "^11.8.2",
-    "@emotion/styled": "^11.8.1",
+    "@emotion/styled": "^11.10.4",
     "@formatjs/icu-messageformat-parser": "^2.0.8",
     "@mui/icons-material": "^5.5.1",
     "@mui/lab": "^5.0.0-alpha.75",
