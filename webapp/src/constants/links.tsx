@@ -205,9 +205,9 @@ export class LINKS {
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
-  static PROJECT_SOCKET_IO_PREVIEW = Link.ofParent(
+  static PROJECT_WEBSOCKETS_PREVIEW = Link.ofParent(
     LINKS.PROJECT,
-    'socket_io_preview'
+    'websockets'
   );
 
   static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');

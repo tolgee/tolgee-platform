@@ -11,7 +11,7 @@ describe('Projects Basics', () => {
     projectTransferringTestData.generate();
   });
 
-  it('shows proper dialog content', () => {
+  it('shows proper dialog content', { retries: { runMode: 5 } }, () => {
     login('test_username', 'admin');
     openTransferDialog('Organization owned project', 'Owned organization');
     gcy('project-transfer-dialog').should(

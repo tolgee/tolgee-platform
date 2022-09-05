@@ -22,7 +22,7 @@ open class TolgeeProperties(
   val maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
   var frontEndUrl: String? = null,
-  var socketIo: SocketIoProperties = SocketIoProperties(),
+  var websocket: WebsocketProperties = WebsocketProperties(),
   var appName: String = "Tolgee",
   open var maxTranslationTextLength: Long = 10000,
   var cache: CacheProperties = CacheProperties(),

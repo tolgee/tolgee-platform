@@ -14,7 +14,6 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
-import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -28,7 +27,6 @@ class KeyService(
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
   private val keyMetaService: KeyMetaService,
-  private val translationsSocketIoModule: ITranslationsSocketIoModule,
   private val tagService: TagService,
 ) {
   private lateinit var translationService: TranslationService
@@ -86,12 +84,7 @@ class KeyService(
   }
 
   fun save(key: Key): Key {
-    val wasCreated = key.id == 0L
     keyRepository.save(key)
-    // modification is handled in edit separately
-    if (wasCreated) {
-      translationsSocketIoModule.onKeyCreated(key)
-    }
     return key
   }
 
@@ -139,7 +132,6 @@ class KeyService(
     val key = get(project.id, dto.oldPathDto.fullPathString)
     val oldName = key.name
     key.name = dto.newFullPathString
-    translationsSocketIoModule.onKeyModified(key, oldName)
     save(key)
   }
 
@@ -163,7 +155,6 @@ class KeyService(
       throw ValidationException(Message.KEY_EXISTS)
     }
     key.name = newName
-    translationsSocketIoModule.onKeyModified(key, oldName)
     return save(key)
   }
 
@@ -174,7 +165,6 @@ class KeyService(
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
     keyRepository.delete(key)
-    translationsSocketIoModule.onKeyDeleted(key)
   }
 
   @Transactional
@@ -184,7 +174,6 @@ class KeyService(
     screenshotService.deleteAllByKeyId(ids)
     val keys = keyRepository.findAllByIdIn(ids)
     keys.forEach {
-      translationsSocketIoModule.onKeyDeleted(it)
     }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
   }

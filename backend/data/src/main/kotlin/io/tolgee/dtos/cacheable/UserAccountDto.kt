@@ -17,4 +17,8 @@ data class UserAccountDto(
       id = entity.id
     )
   }
+
+  override fun toString(): String {
+    return username
+  }
 }

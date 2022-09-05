@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
 import { container } from 'tsyringe';
 import { useDebouncedCallback } from 'use-debounce';
@@ -17,8 +17,8 @@ const PAGE_SIZE = 60;
 
 type TranslationsQueryType =
   operations['getTranslations']['parameters']['query'];
-type KeyWithTranslationsModelType =
-  components['schemas']['KeyWithTranslationsModel'];
+export type DeletableKeyWithTranslationsModelType =
+  components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
 type TranslationModel = components['schemas']['TranslationViewModel'];
@@ -47,7 +47,7 @@ type Props = {
 
 const flattenKeys = (
   data: InfiniteData<TranslationsResponse>
-): KeyWithTranslationsModelType[] =>
+): DeletableKeyWithTranslationsModelType[] =>
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsService = (props: Props) => {
@@ -87,7 +87,7 @@ export const useTranslationsService = (props: Props) => {
   }, [props.initialLangs]);
 
   const [fixedTranslations, setFixedTranslations] = useState<
-    KeyWithTranslationsModelType[] | undefined
+    DeletableKeyWithTranslationsModelType[] | undefined
   >();
 
   const path = useMemo(
@@ -161,7 +161,7 @@ export const useTranslationsService = (props: Props) => {
       query: requrestQuery,
     });
 
-  const insertAsFirst = (data: KeyWithTranslationsModelType) => {
+  const insertAsFirst = (data: DeletableKeyWithTranslationsModelType) => {
     setFixedTranslations((translations) => [data, ...(translations || [])]);
     setManuallyInserted((num) => num + 1);
   };
@@ -220,53 +220,68 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateTranslationKey = (
-    keyId: number,
-    value: Partial<KeyWithTranslationsModelType>
+  const updateTranslationKeys = (
+    data: {
+      keyId: number;
+      value: Partial<DeletableKeyWithTranslationsModelType>;
+    }[]
   ) => {
-    setFixedTranslations((fixedTranslations) =>
-      fixedTranslations?.map((k) => {
-        if (k.keyId === keyId) {
-          return { ...k, ...value };
-        } else {
-          return k;
-        }
-      })
-    );
+    setFixedTranslations((fixedTranslations) => {
+      let result = fixedTranslations;
+      data.forEach((mod) => {
+        result = result?.map((k) => {
+          if (k.keyId === mod.keyId) {
+            return { ...k, ...mod.value };
+          } else {
+            return k;
+          }
+        });
+      });
+      return result;
+    });
   };
 
   const updateScreenshotCount = (data: ChangeScreenshotNum) =>
-    updateTranslationKey(data.keyId, { screenshotCount: data.screenshotCount });
+    updateTranslationKeys([
+      { keyId: data.keyId, value: { screenshotCount: data.screenshotCount } },
+    ]);
 
-  const changeTranslation = (
-    keyId: number,
-    language: string,
-    value: Partial<TranslationModel> | undefined
+  const changeTranslations = (
+    data: {
+      keyId: number;
+      language: string;
+      value: Partial<TranslationModel> | undefined;
+    }[]
   ) => {
-    setFixedTranslations((fixedTranslations) =>
-      fixedTranslations?.map((k) => {
-        if (k.keyId === keyId) {
-          return {
-            ...k,
-            translations: {
-              ...k.translations,
-              [language]: value
-                ? {
-                    ...k.translations[language],
-                    ...value,
-                  }
-                : (undefined as any),
-            },
-          };
-        } else {
+    setFixedTranslations((fixedTranslations) => {
+      let result = fixedTranslations;
+      data.forEach((mod) => {
+        result = result?.map((k) => {
+          if (k.keyId === mod.keyId) {
+            return {
+              ...k,
+              translations: {
+                ...k.translations,
+                [mod.language]: mod.value
+                  ? {
+                      ...k.translations[mod.language],
+                      ...mod.value,
+                    }
+                  : (undefined as any),
+              },
+            };
+          }
           return k;
-        }
-      })
-    );
+        });
+      });
+      return result;
+    });
   };
 
   const updateTranslation = (data: UpdateTranslation) =>
-    changeTranslation(data.keyId, data.lang, data.data);
+    changeTranslations([
+      { keyId: data.keyId, language: data.lang, value: data.data },
+    ]);
 
   const totalCount = translations.data?.pages[0].page?.totalElements;
 
@@ -310,13 +325,13 @@ export const useTranslationsService = (props: Props) => {
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,
     refetchTranslations,
-    changeTranslation,
+    changeTranslations,
     updateQuery,
     search,
     setSearch,
     setUrlSearch,
     setFilters,
-    updateTranslationKey,
+    updateTranslationKeys,
     updateTranslation,
     insertAsFirst,
     urlSearch: urlSearch as string | undefined,

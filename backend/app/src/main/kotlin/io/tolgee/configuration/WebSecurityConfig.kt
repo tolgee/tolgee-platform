@@ -52,7 +52,12 @@ class WebSecurityConfig @Autowired constructor(
       )
       .authorizeRequests()
       .antMatchers(
-        "/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/v2/public/**"
+        "/api/public/**",
+        "/webjars/**",
+        "/swagger-ui.html",
+        "/swagger-resources/**",
+        "/v2/api-docs",
+        "/v2/public/**",
       ).permitAll()
       .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
       .and().sessionManagement()

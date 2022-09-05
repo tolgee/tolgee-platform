@@ -23,6 +23,7 @@
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "downlevelIteration": true,
+    "preserveSymlinks": true,
     "emitDecoratorMetadata": true
   },
   "include": [
