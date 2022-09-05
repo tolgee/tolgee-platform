@@ -3,6 +3,7 @@ package io.tolgee.activity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewDataProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.executeInNewTransaction
@@ -25,16 +26,18 @@ class ActivityService(
   fun storeActivityData(activityHolder: ActivityHolder) {
     val activityRevision = activityHolder.activityRevision ?: return
     val modifiedEntities = activityHolder.modifiedEntities
+    activityRevision.modifiedEntities = activityHolder.modifiedEntities.values.flatMap { it.values }.toMutableList()
 
     executeInNewTransaction(transactionManager) {
       entityManager.persist(activityRevision)
       activityRevision.describingRelations.forEach {
         entityManager.persist(it)
       }
-      modifiedEntities.values.flatMap { it.values }.forEach { activityModifiedEntity ->
+      activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
         entityManager.persist(activityModifiedEntity)
       }
     }
+    applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }
 
   @Transactional

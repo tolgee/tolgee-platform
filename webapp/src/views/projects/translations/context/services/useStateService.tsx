@@ -30,7 +30,9 @@ export const useStateService = ({ translations }: Props) => {
       },
       {
         onSuccess(response) {
-          translations.changeTranslation(data.keyId, data.language, response);
+          translations.changeTranslations([
+            { keyId: data.keyId, language: data.language, value: response },
+          ]);
         },
         onError(e) {
           const parsed = parseErrorResponse(e);

@@ -101,7 +101,7 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  private fun getProjectPermission(projectId: Long, userId: Long = activeUser.id): ProjectPermissionType? {
+  fun getProjectPermission(projectId: Long, userId: Long = activeUser.id): ProjectPermissionType? {
     return permissionService.getProjectPermissionType(projectId, userId)
   }
 

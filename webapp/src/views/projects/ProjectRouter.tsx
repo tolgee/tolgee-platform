@@ -10,13 +10,13 @@ import { ImportView } from './import/ImportView';
 import { LanguageEditView } from './languages/LanguageEdit/LanguageEditView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
-import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 import { TranslationsView } from './translations/TranslationsView';
 import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { DashboardView } from './dashboard/DashboardView';
+import { WebsocketPreview } from './WebsocketPreview';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -81,9 +81,8 @@ export const ProjectRouter = () => {
             {/*
               Preview section...
             */}
-
-            <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
-              <SocketIoPreview />
+            <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
+              <WebsocketPreview />
             </Route>
           </React.Suspense>
         </ProjectPage>

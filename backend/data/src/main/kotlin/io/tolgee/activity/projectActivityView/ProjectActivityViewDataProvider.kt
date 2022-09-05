@@ -123,7 +123,7 @@ class ProjectActivityViewDataProvider(
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
     return rawModifiedEntities.map { modifiedEntity ->
       val relations = modifiedEntity.describingRelations?.map { relationEntry ->
-        relationEntry.key to decompressRef(
+        relationEntry.key to extractCompressedRef(
           relationEntry.value,
           allRelationData[modifiedEntity.activityRevision.id]!!
         )
@@ -191,14 +191,14 @@ class ProjectActivityViewDataProvider(
     return entityManager.createQuery(query).resultList
   }
 
-  private fun decompressRef(
+  private fun extractCompressedRef(
     value: EntityDescriptionRef,
     describingEntities: List<ActivityDescribingEntity>
   ): ExistenceEntityDescription {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
     val relations = entity?.describingRelations
-      ?.map { it.key to decompressRef(it.value, describingEntities) }
+      ?.map { it.key to extractCompressedRef(it.value, describingEntities) }
       ?.toMap()
 
     return ExistenceEntityDescription(

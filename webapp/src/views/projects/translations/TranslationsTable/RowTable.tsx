@@ -7,9 +7,9 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import { styled } from '@mui/material';
+import clsx from 'clsx';
+import { DeletableKeyWithTranslationsModelType } from '../context/services/useTranslationsService';
 
-type KeyWithTranslationsModel =
-  components['schemas']['KeyWithTranslationsModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const StyledContainer = styled('div')`
@@ -17,6 +17,10 @@ const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 0px 0px 0px;
   position: relative;
+  &.deleted {
+    text-decoration: line-through;
+    pointer-events: none;
+  }
 `;
 
 const StyledFakeContainer = styled('div')`
@@ -27,7 +31,7 @@ const StyledFakeContainer = styled('div')`
 `;
 
 type Props = {
-  data: KeyWithTranslationsModel;
+  data: DeletableKeyWithTranslationsModelType;
   languages: LanguageModel[];
   columnSizes: string[];
   onResize: (colIndex: number) => void;
@@ -59,6 +63,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       data-cy="translations-row"
+      className={clsx(data.deleted && 'deleted')}
     >
       <CellKey
         editEnabled={permissions.satisfiesPermission(

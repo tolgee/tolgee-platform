@@ -173,7 +173,7 @@ class V2ProjectsController(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
-    @RequestParam languages: MutableSet<Long>?
+    @RequestParam languages: MutableSet<Long>?,
   ) {
     checkNotCurrentUser(userId)
     val languageEntities = getLanguagesAndCheckFromProject(languages, projectId)

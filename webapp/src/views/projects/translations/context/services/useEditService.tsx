@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { container } from 'tsyringe';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
-  usePutKey,
-  usePutTranslation,
-  usePutTag,
   useDeleteTag,
+  usePutKey,
+  usePutTag,
+  usePutTranslation,
 } from 'tg.service/TranslationHooks';
 import { useTranslationsService } from './useTranslationsService';
 import { useRefsService } from './useRefsService';
@@ -195,7 +195,9 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
 
         if (result) {
           Object.entries(result.translations).forEach(([lang, translation]) =>
-            translations.changeTranslation(keyId, lang, translation)
+            translations.changeTranslations([
+              { keyId, language: lang, value: translation },
+            ])
           );
         }
       } else {
@@ -206,7 +208,9 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
           keyId,
           language,
         });
-        translations.updateTranslationKey(keyId, { keyName: value });
+        translations.updateTranslationKeys([
+          { keyId, value: { keyName: value } },
+        ]);
       }
       doAfterCommand(data.after);
       data.onSuccess?.();

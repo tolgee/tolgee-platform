@@ -24,12 +24,6 @@ class PublicConfigurationDTO(
   val clientSentryDsn = properties.sentry.clientDsn
   val needsEmailVerification = properties.authentication.needsEmailVerification
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
-  val socket = SocketIo(
-    enabled = properties.socketIo.enabled,
-    port = properties.socketIo.port,
-    serverUrl = properties.socketIo.externalUrl,
-    allowedTransports = properties.socketIo.allowedTransports
-  )
   val appName = properties.appName
   val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
@@ -65,8 +59,6 @@ class PublicConfigurationDTO(
     val enabled: Boolean,
     val defaultEnabledForProject: Boolean
   )
-
-  data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?, val allowedTransports: List<String>)
 
   init {
     if (authentication) {
