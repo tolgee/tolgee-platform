@@ -1,3 +1,10 @@
+# [2.39.0](https://github.com/tolgee/tolgee-platform/compare/v2.38.1...v2.39.0) (2022-09-06)
+
+
+### Features
+
+* Websockets improvements & listening on frontend ([7a66450](https://github.com/tolgee/tolgee-platform/commit/7a66450ddfb38ecc157881d89cd3987e1a204adf))
+
 ## [2.38.1](https://github.com/tolgee/tolgee-platform/compare/v2.38.0...v2.38.1) (2022-09-01)
 
 
