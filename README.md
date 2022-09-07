@@ -1,6 +1,6 @@
 <h1 align="center" style="border-bottom: none">
     <b>
-        <a href="https://affine.pro">Tolgee</a><br>
+        <a href="https://tolgee.io">Tolgee</a><br>
     </b>
     An open-source localization platform<br/> developers enjoy to work with
     <br>
