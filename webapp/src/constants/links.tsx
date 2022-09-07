@@ -118,6 +118,21 @@ export class LINKS {
 
   static USER_ACCOUNT_SECURITY = Link.ofParent(LINKS.USER_SETTINGS, 'security');
 
+  static USER_ACCOUNT_SECURITY_MFA_ENABLE = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'enable-mfa'
+  );
+
+  static USER_ACCOUNT_SECURITY_MFA_RECOVERY = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'mfa-recovery-codes'
+  );
+
+  static USER_ACCOUNT_SECURITY_MFA_DISABLE = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'disable-mfa'
+  );
+
   /**
    * Administration
    */

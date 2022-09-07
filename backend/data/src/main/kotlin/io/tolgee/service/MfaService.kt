@@ -31,7 +31,7 @@ class MfaService(
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
       // Re-throw as a permission exception to set status to 403 instead of 401
-      throw PermissionException()
+      throw PermissionException(Message.BAD_CREDENTIALS)
     }
 
     if (user.totpKey?.isNotEmpty() == true) {
@@ -51,7 +51,7 @@ class MfaService(
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
       // Re-throw as a permission exception to set status to 403 instead of 401
-      throw PermissionException()
+      throw PermissionException(Message.BAD_CREDENTIALS)
     }
 
     if (user.totpKey?.isNotEmpty() != true) {
@@ -66,11 +66,11 @@ class MfaService(
       userCredentialsService.checkUserCredentials(user, dto.password)
     } catch (e: AuthenticationException) {
       // Re-throw as a permission exception to set status to 403 instead of 401
-      throw PermissionException()
+      throw PermissionException(Message.BAD_CREDENTIALS)
     }
 
     if (!hasMfaEnabled(user)) {
-      throw AuthenticationException(Message.MFA_NOT_ENABLED)
+      throw BadRequestException(Message.MFA_NOT_ENABLED)
     }
 
     val codes = List(10) { UUID.randomUUID().toString() }

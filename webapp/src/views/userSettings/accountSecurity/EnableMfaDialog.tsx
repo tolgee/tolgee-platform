@@ -1,0 +1,163 @@
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import ReactQR from 'react-qr-code';
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  styled,
+  Typography,
+} from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { LINKS } from 'tg.constants/links';
+import { redirect } from 'tg.hooks/redirect';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { components } from 'tg.service/apiSchema.generated';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { useUser } from 'tg.globalContext/helpers';
+import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { MfaRecoveryCodesDialog } from 'tg.views/userSettings/accountSecurity/MfaRecoveryCodesDialog';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+
+type TotpEnableDto = components['schemas']['UserTotpEnableRequestDto'];
+
+const BASE32_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
+
+const WhiteBox = styled(Box)`
+  background-color: white;
+  border-radius: 8px;
+`;
+
+export const EnableMfaDialog: FunctionComponent = () => {
+  const [recoveryCodesPw, setRecoveryCodesPw] = useState<string | null>(null);
+
+  const onDialogClose = () => {
+    if (recoveryCodesPw) return;
+    redirect(LINKS.USER_ACCOUNT_SECURITY);
+  };
+
+  const secret = useMemo(() => {
+    const secureRng = new Int32Array(3);
+    window.crypto.getRandomValues(secureRng);
+
+    let str = '';
+    for (let i = 0; i < 3; i++) {
+      const v = secureRng[i];
+      str += BASE32_ALPHABET[(v >>> 27) & 0x1f];
+      str += BASE32_ALPHABET[(v >>> 22) & 0x1f];
+      str += BASE32_ALPHABET[(v >>> 17) & 0x1f];
+      str += BASE32_ALPHABET[(v >>> 12) & 0x1f];
+      str += BASE32_ALPHABET[(v >>> 7) & 0x1f];
+      str += BASE32_ALPHABET[(v >>> 2) & 0x1f];
+    }
+
+    return str.slice(0, 16);
+  }, []);
+
+  const user = useUser();
+  const message = useMessage();
+  const t = useTranslate();
+  const globalDispatch = useGlobalDispatch();
+
+  useEffect(() => {
+    if (user && user.mfaEnabled) onDialogClose();
+  }, [user]);
+
+  const enableMfa = useApiMutation({
+    url: '/v2/user/mfa/totp',
+    method: 'put',
+    options: {
+      onSuccess: (r, v) => {
+        message.success(<T keyName="account-security-mfa-enabled-success" />);
+        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        setRecoveryCodesPw(v.content['application/json'].password);
+      },
+    },
+  });
+
+  if (!user) return null;
+  if (recoveryCodesPw) {
+    return <MfaRecoveryCodesDialog password={recoveryCodesPw} />;
+  }
+
+  const encodedOtpName = encodeURIComponent(`Tolgee (${user.username})`);
+  const otpUri = `otpauth://totp/${encodedOtpName})?secret=${secret}`;
+
+  return (
+    <Dialog
+      open={true}
+      onClose={onDialogClose}
+      fullWidth
+      maxWidth="md"
+      data-cy="mfa-enable-dialog"
+    >
+      <DialogTitle data-cy="mfa-enable-dialog-title">
+        <T>account-security-mfa-enable-mfa</T>
+      </DialogTitle>
+      <DialogContent data-cy="mfa-enable-dialog-content">
+        <Box
+          display="flex"
+          flexDirection={{ xs: 'column', md: 'row' }}
+          gap={{ xs: 2, md: 8 }}
+        >
+          <Box flex={0} flexShrink={0}>
+            <Typography>
+              <T>account-security-mfa-enable-step-one</T>
+            </Typography>
+            <Box display="flex" justifyContent="center" flex={1}>
+              <WhiteBox p={2} mt={1} mb={1}>
+                <ReactQR value={otpUri} size={196} />
+              </WhiteBox>
+            </Box>
+            <Typography variant="body2" mb={0.5}>
+              <T>account-security-mfa-enable-manual-entry</T>
+            </Typography>
+            <code>{secret.replace(/.{4}(?=.)/g, '$& ')}</code>
+          </Box>
+          <Box flex={1}>
+            <Typography mb={2}>
+              <T>account-security-mfa-enable-step-two</T>
+            </Typography>
+            <StandardForm
+              onSubmit={(values) => {
+                enableMfa.mutate({
+                  content: { 'application/json': values },
+                });
+              }}
+              saveActionLoadable={enableMfa}
+              onCancel={() => onDialogClose()}
+              initialValues={
+                {
+                  totpKey: secret,
+                  password: '',
+                  otp: '',
+                } as TotpEnableDto
+              }
+              submitButtonInner={t('account-security-mfa-enable-mfa-button')}
+              validationSchema={Validation.USER_MFA_ENABLE}
+            >
+              <TextField
+                inputProps={{
+                  'data-cy': 'mfa-enable-dialog-otp-input',
+                }}
+                name="otp"
+                placeholder="000000"
+                label={t('account-security-mfa-otp-code')}
+              />
+              <TextField
+                inputProps={{
+                  'data-cy': 'mfa-enable-dialog-password-input',
+                }}
+                name="password"
+                type="password"
+                label={t('Password')}
+              />
+            </StandardForm>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+};

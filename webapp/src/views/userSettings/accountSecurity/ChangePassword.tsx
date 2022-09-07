@@ -1,7 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -34,7 +33,7 @@ export const ChangePassword: FunctionComponent = () => {
     );
   };
 
-  const history = useHistory();
+  if (!user) return null;
 
   // todo: third party initial password set flow
   // todo: consider installations where there are no SMTP server configured?
@@ -44,29 +43,26 @@ export const ChangePassword: FunctionComponent = () => {
       <Typography variant="h6">
         <T>Password</T>
       </Typography>
-      {user && (
-        <StandardForm
-          saveActionLoadable={updatePassword}
-          initialValues={
-            {
-              currentPassword: '',
-              password: '',
-              passwordRepeat: '',
-            } as UserUpdatePasswordDTO
-          }
-          validationSchema={Validation.USER_PASSWORD_CHANGE}
-          onCancel={() => history.goBack()}
-          onSubmit={handleSubmit}
-        >
-          <TextField
-            name="currentPassword"
-            type="password"
-            label={<T>current-password</T>}
-            variant="standard"
-          />
-          <SetPasswordFields />
-        </StandardForm>
-      )}
+      <StandardForm
+        saveActionLoadable={updatePassword}
+        initialValues={
+          {
+            currentPassword: '',
+            password: '',
+            passwordRepeat: '',
+          } as UserUpdatePasswordDTO
+        }
+        validationSchema={Validation.USER_PASSWORD_CHANGE}
+        onSubmit={handleSubmit}
+      >
+        <TextField
+          name="currentPassword"
+          type="password"
+          label={<T>current-password</T>}
+          variant="standard"
+        />
+        <SetPasswordFields />
+      </StandardForm>
     </Box>
   );
 };

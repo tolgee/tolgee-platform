@@ -110,6 +110,19 @@ export class Validation {
       .oneOf([Yup.ref('password'), null], 'Passwords must match'),
   });
 
+  static readonly USER_MFA_ENABLE = Yup.object().shape({
+    password: Validation.USER_PASSWORD,
+    otp: Yup.string().required().min(6).max(6),
+  });
+
+  static readonly USER_MFA_VIEW_RECOVERY = Yup.object().shape({
+    password: Validation.USER_PASSWORD,
+  });
+
+  static readonly USER_MFA_DISABLE = Yup.object().shape({
+    password: Validation.USER_PASSWORD,
+  });
+
   static readonly API_KEY_SCOPES = Yup.mixed().test(
     'is-set',
     'Set at least one scope',

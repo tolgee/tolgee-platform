@@ -9,7 +9,7 @@ import javax.validation.constraints.Size
 data class UserTotpEnableRequestDto(
   @field:NotBlank
   @field:Size(min = 16, max = 16)
-  @field:Pattern(regexp = "^(?:[A-Z2-7]{8})*$")
+  @field:Pattern(regexp = "^(?:[a-z2-7]{8})*$")
   var totpKey: String = "",
 
   @field:NotBlank

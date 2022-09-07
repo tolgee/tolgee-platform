@@ -16,7 +16,15 @@ export const UserSettingsRouter = () => {
           <UserProfileView />
         </PrivateRoute>
 
-        <PrivateRoute exact path={LINKS.USER_ACCOUNT_SECURITY.template}>
+        <PrivateRoute
+          exact
+          path={[
+            LINKS.USER_ACCOUNT_SECURITY.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_DISABLE.template,
+          ]}
+        >
           <AccountSecurityView />
         </PrivateRoute>
 

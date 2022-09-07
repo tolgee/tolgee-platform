@@ -1,10 +1,16 @@
 import React, { FunctionComponent } from 'react';
+import { Route } from 'react-router-dom';
 import { Alert } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useUser } from 'tg.globalContext/helpers';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { LINKS } from 'tg.constants/links';
-import { ChangePassword } from 'tg.views/userSettings/accountSecurity/ChangePassword';
+
+import { ChangePassword } from './ChangePassword';
+import { MfaSettings } from './MfaSettings';
+import { EnableMfaDialog } from './EnableMfaDialog';
+import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
+import { DisableMfaDialog } from './DisableMfaDialog';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const t = useTranslate();
@@ -25,8 +31,18 @@ export const AccountSecurityView: FunctionComponent = () => {
           <T>managed-account-notice</T>
         </Alert>
       )}
-      {user && !isManaged && <ChangePassword />}
-      {/* todo: user && <MfaSettings /> */}
+      {!isManaged && <ChangePassword />}
+      <MfaSettings />
+
+      <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
+        <EnableMfaDialog />
+      </Route>
+      <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.template}>
+        <MfaRecoveryCodesDialog />
+      </Route>
+      <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_DISABLE.template}>
+        <DisableMfaDialog />
+      </Route>
     </BaseUserSettingsView>
   );
 };

@@ -274,7 +274,7 @@ class UserAccountService(
     if (userAccount.username != dto.email) {
       if (!Regex("[^@]+@[^@]+").matches(dto.email)) {
         // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
-        throw ValidationException(Message.MALFORMED_EMAIL)
+        throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
       }
 
       findOptional(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }

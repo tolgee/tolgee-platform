@@ -12,11 +12,11 @@ export interface paths {
   "/v2/user/password": {
     put: operations["updateUserPassword"];
   };
-  "/v2/user/mfa/mfa/totp": {
+  "/v2/user/mfa/totp": {
     put: operations["enableMfa"];
     delete: operations["disableMfa"];
   };
-  "/v2/user/mfa/mfa/recovery": {
+  "/v2/user/mfa/recovery": {
     put: operations["regenerateRecoveryCodes"];
   };
   "/v2/user/avatar": {
@@ -1628,11 +1628,7 @@ export interface operations {
   enableMfa: {
     responses: {
       /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -1655,11 +1651,7 @@ export interface operations {
   disableMfa: {
     responses: {
       /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
