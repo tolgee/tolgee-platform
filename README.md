@@ -1,6 +1,6 @@
 <h1 align="center" style="border-bottom: none">
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
     <b>
         <a href="https://affine.pro">Tolgee</a><br>
@@ -126,6 +126,7 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 <table>
   <tr>
     <td align="center"><a href="https://github.com/JanCizmar"><img src="https://avatars.githubusercontent.com/u/18496315?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jan Cizmar</b></sub></a><br /><a href="https://github.com/tolgee/tolgee-platform/commits?author=JanCizmar" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/alitorki/"><img src="https://avatars.githubusercontent.com/u/9049092?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ali Torki</b></sub></a><br /><a href="https://github.com/tolgee/tolgee-platform/commits?author=ali-master" title="Code">💻</a></td>
   </tr>
 </table>
 
