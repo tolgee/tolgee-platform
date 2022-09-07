@@ -8,7 +8,7 @@
 
 <div align="center">
 
-![Logo](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)
+[![Logo](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)](https://tolgee.io)
 
 An open-source alternative to Crowdin, Phrase or Lokalise
 
