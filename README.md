@@ -1,7 +1,4 @@
 <h1 align="center" style="border-bottom: none">
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
     <b>
         <a href="https://affine.pro">Tolgee</a><br>
     </b>
