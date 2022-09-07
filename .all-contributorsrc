@@ -13,6 +13,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ali-master",
+      "name": "Ali Torki",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9049092?v=4",
+      "profile": "https://www.linkedin.com/in/alitorki/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
