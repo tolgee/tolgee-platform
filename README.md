@@ -1,4 +1,7 @@
 <h1 align="center" style="border-bottom: none">
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
     <b>
         <a href="https://affine.pro">Tolgee</a><br>
     </b>
@@ -118,6 +121,18 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/JanCizmar"><img src="https://avatars.githubusercontent.com/u/18496315?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jan Cizmar</b></sub></a><br /><a href="https://github.com/tolgee/tolgee-platform/commits?author=JanCizmar" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 
