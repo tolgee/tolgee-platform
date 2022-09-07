@@ -120,27 +120,9 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 
 ## Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/JanCizmar"><img src="https://avatars.githubusercontent.com/u/18496315?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jan Cizmar</b></sub></a><br /><a href="https://github.com/tolgee/tolgee-platform/commits?author=JanCizmar" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/stepan662"><img src="https://avatars.githubusercontent.com/u/8831144?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Štěpán Granát</b></sub></a><br /><a href="https://github.com/tolgee/tolgee-platform/commits?author=stepan662" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+<a href="https://github.com/tolgee/tolgee-platform/graphs/contributors">
+  <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
+</a>
 
 ## Launching Tolgee Rewards
  Contributed to Tolgee? Here is a big thank you from our community to you.
