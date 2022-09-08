@@ -3,8 +3,8 @@ import { Route, Switch } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 
-import { EmailVerificationHandler } from './EmailVerificationHandler';
 import { LoginView } from './LoginView';
+import { EmailVerificationHandler } from './EmailVerificationHandler';
 import { OAuthRedirectionHandler } from './OAuthRedirectionHandler';
 
 interface LoginRouterProps {}

@@ -7,7 +7,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlobalActions, GlobalState } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
-import { FullPageLoading } from '../common/FullPageLoading';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 

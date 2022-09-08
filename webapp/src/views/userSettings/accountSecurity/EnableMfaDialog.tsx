@@ -114,7 +114,9 @@ export const EnableMfaDialog: FunctionComponent = () => {
             <Typography variant="body2" mb={0.5}>
               <T>account-security-mfa-enable-manual-entry</T>
             </Typography>
-            <code>{secret.replace(/.{4}(?=.)/g, '$& ')}</code>
+            <code data-cy="mfa-enable-dialog-totp-key">
+              {secret.replace(/.{4}(?=.)/g, '$& ')}
+            </code>
           </Box>
           <Box flex={1}>
             <Typography mb={2}>

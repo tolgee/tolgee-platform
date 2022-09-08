@@ -153,6 +153,7 @@ declare namespace DataCy {
         "mfa-enable-dialog-otp-input" |
         "mfa-enable-dialog-password-input" |
         "mfa-enable-dialog-title" |
+        "mfa-enable-dialog-totp-key" |
         "mfa-recovery-button" |
         "mfa-recovery-codes-dialog" |
         "mfa-recovery-codes-dialog-close" |

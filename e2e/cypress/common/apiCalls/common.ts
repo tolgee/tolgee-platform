@@ -188,7 +188,7 @@ export const userEnableMfa = (
   recoveryCodes: string[] = []
 ) => {
   const encodedKey = key
-    .map((byte) => byte.toString(16).toUpperCase())
+    .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
     .join('');
   const joinedCodes = recoveryCodes.join(',');
 

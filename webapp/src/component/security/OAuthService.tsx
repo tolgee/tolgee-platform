@@ -8,6 +8,7 @@ const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
 
 export interface OAuthService {
+  id: string;
   authenticationUrl: string;
   buttonIcon: React.ReactElement;
   buttonLabelTranslationKey: string;
@@ -18,6 +19,7 @@ export const gitHubService = (clientId: string): OAuthService => {
     [PARAMS.SERVICE_TYPE]: 'github',
   });
   return {
+    id: 'github',
     authenticationUrl: encodeURI(
       `${GITHUB_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`
     ),
@@ -31,6 +33,7 @@ export const googleService = (clientId: string): OAuthService => {
     [PARAMS.SERVICE_TYPE]: 'google',
   });
   return {
+    id: 'google',
     authenticationUrl: encodeURI(
       `${GOOGLE_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+email+https://www.googleapis.com/auth/userinfo.profile`
     ),
@@ -48,6 +51,7 @@ export const oauth2Service = (
     [PARAMS.SERVICE_TYPE]: 'oauth2',
   });
   return {
+    id: 'oauth2',
     authenticationUrl: encodeURI(
       `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes
         .map((scope) => `${scope}`)

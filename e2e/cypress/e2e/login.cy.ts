@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import * as totp from 'totp-generator';
 import { HOST, PASSWORD, USERNAME } from '../common/constants';
 import { getAnyContainingText } from '../common/xPath';
 import {
@@ -81,12 +82,13 @@ context('Login', () => {
   });
 
   context('MFA', () => {
+    const TOTP_KEY_B32 = 'meowmeowmeowmeow';
     const TOTP_KEY = [
       0x61, 0x1d, 0x66, 0x11, 0xd6, 0x61, 0x1d, 0x66, 0x11, 0xd6,
     ];
 
     before(() => {
-      userEnableMfa(USERNAME, TOTP_KEY, ['meow']);
+      userEnableMfa(USERNAME, TOTP_KEY, ['meow-meow']);
     });
 
     after(() => {
@@ -97,16 +99,33 @@ context('Login', () => {
       cy.visit(HOST);
     });
 
-    it('Will ask for MFA', () => {
-      cy.xpath('//input[@name="username"]')
-        .type(USERNAME)
-        .should('have.value', USERNAME);
-      cy.xpath('//input[@name="password"]')
-        .type(PASSWORD)
-        .should('have.value', PASSWORD);
+    it('should ask for MFA', () => {
+      cy.xpath('//input[@name="username"]').type(USERNAME);
+      cy.xpath('//input[@name="password"]').type(PASSWORD);
       cy.gcy('login-button').click();
+      cy.xpath('//input[@name="otp"]').should('exist');
+    });
+
+    it('should accept valid TOTP code', () => {
+      cy.xpath('//input[@name="username"]').type(USERNAME);
+      cy.xpath('//input[@name="password"]').type(PASSWORD);
+      cy.gcy('login-button').click();
+
+      cy.xpath('//input[@name="otp"]').type(totp(TOTP_KEY_B32));
       waitForGlobalLoading();
-      // cy.pause();
+      cy.gcy('login-button').should('not.exist');
+      cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
+    });
+
+    it('should accept recovery code', () => {
+      cy.xpath('//input[@name="username"]').type(USERNAME);
+      cy.xpath('//input[@name="password"]').type(PASSWORD);
+      cy.gcy('login-button').click();
+
+      cy.xpath('//input[@name="otp"]').type('meow-meow');
+      waitForGlobalLoading();
+      cy.gcy('login-button').should('not.exist');
+      cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
     });
   });
 });
