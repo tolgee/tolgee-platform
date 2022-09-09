@@ -2,14 +2,16 @@ import * as totp from 'totp-generator';
 import {
   createUser,
   deleteUser,
+  getParsedResetPasswordEmail,
   login,
+  setUserType,
   userEnableMfa,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { assertMessage } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 
-describe('User profile', () => {
+describe('Account security', () => {
   const INITIAL_EMAIL = 'honza@honza.com';
   const INITIAL_PASSWORD = 'honzaaaaaaaa';
 
@@ -91,5 +93,26 @@ describe('User profile', () => {
     cy.reload();
     waitForGlobalLoading();
     cy.location().its('pathname').should('not.eq', '/login');
+  });
+
+  it('asks third-party accounts to set a password', () => {
+    setUserType(INITIAL_EMAIL, 'THIRD_PARTY');
+    cy.reload();
+
+    cy.gcy('account-security-initial-password-set').should('exist');
+    cy.xpath("//*[@name='password']").should('not.exist');
+    cy.gcy('mfa-enable-button').should('not.exist');
+  });
+
+  it('sends an email with reset password instructions', () => {
+    setUserType(INITIAL_EMAIL, 'THIRD_PARTY');
+    cy.reload();
+
+    cy.gcy('account-security-initial-password-set').click();
+    cy.gcy('account-security-set-password-instructions-sent').should('exist');
+
+    getParsedResetPasswordEmail().then((email) => {
+      expect(email.toAddress).eq(INITIAL_EMAIL);
+    });
   });
 });

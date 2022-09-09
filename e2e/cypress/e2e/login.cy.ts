@@ -112,6 +112,7 @@ context('Login', () => {
       cy.gcy('login-button').click();
 
       cy.xpath('//input[@name="otp"]').type(totp(TOTP_KEY_B32));
+      cy.gcy('login-button').click();
       waitForGlobalLoading();
       cy.gcy('login-button').should('not.exist');
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
@@ -123,6 +124,7 @@ context('Login', () => {
       cy.gcy('login-button').click();
 
       cy.xpath('//input[@name="otp"]').type('meow-meow');
+      cy.gcy('login-button').click();
       waitForGlobalLoading();
       cy.gcy('login-button').should('not.exist');
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');

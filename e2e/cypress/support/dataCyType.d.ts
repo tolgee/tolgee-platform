@@ -1,5 +1,7 @@
 declare namespace DataCy {
     export type Value = 
+        "account-security-initial-password-set" |
+        "account-security-set-password-instructions-sent" |
         "activity-compact" |
         "activity-detail" |
         "add-box" |

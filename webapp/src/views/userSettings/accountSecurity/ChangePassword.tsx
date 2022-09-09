@@ -35,9 +35,6 @@ export const ChangePassword: FunctionComponent = () => {
 
   if (!user) return null;
 
-  // todo: third party initial password set flow
-  // todo: consider installations where there are no SMTP server configured?
-
   return (
     <Box>
       <Typography variant="h6">

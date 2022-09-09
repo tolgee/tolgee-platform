@@ -7,6 +7,7 @@ import {
   login,
 } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Test no authentication mode', () => {
   beforeEach(() => {
@@ -55,6 +56,22 @@ describe('Test no authentication mode', () => {
     cy.reload();
     cy.contains('My API keys').should('be.visible');
     cy.gcy('settings-menu-item').contains('User profile').should('not.exist');
+  });
+
+  it('should not allow accessing user profile settings', () => {
+    disableAuthentication();
+    cy.visit(HOST + '/account/profile');
+    waitForGlobalLoading();
+
+    cy.location().its('pathname').should('not.eq', '/account/profile');
+  });
+
+  it('should not allow accessing user account security settings', () => {
+    disableAuthentication();
+    cy.visit(HOST + '/account/security');
+    waitForGlobalLoading();
+
+    cy.location().its('pathname').should('not.eq', '/account/security');
   });
 
   after(() => {

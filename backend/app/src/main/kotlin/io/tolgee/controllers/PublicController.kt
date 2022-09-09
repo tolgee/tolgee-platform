@@ -87,14 +87,25 @@ class PublicController(
     userAccountService.setResetPasswordCode(userAccount, code)
     val message = SimpleMailMessage()
     message.setTo(request.email!!)
-    message.subject = "Password reset"
+
     val callbackString = code + "," + request.email
     val url = request.callbackUrl + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
-    message.text = """Hello!
- To reset your password click this link: 
+    if (userAccount.accountType == UserAccount.AccountType.THIRD_PARTY) {
+      message.subject = "Initial password configuration"
+      message.text = """Hello!
+To set a password for your account, please go to the following link: 
 $url
 
- If you have not requested password reset, please just ignore this e-mail."""
+If you have not requested this e-mail, please ignore it."""
+    } else {
+      message.subject = "Password reset"
+      message.text = """Hello!
+To reset your password click this link: 
+$url
+
+If you have not requested password reset, please just ignore this e-mail."""
+    }
+
     message.from = properties.smtp.from
     mailSender.send(message)
   }
@@ -112,6 +123,8 @@ $url
   @Operation(summary = "Sets new password with password reset code from e-mail")
   fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
     val userAccount = validateEmailCode(request.code!!, request.email!!)
+    if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY)
+      userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
     userAccountService.setUserPassword(userAccount, request.password)
     userAccountService.removeResetCode(userAccount)
   }
@@ -165,12 +178,15 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       "github" -> {
         githubOAuthDelegate.getTokenResponse(code, invitationCode)
       }
+
       "google" -> {
         googleOAuthDelegate.getTokenResponse(code, invitationCode, redirectUri)
       }
+
       "oauth2" -> {
         oauth2Delegate.getTokenResponse(code, invitationCode, redirectUri)
       }
+
       else -> {
         throw NotFoundException(Message.SERVICE_NOT_FOUND)
       }

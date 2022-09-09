@@ -126,6 +126,13 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun setAccountType(userAccount: UserAccount, accountType: UserAccount.AccountType): UserAccount {
+    userAccount.accountType = accountType
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setResetPasswordCode(userAccount: UserAccount, code: String?): UserAccount {
     userAccount.resetPasswordCode = passwordEncoder.encode(code)
     return userAccountRepository.save(userAccount)

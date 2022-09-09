@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { Alert, Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -50,6 +50,10 @@ export const UserProfileView: FunctionComponent = () => {
   const history = useHistory();
   const config = useConfig();
   const isManaged = user?.accountType === 'LDAP';
+
+  if (!config.authentication) {
+    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  }
 
   const Fields = () => {
     const formik = useFormikContext();

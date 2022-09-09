@@ -5,6 +5,8 @@ import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
+type AccountType = components['schemas']['UserAccountModel']['accountType'];
+
 let token = null;
 
 export const v2apiFetch = (
@@ -193,17 +195,24 @@ export const userEnableMfa = (
   const joinedCodes = recoveryCodes.join(',');
 
   const sql = `UPDATE user_account
-                 SET totp_key           = '\\x${encodedKey}',
-                     mfa_recovery_codes = '{${joinedCodes}}'
-                 WHERE username = '${username}'`;
+               SET totp_key           = '\\x${encodedKey}',
+                   mfa_recovery_codes = '{${joinedCodes}}'
+               WHERE username = '${username}'`;
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
 };
 
 export const userDisableMfa = (username: string) => {
   const sql = `UPDATE user_account
-                 SET totp_key           = NULL,
-                     mfa_recovery_codes = '{}'
-                 WHERE username = '${username}'`;
+               SET totp_key           = NULL,
+                   mfa_recovery_codes = '{}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const setUserType = (username: string, type: AccountType) => {
+  const sql = `UPDATE user_account
+               SET account_type = '${type}'
+               WHERE username = '${username}'`;
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
 };
 

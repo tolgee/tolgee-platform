@@ -76,8 +76,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
           {codes ? (
             <Box>
               <Typography mb={2}>
-                Below are your recovery codes. Make sure to store them somewhere
-                safe.
+                <T>account-security-mfa-recovery-codes-description</T>
               </Typography>
               <Grid container spacing={2} component="ul">
                 {codes.map((code) => (
