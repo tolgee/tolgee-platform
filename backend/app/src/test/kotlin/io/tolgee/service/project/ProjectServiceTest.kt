@@ -57,8 +57,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       val organization = usersWithOrganizations[0].organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
-      val user3 = entityManager.merge(usersWithOrganizations[3])
-      entityManager.refresh(user3)
+      val user3 = userAccountService.get(usersWithOrganizations[3].id)
 
       val organization2 = user3.organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)
@@ -78,8 +77,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       val organization = usersWithOrganizations[0].organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
-      val user3 = entityManager.merge(usersWithOrganizations[3])
-      entityManager.refresh(user3)
+      val user3 = userAccountService.get(usersWithOrganizations[3].id) // entityManager.merge(usersWithOrganizations[3])
 
       val organization2 = user3.organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)

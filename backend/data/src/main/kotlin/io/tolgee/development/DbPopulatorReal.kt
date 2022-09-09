@@ -110,9 +110,6 @@ class DbPopulatorReal(
     en = createLanguage("en", project)
     de = createLanguage("de", project)
     projectService.save(project)
-    organization.projects.add(project)
-    entityManager.flush()
-    entityManager.clear()
     return project
   }
 
@@ -248,15 +245,12 @@ class DbPopulatorReal(
     translation.language = en
     translation.key = key
     translation.text = english
-    key.translations.add(translation)
-    key.translations.add(translation)
     entityManager.persist(key)
     entityManager.persist(translation)
     val translationDe = Translation()
     translationDe.language = de
     translationDe.key = key
     translationDe.text = deutsch
-    key.translations.add(translationDe)
     entityManager.persist(translationDe)
     entityManager.flush()
   }

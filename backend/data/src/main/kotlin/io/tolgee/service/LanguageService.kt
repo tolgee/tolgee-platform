@@ -8,7 +8,6 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -27,8 +26,6 @@ class LanguageService(
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
   private val permissionService: PermissionService,
-  @Lazy
-  private val languageStatsService: LanguageStatsService
 ) {
   @set:Autowired
   @set:Lazy
@@ -101,7 +98,7 @@ class LanguageService(
   fun findByTags(tags: Collection<String>, projectId: Long): Set<Language> {
     val languages = languageRepository.findAllByTagInAndProjectId(tags, projectId)
     if (languages.size < tags.size) {
-      throw NotFoundException(io.tolgee.constants.Message.LANGUAGE_NOT_FOUND)
+      throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     }
     val sortedByTagsParam = languages.sortedBy { language ->
       tags.indexOfFirst { tag -> language.tag == tag }
@@ -109,6 +106,7 @@ class LanguageService(
     return sortedByTagsParam.toSet()
   }
 
+  @Transactional
   fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long): Set<Language> {
     return if (languages == null) {
       getImplicitLanguages(projectId)

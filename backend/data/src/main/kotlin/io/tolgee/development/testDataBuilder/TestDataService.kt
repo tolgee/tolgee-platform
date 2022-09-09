@@ -84,9 +84,7 @@ class TestDataService(
     entityManager.clear()
 
     executeInNewTransaction(transactionManager) {
-      saveAllMtCreditBuckets(builder)
       saveProjectData(builder)
-
       finalize()
     }
 
@@ -118,6 +116,7 @@ class TestDataService(
   private fun saveOrganizationDependants(builder: TestDataBuilder) {
     saveOrganizationRoles(builder)
     saveOrganizationAvatars(builder)
+    saveAllMtCreditBuckets(builder)
   }
 
   private fun saveOrganizationAvatars(builder: TestDataBuilder) {
@@ -190,7 +189,7 @@ class TestDataService(
 
   private fun saveTranslationDependants(translationBuilders: List<TranslationBuilder>) {
     val translationComments = translationBuilders.flatMap { it.data.comments.map { it.self } }
-    translationCommentService.createAll(translationComments)
+    translationCommentService.saveAll(translationComments)
   }
 
   private fun saveTranslations(builder: ProjectBuilder): List<TranslationBuilder> {

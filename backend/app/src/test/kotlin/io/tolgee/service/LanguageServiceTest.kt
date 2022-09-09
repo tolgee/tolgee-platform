@@ -10,6 +10,7 @@ import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.model.Permission
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -39,6 +40,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.deleteLanguage(testData.germanLanguage.id)
+    languageService.find(testData.germanLanguage.id).assert.isNull()
   }
 
   @Test
@@ -48,16 +50,19 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.deleteLanguage(testData.englishLanguage.id)
+    languageService.find(testData.englishLanguage.id).assert.isNull()
   }
 
   @Test
   @Transactional
   fun `sets view permission when deleted only permitted language`() {
     val testData = LanguagePermissionsTestData()
+    testData.project.baseLanguage = testData.germanLanguage
     testDataService.saveTestData(testData.root)
     entityManager.flush()
 
     languageService.deleteLanguage(testData.englishLanguage.id)
+    languageService.find(testData.englishLanguage.id).assert.isNull()
 
     val enUserData = permissionService.getProjectPermissionData(testData.project.id, testData.enOnlyUser.id)
     assertThat(enUserData.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.VIEW)

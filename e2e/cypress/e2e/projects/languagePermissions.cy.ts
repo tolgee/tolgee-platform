@@ -10,7 +10,7 @@ import { languagePermissionsData } from '../../common/apiCalls/testData/testData
 import { login } from '../../common/apiCalls/common';
 import { getCell } from '../../common/state';
 
-describe('Project Permissions', () => {
+describe('Langauge Permissions', () => {
   beforeEach(() => {
     languagePermissionsData.clean();
     languagePermissionsData.generate();
@@ -18,6 +18,7 @@ describe('Project Permissions', () => {
 
   afterEach(() => {
     waitForGlobalLoading();
+    // languagePermissionsData.clean();
   });
 
   it('English can be edited', () => {
