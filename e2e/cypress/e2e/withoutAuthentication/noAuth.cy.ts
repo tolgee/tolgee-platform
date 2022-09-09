@@ -49,12 +49,12 @@ describe('Test no authentication mode', () => {
 
   it('Has no link to User profile', () => {
     cy.visit(HOST + '/account/apiKeys');
-    cy.contains('My API keys');
+    cy.contains('Project API keys');
 
     cy.gcy('settings-menu-item').contains('User profile').should('be.visible');
     disableAuthentication();
     cy.reload();
-    cy.contains('My API keys').should('be.visible');
+    cy.contains('Project API keys').should('be.visible');
     cy.gcy('settings-menu-item').contains('User profile').should('not.exist');
   });
 

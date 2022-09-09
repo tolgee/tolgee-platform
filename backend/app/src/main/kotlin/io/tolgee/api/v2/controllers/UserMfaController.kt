@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.MfaService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -19,18 +20,21 @@ class UserMfaController(
 ) {
   @PutMapping("/totp")
   @Operation(summary = "Enables TOTP-based two-factor authentication")
+  @DenyPatAccess
   fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto) {
     mfaService.enableTotpFor(authenticationFacade.userAccountEntity, dto)
   }
 
   @DeleteMapping("/totp")
   @Operation(summary = "Disables TOTP-based two-factor authentication")
+  @DenyPatAccess
   fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto) {
     mfaService.disableTotpFor(authenticationFacade.userAccountEntity, dto)
   }
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerates multi-factor authentication recovery codes")
+  @DenyPatAccess
   fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): List<String> {
     return mfaService.regenerateRecoveryCodes(authenticationFacade.userAccountEntity, dto)
   }

@@ -83,4 +83,12 @@ class JwtTokenProviderImpl(
   }
 
   override fun resolveToken(stringToken: String): JwtToken = JwtToken(stringToken, key)
+
+  override fun getAuthentication(jwtToken: String?): Authentication? {
+    val token = jwtToken?.let { this.resolveToken(jwtToken) }
+    if (token != null && this.validateToken(token)) {
+      return this.getAuthentication(token)
+    }
+    return null
+  }
 }

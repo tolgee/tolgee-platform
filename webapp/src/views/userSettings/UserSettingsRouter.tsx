@@ -6,7 +6,8 @@ import { LINKS } from 'tg.constants/links';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { UserProfileView } from './userProfile/UserProfileView';
 import { ApiKeysView } from './apiKeys/ApiKeysView';
-import { AccountSecurityView } from 'tg.views/userSettings/accountSecurity/AccountSecurityView';
+import { AccountSecurityView } from './accountSecurity/AccountSecurityView';
+import { PatsView } from './pats/PatsView';
 
 export const UserSettingsRouter = () => {
   return (
@@ -30,6 +31,10 @@ export const UserSettingsRouter = () => {
 
         <PrivateRoute path={LINKS.USER_API_KEYS.template}>
           <ApiKeysView />
+        </PrivateRoute>
+
+        <PrivateRoute path={LINKS.USER_PATS.template}>
+          <PatsView />
         </PrivateRoute>
       </Switch>
     </DashboardPage>

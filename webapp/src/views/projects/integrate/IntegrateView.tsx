@@ -82,7 +82,13 @@ export const IntegrateView: FunctionComponent = () => {
                       return code
                         ?.replace(
                           API_KEY_PLACEHOLDER,
-                          selectedApiKey?.key || ''
+                          selectedApiKey['key'] ||
+                            t({
+                              key: 'integrate-api-key-hidden-description',
+                              parameters: {
+                                description: selectedApiKey?.description,
+                              },
+                            })
                         )
                         .replace(
                           '{{{apiUrl}}}',

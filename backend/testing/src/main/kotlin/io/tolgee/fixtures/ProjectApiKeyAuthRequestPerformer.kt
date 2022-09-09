@@ -1,5 +1,6 @@
 package io.tolgee.fixtures
 
+import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
@@ -74,7 +75,7 @@ class ProjectApiKeyAuthRequestPerformer(
   private val headersWithApiKey: HttpHeaders
     get() {
       if (apiKeyPresentMode == ApiKeyPresentMode.HEADER) {
-        return HttpHeaders().apply { add("X-API-Key", apiKey.key) }
+        return HttpHeaders().apply { add(API_KEY_HEADER_NAME, apiKey.key) }
       }
       return HttpHeaders.EMPTY
     }

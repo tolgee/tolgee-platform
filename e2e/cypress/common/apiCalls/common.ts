@@ -1,6 +1,5 @@
 import { API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
@@ -219,7 +218,7 @@ export const setUserType = (username: string, type: AccountType) => {
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
-  ) as any as Promise<ApiKeyDTO>;
+  ) as any as Promise<components['schemas']['ApiKeyDTO']>;
 
 export const getAllProjectApiKeys = (projectId: number) =>
   // Cypress Promise implementation is so clever

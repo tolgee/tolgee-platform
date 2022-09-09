@@ -11,7 +11,7 @@ import io.tolgee.api.v2.hateoas.uploadedImage.UploadedImageModelAssembler
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UploadedImage
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.service.ImageUploadService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

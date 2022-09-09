@@ -12,7 +12,7 @@ import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder

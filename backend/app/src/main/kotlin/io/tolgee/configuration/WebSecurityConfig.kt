@@ -5,7 +5,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
-import io.tolgee.security.api_key_auth.ApiKeyAuthFilter
+import io.tolgee.security.apiKeyAuth.ApiKeyAuthFilter
+import io.tolgee.security.patAuth.PatAuthFilter
 import io.tolgee.security.project_auth.ProjectPermissionFilter
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
 import io.tolgee.security.rateLimits.RateLimitsFilterFactory
@@ -30,6 +31,7 @@ class WebSecurityConfig @Autowired constructor(
   private val activityFilter: ActivityFilter,
   private val disabledAuthenticationFilter: DisabledAuthenticationFilter,
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
+  private val patAuthFilter: PatAuthFilter
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
@@ -38,6 +40,7 @@ class WebSecurityConfig @Autowired constructor(
       .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
       // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
       .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(patAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
       // this is used to authorize user's app calls with generated api key
       .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterAfter(disabledAuthenticationFilter, ApiKeyAuthFilter::class.java)
@@ -49,7 +52,12 @@ class WebSecurityConfig @Autowired constructor(
       )
       .authorizeRequests()
       .antMatchers(
-        "/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/v2/public/**"
+        "/api/public/**",
+        "/webjars/**",
+        "/swagger-ui.html",
+        "/swagger-resources/**",
+        "/v2/api-docs",
+        "/v2/public/**",
       ).permitAll()
       .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
       .and().sessionManagement()

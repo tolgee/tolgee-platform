@@ -73,6 +73,7 @@ export const useIntegrateState = () => {
   const [selectedApiKey, setSelectedApiKey] = useState(
     keys?.find((k) => k.id === stored?.apiKeyId) as
       | components['schemas']['ApiKeyModel']
+      | components['schemas']['RevealedApiKeyModel']
       | undefined
   );
 

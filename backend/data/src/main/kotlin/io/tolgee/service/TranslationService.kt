@@ -26,7 +26,6 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
-import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
@@ -45,7 +44,6 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val importService: ImportService,
-  private val translationsSocketIoModule: ITranslationsSocketIoModule,
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val translationCommentService: TranslationCommentService,
@@ -208,13 +206,7 @@ class TranslationService(
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
     val wasCreated = translation.id == 0L
-    return translationRepository.save(translation).also {
-      if (wasCreated) {
-        translationsSocketIoModule.onTranslationsCreated(listOf(translation))
-      } else {
-        translationsSocketIoModule.onTranslationsModified(listOf(translation))
-      }
-    }
+    return translationRepository.save(translation)
   }
 
   @Transactional
@@ -241,7 +233,6 @@ class TranslationService(
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     translationRepository.findOneByKeyAndLanguage(key, language)
       .ifPresent { entity: Translation ->
-        translationsSocketIoModule.onTranslationsDeleted(listOf(entity))
         translationCommentService.deleteByTranslationIdIn(listOf(entity.id))
         translationRepository.delete(entity)
       }
@@ -279,7 +270,6 @@ class TranslationService(
 
   fun deleteAllByKeys(ids: Collection<Long>) {
     val translations = translationRepository.getAllByKeyIdIn(ids)
-    translationsSocketIoModule.onTranslationsDeleted(translations)
     val translationIds = translations.map { it.id }
     translationCommentService.deleteByTranslationIdIn(translationIds)
     deleteByIdIn(translationIds)

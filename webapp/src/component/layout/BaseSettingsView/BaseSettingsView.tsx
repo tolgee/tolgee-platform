@@ -1,7 +1,8 @@
-import { Box, styled, Typography, Container } from '@mui/material';
+import { Box, Container, styled, Typography } from '@mui/material';
 
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
+import { BaseViewAddButton } from '../BaseViewAddButton';
 
 const StyledWrapper = styled('div')`
   display: grid;
@@ -35,6 +36,8 @@ export const BaseSettingsView: React.FC<Props> = ({
   title,
   menuItems,
   containerMaxWidth,
+  addLinkTo,
+  onAdd,
   ...otherProps
 }) => {
   return (
@@ -47,8 +50,18 @@ export const BaseSettingsView: React.FC<Props> = ({
         <StyledContainer maxWidth={containerMaxWidth}>
           <StyledContent>
             {title && (
-              <Box mb={2}>
-                <Typography variant="h6">{title}</Typography>
+              <Box sx={{ mb: 2, display: 'flex' }}>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6">{title}</Typography>
+                </Box>
+                {(addLinkTo || onAdd) && (
+                  <Box>
+                    <BaseViewAddButton
+                      addLinkTo={addLinkTo}
+                      onClick={onAdd}
+                    ></BaseViewAddButton>
+                  </Box>
+                )}
               </Box>
             )}
             {children}

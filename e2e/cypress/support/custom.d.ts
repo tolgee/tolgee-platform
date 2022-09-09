@@ -14,5 +14,7 @@ declare namespace Cypress {
     findInputByName(name: string): Chainable;
 
     waitForDom(): Chainable;
+
+    chooseDatePicker(selector: string, value: string): void;
   }
 }

@@ -3,89 +3,91 @@ import {
   assertMessage,
   clickAdd,
   confirmStandard,
+  gcy,
   getPopover,
+  selectInSelect,
 } from '../../common/shared';
 import {
   getAnyContainingText,
   getClosestContainingText,
 } from '../../common/xPath';
 import { HOST } from '../../common/constants';
-import {
-  createApiKey,
-  createProject,
-  deleteProject,
-  login,
-} from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import { Scope } from '../../common/types';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
-import { projectTestData } from '../../common/apiCalls/testData/testData';
+import { apiKeysTestData } from '../../common/apiCalls/testData/testData';
+import { setExpiration } from '../../common/apiKeysAndPats';
 
-describe('Api keys', () => {
-  let project;
+describe('API keys', () => {
+  beforeEach(() => {
+    apiKeysTestData.clean();
+    apiKeysTestData.generate();
+    login('test_username');
+    cy.visit(HOST + '/account/apiKeys');
+  });
 
-  describe('As admin', () => {
-    beforeEach(() => {
-      login();
-      createProject({
-        name: 'Test',
-        languages: [{ tag: 'en', name: 'English', originalName: 'English' }],
-      }).then((r) => (project = r.body));
-      cy.visit(HOST + '/account/apiKeys');
-    });
+  afterEach(() => {
+    //apiKeysTestData.clean();
+  });
 
-    afterEach(() => {
-      cy.wrap(null).then(() => deleteProject(project.id));
-    });
+  it('Adds an API key', () => {
+    create(
+      'test_project',
+      ['translations.view', 'translations.edit'],
+      'My new api key'
+    );
+  });
 
-    it('Adds an API key', () => {
-      create('Test', ['translations.view', 'translations.edit']);
-      assertMessage('API key successfully created');
-      cy.contains('translations.view').should('be.visible');
-      cy.contains('translations.edit').should('be.visible');
-    });
+  it('Deletes an api key', () => {
+    deleteKey('Oh I am expired');
+  });
 
-    it('Deletes an api key', () => {
-      createApiKey({
-        projectId: project.id,
-        scopes: ['keys.edit', 'keys.edit', 'translations.view'],
-      }).then((key: ApiKeyDTO) => {
-        cy.reload();
-        cy.contains('API key:').should('be.visible');
-        del(key.key);
-        cy.contains('API key successfully deleted!').should('be.visible');
-      });
-    });
-
-    it('Edits an api key', () => {
-      createApiKey({
-        projectId: project.id,
-        scopes: ['keys.edit', 'keys.edit', 'translations.view'],
-      }).then((key: ApiKeyDTO) => {
-        cy.reload();
-        cy.contains('API key:').should('be.visible');
-        cy.gcy('api-keys-edit-button').eq(0).click();
-        cy.gcy('api-keys-create-edit-dialog')
-          .contains('translations.edit')
-          .click();
-        cy.gcy('api-keys-create-edit-dialog').contains('keys.edit').click();
-        cy.gcy('global-form-save-button').click();
-        assertMessage('API key successfully edited!');
-      });
-    });
+  it('Edits an api key', () => {
+    cy.contains('Oh I am expired')
+      .closestDcy('api-key-list-item')
+      .findDcy('api-key-list-item-description')
+      .click();
+    cy.gcy('api-keys-create-edit-dialog').contains('translations.edit').click();
+    cy.gcy('api-keys-create-edit-dialog').contains('keys.edit').click();
+    const newDescription = 'Brand new description';
+    cy.gcy('generate-api-key-dialog-description-input')
+      .clear()
+      .type(newDescription);
+    cy.gcy('global-form-save-button').click();
+    cy.contains(newDescription)
+      .closestDcy('api-key-list-item')
+      .should('be.visible')
+      .should('not.contain', 'keys.edit');
+    assertMessage('API key successfully edited!');
   });
 
   it('Creates API Key for user with lower permissions', () => {
-    projectTestData.clean();
-    projectTestData.generate();
-    login('cukrberg@facebook.com', 'admin');
+    login('franta');
     visit();
     clickAdd();
-    cy.gcy('global-form-select').click();
-    cy.gcy('api-keys-project-select-item')
-      .contains("Vaclav's cool project")
-      .click();
+    selectInSelect(cy.gcy('global-form-select'), 'test_project');
+    gcy('api-keys-create-edit-dialog')
+      .contains('keys.edit')
+      .should('not.exist');
+    gcy('generate-api-key-dialog-description-input').type('New one');
     cy.gcy('global-form-save-button').click();
     assertMessage('API key successfully created');
+  });
+
+  it('Regenerates key', () => {
+    const description = 'Oh I am expired';
+    cy.contains(description)
+      .closestDcy('api-key-list-item')
+      .findDcy('api-key-list-item-regenerate-button')
+      .click();
+    setExpiration('Custom date', '09/20/2050');
+    gcy('global-form-save-button').click();
+    cy.waitForDom();
+    cy.contains(description)
+      .closestDcy('api-key-list-item')
+      .findDcy('api-key-list-item-new-token-input')
+      .find('input')
+      .should('contain.value', 'tgpak_');
+    cy.contains('Expires at Tuesday, September 20, 2050').should('be.visible');
   });
 });
 
@@ -93,28 +95,45 @@ const visit = () => {
   cy.visit(HOST + '/account/apiKeys');
 };
 
-const create = (project: string, scopes: Scope[]) => {
+const create = (project: string, scopes: Scope[], description) => {
   clickAdd();
   cy.waitForDom();
+  cy.gcy('generate-api-key-dialog-description-input').type(description);
   cy.gcy('global-form-select').click();
-  cy.screenshot();
   getPopover().contains(project).click();
   const toRemove = new Set(allScopes);
   scopes.forEach((s) => toRemove.delete(s));
   toRemove.forEach((s) => {
-    cy.contains('Generate API key').xpath(getClosestContainingText(s)).click();
+    cy.contains('Generate Project API key')
+      .xpath(getClosestContainingText(s))
+      .click();
   });
-  cy.screenshot();
   cy.xpath(getAnyContainingText('Save', 'button')).click();
-  cy.screenshot();
+  cy.waitForDom();
+  cy.contains(description)
+    .closestDcy('api-key-list-item')
+    .should('be.visible')
+    .should('contain.text', 'API key created.');
+  cy.contains(description)
+    .closestDcy('api-key-list-item')
+    .findDcy('api-key-list-item-new-token-input')
+    .find('input')
+    .should('contain.value', 'tgpak_');
+  scopes.forEach((scope) =>
+    cy
+      .contains(description)
+      .closestDcy('api-key-list-item')
+      .should('contain', scope)
+  );
+  assertMessage('API key successfully created');
 };
 
-const del = (key) => {
-  cy.wait(500);
-  cy.xpath(getAnyContainingText(key))
-    .last()
-    .xpath("(./ancestor::*//*[@aria-label='delete'])[1]")
-    .scrollIntoView({ offset: { top: -500, left: 0 } })
+const deleteKey = (description: string) => {
+  cy.contains(description)
+    .closestDcy('api-key-list-item')
+    .findDcy('api-key-list-item-delete-button')
     .click();
   confirmStandard();
+  cy.contains(description).should('not.exist');
+  assertMessage('API Key deleted');
 };

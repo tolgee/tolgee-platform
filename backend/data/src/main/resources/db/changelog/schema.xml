@@ -2031,7 +2031,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="language_id" type="BIGINT">
-                <constraints unique="true" />
+                <constraints unique="true"/>
             </column>
         </createTable>
     </changeSet>
@@ -2057,7 +2057,61 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1660139102933-1">
-        <addNotNullConstraint columnDataType="boolean" columnName="has_thumbnail" tableName="screenshot" validate="true"/>
+        <addNotNullConstraint columnDataType="boolean" columnName="has_thumbnail" tableName="screenshot"
+                              validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661323658675-1">
+        <createTable tableName="pat">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="patPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="token_hash" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661323658675-2">
+        <addUniqueConstraint columnNames="token_hash" constraintName="pat_token_hash_unique" tableName="pat"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661323658675-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="pat"
+                                 constraintName="FKdjjacqlrm6ps628vl2tgv6af9" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661412392581-1">
+        <addColumn tableName="api_key">
+            <column name="description" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661412392581-2">
+        <addColumn tableName="api_key">
+            <column name="key_hash" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661412392581-3">
+        <addUniqueConstraint columnNames="key_hash" constraintName="api_key_hash_unique" tableName="api_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661361670848-3">
+        <sqlFile path="classpath:db/changelog/hideApiKeyMigration.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661420385794-1">
+        <addColumn tableName="api_key">
+            <column name="expires_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1661420385794-2">
+        <addColumn tableName="api_key">
+            <column name="last_used_at" type="timestamp"/>
+        </addColumn>
     </changeSet>
     <changeSet author="cynthia (generated)" id="1660576021025-1">
         <addColumn tableName="user_account">

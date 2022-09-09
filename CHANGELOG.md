@@ -1,3 +1,59 @@
+## [2.39.2](https://github.com/tolgee/tolgee-platform/compare/v2.39.1...v2.39.2) (2022-09-09)
+
+
+### Bug Fixes
+
+* Faster startup ([bae9076](https://github.com/tolgee/tolgee-platform/commit/bae9076cbf6ded2223db545409aa61d497a3de4b))
+
+## [2.39.1](https://github.com/tolgee/tolgee-platform/compare/v2.39.0...v2.39.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* Websocket client data nullability ([6c8bb06](https://github.com/tolgee/tolgee-platform/commit/6c8bb064d0bbd7aa28269642210d78a691c1e38b))
+
+# [2.39.0](https://github.com/tolgee/tolgee-platform/compare/v2.38.1...v2.39.0) (2022-09-06)
+
+
+### Features
+
+* Websockets improvements & listening on frontend ([7a66450](https://github.com/tolgee/tolgee-platform/commit/7a66450ddfb38ecc157881d89cd3987e1a204adf))
+
+## [2.38.1](https://github.com/tolgee/tolgee-platform/compare/v2.38.0...v2.38.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* update tolgee-js ([a9432ca](https://github.com/tolgee/tolgee-platform/commit/a9432caf53f8cc046d2c9f649b34a89a753d28ec))
+
+# [2.38.0](https://github.com/tolgee/tolgee-platform/compare/v2.37.1...v2.38.0) (2022-08-29)
+
+
+### Features
+
+* Personal Access Tokens & API key improvements ([3312746](https://github.com/tolgee/tolgee-platform/commit/3312746f5d2bcaf1ef0f73fcafaff54677a62d41))
+
+## [2.37.1](https://github.com/tolgee/tolgee-platform/compare/v2.37.0...v2.37.1) (2022-08-24)
+
+
+### Bug Fixes
+
+* Update dependencies ([8555515](https://github.com/tolgee/tolgee-platform/commit/85555150a3b7a3b9830be231d0f3afcab1e11e86))
+
+# [2.37.0](https://github.com/tolgee/tolgee-platform/compare/v2.36.1...v2.37.0) (2022-08-19)
+
+
+### Features
+
+* Auto translation endpoint ([114b865](https://github.com/tolgee/tolgee-platform/commit/114b865b5f86942f262cc8b622896b5e70519021))
+
+## [2.36.1](https://github.com/tolgee/tolgee-platform/compare/v2.36.0...v2.36.1) (2022-08-16)
+
+
+### Bug Fixes
+
+* don't crash when invalid flag ([14ed09b](https://github.com/tolgee/tolgee-platform/commit/14ed09b7792f3e0e7e55270cd7f6f501bb0e772b))
+
 # [2.36.0](https://github.com/tolgee/tolgee-platform/compare/v2.35.1...v2.36.0) (2022-08-13)
 
 

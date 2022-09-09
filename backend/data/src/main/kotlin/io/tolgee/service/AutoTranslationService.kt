@@ -19,29 +19,49 @@ class AutoTranslationService(
   private val translationService: TranslationService,
   private val autoTranslationConfigRepository: AutoTranslationConfigRepository,
   private val translationMemoryService: TranslationMemoryService,
-  private val mtService: MtService
+  private val mtService: MtService,
+  private val languageService: LanguageService
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-  fun autoTranslate(key: Key) {
+  fun autoTranslate(
+    key: Key,
+    languageTags: Set<String>? = null,
+  ) {
     val config = getConfig(key.project)
     if (config.usingPrimaryMtService || config.usingTm) {
-      if (config.usingTm) {
-        autoTranslateUsingTm(key)
-      }
-      if (config.usingPrimaryMtService) {
-        autoTranslateUsingMachineTranslation(key)
-      }
+      autoTranslate(key, languageTags, config.usingTm, config.usingPrimaryMtService)
     }
   }
 
-  private fun autoTranslateUsingMachineTranslation(key: Key) {
-    val untranslated = getUntranslatedTranslations(key)
-    val languages = untranslated.map { it.language }
+  fun autoTranslate(
+    key: Key,
+    languageTags: Set<String>? = null,
+    useTranslationMemory: Boolean,
+    useMachineTranslation: Boolean
+  ) {
+    if (useTranslationMemory) {
+      autoTranslateUsingTm(key, languageTags)
+    }
+    if (useMachineTranslation) {
+      autoTranslateUsingMachineTranslation(key, languageTags)
+    }
+  }
+
+  private fun autoTranslateUsingMachineTranslation(key: Key, languageTags: Set<String>? = null) {
+    val translations = languageTags?.let { getTranslations(key, languageTags) } ?: getUntranslatedTranslations(key)
+    autoTranslateUsingMachineTranslation(translations, key)
+  }
+
+  private fun autoTranslateUsingMachineTranslation(
+    translations: List<Translation>,
+    key: Key
+  ) {
+    val languages = translations.map { it.language }
 
     try {
       mtService.getPrimaryMachineTranslations(key, languages)
-        .zip(untranslated)
+        .zip(translations)
         .asSequence()
         .forEach { (translateResult, translation) ->
           translateResult?.let {
@@ -55,8 +75,15 @@ class AutoTranslationService(
     }
   }
 
-  private fun autoTranslateUsingTm(key: Key) {
-    val untranslated = getUntranslatedTranslations(key)
+  private fun autoTranslateUsingTm(key: Key, languageTags: Set<String>? = null) {
+    val translations = languageTags?.let { getTranslations(key, languageTags) } ?: getUntranslatedTranslations(key)
+    autoTranslateUsingTm(translations, key)
+  }
+
+  private fun autoTranslateUsingTm(
+    untranslated: List<Translation>,
+    key: Key
+  ) {
     untranslated.forEach { translation ->
       val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
       tmValue?.targetTranslationText
@@ -74,6 +101,13 @@ class AutoTranslationService(
     this.mtProvider = usedService
     this.key.translations.add(this)
     translationService.save(this)
+  }
+
+  private fun getTranslations(key: Key, languageTags: Set<String>): List<Translation> {
+    val languages = languageService.findByTags(languageTags, projectId = key.project.id)
+    return languages.map {
+      translationService.getOrCreate(key, it)
+    }
   }
 
   private fun getUntranslatedTranslations(key: Key): List<Translation> {

@@ -8,8 +8,15 @@ const StyledImg = styled('img')`
   );
 `;
 
-export const getFlagPath = (hex: string) =>
-  `/static/flags/${getSvgNameByEmoji(hex)}.svg`;
+export const getFlagPath = (hex: string) => {
+  let flagName: string;
+  try {
+    flagName = getSvgNameByEmoji(hex);
+  } catch (e) {
+    flagName = getSvgNameByEmoji('🏳️');
+  }
+  return `/static/flags/${flagName}.svg`;
+};
 
 export const FlagImage: FC<
   ImgHTMLAttributes<HTMLImageElement> & { flagEmoji: string }
@@ -18,7 +25,7 @@ export const FlagImage: FC<
     <StyledImg
       {...props}
       loading="lazy"
-      src={getFlagPath(flagEmoji || '🏳️')}
+      src={getFlagPath(flagEmoji)}
       alt={flagEmoji}
     />
   );

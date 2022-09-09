@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 
 enum class ActivityType(
   val onlyCountsInList: Boolean = false,
-  val restrictEntitiesInList: Array<KClass<out EntityWithId>>? = null
+  val restrictEntitiesInList: Array<KClass<out EntityWithId>>? = null,
 ) {
   UNKNOWN,
   SET_TRANSLATION_STATE,

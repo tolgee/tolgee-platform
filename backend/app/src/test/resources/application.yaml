@@ -25,6 +25,8 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+  jmx:
+    enabled: false
 tolgee:
   postgres-autostart:
     enabled: true

@@ -1,52 +1,31 @@
 package io.tolgee.autoTranslating
 
-import com.amazonaws.services.translate.AmazonTranslate
-import com.google.cloud.translate.Translate
 import io.tolgee.MachineTranslationTest
 import io.tolgee.constants.MtServiceType
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
-import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.key.Key
-import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.transaction.annotation.Transactional
 import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineTranslationTest {
-
+class AutoTranslatingTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
     private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "Translated with Google"
-    private const val CREATE_KEY_NAME = "super_key"
     private const val THIS_IS_BEAUTIFUL_DE = "Es ist schön."
   }
 
   lateinit var testData: AutoTranslateTestData
-
-  @Autowired
-  @MockBean
-  override lateinit var googleTranslate: Translate
-
-  @Autowired
-  @MockBean
-  override lateinit var amazonTranslate: AmazonTranslate
-
   @BeforeEach
   fun setup() {
     testData = AutoTranslateTestData()
@@ -245,14 +224,6 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
     .getLangTranslation(testData.germanLanguage).text
 
-  private fun createAnotherThisIsBeautifulKey() {
-    performCreateKey(
-      mapOf(
-        "en" to "This is beautiful",
-      )
-    )
-  }
-
   private fun performSetConfig(usingTm: Boolean, usingMt: Boolean) {
     performProjectAuthPut(
       "auto-translation-settings",
@@ -261,24 +232,6 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
         "usingMachineTranslation" to usingMt
       )
     ).andIsOk
-  }
-
-  private fun performCreateKey(translations: Map<String, String>) {
-    performProjectAuthPost(
-      "keys",
-      CreateKeyDto(
-        name = CREATE_KEY_NAME,
-        translations = translations
-      )
-    ).andIsCreated
-  }
-
-  private fun Key.getLangTranslation(lang: Language): Translation {
-    return transactionTemplate.execute {
-      keyService.get(this.id).translations.find {
-        it.language == lang
-      } ?: throw IllegalStateException("Translation not found")
-    }
   }
 
   private fun performSetEnTranslation(key: String) {

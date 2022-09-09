@@ -31,10 +31,10 @@ describe('Group actions', () => {
   it('will delete all properly', () => {
     gcy('translations-row-checkbox').first().click();
     gcy('translations-select-all-button').click();
-    waitForGlobalLoading();
+    waitForGlobalLoading(500);
     gcy('translations-delete-button').click();
     confirmStandard();
-    waitForGlobalLoading();
+    waitForGlobalLoading(500);
     gcy('global-empty-list').should('be.visible');
   });
 
@@ -45,7 +45,7 @@ describe('Group actions', () => {
     gcy('translations-row-checkbox').first().click();
     gcy('translations-delete-button').click();
     confirmStandard();
-    waitForGlobalLoading();
+    waitForGlobalLoading(500);
     gcy('translations-key-count').contains('1 Key').should('be.visible');
   });
 

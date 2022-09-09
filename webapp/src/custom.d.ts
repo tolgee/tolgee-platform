@@ -21,6 +21,7 @@ declare module '@mui/material/styles/createPalette' {
     editor: Editor;
     billingProgress: BillingProgress;
     billingPlan: PaletteColor;
+    globalLoading: PaletteColor;
   }
 
   interface PaletteOptions {
@@ -35,6 +36,7 @@ declare module '@mui/material/styles/createPalette' {
     editor: Editor;
     billingProgress: BillingProgress;
     billingPlan: PaletteColorOptions;
+    globalLoading: PaletteColorOptions;
   }
 }
 

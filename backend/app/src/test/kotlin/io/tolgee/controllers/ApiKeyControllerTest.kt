@@ -1,9 +1,9 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
-import io.tolgee.dtos.request.apiKey.EditApiKeyDTO
+import io.tolgee.dtos.request.apiKey.EditApiKeyDto
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
 import java.util.stream.Collectors
@@ -26,9 +27,10 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   @Test
   fun create_success() {
     val apiKeyDTO = doCreate()
-    val apiKey = apiKeyService.getApiKey(apiKeyDTO.key)
-    Assertions.assertThat(apiKey).isPresent
-    checkKey(apiKey.get().key)
+    val key = apiKeyDTO.key!!
+    performGet("/v2/api-keys/current?ak=$key").andIsOk.andAssertThatJson {
+      node("description").isNotNull
+    }
   }
 
   private fun doCreate(username: String): ApiKeyDTO {
@@ -70,9 +72,9 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   fun edit_success() {
     val apiKeyDTO = doCreate()
     val newScopes = setOf(ApiScope.TRANSLATIONS_EDIT)
-    val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
+    val editDto = EditApiKeyDto(id = apiKeyDTO.id, scopes = newScopes)
     performAuthPost("/api/apiKeys/edit", editDto).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    val apiKey = apiKeyService.getApiKey(apiKeyDTO.id)
+    val apiKey = apiKeyService.findOptional(apiKeyDTO.id)
     Assertions.assertThat(apiKey).isPresent
     Assertions.assertThat(apiKey.get().scopesEnum).isEqualTo(newScopes)
   }
@@ -81,7 +83,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   fun edit_failure_no_scopes() {
     val newScopes: Set<ApiScope> = setOf()
     val apiKeyDTO = doCreate()
-    val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
+    val editDto = EditApiKeyDto(id = apiKeyDTO.id, scopes = newScopes)
     val mvcResult = performAuthPost("/api/apiKeys/edit", editDto)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
     assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
@@ -99,55 +101,68 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
       project = base.project
     )
     val testUser = dbPopulator.createUserIfNotExists("testUser")
-    val user2Key = apiKeyService.create(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), base.project)
-    val apiKeyDTO = doCreate("ben")
-    var mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    var set = mvcResult.mapResponseTo<Set<ApiKeyDTO?>>()
-    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
+    apiKeyService.create(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), base.project)
+    doCreate("ben")
+    performAuthGet("/api/apiKeys").andIsOk.andAssertThatJson {
+      isArray.hasSize(3)
+      node("[0].key").isNull()
+      node("[0].description").isString.contains("......")
+    }
     loginAsUser("testUser")
-    mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    set = mvcResult.mapResponseTo()
-    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
+    performAuthGet("/api/apiKeys").andIsOk.andAssertThatJson {
+      isArray.hasSize(1)
+      node("[0].key").isEqualTo(null)
+      node("[0].description").isString.contains("......")
+    }
   }
 
   @Test
   fun allByProject() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val apiKeyDTO = doCreate(project)
-    val apiKey1 = apiKeyService.create(
+    doCreate(project)
+    apiKeyService.create(
       base.userAccount,
       setOf(ApiScope.KEYS_EDIT),
       project
     )
     val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername).project
-    val apiKey2 = apiKeyService.create(
+    apiKeyService.create(
       base.userAccount, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project
     )
     val testUser = dbPopulator.createUserIfNotExists("testUser")
     val user2Key = apiKeyService.create(
       testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project2
     )
-    var mvcResult = performAuthGet(
+
+    performAuthGet(
       "/api/apiKeys/project/" + project.id
-    ).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    var set: Set<ApiKeyDTO> = mvcResult.mapResponseTo()
-    Assertions.assertThat(set).extracting("key")
-      .containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
+    ).andIsOk.andAssertThatJson {
+      isArray.hasSize(3)
+    }
 
     loginAsUser("testUser")
     performAuthGet("/api/apiKeys/project/" + project2.id)
       .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
     permissionService.grantFullAccessToProject(testUser, project2)
-    mvcResult = performAuthGet("/api/apiKeys/project/" + project2.id)
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    set = mapResponse(
-      mvcResult,
-      TypeFactory.defaultInstance()
-        .constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java)
-    )
-    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
+    performAuthGet("/api/apiKeys/project/" + project2.id).andIsOk
     logout()
+  }
+
+  @Test
+  fun getScopes() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
+    mvc.perform(MockMvcRequestBuilders.get("/uaa/scopes?ak=" + apiKey.key))
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+  }
+
+  @Test
+  fun getLanguages() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
+    val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
   }
 
   @Test

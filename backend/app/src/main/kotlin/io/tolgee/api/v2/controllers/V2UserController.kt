@@ -7,6 +7,7 @@ import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.UserAccountService
 import org.springframework.http.HttpStatus
@@ -25,7 +26,7 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user")
-@Tag(name = "User", description = "Manipulates currently authorized user")
+@Tag(name = "User", description = "Manipulates currently authenticated user")
 class V2UserController(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
@@ -41,10 +42,12 @@ class V2UserController(
 
   @PostMapping("")
   @Operation(summary = "Updates current user's data", deprecated = true)
+  @DenyPatAccess
   fun updateUserOld(@RequestBody @Valid dto: UserUpdateRequestDto?): UserAccountModel = updateUser(dto)
 
   @PutMapping("")
   @Operation(summary = "Updates current user's data")
+  @DenyPatAccess
   fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDto?): UserAccountModel {
     val userAccount = userAccountService.update(authenticationFacade.userAccountEntity, dto!!)
     return userAccountModelAssembler.toModel(userAccount)
@@ -52,6 +55,7 @@ class V2UserController(
 
   @PutMapping("/password")
   @Operation(summary = "Updates current user's password")
+  @DenyPatAccess
   fun updateUserPassword(@RequestBody @Valid dto: UserUpdatePasswordRequestDto?): UserAccountModel {
     val userAccount = userAccountService.updatePassword(authenticationFacade.userAccountEntity, dto!!)
     return userAccountModelAssembler.toModel(userAccount)
@@ -60,6 +64,7 @@ class V2UserController(
   @PutMapping("/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads user's avatar")
   @ResponseStatus(HttpStatus.OK)
+  @DenyPatAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
   ): UserAccountModel {
@@ -72,6 +77,7 @@ class V2UserController(
   @DeleteMapping("/avatar")
   @Operation(summary = "Deletes user's avatar")
   @ResponseStatus(HttpStatus.OK)
+  @DenyPatAccess
   fun removeAvatar(): UserAccountModel {
     val entity = authenticationFacade.userAccountEntity
     userAccountService.removeAvatar(authenticationFacade.userAccountEntity)

@@ -34,7 +34,7 @@ import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -173,7 +173,7 @@ class V2ProjectsController(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
-    @RequestParam languages: MutableSet<Long>?
+    @RequestParam languages: MutableSet<Long>?,
   ) {
     checkNotCurrentUser(userId)
     val languageEntities = getLanguagesAndCheckFromProject(languages, projectId)

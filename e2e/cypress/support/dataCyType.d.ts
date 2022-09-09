@@ -17,8 +17,14 @@ declare namespace DataCy {
         "administration-user-debug-account" |
         "administration-user-role-select" |
         "administration-users-list-item" |
+        "api-key-expiry-info" |
+        "api-key-list-item" |
+        "api-key-list-item-delete-button" |
+        "api-key-list-item-description" |
+        "api-key-list-item-last-used" |
+        "api-key-list-item-new-token-input" |
+        "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
-        "api-keys-edit-button" |
         "api-keys-project-select-item" |
         "auto-avatar-img" |
         "avatar-image" |
@@ -49,6 +55,12 @@ declare namespace DataCy {
         "dashboard-projects-list-item" |
         "dropzone" |
         "dropzone-inner" |
+        "edit-pat-dialog-content" |
+        "edit-pat-dialog-description-input" |
+        "edit-pat-dialog-title" |
+        "expiration-date-field" |
+        "expiration-date-picker" |
+        "expiration-select" |
         "export-format-selector" |
         "export-format-selector-item" |
         "export-language-selector" |
@@ -56,6 +68,10 @@ declare namespace DataCy {
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
+        "generate-api-key-dialog-description-input" |
+        "generate-pat-dialog-content" |
+        "generate-pat-dialog-description-input" |
+        "generate-pat-dialog-title" |
         "global-base-view-content" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
@@ -183,6 +199,14 @@ declare namespace DataCy {
         "organization-switch-item" |
         "organization-switch-new" |
         "organization-switch-search" |
+        "pat-expiry-info" |
+        "pat-list-item" |
+        "pat-list-item-alert" |
+        "pat-list-item-delete-button" |
+        "pat-list-item-description" |
+        "pat-list-item-last-used" |
+        "pat-list-item-new-token-input" |
+        "pat-list-item-regenerate-button" |
         "permission-select-item" |
         "permissions-language-menu-button" |
         "permissions-languages-menu" |
@@ -233,6 +257,8 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "regenerate-pat-dialog-content" |
+        "regenerate-pat-dialog-title" |
         "screenshot-box" |
         "settings-menu-item" |
         "sign-up-submit-button" |

@@ -14,18 +14,20 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.ApiKeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.PermissionService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.persistence.EntityManager
@@ -34,17 +36,18 @@ import javax.persistence.EntityManager
 class DbPopulatorReal(
   private val entityManager: EntityManager,
   private val userAccountRepository: UserAccountRepository,
-  private val permissionService: PermissionService,
   private val userAccountService: UserAccountService,
   private val languageService: LanguageService,
-  private val apiKeyRepository: ApiKeyRepository,
   private val tolgeeProperties: TolgeeProperties,
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationRepository: OrganizationRepository,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val projectService: ProjectService,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
+  private val apiKeyService: ApiKeyService,
+  private val languageStatsService: LanguageStatsService,
+  private val platformTransactionManager: PlatformTransactionManager
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -154,9 +157,12 @@ class DbPopulatorReal(
     return createBase(projectName, tolgeeProperties.authentication.initialUsername)
   }
 
-  @Transactional
   fun populate(projectName: String): Base {
-    return populate(projectName, tolgeeProperties.authentication.initialUsername)
+    return executeInNewTransaction(platformTransactionManager) {
+      populate(projectName, tolgeeProperties.authentication.initialUsername)
+    }.also {
+      languageStatsService.refreshLanguageStats(it.project.id)
+    }
   }
 
   @Transactional
@@ -211,7 +217,7 @@ class DbPopulatorReal(
 
   private fun createApiKey(project: Project) {
     val user = project.organizationOwner.memberRoles[0].user
-    if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
+    if (apiKeyService.findOptional(apiKeyService.hashKey(API_KEY)).isEmpty) {
       val apiKey = ApiKey(
         project = project,
         key = API_KEY,
@@ -219,7 +225,7 @@ class DbPopulatorReal(
         scopesEnum = ApiScope.values().toSet()
       )
       project.apiKeys.add(apiKey)
-      apiKeyRepository.save(apiKey)
+      apiKeyService.save(apiKey)
     }
   }
 

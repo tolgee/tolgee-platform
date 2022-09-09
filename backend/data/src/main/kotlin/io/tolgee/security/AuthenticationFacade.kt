@@ -5,7 +5,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
-import io.tolgee.security.api_key_auth.ApiKeyAuthenticationToken
+import io.tolgee.security.apiKeyAuth.ApiKeyAuthenticationToken
 import io.tolgee.service.UserAccountService
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,8 +28,10 @@ class AuthenticationFacade(
     } else authentication?.principal as? UserAccountDto
 
   val userAccountEntity: UserAccount
-    get() = userAccountService.find(userAccount.id)
-      .orElseThrow { throw NotFoundException() }!!
+    get() = userAccountEntityOrNull ?: throw NotFoundException()
+
+  val userAccountEntityOrNull: UserAccount?
+    get() = userAccountService.find(userAccount.id).orElse(null)
 
   val isApiKeyAuthentication: Boolean
     get() = authentication is ApiKeyAuthenticationToken
