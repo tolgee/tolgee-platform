@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import CodeMirror from 'codemirror';
 import { Controlled as CodeMirrorReact } from 'react-codemirror2-react-17';
 import { parse } from '@formatjs/icu-messageformat-parser';
-import { styled, GlobalStyles } from '@mui/material';
+import { GlobalStyles, styled } from '@mui/material';
 import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
@@ -11,14 +11,14 @@ import 'codemirror/addon/lint/lint.css';
 
 import icuMode from './icuMode';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
-
-export type Direction = 'DOWN';
+import { Direction } from 'tg.fixtures/getLanguageDirection';
 
 const StyledWrapper = styled('div')<{
   minheight: string | number;
   background: string | undefined;
 }>`
   display: grid;
+
   & .react-codemirror2 {
     display: grid;
     position: relative;
@@ -52,9 +52,11 @@ const StyledWrapper = styled('div')<{
         Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol' !important;
     }
+
     .CodeMirror-lint-markers {
       width: 5px;
     }
+
     .CodeMirror-gutters {
       border: 0px;
       background: transparent;
@@ -67,24 +69,31 @@ const StyledWrapper = styled('div')<{
       position: relative;
       top: -1px;
     }
+
     .cm-function {
       color: ${({ theme }) => theme.palette.editor.function};
     }
+
     .cm-string {
       color: ${({ theme }) => theme.palette.editor.main};
     }
+
     .cm-parameter {
       color: ${({ theme }) => theme.palette.editor.other};
     }
+
     .cm-option {
       color: ${({ theme }) => theme.palette.editor.other};
     }
+
     .cm-keyword {
       color: ${({ theme }) => theme.palette.editor.other};
     }
+
     .cm-bracket {
       color: ${({ theme }) => theme.palette.editor.other};
     }
+
     .cm-def {
       color: ${({ theme }) => theme.palette.editor.function};
     }
@@ -129,6 +138,7 @@ type Props = {
   shortcuts?: CodeMirror.KeyMap;
   scrollMargins?: Parameters<typeof useScrollMargins>[0];
   autoScrollIntoView?: boolean;
+  direction?: Direction;
 };
 
 export const Editor: React.FC<Props> = ({
@@ -145,6 +155,7 @@ export const Editor: React.FC<Props> = ({
   shortcuts,
   scrollMargins,
   autoScrollIntoView,
+  direction = 'ltr',
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const t = useTranslate();
@@ -184,6 +195,7 @@ export const Editor: React.FC<Props> = ({
     },
     inputStyle: 'contenteditable',
     spellcheck: !plaintext,
+    direction: direction,
   };
 
   const wrapperScrollMargins = useScrollMargins(scrollMargins);
