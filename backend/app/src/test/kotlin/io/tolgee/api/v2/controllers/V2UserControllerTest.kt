@@ -155,4 +155,15 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     val requestDTO = UserUpdateRequestDto(name = "zzz", email = "ben@ben.aa")
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
   }
+
+  @Test
+  fun `it invalidates tokens generated prior a password change`() {
+    val requestDTO = UserUpdatePasswordRequestDto(
+      password = "super new password",
+      currentPassword = initialPassword
+    )
+
+    performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+  }
 }

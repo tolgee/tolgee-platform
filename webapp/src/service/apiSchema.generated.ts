@@ -565,6 +565,10 @@ export interface components {
       currentPassword: string;
       password: string;
     };
+    JwtAuthenticationResponse: {
+      accessToken?: string;
+      tokenType?: string;
+    };
     UserTotpEnableRequestDto: {
       totpKey: string;
       otp: string;
@@ -827,10 +831,10 @@ export interface components {
       token: string;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
-      id: number;
+      lastUsedAt?: number;
       description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -872,6 +876,7 @@ export interface components {
     };
     V2EditApiKeyDto: {
       scopes: string[];
+      description?: string;
     };
     ApiKeyModel: {
       /** ID of the API key */
@@ -900,15 +905,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectId: number;
-      lastUsedAt?: number;
       username?: string;
       expiresAt?: number;
+      projectId: number;
+      scopes: string[];
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     OldEditKeyDto: {
       currentName: string;
@@ -1054,10 +1059,6 @@ export interface components {
       callbackUrl?: string;
       recaptchaToken?: string;
     };
-    JwtAuthenticationResponse: {
-      accessToken?: string;
-      tokenType?: string;
-    };
     ResetPassword: {
       email: string;
       code: string;
@@ -1150,7 +1151,6 @@ export interface components {
       clientSentryDsn?: string;
       needsEmailVerification: boolean;
       userCanCreateOrganizations: boolean;
-      socket: components["schemas"]["SocketIo"];
       appName: string;
       version: string;
       showVersion: boolean;
@@ -1158,12 +1158,6 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
-    };
-    SocketIo: {
-      enabled: boolean;
-      port: number;
-      serverUrl?: string;
-      allowedTransports: string[];
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1552,15 +1546,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectId: number;
-      lastUsedAt?: number;
       username?: string;
       expiresAt?: number;
+      projectId: number;
+      scopes: string[];
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1693,7 +1687,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
@@ -1718,7 +1712,11 @@ export interface operations {
   enableMfa: {
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -1741,7 +1739,11 @@ export interface operations {
   disableMfa: {
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

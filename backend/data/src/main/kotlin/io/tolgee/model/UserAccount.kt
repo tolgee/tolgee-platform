@@ -3,6 +3,7 @@ package io.tolgee.model
 import com.vladmihalcea.hibernate.type.array.ListArrayType
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
@@ -45,6 +46,9 @@ data class UserAccount(
   @Type(type = "string-array")
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
   var mfaRecoveryCodes: List<String> = emptyList()
+
+  @Column(name = "tokens_valid_not_before")
+  var tokensValidNotBefore: Date? = null
 
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var permissions: MutableSet<Permission> = mutableSetOf()

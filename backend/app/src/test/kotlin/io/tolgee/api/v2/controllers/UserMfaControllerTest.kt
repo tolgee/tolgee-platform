@@ -122,4 +122,23 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
   }
+
+  @Test
+  fun `it invalidates tokens generated prior a mfa status change`() {
+    val enableRequestDto = UserTotpEnableRequestDto(
+      totpKey = TOTP_KEY,
+      otp = mfaService.generateCode(encodedKey).toString(),
+      password = initialPassword
+    )
+
+    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+    logout()
+
+    val disableRequestDto = UserTotpDisableRequestDto(
+      password = initialPassword
+    )
+    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+  }
 }

@@ -1,11 +1,15 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { container } from 'tsyringe';
+
+import { components } from 'tg.service/apiSchema.generated';
+import { SecurityService } from 'tg.service/SecurityService';
+
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
 import { redirect } from 'tg.hooks/redirect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
@@ -13,6 +17,8 @@ import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 type TotpDisableDto = components['schemas']['UserTotpDisableRequestDto'];
+
+const securityService = container.resolve(SecurityService);
 
 export const DisableMfaDialog: FunctionComponent = () => {
   const onDialogClose = () => {
@@ -32,7 +38,8 @@ export const DisableMfaDialog: FunctionComponent = () => {
     url: '/v2/user/mfa/totp',
     method: 'delete',
     options: {
-      onSuccess: () => {
+      onSuccess: (r) => {
+        securityService.setToken(r.accessToken!);
         message.success(<T keyName="account-security-mfa-disabled-success" />);
         globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         onDialogClose();

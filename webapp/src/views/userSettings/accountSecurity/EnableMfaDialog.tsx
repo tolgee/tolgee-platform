@@ -9,17 +9,21 @@ import {
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { container } from 'tsyringe';
+
+import { SecurityService } from 'tg.service/SecurityService';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { components } from 'tg.service/apiSchema.generated';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { LINKS } from 'tg.constants/links';
 import { redirect } from 'tg.hooks/redirect';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
 import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
-import { MfaRecoveryCodesDialog } from 'tg.views/userSettings/accountSecurity/MfaRecoveryCodesDialog';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+
+import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 
 type TotpEnableDto = components['schemas']['UserTotpEnableRequestDto'];
 
@@ -29,6 +33,8 @@ const WhiteBox = styled(Box)`
   background-color: white;
   border-radius: 8px;
 `;
+
+const securityService = container.resolve(SecurityService);
 
 export const EnableMfaDialog: FunctionComponent = () => {
   const [recoveryCodesPw, setRecoveryCodesPw] = useState<string | null>(null);
@@ -70,6 +76,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
     method: 'put',
     options: {
       onSuccess: (r, v) => {
+        securityService.setToken(r.accessToken!);
         message.success(<T keyName="account-security-mfa-enabled-success" />);
         globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
         setRecoveryCodesPw(v.content['application/json'].password);

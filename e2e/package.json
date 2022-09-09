@@ -3,7 +3,7 @@
   "version": "1.0.0-alpha.8",
   "description": "e2e tests for tolgee server & webapp",
   "scripts": {
-    "cy:run": "cypress run --browser chrome --headless",
+    "cy:run": "cypress run --browser chromium --headless",
     "cy:open": "cypress open",
     "prettier": "prettier --write ./cypress",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",

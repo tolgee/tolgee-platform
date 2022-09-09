@@ -1,31 +1,37 @@
 package io.tolgee.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 
 import java.security.Key;
+import java.util.Date;
 
 
 public class JwtToken {
     private final String value;
-    private final Key key;
+
+    private final Jws<Claims> parsed;
 
     public JwtToken(String value, Key key) {
         this.value = value;
-        this.key = key;
+        this.parsed = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(value);
     }
 
     public String getContent() {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(this.value).getBody();
-        return claims.getSubject();
-    }
-
-    @Override
-    public String toString() {
-        return value;
+        return this.parsed.getBody().getSubject();
     }
 
     public Long getId() {
         return Long.parseLong(getContent());
+    }
+
+    public Date getIssuedAt() {
+        return this.parsed.getBody().getIssuedAt();
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
     }
 }

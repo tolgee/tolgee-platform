@@ -2135,4 +2135,9 @@
             UPDATE user_account SET account_type = 'LDAP' WHERE password IS NULL AND third_party_auth_type IS NULL;
         </sql>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1662731848280-1">
+        <addColumn tableName="user_account">
+            <column name="tokens_valid_not_before" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

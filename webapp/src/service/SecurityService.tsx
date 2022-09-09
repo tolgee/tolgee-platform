@@ -64,6 +64,10 @@ export class SecurityService {
     return this.handleLoginResponse(response);
   }
 
+  setToken(token: string) {
+    this.tokenService.setToken(token);
+  }
+
   public resetPasswordRequest = (email: string) => {
     const url = `${API_LINKS.RESET_PASSWORD_REQUEST}`;
     return this.http.post<never>(url, {

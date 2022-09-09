@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator
+import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.SecurityConfiguration
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
@@ -15,14 +16,14 @@ import io.tolgee.security.payload.LoginRequest
 import org.apache.commons.codec.binary.Base32
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 @Service
 class MfaService(
   private val totpGenerator: TimeBasedOneTimePasswordGenerator,
   private val userAccountService: UserAccountService,
-  private val userCredentialsService: UserCredentialsService
+  private val userCredentialsService: UserCredentialsService,
+  private val keyGenerator: KeyGenerator
 ) {
   private val base32 = Base32()
 
@@ -73,7 +74,11 @@ class MfaService(
       throw BadRequestException(Message.MFA_NOT_ENABLED)
     }
 
-    val codes = List(10) { UUID.randomUUID().toString() }
+    val codes = List(10) {
+      val key = keyGenerator.generate()
+      "${key.substring(0, 4)}-${key.substring(4, 8)}-${key.substring(8, 12)}-${key.substring(12, 16)}"
+    }
+
     userAccountService.setMfaRecoveryCodes(user, codes)
     return codes
   }

@@ -20,6 +20,7 @@ import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.util.executeInNewTransaction
+import org.apache.commons.lang3.time.DateUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -141,6 +142,7 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setUserPassword(userAccount: UserAccount, password: String?): UserAccount {
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -161,6 +163,7 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun enableMfaTotp(userAccount: UserAccount, key: ByteArray): UserAccount {
     userAccount.totpKey = key
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     return userAccountRepository.save(userAccount)
   }
 
@@ -170,6 +173,7 @@ class UserAccountService(
     userAccount.totpKey = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     return userAccountRepository.save(userAccount)
   }
 
@@ -270,6 +274,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException()
 
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
     return userAccountRepository.save(userAccount)
   }
