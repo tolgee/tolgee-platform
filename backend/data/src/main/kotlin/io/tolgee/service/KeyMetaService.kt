@@ -36,28 +36,24 @@ class KeyMetaService(
     keyCodeReferenceRepository.saveAll(entities)
 
   fun import(target: KeyMeta, source: KeyMeta) {
-    target.comments.import(target, source.comments) { a, b ->
+    target.comments.import(target, source.comments.toList()) { a, b ->
       a.text == b.text && a.fromImport == b.fromImport
     }
-    target.codeReferences.import(target, source.codeReferences) { a, b ->
+    target.codeReferences.import(target, source.codeReferences.toList()) { a, b ->
       a.line == b.line && a.path == b.path
     }
   }
 
-  private inline fun <T : WithKeyMetaReference> MutableList<T>.import(
+  private inline fun <T : WithKeyMetaReference> List<T>.import(
     target: KeyMeta,
-    other: MutableCollection<T>,
+    source: Collection<T>,
     equalsFn: (a: T, b: T) -> Boolean
   ) {
-    val toRemove = mutableListOf<WithKeyMetaReference>()
-    other.forEach { otherItem ->
+    source.forEach { otherItem ->
       if (!this.any { equalsFn(it, otherItem) }) {
-        this.add(otherItem)
-        toRemove.add(otherItem)
         otherItem.keyMeta = target
       }
     }
-    other.removeAll(toRemove)
   }
 
   fun getWithFetchedData(import: Import): List<KeyMeta> {

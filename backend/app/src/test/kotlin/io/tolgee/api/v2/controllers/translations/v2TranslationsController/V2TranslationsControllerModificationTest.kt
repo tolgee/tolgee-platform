@@ -28,13 +28,12 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `sets translations for existing key`() {
+    saveTestData()
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -52,6 +51,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `returns selected languages after set`() {
+    saveTestData()
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -67,6 +67,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `validated translation length`() {
+    saveTestData()
     val text = "a".repeat(10001)
     performProjectAuthPut(
       "/translations",
@@ -79,6 +80,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `sets translation state`() {
+    saveTestData()
     val id = testData.aKeyGermanTranslation.id
     performProjectAuthPut("/translations/$id/set-state/UNTRANSLATED", null).andIsOk
       .andAssertThatJson {
@@ -94,6 +96,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @Test
   fun `sets translations for existing key API key forbidden`() {
+    saveTestData()
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
@@ -103,6 +106,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
   @Test
   fun `sets translations for new key with API key`() {
+    saveTestData()
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
@@ -112,6 +116,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @Test
   fun `sets translations for new key forbidden with api key`() {
+    saveTestData()
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto("A key not existings", mutableMapOf("en" to "English"))
@@ -121,6 +126,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `sets untranslated state if null value provided`() {
+    saveTestData()
     assertThat(translationService.find(testData.aKeyGermanTranslation.id)).isNotNull
     performProjectAuthPut(
       "/translations",
@@ -144,6 +150,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `sets translations for not existing key`() {
+    saveTestData()
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -161,7 +168,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @Test
   fun `sets translated state when non blank text is provided`() {
     testData.addUntranslated()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -177,7 +184,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @ProjectJWTAuthTestMethod
   @Test
   fun `removes the auto translated state`() {
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     val translation = testData.aKeyGermanTranslation
     performProjectAuthPut(
       "/translations/${translation.id}/dismiss-auto-translated-state",
@@ -186,5 +193,10 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     val updatedTranslation = translationService.get(translation.id)
     assertThat(updatedTranslation.auto).isEqualTo(false)
     assertThat(updatedTranslation.mtProvider).isEqualTo(null)
+  }
+
+  private fun saveTestData() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 }

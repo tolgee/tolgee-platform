@@ -226,7 +226,7 @@ class TranslationsViewBuilder(
       whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
     }
     if (params.filterKeyName != null) {
-      whereConditions.add(cb.equal(keyNameExpression, params.filterKeyName))
+      whereConditions.add(keyNameExpression.`in`(params.filterKeyName))
     } else if (params.filterKeyId != null) {
       whereConditions.add(keyIdExpression.`in`(params.filterKeyId))
     } else {

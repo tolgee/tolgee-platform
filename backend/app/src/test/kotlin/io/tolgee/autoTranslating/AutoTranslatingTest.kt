@@ -26,11 +26,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   lateinit var testData: AutoTranslateTestData
+
   @BeforeEach
   fun setup() {
     testData = AutoTranslateTestData()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
     this.projectSupplier = { testData.project }
     initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
@@ -40,6 +39,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   @Transactional
   fun `auto translates new key`() {
+    saveTestData()
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
     assertThat(mtCreditBucketService.getCreditBalances(testData.project).creditBalance)
@@ -49,25 +49,29 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates when base provided (non-existing)`() {
+    saveTestData()
     performSetEnTranslation(testData.baseTranslationNotExistKey.name)
 
-    val esTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.spanishLanguage)
-    val deTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.germanLanguage)
+    executeInNewTransaction {
+      val esTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.spanishLanguage)
+      val deTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.germanLanguage)
 
-    assertThat(esTranslation.text).isEqualTo("i am translated")
-    assertThat(esTranslation.state).isEqualTo(TranslationState.TRANSLATED)
-    assertThat(esTranslation.auto).isEqualTo(false)
+      assertThat(esTranslation.text).isEqualTo("i am translated")
+      assertThat(esTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+      assertThat(esTranslation.auto).isEqualTo(false)
 
-    assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-    assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
-    assertThat(deTranslation.auto).isEqualTo(true)
-    assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)
+      assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+      assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+      assertThat(deTranslation.auto).isEqualTo(true)
+      assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)
+    }
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   @Transactional
   fun `auto translates when base provided (existing, but untranslated)`() {
+    saveTestData()
     performSetEnTranslation(testData.baseTranslationUntranslated.name)
 
     val esTranslation = testData.baseTranslationUntranslated.getLangTranslation(testData.spanishLanguage).text
@@ -81,17 +85,16 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   @Transactional
   fun `auto translates using TM`() {
+    saveTestData()
     testUsingTmWorks()
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `it translates in parallel`() {
     testData.generateManyLanguages()
     initMachineTranslationMocks(500)
-    testDataService.saveTestData(testData.root)
-
+    saveTestData()
     val time = measureTimeMillis {
       performCreateKey(
         mapOf(
@@ -99,18 +102,21 @@ class AutoTranslatingTest : MachineTranslationTest() {
         )
       )
     }
-
     assertThat(time).isLessThan(2000)
 
-    val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations.toList()
-    assertThat(translations).hasSize(9)
-    assertThat(translations[4].text).isEqualTo("Translated with Amazon")
-    assertThat(translations[5].text).isEqualTo("Translated with Google")
+    executeInNewTransaction {
+      val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations
+        .toList().sortedBy { it.text }
+      assertThat(translations).hasSize(9)
+      assertThat(translations[1].text).isEqualTo("Translated with Amazon")
+      assertThat(translations[5].text).isEqualTo("Translated with Google")
+    }
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `config test tm enabled`() {
+    saveTestData()
     performSetConfig(true, false)
     testUsingTmWorks()
   }
@@ -118,6 +124,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `config test mt disabled`() {
+    saveTestData()
     performSetConfig(true, false)
     testUsingMtDoesNotWork()
   }
@@ -125,6 +132,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `config test mt enabled`() {
+    saveTestData()
     performSetConfig(false, true)
     testUsingMtWorks()
   }
@@ -132,6 +140,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `config test tm disabled`() {
+    saveTestData()
     performSetConfig(false, true)
     testUsingTmDoesNotWork()
   }
@@ -139,6 +148,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `doesn't fail when out of credits`() {
+    saveTestData()
     initMachineTranslationProperties(0)
     performCreateHalloKeyWithEnAndDeTranslations()
     transactionTemplate.execute {
@@ -156,7 +166,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `doesn't consume credits when not enough for all`() {
     testData.generateLanguagesWithDifferentPrimaryServices()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     initMachineTranslationProperties(700)
     performCreateHalloKeyWithEnAndDeTranslations()
     transactionTemplate.execute {
@@ -173,6 +183,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `it returns autoTranslateConfig`() {
+    saveTestData()
     performProjectAuthGet("auto-translation-settings").andIsOk.andAssertThatJson {
       node("usingTranslationMemory").isEqualTo(true)
       node("usingMachineTranslation").isEqualTo(true)
@@ -242,5 +253,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
         translations = mapOf("en" to "Hello")
       )
     )
+  }
+
+  fun saveTestData() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 }

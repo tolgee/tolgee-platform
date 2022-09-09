@@ -3,7 +3,6 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.security.InternalController
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.project.ProjectService
@@ -26,7 +25,7 @@ class LanguageE2eDataController(
 ) {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun generateBaseData(): Project {
+  fun generateBaseData(): Map<String, Any> {
     val data = testDataService.saveTestData {
       val userAccountBuilder = addUserAccount {
         username = "franta"
@@ -62,9 +61,7 @@ class LanguageE2eDataController(
         }
       }
     }
-
-    testDataService.saveTestData(data)
-    return data.data.projects[0].self
+    return mapOf<String, Any>("id" to data.data.projects[0].self.id)
   }
 
   @GetMapping(value = ["/clean"])

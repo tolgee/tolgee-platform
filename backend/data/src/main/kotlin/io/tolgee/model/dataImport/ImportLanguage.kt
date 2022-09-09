@@ -17,7 +17,7 @@ class ImportLanguage(
   @ManyToOne(optional = false)
   var file: ImportFile
 ) : StandardAuditModel() {
-  @OneToMany(mappedBy = "language")
+  @OneToMany(mappedBy = "language", orphanRemoval = true)
   var translations: MutableList<ImportTranslation> = mutableListOf()
 
   @ManyToOne

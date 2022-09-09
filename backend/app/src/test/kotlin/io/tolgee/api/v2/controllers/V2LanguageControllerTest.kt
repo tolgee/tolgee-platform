@@ -107,24 +107,29 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `cannot delete base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val en = project.getLanguage("en").orElseThrow { NotFoundException() }
-    project.baseLanguage = en
-    projectService.save(project)
-    performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
-      node("code").isEqualTo("cannot_delete_base_language")
+    executeInNewTransaction {
+      val project = projectService.get(base.project.id)
+      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      project.baseLanguage = en
+      projectService.save(project)
+
+      performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
+        node("code").isEqualTo("cannot_delete_base_language")
+      }
     }
   }
 
   @Test
   fun `automatically sets base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val en = project.getLanguage("en").orElseThrow { NotFoundException() }
-    project.baseLanguage = null
-    projectService.save(project)
-    performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
-      node("code").isEqualTo("cannot_delete_base_language")
+    executeInNewTransaction {
+      val project = projectService.get(base.project.id)
+      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      project.baseLanguage = null
+      projectService.save(project)
+      performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {
+        node("code").isEqualTo("cannot_delete_base_language")
+      }
     }
   }
 

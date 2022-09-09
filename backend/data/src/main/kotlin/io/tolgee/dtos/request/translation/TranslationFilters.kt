@@ -30,10 +30,10 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "String to search in key name or translation text")
   var search: String? = null
 
-  @field:Parameter(description = "Selects only one key with provided name")
-  var filterKeyName: String? = null
+  @field:Parameter(description = "Selects key with provided names. Use this param multiple times to fetch more keys.")
+  var filterKeyName: List<String>? = null
 
-  @field:Parameter(description = "Selects only one key with provided id")
+  @field:Parameter(description = "Selects key with provided ID. Use this param multiple times to fetch more keys.")
   var filterKeyId: List<Long>? = null
 
   @field:Parameter(description = "Selects only keys, where translation is missing in any language")

@@ -20,9 +20,7 @@ OrganizationBuilder(
 
   val data = DATA()
 
-  fun addRole(ft: FT<OrganizationRole>) = addOperation(data.roles, ft).also {
-    this.self.memberRoles.add(it.self)
-  }
+  fun addRole(ft: FT<OrganizationRole>) = addOperation(data.roles, ft)
 
   fun addMtCreditBucket(ft: FT<MtCreditBucket>): MtCreditBucketBuilder {
     val builder = MtCreditBucketBuilder()

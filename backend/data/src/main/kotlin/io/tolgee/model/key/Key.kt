@@ -24,6 +24,7 @@ import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
+import javax.persistence.OrderBy
 import javax.persistence.PrePersist
 import javax.persistence.PreRemove
 import javax.persistence.Table
@@ -50,12 +51,13 @@ class Key(
   lateinit var project: Project
 
   @OneToMany(mappedBy = "key")
-  var translations: MutableSet<Translation> = HashSet()
+  var translations: MutableSet<Translation> = mutableSetOf()
 
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key")
+  @OrderBy("id")
   var screenshots: MutableSet<Screenshot> = mutableSetOf()
 
   constructor(

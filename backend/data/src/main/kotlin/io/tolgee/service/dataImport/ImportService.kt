@@ -210,7 +210,6 @@ class ImportService(
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
     val import = language.file.import
-    this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
     if (this.findLanguages(import = language.file.import).isEmpty()) {
       deleteImport(import)

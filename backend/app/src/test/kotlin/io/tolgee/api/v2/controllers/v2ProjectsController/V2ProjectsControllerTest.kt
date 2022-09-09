@@ -268,6 +268,10 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
   @Test
   fun setUsersPermissionsHigherBase() {
+    executeInNewTransaction {
+      entityManager.persist(UserAccount().apply { name = "hej"; username = "hejhej" })
+      entityManager.flush()
+    }
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")

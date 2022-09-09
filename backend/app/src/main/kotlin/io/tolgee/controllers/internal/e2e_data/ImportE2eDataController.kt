@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
 import io.tolgee.service.UserAccountService
@@ -32,16 +31,16 @@ class ImportE2eDataController(
 ) {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun generateBasicTestData(): Import {
+  fun generateBasicTestData(): Map<String, Any> {
     val data = ImportTestData()
     data.addFileIssues()
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-with-long-text"])
   @Transactional
-  fun generateWithLongText(): Import {
+  fun generateWithLongText(): Map<String, Any> {
     val data = ImportTestData()
     data.importBuilder.data.importFiles[0].data.importTranslations[0].self {
       text = "Hello, I am translation, with pretty long long long long long long long long long " +
@@ -53,44 +52,44 @@ class ImportE2eDataController(
     }
     data.addFileIssues()
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-applicable"])
   @Transactional
-  fun generateApplicableTestData(): Import {
+  fun generateApplicableTestData(): Map<String, Any> {
     val data = ImportTestData()
     data.setAllResolved()
     data.addFileIssues()
     data.importFrench.existingLanguage = data.french
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-all-selected"])
   @Transactional
-  fun generateAllSelectedTestData(): Import {
+  fun generateAllSelectedTestData(): Map<String, Any> {
     val data = ImportTestData()
     data.addFileIssues()
     data.importFrench.existingLanguage = data.french
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-lot-of-data"])
   @Transactional
-  fun generateLotTestData(): Import {
+  fun generateLotTestData(): Map<String, Any> {
     val data = ImportTestData()
     data.addFileIssues()
     data.addManyFileIssues()
     data.addManyTranslations()
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-many-languages"])
   @Transactional
-  fun addManyLanguages(): Import {
+  fun addManyLanguages(): Map<String, Any> {
     val data = ImportTestData()
     val file = data.importBuilder.data.importFiles[0]
     (0..90).forEach {
@@ -100,12 +99,12 @@ class ImportE2eDataController(
       }
     }
     testDataService.saveTestData(data.root)
-    return data.importBuilder.self
+    return mapOf<String, Any>("project" to mapOf<String, Any>("id" to data.project.id))
   }
 
   @GetMapping(value = ["/generate-base"])
   @Transactional
-  fun generateBaseData(): Project {
+  fun generateBaseData(): Map<String, Any> {
     val data = testDataService.saveTestData {
       val userAccountBuilder = addUserAccount {
         username = "franta"
@@ -125,9 +124,7 @@ class ImportE2eDataController(
         }
       }
     }
-
-    testDataService.saveTestData(data)
-    return data.data.projects[0].self
+    return mapOf<String, Any>("id" to data.data.projects[0].self.id)
   }
 
   @GetMapping(value = ["/clean"])

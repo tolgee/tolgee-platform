@@ -59,6 +59,8 @@ class TranslationCommentsTestData {
         originalName = "Čeština"
       }.self
 
+      self.baseLanguage = czechLanguage
+
       addKey {
         name = "A key"
         this@TranslationCommentsTestData.aKey = this

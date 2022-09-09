@@ -1,7 +1,7 @@
 package io.tolgee.websocket
 
 import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
-import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
+import io.tolgee.api.v2.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class ActivityWebsocketListener(
   private val websocketEventPublisher: WebsocketEventPublisher,
-  private val userAccountModelAssembler: UserAccountModelAssembler,
+  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   private val userAccountService: UserAccountService,
   private val relationDescriptionExtractor: RelationDescriptionExtractor
 ) {
@@ -42,7 +42,7 @@ class ActivityWebsocketListener(
       val user = userAccountService.find(userId).orElse(null) ?: return@let null
       ActorInfo(
         type = ActorType.USER,
-        data = userAccountModelAssembler.toModel(user)
+        data = simpleUserAccountModelAssembler.toModel(user)
       )
     } ?: ActorInfo(type = ActorType.UNKNOWN, data = null)
   }

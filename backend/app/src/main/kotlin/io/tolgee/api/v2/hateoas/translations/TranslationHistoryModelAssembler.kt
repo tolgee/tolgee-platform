@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TranslationHistoryModelAssembler(
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
 ) : RepresentationModelAssemblerSupport<TranslationHistoryView, TranslationHistoryModel>(
   V2TranslationsController::class.java, TranslationHistoryModel::class.java
 ) {

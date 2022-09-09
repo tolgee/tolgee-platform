@@ -99,7 +99,6 @@ class AutoTranslationService(
     this.auto = true
     this.text = text
     this.mtProvider = usedService
-    this.key.translations.add(this)
     translationService.save(this)
   }
 

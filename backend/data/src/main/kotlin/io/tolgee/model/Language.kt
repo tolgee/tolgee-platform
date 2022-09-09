@@ -60,7 +60,7 @@ class Language : StandardAuditModel() {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
   var translations: MutableSet<Translation>? = null
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
   @Column(nullable = false)

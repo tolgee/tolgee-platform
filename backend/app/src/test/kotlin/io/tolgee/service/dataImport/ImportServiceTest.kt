@@ -21,13 +21,19 @@ class ImportServiceTest : AbstractSpringTest() {
 
   @Test
   fun `it selects existing language`() {
-    importTestData.setAllResolved()
-    testDataService.saveTestData(importTestData.root)
-    importService.selectExistingLanguage(importTestData.importFrench, importTestData.french)
-    assertThat(importTestData.importFrench.existingLanguage).isEqualTo(importTestData.french)
-    val translations = importService.findTranslations(importTestData.importFrench.id)
-    assertThat(translations[0].conflict).isNotNull
-    assertThat(translations[1].conflict).isNull()
+    executeInNewTransaction {
+      importTestData.setAllResolved()
+      testDataService.saveTestData(importTestData.root)
+    }
+    executeInNewTransaction {
+      val importFrench = importService.findLanguage(importTestData.importFrench.id)!!
+      val french = languageService.get(importTestData.french.id)
+      importService.selectExistingLanguage(importFrench, french)
+      assertThat(importFrench.existingLanguage).isEqualTo(french)
+      val translations = importService.findTranslations(importTestData.importFrench.id)
+      assertThat(translations[0].conflict).isNotNull
+      assertThat(translations[1].conflict).isNull()
+    }
   }
 
   @Test
