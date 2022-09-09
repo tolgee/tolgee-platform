@@ -163,7 +163,11 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
 
+    loginAsAdminIfNotLogged()
+    Thread.sleep(1000)
+
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
+    refreshUser()
     performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
   }
 }

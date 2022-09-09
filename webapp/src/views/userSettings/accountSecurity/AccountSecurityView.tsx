@@ -70,7 +70,7 @@ export const AccountSecurityView: FunctionComponent = () => {
             loading={loadable.loading}
             onClick={() =>
               globalActions.loadableActions.resetPasswordRequest.dispatch(
-                user.username
+                user!.username
               )
             }
           >

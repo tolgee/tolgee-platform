@@ -125,6 +125,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it invalidates tokens generated prior a mfa status change`() {
+    loginAsAdminIfNotLogged()
+    Thread.sleep(1000)
+
     val enableRequestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
       otp = mfaService.generateCode(encodedKey).toString(),
@@ -132,13 +135,18 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPut("/v2/user/mfa/totp", enableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    refreshUser()
     performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+
     logout()
+    loginAsAdminIfNotLogged()
+    Thread.sleep(1000)
 
     val disableRequestDto = UserTotpDisableRequestDto(
       password = initialPassword
     )
     performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    refreshUser()
     performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
   }
 }
