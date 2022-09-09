@@ -1,3 +1,10 @@
+## [2.39.2](https://github.com/tolgee/tolgee-platform/compare/v2.39.1...v2.39.2) (2022-09-09)
+
+
+### Bug Fixes
+
+* Faster startup ([bae9076](https://github.com/tolgee/tolgee-platform/commit/bae9076cbf6ded2223db545409aa61d497a3de4b))
+
 ## [2.39.1](https://github.com/tolgee/tolgee-platform/compare/v2.39.0...v2.39.1) (2022-09-09)
 
 
