@@ -1,4 +1,4 @@
-import { Tabs, Tab, IconButton, styled, useTheme } from '@mui/material';
+import { IconButton, styled, Tab, Tabs, useTheme } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
@@ -14,6 +14,7 @@ import { useTranslationTools } from './TranslationTools/useTranslationTools';
 import { useProject } from 'tg.hooks/useProject';
 import { EditMode } from './context/types';
 import { History } from './history/History';
+import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -196,6 +197,7 @@ export const TranslationOpened: React.FC<Props> = ({
               onChange={onChange}
               onCancel={() => onCancel(true)}
               onSave={onSave}
+              direction={getLanguageDirection(language.tag)}
               autofocus={autofocus}
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
