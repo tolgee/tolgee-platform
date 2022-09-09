@@ -164,7 +164,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     )
 
     loginAsAdminIfNotLogged()
-    Thread.sleep(1000)
+    Thread.sleep(2000)
 
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     refreshUser()

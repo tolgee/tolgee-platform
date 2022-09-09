@@ -106,8 +106,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
               validationSchema={Validation.USER_MFA_VIEW_RECOVERY}
             >
               <Typography>
-                {/* eslint-disable-next-line react/display-name */}
-                <T parameters={{ b: (a) => <b>{a}</b> }}>
+                <T parameters={{ b: <b /> }}>
                   account-security-mfa-recovery-info
                 </T>
               </Typography>

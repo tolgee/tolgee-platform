@@ -91,7 +91,6 @@ export class Validation {
   ) =>
     Yup.object().shape({
       currentPassword: Yup.string()
-        .min(8)
         .max(50)
         .when('email', {
           is: (email) => email !== currentEmail,
@@ -103,7 +102,7 @@ export class Validation {
     });
 
   static readonly USER_PASSWORD_CHANGE = Yup.object().shape({
-    currentPassword: Validation.USER_PASSWORD,
+    currentPassword: Yup.string().max(50).required(),
     password: Validation.USER_PASSWORD,
     passwordRepeat: Yup.string()
       .notRequired()
@@ -111,16 +110,16 @@ export class Validation {
   });
 
   static readonly USER_MFA_ENABLE = Yup.object().shape({
-    password: Validation.USER_PASSWORD,
+    password: Yup.string().max(50).required(),
     otp: Yup.string().required().min(6).max(6),
   });
 
   static readonly USER_MFA_VIEW_RECOVERY = Yup.object().shape({
-    password: Validation.USER_PASSWORD,
+    password: Yup.string().max(50).required(),
   });
 
   static readonly USER_MFA_DISABLE = Yup.object().shape({
-    password: Validation.USER_PASSWORD,
+    password: Yup.string().max(50).required(),
   });
 
   static readonly API_KEY_SCOPES = Yup.mixed().test(

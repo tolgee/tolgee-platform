@@ -13,7 +13,7 @@ data class UserUpdateRequestDto(
   @field:NotBlank
   var email: String = "",
 
-  @field:Size(min = 8, max = 50)
+  @field:Size(max = 50)
   var currentPassword: String? = null,
 
   @Schema(

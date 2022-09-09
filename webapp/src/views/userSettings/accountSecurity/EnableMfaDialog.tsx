@@ -45,12 +45,18 @@ export const EnableMfaDialog: FunctionComponent = () => {
   };
 
   const secret = useMemo(() => {
+    // Generate 96 bits of secure random data in 32-bits chunks
     const secureRng = new Int32Array(3);
     window.crypto.getRandomValues(secureRng);
 
     let str = '';
+    // Turn the random bits into a random Base32 string
+    // We iterate over our random chunks
     for (let i = 0; i < 3; i++) {
       const v = secureRng[i];
+
+      // log2(32) == 5 ==> we need to peek 5 bits of data to get 1 letter
+      // shift & mask here we go
       str += BASE32_ALPHABET[(v >>> 27) & 0x1f];
       str += BASE32_ALPHABET[(v >>> 22) & 0x1f];
       str += BASE32_ALPHABET[(v >>> 17) & 0x1f];
@@ -59,6 +65,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
       str += BASE32_ALPHABET[(v >>> 2) & 0x1f];
     }
 
+    // We generated more than 16 chars, so we truncate the string
     return str.slice(0, 16);
   }, []);
 
@@ -149,19 +156,19 @@ export const EnableMfaDialog: FunctionComponent = () => {
             >
               <TextField
                 inputProps={{
-                  'data-cy': 'mfa-enable-dialog-otp-input',
-                }}
-                name="otp"
-                placeholder="000000"
-                label={t('account-security-mfa-otp-code')}
-              />
-              <TextField
-                inputProps={{
                   'data-cy': 'mfa-enable-dialog-password-input',
                 }}
                 name="password"
                 type="password"
                 label={t('Password')}
+              />
+              <TextField
+                inputProps={{
+                  'data-cy': 'mfa-enable-dialog-otp-input',
+                }}
+                name="otp"
+                placeholder="000000"
+                label={t('account-security-mfa-otp-code')}
               />
             </StandardForm>
           </Box>

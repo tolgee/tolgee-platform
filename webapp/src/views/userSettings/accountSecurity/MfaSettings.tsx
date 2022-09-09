@@ -13,9 +13,6 @@ const StyledDisabled = styled('span')`
   color: ${({ theme }) => theme.palette.error.main};
 `;
 
-const StyledEnabledParam = (value) => <StyledEnabled>{value}</StyledEnabled>;
-const StyledDisabledParam = (value) => <StyledDisabled>{value}</StyledDisabled>;
-
 export const MfaSettings: FunctionComponent = () => {
   const user = useUser();
   if (!user) return null;
@@ -34,11 +31,11 @@ export const MfaSettings: FunctionComponent = () => {
         <Box>
           <Typography>
             {user.mfaEnabled ? (
-              <T parameters={{ b: StyledEnabledParam }}>
+              <T parameters={{ b: <StyledEnabled /> }}>
                 account-security-mfa-status-enabled
               </T>
             ) : (
-              <T parameters={{ b: StyledDisabledParam }}>
+              <T parameters={{ b: <StyledDisabled /> }}>
                 account-security-mfa-status-disabled
               </T>
             )}

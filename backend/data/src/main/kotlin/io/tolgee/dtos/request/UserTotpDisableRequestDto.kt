@@ -7,6 +7,6 @@ import javax.validation.constraints.Size
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserTotpDisableRequestDto(
   @field:NotBlank
-  @field:Size(min = 8, max = 50)
+  @field:Size(max = 50)
   var password: String = ""
 )

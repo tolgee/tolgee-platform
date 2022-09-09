@@ -126,7 +126,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Test
   fun `it invalidates tokens generated prior a mfa status change`() {
     loginAsAdminIfNotLogged()
-    Thread.sleep(1000)
+    Thread.sleep(2000)
 
     val enableRequestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
@@ -140,7 +140,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     logout()
     loginAsAdminIfNotLogged()
-    Thread.sleep(1000)
+    Thread.sleep(2000)
 
     val disableRequestDto = UserTotpDisableRequestDto(
       password = initialPassword

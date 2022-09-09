@@ -77,7 +77,9 @@ export const UserProfileView: FunctionComponent = () => {
               variant="standard"
               name="email"
               disabled={isManaged}
-              helperText={isManaged ? t('managed-account-field-hint') : void 0}
+              helperText={
+                isManaged ? t('managed-account-field-hint') : undefined
+              }
               label={<T>User settings - E-mail</T>}
             />
             {user?.emailAwaitingVerification && (
