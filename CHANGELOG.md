@@ -1,3 +1,10 @@
+## [2.39.1](https://github.com/tolgee/tolgee-platform/compare/v2.39.0...v2.39.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* Websocket client data nullability ([6c8bb06](https://github.com/tolgee/tolgee-platform/commit/6c8bb064d0bbd7aa28269642210d78a691c1e38b))
+
 # [2.39.0](https://github.com/tolgee/tolgee-platform/compare/v2.38.1...v2.39.0) (2022-09-06)
 
 
