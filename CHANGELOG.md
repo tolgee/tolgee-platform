@@ -1,3 +1,10 @@
+# [2.40.0](https://github.com/tolgee/tolgee-platform/compare/v2.39.2...v2.40.0) (2022-09-09)
+
+
+### Features
+
+* Support for right-to-left languages ([4174b96](https://github.com/tolgee/tolgee-platform/commit/4174b962d1d4e490bc84e26cd7f36f8998af8783))
+
 ## [2.39.2](https://github.com/tolgee/tolgee-platform/compare/v2.39.1...v2.39.2) (2022-09-09)
 
 
