@@ -135,8 +135,8 @@ export type EventType = 'translation-data-modified';
 export type Channel = `/projects/${number}/${EventType}`;
 
 export type TranslationsModifiedData = WebsocketEvent<{
-  translations: EntityModification<'translation'>[];
-  keys: EntityModification<'key'>[];
+  translations: EntityModification<'translation'>[] | null;
+  keys: EntityModification<'key'>[] | null;
 }>;
 
 export type EntityModification<T> = T extends keyof schemas

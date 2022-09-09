@@ -27,16 +27,19 @@ export const useWebsocketListener = (
       client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (event) => {
-          const translationUpdates = event.data.translations.map(
+          const translationUpdates = event.data?.translations?.map(
             (translation) => ({
               keyId: translation.relations.key.entityId,
               language: translation.relations.language.data.tag,
               value: getModifyingObject(translation.modifications),
             })
           );
-          translationService.changeTranslations(translationUpdates);
 
-          const keyUpdates = event.data.keys.map((key) => ({
+          if (translationUpdates) {
+            translationService.changeTranslations(translationUpdates);
+          }
+
+          const keyUpdates = event.data.keys?.map((key) => ({
             keyId: key.id,
             value:
               key.changeType == 'DEL'
@@ -47,7 +50,9 @@ export const useWebsocketListener = (
                     }),
                   },
           }));
-          translationService.updateTranslationKeys(keyUpdates);
+          if (keyUpdates) {
+            translationService.updateTranslationKeys(keyUpdates);
+          }
         }
       );
       return () => client.disconnect();
