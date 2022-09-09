@@ -4,7 +4,6 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
-import io.tolgee.security.JwtToken
 import io.tolgee.security.JwtTokenProvider
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
