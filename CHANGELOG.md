@@ -1,3 +1,10 @@
+# [2.41.0](https://github.com/tolgee/tolgee-platform/compare/v2.40.0...v2.41.0) (2022-09-11)
+
+
+### Features
+
+* Filter by multiple key names, fixed lazy loading ([f62a2f2](https://github.com/tolgee/tolgee-platform/commit/f62a2f2d4b726d0a766bb7e93bcd55c8b6f40a5e))
+
 # [2.40.0](https://github.com/tolgee/tolgee-platform/compare/v2.39.2...v2.40.0) (2022-09-09)
 
 
