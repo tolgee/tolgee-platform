@@ -26,7 +26,7 @@ class UserCredentialsService @Autowired constructor(
   fun checkUserCredentials(username: String, password: String): UserAccount {
     if (configuration.authentication.ldap.enabled) {
       val details = checkLdapUserCredentials(username, password)
-      return userAccountService.findOptional(details.username).orElseGet {
+      val account = userAccountService.findOptional(details.username).orElseGet {
         val userAccount = UserAccount(
           username = details.username,
           accountType = UserAccount.AccountType.LDAP
@@ -34,11 +34,19 @@ class UserCredentialsService @Autowired constructor(
         userAccountService.createUser(userAccount)
         userAccount
       }
+
+      if (account.accountType != UserAccount.AccountType.LDAP)
+        throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+
+      return account
     }
 
     val userAccount = userAccountService.findOptional(username).orElseThrow {
       AuthenticationException(Message.BAD_CREDENTIALS)
     }
+
+    if (userAccount.accountType == UserAccount.AccountType.LDAP)
+      throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
 
     checkNativeUserCredentials(userAccount, password)
     return userAccount
