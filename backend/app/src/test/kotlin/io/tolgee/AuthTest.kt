@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
@@ -35,6 +36,9 @@ class AuthTest : AbstractControllerTest() {
 
   @Autowired
   private var authMvc: MockMvc? = null
+
+  @Autowired
+  private lateinit var jwtTokenProvider: JwtTokenProvider
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
@@ -73,6 +77,25 @@ class AuthTest : AbstractControllerTest() {
     )
       .andReturn()
     assertThat(mvcResult.response.status).isEqualTo(200)
+  }
+
+  @Test
+  fun `expired tokens do not have access`() {
+    tolgeeProperties.authentication.jwtExpiration *= -1 // Invert sign to *subtract* expiry time
+    val user = userAccountService[initialUsername].id
+    val token = jwtTokenProvider.generateToken(user)
+    tolgeeProperties.authentication.jwtExpiration *= -1 // Reset to normal
+    Thread.sleep(2000) // Make sure token is expired
+
+    val mvcResult = mvc.perform(
+      MockMvcRequestBuilders.get("/api/projects")
+        .accept(MediaType.ALL)
+        .header("Authorization", String.format("Bearer %s", token))
+        .contentType(MediaType.APPLICATION_JSON)
+    ).andReturn()
+
+    assertThat(mvcResult.response.status).isEqualTo(401)
+    assertThat(mvcResult.response.contentAsString).contains(Message.EXPIRED_JWT_TOKEN.code)
   }
 
   @Test
