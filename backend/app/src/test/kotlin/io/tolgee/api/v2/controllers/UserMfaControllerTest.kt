@@ -27,7 +27,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   fun enableMfa() {
     userAccount?.let {
-      userAccountService.enableMfaTotp(it, encodedKey)
+      userAccountService.enableMfaTotp(userAccountService.get(it.id), encodedKey)
     }
   }
 
