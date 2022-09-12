@@ -168,7 +168,7 @@ export const [
       case 'CHANGE_FIELD':
         return editService.changeField(action.payload);
       case 'SELECT_LANGUAGES':
-        translationService.updateQuery({ languages: action.payload });
+        translationService.setLanguages(action.payload);
         return handleTranslationsReset();
       case 'UPDATE_LANGUAGES':
         translationService.updateQuery({});
