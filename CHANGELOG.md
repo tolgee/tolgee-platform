@@ -1,3 +1,10 @@
+# [2.42.0](https://github.com/tolgee/tolgee-platform/compare/v2.41.0...v2.42.0) (2022-09-12)
+
+
+### Features
+
+* Fetch languages with delay ([faecca3](https://github.com/tolgee/tolgee-platform/commit/faecca380b27f21091661d4e2de20c6522311eaa))
+
 # [2.41.0](https://github.com/tolgee/tolgee-platform/compare/v2.40.0...v2.41.0) (2022-09-11)
 
 
