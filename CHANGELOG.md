@@ -1,3 +1,10 @@
+## [2.42.1](https://github.com/tolgee/tolgee-platform/compare/v2.42.0...v2.42.1) (2022-09-12)
+
+
+### Bug Fixes
+
+* Translations view optimization ([57f28a2](https://github.com/tolgee/tolgee-platform/commit/57f28a2a4ec4fedcee87b6fd89e0ceb981583a0b))
+
 # [2.42.0](https://github.com/tolgee/tolgee-platform/compare/v2.41.0...v2.42.0) (2022-09-12)
 
 
