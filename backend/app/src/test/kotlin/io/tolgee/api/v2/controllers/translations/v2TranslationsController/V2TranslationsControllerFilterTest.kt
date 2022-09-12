@@ -44,6 +44,20 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by multiple keyNames`() {
+    testData.generateLotOfData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterKeyName=key 18&filterKeyName=key 20")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters by keyId`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)

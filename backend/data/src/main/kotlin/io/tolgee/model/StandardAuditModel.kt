@@ -20,7 +20,7 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
     strategy = GenerationType.SEQUENCE,
     generator = "sequenceGenerator"
   )
-  override val id: Long = 0
+  override var id: Long = 0
 
   override fun equals(other: Any?): Boolean {
     other ?: return false

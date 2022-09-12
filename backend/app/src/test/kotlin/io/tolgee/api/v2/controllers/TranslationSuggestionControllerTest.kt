@@ -127,14 +127,13 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun initTestData() {
     testData = SuggestionTestData()
-    testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
-    userAccount = testData.user
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests from TM with keyId`() {
+    saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
       SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id)
@@ -154,6 +153,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests from TM with baseText`() {
+    saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
       SuggestRequestDto(baseText = "This is beautiful", targetLanguageId = testData.germanLanguage.id)
@@ -174,7 +174,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `it suggests from TM fast enough`() {
     testData.generateLotOfData()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     val time = measureTimeMillis {
       performAuthPost(
         "/v2/projects/${project.id}/suggest/translation-memory",
@@ -187,6 +187,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests machine translations with keyId`() {
+    saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
@@ -202,6 +203,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests machine translations with baseText`() {
+    saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(baseText = "Yupee", targetLanguageId = testData.germanLanguage.id)
@@ -217,7 +219,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (AWS)`() {
     testData.enableAWS()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations").isEqualTo(
         """
@@ -234,7 +236,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `it suggests using just enabled services (Google, AWS, DeepL, Azure)`() {
     mockDefaultMtBucketSize(4000)
     testData.enableAll()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
 
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
@@ -252,7 +254,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `it respects default config`() {
     machineTranslationProperties.freeCreditsAmount = 2000
     testData.addDefaultConfig()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
 
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations").isEqualTo(
@@ -270,7 +272,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `primary service is first (AWS)`() {
     machineTranslationProperties.freeCreditsAmount = -1
     testData.enableAll()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
 
     (0..20).forEach {
       verifyServiceFirst("AWS")
@@ -282,7 +284,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `primary service is first (GOOGLE)`() {
     machineTranslationProperties.freeCreditsAmount = -1
     testData.enableAllGooglePrimary()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
 
     (0..20).forEach {
       verifyServiceFirst("GOOGLE")
@@ -292,6 +294,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
+    saveTestData()
+
     testMtCreditConsumption()
 
     mockCurrentDate { DateUtils.addMonths(Date(), 1) }
@@ -305,7 +309,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `it consumes extra credits`() {
     testData.addBucketWithExtraCredits()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     performMtRequestAndExpectAfterBalance(100, 1000)
     performMtRequestAndExpectAfterBalance(0, 200)
     performMtRequestAndExpectBadRequest().andAssertThatJson {
@@ -317,6 +321,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it doesn't consume when cached`() {
+    saveTestData()
     val valueWrapperMock = mock<Cache.ValueWrapper>()
     whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
     whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
@@ -354,5 +359,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     val result = performMtRequest().andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
     val services = (result["machineTranslations"] as Map<String, String>).keys.toList()
     assertThat(services[0]).isEqualTo(service)
+  }
+
+  private fun saveTestData() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 }

@@ -1,3 +1,24 @@
+# [2.42.0](https://github.com/tolgee/tolgee-platform/compare/v2.41.0...v2.42.0) (2022-09-12)
+
+
+### Features
+
+* Fetch languages with delay ([faecca3](https://github.com/tolgee/tolgee-platform/commit/faecca380b27f21091661d4e2de20c6522311eaa))
+
+# [2.41.0](https://github.com/tolgee/tolgee-platform/compare/v2.40.0...v2.41.0) (2022-09-11)
+
+
+### Features
+
+* Filter by multiple key names, fixed lazy loading ([f62a2f2](https://github.com/tolgee/tolgee-platform/commit/f62a2f2d4b726d0a766bb7e93bcd55c8b6f40a5e))
+
+# [2.40.0](https://github.com/tolgee/tolgee-platform/compare/v2.39.2...v2.40.0) (2022-09-09)
+
+
+### Features
+
+* Support for right-to-left languages ([4174b96](https://github.com/tolgee/tolgee-platform/commit/4174b962d1d4e490bc84e26cd7f36f8998af8783))
+
 ## [2.39.2](https://github.com/tolgee/tolgee-platform/compare/v2.39.1...v2.39.2) (2022-09-09)
 
 

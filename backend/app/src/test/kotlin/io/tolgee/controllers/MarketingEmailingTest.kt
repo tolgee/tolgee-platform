@@ -112,8 +112,10 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
       .andIsOk
     verify(contactsApi, times(0)).createContact(any())
 
-    val user = userAccountService.get(testMail)
-    acceptEmailVerification(user)
+    executeInNewTransaction {
+      val user = userAccountService.get(testMail)
+      acceptEmailVerification(user)
+    }
     Thread.sleep(100)
     verifyCreateContactCalled()
   }
@@ -131,11 +133,17 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   fun `updates contact email when verified`() {
     tolgeeProperties.authentication.needsEmailVerification = true
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
-    userAccountService.update(user, updateRequestDto)
+    val updatedUser = executeInNewTransaction {
+      val updatedUser = userAccountService.get(user.id)
+      userAccountService.update(userAccountService.get(user.id), updateRequestDto)
+      updatedUser
+    }
     Thread.sleep(100)
     verify(contactsApi).updateContact(eq(testMail), any())
     Mockito.clearInvocations(contactsApi)
-    acceptEmailVerification(user)
+    executeInNewTransaction {
+      acceptEmailVerification(updatedUser)
+    }
     verifyEmailSentOnUpdate()
   }
 

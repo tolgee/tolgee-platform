@@ -5,6 +5,7 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 
@@ -16,7 +17,7 @@ class MtServiceConfig : StandardAuditModel() {
   /**
    * When null, then its default config
    */
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   var targetLanguage: Language? = null
 
   @Enumerated(EnumType.STRING)

@@ -189,15 +189,14 @@ class TranslationService(
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
       translation.state = TranslationState.TRANSLATED
     }
-    if (translation.id == 0L) {
-      key.translations.add(translation)
-    }
     if (text == null || text.isEmpty()) {
       translation.state = TranslationState.UNTRANSLATED
       translation.text = null
     }
     dismissAutoTranslated(translation)
-    return save(translation)
+    val t = save(translation)
+    key.translations.add(t)
+    return t
   }
 
   fun save(translation: Translation): Translation {
@@ -205,12 +204,12 @@ class TranslationService(
     if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
-    val wasCreated = translation.id == 0L
     return translationRepository.save(translation)
   }
 
   @Transactional
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+    val myKey = keyService.get(key.id)
     val languages = languageService.findByTags(translations.keys, key.project.id)
     val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
 
@@ -220,22 +219,12 @@ class TranslationService(
       applicationEventPublisher.publishEvent(
         OnTranslationsSet(
           source = this,
-          key = key,
+          key = myKey,
           oldValues = oldTranslations,
           translations = it.values.toList()
         )
       )
     }
-  }
-
-  fun deleteIfExists(key: Key, languageTag: String) {
-    val language = languageService.findByTag(languageTag, key.project)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    translationRepository.findOneByKeyAndLanguage(key, language)
-      .ifPresent { entity: Translation ->
-        translationCommentService.deleteByTranslationIdIn(listOf(entity.id))
-        translationRepository.delete(entity)
-      }
   }
 
   @Suppress("UNCHECKED_CAST")

@@ -25,8 +25,6 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   fun setup() {
     testData = AutoTranslateTestData()
     testData.disableAutoTranslating()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
     this.projectSupplier = { testData.project }
     initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
@@ -35,6 +33,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates using MT`() {
+    saveTestData()
     performProjectAuthPut(
       "keys/${testData.thisIsBeautifulKey.id}/auto-translate?" +
         "useMachineTranslation=true" +
@@ -51,6 +50,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates manually only specified language`() {
+    saveTestData()
     performProjectAuthPut(
       "keys/${testData.thisIsBeautifulKey.id}/auto-translate?" +
         "languages=${testData.spanishLanguage.tag}&" +
@@ -67,7 +67,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @Test
   fun `auto translates manually using TM`() {
     val another = testData.createAnotherThisIsBeautifulKey()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     performProjectAuthPut(
       "keys/${another.id}/auto-translate?" +
         "languages=${testData.germanLanguage.tag}&" +
@@ -82,6 +82,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `works with API key`() {
+    saveTestData()
     performProjectAuthPut(
       "keys/${testData.thisIsBeautifulKey.id}/auto-translate?" +
         "useMachineTranslation=true" +
@@ -98,6 +99,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @Test
   fun `insufficient API key scope`() {
+    saveTestData()
     performProjectAuthPut(
       "keys/${testData.thisIsBeautifulKey.id}/auto-translate?" +
         "useMachineTranslation=true" +
@@ -111,7 +113,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @Test
   fun `cannot translate base`() {
     val another = testData.createAnotherThisIsBeautifulKey()
-    testDataService.saveTestData(testData.root)
+    saveTestData()
     performProjectAuthPut(
       "keys/${another.id}/auto-translate?" +
         "languages=en&" +
@@ -123,6 +125,12 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `doesn't work when no service provided`() {
+    saveTestData()
     performProjectAuthPut("keys/${testData.thisIsBeautifulKey.id}/auto-translate", null).andIsBadRequest
+  }
+
+  private fun saveTestData() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 }

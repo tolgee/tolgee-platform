@@ -77,7 +77,12 @@ task runE2e(type: Exec, group: "e2e") {
 
     workingDir E2E_DIR
 
-    finalizedBy "stopDockerE2e", "cleanupDockerE2e"
+    finalizedBy "saveServerLogs", "stopDockerE2e", "cleanupDockerE2e"
+}
+
+task saveServerLogs(type: Exec, group: "e2E"){
+    commandLine "bash", "-c", "docker-compose logs > server.log"
+    workingDir E2E_DIR
 }
 
 task openE2e(type: Exec, group: "e2e") {

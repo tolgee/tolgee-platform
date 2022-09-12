@@ -134,11 +134,6 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   fun Key.refresh(): Key {
-    entityManager.flush()
-    entityManager.clear()
-    val key = entityManager.merge(this)
-    entityManager.refresh(key)
-    entityManager.refresh(key.keyMeta)
-    return key
+    return keyService.get(this.id)
   }
 }

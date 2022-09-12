@@ -178,13 +178,15 @@ class OrganizationService(
       invitationService.delete(invitation)
     }
 
-    organization.prefereredBy.forEach {
-      it.preferredOrganization = findOrCreatePreferred(
-        userAccount = it.userAccount,
-        exceptOrganizationId = organization.id
-      )
-      userPreferencesService.save(it)
-    }
+    organization.prefereredBy
+      .toList() // we need to clone it so hibernate doesn't change it concurrently
+      .forEach {
+        it.preferredOrganization = findOrCreatePreferred(
+          userAccount = it.userAccount,
+          exceptOrganizationId = organization.id
+        )
+        userPreferencesService.save(it)
+      }
 
     organizationRoleService.deleteAllInOrganization(organization)
 

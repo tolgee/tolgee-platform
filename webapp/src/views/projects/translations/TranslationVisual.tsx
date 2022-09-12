@@ -3,6 +3,7 @@ import { styled, Typography } from '@mui/material';
 
 import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
+import { DirectionLocaleWrapper } from './DirectionLocaleWrapper';
 
 const StyledVariants = styled('div')`
   display: grid;
@@ -66,7 +67,9 @@ export const TranslationVisual: React.FC<Props> = ({
         maxLines={limitLines ? 3 : undefined}
         lang={locale}
       >
-        {text}
+        <DirectionLocaleWrapper languageTag={locale}>
+          {text}
+        </DirectionLocaleWrapper>
       </LimitedHeightText>
     );
   } else {
@@ -87,7 +90,9 @@ export const TranslationVisual: React.FC<Props> = ({
             maxLines={limitLines ? 3 : undefined}
             lang={locale}
           >
-            {variants[0].value}
+            <DirectionLocaleWrapper languageTag={locale}>
+              {variants[0].value}
+            </DirectionLocaleWrapper>
           </LimitedHeightText>
         ) : (
           <LimitedHeightText
@@ -101,7 +106,9 @@ export const TranslationVisual: React.FC<Props> = ({
                 <React.Fragment key={i}>
                   <div className="chip">{option}</div>
                   <div className={limitLines ? 'textWrapped' : undefined}>
-                    {value}
+                    <DirectionLocaleWrapper languageTag={locale}>
+                      {value}
+                    </DirectionLocaleWrapper>
                   </div>
                 </React.Fragment>
               ))}

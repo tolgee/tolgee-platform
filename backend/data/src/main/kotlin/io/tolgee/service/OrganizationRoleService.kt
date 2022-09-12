@@ -109,8 +109,6 @@ class OrganizationRoleService(
     OrganizationRole(user = user, organization = organization, type = organizationRoleType)
       .let {
         organizationRoleRepository.save(it)
-        organization.memberRoles.add(it)
-        entityManager.merge(user).organizationRoles.add(it)
       }
   }
 

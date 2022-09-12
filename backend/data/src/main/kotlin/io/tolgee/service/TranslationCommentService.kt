@@ -74,7 +74,7 @@ class TranslationCommentService(
     return translationCommentRepository.save(entity)
   }
 
-  fun createAll(entities: Collection<TranslationComment>) {
+  fun saveAll(entities: Collection<TranslationComment>) {
     translationCommentRepository.saveAll(entities)
   }
 

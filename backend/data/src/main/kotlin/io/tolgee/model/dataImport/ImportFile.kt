@@ -34,11 +34,11 @@ class ImportFile(
   var archive: ImportFile? = null
 
   fun addIssue(type: FileIssueType, params: Map<FileIssueParamType, String>) {
-    this.issues.add(
-      ImportFileIssue(file = this, type = type).apply {
-        this.params = params.map { ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis()) }.toMutableList()
-      }
-    )
+    ImportFileIssue(file = this, type = type).apply {
+      this.params = params.map {
+        ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+      }.toMutableList()
+    }
   }
 
   fun addKeyIsNotStringIssue(keyName: Any, keyIndex: Int) {

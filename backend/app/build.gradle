@@ -39,6 +39,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
+apply plugin: "org.jetbrains.kotlin.plugin.spring"
 
 repositories {
     mavenCentral()
@@ -47,6 +48,7 @@ repositories {
 sourceCompatibility = 11
 
 allOpen {
+    annotation("javax.persistence.Entity")
     annotation("javax.persistence.MappedSuperclass")
     annotation("javax.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
@@ -82,7 +84,6 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
-    implementation("org.springframework.data:spring-data-envers")
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
 
