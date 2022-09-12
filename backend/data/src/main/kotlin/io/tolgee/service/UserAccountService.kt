@@ -22,6 +22,7 @@ import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.util.executeInNewTransaction
 import org.apache.commons.lang3.time.DateUtils
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -53,6 +54,8 @@ class UserAccountService(
   @Autowired
   @Lazy
   lateinit var permissionService: PermissionService
+
+  private val emailValidator = EmailValidator()
 
   fun findOptional(username: String?): Optional<UserAccount> {
     return userAccountRepository.findByUsername(username)
@@ -289,7 +292,7 @@ class UserAccountService(
     dto: UserUpdateRequestDto
   ) {
     if (userAccount.username != dto.email) {
-      if (!Regex("[^@]+@[^@]+").matches(dto.email)) {
+      if (!emailValidator.isValid(dto.email, null)) {
         // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
         throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
       }
