@@ -101,9 +101,6 @@ class MfaService(
         throw AuthenticationException(Message.INVALID_OTP_CODE)
       }
     } else {
-      if (!user.mfaRecoveryCodes.contains(loginRequest.otp)) {
-        throw AuthenticationException(Message.INVALID_OTP_CODE)
-      }
       userAccountService.consumeMfaRecoveryCode(user, loginRequest.otp)
     }
   }

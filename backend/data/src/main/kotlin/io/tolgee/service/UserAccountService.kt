@@ -11,6 +11,7 @@ import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -180,6 +181,10 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun consumeMfaRecoveryCode(userAccount: UserAccount, token: String): UserAccount {
+    if (!userAccount.mfaRecoveryCodes.contains(token)) {
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+
     userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(token)
     return userAccountRepository.save(userAccount)
   }

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.sun.istack.NotNull
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
@@ -26,8 +28,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -44,7 +44,7 @@ class PublicController(
   private val oauth2Delegate: OAuth2Delegate,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
-  private val mailSender: JavaMailSender,
+  private val tolgeeEmailSender: TolgeeEmailSender,
   private val emailVerificationService: EmailVerificationService,
   private val dbPopulatorReal: DbPopulatorReal,
   private val reCaptchaValidationService: ReCaptchaValidationService,
@@ -85,29 +85,26 @@ class PublicController(
     val userAccount = userAccountService.findOptional(request.email).orElse(null) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
-    val message = SimpleMailMessage()
-    message.setTo(request.email!!)
 
     val callbackString = code + "," + request.email
     val url = request.callbackUrl + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
-    if (userAccount.accountType == UserAccount.AccountType.THIRD_PARTY) {
-      message.subject = "Initial password configuration"
-      message.text = """Hello!
-To set a password for your account, please go to the following link: 
-$url
+    val isInitial = userAccount.accountType == UserAccount.AccountType.THIRD_PARTY
 
-If you have not requested this e-mail, please ignore it."""
-    } else {
-      message.subject = "Password reset"
-      message.text = """Hello!
-To reset your password click this link: 
-$url
+    val params = EmailParams(
+      to = request.email!!,
+      subject = if (isInitial) "Initial password configuration" else "Password reset",
+      text = """
+        Hello! 👋<br/><br/>
+        ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
+        <a href="$url">$url</a><br/><br/>
+        If you have not requested this e-mail, please ignore it.<br/><br/>
+        
+        Regards,<br/>
+        Tolgee<br/><br/>
+      """.trimIndent()
+    )
 
-If you have not requested password reset, please just ignore this e-mail."""
-    }
-
-    message.from = properties.smtp.from
-    mailSender.send(message)
+    tolgeeEmailSender.sendEmail(params)
   }
 
   @GetMapping("/reset_password_validate/{email}/{code}")

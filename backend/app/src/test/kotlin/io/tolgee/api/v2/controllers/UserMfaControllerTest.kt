@@ -3,6 +3,9 @@ package io.tolgee.api.v2.controllers
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.MfaService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -36,7 +39,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
 
-    performAuthPut("/v2/user/mfa/totp", requestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
     val fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().totpKey).isEqualTo(encodedKey)
@@ -48,7 +51,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     val requestDto = UserTotpDisableRequestDto(
       password = initialPassword
     )
-    performAuthDelete("/v2/user/mfa/totp", requestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
     val fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().totpKey).isNull()
@@ -65,7 +68,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
 
-    performAuthPut("/v2/user/mfa/recovery", requestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
     fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isNotEmpty
@@ -80,7 +83,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     val res = performAuthPut("/v2/user/mfa/totp", requestDto)
-      .andExpect(MockMvcResultMatchers.status().isBadRequest)
+      .andIsBadRequest
       .andReturn()
 
     assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
@@ -105,19 +108,19 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = "pwease let me innn!!!! >:("
     )
 
-    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andExpect(MockMvcResultMatchers.status().isForbidden)
+    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsForbidden
     var fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().totpKey).isNull()
 
     enableMfa()
 
-    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andExpect(MockMvcResultMatchers.status().isForbidden)
+    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsForbidden
     fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().totpKey).isNotNull
 
-    performAuthPut("/v2/user/mfa/recovery", recoveryRequestDto).andExpect(MockMvcResultMatchers.status().isForbidden)
+    performAuthPut("/v2/user/mfa/recovery", recoveryRequestDto).andIsForbidden
     fromDb = userAccountService.findOptional(initialUsername)
     Assertions.assertThat(fromDb).isNotEmpty
     Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
@@ -134,7 +137,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
 
-    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsOk
     refreshUser()
     performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
 
@@ -145,7 +148,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     val disableRequestDto = UserTotpDisableRequestDto(
       password = initialPassword
     )
-    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andExpect(MockMvcResultMatchers.status().isOk)
+    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsOk
     refreshUser()
     performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
   }
