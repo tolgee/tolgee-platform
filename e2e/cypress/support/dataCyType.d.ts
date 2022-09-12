@@ -1,5 +1,7 @@
 declare namespace DataCy {
     export type Value = 
+        "account-security-initial-password-set" |
+        "account-security-set-password-instructions-sent" |
         "activity-compact" |
         "activity-detail" |
         "add-box" |
@@ -158,6 +160,24 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "login-button" |
+        "mfa-disable-button" |
+        "mfa-disable-dialog" |
+        "mfa-disable-dialog-content" |
+        "mfa-disable-dialog-password-input" |
+        "mfa-disable-dialog-title" |
+        "mfa-enable-button" |
+        "mfa-enable-dialog" |
+        "mfa-enable-dialog-content" |
+        "mfa-enable-dialog-otp-input" |
+        "mfa-enable-dialog-password-input" |
+        "mfa-enable-dialog-title" |
+        "mfa-enable-dialog-totp-key" |
+        "mfa-recovery-button" |
+        "mfa-recovery-codes-dialog" |
+        "mfa-recovery-codes-dialog-close" |
+        "mfa-recovery-codes-dialog-content" |
+        "mfa-recovery-codes-dialog-password-input" |
+        "mfa-recovery-codes-dialog-title" |
         "navigation-item" |
         "organization-address-part-field" |
         "organization-description-field" |

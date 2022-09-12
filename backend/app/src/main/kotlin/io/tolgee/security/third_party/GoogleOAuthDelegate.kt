@@ -92,6 +92,7 @@ class GoogleOAuthDelegate(
           newUserAccount.name = userResponse.name ?: (userResponse.given_name + " " + userResponse.family_name)
           newUserAccount.thirdPartyAuthId = userResponse.sub
           newUserAccount.thirdPartyAuthType = "google"
+          newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
           userAccountService.createUser(newUserAccount)
           if (invitation != null) {
             invitationService.accept(invitation.code, newUserAccount)

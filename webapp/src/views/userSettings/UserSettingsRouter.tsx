@@ -6,6 +6,7 @@ import { LINKS } from 'tg.constants/links';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { UserProfileView } from './userProfile/UserProfileView';
 import { ApiKeysView } from './apiKeys/ApiKeysView';
+import { AccountSecurityView } from './accountSecurity/AccountSecurityView';
 import { PatsView } from './pats/PatsView';
 
 export const UserSettingsRouter = () => {
@@ -14,6 +15,18 @@ export const UserSettingsRouter = () => {
       <Switch>
         <PrivateRoute exact path={LINKS.USER_PROFILE.template}>
           <UserProfileView />
+        </PrivateRoute>
+
+        <PrivateRoute
+          exact
+          path={[
+            LINKS.USER_ACCOUNT_SECURITY.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.template,
+            LINKS.USER_ACCOUNT_SECURITY_MFA_DISABLE.template,
+          ]}
+        >
+          <AccountSecurityView />
         </PrivateRoute>
 
         <PrivateRoute path={LINKS.USER_API_KEYS.template}>

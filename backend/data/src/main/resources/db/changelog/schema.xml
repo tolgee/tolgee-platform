@@ -2113,4 +2113,31 @@
             <column name="last_used_at" type="timestamp"/>
         </addColumn>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1660576021025-1">
+        <addColumn tableName="user_account">
+            <column name="totp_key" type="bytea"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1660576021025-2">
+        <addColumn tableName="user_account">
+            <column name="mfa_recovery_codes" type="text[]"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1661345119881-1">
+        <addColumn tableName="user_account">
+            <column name="account_type" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia" id="1661345119881-2">
+        <sql dbms="postgresql">
+            UPDATE user_account SET account_type = 'LOCAL';
+            UPDATE user_account SET account_type = 'THIRD_PARTY' WHERE password IS NULL;
+            UPDATE user_account SET account_type = 'LDAP' WHERE password IS NULL AND third_party_auth_type IS NULL;
+        </sql>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1662731848280-1">
+        <addColumn tableName="user_account">
+            <column name="tokens_valid_not_before" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

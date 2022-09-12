@@ -2,8 +2,11 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
+import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
+
+type AccountType = components['schemas']['UserAccountModel']['accountType'];
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -33,7 +36,7 @@ Yup.setLocale({
 });
 
 export class Validation {
-  static readonly USER_PASSWORD = Yup.string().min(8).max(100).required();
+  static readonly USER_PASSWORD = Yup.string().min(8).max(50).required();
 
   static readonly USER_PASSWORD_WITH_REPEAT_NAKED = {
     password: Validation.USER_PASSWORD,
@@ -82,13 +85,41 @@ export class Validation {
         : Yup.string(),
     });
 
-  static readonly USER_SETTINGS = Yup.object().shape({
-    password: Yup.string().min(8).max(100),
+  static readonly USER_SETTINGS = (
+    accountType: AccountType,
+    currentEmail: string
+  ) =>
+    Yup.object().shape({
+      currentPassword: Yup.string()
+        .max(50)
+        .when('email', {
+          is: (email) => email !== currentEmail,
+          then: Yup.string().required('Current password is required'),
+        }),
+      name: Yup.string().required(),
+      email:
+        accountType === 'LDAP' ? Yup.string() : Yup.string().email().required(),
+    });
+
+  static readonly USER_PASSWORD_CHANGE = Yup.object().shape({
+    currentPassword: Yup.string().max(50).required(),
+    password: Validation.USER_PASSWORD,
     passwordRepeat: Yup.string()
       .notRequired()
       .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-    name: Yup.string().required(),
-    email: Yup.string().email().required(),
+  });
+
+  static readonly USER_MFA_ENABLE = Yup.object().shape({
+    password: Yup.string().max(50).required(),
+    otp: Yup.string().required().min(6).max(6),
+  });
+
+  static readonly USER_MFA_VIEW_RECOVERY = Yup.object().shape({
+    password: Yup.string().max(50).required(),
+  });
+
+  static readonly USER_MFA_DISABLE = Yup.object().shape({
+    password: Yup.string().max(50).required(),
   });
 
   static readonly API_KEY_SCOPES = Yup.mixed().test(

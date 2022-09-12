@@ -4,6 +4,21 @@
  */
 
 export interface paths {
+  "/v2/user": {
+    get: operations["getInfo"];
+    put: operations["updateUser"];
+    post: operations["updateUserOld"];
+  };
+  "/v2/user/password": {
+    put: operations["updateUserPassword"];
+  };
+  "/v2/user/mfa/totp": {
+    put: operations["enableMfa"];
+    delete: operations["disableMfa"];
+  };
+  "/v2/user/mfa/recovery": {
+    put: operations["regenerateRecoveryCodes"];
+  };
   "/v2/user/avatar": {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
@@ -178,10 +193,6 @@ export interface paths {
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
-  };
-  "/v2/user": {
-    get: operations["getInfo"];
-    post: operations["updateUser"];
   };
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
@@ -529,6 +540,13 @@ export interface paths {
 
 export interface components {
   schemas: {
+    UserUpdateRequestDto: {
+      name: string;
+      email: string;
+      currentPassword?: string;
+      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      callbackUrl?: string;
+    };
     Avatar: {
       large: string;
       thumbnail: string;
@@ -538,8 +556,26 @@ export interface components {
       username: string;
       name?: string;
       emailAwaitingVerification?: string;
+      mfaEnabled: boolean;
       avatar?: components["schemas"]["Avatar"];
+      accountType: "LOCAL" | "LDAP" | "THIRD_PARTY";
       globalServerRole: "USER" | "ADMIN";
+    };
+    UserUpdatePasswordRequestDto: {
+      currentPassword: string;
+      password: string;
+    };
+    JwtAuthenticationResponse: {
+      accessToken?: string;
+      tokenType?: string;
+    };
+    UserTotpEnableRequestDto: {
+      totpKey: string;
+      otp: string;
+      password: string;
+    };
+    UserMfaRecoveryRequestDto: {
+      password: string;
     };
     EditProjectDTO: {
       name: string;
@@ -795,10 +831,10 @@ export interface components {
       token: string;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
-      id: number;
+      lastUsedAt?: number;
       description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -840,6 +876,7 @@ export interface components {
     };
     V2EditApiKeyDto: {
       scopes: string[];
+      description?: string;
     };
     ApiKeyModel: {
       /** ID of the API key */
@@ -868,26 +905,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectId: number;
-      lastUsedAt?: number;
       username?: string;
       expiresAt?: number;
+      projectId: number;
+      scopes: string[];
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     OldEditKeyDto: {
       currentName: string;
       newName: string;
-    };
-    UserUpdateRequestDto: {
-      name: string;
-      email: string;
-      password?: string;
-      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
-      callbackUrl?: string;
     };
     GenerateSlugDto: {
       name: string;
@@ -1029,10 +1059,6 @@ export interface components {
       callbackUrl?: string;
       recaptchaToken?: string;
     };
-    JwtAuthenticationResponse: {
-      accessToken?: string;
-      tokenType?: string;
-    };
     ResetPassword: {
       email: string;
       code: string;
@@ -1045,6 +1071,7 @@ export interface components {
     LoginRequest: {
       username?: string;
       password?: string;
+      otp?: string;
     };
     GetKeyTranslationsReqDto: {
       key?: string;
@@ -1124,7 +1151,6 @@ export interface components {
       clientSentryDsn?: string;
       needsEmailVerification: boolean;
       userCanCreateOrganizations: boolean;
-      socket: components["schemas"]["SocketIo"];
       appName: string;
       version: string;
       showVersion: boolean;
@@ -1132,12 +1158,6 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
-    };
-    SocketIo: {
-      enabled: boolean;
-      port: number;
-      serverUrl?: string;
-      allowedTransports: string[];
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1526,15 +1546,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectId: number;
-      lastUsedAt?: number;
       username?: string;
       expiresAt?: number;
+      projectId: number;
+      scopes: string[];
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
-      scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1575,6 +1595,9 @@ export interface components {
       code?: string;
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    UserTotpDisableRequestDto: {
+      password: string;
+    };
     DeleteKeysDto: {
       /** IDs of keys to delete */
       ids: number[];
@@ -1583,6 +1606,190 @@ export interface components {
 }
 
 export interface operations {
+  getInfo: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  updateUserOld: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  updateUserPassword: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdatePasswordRequestDto"];
+      };
+    };
+  };
+  enableMfa: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpEnableRequestDto"];
+      };
+    };
+  };
+  disableMfa: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpDisableRequestDto"];
+      };
+    };
+  };
+  regenerateRecoveryCodes: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMfaRecoveryRequestDto"];
+      };
+    };
+  };
   uploadAvatar: {
     responses: {
       /** OK */
@@ -3598,55 +3805,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
-  getInfo: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updateUser: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };

@@ -7,7 +7,7 @@ import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
@@ -28,6 +28,7 @@ type ValueType = {
 const PasswordResetSetView: FunctionComponent = () => {
   const t = useTranslate();
   const match = useRouteMatch();
+  const user = useUser();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];
   const [code, email] = atob(encodedData).split(',');
 
@@ -53,7 +54,7 @@ const PasswordResetSetView: FunctionComponent = () => {
 
   if (
     !remoteConfig.authentication ||
-    security.allowPrivate ||
+    (security.allowPrivate && user && user.accountType !== 'THIRD_PARTY') ||
     !remoteConfig.passwordResettable ||
     success
   ) {

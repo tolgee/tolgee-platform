@@ -11,7 +11,7 @@ import { Administration } from 'tg.views/administration/Administration';
 import { OrganizationRedirectHandler } from './security/OrganizationRedirectHandler';
 
 const LoginRouter = React.lazy(
-  () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
+  () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
 );
 const SignUpView = React.lazy(
   () => import(/* webpackChunkName: "sign-up-view" */ './security/SignUpView')

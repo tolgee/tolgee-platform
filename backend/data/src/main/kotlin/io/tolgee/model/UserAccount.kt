@@ -1,19 +1,10 @@
 package io.tolgee.model
 
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
+import com.vladmihalcea.hibernate.type.array.ListArrayType
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import java.util.*
+import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
 @Entity
@@ -29,6 +20,7 @@ import javax.validation.constraints.NotBlank
     )
   ]
 )
+@TypeDef(name = "string-array", typeClass = ListArrayType::class)
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +34,21 @@ data class UserAccount(
   var name: String = "",
 
   @Enumerated(EnumType.STRING)
-  var role: Role? = Role.USER
+  var role: Role? = Role.USER,
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "account_type")
+  var accountType: AccountType? = AccountType.LOCAL,
 ) : AuditModel(), ModelWithAvatar {
+  @Column(name = "totp_key", columnDefinition = "bytea")
+  var totpKey: ByteArray? = null
+
+  @Type(type = "string-array")
+  @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
+  var mfaRecoveryCodes: List<String> = emptyList()
+
+  @Column(name = "tokens_valid_not_before")
+  var tokensValidNotBefore: Date? = null
 
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var permissions: MutableSet<Permission> = mutableSetOf()
@@ -82,12 +87,14 @@ data class UserAccount(
     name: String?,
     permissions: MutableSet<Permission>,
     role: Role = Role.USER,
+    accountType: AccountType = AccountType.LOCAL,
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?
   ) : this(id = 0L, username = "", password, name = "") {
     this.permissions = permissions
     this.role = role
+    this.accountType = accountType
     this.thirdPartyAuthType = thirdPartyAuthType
     this.thirdPartyAuthId = thirdPartyAuthId
     this.resetPasswordCode = resetPasswordCode
@@ -95,5 +102,9 @@ data class UserAccount(
 
   enum class Role {
     USER, ADMIN
+  }
+
+  enum class AccountType {
+    LOCAL, LDAP, THIRD_PARTY
   }
 }

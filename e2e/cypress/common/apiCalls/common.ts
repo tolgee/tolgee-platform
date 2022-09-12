@@ -4,6 +4,8 @@ import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
+type AccountType = components['schemas']['UserAccountModel']['accountType'];
+
 let token = null;
 
 export const v2apiFetch = (
@@ -181,6 +183,38 @@ export const getUser = (username: string) => {
   });
 };
 
+export const userEnableMfa = (
+  username: string,
+  key: number[],
+  recoveryCodes: string[] = []
+) => {
+  const encodedKey = key
+    .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
+    .join('');
+  const joinedCodes = recoveryCodes.join(',');
+
+  const sql = `UPDATE user_account
+               SET totp_key           = '\\x${encodedKey}',
+                   mfa_recovery_codes = '{${joinedCodes}}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const userDisableMfa = (username: string) => {
+  const sql = `UPDATE user_account
+               SET totp_key           = NULL,
+                   mfa_recovery_codes = '{}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const setUserType = (username: string, type: AccountType) => {
+  const sql = `UPDATE user_account
+               SET account_type = '${type}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
@@ -193,14 +227,14 @@ export const getAllProjectApiKeys = (projectId: number) =>
   // so we need to wrap the whole fn with another promise to actually
   // resolve empty array
   // thanks Cypress!
-  new Promise((resolve) =>
+  new Promise<components['schemas']['ApiKeyModel'][]>((resolve) =>
     v2apiFetch(`api-keys`, {
       method: 'GET',
       qs: {
         filterProjectId: projectId,
       },
     }).then((r) => resolve(r.body?._embedded?.apiKeys || []))
-  ) as any as Promise<components['schemas']['ApiKeyModel'][]>;
+  );
 
 export const deleteAllProjectApiKeys = (projectId: number) =>
   getAllProjectApiKeys(projectId).then((keys) => {
@@ -258,7 +292,7 @@ export const deleteAllEmails = () =>
 export const getParsedResetPasswordEmail = () =>
   getAllEmails().then((r) => {
     return {
-      resetLink: r[0].text.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
+      resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
       text: r[0].text,

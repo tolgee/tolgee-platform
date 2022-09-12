@@ -71,8 +71,13 @@ class JwtTokenProviderImpl(
   }
 
   override fun getUser(token: JwtToken): UserAccountDto {
-    return userAccountService.getDto(token.id)
-      ?: throw AuthenticationException(io.tolgee.constants.Message.USER_NOT_FOUND)
+    val userAccount = userAccountService.find(token.id)
+      .orElseThrow { AuthenticationException(io.tolgee.constants.Message.USER_NOT_FOUND) }
+
+    if (userAccount.tokensValidNotBefore != null && token.issuedAt.before(userAccount.tokensValidNotBefore))
+      throw AuthenticationException(io.tolgee.constants.Message.EXPIRED_JWT_TOKEN)
+
+    return UserAccountDto.fromEntity(userAccount)
   }
 
   override fun resolveToken(req: HttpServletRequest): JwtToken? {

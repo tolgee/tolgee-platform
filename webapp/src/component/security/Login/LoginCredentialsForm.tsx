@@ -1,22 +1,21 @@
-import React, { FunctionComponent } from 'react';
+import React, { RefObject, useEffect } from 'react';
 import { Alert, Button, Link as MuiLink, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
-import { Link, Redirect, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
-import { SecurityService } from 'tg.service/SecurityService';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
-import LoadingButton from '../common/form/LoadingButton';
-import { StandardForm } from '../common/form/StandardForm';
-import { TextField } from '../common/form/fields/TextField';
-import { DashboardPage } from '../layout/DashboardPage';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import {
   gitHubService,
   googleService,
@@ -24,18 +23,28 @@ import {
   OAuthService,
 } from 'tg.component/security/OAuthService';
 
-interface LoginProps {}
-
 const globalActions = container.resolve(GlobalActions);
-const securityServiceIns = container.resolve(SecurityService);
-// noinspection JSUnusedLocalSymbols
-export const LoginView: FunctionComponent<LoginProps> = (props) => {
+
+type Credentials = { username: string; password: string };
+type LoginViewCredentialsProps = {
+  credentialsRef: RefObject<Credentials>;
+  onMfaEnabled: () => void;
+};
+
+export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const t = useTranslate();
+  const remoteConfig = useConfig();
   const security = useSelector((state: AppState) => state.global.security);
   const authLoading = useSelector(
     (state: AppState) => state.global.authLoading
   );
-  const remoteConfig = useConfig();
+
+  useEffect(() => {
+    if (security.loginErrorCode === 'mfa_enabled') {
+      security.loginErrorCode = null;
+      props.onMfaEnabled();
+    }
+  }, [security.loginErrorCode]);
 
   const oAuthServices: OAuthService[] = [];
   const githubConfig = remoteConfig.authMethods?.github;
@@ -62,15 +71,6 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
     );
   }
 
-  const history = useHistory();
-  if (history.location.state && (history.location.state as any).from) {
-    securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
-  }
-
-  if (!remoteConfig.authentication || security.allowPrivate) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
-  }
-
   return (
     <DashboardPage>
       <CompactView
@@ -86,7 +86,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
         }
         content={
           <StandardForm
-            initialValues={{ username: '', password: '' }}
+            initialValues={props.credentialsRef.current!}
             submitButtons={
               <Box mt={2}>
                 <Box display="flex" flexDirection="column" alignItems="stretch">
@@ -108,8 +108,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                       marginX={-1}
                     />
                   )}
-                  {oAuthServices.map((provider, i) => (
-                    <React.Fragment key={i}>
+                  {oAuthServices.map((provider) => (
+                    <React.Fragment key={provider.id}>
                       <Button
                         component="a"
                         href={provider.authenticationUrl}
@@ -125,7 +125,11 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                 </Box>
               </Box>
             }
-            onSubmit={(data) => globalActions.login.dispatch(data)}
+            onSubmit={(data) => {
+              props.credentialsRef.current!.username = data.username;
+              props.credentialsRef.current!.password = data.password;
+              globalActions.login.dispatch(data);
+            }}
           >
             <TextField
               name="username"
@@ -144,13 +148,11 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
           <Box display="flex" justifyContent="space-between" flexWrap="wrap">
             <Box>
               {security.allowRegistration && (
-                <>
-                  <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
-                    <Typography variant="caption">
-                      <T>login_sign_up</T>
-                    </Typography>
-                  </MuiLink>
-                </>
+                <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
+                  <Typography variant="caption">
+                    <T>login_sign_up</T>
+                  </Typography>
+                </MuiLink>
               )}
             </Box>
             {remoteConfig.passwordResettable && (
@@ -168,4 +170,4 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
       />
     </DashboardPage>
   );
-};
+}

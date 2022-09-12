@@ -9,7 +9,7 @@ import { SignUpService } from 'tg.service/SignUpService';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
-import { FullPageLoading } from '../common/FullPageLoading';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 

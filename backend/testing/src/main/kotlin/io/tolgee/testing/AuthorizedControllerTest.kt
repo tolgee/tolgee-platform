@@ -60,6 +60,10 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     init(jwtTokenProvider.generateToken(_userAccount!!.id).toString())
   }
 
+  fun refreshUser() {
+    _userAccount = userAccountService.find(_userAccount!!.id).get()
+  }
+
   fun logout() {
     _userAccount = null
   }
