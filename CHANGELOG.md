@@ -1,3 +1,10 @@
+# [2.43.0](https://github.com/tolgee/tolgee-platform/compare/v2.42.1...v2.43.0) (2022-09-12)
+
+
+### Features
+
+* account security enhancements ([#1365](https://github.com/tolgee/tolgee-platform/issues/1365)) ([8cc4fc2](https://github.com/tolgee/tolgee-platform/commit/8cc4fc228c8ab3c4f6378d62042e0f288b728692))
+
 ## [2.42.1](https://github.com/tolgee/tolgee-platform/compare/v2.42.0...v2.42.1) (2022-09-12)
 
 
