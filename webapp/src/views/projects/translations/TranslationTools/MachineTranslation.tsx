@@ -5,6 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { TabMessage } from './TabMessage';
 import { useProviderImg } from './useProviderImg';
 import { useTranslationTools } from './useTranslationTools';
+import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
 type SuggestResultModel = components['schemas']['SuggestResultModel'];
 
@@ -23,6 +24,7 @@ const StyledItem = styled('div')`
   cursor: pointer;
   transition: all 0.1s ease-in-out;
   transition-property: background color;
+
   &:hover {
     background: ${({ theme }) => theme.palette.emphasis[100]};
     color: ${({ theme }) => theme.palette.primary.main};
@@ -41,11 +43,13 @@ const StyledValue = styled('div')`
 type Props = {
   data: SuggestResultModel | undefined;
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
+  languageTag: string;
 };
 
 export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
+  languageTag,
 }) => {
   const t = useTranslate();
   const getProviderImg = useProviderImg();
@@ -80,7 +84,11 @@ export const MachineTranslation: React.FC<Props> = ({
               <StyledSource>
                 {providerImg && <img src={providerImg} width="16px" />}
               </StyledSource>
-              <StyledValue>{translation}</StyledValue>
+              <StyledValue>
+                <span dir={getLanguageDirection(languageTag)}>
+                  {translation}
+                </span>
+              </StyledValue>
             </StyledItem>
           );
         })

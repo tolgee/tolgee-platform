@@ -10,7 +10,7 @@ import { FieldLabel } from '../KeySingle/FieldLabel';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { ToolsPottomPanel } from '../TranslationTools/ToolsBottomPanel';
+import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
@@ -249,7 +249,9 @@ export const FormBody: React.FC<Props> = ({
           </LoadingButton>
         </Box>
       </Box>
-      {hintDisplayed && <ToolsPottomPanel data={toolsData} />}
+      {hintDisplayed && targetLang && (
+        <ToolsBottomPanel data={toolsData} languageTag={targetLang.tag} />
+      )}
     </>
   );
 };

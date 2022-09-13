@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useCurrentLanguage } from '@tolgee/react';
-import { Tooltip, Box, styled } from '@mui/material';
+import { Box, styled, Tooltip } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -87,9 +87,14 @@ const StyledSmallActionButton = styled(SmallActionButton)`
 type Props = {
   entry: TranslationHistoryModel;
   showDifferences: boolean;
+  languageTag: string;
 };
 
-export const HistoryItem: React.FC<Props> = ({ entry, showDifferences }) => {
+export const HistoryItem: React.FC<Props> = ({
+  entry,
+  showDifferences,
+  languageTag,
+}) => {
   const lang = useCurrentLanguage();
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -102,7 +107,9 @@ export const HistoryItem: React.FC<Props> = ({ entry, showDifferences }) => {
 
   const textDiff = useMemo(
     () =>
-      showDifferences ? getTextDiff(textChanges) : getNoDiffChange(textChanges),
+      showDifferences
+        ? getTextDiff(textChanges, languageTag)
+        : getNoDiffChange(textChanges, languageTag),
     [textChanges, showDifferences]
   );
   const stateDiff = useMemo(() => getStateChange(stateChanges), [stateChanges]);

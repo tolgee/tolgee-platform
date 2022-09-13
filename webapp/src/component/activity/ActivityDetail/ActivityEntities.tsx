@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { Activity } from '../types';
 import { formatDiff } from '../formatTools';
@@ -62,6 +62,7 @@ export const ActivityEntities: React.FC<Props> = ({
                 value: field.value,
                 options: field.options,
                 diffEnabled,
+                languageTag: field.languageTag,
               });
               return value ? (
                 <React.Fragment key={i}>

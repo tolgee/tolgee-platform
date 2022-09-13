@@ -8,12 +8,15 @@ const TOOLS_BOTTOM_HEIGHT = 200;
 
 type Props = {
   data: TranslationToolsProps['data'];
+  languageTag: TranslationToolsProps['languageTag'];
 };
 
-export const ToolsPottomPanel: React.FC<Props> = ({ data }) => {
+export const ToolsBottomPanel: React.FC<Props> = ({ data, languageTag }) => {
   return (
     <BottomPanel height={TOOLS_BOTTOM_HEIGHT}>
-      {(width) => <TranslationTools width={width} data={data} />}
+      {(width) => (
+        <TranslationTools languageTag={languageTag} width={width} data={data} />
+      )}
     </BottomPanel>
   );
 };

@@ -218,6 +218,7 @@ export const TranslationOpened: React.FC<Props> = ({
               anchorEl={cellRef.current || undefined}
               cellPosition={cellPosition}
               data={data}
+              languageTag={language.tag}
             />
           )}
         </>
@@ -230,13 +231,7 @@ export const TranslationOpened: React.FC<Props> = ({
           editEnabled={editEnabled}
         />
       ) : mode === 'history' ? (
-        <History
-          keyId={keyId}
-          language={language}
-          translation={translation}
-          onCancel={() => onCancel(true)}
-          editEnabled={editEnabled}
-        />
+        <History language={language} translation={translation} />
       ) : null}
     </StyledContainer>
   );
