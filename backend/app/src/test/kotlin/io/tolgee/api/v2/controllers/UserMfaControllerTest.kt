@@ -35,7 +35,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   fun `it enables MFA`() {
     val requestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
-      otp = mfaService.generateCode(encodedKey).toString(),
+      otp = mfaService.generateStringCode(encodedKey),
       password = initialPassword
     )
 
@@ -78,7 +78,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   fun `it requires valid TOTP code for activation`() {
     val requestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
-      otp = (mfaService.generateCode(encodedKey) + 1).toString(),
+      otp = (mfaService.generateCode(encodedKey) + 1).toString().padStart(6, '0'),
       password = initialPassword
     )
 
@@ -96,7 +96,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   fun `it requires valid password`() {
     val enableRequestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
-      otp = mfaService.generateCode(encodedKey).toString(),
+      otp = mfaService.generateStringCode(encodedKey),
       password = "pwease let me innn!!!! >:("
     )
 
@@ -133,7 +133,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     val enableRequestDto = UserTotpEnableRequestDto(
       totpKey = TOTP_KEY,
-      otp = mfaService.generateCode(encodedKey).toString(),
+      otp = mfaService.generateStringCode(encodedKey),
       password = initialPassword
     )
 
