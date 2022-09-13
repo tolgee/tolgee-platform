@@ -1,3 +1,10 @@
+## [2.43.1](https://github.com/tolgee/tolgee-platform/compare/v2.43.0...v2.43.1) (2022-09-13)
+
+
+### Bug Fixes
+
+* Fix MFA tests ([#1371](https://github.com/tolgee/tolgee-platform/issues/1371)) ([fdf06b4](https://github.com/tolgee/tolgee-platform/commit/fdf06b4b363c8689be552dc4b27bc7ae9f295b89))
+
 # [2.43.0](https://github.com/tolgee/tolgee-platform/compare/v2.42.1...v2.43.0) (2022-09-12)
 
 
