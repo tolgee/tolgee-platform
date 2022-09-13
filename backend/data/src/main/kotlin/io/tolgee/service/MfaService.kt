@@ -125,4 +125,8 @@ class MfaService(
   fun generateCode(key: ByteArray): Int {
     return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
   }
+
+  fun generateStringCode(key: ByteArray): String {
+    return generateCode(key).toString().padStart(6, '0')
+  }
 }
