@@ -1,3 +1,10 @@
+## [2.43.2](https://github.com/tolgee/tolgee-platform/compare/v2.43.1...v2.43.2) (2022-09-14)
+
+
+### Bug Fixes
+
+* Fix right-to-left in MT suggestions, history and activity ([#1372](https://github.com/tolgee/tolgee-platform/issues/1372)) ([6e38d77](https://github.com/tolgee/tolgee-platform/commit/6e38d775371358bb948b4b2ecce0fe972e7a4de1))
+
 ## [2.43.1](https://github.com/tolgee/tolgee-platform/compare/v2.43.0...v2.43.1) (2022-09-13)
 
 
