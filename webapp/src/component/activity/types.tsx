@@ -94,6 +94,7 @@ export type Field = {
   label?: string;
   value: DiffValue<any>;
   options: FieldOptionsObj;
+  languageTag?: string;
 };
 
 export type EntityOptions = {

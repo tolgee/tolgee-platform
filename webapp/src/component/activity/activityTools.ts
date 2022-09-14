@@ -28,7 +28,8 @@ export const getDiffVersion = (
 const buildField = (
   value: DiffValue<any>,
   options: FieldOptionsObj,
-  name: string
+  name: string,
+  languageTag?: string | undefined
 ): Field => {
   const label = options.label;
 
@@ -37,6 +38,7 @@ const buildField = (
     value,
     label,
     options,
+    languageTag,
   };
 };
 
@@ -105,6 +107,16 @@ const reduceReferences = (allReferences: Reference[]): Reference[] => {
   return [...unifiedMap.values(), ...otherReferences];
 };
 
+function getFieldLanguageTag(
+  fieldName: string,
+  entityType: EntityEnum,
+  entityData: ModifiedEntityModel
+): string | undefined {
+  if (entityType == 'Translation') {
+    return entityData.relations?.['language'].data?.['tag'] as any as string;
+  }
+}
+
 const buildEntity = (
   entityType: EntityEnum,
   entityData: ModifiedEntityModel,
@@ -119,7 +131,7 @@ const buildEntity = (
   };
 
   Object.entries(options.fields)
-    .filter(([field]) => selectedFields.includes(field))
+    .filter(([fieldName]) => selectedFields.includes(fieldName))
     .forEach(([fieldName, o]) => {
       if (!o) {
         return null;
@@ -132,8 +144,16 @@ const buildEntity = (
         optionsObj
       );
 
+      const languageTag = getFieldLanguageTag(
+        fieldName,
+        entityType,
+        entityData
+      );
+
       if (fieldData) {
-        result.fields.push(buildField(fieldData, optionsObj, fieldName));
+        result.fields.push(
+          buildField(fieldData, optionsObj, fieldName, languageTag)
+        );
       }
     });
 

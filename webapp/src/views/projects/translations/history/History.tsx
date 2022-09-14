@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { T } from '@tolgee/react';
-import { styled, Switch, FormControlLabel } from '@mui/material';
+import { FormControlLabel, styled, Switch } from '@mui/material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
@@ -61,14 +61,11 @@ const StyledLoadMore = styled('div')`
 `;
 
 type Props = {
-  keyId: number;
   language: LanguageModel;
   translation: TranslationViewModel | undefined;
-  onCancel: () => void;
-  editEnabled: boolean;
 };
 
-export const History: React.FC<Props> = ({ translation }) => {
+export const History: React.FC<Props> = ({ translation, language }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const project = useProject();
   const counter = useDateCounter();
@@ -164,6 +161,7 @@ export const History: React.FC<Props> = ({ translation }) => {
             <React.Fragment key={entry.timestamp}>
               {counter.isNewDate(date) && <StickyDateSeparator date={date} />}
               <HistoryItem
+                languageTag={language.tag}
                 key={entry.timestamp}
                 entry={entry}
                 showDifferences={showdifferences}
