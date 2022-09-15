@@ -1,3 +1,10 @@
+# [2.44.0](https://github.com/tolgee/tolgee-platform/compare/v2.43.2...v2.44.0) (2022-09-15)
+
+
+### Features
+
+* limit number of selected languages ([f0d081c](https://github.com/tolgee/tolgee-platform/commit/f0d081c8007a1a08c17d1f7f223509b41fa9d238))
+
 ## [2.43.2](https://github.com/tolgee/tolgee-platform/compare/v2.43.1...v2.43.2) (2022-09-14)
 
 
