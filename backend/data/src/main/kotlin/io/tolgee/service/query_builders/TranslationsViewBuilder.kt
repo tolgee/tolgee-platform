@@ -124,9 +124,32 @@ class TranslationsViewBuilder(
   private fun addLeftJoinedColumns() {
     addScreenshotCounts()
     selection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
-    for (language in languages) {
+
+    // we want to add all the translation joins first
+    val translationJoins = languages.map { language ->
       val translation = root.join(Key_.translations, JoinType.LEFT)
       translation.on(cb.equal(translation.get(Translation_.language), language))
+      language to translation
+    }
+
+    // and then we want to add the comment joins
+    translationJoins.forEach { (language, translation) ->
+      val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
+      unresolvedCommentsJoin.on(
+        cb.and(
+          cb.equal(
+            unresolvedCommentsJoin.get(TranslationComment_.translation),
+            translation
+          ),
+          cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
+        )
+      )
+      val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
+
+      val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
+      val commentsExpression = cb.countDistinct(commentsJoin)
+
+      // and add all to the selection
       val translationId = translation.get(Translation_.id)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
         translationId
@@ -140,31 +163,17 @@ class TranslationsViewBuilder(
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
         translationStateField
 
-      addNotFilteringTranslationFields(language, translation)
-
-      val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
-      val commentsExpression = cb.countDistinct(commentsJoin)
       selection[
         KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::commentCount.name
       ] = commentsExpression
 
-      val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
-      unresolvedCommentsJoin.on(
-        cb.and(
-          cb.equal(
-            unresolvedCommentsJoin.get(TranslationComment_.translation),
-            translation
-          ),
-          cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
-        )
-      )
-      val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
       selection[
         KeyWithTranslationsView::translations.name + "." +
           language.tag + "." +
           TranslationView::unresolvedCommentCount.name
       ] = unresolvedCommentsExpression
 
+      addNotFilteringTranslationFields(language, translation)
       fullTextFields.add(translationTextField)
       translationsTextFields.add(translationTextField)
       applyTranslationFilters(language, translationTextField, translationStateField)
