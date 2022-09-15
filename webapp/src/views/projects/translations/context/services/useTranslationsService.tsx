@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { InfiniteData } from 'react-query';
 import { container } from 'tsyringe';
 import { useDebouncedCallback } from 'use-debounce';
+import { T } from '@tolgee/react';
 
 import {
   useApiInfiniteQuery,
@@ -12,7 +13,9 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { ChangeScreenshotNum, UpdateTranslation } from '../types';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
+const MAX_LANGUAGES = 10;
 const PAGE_SIZE = 60;
 
 type TranslationsQueryType =
@@ -66,6 +69,8 @@ export const useTranslationsService = (props: Props) => {
     defaultVal: '',
   });
 
+  const messaging = useMessage();
+
   const [search, _setSearch] = useState(urlSearch);
   const [languages, _setLanguages] = useState<string[] | undefined>(undefined);
 
@@ -88,12 +93,13 @@ export const useTranslationsService = (props: Props) => {
 
   useEffect(() => {
     if (props.initialLangs !== null) {
+      const languages = props.initialLangs?.slice(0, MAX_LANGUAGES);
       setEnabled(true);
       setQuery({
         ...query,
-        languages: props.initialLangs,
+        languages: languages,
       });
-      _setLanguages(props.initialLangs);
+      _setLanguages(languages);
     }
   }, [props.initialLangs]);
 
@@ -205,6 +211,15 @@ export const useTranslationsService = (props: Props) => {
   };
 
   const setLanguages = (value: string[] | undefined) => {
+    if (value && value.length > 10) {
+      messaging.error(
+        <T
+          keyName="translations_languages_limit_reached"
+          parameters={{ max: MAX_LANGUAGES }}
+        />
+      );
+      return;
+    }
     if (props.updateLocalStorageLanguages) {
       projectPreferences.setForProject(props.projectId, value);
     }
