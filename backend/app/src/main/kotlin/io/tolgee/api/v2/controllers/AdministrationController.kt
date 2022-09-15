@@ -88,7 +88,7 @@ class AdministrationController(
   ): String {
     securityService.checkUserIsServerAdmin()
     val user = userAccountService.get(userId)
-    val token = jwtTokenProvider.generateToken(user.id)
+    val token = jwtTokenProvider.generateToken(user.id, isSuper = true)
     return token.toString()
   }
 }

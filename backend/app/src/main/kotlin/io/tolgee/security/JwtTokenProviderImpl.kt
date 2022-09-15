@@ -3,12 +3,15 @@
  */
 package io.tolgee.security
 
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.JwtSecretProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -26,7 +29,8 @@ class JwtTokenProviderImpl(
   private val configuration: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val jwtSecretProvider: JwtSecretProvider,
-  private val authenticationProvider: AuthenticationProvider
+  private val authenticationProvider: AuthenticationProvider,
+  private val currentDateProvider: CurrentDateProvider
 ) : JwtTokenProvider {
 
   private val logger = LoggerFactory.getLogger(JwtTokenProviderImpl::class.java)
@@ -34,12 +38,24 @@ class JwtTokenProviderImpl(
   private val key: SecretKey
     get() = Keys.hmacShaKeyFor(jwtSecretProvider.jwtSecret)
 
-  override fun generateToken(userId: Long): JwtToken {
+  /**
+   * This generates a JWT token.
+   * isSuper = true makes this key able to do sensitive operations (is JWT)
+   * Super JWT can be returned only when 2FA is passed or is not set
+   */
+  override fun generateToken(userId: Long, isSuper: Boolean): JwtToken {
+    val twentyMinutes = 20 * 60 * 1000
+    val claims = mutableMapOf<String, Any>()
+    if (isSuper) {
+      // super key is needed for sensitive operations
+      claims["superExpiration"] = currentDateProvider.date.time + twentyMinutes
+    }
     val now = Date()
     return JwtToken(
       Jwts.builder()
         .setSubject(userId.toString())
         .setIssuedAt(Date())
+        .addClaims(claims)
         .setExpiration(Date(now.time + configuration.authentication.jwtExpiration))
         .signWith(key)
         .compact(),
@@ -47,10 +63,9 @@ class JwtTokenProviderImpl(
     )
   }
 
-  override fun validateToken(authToken: JwtToken): Boolean {
+  override fun validateToken(authToken: JwtToken): Jws<Claims> {
     try {
-      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
-      return true
+      return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
     } catch (ex: SignatureException) {
       logger.error("Invalid JWT signature")
     } catch (ex: MalformedJwtException) {
@@ -72,7 +87,7 @@ class JwtTokenProviderImpl(
 
   override fun getUser(token: JwtToken): UserAccountDto {
     val userAccount = userAccountService.find(token.id)
-      .orElseThrow { AuthenticationException(io.tolgee.constants.Message.USER_NOT_FOUND) }
+      ?: throw AuthenticationException(io.tolgee.constants.Message.USER_NOT_FOUND)
 
     if (userAccount.tokensValidNotBefore != null && token.issuedAt.before(userAccount.tokensValidNotBefore))
       throw AuthenticationException(io.tolgee.constants.Message.EXPIRED_JWT_TOKEN)
@@ -91,7 +106,8 @@ class JwtTokenProviderImpl(
 
   override fun getAuthentication(jwtToken: String?): Authentication? {
     val token = jwtToken?.let { this.resolveToken(jwtToken) }
-    if (token != null && this.validateToken(token)) {
+    if (token != null) {
+      this.validateToken(token)
       return this.getAuthentication(token)
     }
     return null

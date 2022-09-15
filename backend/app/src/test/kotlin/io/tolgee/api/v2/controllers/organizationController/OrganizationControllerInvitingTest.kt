@@ -56,7 +56,6 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
       Permission.ProjectPermissionType.VIEW
     )
     tolgeeProperties.frontEndUrl = null
-    this.userAccount = userAccountService.findOptional(username = userAccount!!.username).get()
   }
 
   @Test

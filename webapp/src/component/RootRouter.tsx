@@ -9,6 +9,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { Administration } from 'tg.views/administration/Administration';
 import { OrganizationRedirectHandler } from './security/OrganizationRedirectHandler';
+import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -71,20 +72,22 @@ export const RootRouter = () => (
     <PrivateRoute path={LINKS.GO_TO_ORGANIZATION.template}>
       <OrganizationRedirectHandler />
     </PrivateRoute>
-    <PrivateRoute exact path={LINKS.ROOT.template}>
-      <Redirect to={LINKS.PROJECTS.template} />
-    </PrivateRoute>
-    <PrivateRoute path={LINKS.PROJECTS.template}>
-      <ProjectsRouter />
-    </PrivateRoute>
     <PrivateRoute path={LINKS.USER_SETTINGS.template}>
       <UserSettingsRouter />
-    </PrivateRoute>
-    <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-      <OrganizationsRouter />
     </PrivateRoute>
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <Administration />
     </PrivateRoute>
+    <RequirePreferredOrganization>
+      <PrivateRoute exact path={LINKS.ROOT.template}>
+        <Redirect to={LINKS.PROJECTS.template} />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.PROJECTS.template}>
+        <ProjectsRouter />
+      </PrivateRoute>
+      <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+        <OrganizationsRouter />
+      </PrivateRoute>
+    </RequirePreferredOrganization>
   </Switch>
 );

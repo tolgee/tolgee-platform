@@ -48,9 +48,8 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.findOptional(requestDTO.email)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().name).isEqualTo(requestDTO.name)
+    val fromDb = userAccountService.find(requestDTO.email)
+    Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
   }
 
   @Test
@@ -60,9 +59,8 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb.get().password))
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
       .describedAs("Password is changed").isTrue
   }
 

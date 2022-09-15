@@ -124,7 +124,7 @@ class ProjectsE2eDataController(
     }
 
     users.forEach {
-      userAccountService.findOptional(username = it.email).orElse(null)?.let {
+      userAccountService.find(username = it.email)?.let {
         userAccountRepository.delete(it)
       }
     }

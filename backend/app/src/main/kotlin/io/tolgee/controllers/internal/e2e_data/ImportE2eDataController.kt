@@ -133,7 +133,7 @@ class ImportE2eDataController(
     entityManager.createQuery("select i from Import i").resultList.forEach {
       importService.deleteImport(it as Import)
     }
-    userAccountService.findOptional("franta").orElse(null)?.let {
+    userAccountService.find("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

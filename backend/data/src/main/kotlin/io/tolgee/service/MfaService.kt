@@ -12,7 +12,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
-import io.tolgee.security.payload.LoginRequest
 import org.apache.commons.codec.binary.Base32
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -87,21 +86,21 @@ class MfaService(
     return user.totpKey?.isNotEmpty() == true
   }
 
-  fun checkMfa(user: UserAccount, loginRequest: LoginRequest) {
-    if (user.totpKey?.isNotEmpty() != true) {
+  fun checkMfa(user: UserAccount, otp: String?) {
+    if (!user.isMfaEnabled) {
       return
     }
 
-    if (loginRequest.otp?.isEmpty() != false) {
+    if (otp?.isEmpty() != false) {
       throw AuthenticationException(Message.MFA_ENABLED)
     }
 
-    if (loginRequest.otp.length == 6) {
-      if (!validateTotpCode(user, loginRequest.otp)) {
+    if (otp.length == 6) {
+      if (!validateTotpCode(user, otp)) {
         throw AuthenticationException(Message.INVALID_OTP_CODE)
       }
     } else {
-      userAccountService.consumeMfaRecoveryCode(user, loginRequest.otp)
+      userAccountService.consumeMfaRecoveryCode(user, otp)
     }
   }
 

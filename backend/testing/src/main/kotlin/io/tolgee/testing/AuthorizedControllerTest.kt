@@ -49,19 +49,17 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   }
 
   fun loginAsUser(userName: String) {
-    _userAccount = userAccountService.findOptional(userName).orElseGet {
-      dbPopulator.createUserIfNotExists("admin")
-    }
-    init(jwtTokenProvider.generateToken(_userAccount!!.id).toString())
+    val account = userAccountService.find(userName) ?: dbPopulator.createUserIfNotExists("admin")
+    loginAsUser(account)
   }
 
   fun loginAsUser(userAccount: UserAccount) {
     _userAccount = userAccount
-    init(jwtTokenProvider.generateToken(_userAccount!!.id).toString())
+    init(jwtTokenProvider.generateToken(_userAccount!!.id, true).toString())
   }
 
   fun refreshUser() {
-    _userAccount = userAccountService.find(_userAccount!!.id).get()
+    _userAccount = userAccountService.find(_userAccount!!.id)
   }
 
   fun logout() {

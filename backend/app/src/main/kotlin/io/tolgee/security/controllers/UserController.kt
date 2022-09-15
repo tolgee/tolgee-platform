@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.response.UserResponseDTO
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.service.UserAccountService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -34,6 +35,7 @@ class UserController(
 
   @PostMapping("")
   @Operation(summary = "Updates current user's data")
+  @NeedsSuperJwtToken
   fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDto?) {
     userAccountService.update(authenticationFacade.userAccountEntity, dto!!)
   }

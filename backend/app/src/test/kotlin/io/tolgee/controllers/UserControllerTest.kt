@@ -47,9 +47,8 @@ class UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.findOptional(requestDTO.email)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().name).isEqualTo(requestDTO.name)
+    val fromDb = userAccountService.find(requestDTO.email)
+    Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
   }
 
   @Test

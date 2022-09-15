@@ -2,19 +2,38 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModel
+import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.PrivateUserAccountModel
 import io.tolgee.api.v2.hateoas.user_account.PrivateUserAccountModelAssembler
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.GetSuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.MfaService
+import io.tolgee.service.OrganizationService
 import io.tolgee.service.UserAccountService
+import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.http.ResponseEntity
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 
@@ -26,13 +45,24 @@ class V2UserController(
   private val userAccountService: UserAccountService,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
   private val imageUploadService: ImageUploadService,
-  private val jwtTokenProvider: JwtTokenProvider
+  private val organizationService: OrganizationService,
+  private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
+  private val passwordEncoder: PasswordEncoder,
+  private val jwtTokenProvider: JwtTokenProvider,
+  private val mfaService: MfaService
 ) {
   @Operation(summary = "Returns current user's data.")
   @GetMapping("")
   fun getInfo(): PrivateUserAccountModel {
     val userAccount = authenticationFacade.userAccountEntity
     return privateUserAccountModelAssembler.toModel(userAccount)
+  }
+
+  @Operation(summary = "Deletes current user.")
+  @DeleteMapping("")
+  @NeedsSuperJwtToken
+  fun delete() {
+    userAccountService.delete(authenticationFacade.userAccountEntity)
   }
 
   @PostMapping("")
@@ -79,5 +109,28 @@ class V2UserController(
     val entity = authenticationFacade.userAccountEntity
     userAccountService.removeAvatar(authenticationFacade.userAccountEntity)
     return privateUserAccountModelAssembler.toModel(entity)
+  }
+
+  @GetMapping("/single-owned-organizations")
+  @Operation(summary = "Returns all organizations owned only by current user")
+  @ResponseStatus(HttpStatus.OK)
+  @DenyPatAccess
+  fun getAllSingleOwnedOrganizations(): CollectionModel<SimpleOrganizationModel> {
+    val organizations = organizationService.getAllSingleOwnedByUser(authenticationFacade.userAccountEntity)
+    return simpleOrganizationModelAssembler.toCollectionModel(organizations)
+  }
+
+  @PostMapping("get-super-token")
+  @Operation(summary = "Generates new JWT token permitted to sensitive operations")
+  fun getSuperToken(@RequestBody @Valid req: GetSuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
+    if (authenticationFacade.userAccountEntity.isMfaEnabled) {
+      mfaService.checkMfa(authenticationFacade.userAccountEntity, req.otp)
+    } else {
+      val matches = passwordEncoder.matches(req.password, authenticationFacade.userAccountEntity.password)
+      if (!matches) throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
+    }
+
+    val jwt = jwtTokenProvider.generateToken(authenticationFacade.userAccount.id, true).toString()
+    return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 }

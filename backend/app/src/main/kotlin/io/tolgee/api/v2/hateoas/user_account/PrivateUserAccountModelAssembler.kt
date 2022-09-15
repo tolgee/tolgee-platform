@@ -25,7 +25,9 @@ class PrivateUserAccountModelAssembler(
       mfaEnabled = mfaService.hasMfaEnabled(entity),
       avatar = avatar,
       accountType = entity.accountType ?: UserAccount.AccountType.LOCAL,
-      globalServerRole = entity.role ?: UserAccount.Role.USER
+      globalServerRole = entity.role ?: UserAccount.Role.USER,
+      deletable = entity.isDeletable,
+      needsSuperJwtToken = entity.needsSuperJwt
     )
   }
 }

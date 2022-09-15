@@ -14,5 +14,7 @@ data class PrivateUserAccountModel(
   var mfaEnabled: Boolean,
   var avatar: Avatar?,
   var accountType: UserAccount.AccountType,
-  var globalServerRole: UserAccount.Role
+  var globalServerRole: UserAccount.Role,
+  val deletable: Boolean,
+  val needsSuperJwtToken: Boolean
 ) : RepresentationModel<PrivateUserAccountModel>()

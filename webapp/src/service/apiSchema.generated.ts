@@ -8,6 +8,7 @@ export interface paths {
     get: operations["getInfo"];
     put: operations["updateUser"];
     post: operations["updateUserOld"];
+    delete: operations["delete"];
   };
   "/v2/user/password": {
     put: operations["updateUserPassword"];
@@ -97,7 +98,7 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
     put: operations["update"];
-    delete: operations["delete_4"];
+    delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
     put: operations["dismissAutoTranslatedState"];
@@ -134,7 +135,7 @@ export interface paths {
   "/v2/pats/{id}": {
     get: operations["get_7"];
     put: operations["update_2"];
-    delete: operations["delete_6"];
+    delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
     put: operations["regenerate"];
@@ -168,16 +169,16 @@ export interface paths {
   "/v2/organizations/{id}": {
     get: operations["get_10"];
     put: operations["update_3"];
-    delete: operations["delete_7"];
+    delete: operations["delete_8"];
   };
   "/api/organizations/{id}": {
     get: operations["get_11"];
     put: operations["update_4"];
-    delete: operations["delete_8"];
+    delete: operations["delete_9"];
   };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_5"];
-    delete: operations["delete_10"];
+    delete: operations["delete_11"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
@@ -188,11 +189,14 @@ export interface paths {
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
     post: operations["create_13"];
-    delete: operations["delete_13"];
+    delete: operations["delete_14"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
+  };
+  "/v2/user/get-super-token": {
+    post: operations["getSuperToken"];
   };
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
@@ -215,7 +219,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/keys": {
     post: operations["create_1"];
-    delete: operations["delete_2"];
+    delete: operations["delete_3"];
   };
   "/v2/projects/{projectId}/import/with-streaming-response": {
     /** Prepares provided files to import, streams operation progress */
@@ -312,6 +316,9 @@ export interface paths {
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
+  };
+  "/v2/user/single-owned-organizations": {
+    get: operations["getAllSingleOwnedOrganizations"];
   };
   "/v2/user-preferences": {
     get: operations["get"];
@@ -480,7 +487,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_11"];
+    delete: operations["delete_12"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -510,7 +517,7 @@ export interface paths {
     delete: operations["removeTag"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete"];
+    delete: operations["delete_1"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_1"];
@@ -525,7 +532,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_9"];
+    delete: operations["delete_10"];
   };
   "/api/project/{projectId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_3"];
@@ -534,7 +541,7 @@ export interface paths {
     delete: operations["deleteInvitation_1"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_15"];
+    delete: operations["delete_16"];
   };
 }
 
@@ -551,7 +558,7 @@ export interface components {
       large: string;
       thumbnail: string;
     };
-    UserAccountModel: {
+    PrivateUserAccountModel: {
       id: number;
       username: string;
       name?: string;
@@ -560,6 +567,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       accountType: "LOCAL" | "LDAP" | "THIRD_PARTY";
       globalServerRole: "USER" | "ADMIN";
+      deletable: boolean;
     };
     UserUpdatePasswordRequestDto: {
       currentPassword: string;
@@ -775,6 +783,16 @@ export interface components {
       /** Date when it was updated */
       updatedAt: string;
     };
+    /** User who created the comment */
+    UserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      emailAwaitingVerification?: string;
+      avatar?: components["schemas"]["Avatar"];
+      globalServerRole: "USER" | "ADMIN";
+      createdAt: string;
+    };
     TranslationCommentDto: {
       text: string;
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
@@ -831,8 +849,8 @@ export interface components {
       token: string;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       description: string;
       id: number;
     };
@@ -906,18 +924,24 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       username?: string;
+      lastUsedAt?: number;
       expiresAt?: number;
       projectId: number;
-      scopes: string[];
-      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
+      scopes: string[];
       description: string;
       id: number;
     };
     OldEditKeyDto: {
       currentName: string;
       newName: string;
+    };
+    GetSuperTokenRequest: {
+      /** Has to be provided when TOTP enabled */
+      otp?: string;
+      /** Has to be provided when TOTP not enabled */
+      password?: string;
     };
     GenerateSlugDto: {
       name: string;
@@ -1066,7 +1090,7 @@ export interface components {
     };
     ResetPasswordRequest: {
       callbackUrl: string;
-      email?: string;
+      email: string;
     };
     LoginRequest: {
       username?: string;
@@ -1103,6 +1127,11 @@ export interface components {
       scopes: string[];
       description?: string;
     };
+    CollectionModelSimpleOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+    };
     UserPreferencesModel: {
       language?: string;
       preferredOrganizationId?: number;
@@ -1114,7 +1143,7 @@ export interface components {
     };
     InitialDataModel: {
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
-      userInfo?: components["schemas"]["UserAccountModel"];
+      userInfo?: components["schemas"]["PrivateUserAccountModel"];
       preferredOrganization?: components["schemas"]["OrganizationModel"];
       languageTag?: string;
     };
@@ -1547,12 +1576,12 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       username?: string;
+      lastUsedAt?: number;
       expiresAt?: number;
       projectId: number;
-      scopes: string[];
-      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
+      scopes: string[];
       description: string;
       id: number;
     };
@@ -1611,7 +1640,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -1633,7 +1662,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -1660,7 +1689,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -1679,6 +1708,24 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  delete: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -1795,7 +1842,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -1824,7 +1871,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserAccountModel"];
+          "*/*": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -2570,7 +2617,7 @@ export interface operations {
       };
     };
   };
-  delete_4: {
+  delete_5: {
     parameters: {
       path: {
         commentId: number;
@@ -2643,9 +2690,9 @@ export interface operations {
         languages?: string[];
         /** String to search in key name or translation text */
         search?: string;
-        /** Selects only one key with provided name */
-        filterKeyName?: string;
-        /** Selects only one key with provided id */
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
         /** Selects only keys, where translation is missing in any language */
         filterUntranslatedAny?: boolean;
@@ -3048,7 +3095,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_7: {
     parameters: {
       path: {
         id: number;
@@ -3452,7 +3499,7 @@ export interface operations {
       };
     };
   };
-  delete_7: {
+  delete_8: {
     parameters: {
       path: {
         id: number;
@@ -3534,7 +3581,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_9: {
     parameters: {
       path: {
         id: number;
@@ -3589,7 +3636,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_11: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3724,7 +3771,7 @@ export interface operations {
       };
     };
   };
-  delete_13: {
+  delete_14: {
     parameters: {
       path: {
         projectId: number;
@@ -3805,6 +3852,33 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  getSuperToken: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetSuperTokenRequest"];
       };
     };
   };
@@ -4040,7 +4114,7 @@ export interface operations {
       };
     };
   };
-  delete_2: {
+  delete_3: {
     parameters: {
       path: {
         projectId: number;
@@ -5233,6 +5307,28 @@ export interface operations {
       };
     };
   };
+  getAllSingleOwnedOrganizations: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get: {
     responses: {
       /** OK */
@@ -5824,9 +5920,9 @@ export interface operations {
         languages?: string[];
         /** String to search in key name or translation text */
         search?: string;
-        /** Selects only one key with provided name */
-        filterKeyName?: string;
-        /** Selects only one key with provided id */
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
         /** Selects only keys, where translation is missing in any language */
         filterUntranslatedAny?: boolean;
@@ -6883,7 +6979,7 @@ export interface operations {
       };
     };
   };
-  delete_11: {
+  delete_12: {
     parameters: {
       path: {
         id: number;
@@ -7142,7 +7238,7 @@ export interface operations {
       };
     };
   };
-  delete: {
+  delete_1: {
     parameters: {
       path: {
         ids: number[];
@@ -7261,7 +7357,7 @@ export interface operations {
       };
     };
   };
-  delete_9: {
+  delete_10: {
     parameters: {
       path: {
         ids: number[];
@@ -7331,7 +7427,7 @@ export interface operations {
       };
     };
   };
-  delete_15: {
+  delete_16: {
     parameters: {
       path: {
         key: string;

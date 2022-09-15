@@ -22,14 +22,24 @@ import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
-import io.tolgee.service.*
+import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.MfaService
+import io.tolgee.service.SignUpService
+import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserCredentialsService
 import io.tolgee.service.security.ReCaptchaValidationService
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -50,7 +60,7 @@ class PublicController(
   private val reCaptchaValidationService: ReCaptchaValidationService,
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
-  private val userCredentialsService: UserCredentialsService
+  private val userCredentialsService: UserCredentialsService,
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
@@ -73,16 +83,17 @@ class PublicController(
 
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
-    mfaService.checkMfa(userAccount, loginRequest)
+    mfaService.checkMfa(userAccount, loginRequest.otp)
 
-    val jwt = tokenProvider.generateToken(userAccount.id).toString()
+    // two factor passed, so we can generate super token
+    val jwt = tokenProvider.generateToken(userAccount.id, true).toString()
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 
   @Operation(summary = "Reset password request")
   @PostMapping("/reset_password_request")
   fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
-    val userAccount = userAccountService.findOptional(request.email).orElse(null) ?: return
+    val userAccount = userAccountService.find(request.email!!) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
 
@@ -155,7 +166,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Validates if email is not in use")
   fun validateEmail(@RequestBody email: TextNode): Boolean {
-    return userAccountService.findOptional(email.asText()).isEmpty
+    return userAccountService.find(email.asText()) == null
   }
 
   @GetMapping("/authorize_oauth/{serviceType}")
@@ -191,7 +202,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   private fun validateEmailCode(code: String, email: String): UserAccount {
-    val userAccount = userAccountService.findOptional(email).orElseThrow { NotFoundException() }
+    val userAccount = userAccountService.find(email) ?: throw NotFoundException()
       ?: throw BadRequestException(Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {

@@ -2130,14 +2130,46 @@
     </changeSet>
     <changeSet author="cynthia" id="1661345119881-2">
         <sql dbms="postgresql">
-            UPDATE user_account SET account_type = 'LOCAL';
-            UPDATE user_account SET account_type = 'THIRD_PARTY' WHERE password IS NULL;
-            UPDATE user_account SET account_type = 'LDAP' WHERE password IS NULL AND third_party_auth_type IS NULL;
+            UPDATE user_account
+            SET account_type = 'LOCAL';
+            UPDATE user_account
+            SET account_type = 'THIRD_PARTY'
+            WHERE password IS NULL;
+            UPDATE user_account
+            SET account_type = 'LDAP'
+            WHERE password IS NULL
+              AND third_party_auth_type IS NULL;
         </sql>
     </changeSet>
     <changeSet author="cynthia (generated)" id="1662731848280-1">
         <addColumn tableName="user_account">
             <column name="tokens_valid_not_before" type="timestamp"/>
         </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663245960795-1">
+        <addColumn tableName="user_account">
+            <column name="deleted_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663245960795-2">
+        <dropTable tableName="revision"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663247386701-1">
+        <dropUniqueConstraint constraintName="useraccount_username" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663247386701-2">
+        <sql>
+            create unique index on public.user_account (username, deleted_at) where deleted_at is not null;
+            create unique index on public.user_account (username) where deleted_at is null;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663247386701-3">
+        <sql>
+            create unique index on public.user_account (third_party_auth_id, third_party_auth_type, deleted_at) where deleted_at is not null;
+            create unique index on public.user_account (third_party_auth_id, third_party_auth_type) where deleted_at is null;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1663316155469-1">
+        <dropUniqueConstraint constraintName="useraccount_authtype_auth_id" tableName="user_account"/>
     </changeSet>
 </databaseChangeLog>

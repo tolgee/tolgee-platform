@@ -14,7 +14,7 @@ class UserPreferencesService(
   private val userPreferencesRepository: UserPreferencesRepository,
   private val userAccountService: UserAccountService,
   private val organizationService: OrganizationService,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
 ) {
   fun setLanguage(tag: String, userAccount: UserAccount) {
     val preferences = findOrCreate(userAccount.id)
@@ -57,14 +57,23 @@ class UserPreferencesService(
   /**
    * Sets different organization as preferred if user has no access to the current one
    */
-  fun refreshPreferredOrganization(userAccountId: Long) {
+  fun refreshPreferredOrganization(userAccountId: Long): Organization? {
     val preferences = findOrCreate(userAccountId)
-    val canUserView = organizationRoleService.canUserView(userAccountId, preferences.preferredOrganization.id)
+
+    val canUserView = preferences.preferredOrganization?.let { po ->
+      organizationRoleService.canUserView(
+        userAccountId,
+        po.id
+      )
+    } ?: false
+
     if (!canUserView) {
       preferences.preferredOrganization = organizationService.findOrCreatePreferred(
         userAccount = preferences.userAccount
       )
       save(preferences)
     }
+
+    return preferences.preferredOrganization
   }
 }

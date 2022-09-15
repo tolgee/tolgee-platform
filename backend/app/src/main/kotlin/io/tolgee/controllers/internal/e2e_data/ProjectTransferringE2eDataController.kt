@@ -42,7 +42,7 @@ class ProjectTransferringE2eDataController(
       }
     }
     listOf(data.user, data.user2, data.user).forEach { user ->
-      userAccountService.findOptional(user.username).orElse(null)?.let {
+      userAccountService.find(user.username)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

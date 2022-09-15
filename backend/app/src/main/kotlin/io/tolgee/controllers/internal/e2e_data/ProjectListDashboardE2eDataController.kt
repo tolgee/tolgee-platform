@@ -3,7 +3,6 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.fixtures.toNullable
 import io.tolgee.security.InternalController
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.project.ProjectService
@@ -36,13 +35,13 @@ class ProjectListDashboardE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanup() {
-    userAccountService.findOptional("projectListDashboardUser").orElse(null)?.let {
+    userAccountService.find("projectListDashboardUser")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }
       userAccountService.delete(it)
     }
-    userAccountService.findOptional(ProjectsTestData().userWithTranslatePermission.username).toNullable()?.let {
+    userAccountService.find(ProjectsTestData().userWithTranslatePermission.username)?.let {
       userAccountService.delete(it)
     }
   }

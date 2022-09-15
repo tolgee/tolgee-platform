@@ -40,9 +40,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isEqualTo(encodedKey)
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
   }
 
   @Test
@@ -52,9 +51,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
     performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
   }
 
   @Test
@@ -64,14 +62,12 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
 
-    var fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
+    var fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
 
     performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isNotEmpty
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isNotEmpty
   }
 
   @Test
@@ -87,9 +83,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       .andReturn()
 
     assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
   }
 
   @Test
@@ -109,21 +104,18 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsForbidden
-    var fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    var fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
 
     enableMfa()
 
     performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsForbidden
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNotNull
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNotNull
 
     performAuthPut("/v2/user/mfa/recovery", recoveryRequestDto).andIsForbidden
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
   }
 
   @Test

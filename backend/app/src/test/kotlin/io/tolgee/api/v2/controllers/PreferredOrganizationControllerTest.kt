@@ -39,6 +39,6 @@ class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
     userAccount = testData.kvetoslav
     val defaultOrg = testData.userAccountBuilder.defaultOrganizationBuilder.self
     performAuthGet("/v2/organizations/${defaultOrg.id}").andIsOk
-    assertThat(userPreferencesService.find(userAccount!!.id)!!.preferredOrganization.id).isEqualTo(defaultOrg.id)
+    assertThat(userPreferencesService.find(userAccount!!.id)!!.preferredOrganization!!.id).isEqualTo(defaultOrg.id)
   }
 }

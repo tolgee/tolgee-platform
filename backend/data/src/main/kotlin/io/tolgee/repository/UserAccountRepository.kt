@@ -13,7 +13,22 @@ import java.util.*
 @Repository
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findByUsername(username: String?): Optional<UserAccount>
-  fun findByThirdPartyAuthTypeAndThirdPartyAuthId(
+
+  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null")
+  fun findNotDeleted(username: String): UserAccount?
+
+  @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null")
+  fun findNotDeleted(id: Long): UserAccount?
+
+  @Query(
+    """
+    from UserAccount ua 
+      where ua.thirdPartyAuthId = :thirdPartyAuthId 
+        and ua.thirdPartyAuthType = :thirdPartyAuthType
+        and ua.deletedAt is null
+  """
+  )
+  fun findThirdByThirdParty(
     thirdPartyAuthId: String,
     thirdPartyAuthType: String
   ): Optional<UserAccount>
@@ -59,6 +74,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     from UserAccount ua
     left join ua.organizationRoles orl
     where orl is null
+      and ua.deletedAt is null
   """
   )
   fun findAllWithoutAnyOrganization(pageable: Pageable): Page<UserAccount>
@@ -69,6 +85,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     from UserAccount ua
     left join ua.organizationRoles orl
     where orl is null
+      and ua.deletedAt is null
   """
   )
   fun findAllWithoutAnyOrganizationIds(): List<Long>
@@ -79,7 +96,15 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     where ((lower(userAccount.name)
       like lower(concat('%', cast(:search as text),'%')) 
       or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+      and userAccount.deletedAt is null
   """
   )
   fun findAllPaged(search: String?, pageable: Pageable): Page<UserAccount>
+
+  @Query(
+    value = """
+    select ua from UserAccount ua where id in (:ids)
+  """
+  )
+  fun getAllByIdsIgnoreDeleted(ids: Set<Long>): MutableList<UserAccount>
 }

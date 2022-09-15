@@ -36,7 +36,7 @@ class LanguagePermissionsE2eDataController(
     val data = LanguagePermissionsTestData()
 
     listOf(data.allLangUser.username, data.enOnlyUser.username, data.bothLangsExplicitUser.username).forEach { user ->
-      userAccountService.findOptional(user).orElse(null)?.let {
+      userAccountService.find(user)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

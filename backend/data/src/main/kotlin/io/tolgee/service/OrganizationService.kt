@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -33,7 +34,8 @@ class OrganizationService(
   private val invitationService: InvitationService,
   private val avatarService: AvatarService,
   @Lazy
-  private val userPreferencesService: UserPreferencesService
+  private val userPreferencesService: UserPreferencesService,
+  private val tolgeeProperties: TolgeeProperties
 ) {
 
   @set:Autowired
@@ -98,8 +100,13 @@ class OrganizationService(
   /**
    * Returns existing or created organization which seems to be potentially preferred.
    */
-  fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization {
-    return findPreferred(userAccount.id, exceptOrganizationId) ?: createPreferred(userAccount)
+  fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization? {
+    return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
+      if (tolgeeProperties.authentication.userCanCreateOrganizations) {
+        return@let createPreferred(userAccount)
+      }
+      null
+    }
   }
 
   fun findPermittedPaged(
@@ -224,6 +231,11 @@ class OrganizationService(
       this.validateSlugUniqueness(it)
     }
   }
+
+  /**
+   * Returns all organizations which are owned only by the specified user
+   */
+  fun getAllSingleOwnedByUser(userAccount: UserAccount) = organizationRepository.getAllSingleOwnedByUser(userAccount)
 
   fun getOrganizationAndCheckUserIsOwner(organizationId: Long): Organization {
     val organization = this.get(organizationId)
