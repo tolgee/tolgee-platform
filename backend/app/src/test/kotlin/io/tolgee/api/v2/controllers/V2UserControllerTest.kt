@@ -4,6 +4,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -72,7 +74,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     var mvcResult = performAuthPut("/v2/user", requestDTO)
-      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+      .andIsBadRequest.andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("name")
 
@@ -83,7 +85,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     )
     dbPopulator.createUserIfNotExists(requestDTO.email)
     mvcResult = performAuthPut("/v2/user", requestDTO)
-      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+      .andIsBadRequest.andReturn()
     assertThat(mvcResult)
       .error().isCustomValidation.hasMessage("username_already_exists")
   }
@@ -95,7 +97,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     val mvcResult = performAuthPut("/v2/user/password", requestDto)
-      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+      .andIsBadRequest.andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("password")
   }
@@ -123,28 +125,28 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   fun `it doesn't allow updating the email without password`() {
     loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
     val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.zz")
-    performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isBadRequest)
+    performAuthPut("/v2/user", requestDTO).andIsBadRequest
   }
 
   @Test
   fun `it doesn't allow updating the email with an invalid password`() {
     loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
     val requestDTO = UserUpdateRequestDto(name = "a", email = "ben@ben.zz", currentPassword = "meow meow meow")
-    performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isForbidden)
+    performAuthPut("/v2/user", requestDTO).andIsBadRequest
   }
 
   @Test
   fun `it doesn't allow updating the password without password`() {
     loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
     val requestDTO = UserUpdatePasswordRequestDto(password = "vewy secuwe paffword")
-    performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isBadRequest)
+    performAuthPut("/v2/user/password", requestDTO).andIsBadRequest
   }
 
   @Test
   fun `it doesn't allow updating the password with an invalid password`() {
     loginAsUser(dbPopulator.createUserIfNotExists("ben@ben.aa"))
     val requestDTO = UserUpdatePasswordRequestDto(password = "vewy secuwe paffword", currentPassword = "meow meow meow")
-    performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isForbidden)
+    performAuthPut("/v2/user/password", requestDTO).andIsForbidden
   }
 
   @Test

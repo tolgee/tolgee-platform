@@ -4,7 +4,6 @@ import io.tolgee.dtos.Avatar
 import io.tolgee.model.UserAccount
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
 
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountModel(
@@ -14,5 +13,4 @@ data class UserAccountModel(
   var emailAwaitingVerification: String?,
   var avatar: Avatar?,
   var globalServerRole: UserAccount.Role,
-  var createdAt: Date
 ) : RepresentationModel<UserAccountModel>()

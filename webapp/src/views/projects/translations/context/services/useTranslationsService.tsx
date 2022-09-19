@@ -115,7 +115,7 @@ export const useTranslationsService = (props: Props) => {
   const requestQuery = {
     ...query,
     ...parsedFilters,
-    filterKeyName: props.keyName,
+    filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
   };

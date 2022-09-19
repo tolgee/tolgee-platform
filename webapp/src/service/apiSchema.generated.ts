@@ -568,6 +568,7 @@ export interface components {
       accountType: "LOCAL" | "LDAP" | "THIRD_PARTY";
       globalServerRole: "USER" | "ADMIN";
       deletable: boolean;
+      needsSuperJwtToken: boolean;
     };
     UserUpdatePasswordRequestDto: {
       currentPassword: string;
@@ -791,7 +792,6 @@ export interface components {
       emailAwaitingVerification?: string;
       avatar?: components["schemas"]["Avatar"];
       globalServerRole: "USER" | "ADMIN";
-      createdAt: string;
     };
     TranslationCommentDto: {
       text: string;
@@ -925,8 +925,8 @@ export interface components {
       key: string;
       username?: string;
       lastUsedAt?: number;
-      expiresAt?: number;
       projectId: number;
+      expiresAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];
@@ -1577,8 +1577,8 @@ export interface components {
       permittedLanguageIds?: number[];
       username?: string;
       lastUsedAt?: number;
-      expiresAt?: number;
       projectId: number;
+      expiresAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];

@@ -6,7 +6,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
 
-type AccountType = components['schemas']['UserAccountModel']['accountType'];
+type AccountType =
+  components['schemas']['PrivateUserAccountModel']['accountType'];
 
 Yup.setLocale({
   // use constant translation keys for messages without values

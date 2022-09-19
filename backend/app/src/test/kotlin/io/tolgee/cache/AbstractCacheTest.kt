@@ -65,11 +65,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       name = "Account"
       id = 10
     }
-    whenever(userAccountRepository.findById(user.id)).then { Optional.of(user) }
+    whenever(userAccountRepository.findNotDeleted(user.id)).then { user }
     userAccountService.findDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findById(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
     userAccountService.findDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findById(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
   }
 
   @Test

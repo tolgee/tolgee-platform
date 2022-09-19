@@ -4,7 +4,8 @@ import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
-type AccountType = components['schemas']['UserAccountModel']['accountType'];
+type AccountType =
+  components['schemas']['PrivateUserAccountModel']['accountType'];
 
 let token = null;
 

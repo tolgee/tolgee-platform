@@ -10,10 +10,12 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import org.springframework.context.ApplicationContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
@@ -26,7 +28,8 @@ class StartupImportService(
   private val userAccountService: UserAccountService,
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val authenticationProvider: AuthenticationProvider
 ) {
 
   @Transactional
@@ -40,6 +43,7 @@ class StartupImportService(
         if (fileDtos != null) {
           val userAccount = getInitialUserAccount()
           val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
+          SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
           val projectName = projectDir.nameWithoutExtension
           val existingProjects = projectService.findAllByNameAndOrganizationOwner(projectName, organization)
           if (existingProjects.isEmpty()) {
