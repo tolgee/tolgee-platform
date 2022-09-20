@@ -79,15 +79,17 @@ export const RootRouter = () => (
       <Administration />
     </PrivateRoute>
     <RequirePreferredOrganization>
-      <PrivateRoute exact path={LINKS.ROOT.template}>
-        <Redirect to={LINKS.PROJECTS.template} />
-      </PrivateRoute>
-      <PrivateRoute path={LINKS.PROJECTS.template}>
-        <ProjectsRouter />
-      </PrivateRoute>
-      <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-        <OrganizationsRouter />
-      </PrivateRoute>
+      <Switch>
+        <PrivateRoute exact path={LINKS.ROOT.template}>
+          <Redirect to={LINKS.PROJECTS.template} />
+        </PrivateRoute>
+        <PrivateRoute path={LINKS.PROJECTS.template}>
+          <ProjectsRouter />
+        </PrivateRoute>
+        <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+          <OrganizationsRouter />
+        </PrivateRoute>
+      </Switch>
     </RequirePreferredOrganization>
   </Switch>
 );

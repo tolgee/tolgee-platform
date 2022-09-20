@@ -61,6 +61,8 @@ describe('User profile', () => {
     cy.contains(EMAIL_VERIFICATION_TEXT).should('not.exist');
     cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
     cy.gcy('global-form-save-button').click();
+    cy.waitForDom();
+    assertMessage('User data updated');
     cy.get('form').findInputByName('email').should('have.value', NEW_EMAIL);
   });
 

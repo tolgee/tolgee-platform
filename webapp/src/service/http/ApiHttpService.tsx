@@ -68,70 +68,68 @@ export class ApiHttpService {
 
         fetch(this.apiUrl + input, init)
           .then(async (r) => {
-            if (r.status == 401 && !options.disableAuthHandling) {
-              // eslint-disable-next-line no-console
-              console.warn('Redirecting to login - unauthorized user');
-              ApiHttpService.getResObject(r).then(() => {
+            if (r.status >= 400) {
+              const resObject = await ApiHttpService.getResObject(r);
+              if (r.status == 401 && !options.disableAuthHandling) {
+                // eslint-disable-next-line no-console
+                console.warn('Redirecting to login - unauthorized user');
                 this.messageService.error(<T>expired_jwt_token</T>);
                 redirectionActions.redirect.dispatch(LINKS.LOGIN.build());
                 this.tokenService.disposeToken();
                 location.reload();
-              });
-              return;
-            }
-            if (r.status >= 500) {
-              const data = await ApiHttpService.getResObject(r);
-              const message =
-                '500: ' + (data?.message || 'Error status code from server');
-              errorActions.globalError.dispatch(new GlobalError(message));
-              throw new Error(message);
-            }
-            if (r.status == 403) {
-              const data = await r.json();
-              if (data.code === 'expired_super_jwt_token') {
-                container.resolve(GlobalActions).requestSuperJwt.dispatch({
-                  onSuccess: () => {
-                    fetchIt();
-                  },
-                  onCancel: () => {},
-                });
+                return;
+              }
+              if (r.status >= 500) {
+                const message =
+                  '500: ' +
+                  (resObject?.message || 'Error status code from server');
+                errorActions.globalError.dispatch(new GlobalError(message));
+                throw new Error(message);
+              }
+              if (r.status == 403) {
+                if (resObject.code === 'expired_super_jwt_token') {
+                  container.resolve(GlobalActions).requestSuperJwt.dispatch({
+                    onSuccess: () => {
+                      fetchIt();
+                    },
+                    onCancel: () => {},
+                  });
+                  return;
+                }
+              }
+              if (
+                r.status == 403 &&
+                (init?.method === undefined || init?.method === 'get') &&
+                !options.disableAuthHandling
+              ) {
+                if (init?.method === undefined || init?.method === 'get') {
+                  redirectionActions.redirect.dispatch(
+                    LINKS.AFTER_LOGIN.build()
+                  );
+                }
+                this.messageService.error(<T>operation_not_permitted_error</T>);
+                Sentry.captureException(new Error('Operation not permitted'));
+                reject({ ...resObject, __handled: true });
+                return;
+              }
+              if (r.status == 404 && !options.disableNotFoundHandling) {
+                if (init?.method === undefined || init?.method === 'get') {
+                  redirectionActions.redirect.dispatch(
+                    LINKS.AFTER_LOGIN.build()
+                  );
+                }
+                this.messageService.error(<T>resource_not_found_message</T>);
+              }
+              if (r.status == 400 && !options.disableBadRequestHandling) {
+                this.messageService.error(<T>{resObject.code}</T>);
+              }
+              if (r.status >= 400 && r.status <= 500) {
+                errorCapture(resObject.code);
+                reject(resObject);
                 return;
               }
             }
-            if (
-              r.status == 403 &&
-              (init?.method === undefined || init?.method === 'get') &&
-              !options.disableAuthHandling
-            ) {
-              if (init?.method === undefined || init?.method === 'get') {
-                redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-              }
-              this.messageService.error(<T>operation_not_permitted_error</T>);
-              Sentry.captureException(new Error('Operation not permitted'));
-              ApiHttpService.getResObject(r).then((b) =>
-                reject({ ...b, __handled: true })
-              );
-              return;
-            }
-            if (r.status == 404 && !options.disableNotFoundHandling) {
-              if (init?.method === undefined || init?.method === 'get') {
-                redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-              }
-              this.messageService.error(<T>resource_not_found_message</T>);
-            }
-            if (r.status == 400 && !options.disableBadRequestHandling) {
-              ApiHttpService.getResObject(r).then((b) => {
-                this.messageService.error(<T>{b.code}</T>);
-              });
-            }
-            if (r.status >= 400 && r.status <= 500) {
-              ApiHttpService.getResObject(r).then((b) => {
-                errorCapture(b.code);
-                reject(b);
-              });
-            } else {
-              resolve(r);
-            }
+            resolve(r);
           })
           .catch((e) => {
             // eslint-disable-next-line no-console
