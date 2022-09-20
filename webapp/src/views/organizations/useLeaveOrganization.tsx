@@ -15,6 +15,20 @@ export const useLeaveOrganization = () => {
   const leaveLoadable = useApiMutation({
     url: '/v2/organizations/{id}/leave',
     method: 'put',
+    options: {
+      onSuccess() {
+        messageService.success(<T>organization_left_message</T>);
+        history.push(LINKS.PROJECTS.build());
+        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+      },
+      onError(e) {
+        const parsed = parseErrorResponse(e);
+        parsed.forEach((error) => messageService.error(<T>{error}</T>));
+      },
+    },
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
   });
   const history = useHistory();
   const globalDispatch = useGlobalDispatch();
@@ -22,21 +36,7 @@ export const useLeaveOrganization = () => {
   return (id: number) => {
     confirmation({
       message: <T>really_leave_organization_confirmation_message</T>,
-      onConfirm: () =>
-        leaveLoadable.mutate(
-          { path: { id } },
-          {
-            onSuccess() {
-              messageService.success(<T>organization_left_message</T>);
-              history.push(LINKS.PROJECTS.build());
-              globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
-            },
-            onError(e) {
-              const parsed = parseErrorResponse(e);
-              parsed.forEach((error) => messageService.error(<T>{error}</T>));
-            },
-          }
-        ),
+      onConfirm: () => leaveLoadable.mutate({ path: { id } }),
     });
   };
 };
