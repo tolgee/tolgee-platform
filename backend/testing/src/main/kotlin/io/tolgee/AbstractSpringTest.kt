@@ -26,6 +26,7 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.MfaService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PatService
@@ -188,6 +189,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var patService: PatService
+
+  @Autowired
+  lateinit var mfaService: MfaService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

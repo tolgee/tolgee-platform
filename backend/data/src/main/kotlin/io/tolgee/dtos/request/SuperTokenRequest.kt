@@ -2,7 +2,7 @@ package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class GetSuperTokenRequest(
+data class SuperTokenRequest(
   @Schema(description = "Has to be provided when TOTP enabled")
   var otp: String? = null,
 

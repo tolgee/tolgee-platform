@@ -18,15 +18,7 @@ class PreferredOrganizationFacade(
 
   fun getPreferred(): OrganizationModel? {
     val preferences = userPreferencesService.findOrCreate(authenticationFacade.userAccount.id)
-    var preferredOrganization = preferences.preferredOrganization
-
-    // try to refresh if user has null
-    // user with null preferred organization could have been gained some organization
-    // multiple ways (invitation to project/organization, change of server settings)
-    if (preferredOrganization == null) {
-      preferredOrganization = userPreferencesService.refreshPreferredOrganization(authenticationFacade.userAccount.id)
-    }
-
+    val preferredOrganization = preferences.preferredOrganization
     if (preferredOrganization != null) {
       val roleType = organizationRoleService.findType(preferredOrganization.id)
       val view = OrganizationView.of(preferredOrganization, roleType)

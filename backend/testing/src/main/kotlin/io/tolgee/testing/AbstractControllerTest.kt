@@ -43,14 +43,14 @@ abstract class AbstractControllerTest :
 
   protected fun login(userName: String, password: String?): DefaultAuthenticationResult {
     val response = doAuthentication(userName, password)
-      .response.contentAsString
+      .andReturn().response.contentAsString
     val userAccount = userAccountService.find(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
       mapper.readValue(response, HashMap::class.java)["accessToken"] as String, userAccount
     )
   }
 
-  protected fun doAuthentication(username: String?, password: String?): MvcResult {
+  protected fun doAuthentication(username: String?, password: String?): ResultActions {
     val request = LoginRequest()
     request.username = username
     request.password = password
@@ -61,7 +61,6 @@ abstract class AbstractControllerTest :
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON)
     )
-      .andReturn()
   }
 
   protected fun <T> mapResponse(result: MvcResult, type: JavaType?): T {

@@ -11,7 +11,11 @@ import {
   userEnableMfa,
 } from '../common/apiCalls/common';
 import { assertMessage, getPopover } from '../common/shared';
-import { loginWithFakeGithub, loginWithFakeOAuth2 } from '../common/login';
+import {
+  loginViaForm,
+  loginWithFakeGithub,
+  loginWithFakeOAuth2,
+} from '../common/login';
 import { waitForGlobalLoading } from '../common/loading';
 
 context('Login', () => {
@@ -20,14 +24,7 @@ context('Login', () => {
   });
 
   it('Will login', () => {
-    cy.xpath('//input[@name="username"]')
-      .type(USERNAME)
-      .should('have.value', USERNAME);
-    cy.xpath('//input[@name="password"]')
-      .type(PASSWORD)
-      .should('have.value', PASSWORD);
-    cy.gcy('login-button').click();
-    waitForGlobalLoading();
+    loginViaForm();
     cy.gcy('login-button').should('not.exist');
     cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
   });

@@ -36,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(
@@ -46,7 +47,8 @@ class UserAccountService(
   private val passwordEncoder: PasswordEncoder,
   @Lazy
   private val organizationService: OrganizationService,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
+  private val entityManager: EntityManager
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -96,8 +98,27 @@ class UserAccountService(
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
+  @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccountRepository.delete(userAccount)
+    userAccount.emailVerification?.let {
+      entityManager.remove(it)
+    }
+    userAccount.apiKeys?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.pats?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.permissions.forEach {
+      entityManager.remove(it)
+    }
+    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+      organizationService.delete(it.id)
+    }
+    userAccount.organizationRoles.forEach {
+      entityManager.remove(it)
+    }
+    userAccountRepository.softDeleteUser(userAccount)
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
@@ -321,8 +342,8 @@ class UserAccountService(
     return userAccountRepository.saveAndFlush(user)
   }
 
-  fun getAllByIdsIgnoreDeleted(ids: Set<Long>): MutableList<UserAccount> {
-    return userAccountRepository.getAllByIdsIgnoreDeleted(ids)
+  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount> {
+    return userAccountRepository.getAllByIdsIncludingDeleted(ids)
   }
 
   fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {

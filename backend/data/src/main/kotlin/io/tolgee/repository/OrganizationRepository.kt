@@ -95,7 +95,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     """select o
     from Organization o 
     join o.memberRoles mr on mr.user = :userAccount and mr.type = :type
-    join o.memberRoles mra on mr.type = :type
+    join o.memberRoles mra on mra.type = :type
     group by o.id, mr.id
     having count(mra.id) = 1
  """

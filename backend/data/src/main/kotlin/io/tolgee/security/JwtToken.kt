@@ -15,6 +15,9 @@ class JwtToken(private val value: String, private val key: Key?) {
   val content: String
     get() = parsed.body.subject
 
+  val claims: Claims
+    get() = parsed.body
+
   val id: Long
     get() = content.toLong()
 

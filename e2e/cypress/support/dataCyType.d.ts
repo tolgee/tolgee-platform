@@ -53,6 +53,7 @@ declare namespace DataCy {
         "comment-text" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |
+        "delete-user-button" |
         "dropzone" |
         "dropzone-inner" |
         "edit-pat-dialog-content" |
@@ -316,6 +317,7 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "user-delete-organization-message-item" |
         "user-menu-logout" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |

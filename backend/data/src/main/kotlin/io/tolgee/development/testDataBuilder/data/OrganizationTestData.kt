@@ -9,6 +9,7 @@ class OrganizationTestData : BaseTestData() {
   lateinit var pepa: UserAccount
   lateinit var jirina: UserAccount
   lateinit var kvetoslav: UserAccount
+  lateinit var milan: UserAccount
 
   lateinit var pepaOrg: Organization
   lateinit var jirinaOrg: Organization
@@ -96,6 +97,11 @@ class OrganizationTestData : BaseTestData() {
           language = "ft"
           preferredOrganization = jirinaOrg
         }
+      }
+      addUserAccountWithoutOrganization {
+        name = "Milan"
+        username = "milan"
+        milan = this
       }
     }
   }

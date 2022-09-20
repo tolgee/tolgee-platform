@@ -1,7 +1,6 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType
-import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import java.util.*
@@ -21,7 +20,6 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 @TypeDef(name = "string-array", typeClass = ListArrayType::class)
-@SQLDelete(sql = "UPDATE user_account set deleted_at = now() WHERE id=?")
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

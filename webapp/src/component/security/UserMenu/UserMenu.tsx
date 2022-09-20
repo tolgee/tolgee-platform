@@ -88,7 +88,8 @@ export const UserMenu: React.FC = () => {
   }
 
   const showBilling =
-    config.billing.enabled && preferredOrganization.currentUserRole === 'OWNER';
+    config.billing.enabled &&
+    preferredOrganization?.currentUserRole === 'OWNER';
 
   const getOrganizationMenuItems = () =>
     [

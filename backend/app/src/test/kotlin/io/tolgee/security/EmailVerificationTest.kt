@@ -56,14 +56,14 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     emailVerificationService.createForUser(createUser)
 
     val response = doAuthentication(initialUsername, initialPassword)
-    assertThat(response).error().hasCode("email_not_verified")
+    assertThat(response.andReturn()).error().hasCode("email_not_verified")
   }
 
   @Test
   fun doesLoginWhenVerified() {
     dbPopulator.createUserIfNotExists(initialUsername)
     val result = doAuthentication(initialUsername, initialPassword)
-    assertThat(result.response.status).isEqualTo(200)
+    assertThat(result.andReturn().response.status).isEqualTo(200)
   }
 
   @Test

@@ -195,7 +195,7 @@ export interface paths {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
   };
-  "/v2/user/get-super-token": {
+  "/v2/user/generate-super-token": {
     post: operations["getSuperToken"];
   };
   "/v2/slug/generate-project": {

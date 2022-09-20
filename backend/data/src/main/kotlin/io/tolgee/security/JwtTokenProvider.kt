@@ -14,4 +14,5 @@ interface JwtTokenProvider {
   fun resolveToken(req: HttpServletRequest): JwtToken?
   fun resolveToken(stringToken: String): JwtToken
   fun getAuthentication(jwtToken: String?): Authentication?
+  fun generateToken(userId: Long, superExpiration: Long?): JwtToken
 }

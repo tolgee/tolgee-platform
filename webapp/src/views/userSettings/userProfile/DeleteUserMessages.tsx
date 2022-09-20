@@ -29,7 +29,12 @@ export const DeleteUserMessages = () => {
           <T keyName="organizations-will-be-deleted" />
           <ul>
             {organizations?.map((organization) => (
-              <li key={organization.id}>{organization.name}</li>
+              <li
+                data-cy={'user-delete-organization-message-item'}
+                key={organization.id}
+              >
+                {organization.name}
+              </li>
             ))}
           </ul>
         </>

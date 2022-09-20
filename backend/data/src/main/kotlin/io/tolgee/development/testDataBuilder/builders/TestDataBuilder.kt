@@ -5,7 +5,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class TestDataBuilder {
+class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
+
   class DATA {
     val userAccounts = mutableListOf<UserAccountBuilder>()
     val projects = mutableListOf<ProjectBuilder>()
@@ -59,5 +60,9 @@ class TestDataBuilder {
     data.organizations.add(builder)
     ft(builder.self)
     return builder
+  }
+
+  init {
+    fn(this)
   }
 }

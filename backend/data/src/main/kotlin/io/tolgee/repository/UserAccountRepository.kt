@@ -6,6 +6,7 @@ import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -19,6 +20,10 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null")
   fun findNotDeleted(id: Long): UserAccount?
+
+  @Modifying
+  @Query("""update UserAccount ua set ua.deletedAt = now() where ua = :user""")
+  fun softDeleteUser(user: UserAccount)
 
   @Query(
     """
@@ -106,5 +111,5 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     select ua from UserAccount ua where id in (:ids)
   """
   )
-  fun getAllByIdsIgnoreDeleted(ids: Set<Long>): MutableList<UserAccount>
+  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount>
 }

@@ -4,6 +4,9 @@ import { cleanTestData, generateTestDataObject } from './generator';
 
 export const organizationTestData = generateTestDataObject('organizations');
 
+export const organizationNewTestData =
+  generateTestDataObject('organization-new');
+
 export const languagesTestData = generateTestDataObject('languages');
 
 export const commentsTestData = generateTestDataObject('translation-comments');
@@ -77,3 +80,5 @@ export const administrationTestData = generateTestDataObject('administration');
 export const translationWebsocketsTestData = generateTestDataObject(
   'websocket-translations'
 );
+
+export const userDeletionTestData = generateTestDataObject('user-deletion');

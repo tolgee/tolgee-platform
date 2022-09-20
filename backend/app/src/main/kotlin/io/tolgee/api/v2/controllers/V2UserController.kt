@@ -7,7 +7,7 @@ import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.PrivateUserAccountModel
 import io.tolgee.api.v2.hateoas.user_account.PrivateUserAccountModelAssembler
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.GetSuperTokenRequest
+import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.BadRequestException
@@ -120,12 +120,15 @@ class V2UserController(
     return simpleOrganizationModelAssembler.toCollectionModel(organizations)
   }
 
-  @PostMapping("get-super-token")
+  @PostMapping("/generate-super-token")
   @Operation(summary = "Generates new JWT token permitted to sensitive operations")
-  fun getSuperToken(@RequestBody @Valid req: GetSuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
+  fun getSuperToken(@RequestBody @Valid req: SuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
     if (authenticationFacade.userAccountEntity.isMfaEnabled) {
       mfaService.checkMfa(authenticationFacade.userAccountEntity, req.otp)
     } else {
+      if (req.password.isNullOrBlank()) {
+        throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
+      }
       val matches = passwordEncoder.matches(req.password, authenticationFacade.userAccountEntity.password)
       if (!matches) throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
     }

@@ -81,6 +81,10 @@ class OrganizationRoleService(
     return false
   }
 
+  fun find(id: Long): OrganizationRole? {
+    return organizationRoleRepository.findById(id).orElse(null)
+  }
+
   fun getType(userId: Long, organizationId: Long): OrganizationRoleType {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type!! }

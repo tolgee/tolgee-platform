@@ -104,7 +104,7 @@ class ProjectActivityViewDataProvider(
   }
 
   private fun getAuthors(revisions: Page<ActivityRevision>) =
-    userAccountService.getAllByIdsIgnoreDeleted(
+    userAccountService.getAllByIdsIncludingDeleted(
       revisions.content.mapNotNull { it.authorId }.toSet()
     ).associateBy { it.id }
 

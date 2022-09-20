@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -15,6 +16,7 @@ class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     testData = OrganizationTestData()
+    tolgeeProperties.authentication.userCanCreateOrganizations = true
     testDataService.saveTestData(testData.root)
   }
 
@@ -32,6 +34,19 @@ class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/preferred-organization").andIsOk.andAssertThatJson {
       node("name").isString.isEqualTo("Organizacion")
     }
+  }
+
+  @Test
+  fun `is not created when disabled`() {
+    tolgeeProperties.authentication.userCanCreateOrganizations = false
+    userAccount = testData.milan
+    performAuthGet("/v2/preferred-organization").andIsForbidden
+  }
+
+  @Test
+  fun `is created when enabled`() {
+    userAccount = testData.milan
+    performAuthGet("/v2/preferred-organization").andIsOk
   }
 
   @Test

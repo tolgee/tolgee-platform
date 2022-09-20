@@ -20,7 +20,7 @@ export const SuperJwtDialog = () => {
   const user = useUser();
 
   const superTokenMutation = useApiMutation({
-    url: '/v2/user/get-super-token',
+    url: '/v2/user/generate-super-token',
     method: 'post',
     options: {
       onSuccess(res) {

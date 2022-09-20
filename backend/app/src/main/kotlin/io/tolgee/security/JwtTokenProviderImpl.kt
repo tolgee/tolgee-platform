@@ -45,10 +45,19 @@ class JwtTokenProviderImpl(
    */
   override fun generateToken(userId: Long, isSuper: Boolean): JwtToken {
     val twentyMinutes = 20 * 60 * 1000
+    return generateToken(userId, if (isSuper) currentDateProvider.date.time + twentyMinutes else null)
+  }
+
+  /**
+   * This generates a JWT token.
+   * superExpiration = when this tokens superiority expires
+   * Super JWT can be returned only when 2FA is passed or is not set
+   */
+  override fun generateToken(userId: Long, superExpiration: Long?): JwtToken {
     val claims = mutableMapOf<String, Any>()
-    if (isSuper) {
+    if (superExpiration != null) {
       // super key is needed for sensitive operations
-      claims["superExpiration"] = currentDateProvider.date.time + twentyMinutes
+      claims["superExpiration"] = superExpiration
     }
     val now = Date()
     return JwtToken(

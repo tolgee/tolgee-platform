@@ -102,7 +102,7 @@ class OrganizationService(
    */
   fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      if (tolgeeProperties.authentication.userCanCreateOrganizations) {
+      if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
         return@let createPreferred(userAccount)
       }
       null

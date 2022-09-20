@@ -31,6 +31,7 @@ export const DeleteUserButton: FC = () => {
   return (
     <Button
       color="error"
+      data-cy="delete-user-button"
       variant={'outlined'}
       onClick={() =>
         confirmation({
