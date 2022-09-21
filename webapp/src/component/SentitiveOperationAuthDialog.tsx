@@ -12,7 +12,7 @@ import React from 'react';
 
 type Value = { otp?: string; password?: string };
 
-export const SuperJwtDialog = () => {
+export const SentitiveOperationAuthDialog = () => {
   const globalActions = container.resolve(GlobalActions);
   const afterAction = useSelector(
     (s: AppState) => s.global.requestSuperJwtAfterAction
@@ -32,12 +32,13 @@ export const SuperJwtDialog = () => {
   });
 
   return (
-    <Dialog open={!!afterAction}>
+    <Dialog open={!!afterAction} data-cy="sensitive-protection-dialog">
       <DialogTitle>
         <T keyName="sensitive-authentication-dialog-title" />
       </DialogTitle>
       <DialogContent>
         <StandardForm
+          submitButtonInner={<T>sensitive-auth-submit-button</T>}
           saveActionLoadable={superTokenMutation}
           onCancel={() => {
             globalActions.cancelSuperJwtRequest.dispatch();
@@ -49,12 +50,18 @@ export const SuperJwtDialog = () => {
         >
           {user?.mfaEnabled ? (
             <TextField
+              inputProps={{
+                'data-cy': 'sensitive-dialog-otp-input',
+              }}
               name="otp"
               label={<T>account-security-mfa-otp-code</T>}
               variant="standard"
             />
           ) : (
             <TextField
+              inputProps={{
+                'data-cy': 'sensitive-dialog-password-input',
+              }}
               name="password"
               type="password"
               label={<T>login_password_label</T>}

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import java.io.FileNotFoundException
+import javax.persistence.EntityManager
 
 abstract class AbstractE2eDataController {
   abstract val testData: TestDataBuilder
@@ -22,18 +23,19 @@ abstract class AbstractE2eDataController {
   @Autowired
   private lateinit var organizationService: OrganizationService
 
+  @Autowired
+  private lateinit var entityManager: EntityManager
+
   @GetMapping(value = ["/clean"])
   @Transactional
   open fun cleanup(): Any? {
     try {
       testData.data.userAccounts.forEach {
         userAccountService.find(it.self.username)?.let { user ->
-          projectService.findAllPermitted(user).forEach {
-            it.id?.let { id -> projectService.deleteProject(id) }
-          }
           userAccountService.delete(user)
         }
       }
+      entityManager.flush()
       testData.data.organizations.forEach { organizationBuilder ->
         organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
       }

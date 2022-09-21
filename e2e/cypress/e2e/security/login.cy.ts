@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
-import { HOST, PASSWORD, USERNAME } from '../common/constants';
-import { getAnyContainingText } from '../common/xPath';
+import { HOST, PASSWORD, USERNAME } from '../../common/constants';
+import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
   deleteAllEmails,
@@ -9,14 +9,14 @@ import {
   login,
   userDisableMfa,
   userEnableMfa,
-} from '../common/apiCalls/common';
-import { assertMessage, getPopover } from '../common/shared';
+} from '../../common/apiCalls/common';
+import { assertMessage, getPopover } from '../../common/shared';
 import {
   loginViaForm,
   loginWithFakeGithub,
   loginWithFakeOAuth2,
-} from '../common/login';
-import { waitForGlobalLoading } from '../common/loading';
+} from '../../common/login';
+import { waitForGlobalLoading } from '../../common/loading';
 
 context('Login', () => {
   beforeEach(() => {

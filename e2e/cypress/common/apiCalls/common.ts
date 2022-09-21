@@ -54,7 +54,11 @@ export const internalFetch = (
   });
 };
 
-export const login = (username = USERNAME, password = PASSWORD) => {
+export const login = (
+  username = USERNAME,
+  password = PASSWORD,
+  otp: string = undefined
+) => {
   return cy
     .request({
       url: API_URL + '/api/public/generatetoken',
@@ -65,6 +69,7 @@ export const login = (username = USERNAME, password = PASSWORD) => {
       body: JSON.stringify({
         username,
         password,
+        otp,
       }),
     })
     .then((res) => {

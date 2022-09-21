@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
-import { HOST } from '../common/constants';
-import { organizationNewTestData } from '../common/apiCalls/testData/testData';
-import { login, setProperty } from '../common/apiCalls/common';
-import { gcy } from '../common/shared';
+import { HOST } from '../../common/constants';
+import { organizationNewTestData } from '../../common/apiCalls/testData/testData';
+import { login, setProperty } from '../../common/apiCalls/common';
+import { gcy } from '../../common/shared';
 
 context('No permission', () => {
   beforeEach(() => {

@@ -112,7 +112,13 @@ class UserAccountService(
     userAccount.permissions.forEach {
       entityManager.remove(it)
     }
+    userAccount.preferences?.let {
+      entityManager.remove(it)
+    }
     organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+      it.prefereredBy.removeIf { preferences ->
+        preferences.userAccount.id == userAccount.id
+      }
       organizationService.delete(it.id)
     }
     userAccount.organizationRoles.forEach {

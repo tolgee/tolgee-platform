@@ -261,6 +261,9 @@ declare namespace DataCy {
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "sensitive-dialog-otp-input" |
+        "sensitive-dialog-password-input" |
+        "sensitive-protection-dialog" |
         "settings-menu-item" |
         "sign-up-submit-button" |
         "tag-autocomplete-input" |

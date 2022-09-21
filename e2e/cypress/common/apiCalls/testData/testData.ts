@@ -82,3 +82,9 @@ export const translationWebsocketsTestData = generateTestDataObject(
 );
 
 export const userDeletionTestData = generateTestDataObject('user-deletion');
+
+export const sensitiveOperationProtectionTestData = {
+  ...generateTestDataObject('sensitive-operation-protection'),
+  getOtp: () =>
+    internalFetch(`e2e-data/sensitive-operation-protection/get-totp`),
+};

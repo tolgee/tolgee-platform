@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
@@ -56,7 +55,6 @@ class PublicController(
   private val userAccountService: UserAccountService,
   private val tolgeeEmailSender: TolgeeEmailSender,
   private val emailVerificationService: EmailVerificationService,
-  private val dbPopulatorReal: DbPopulatorReal,
   private val reCaptchaValidationService: ReCaptchaValidationService,
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
@@ -179,7 +177,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
-      val user = dbPopulatorReal.createUserIfNotExists("johndoe@doe.com")
+      val user = getFakeGithubUser()
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
     }
     return when (serviceType) {
@@ -201,9 +199,21 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     }
   }
 
+  private fun getFakeGithubUser(): UserAccount {
+    val username = "johndoe@doe.com"
+    val user = userAccountService.find(username) ?: let {
+      UserAccount().apply {
+        this.username = username
+        name = "john"
+        accountType = UserAccount.AccountType.THIRD_PARTY
+        userAccountService.save(this)
+      }
+    }
+    return user
+  }
+
   private fun validateEmailCode(code: String, email: String): UserAccount {
-    val userAccount = userAccountService.find(email) ?: throw NotFoundException()
-      ?: throw BadRequestException(Message.BAD_CREDENTIALS)
+    val userAccount = userAccountService.find(email) ?: throw BadRequestException(Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {
       throw BadRequestException(Message.BAD_CREDENTIALS)
