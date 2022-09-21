@@ -104,6 +104,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     enableMfa()
 
+    loginAsUser(userAccount!!) // get new token
+
     performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsForbidden
     fromDb = userAccountService.find(initialUsername)
     Assertions.assertThat(fromDb!!.totpKey).isNotNull
