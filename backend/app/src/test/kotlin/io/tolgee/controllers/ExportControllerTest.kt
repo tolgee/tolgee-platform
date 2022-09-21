@@ -7,7 +7,6 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -18,13 +17,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ExportControllerTest : ProjectAuthControllerTest() {
-
-  @AfterEach
-  fun cleanup() {
-    projectService.deleteProject(project.id)
-    userAccount?.let { userAccountService.delete(it) }
-  }
-
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod

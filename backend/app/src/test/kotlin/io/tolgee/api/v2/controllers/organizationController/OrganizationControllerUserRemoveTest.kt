@@ -43,7 +43,7 @@ class OrganizationControllerUserRemoveTest : BaseOrganizationControllerTest() {
   }
 
   @Test
-  fun `doesn't create new preferred preferred`() {
+  fun `doesn't create new preferred when cannot create organizations`() {
     tolgeeProperties.authentication.userCanCreateOrganizations = false
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)

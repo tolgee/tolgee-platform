@@ -58,20 +58,17 @@ class UserPreferencesService(
 
   fun UserPreferences.tryRefreshPreferredOrganizationWhenNull() {
     if (this.preferredOrganization == null) {
-      this.preferredOrganization =
-        this@UserPreferencesService.refreshPreferredOrganization(authenticationFacade.userAccount.id)
+      this.preferredOrganization = this@UserPreferencesService.refreshPreferredOrganization(this)
     }
   }
 
   /**
    * Sets different organization as preferred if user has no access to the current one
    */
-  fun refreshPreferredOrganization(userAccountId: Long): Organization? {
-    val preferences = findOrCreateNoRefreshPreferred(userAccountId)
-
+  fun refreshPreferredOrganization(preferences: UserPreferences): Organization? {
     val canUserView = preferences.preferredOrganization?.let { po ->
       organizationRoleService.canUserView(
-        userAccountId,
+        preferences.userAccount.id,
         po.id
       )
     } ?: false
@@ -84,6 +81,14 @@ class UserPreferencesService(
     }
 
     return preferences.preferredOrganization
+  }
+
+  /**
+   * Sets different organization as preferred if user has no access to the current one
+   */
+  fun refreshPreferredOrganization(userAccountId: Long): Organization? {
+    val preferences = findOrCreateNoRefreshPreferred(userAccountId)
+    return refreshPreferredOrganization(preferences)
   }
 
   private fun findOrCreateNoRefreshPreferred(userAccountId: Long): UserPreferences {
