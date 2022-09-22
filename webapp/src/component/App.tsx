@@ -19,7 +19,7 @@ import { Chatwoot } from './Chatwoot';
 import { PlanLimitPopover } from './billing/PlanLimitPopover';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
-import { SentitiveOperationAuthDialog } from './SentitiveOperationAuthDialog';
+import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -117,7 +117,7 @@ export class App extends React.Component {
         <Head />
         <Redirection />
         <Chatwoot />
-        <SentitiveOperationAuthDialog />
+        <SensitiveOperationAuthDialog />
         <MandatoryDataProvider>
           <RootRouter />
           <SnackBar />

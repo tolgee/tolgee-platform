@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.JwtSecretProvider
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
@@ -30,7 +31,8 @@ class JwtTokenProviderImpl(
   private val userAccountService: UserAccountService,
   private val jwtSecretProvider: JwtSecretProvider,
   private val authenticationProvider: AuthenticationProvider,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val authenticationProperties: AuthenticationProperties
 ) : JwtTokenProvider {
 
   private val logger = LoggerFactory.getLogger(JwtTokenProviderImpl::class.java)
@@ -44,8 +46,14 @@ class JwtTokenProviderImpl(
    * Super JWT can be returned only when 2FA is passed or is not set
    */
   override fun generateToken(userId: Long, isSuper: Boolean): JwtToken {
-    val twentyMinutes = 20 * 60 * 1000
-    return generateToken(userId, if (isSuper) currentDateProvider.date.time + twentyMinutes else null)
+    val expirationTime = if (isSuper)
+      currentDateProvider.date.time + authenticationProperties.jwtSuperExpiration
+    else null
+
+    return generateToken(
+      userId,
+      expirationTime
+    )
   }
 
   /**

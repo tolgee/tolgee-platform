@@ -198,7 +198,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
     state.requestSuperJwtAfterAction?.onCancel();
     return <GlobalState>{
       ...state,
-      requestSuperJwtAfterAction: {},
+      requestSuperJwtAfterAction: null,
     };
   });
 

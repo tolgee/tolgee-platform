@@ -57,7 +57,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
             {props.message}
           </DialogContentText>
           {props.hardModeText && (
-            <Box>
+            <Box mt={2} mb={1}>
               <TextField
                 variant="standard"
                 data-cy={'global-confirmation-hard-mode-text-field'}

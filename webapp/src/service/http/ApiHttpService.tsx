@@ -92,7 +92,9 @@ export class ApiHttpService {
                     onSuccess: () => {
                       fetchIt();
                     },
-                    onCancel: () => {},
+                    onCancel: () => {
+                      reject({ code: 'authentication_cancelled' });
+                    },
                   });
                   return;
                 }

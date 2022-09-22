@@ -10,7 +10,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.NeedsSuperJwtToken
@@ -127,10 +127,10 @@ class V2UserController(
       mfaService.checkMfa(authenticationFacade.userAccountEntity, req.otp)
     } else {
       if (req.password.isNullOrBlank()) {
-        throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
+        throw AuthenticationException(Message.WRONG_CURRENT_PASSWORD)
       }
       val matches = passwordEncoder.matches(req.password, authenticationFacade.userAccountEntity.password)
-      if (!matches) throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
+      if (!matches) throw AuthenticationException(Message.WRONG_CURRENT_PASSWORD)
     }
 
     val jwt = jwtTokenProvider.generateToken(authenticationFacade.userAccount.id, true).toString()

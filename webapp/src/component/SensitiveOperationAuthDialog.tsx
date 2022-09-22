@@ -4,7 +4,13 @@ import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
 import { useUser } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { T } from '@tolgee/react';
 import { StandardForm } from './common/form/StandardForm';
 import { TextField } from './common/form/fields/TextField';
@@ -12,7 +18,7 @@ import React from 'react';
 
 type Value = { otp?: string; password?: string };
 
-export const SentitiveOperationAuthDialog = () => {
+export const SensitiveOperationAuthDialog = () => {
   const globalActions = container.resolve(GlobalActions);
   const afterAction = useSelector(
     (s: AppState) => s.global.requestSuperJwtAfterAction
@@ -29,6 +35,9 @@ export const SentitiveOperationAuthDialog = () => {
         onSuccess?.();
       },
     },
+    fetchOptions: {
+      disableAuthHandling: true,
+    },
   });
 
   return (
@@ -37,7 +46,11 @@ export const SentitiveOperationAuthDialog = () => {
         <T keyName="sensitive-authentication-dialog-title" />
       </DialogTitle>
       <DialogContent>
+        <Typography variant="body2">
+          <T keyName="sensitive-authentication-message" />
+        </Typography>
         <StandardForm
+          rootSx={{ mb: 0 }}
           submitButtonInner={<T>sensitive-auth-submit-button</T>}
           saveActionLoadable={superTokenMutation}
           onCancel={() => {
@@ -48,26 +61,33 @@ export const SentitiveOperationAuthDialog = () => {
             superTokenMutation.mutate({ content: { 'application/json': v } });
           }}
         >
-          {user?.mfaEnabled ? (
-            <TextField
-              inputProps={{
-                'data-cy': 'sensitive-dialog-otp-input',
-              }}
-              name="otp"
-              label={<T>account-security-mfa-otp-code</T>}
-              variant="standard"
-            />
-          ) : (
-            <TextField
-              inputProps={{
-                'data-cy': 'sensitive-dialog-password-input',
-              }}
-              name="password"
-              type="password"
-              label={<T>login_password_label</T>}
-              variant="standard"
-            />
-          )}
+          <Box mb={2}>
+            {user?.mfaEnabled ? (
+              <>
+                <Typography variant="body2">
+                  <T keyName="sensitive-dialog-provide-2fa-code" />
+                </Typography>
+                <TextField
+                  inputProps={{
+                    'data-cy': 'sensitive-dialog-otp-input',
+                  }}
+                  name="otp"
+                  label={<T>account-security-mfa-otp-code</T>}
+                  variant="standard"
+                />
+              </>
+            ) : (
+              <TextField
+                inputProps={{
+                  'data-cy': 'sensitive-dialog-password-input',
+                }}
+                name="password"
+                type="password"
+                label={<T>login_password_label</T>}
+                variant="standard"
+              />
+            )}
+          </Box>
         </StandardForm>
       </DialogContent>
     </Dialog>

@@ -15,9 +15,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProviderImpl
+import io.tolgee.security.LoginRequest
 import io.tolgee.security.payload.ApiResponse
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
@@ -62,8 +62,8 @@ class PublicController(
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
-  fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
-    if (loginRequest.username.isEmpty() || loginRequest.password.isEmpty()) {
+  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<*> {
+    if (loginRequest.username.isBlank() || loginRequest.password.isEmpty()) {
       return ResponseEntity(
         ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.code),
         HttpStatus.BAD_REQUEST

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.AbstractSpringTest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
-import io.tolgee.security.payload.LoginRequest
+import io.tolgee.security.LoginRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -41,7 +41,7 @@ abstract class AbstractControllerTest :
     }
   }
 
-  protected fun login(userName: String, password: String?): DefaultAuthenticationResult {
+  protected fun login(userName: String, password: String): DefaultAuthenticationResult {
     val response = doAuthentication(userName, password)
       .andReturn().response.contentAsString
     val userAccount = userAccountService.find(userName) ?: throw NotFoundException()
@@ -50,7 +50,7 @@ abstract class AbstractControllerTest :
     )
   }
 
-  protected fun doAuthentication(username: String?, password: String?): ResultActions {
+  protected fun doAuthentication(username: String, password: String): ResultActions {
     val request = LoginRequest()
     request.username = username
     request.password = password
