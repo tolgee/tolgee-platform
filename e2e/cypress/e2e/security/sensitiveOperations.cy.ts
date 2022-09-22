@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { HOST } from '../../common/constants';
 import { sensitiveOperationProtectionTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { deleteUser, login } from '../../common/apiCalls/common';
 import {
   assertMessage,
   confirmHardMode,
@@ -95,6 +95,7 @@ context('Sensitive operations', () => {
   });
 
   it("Doesn't ask when third party", () => {
+    deleteUser('johndoe@doe.com'); // if some test leaves it there
     cy.visit(HOST);
     loginWithFakeGithub();
     cy.visit(HOST + '/account/profile');
