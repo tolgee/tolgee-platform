@@ -35,7 +35,7 @@ context('Sensitive operations', () => {
     assertMessage('deleted');
   });
 
-  it('Asks for OTP before operation', () => {
+  it('Asks for OTP before operation', { retries: 3 }, () => {
     doOtpProtectedOperation();
     getOtp().then((otp) => {
       gcy('sensitive-dialog-otp-input').type(otp);
@@ -65,17 +65,6 @@ context('Sensitive operations', () => {
       .findDcy('global-form-save-button')
       .click();
     cy.contains('Invalid 2FA code').should('be.visible');
-  });
-
-  it('Asks for OTP before operation', () => {
-    doOtpProtectedOperation();
-    getOtp().then((otp) => {
-      gcy('sensitive-dialog-otp-input').type(otp);
-    });
-    gcy('sensitive-protection-dialog')
-      .findDcy('global-form-save-button')
-      .click();
-    assertMessage('deleted');
   });
 
   it('Can be cancelled for password', () => {

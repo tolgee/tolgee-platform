@@ -23,13 +23,13 @@ context('Login', () => {
     cy.visit(HOST);
   });
 
-  it('Will login', () => {
+  it('login', () => {
     loginViaForm();
     cy.gcy('login-button').should('not.exist');
     cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
   });
 
-  it('Will fail on invalid credentials', () => {
+  it('fails on invalid credentials', () => {
     cy.xpath('//input[@name="username"]')
       .type('aaaa')
       .should('have.value', 'aaaa');
@@ -41,14 +41,14 @@ context('Login', () => {
     cy.contains('Invalid credentials').should('be.visible');
   });
 
-  it('Will login with github', () => {
+  it('login with github', () => {
     loginWithFakeGithub();
   });
-  it('Will login with oauth2', () => {
+  it('login with oauth2', () => {
     loginWithFakeOAuth2();
   });
 
-  it('Will logout', () => {
+  it('logout', () => {
     login();
     cy.reload();
     cy.xpath("//*[@aria-controls='user-menu']").click();
@@ -56,7 +56,7 @@ context('Login', () => {
     cy.gcy('login-button').should('be.visible');
   });
 
-  it('will reset password', () => {
+  it('resets password', () => {
     deleteAllEmails();
     const username = 'test@testuser.com';
     createUser(username);
@@ -96,14 +96,14 @@ context('Login', () => {
       cy.visit(HOST);
     });
 
-    it('should ask for MFA', () => {
+    it('asks for MFA', () => {
       cy.xpath('//input[@name="username"]').type(USERNAME);
       cy.xpath('//input[@name="password"]').type(PASSWORD);
       cy.gcy('login-button').click();
       cy.xpath('//input[@name="otp"]').should('exist');
     });
 
-    it('should accept valid TOTP code', () => {
+    it('accepts valid TOTP code', { retries: 3 }, () => {
       cy.xpath('//input[@name="username"]').type(USERNAME);
       cy.xpath('//input[@name="password"]').type(PASSWORD);
       cy.gcy('login-button').click();
@@ -115,7 +115,7 @@ context('Login', () => {
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
     });
 
-    it('should accept recovery code', () => {
+    it('accepts recovery code', () => {
       cy.xpath('//input[@name="username"]').type(USERNAME);
       cy.xpath('//input[@name="password"]').type(PASSWORD);
       cy.gcy('login-button').click();
