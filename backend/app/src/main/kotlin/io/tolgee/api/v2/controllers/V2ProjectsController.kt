@@ -133,6 +133,7 @@ V2ProjectsController(
   @GetMapping("/{projectId}/users")
   @Operation(summary = "Returns project all users, who have permission to access project")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
@@ -307,6 +308,7 @@ V2ProjectsController(
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
     securityService.checkProjectPermission(id, ProjectPermissionType.MANAGE)

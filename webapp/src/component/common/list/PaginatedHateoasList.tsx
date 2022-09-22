@@ -1,6 +1,5 @@
 import { JSXElementConstructor, ReactNode, useEffect } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
-import { Alert } from '@mui/material';
+import { Alert, Box, Grid, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { UseQueryResult } from 'react-query';
 
@@ -88,9 +87,15 @@ export const PaginatedHateoasList = <
         </Box>
       )}
       {loadable.error && (
-        <Alert severity="error">
-          <T>simple_paginated_list_error_message</T>
-        </Alert>
+        <Box mt={2}>
+          <Alert severity="error">
+            {typeof loadable.error.code === 'string' ? (
+              <T>{loadable.error.code}</T>
+            ) : (
+              <T>simple_paginated_list_error_message</T>
+            )}
+          </Alert>
+        </Box>
       )}
       {items ? (
         <SimpleList
@@ -111,7 +116,9 @@ export const PaginatedHateoasList = <
           listComponentProps={props.listComponentProps}
         />
       ) : (
-        props.emptyPlaceholder || (!loadable.isLoading && <EmptyListMessage />)
+        !loadable.isLoading &&
+        !loadable.isError &&
+        (props.emptyPlaceholder || <EmptyListMessage />)
       )}
     </Box>
   );

@@ -99,11 +99,7 @@ export class ApiHttpService {
                   return;
                 }
               }
-              if (
-                r.status == 403 &&
-                (init?.method === undefined || init?.method === 'get') &&
-                !options.disableAuthHandling
-              ) {
+              if (r.status == 403 && !options.disableAuthHandling) {
                 if (init?.method === undefined || init?.method === 'get') {
                   redirectionActions.redirect.dispatch(
                     LINKS.AFTER_LOGIN.build()

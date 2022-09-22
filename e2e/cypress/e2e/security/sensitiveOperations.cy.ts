@@ -2,7 +2,12 @@
 import { HOST } from '../../common/constants';
 import { sensitiveOperationProtectionTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { assertMessage, confirmHardMode, gcy } from '../../common/shared';
+import {
+  assertMessage,
+  confirmHardMode,
+  gcy,
+  selectInProjectMenu,
+} from '../../common/shared';
 import { loginWithFakeGithub } from '../../common/login';
 
 context('Sensitive operations', () => {
@@ -26,11 +31,7 @@ context('Sensitive operations', () => {
 
   it('Asks for password before operation', () => {
     doPasswordProtectedOperation();
-
-    gcy('sensitive-dialog-password-input').type('admin');
-    gcy('sensitive-protection-dialog')
-      .findDcy('global-form-save-button')
-      .click();
+    doPasswordAuth();
     assertMessage('deleted');
   });
 
@@ -79,9 +80,7 @@ context('Sensitive operations', () => {
 
   it('Can be cancelled for password', () => {
     doPasswordProtectedOperation();
-    gcy('sensitive-protection-dialog')
-      .findDcy('global-form-cancel-button')
-      .click();
+    cancelAuthDialog();
     gcy('sensitive-protection-dialog').should('not.exist');
     cy.contains('Project settings').should('be.visible');
   });
@@ -103,6 +102,28 @@ context('Sensitive operations', () => {
     confirmHardMode();
     assertMessage('deleted');
     gcy('login-button').should('be.visible');
+  });
+
+  it('It works in members view (so it works with get requests and double requests)', () => {
+    cy.wrap('').then(() => {
+      window.localStorage.setItem('jwtToken', data.frantaExpiredSuperJwt);
+    });
+    cy.visit(`${HOST}/projects/${data.frantasProjectId}`);
+    selectInProjectMenu('Members');
+    cy.contains('Members').should('be.visible');
+    doPasswordAuth();
+    cy.contains('No pending invitations').should('be.visible');
+    cy.contains('Franta (franta)').should('be.visible');
+  });
+
+  it('It works in members view and can be cancelled', () => {
+    cy.wrap('').then(() => {
+      window.localStorage.setItem('jwtToken', data.frantaExpiredSuperJwt);
+    });
+    cy.visit(`${HOST}/projects/${data.frantasProjectId}`);
+    selectInProjectMenu('Members');
+    cy.contains('Members').should('be.visible');
+    cancelAuthDialog();
   });
 
   function doOtpProtectedOperation() {
@@ -143,4 +164,15 @@ function doSensitiveOperation(
       window.localStorage.setItem('jwtToken', expiredJwt);
     });
   confirmHardMode();
+}
+
+function doPasswordAuth() {
+  gcy('sensitive-dialog-password-input').type('admin');
+  gcy('sensitive-protection-dialog').findDcy('global-form-save-button').click();
+}
+
+function cancelAuthDialog() {
+  gcy('sensitive-protection-dialog')
+    .findDcy('global-form-cancel-button')
+    .click();
 }

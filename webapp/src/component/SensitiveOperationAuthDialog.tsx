@@ -20,8 +20,8 @@ type Value = { otp?: string; password?: string };
 
 export const SensitiveOperationAuthDialog = () => {
   const globalActions = container.resolve(GlobalActions);
-  const afterAction = useSelector(
-    (s: AppState) => s.global.requestSuperJwtAfterAction
+  const afterActions = useSelector(
+    (s: AppState) => s.global.requestSuperJwtAfterActions
   );
   const user = useUser();
 
@@ -30,9 +30,11 @@ export const SensitiveOperationAuthDialog = () => {
     method: 'post',
     options: {
       onSuccess(res) {
-        const onSuccess = afterAction?.onSuccess;
+        const onSuccessCallbacks = afterActions.map(
+          (action) => action.onSuccess
+        );
         globalActions.successSuperJwtRequest.dispatch(res.accessToken!);
-        onSuccess?.();
+        onSuccessCallbacks.forEach((fn) => fn());
       },
     },
     fetchOptions: {
@@ -40,8 +42,18 @@ export const SensitiveOperationAuthDialog = () => {
     },
   });
 
+  const onCancel = () => {
+    afterActions.forEach((action) => {
+      action.onCancel();
+    });
+    globalActions.cancelSuperJwtRequest.dispatch();
+  };
+
   return (
-    <Dialog open={!!afterAction} data-cy="sensitive-protection-dialog">
+    <Dialog
+      open={afterActions.length > 0}
+      data-cy="sensitive-protection-dialog"
+    >
       <DialogTitle>
         <T keyName="sensitive-authentication-dialog-title" />
       </DialogTitle>
@@ -53,9 +65,7 @@ export const SensitiveOperationAuthDialog = () => {
           rootSx={{ mb: 0 }}
           submitButtonInner={<T>sensitive-auth-submit-button</T>}
           saveActionLoadable={superTokenMutation}
-          onCancel={() => {
-            globalActions.cancelSuperJwtRequest.dispatch();
-          }}
+          onCancel={onCancel}
           initialValues={{ otp: '', password: '' } as Value}
           onSubmit={(v: Value) => {
             superTokenMutation.mutate({ content: { 'application/json': v } });
