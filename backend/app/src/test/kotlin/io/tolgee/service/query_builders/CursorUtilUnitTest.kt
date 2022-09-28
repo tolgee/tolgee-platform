@@ -51,18 +51,14 @@ class CursorUtilUnitTest {
         node("direction").isEqualTo("ASC")
         node("value").isEqualTo("Super key translated 🎌")
       }
-      node("keyId") {
-        node("direction").isEqualTo("ASC")
-        node("value").isString.isEqualTo("1")
-      }
     }
   }
 
   @Test
   fun `parses cursor`() {
     val parsed = CursorUtil.parseCursor(cursor)
-    assertThat(parsed["keyId"]?.direction).isEqualTo(Sort.Direction.ASC)
-    assertThat(parsed["keyId"]?.value).isEqualTo("1")
-    assertThat(parsed.entries).hasSize(3)
+    assertThat(parsed["keyName"]?.direction).isEqualTo(Sort.Direction.DESC)
+    assertThat(parsed["keyName"]?.value).isEqualTo("Super key")
+    assertThat(parsed.entries).hasSize(2)
   }
 }
