@@ -156,6 +156,35 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `works with cursor and no sort specified`() {
+    // Reference: https://github.com/tolgee/tolgee-platform/issues/1345
+    testData.generateCursorTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
+    val seenKeys = mutableListOf<String>()
+    var cursor: String? = null
+    do {
+      performProjectAuthGet(if (cursor == null) "/translations?size=2" else "/translations?size=2&cursor=$cursor")
+        .andAssertThatJson {
+          try {
+            node("nextCursor").isString.satisfies { cursor = it }
+          } catch (_: AssertionError) {
+            cursor = null
+            node("_embedded").isAbsent()
+            return@andAssertThatJson
+          }
+
+          node("_embedded.keys[0].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+          node("_embedded.keys[1].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+        }
+    } while (cursor != null)
+
+    assertThat(seenKeys).hasSize(8)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `sorts data by translation text`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
