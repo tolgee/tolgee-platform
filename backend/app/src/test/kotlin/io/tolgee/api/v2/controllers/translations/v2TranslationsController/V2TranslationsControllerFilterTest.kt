@@ -236,7 +236,7 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?filterTag=Cool tag&filterTag=Another cool tag")
+    performProjectAuthGet("/translations?sort=keyName&filterTag=Cool tag&filterTag=Another cool tag")
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[0].keyTags[0].name").isEqualTo("Cool tag")
