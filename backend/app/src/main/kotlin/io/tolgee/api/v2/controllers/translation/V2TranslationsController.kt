@@ -35,6 +35,7 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -47,6 +48,7 @@ import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
@@ -175,7 +177,8 @@ class V2TranslationsController(
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
 
-    val data = translationService.getViewData(projectHolder.project.id, pageable, params, languages)
+    val pageableWithSort = getSafeSortPageable(pageable)
+    val data = translationService.getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     val keysWithScreenshots = getKeysWithScreenshots(data.map { it.keyId }.toList())
 
@@ -263,6 +266,15 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     if (authenticationFacade.isApiKeyAuthentication) {
       securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
     }
+  }
+
+  private fun getSafeSortPageable(pageable: Pageable): Pageable {
+    var sort = pageable.sort
+    if (sort.getOrderFor(KeyWithTranslationsView::keyId.name) == null) {
+      sort = sort.and(Sort.by(Sort.Direction.ASC, KeyWithTranslationsView::keyId.name))
+    }
+
+    return PageRequest.of(pageable.pageNumber, pageable.pageSize, sort)
   }
 
   private fun Translation.checkFromProject() {
