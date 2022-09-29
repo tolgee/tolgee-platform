@@ -16,7 +16,6 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProviderImpl
 import io.tolgee.security.LoginRequest
-import io.tolgee.security.payload.ApiResponse
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
@@ -28,7 +27,6 @@ import io.tolgee.service.UserAccountService
 import io.tolgee.service.UserCredentialsService
 import io.tolgee.service.security.ReCaptchaValidationService
 import org.apache.commons.lang3.RandomStringUtils
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -63,13 +61,6 @@ class PublicController(
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<*> {
-    if (loginRequest.username.isBlank() || loginRequest.password.isEmpty()) {
-      return ResponseEntity(
-        ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.code),
-        HttpStatus.BAD_REQUEST
-      )
-    }
-
     // note: These checks are left to keep the behavior of this legacy endpoint untouched;
     // v2 endpoint will allow for hybrid authentication between platform accounts and ldap accounts
     if (properties.authentication.ldap.enabled && properties.authentication.nativeEnabled) {

@@ -1,11 +1,12 @@
 package io.tolgee.security
 
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
 class LoginRequest {
-  @NotBlank
+  @field:NotBlank
   var username: String = ""
-  @NotBlank
+  @field:NotEmpty
   var password: String = ""
   var otp: String? = null
 }

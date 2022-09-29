@@ -31,6 +31,7 @@ import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.NeedsSuperJwtToken
+import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
@@ -133,6 +134,7 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}")
   @Operation(summary = "Updates organization data")
   @NeedsSuperJwtToken
+  @DenyPatAccess
   fun update(@PathVariable("id") id: Long, @RequestBody @Valid dto: OrganizationDto): OrganizationModel {
     organizationRoleService.checkUserIsOwner(id)
     return this.organizationService.edit(id, editDto = dto).toModel()
@@ -149,6 +151,7 @@ class OrganizationController(
   @GetMapping("/{id:[0-9]+}/users")
   @Operation(summary = "Returns all users in organization")
   @NeedsSuperJwtToken
+  @DenyPatAccess
   fun getAllUsers(
     @PathVariable("id") id: Long,
     @ParameterObject @SortDefault(sort = ["name"], direction = Sort.Direction.ASC) pageable: Pageable,

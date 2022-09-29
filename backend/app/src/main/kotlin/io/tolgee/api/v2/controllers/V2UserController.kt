@@ -122,6 +122,7 @@ class V2UserController(
 
   @PostMapping("/generate-super-token")
   @Operation(summary = "Generates new JWT token permitted to sensitive operations")
+  @DenyPatAccess
   fun getSuperToken(@RequestBody @Valid req: SuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
     if (authenticationFacade.userAccountEntity.isMfaEnabled) {
       mfaService.checkMfa(authenticationFacade.userAccountEntity, req.otp)
