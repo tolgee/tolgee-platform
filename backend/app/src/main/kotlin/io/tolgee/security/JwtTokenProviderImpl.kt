@@ -82,6 +82,7 @@ class JwtTokenProviderImpl(
   override fun checkToken(authToken: JwtToken) {
     try {
       Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
+      return
     } catch (ex: SignatureException) {
       logger.error("Invalid JWT signature")
     } catch (ex: MalformedJwtException) {
@@ -97,8 +98,8 @@ class JwtTokenProviderImpl(
   }
 
   override fun getAuthentication(token: JwtToken): Authentication {
-    val user = getUser(token)
     this.checkToken(token)
+    val user = getUser(token)
     return authenticationProvider.getAuthentication(user)
   }
 
