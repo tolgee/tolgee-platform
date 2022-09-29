@@ -1,8 +1,8 @@
 import {
+  createKey,
   createProject,
   deleteProject,
   login,
-  setTranslations,
 } from './apiCalls/common';
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
@@ -115,7 +115,7 @@ export const create4Translations = (projectId: number) => {
   const promises = [];
   for (let i = 1; i < 5; i++) {
     promises.push(
-      setTranslations(projectId, `Cool key ${i.toString().padStart(2, '0')}`, {
+      createKey(projectId, `Cool key ${i.toString().padStart(2, '0')}`, {
         en: `Cool translated text ${i}`,
         cs: `Studený přeložený text ${i}`,
       })

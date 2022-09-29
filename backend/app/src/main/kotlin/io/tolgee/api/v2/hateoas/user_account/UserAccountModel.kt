@@ -12,5 +12,6 @@ data class UserAccountModel(
   var name: String?,
   var emailAwaitingVerification: String?,
   var avatar: Avatar?,
-  var globalServerRole: UserAccount.Role
+  var globalServerRole: UserAccount.Role,
+  var deleted: Boolean
 ) : RepresentationModel<UserAccountModel>()

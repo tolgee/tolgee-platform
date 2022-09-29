@@ -67,7 +67,7 @@ class LanguageE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanup() {
-    userAccountService.findOptional("franta").orElse(null)?.let {
+    userAccountService.find("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

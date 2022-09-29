@@ -72,7 +72,7 @@ class EmailVerificationService(
 
   @Transactional
   fun verify(userId: Long, code: String) {
-    val user = userAccountService.find(userId).orElseThrow { NotFoundException() }
+    val user = userAccountService.find(userId) ?: throw NotFoundException()
     val old = UserAccountDto.fromEntity(user)
     val emailVerification = user?.emailVerification
 

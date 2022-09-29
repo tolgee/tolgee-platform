@@ -71,9 +71,11 @@ class GoogleOAuthDelegate(
           }
         }
 
-        val userAccountOptional = userAccountService.findByThirdParty("google", userResponse!!.sub)
+        val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+
+        val userAccountOptional = userAccountService.findByThirdParty("google", userResponse!!.sub!!)
         val user = userAccountOptional.orElseGet {
-          userAccountService.findOptional(userResponse.email).ifPresent {
+          userAccountService.find(googleEmail)?.let {
             throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
           }
 

@@ -90,4 +90,18 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         """
   )
   fun findAllViews(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView>
+
+  @Query(
+    """select o
+    from Organization o 
+    join o.memberRoles mr on mr.user = :userAccount and mr.type = :type
+    join o.memberRoles mra on mra.type = :type
+    group by o.id, mr.id
+    having count(mra.id) = 1
+ """
+  )
+  fun getAllSingleOwnedByUser(
+    userAccount: UserAccount,
+    type: OrganizationRoleType = OrganizationRoleType.OWNER
+  ): List<Organization>
 }

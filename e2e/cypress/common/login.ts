@@ -1,4 +1,5 @@
-import { HOST } from '../common/constants';
+import { HOST, PASSWORD, USERNAME } from '../common/constants';
+import { waitForGlobalLoading } from './loading';
 
 export const loginWithFakeGithub = () => {
   cy.intercept('https://github.com/login/oauth/**', {
@@ -34,4 +35,15 @@ export const loginWithFakeOAuth2 = () => {
       '/login/auth_callback/oauth2?code=this_is_dummy_code&redirect_uri=https%3A%2F%2Fdummy-url.com%2Fcallback'
   );
   cy.contains('Projects').should('be.visible');
+};
+
+export const loginViaForm = (username = USERNAME, password = PASSWORD) => {
+  cy.xpath('//input[@name="username"]')
+    .type(username)
+    .should('have.value', username);
+  cy.xpath('//input[@name="password"]')
+    .type(password)
+    .should('have.value', password);
+  cy.gcy('login-button').click();
+  waitForGlobalLoading();
 };

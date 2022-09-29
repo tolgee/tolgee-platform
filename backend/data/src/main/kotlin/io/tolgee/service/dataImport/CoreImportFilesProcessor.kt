@@ -108,6 +108,7 @@ class CoreImportFilesProcessor(
   private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
 
   private fun FileProcessorContext.processResult() {
+    val userAccount = authenticationFacade.userAccountEntity
     this.processLanguages()
 
     importDataManager.storedKeys // populate keys first
@@ -117,9 +118,9 @@ class CoreImportFilesProcessor(
         if (meta.id == 0L) {
           keyMetaService.save(meta)
         }
-        meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccountEntity }
+        meta.comments.onEach { comment -> comment.author = comment.author ?: userAccount }
         keyMetaService.saveAllComments(meta.comments)
-        meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccountEntity }
+        meta.codeReferences.onEach { ref -> ref.author = ref.author ?: userAccount }
         keyMetaService.saveAllCodeReferences(meta.codeReferences)
       }
     }

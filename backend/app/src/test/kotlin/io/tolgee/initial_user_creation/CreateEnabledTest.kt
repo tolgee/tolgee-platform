@@ -28,7 +28,7 @@ import java.io.File
   properties = [
     "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
     "tolgee.authentication.create-initial-user=true",
-    "tolgee.authentication.initialUsername=johny"
+    "tolgee.authentication.initial-username=johny"
   ]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,8 +62,8 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
   @Test
   fun passwordStoredInDb() {
-    val johny = userAccountService.findOptional("johny").orElseGet(null)
-    assertThat(passwordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
+    val johny = userAccountService.find("johny")
+    assertThat(passwordEncoder.matches(passwordFile.readText(), johny!!.password)).isTrue
   }
 
   @AfterAll

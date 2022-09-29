@@ -16,14 +16,14 @@ class UserPreferences(
   var userAccount: UserAccount,
 ) : AuditModel() {
 
-  constructor(userAccount: UserAccount, preferredOrganization: Organization) : this(userAccount) {
+  constructor(userAccount: UserAccount, preferredOrganization: Organization?) : this(userAccount) {
     this.preferredOrganization = preferredOrganization
   }
 
   var language: String? = null
 
   @ManyToOne
-  lateinit var preferredOrganization: Organization
+  var preferredOrganization: Organization? = null
 
   @Id
   @Column(name = "user_account_id")

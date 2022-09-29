@@ -14,6 +14,7 @@ import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../cell/SmallActionButton';
 import { LimitedHeightText } from '../LimitedHeightText';
 import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
+import { UserName } from 'tg.component/common/UserName';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -117,7 +118,7 @@ export const HistoryItem: React.FC<Props> = ({
 
   return textDiff || stateDiff || mtProviderDiff ? (
     <StyledContainer data-cy="translation-history-item">
-      <Tooltip title={entry.author?.name || entry.author?.username || ''}>
+      <Tooltip title={<UserName {...entry.author} />}>
         <StyledAvatar>
           <AvatarImg
             owner={{

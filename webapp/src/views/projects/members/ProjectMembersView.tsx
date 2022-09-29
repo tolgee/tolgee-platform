@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -100,13 +100,17 @@ export const ProjectMembersView: FunctionComponent = () => {
           </Button>
         </Box>
 
-        {!invitations && !invitationsLoadable.isLoading && (
-          <Box m={4} display="flex" justifyContent="center">
-            <Typography color="textSecondary">
-              {t('invite_user_nothing_found')}
-            </Typography>
-          </Box>
-        )}
+        <PaginatedHateoasList
+          loadable={invitationsLoadable}
+          renderItem={(i) => <InvitationItem invitation={i} />}
+          emptyPlaceholder={
+            <Box m={4} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                {t('invite_user_nothing_found')}
+              </Typography>
+            </Box>
+          }
+        />
 
         {invitations?.length && (
           <SimpleList

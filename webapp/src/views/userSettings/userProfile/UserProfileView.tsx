@@ -16,6 +16,7 @@ import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { LINKS } from 'tg.constants/links';
+import { DeleteUserButton } from './DeleteUserButton';
 
 const messagesService = container.resolve(MessageService);
 
@@ -62,7 +63,7 @@ export const UserProfileView: FunctionComponent = () => {
     const emailChanged = newEmail !== initialEmail;
 
     return (
-      <Box data-cy="user-profile">
+      <Box data-cy="user-profile" sx={{ mb: 2 }}>
         <Grid container spacing={8}>
           <Grid item xs="auto">
             <UserProfileAvatar />
@@ -131,6 +132,7 @@ export const UserProfileView: FunctionComponent = () => {
       {user && (
         <StandardForm
           saveActionLoadable={updateUser}
+          customActions={<DeleteUserButton />}
           initialValues={
             {
               name: user.name,

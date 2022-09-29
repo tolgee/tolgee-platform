@@ -23,7 +23,8 @@ class TranslationHistoryModelAssembler(
           id = it,
           name = view.authorName,
           username = view.authorEmail ?: "",
-          avatar = avatar
+          avatar = avatar,
+          deleted = view.authorDeletedAt != null
         )
       },
       timestamp = view.timestamp.time,

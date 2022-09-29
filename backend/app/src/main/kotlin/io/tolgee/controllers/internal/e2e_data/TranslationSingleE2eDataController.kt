@@ -37,7 +37,7 @@ class TranslationSingleE2eDataController(
     val data = TranslationSingleTestData()
 
     listOf(data.user.username, data.pepa.username, "jindra", "vojta").forEach { user ->
-      userAccountService.findOptional(user).orElse(null)?.let {
+      userAccountService.find(user)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

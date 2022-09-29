@@ -6,22 +6,17 @@ import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.service.MfaService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 class UserMfaControllerTest : AuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"
   }
-
-  @Autowired
-  lateinit var mfaService: MfaService
 
   private val encodedKey: ByteArray = Base32().decode(TOTP_KEY)
 
@@ -40,9 +35,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isEqualTo(encodedKey)
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
   }
 
   @Test
@@ -52,9 +46,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
     performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
   }
 
   @Test
@@ -64,14 +57,12 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       password = initialPassword
     )
 
-    var fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
+    var fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
 
     performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isNotEmpty
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isNotEmpty
   }
 
   @Test
@@ -87,9 +78,8 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       .andReturn()
 
     assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
-    val fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    val fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
   }
 
   @Test
@@ -109,21 +99,20 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     )
 
     performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsForbidden
-    var fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNull()
+    var fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNull()
 
     enableMfa()
 
+    loginAsUser(userAccount!!) // get new token
+
     performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsForbidden
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().totpKey).isNotNull
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isNotNull
 
     performAuthPut("/v2/user/mfa/recovery", recoveryRequestDto).andIsForbidden
-    fromDb = userAccountService.findOptional(initialUsername)
-    Assertions.assertThat(fromDb).isNotEmpty
-    Assertions.assertThat(fromDb.get().mfaRecoveryCodes).isEmpty()
+    fromDb = userAccountService.find(initialUsername)
+    Assertions.assertThat(fromDb!!.mfaRecoveryCodes).isEmpty()
   }
 
   @Test

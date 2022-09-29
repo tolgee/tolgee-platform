@@ -14,7 +14,7 @@ class UserPreferencesService(
   private val userPreferencesRepository: UserPreferencesRepository,
   private val userAccountService: UserAccountService,
   private val organizationService: OrganizationService,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
 ) {
   fun setLanguage(tag: String, userAccount: UserAccount) {
     val preferences = findOrCreate(userAccount.id)
@@ -47,24 +47,58 @@ class UserPreferencesService(
   }
 
   fun find(userAccountId: Long = authenticationFacade.userAccount.id): UserPreferences? {
-    return userPreferencesRepository.findById(userAccountId).orElse(null)
+    val preferences = userPreferencesRepository.findById(userAccountId).orElse(null) ?: return null
+    preferences.tryRefreshPreferredOrganizationWhenNull()
+    return preferences
   }
 
   fun save(prefs: UserPreferences): UserPreferences {
     return userPreferencesRepository.save(prefs)
   }
 
+  fun UserPreferences.tryRefreshPreferredOrganizationWhenNull() {
+    if (this.preferredOrganization == null) {
+      this.preferredOrganization = this@UserPreferencesService.refreshPreferredOrganization(this)
+    }
+  }
+
   /**
    * Sets different organization as preferred if user has no access to the current one
    */
-  fun refreshPreferredOrganization(userAccountId: Long) {
-    val preferences = findOrCreate(userAccountId)
-    val canUserView = organizationRoleService.canUserView(userAccountId, preferences.preferredOrganization.id)
+  fun refreshPreferredOrganization(preferences: UserPreferences): Organization? {
+    val canUserView = preferences.preferredOrganization?.let { po ->
+      organizationRoleService.canUserView(
+        preferences.userAccount.id,
+        po.id
+      )
+    } ?: false
+
     if (!canUserView) {
       preferences.preferredOrganization = organizationService.findOrCreatePreferred(
         userAccount = preferences.userAccount
       )
       save(preferences)
     }
+
+    return preferences.preferredOrganization
+  }
+
+  /**
+   * Sets different organization as preferred if user has no access to the current one
+   */
+  fun refreshPreferredOrganization(userAccountId: Long): Organization? {
+    val preferences = findOrCreateNoRefreshPreferred(userAccountId)
+    return refreshPreferredOrganization(preferences)
+  }
+
+  private fun findOrCreateNoRefreshPreferred(userAccountId: Long): UserPreferences {
+    return tryUntilItDoesntBreakConstraint {
+      val userAccount = userAccountService.get(userAccountId)
+      return@tryUntilItDoesntBreakConstraint findNoRefreshPreferred(userAccountId) ?: create(userAccount)
+    }
+  }
+
+  private fun findNoRefreshPreferred(userAccountId: Long): UserPreferences? {
+    return userPreferencesRepository.findById(userAccountId).orElse(null) ?: return null
   }
 }

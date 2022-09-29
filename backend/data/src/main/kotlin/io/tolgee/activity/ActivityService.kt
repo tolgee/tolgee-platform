@@ -25,7 +25,6 @@ class ActivityService(
   @Transactional
   fun storeActivityData(activityHolder: ActivityHolder) {
     val activityRevision = activityHolder.activityRevision ?: return
-    val modifiedEntities = activityHolder.modifiedEntities
     activityRevision.modifiedEntities = activityHolder.modifiedEntities.values.flatMap { it.values }.toMutableList()
 
     executeInNewTransaction(transactionManager) {

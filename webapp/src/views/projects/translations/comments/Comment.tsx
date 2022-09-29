@@ -1,13 +1,14 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useCurrentLanguage, T, useTranslate } from '@tolgee/react';
+import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
 import { Menu, MenuItem, styled, Tooltip } from '@mui/material';
-import { MoreVert, Check } from '@mui/icons-material';
+import { Check, MoreVert } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { SmallActionButton } from '../cell/SmallActionButton';
+import { UserName } from 'tg.component/common/UserName';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 
@@ -139,7 +140,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
       })}
       data-cy="comment"
     >
-      <Tooltip title={data.author.name || data.author.username}>
+      <Tooltip title={<UserName {...data.author} />}>
         <StyledAvatar>
           <AvatarImg owner={{ ...data.author, type: 'USER' }} size={24} />
         </StyledAvatar>

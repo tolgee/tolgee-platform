@@ -18,8 +18,7 @@ export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
     <StyledContainer
       style={{
         borderRadius: props.owner.type === 'PROJECT' ? '10%' : '50%',
-        overflow: 'hidden',
-        display: 'flex',
+        filter: props.owner.deleted === true ? 'grayscale(1)' : undefined,
       }}
     >
       {avatarPath ? (

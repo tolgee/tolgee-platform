@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.InitialDataModel
+import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.controllers.ConfigurationController
 import io.tolgee.controllers.IController
 import io.tolgee.security.AuthenticationFacade
@@ -25,8 +26,8 @@ class InitialDataController(
   private val configurationController: ConfigurationController,
   private val authenticationFacade: AuthenticationFacade,
   private val userController: V2UserController,
-  private val organizationController: PreferredOrganizationController,
-  private val userPreferencesService: UserPreferencesService
+  private val userPreferencesService: UserPreferencesService,
+  private val preferredOrganizationFacade: PreferredOrganizationFacade
 ) : IController {
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
@@ -39,7 +40,7 @@ class InitialDataController(
     val userAccount = authenticationFacade.userAccountOrNull
     if (userAccount != null) {
       data.userInfo = userController.getInfo()
-      data.preferredOrganization = organizationController.getPreferred()
+      data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
     }
 

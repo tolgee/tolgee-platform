@@ -20,6 +20,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -120,6 +121,7 @@ class V2LanguagesController(
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
   @AccessWithApiKey(scopes = [ApiScope.LANGUAGES_EDIT])
+  @NeedsSuperJwtToken
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.findById(languageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }

@@ -13,6 +13,7 @@ import io.tolgee.dtos.request.pat.UpdatePatDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Pat
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.PatService
 import org.springdoc.api.annotations.ParameterObject
@@ -67,6 +68,7 @@ class PatController(
   @Operation(summary = "Creates new Personal Access Token")
   @ResponseStatus(HttpStatus.CREATED)
   @DenyPatAccess
+  @NeedsSuperJwtToken
   fun create(@RequestBody @Valid dto: CreatePatDto): RevealedPatModel {
     return revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.userAccountEntity))
   }
@@ -77,6 +79,7 @@ class PatController(
       "It generates new token value and updates its time of expiration."
   )
   @DenyPatAccess
+  @NeedsSuperJwtToken
   fun regenerate(
     @RequestBody @Valid dto: RegeneratePatDto,
     @PathVariable id: Long
@@ -88,6 +91,7 @@ class PatController(
   @PutMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Updates Personal Access Token")
   @DenyPatAccess
+  @NeedsSuperJwtToken
   fun update(
     @RequestBody @Valid dto: UpdatePatDto,
     @PathVariable id: Long
@@ -99,6 +103,7 @@ class PatController(
   @DeleteMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Deletes Personal Access Token")
   @DenyPatAccess
+  @NeedsSuperJwtToken
   fun delete(
     @PathVariable id: Long
   ) {

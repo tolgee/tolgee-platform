@@ -37,12 +37,12 @@ class ProjectLeavingE2eDataController(
   fun cleanup() {
     val data = ProjectLeavingTestData()
     listOf(data.organization, data.notOwnedOrganization).forEach {
-      organizationService.find(it.slug!!)?.let { found ->
+      organizationService.find(it.slug)?.let { found ->
         organizationService.delete(found.id)
       }
     }
     listOf(data.user, data.userWithOrganizationRole, data.user3, data.project1nonOwner).forEach { user ->
-      userAccountService.findOptional(user.username).orElse(null)?.let {
+      userAccountService.find(user.username)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

@@ -12,7 +12,11 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.InvitationService
 import io.tolgee.service.UserAccountService
 import org.slf4j.LoggerFactory
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -82,14 +86,14 @@ class OAuth2Delegate(
           throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_SUB)
         }
 
-        if (userResponse.email == null) {
+        val email = userResponse.email ?: let {
           logger.info("Third party user email is null. Missing scope email?")
           throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
         }
 
-        val userAccountOptional = userAccountService.findByThirdParty("oauth2", userResponse.sub)
+        val userAccountOptional = userAccountService.findByThirdParty("oauth2", userResponse.sub!!)
         val user = userAccountOptional.orElseGet {
-          userAccountService.findOptional(userResponse.email).ifPresent {
+          userAccountService.find(email)?.let {
             throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
           }
 

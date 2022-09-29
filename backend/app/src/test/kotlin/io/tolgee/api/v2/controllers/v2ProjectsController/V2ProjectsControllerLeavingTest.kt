@@ -52,7 +52,7 @@ class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("/leave", null).andIsOk
     val preferences = userPreferencesService.find(testData.kvetoslav.id)!!
-    assertThat(preferences.preferredOrganization.id)
+    assertThat(preferences.preferredOrganization?.id)
       .isNotEqualTo(testData.userAccountBuilder.defaultOrganizationBuilder.self.id)
   }
 }

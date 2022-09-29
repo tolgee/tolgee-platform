@@ -13,12 +13,13 @@ export const useIsAdmin = () =>
 
 export const usePreferredOrganization = () => {
   const globalDispatch = useGlobalDispatch();
-  const preferredOrganization = useGlobalContext(
-    (v) => v.preferredOrganization!
-  );
+  const { preferredOrganization, isFetching } = useGlobalContext((v) => ({
+    preferredOrganization: v.preferredOrganization!,
+    isFetching: v.isFetching,
+  }));
   const updatePreferredOrganization = (org: number | OrganizationModel) =>
     globalDispatch({ type: 'UPDATE_ORGANIZATION', payload: org });
-  return { preferredOrganization, updatePreferredOrganization };
+  return { preferredOrganization, updatePreferredOrganization, isFetching };
 };
 
 export const useOrganizationUsage = () => {

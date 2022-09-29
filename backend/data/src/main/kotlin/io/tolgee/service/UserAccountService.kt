@@ -36,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(
@@ -46,7 +47,8 @@ class UserAccountService(
   private val passwordEncoder: PasswordEncoder,
   @Lazy
   private val organizationService: OrganizationService,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
+  private val entityManager: EntityManager
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -57,31 +59,25 @@ class UserAccountService(
 
   private val emailValidator = EmailValidator()
 
-  fun findOptional(username: String?): Optional<UserAccount> {
-    return userAccountRepository.findByUsername(username)
-  }
-
   fun find(username: String): UserAccount? {
-    return userAccountRepository.findByUsername(username).orElse(null)
+    return userAccountRepository.findNotDeleted(username)
   }
 
   operator fun get(username: String): UserAccount {
-    return userAccountRepository
-      .findByUsername(username)
-      .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
+    return this.find(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
-  fun find(id: Long): Optional<UserAccount> {
-    return userAccountRepository.findById(id)
+  fun find(id: Long): UserAccount? {
+    return userAccountRepository.findNotDeleted(id)
   }
 
   fun get(id: Long): UserAccount {
-    return userAccountRepository.findById(id).orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
+    return this.find(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
-  fun getDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findById(id).orElse(null)?.let {
+  fun findDto(id: Long): UserAccountDto? {
+    return userAccountRepository.findNotDeleted(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }
@@ -102,8 +98,33 @@ class UserAccountService(
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
+  @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccountRepository.delete(userAccount)
+    userAccount.emailVerification?.let {
+      entityManager.remove(it)
+    }
+    userAccount.apiKeys?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.pats?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.permissions.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.preferences?.let {
+      entityManager.remove(it)
+    }
+    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+      it.prefereredBy.removeIf { preferences ->
+        preferences.userAccount.id == userAccount.id
+      }
+      organizationService.delete(it.id)
+    }
+    userAccount.organizationRoles.forEach {
+      entityManager.remove(it)
+    }
+    userAccountRepository.softDeleteUser(userAccount)
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
@@ -125,8 +146,8 @@ class UserAccountService(
       }
     }
 
-  fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
-    return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type!!, id!!)
+  fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
+    return userAccountRepository.findThirdByThirdParty(id, type)
   }
 
   @Transactional
@@ -263,7 +284,7 @@ class UserAccountService(
 
       if (dto.currentPassword?.isNotEmpty() != true) throw BadRequestException(Message.CURRENT_PASSWORD_REQUIRED)
       val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
-      if (!matches) throw PermissionException()
+      if (!matches) throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
     }
 
     val old = UserAccountDto.fromEntity(userAccount)
@@ -297,7 +318,7 @@ class UserAccountService(
         throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
       }
 
-      findOptional(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+      this.find(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
       } else {
@@ -327,8 +348,8 @@ class UserAccountService(
     return userAccountRepository.saveAndFlush(user)
   }
 
-  fun getAllByIds(ids: Set<Long>): MutableList<UserAccount> {
-    return userAccountRepository.findAllById(ids)
+  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount> {
+    return userAccountRepository.getAllByIdsIncludingDeleted(ids)
   }
 
   fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {

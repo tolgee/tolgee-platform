@@ -1,4 +1,4 @@
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -23,7 +23,7 @@ const StyledTitle = styled(Box)`
 `;
 
 type Props = {
-  entity: UserAccountModel | OrganizationModel;
+  entity: Omit<UserAccountModel, 'deleted'> | OrganizationModel;
   type: 'USER' | 'ORG';
   title?: string;
   subtitle?: string;

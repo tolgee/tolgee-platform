@@ -26,6 +26,10 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   passwordResetSetSucceed = false;
   confirmationDialog: ConfirmationDialogProps | null = null;
   loading = false;
+  requestSuperJwtAfterActions: {
+    onSuccess: () => void;
+    onCancel: () => void;
+  }[] = [];
 }
 
 @singleton()
@@ -173,6 +177,46 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         adminJwtToken: state.security.jwtToken,
         jwtToken: action.payload,
       },
+    };
+  });
+
+  requestSuperJwt = this.createAction(
+    'REQUEST_SUPER_JWT',
+    (
+      payload: typeof GlobalState['prototype']['requestSuperJwtAfterActions'][0]
+    ) => payload
+  ).build.on((state, action) => {
+    return <GlobalState>{
+      ...state,
+      requestSuperJwtAfterActions: [
+        ...state.requestSuperJwtAfterActions,
+        action.payload,
+      ],
+    };
+  });
+
+  cancelSuperJwtRequest = this.createAction(
+    'REQUEST_SUPER_JWT_CANCEL',
+    () => {}
+  ).build.on((state) => {
+    return <GlobalState>{
+      ...state,
+      requestSuperJwtAfterActions: [],
+    };
+  });
+
+  successSuperJwtRequest = this.createAction(
+    'REQUEST_SUPER_JWT_SUCCESS',
+    (jwtToken) => jwtToken
+  ).build.on((state, action) => {
+    tokenService.setToken(action.payload);
+    return <GlobalState>{
+      ...state,
+      security: {
+        ...state.security,
+        jwtToken: action.payload,
+      },
+      requestSuperJwtAfterActions: [],
     };
   });
 

@@ -30,6 +30,8 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.NeedsSuperJwtToken
+import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
@@ -131,6 +133,8 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}")
   @Operation(summary = "Updates organization data")
+  @NeedsSuperJwtToken
+  @DenyPatAccess
   fun update(@PathVariable("id") id: Long, @RequestBody @Valid dto: OrganizationDto): OrganizationModel {
     organizationRoleService.checkUserIsOwner(id)
     return this.organizationService.edit(id, editDto = dto).toModel()
@@ -138,6 +142,7 @@ class OrganizationController(
 
   @DeleteMapping("/{id:[0-9]+}")
   @Operation(summary = "Deletes organization and all its projects")
+  @NeedsSuperJwtToken
   fun delete(@PathVariable("id") id: Long) {
     organizationRoleService.checkUserIsOwner(id)
     organizationService.delete(id)
@@ -145,6 +150,8 @@ class OrganizationController(
 
   @GetMapping("/{id:[0-9]+}/users")
   @Operation(summary = "Returns all users in organization")
+  @NeedsSuperJwtToken
+  @DenyPatAccess
   fun getAllUsers(
     @PathVariable("id") id: Long,
     @ParameterObject @SortDefault(sort = ["name"], direction = Sort.Direction.ASC) pageable: Pageable,
@@ -157,6 +164,7 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}/leave")
   @Operation(summary = "Removes current user from organization")
+  @NeedsSuperJwtToken
   fun leaveOrganization(@PathVariable("id") id: Long) {
     organizationService.find(id)?.let {
       if (!organizationService.isThereAnotherOwner(id)) {
@@ -169,6 +177,7 @@ class OrganizationController(
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
   @Operation(summary = "Sets user role (Owner or Member)")
+  @NeedsSuperJwtToken
   fun setUserRole(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
@@ -183,6 +192,7 @@ class OrganizationController(
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
   @Operation(summary = "Removes user from organization")
+  @NeedsSuperJwtToken
   fun removeUser(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long
@@ -193,6 +203,7 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}/invite")
   @Operation(summary = "Generates user invitation link for organization")
+  @NeedsSuperJwtToken
   fun inviteUser(
     @RequestBody @Valid dto: OrganizationInviteUserDto,
     @PathVariable("id") id: Long
@@ -215,6 +226,7 @@ class OrganizationController(
 
   @GetMapping("/{organizationId}/invitations")
   @Operation(summary = "Returns all invitations to organization")
+  @NeedsSuperJwtToken
   fun getInvitations(@PathVariable("organizationId") id: Long):
     CollectionModel<OrganizationInvitationModel> {
     val organization = organizationService.find(id) ?: throw NotFoundException()

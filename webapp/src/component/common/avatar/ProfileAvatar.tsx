@@ -17,6 +17,7 @@ export type AvatarOwner = {
   id: number | string;
   avatar?: components['schemas']['Avatar'];
   type: 'ORG' | 'USER' | 'PROJECT';
+  deleted?: boolean;
 };
 
 const StyledEditButton = styled(IconButton)`
@@ -39,6 +40,7 @@ const EditButtonWrapper = styled(Box)`
 
 const StyledBox = styled(Box)`
   position: relative;
+
   &:hover ${StyledEditButton} {
     opacity: 1;
   }

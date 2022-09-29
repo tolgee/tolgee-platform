@@ -7,14 +7,16 @@ data class UserAccountDto(
   val name: String,
   val username: String,
   val role: UserAccount.Role?,
-  val id: Long
+  val id: Long,
+  val needsSuperJwt: Boolean
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) = UserAccountDto(
       name = entity.name,
       username = entity.username,
       role = entity.role,
-      id = entity.id
+      id = entity.id,
+      needsSuperJwt = entity.needsSuperJwt
     )
   }
 

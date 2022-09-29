@@ -7,11 +7,9 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.organization.OrganizationModel
-import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
-import io.tolgee.model.views.OrganizationView
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.UserPreferencesService
+import io.tolgee.component.PreferredOrganizationFacade
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.PermissionException
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,18 +21,15 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Organizations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class PreferredOrganizationController(
-  private val authenticationFacade: AuthenticationFacade,
-  private val organizationRoleService: OrganizationRoleService,
-  private val userPreferencesService: UserPreferencesService,
-  private val organizationModelAssembler: OrganizationModelAssembler,
+  private val preferredOrganizationFacade: PreferredOrganizationFacade
 ) {
   @GetMapping("")
-  @Operation(summary = "Returns preferred organization")
-  fun getPreferred(): OrganizationModel? {
-    val preferences = userPreferencesService.findOrCreate(authenticationFacade.userAccount.id)
-    val preferredOrganization = preferences.preferredOrganization
-    val roleType = organizationRoleService.findType(preferredOrganization.id)
-    val view = OrganizationView.of(preferredOrganization, roleType)
-    return this.organizationModelAssembler.toModel(view)
+  @Operation(
+    summary = "Returns preferred organization. " +
+      "If server allows users to create organization, preferred organization is automatically created " +
+      "if user doesn't have access to any organization."
+  )
+  fun getPreferred(): OrganizationModel {
+    return preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
   }
 }

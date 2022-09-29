@@ -1,6 +1,6 @@
 spring:
-  liquibase:
-    drop-first: true
+  jpa:
+    show-sql: true
 tolgee:
   frontend-url: http://localhost:8081
   authentication:

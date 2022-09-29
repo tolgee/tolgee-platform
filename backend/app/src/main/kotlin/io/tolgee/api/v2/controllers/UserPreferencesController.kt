@@ -32,7 +32,7 @@ class UserPreferencesController(
   @Operation(summary = "Get user's preferences")
   fun get(): UserPreferencesModel {
     return userPreferencesService.findOrCreate(authenticationFacade.userAccount.id).let {
-      UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization.id)
+      UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization?.id)
     }
   }
 

@@ -28,7 +28,7 @@ class SignUpService(
       invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
     }
 
-    userAccountService.findOptional(dto.email).ifPresent {
+    userAccountService.find(dto.email)?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
@@ -43,7 +43,7 @@ class SignUpService(
     }
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)

@@ -1,9 +1,9 @@
-import { HOST } from '../common/constants';
-import { getInput } from '../common/xPath';
+import { HOST } from '../../common/constants';
+import { getInput } from '../../common/xPath';
 import {
   createProject,
   deleteAllEmails,
-  deleteUser,
+  deleteUserSql,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
@@ -15,11 +15,11 @@ import {
   setRecaptchaSecretKey,
   setRecaptchaSiteKey,
   v2apiFetch,
-} from '../common/apiCalls/common';
-import { assertMessage, gcy } from '../common/shared';
-import { loginWithFakeGithub } from '../common/login';
-import { ProjectDTO } from '../../../webapp/src/service/response.types';
-import { waitForGlobalLoading } from '../common/loading';
+} from '../../common/apiCalls/common';
+import { assertMessage, gcy } from '../../common/shared';
+import { loginWithFakeGithub } from '../../common/login';
+import { ProjectDTO } from '../../../../webapp/src/service/response.types';
+import { waitForGlobalLoading } from '../../common/loading';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
@@ -57,7 +57,7 @@ context('Sign up', () => {
     getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
     logout();
     visit();
-    deleteUser(TEST_USERNAME);
+    deleteUserSql(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
   });

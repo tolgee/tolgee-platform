@@ -3,8 +3,13 @@ package io.tolgee
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.model.Project
+import io.tolgee.security.JwtToken
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
@@ -24,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestTemplate
+import java.util.*
 
 @Transactional
 class AuthTest : AbstractControllerTest() {
@@ -44,16 +50,18 @@ class AuthTest : AbstractControllerTest() {
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val oAuth2AuthUtil: OAuth2AuthUtil by lazy { OAuth2AuthUtil(tolgeeProperties, authMvc, restTemplate) }
 
+  private lateinit var project: Project
+
   @BeforeEach
   fun setup() {
-    dbPopulator.createBase(generateUniqueString())
+    project = dbPopulator.createBase(generateUniqueString()).project
     authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
   }
 
   @Test
   fun generatesTokenForValidUser() {
     val response = doAuthentication(initialUsername, initialPassword)
-    val result: HashMap<String, Any> = response.mapResponseTo()
+    val result: HashMap<String, Any> = response.andReturn().mapResponseTo()
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
   }
@@ -61,13 +69,13 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun doesNotGenerateTokenForInvalidUser() {
     val mvcResult = doAuthentication("bena", "benaspassword")
-    assertThat(mvcResult.response.status).isEqualTo(401)
+    assertThat(mvcResult.andReturn().response.status).isEqualTo(401)
   }
 
   @Test
   fun userWithTokenHasAccess() {
     val response = doAuthentication(initialUsername, initialPassword)
-      .response.contentAsString
+      .andReturn().response.contentAsString
     val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
     val mvcResult = mvc.perform(
       MockMvcRequestBuilders.get("/api/projects")
@@ -224,5 +232,32 @@ class AuthTest : AbstractControllerTest() {
     val result = ObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
+  }
+
+  @Test
+  fun `doesn't auth deleted user`() {
+    val admin = userAccountService.get(initialUsername)
+    userAccountService.delete(admin)
+    doAuthentication(initialUsername, initialPassword).andIsUnauthorized
+  }
+
+  @Test
+  fun `super token endpoints require super token`() {
+    val admin = userAccountService.get(initialUsername)
+    var token = jwtTokenProvider.generateToken(admin.id, false)
+    assertExpired(token)
+    token = jwtTokenProvider.generateToken(admin.id, Date().time - 10)
+    assertExpired(token)
+  }
+
+  private fun assertExpired(token: JwtToken) {
+    mvc.perform(
+      MockMvcRequestBuilders.put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
+        .accept(MediaType.ALL)
+        .header("Authorization", String.format("Bearer %s", token))
+        .contentType(MediaType.APPLICATION_JSON)
+    ).andIsForbidden.andAssertThatJson {
+      node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
+    }
   }
 }

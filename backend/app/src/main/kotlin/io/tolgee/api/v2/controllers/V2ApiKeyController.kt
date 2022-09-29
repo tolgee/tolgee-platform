@@ -20,6 +20,7 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -62,6 +63,7 @@ class V2ApiKeyController(
 
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Creates new API key with provided scopes")
+  @NeedsSuperJwtToken
   fun create(@RequestBody @Valid dto: CreateApiKeyDto): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
     if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
@@ -127,6 +129,7 @@ class V2ApiKeyController(
 
   @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Edits existing API key")
+  @NeedsSuperJwtToken
   fun update(@RequestBody @Valid dto: V2EditApiKeyDto, @PathVariable apiKeyId: Long): ApiKeyModel {
     val apiKey = apiKeyService.get(apiKeyId)
     checkOwner(apiKey)
@@ -140,6 +143,7 @@ class V2ApiKeyController(
     summary = "Regenerates API key. " +
       "It generates new API key value and updates its time of expiration."
   )
+  @NeedsSuperJwtToken
   fun regenerate(
     @RequestBody @Valid dto: RegenerateApiKeyDto,
     @PathVariable apiKeyId: Long
@@ -150,6 +154,7 @@ class V2ApiKeyController(
 
   @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Deletes API key")
+  @NeedsSuperJwtToken
   fun delete(@PathVariable apiKeyId: Long) {
     val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     checkOwner(apiKey)

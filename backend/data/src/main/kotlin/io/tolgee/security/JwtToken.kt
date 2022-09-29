@@ -15,6 +15,9 @@ class JwtToken(private val value: String, private val key: Key?) {
   val content: String
     get() = parsed.body.subject
 
+  val claims: Claims
+    get() = parsed.body
+
   val id: Long
     get() = content.toLong()
 
@@ -23,5 +26,12 @@ class JwtToken(private val value: String, private val key: Key?) {
 
   override fun toString(): String {
     return value
+  }
+
+  val superExpiration: Long?
+    get() = this.claims[JWT_TOKEN_SUPER_EXPIRATION_CLAIM] as? Long
+
+  companion object {
+    const val JWT_TOKEN_SUPER_EXPIRATION_CLAIM = "ste"
   }
 }

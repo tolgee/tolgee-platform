@@ -42,6 +42,9 @@ export const useLeaveProject = () => {
         setIsLeaving(false);
       },
     },
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
   });
 
   const leave = (projectName: string, projectId: number) => {

@@ -53,6 +53,7 @@ declare namespace DataCy {
         "comment-text" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |
+        "delete-user-button" |
         "dropzone" |
         "dropzone-inner" |
         "edit-pat-dialog-content" |
@@ -68,6 +69,7 @@ declare namespace DataCy {
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
+        "former-user-name" |
         "generate-api-key-dialog-description-input" |
         "generate-pat-dialog-content" |
         "generate-pat-dialog-description-input" |
@@ -260,6 +262,9 @@ declare namespace DataCy {
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "sensitive-dialog-otp-input" |
+        "sensitive-dialog-password-input" |
+        "sensitive-protection-dialog" |
         "settings-menu-item" |
         "sign-up-submit-button" |
         "tag-autocomplete-input" |
@@ -316,6 +321,7 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "user-delete-organization-message-item" |
         "user-menu-logout" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
