@@ -27,4 +27,11 @@ class JwtToken(private val value: String, private val key: Key?) {
   override fun toString(): String {
     return value
   }
+
+  val superExpiration: Long?
+    get() = this.claims[JWT_TOKEN_SUPER_EXPIRATION_CLAIM] as? Long
+
+  companion object {
+    const val JWT_TOKEN_SUPER_EXPIRATION_CLAIM = "ste"
+  }
 }

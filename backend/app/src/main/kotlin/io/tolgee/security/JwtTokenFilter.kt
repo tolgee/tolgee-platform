@@ -37,12 +37,11 @@ class JwtTokenFilter @Autowired constructor(
     val token = jwtTokenProvider.resolveToken(req)
     try {
       if (token != null) {
-        val claims = jwtTokenProvider.validateToken(token)
         val auth = jwtTokenProvider.getAuthentication(token)
         SecurityContextHolder.getContext().authentication = auth
         val userAccountDto = auth.principal as UserAccountDto
         if (userAccountDto.needsSuperJwt) {
-          val isSuperTokenValid = claims.body.superExpiration
+          val isSuperTokenValid = token.superExpiration
             ?.let { it >= currentDateProvider.date.time } ?: false
           val needsSuperJwtToken = needsSuperToken(req)
           if (needsSuperJwtToken && !isSuperTokenValid) {

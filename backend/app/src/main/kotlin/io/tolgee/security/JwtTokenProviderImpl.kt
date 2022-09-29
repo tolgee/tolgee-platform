@@ -3,9 +3,7 @@
  */
 package io.tolgee.security
 
-import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
@@ -17,6 +15,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.security.JwtToken.Companion.JWT_TOKEN_SUPER_EXPIRATION_CLAIM
 import io.tolgee.service.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -65,7 +64,7 @@ class JwtTokenProviderImpl(
     val claims = mutableMapOf<String, Any>()
     if (superExpiration != null) {
       // super key is needed for sensitive operations
-      claims["superExpiration"] = superExpiration
+      claims[JWT_TOKEN_SUPER_EXPIRATION_CLAIM] = superExpiration
     }
     val now = Date()
     return JwtToken(
@@ -80,9 +79,9 @@ class JwtTokenProviderImpl(
     )
   }
 
-  override fun validateToken(authToken: JwtToken): Jws<Claims> {
+  override fun checkToken(authToken: JwtToken) {
     try {
-      return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
     } catch (ex: SignatureException) {
       logger.error("Invalid JWT signature")
     } catch (ex: MalformedJwtException) {
@@ -99,6 +98,7 @@ class JwtTokenProviderImpl(
 
   override fun getAuthentication(token: JwtToken): Authentication {
     val user = getUser(token)
+    this.checkToken(token)
     return authenticationProvider.getAuthentication(user)
   }
 
@@ -124,7 +124,6 @@ class JwtTokenProviderImpl(
   override fun getAuthentication(jwtToken: String?): Authentication? {
     val token = jwtToken?.let { this.resolveToken(jwtToken) }
     if (token != null) {
-      this.validateToken(token)
       return this.getAuthentication(token)
     }
     return null

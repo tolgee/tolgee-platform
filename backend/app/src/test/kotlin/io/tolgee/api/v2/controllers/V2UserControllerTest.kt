@@ -12,7 +12,6 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
-import io.tolgee.security.superExpiration
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
@@ -234,7 +233,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       )
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
-        jwtTokenProvider.resolveToken(token).claims.superExpiration!!.assert.isGreaterThan(Date().time)
+        jwtTokenProvider.resolveToken(token).superExpiration!!.assert.isGreaterThan(Date().time)
       }
     }
   }
@@ -251,7 +250,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       )
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
-        jwtTokenProvider.resolveToken(token).claims.superExpiration!!.assert.isGreaterThan(Date().time)
+        jwtTokenProvider.resolveToken(token).superExpiration!!.assert.isGreaterThan(Date().time)
       }
     }
   }
