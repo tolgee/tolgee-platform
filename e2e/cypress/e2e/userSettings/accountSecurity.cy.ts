@@ -1,7 +1,7 @@
 import * as totp from 'totp-generator';
 import {
   createUser,
-  deleteUser,
+  deleteUserSql,
   getParsedResetPasswordEmail,
   login,
   setUserType,
@@ -22,7 +22,7 @@ describe('Account security', () => {
   });
 
   afterEach(() => {
-    deleteUser(INITIAL_EMAIL);
+    deleteUserSql(INITIAL_EMAIL);
   });
 
   it('changes password', () => {

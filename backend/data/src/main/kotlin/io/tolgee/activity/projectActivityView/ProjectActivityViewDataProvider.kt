@@ -63,6 +63,7 @@ class ProjectActivityViewDataProvider(
         authorUsername = author?.username,
         authorName = author?.name,
         authorAvatarHash = author?.avatarHash,
+        authorDeleted = author?.deletedAt != null,
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
         counts = counts[revision.id]

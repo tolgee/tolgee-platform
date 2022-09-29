@@ -20,6 +20,7 @@ class SimpleUserAccountModelAssembler(
       username = entity.username,
       name = entity.name,
       avatar = avatar,
+      deleted = entity.deletedAt != null
     )
   }
 }

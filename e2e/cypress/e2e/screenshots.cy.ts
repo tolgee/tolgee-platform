@@ -1,9 +1,9 @@
 import {
   addScreenshot,
+  createKey,
   createProject,
   deleteProject,
   login,
-  setTranslations,
 } from '../common/apiCalls/common';
 import { HOST } from '../common/constants';
 import 'cypress-file-upload';
@@ -38,11 +38,9 @@ describe('Screenshots', () => {
         const promises = [];
         for (let i = 1; i < 5; i++) {
           promises.push(
-            setTranslations(
-              project.id,
-              `Cool key ${i.toString().padStart(2, '0')}`,
-              { en: 'Cool' }
-            )
+            createKey(project.id, `Cool key ${i.toString().padStart(2, '0')}`, {
+              en: 'Cool',
+            })
           );
         }
         return Cypress.Promise.all(promises).then(() => {

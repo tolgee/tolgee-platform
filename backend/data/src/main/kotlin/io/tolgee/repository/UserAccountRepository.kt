@@ -22,7 +22,21 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findNotDeleted(id: Long): UserAccount?
 
   @Modifying
-  @Query("""update UserAccount ua set ua.deletedAt = now() where ua = :user""")
+  @Query(
+    """update UserAccount ua 
+    set 
+     ua.deletedAt = now(), 
+     ua.password = null, 
+     ua.totpKey = null, 
+     ua.mfaRecoveryCodes = null,
+     ua.thirdPartyAuthId = null,
+     ua.thirdPartyAuthType = null,
+     ua.avatarHash = null,
+     ua.username = 'former',
+     ua.name = 'Former user'
+     where ua = :user
+     """
+  )
   fun softDeleteUser(user: UserAccount)
 
   @Query(

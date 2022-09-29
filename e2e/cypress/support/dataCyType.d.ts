@@ -69,6 +69,7 @@ declare namespace DataCy {
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
+        "former-user-name" |
         "generate-api-key-dialog-description-input" |
         "generate-pat-dialog-content" |
         "generate-pat-dialog-description-input" |

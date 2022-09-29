@@ -195,6 +195,9 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     organizationService.find(testData.frantasOrganization.id).assert.isNull()
     // doesn't delete organization with multiple owners
     organizationService.find(testData.pepaFrantaOrganization.id).assert.isNotNull
+    val deleted = userAccountService.getAllByIdsIncludingDeleted(setOf(testData.franta.id)).single()
+    deleted.name.assert.isEqualTo("Former user")
+    deleted.username.assert.isEqualTo("former")
   }
 
   @Test

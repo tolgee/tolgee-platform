@@ -2159,13 +2159,11 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1663247386701-2">
         <sql>
-            create unique index on public.user_account (username, deleted_at) where deleted_at is not null;
             create unique index on public.user_account (username) where deleted_at is null;
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1663247386701-3">
         <sql>
-            create unique index on public.user_account (third_party_auth_id, third_party_auth_type, deleted_at) where deleted_at is not null;
             create unique index on public.user_account (third_party_auth_id, third_party_auth_type) where deleted_at is null;
         </sql>
     </changeSet>

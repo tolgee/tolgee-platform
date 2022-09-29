@@ -35,7 +35,6 @@ abstract class AbstractE2eDataController {
           userAccountService.delete(user)
         }
       }
-      entityManager.flush()
       testData.data.organizations.forEach { organizationBuilder ->
         organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
       }

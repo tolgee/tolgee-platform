@@ -3,7 +3,7 @@ import { getInput } from '../../common/xPath';
 import {
   createProject,
   deleteAllEmails,
-  deleteUser,
+  deleteUserSql,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
@@ -57,7 +57,7 @@ context('Sign up', () => {
     getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
     logout();
     visit();
-    deleteUser(TEST_USERNAME);
+    deleteUserSql(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
   });

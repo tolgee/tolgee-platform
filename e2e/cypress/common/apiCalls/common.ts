@@ -129,12 +129,22 @@ export const createTestProject = () =>
     ],
   });
 
-export const setTranslations = (
+export const createKey = (
   projectId,
   key: string,
   translations: { [lang: string]: string }
 ) =>
   apiFetch(`project/${projectId}/keys/create`, {
+    body: { key, translations },
+    method: 'POST',
+  });
+
+export const setTranslations = (
+  projectId,
+  key: string,
+  translations: { [lang: string]: string }
+) =>
+  v2apiFetch(`projects/${projectId}/translations`, {
     body: { key, translations },
     method: 'POST',
   });
@@ -150,14 +160,18 @@ export const createUser = (
 ) => {
   password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
-  return deleteUser(username).then(() => {
+  return deleteUserSql(username).then(() => {
     const sql = `insert into user_account (username, name, password, created_at, updated_at)
                  values ('${username}', '${fullName}', '${password}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
     return internalFetch(`sql/execute`, { method: 'POST', body: sql });
   });
 };
 
-export const deleteUser = (username: string) => {
+export const deleteUser = () => {
+  return v2apiFetch('user', { method: 'delete' });
+};
+
+export const deleteUserSql = (username: string) => {
   const sql = `
       delete
       from permission

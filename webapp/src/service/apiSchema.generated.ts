@@ -792,6 +792,7 @@ export interface components {
       emailAwaitingVerification?: string;
       avatar?: components["schemas"]["Avatar"];
       globalServerRole: "USER" | "ADMIN";
+      deleted: boolean;
     };
     TranslationCommentDto: {
       text: string;
@@ -847,12 +848,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      createdAt: number;
-      updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
-      description: string;
+      lastUsedAt?: number;
+      updatedAt: number;
+      createdAt: number;
       id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -923,21 +924,21 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      username?: string;
-      lastUsedAt?: number;
-      projectId: number;
-      expiresAt?: number;
       projectName: string;
       userFullName?: string;
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       scopes: string[];
-      description: string;
       id: number;
+      description: string;
     };
     OldEditKeyDto: {
       currentName: string;
       newName: string;
     };
-    GetSuperTokenRequest: {
+    SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
       otp?: string;
       /** Has to be provided when TOTP not enabled */
@@ -1093,8 +1094,8 @@ export interface components {
       email: string;
     };
     LoginRequest: {
-      username?: string;
-      password?: string;
+      username: string;
+      password: string;
       otp?: string;
     };
     GetKeyTranslationsReqDto: {
@@ -1283,6 +1284,7 @@ export interface components {
       username?: string;
       name?: string;
       avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
     };
     ProjectActivityModel: {
       revisionId: number;
@@ -1337,7 +1339,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1349,6 +1350,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1385,6 +1387,7 @@ export interface components {
       username: string;
       name?: string;
       avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
     };
     TranslationHistoryModel: {
       /** Modified fields */
@@ -1575,15 +1578,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      username?: string;
-      lastUsedAt?: number;
-      projectId: number;
-      expiresAt?: number;
       projectName: string;
       userFullName?: string;
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       scopes: string[];
-      description: string;
       id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3878,7 +3881,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetSuperTokenRequest"];
+        "application/json": components["schemas"]["SuperTokenRequest"];
       };
     };
   };
