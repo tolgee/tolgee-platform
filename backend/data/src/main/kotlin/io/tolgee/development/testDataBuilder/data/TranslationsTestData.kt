@@ -300,6 +300,25 @@ class TranslationsTestData {
     }
   }
 
+  fun generateCursorWithDupeTestData() {
+    root.data.projects[0].apply {
+      addKey { name = "a" }.build {
+        addTranslation {
+          language = germanLanguage
+          text = "a"
+        }
+      }
+      (1..5).forEach {
+        addKey { name = "key-$it" }.build {
+          addTranslation {
+            language = germanLanguage
+            text = "Key text..."
+          }
+        }
+      }
+    }
+  }
+
   fun generateCommentTestData() {
     root.data.projects[0].apply {
       addKey { name = "ee" }.build {

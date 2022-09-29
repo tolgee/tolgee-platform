@@ -18,14 +18,6 @@ class CursorUtil {
         )
       }.toMap().toMutableMap()
 
-      // add key id, to make cursor always contain unique value
-      if (cursor[KeyWithTranslationsView::keyId.name] == null) {
-        cursor[KeyWithTranslationsView::keyId.name] = CursorValue(
-          direction = Sort.Direction.ASC,
-          value = item?.keyId.toString()
-        )
-      }
-
       val json = jacksonObjectMapper().writer().writeValueAsString(cursor)
       return Base64.getEncoder().encodeToString(json.toByteArray())
     }

@@ -338,12 +338,6 @@ class TranslationsViewBuilder(
     ): Page<KeyWithTranslationsView> {
       val em = applicationContext.getBean(EntityManager::class.java)
       val tagService = applicationContext.getBean(TagService::class.java)
-      var sort = if (pageable.sort.isSorted)
-        pageable.sort
-      else
-        Sort.by(Sort.Order.asc(KEY_NAME_FIELD))
-
-      sort = sort.and(Sort.by(Sort.Direction.ASC, KeyWithTranslationsView::keyId.name))
 
       // otherwise it takes forever for postgres to plan the execution
       em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
@@ -353,7 +347,7 @@ class TranslationsViewBuilder(
         projectId = projectId,
         languages = languages,
         params = params,
-        sort = sort,
+        sort = pageable.sort,
         cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
@@ -363,7 +357,7 @@ class TranslationsViewBuilder(
         projectId = projectId,
         languages = languages,
         params = params,
-        sort = sort,
+        sort = pageable.sort,
         cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val query = em.createQuery(translationsViewBuilder.dataQuery).setMaxResults(pageable.pageSize)
