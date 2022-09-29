@@ -1,3 +1,10 @@
+## [2.44.1](https://github.com/tolgee/tolgee-platform/compare/v2.44.0...v2.44.1) (2022-09-29)
+
+
+### Bug Fixes
+
+* consistent sorting when sort is unspecified ([#1383](https://github.com/tolgee/tolgee-platform/issues/1383)) ([afd2a1d](https://github.com/tolgee/tolgee-platform/commit/afd2a1db034e1cae2bbaa4322691d5297e5747fc)), closes [#1345](https://github.com/tolgee/tolgee-platform/issues/1345)
+
 # [2.44.0](https://github.com/tolgee/tolgee-platform/compare/v2.43.2...v2.44.0) (2022-09-15)
 
 
