@@ -1,3 +1,10 @@
+# [2.45.0](https://github.com/tolgee/tolgee-platform/compare/v2.44.1...v2.45.0) (2022-09-30)
+
+
+### Features
+
+* Delete user account, fix no organization, fix organization bug ([#1377](https://github.com/tolgee/tolgee-platform/issues/1377)) ([cec33f1](https://github.com/tolgee/tolgee-platform/commit/cec33f146a3dbe4930ff8d658e764321210724d0))
+
 ## [2.44.1](https://github.com/tolgee/tolgee-platform/compare/v2.44.0...v2.44.1) (2022-09-29)
 
 
