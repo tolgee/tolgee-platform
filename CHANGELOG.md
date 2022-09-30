@@ -1,3 +1,10 @@
+## [2.45.1](https://github.com/tolgee/tolgee-platform/compare/v2.45.0...v2.45.1) (2022-09-30)
+
+
+### Bug Fixes
+
+* Locking ([#1386](https://github.com/tolgee/tolgee-platform/issues/1386)) ([665375d](https://github.com/tolgee/tolgee-platform/commit/665375d279115d83f7ebc140ef5a0fe733a0250c))
+
 # [2.45.0](https://github.com/tolgee/tolgee-platform/compare/v2.44.1...v2.45.0) (2022-09-30)
 
 
