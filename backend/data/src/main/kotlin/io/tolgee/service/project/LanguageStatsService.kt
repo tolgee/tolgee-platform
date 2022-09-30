@@ -13,7 +13,6 @@ import io.tolgee.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit
 import javax.persistence.EntityManager
 
 @Transactional
@@ -28,7 +27,7 @@ class LanguageStatsService(
   private val platformTransactionManager: PlatformTransactionManager
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
-    withLocking(projectId) {
+    lockingProvider.withLocking("refresh-lang-stats-$projectId") {
       executeInNewTransaction(platformTransactionManager) {
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
@@ -75,19 +74,6 @@ class LanguageStatsService(
           logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?")
         }
       }
-    }
-  }
-
-  private fun withLocking(projectId: Long, fn: () -> Unit) {
-    val lock = lockingProvider.getLock("refresh-language-stats$projectId")
-    if (!lock.tryLock(60, TimeUnit.SECONDS)) {
-      // if not satisfied in 60 seconds, it probably still locked because of server shut down or etc
-      lock.unlock()
-    }
-    try {
-      fn()
-    } finally {
-      lock.unlock()
     }
   }
 
