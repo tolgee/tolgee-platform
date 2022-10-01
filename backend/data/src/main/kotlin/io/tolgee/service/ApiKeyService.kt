@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import com.google.common.io.BaseEncoding
+import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
 import io.tolgee.constants.Message
@@ -140,6 +141,11 @@ class ApiKeyService(
       val (projectId, key) = decoded.split("_".toRegex(), 2)
       return DecodedApiKey(projectId.toLong(), key)
     } catch (e: IllegalArgumentException) {
+      return null
+    } catch (e: IndexOutOfBoundsException) {
+      return null
+    } catch (e: Exception) {
+      Sentry.captureException(e)
       return null
     }
   }
