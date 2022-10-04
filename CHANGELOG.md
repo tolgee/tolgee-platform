@@ -1,3 +1,10 @@
+## [2.45.2](https://github.com/tolgee/tolgee-platform/compare/v2.45.1...v2.45.2) (2022-10-04)
+
+
+### Bug Fixes
+
+* supress not enough credit message ([#1387](https://github.com/tolgee/tolgee-platform/issues/1387)) ([b91a21a](https://github.com/tolgee/tolgee-platform/commit/b91a21aa15dbfafaaa304f1d471b15c8184c4319))
+
 ## [2.45.1](https://github.com/tolgee/tolgee-platform/compare/v2.45.0...v2.45.1) (2022-09-30)
 
 
