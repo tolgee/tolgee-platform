@@ -87,7 +87,7 @@ describe('API keys', () => {
       .findDcy('api-key-list-item-new-token-input')
       .find('input')
       .should('contain.value', 'tgpak_');
-    cy.contains('Expires at Tuesday, September 20, 2050').should('be.visible');
+    cy.contains('Expires on Tuesday, September 20, 2050').should('be.visible');
   });
 });
 
