@@ -46,7 +46,7 @@ describe('Personal Access tokens', () => {
       description: 'Hello! I was just created!',
       selectValue: 'Custom date',
       customDate: '09/15/2050',
-      expectFormattedDate: 'Expires at Thursday, September 15, 2050',
+      expectFormattedDate: 'Expires on Thursday, September 15, 2050',
     });
     createAndAssertToken({
       description: 'Hello2',

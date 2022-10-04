@@ -47,6 +47,9 @@ export const useTranslationTools = ({
     content: {
       'application/json': { keyId: keyId, targetLanguageId, baseText },
     },
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
     options: {
       enabled,
       onSettled(data) {
