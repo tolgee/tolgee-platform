@@ -72,7 +72,7 @@ class KeyComplexEditHelper(
       updateScreenshotsWithPermissionCheck(dto, key)
     }
 
-    return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name))
+    return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name, dto.namespace))
   }
 
   private fun setActivityHolder() {

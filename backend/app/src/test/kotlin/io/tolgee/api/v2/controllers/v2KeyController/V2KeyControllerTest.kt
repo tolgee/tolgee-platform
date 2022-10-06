@@ -133,7 +133,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName)
+    val key = keyService.get(project.id, keyName, null)
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 
@@ -214,7 +214,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName)
+    val key = keyService.get(project.id, keyName, null)
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 

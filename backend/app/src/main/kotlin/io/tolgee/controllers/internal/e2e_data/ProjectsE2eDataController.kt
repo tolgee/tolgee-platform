@@ -105,7 +105,7 @@ class ProjectsE2eDataController(
             createdLanguages.add(it)
           }
         }
-        keyService.create(project, SetTranslationsWithKeyDto(it.key, it.value))
+        keyService.create(project, SetTranslationsWithKeyDto(it.key, null, it.value))
       }
     }
   }

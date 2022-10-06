@@ -30,8 +30,8 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Test
   fun `returns correct map when collision`() {
     val project = dbPopulator.populate("App").project
-    keyService.create(project, SetTranslationsWithKeyDto("folder.folder", mapOf("en" to "Ha")))
-    keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", mapOf("en" to "Ha")))
+    keyService.create(project, SetTranslationsWithKeyDto("folder.folder", null, mapOf("en" to "Ha")))
+    keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", null, mapOf("en" to "Ha")))
 
     val viewData = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), project.id)
     @Suppress("UNCHECKED_CAST")

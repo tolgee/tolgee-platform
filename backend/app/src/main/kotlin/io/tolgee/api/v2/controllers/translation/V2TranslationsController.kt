@@ -122,7 +122,7 @@ class V2TranslationsController(
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.get(projectHolder.project.id, dto.key)
+    val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
 
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
@@ -143,12 +143,12 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
       activityHolder.activity = ActivityType.SET_TRANSLATIONS
     } ?: let {
       checkKeyEditScope()
       activityHolder.activity = ActivityType.CREATE_KEY
-      keyService.create(projectHolder.projectEntity, dto.key)
+      keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
     }
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)

@@ -80,25 +80,6 @@ class TranslationService(
     return translationRepository.getAllByLanguageId(languageId)
   }
 
-  fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
-    val project = projectService.get(projectId)
-    val key = keyService.findOptional(projectId, path!!).orElse(null)
-    val languages: Set<Language> = if (languageTags == null) {
-      languageService.getImplicitLanguages(projectId)
-    } else {
-      languageService.findByTags(languageTags, projectId)
-    }
-    val translations = getKeyTranslations(languages, project, key)
-    val translationsMap = translations.stream()
-      .collect(Collectors.toMap({ v: Translation -> v.language.tag }, Translation::text))
-    for (language in languages) {
-      if (translationsMap.keys.stream().filter { l: String? -> l == language.tag }.findAny().isEmpty) {
-        translationsMap[language.tag] = ""
-      }
-    }
-    return translationsMap
-  }
-
   fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
     return if (key != null) {
       translationRepository.getTranslations(key, project, languages)

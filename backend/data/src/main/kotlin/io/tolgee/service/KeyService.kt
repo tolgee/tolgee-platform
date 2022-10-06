@@ -1,14 +1,12 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.key.OldEditKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -32,20 +30,15 @@ class KeyService(
   private lateinit var translationService: TranslationService
 
   @Transactional
-  fun getOrCreateKey(project: Project, path: PathDTO): Key {
-    return getOrCreateKey(project, path.fullPathString)
-  }
-
-  @Transactional
-  fun getOrCreateKey(project: Project, keyName: String): Key {
-    val key = getOrCreateKeyNoPersist(project, keyName)
+  fun getOrCreateKey(project: Project, keyName: String, namespace: String): Key {
+    val key = getOrCreateKeyNoPersist(project, keyName, namespace)
     entityManager.persist(key)
     return key
   }
 
   @Transactional
-  fun getOrCreateKeyNoPersist(project: Project, keyName: String): Key {
-    return findOptional(project.id, keyName).orElseGet {
+  fun getOrCreateKeyNoPersist(project: Project, keyName: String, namespace: String): Key {
+    return findOptional(project.id, keyName, namespace).orElseGet {
       Key(name = keyName, project = project)
     }!!
   }
@@ -54,21 +47,17 @@ class KeyService(
     return keyRepository.getAllByProjectId(projectId)
   }
 
-  fun get(projectId: Long, name: String): Key {
-    return keyRepository.getByNameAndProjectId(name, projectId)
+  fun get(projectId: Long, name: String, namespace: String?): Key {
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
-  fun find(projectId: Long, name: String): Key? {
-    return this.findOptional(projectId, name).orElseGet { null }
+  fun find(projectId: Long, name: String, namespace: String?): Key? {
+    return this.findOptional(projectId, name, namespace).orElseGet { null }
   }
 
-  fun findOptional(projectId: Long, name: String): Optional<Key> {
-    return keyRepository.getByNameAndProjectId(name, projectId)
-  }
-
-  fun findOptional(projectId: Long, pathDTO: PathDTO): Optional<Key> {
-    return keyRepository.getByNameAndProjectId(pathDTO.fullPathString, projectId)
+  private fun findOptional(projectId: Long, name: String, namespace: String?): Optional<Key> {
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
   }
 
   fun get(id: Long): Key {
@@ -88,18 +77,9 @@ class KeyService(
     return key
   }
 
-  @Deprecated("Use other create method")
-  fun create(project: Project, dto: DeprecatedKeyDto): Key {
-    if (this.findOptional(project.id, dto.pathDto).isPresent) {
-      throw ValidationException(Message.KEY_EXISTS)
-    }
-    val key = Key(name = dto.fullPathString, project = project)
-    return save(key)
-  }
-
   @Transactional
   fun create(project: Project, dto: CreateKeyDto): Key {
-    if (this.findOptional(project.id, dto.name).isPresent) {
+    if (this.findOptional(project.id, dto.name, dto.namespace).isPresent) {
       throw BadRequestException(Message.KEY_EXISTS)
     }
 
@@ -126,32 +106,31 @@ class KeyService(
     if (dto.newFullPathString == dto.oldFullPathString) {
       return
     }
-    if (findOptional(project.id, dto.newPathDto).isPresent) {
+    if (findOptional(project.id, dto.newPathDto.fullPathString, null).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
-    val key = get(project.id, dto.oldPathDto.fullPathString)
+    val key = get(project.id, dto.oldPathDto.fullPathString, null)
     val oldName = key.name
     key.name = dto.newFullPathString
     save(key)
   }
 
   fun edit(projectId: Long, dto: OldEditKeyDto): Key {
-    val key = get(projectId, dto.oldPathDto.fullPathString)
-    return edit(key, dto.newName)
+    val key = get(projectId, dto.oldPathDto.fullPathString, null)
+    return edit(key, dto.newName, null)
   }
 
   fun edit(keyId: Long, dto: EditKeyDto): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
-    return edit(key, dto.name)
+    return edit(key, dto.name, dto.namespace)
   }
 
-  fun edit(key: Key, newName: String): Key {
-    val oldName = key.name
+  fun edit(key: Key, newName: String, newNamespace: String?): Key {
     // do nothing on no change
-    if (key.name == newName) {
+    if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
-    if (findOptional(key.project.id, newName).isPresent) {
+    if (findOptional(key.project.id, newName, newNamespace).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
     key.name = newName
@@ -186,14 +165,14 @@ class KeyService(
 
   @Transactional
   fun create(project: Project, dto: SetTranslationsWithKeyDto): Key {
-    val key = create(project, dto.key)
+    val key = create(project, dto.key, dto.key)
     translationService.setForKey(key, dto.translations)
     return key
   }
 
   @Transactional
-  fun create(project: Project, name: String): Key {
-    if (this.findOptional(project.id, name).isPresent) {
+  fun create(project: Project, name: String, namespace: String?): Key {
+    if (this.findOptional(project.id, name, namespace).isPresent) {
       throw BadRequestException(Message.KEY_EXISTS)
     }
     val key = Key(name = name, project = project)

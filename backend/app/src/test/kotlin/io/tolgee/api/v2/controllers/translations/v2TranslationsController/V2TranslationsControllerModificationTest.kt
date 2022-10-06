@@ -38,7 +38,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", mutableMapOf("en" to "English")
+        "A key", null, mutableMapOf("en" to "English")
       )
     ).andIsOk
       .andAssertThatJson {
@@ -56,7 +56,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", mutableMapOf("en" to "English"), setOf("en", "de")
+        "A key", null, mutableMapOf("en" to "English"), setOf("en", "de")
       )
     ).andIsOk
       .andAssertThatJson {
@@ -73,7 +73,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", mutableMapOf("en" to text)
+        "A key", null, mutableMapOf("en" to text)
       )
     ).andIsBadRequest
   }
@@ -100,7 +100,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     saveTestData()
     performProjectAuthPut(
       "/translations",
-      SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English"))
     ).andIsForbidden
   }
 
@@ -110,7 +110,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     saveTestData()
     performProjectAuthPost(
       "/translations",
-      SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English"))
     ).andIsOk
   }
 
@@ -133,7 +133,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     saveTestData()
     performProjectAuthPost(
       "/translations",
-      SetTranslationsWithKeyDto("A key not existings", mutableMapOf("en" to "English"))
+      SetTranslationsWithKeyDto("A key not existings", null, mutableMapOf("en" to "English"))
     ).andIsForbidden
   }
 
@@ -145,7 +145,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "A key", mutableMapOf("en" to "English", "de" to null)
+        "A key", null, mutableMapOf("en" to "English", "de" to null)
       )
     ).andIsOk
       .andAssertThatJson {
@@ -168,7 +168,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto(
-        "Super ultra cool new key", mutableMapOf("en" to "English")
+        "Super ultra cool new key", null, mutableMapOf("en" to "English")
       )
     ).andIsOk.andAssertThatJson {
       node("translations.en.text").isEqualTo("English")
@@ -186,7 +186,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        "lala", mutableMapOf("en" to "English")
+        "lala", null, mutableMapOf("en" to "English")
       )
     ).andIsOk.andAssertThatJson {
       node("translations.en.text").isEqualTo("English")

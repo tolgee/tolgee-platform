@@ -4,7 +4,7 @@
 
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
-import io.tolgee.dtos.response.DeprecatedKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
@@ -39,7 +39,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `uploads single screenshot`() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
 
     performStoreScreenshot(project, key).andPrettyPrint.andIsCreated.andAssertThatJson {
       val screenshots = screenshotService.findAll(key = key)
@@ -53,7 +53,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `does not upload more then 20`() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     repeat((1..20).count()) {
       performStoreScreenshot(project, key).andIsCreated
     }
@@ -64,8 +64,8 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun findAll() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
-    val key2 = keyService.create(project, DeprecatedKeyDto("test_2"))
+    val key = keyService.create(project, CreateKeyDto("test"))
+    val key2 = keyService.create(project, CreateKeyDto("test_2"))
 
     screenshotService.store(screenshotFile, key)
     screenshotService.store(screenshotFile, key)
@@ -88,7 +88,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `returns correct fileUrl when absolute url is set`() {
     tolgeeProperties.fileStorageUrl = "http://hello.com"
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     screenshotService.store(screenshotFile, key)
 
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
@@ -100,7 +100,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun getScreenshotFile() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
@@ -116,7 +116,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun delete() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
 
     val list = (1..20).map {
       screenshotService.store(screenshotFile, key)
@@ -133,7 +133,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadValidationNoImage() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     val response = performProjectAuthMultipart(
       "keys/${key.id}/screenshots",
       listOf(
