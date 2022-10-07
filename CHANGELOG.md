@@ -1,3 +1,10 @@
+## [2.45.3](https://github.com/tolgee/tolgee-platform/compare/v2.45.2...v2.45.3) (2022-10-07)
+
+
+### Bug Fixes
+
+* Catch invalid API key properly ([#1390](https://github.com/tolgee/tolgee-platform/issues/1390)) ([9ba8b9c](https://github.com/tolgee/tolgee-platform/commit/9ba8b9c99c14fa9227e5092781e37ddbf21ccb8d))
+
 ## [2.45.2](https://github.com/tolgee/tolgee-platform/compare/v2.45.1...v2.45.2) (2022-10-04)
 
 
