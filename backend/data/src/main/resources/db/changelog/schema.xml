@@ -2190,23 +2190,27 @@
             <column name="namespace_id" type="int8"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1665064956379-5">
-        <createIndex tableName="key" unique="true">
-            <column name="project_id"/>
-            <column name="name"/>
-            <column name="namespace_id"/>
-        </createIndex>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1665064956379-6">
-        <addForeignKeyConstraint baseColumnNames="namespace_id" baseTableName="key" constraintName="FK7ex52jk5v6xtvpbaojlmv9cas" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="namespace_id" baseTableName="key"
+                                 constraintName="FK7ex52jk5v6xtvpbaojlmv9cas" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="namespace"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665064956379-7">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="namespace" constraintName="FKo9xwhbk7m02ohl0qnxk658hud" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="namespace"
+                                 constraintName="FKo9xwhbk7m02ohl0qnxk658hud" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665064956379-1">
         <dropUniqueConstraint constraintName="key_project_id_name" tableName="key"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665064956379-2">
-        <addUniqueConstraint columnNames="project_id, name, namespace_id" constraintName="key_project_id_name" tableName="key"/>
+        <sql>
+            create unique index on public.key (project_id, "name", namespace_id) where namespace_id is not null;
+        </sql>
+        <sql>
+            create unique index on public.key (project_id, "name") where namespace_id is null;
+        </sql>
     </changeSet>
 </databaseChangeLog>
