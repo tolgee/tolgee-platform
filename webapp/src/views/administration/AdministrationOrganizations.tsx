@@ -27,9 +27,14 @@ const StyledWrapper = styled('div')`
   }
 `;
 
-export const AdministrationOrganizations = () => {
+export const AdministrationOrganizations = ({
+  search,
+  setSearch,
+}: {
+  search: string;
+  setSearch: (str: string) => void;
+}) => {
   const [page, setPage] = useState(0);
-  const [search, setSearch] = useState('');
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
 
@@ -57,6 +62,7 @@ export const AdministrationOrganizations = () => {
         <BaseView
           windowTitle={t('administration_organizations')}
           onSearch={setSearch}
+          initialSearch={search}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}

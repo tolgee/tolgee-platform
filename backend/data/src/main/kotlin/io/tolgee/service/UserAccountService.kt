@@ -97,6 +97,13 @@ class UserAccountService(
     }
   }
 
+  @CacheEvict(Caches.USER_ACCOUNTS, key = "#id")
+  @Transactional
+  fun delete(id: Long) {
+    val user = this.get(id)
+    delete(user)
+  }
+
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
   @Transactional
   fun delete(userAccount: UserAccount) {

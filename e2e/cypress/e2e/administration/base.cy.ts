@@ -70,6 +70,17 @@ describe('Administration', () => {
       .should('have.attr', 'aria-disabled', 'true');
   });
 
+  it('can delete user', () => {
+    visitAdministration();
+    gcy('administration-tabs-users').click();
+    getUserListItem('John User')
+      .findDcy('administration-user-delete-user')
+      .click();
+    confirmStandard();
+    assertMessage('User deleted');
+    cy.contains('John User').should('not.exist');
+  });
+
   it('only admin can add organization when userCanCreateOrganizations = false', () => {
     login('user@user.com');
     setProperty('authentication.userCanCreateOrganizations', false);

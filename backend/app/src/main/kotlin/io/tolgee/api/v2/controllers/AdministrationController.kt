@@ -5,7 +5,9 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
+import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.AuthenticationFacade
@@ -21,6 +23,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -73,6 +76,18 @@ class AdministrationController(
     securityService.checkUserIsServerAdmin()
     val users = userAccountService.findAllPaged(pageable, search)
     return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
+  }
+
+  @DeleteMapping(value = ["/users/{userId}"])
+  @Operation(summary = "Deletes an user")
+  @NeedsSuperJwtToken
+  @DenyPatAccess
+  fun deleteUser(@PathVariable userId: Long) {
+    securityService.checkUserIsServerAdmin()
+    if (userId == authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
+    }
+    userAccountService.delete(userId)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])
