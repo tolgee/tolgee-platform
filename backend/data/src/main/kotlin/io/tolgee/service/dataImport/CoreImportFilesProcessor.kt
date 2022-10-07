@@ -17,10 +17,10 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
+import io.tolgee.service.key.KeyMetaService
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(

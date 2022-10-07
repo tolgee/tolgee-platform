@@ -41,12 +41,12 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.SecurityService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.query_builders.CursorUtil
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable

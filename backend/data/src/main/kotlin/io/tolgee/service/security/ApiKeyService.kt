@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import com.google.common.io.BaseEncoding
 import io.sentry.Sentry

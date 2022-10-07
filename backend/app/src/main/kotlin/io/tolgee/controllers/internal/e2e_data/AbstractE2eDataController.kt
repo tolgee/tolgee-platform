@@ -1,9 +1,9 @@
 package io.tolgee.controllers.internal.e2e_data
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional

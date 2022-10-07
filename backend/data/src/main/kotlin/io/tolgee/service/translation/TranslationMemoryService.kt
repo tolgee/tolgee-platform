@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.translation
 
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key

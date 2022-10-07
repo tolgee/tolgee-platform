@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.service.InvitationService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.SecurityService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.security.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

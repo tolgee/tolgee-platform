@@ -14,7 +14,7 @@ data class ComplexEditKeyDto(
 
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
-  val namespace: String = "",
+  val namespace: String? = null,
 
   @Schema(description = "Translations to update")
   val translations: Map<String, String?>? = null,

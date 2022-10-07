@@ -14,6 +14,8 @@ import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service

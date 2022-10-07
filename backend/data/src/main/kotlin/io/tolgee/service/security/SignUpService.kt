@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -7,6 +7,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.InvitationService
+import io.tolgee.service.organization.OrganizationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

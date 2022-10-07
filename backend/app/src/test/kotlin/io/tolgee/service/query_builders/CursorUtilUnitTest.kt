@@ -20,6 +20,7 @@ class CursorUtilUnitTest {
     val item = KeyWithTranslationsView(
       keyId = 1,
       keyName = "Super key",
+      namespace = null,
       screenshotCount = 1,
       translations = mutableMapOf(
         "en" to TranslationView(

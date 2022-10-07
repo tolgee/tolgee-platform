@@ -22,8 +22,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
-import io.tolgee.service.SecurityService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

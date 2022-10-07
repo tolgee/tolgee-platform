@@ -7,9 +7,9 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.KeyMetaService
-import io.tolgee.service.KeyService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(

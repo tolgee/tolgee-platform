@@ -9,8 +9,8 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
-import io.tolgee.service.SecurityService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationService
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity

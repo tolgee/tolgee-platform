@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.key
 
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException

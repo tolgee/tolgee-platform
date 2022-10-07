@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
@@ -10,6 +10,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

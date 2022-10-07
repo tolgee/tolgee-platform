@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.organization
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -12,7 +12,10 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.AvatarService
+import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy

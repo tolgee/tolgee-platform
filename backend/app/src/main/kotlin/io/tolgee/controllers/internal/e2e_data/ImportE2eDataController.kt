@@ -6,9 +6,9 @@ import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
-import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

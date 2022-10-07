@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.userPreferences.UserPreferencesModel
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserPreferencesService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

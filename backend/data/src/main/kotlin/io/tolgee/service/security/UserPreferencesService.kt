@@ -1,10 +1,12 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
 import io.tolgee.repository.UserPreferencesRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.stereotype.Service
 

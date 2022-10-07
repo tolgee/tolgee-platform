@@ -1,7 +1,7 @@
 package io.tolgee.component
 
 import io.tolgee.events.OnTranslationsSet
-import io.tolgee.service.AutoTranslationService
+import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 

@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message

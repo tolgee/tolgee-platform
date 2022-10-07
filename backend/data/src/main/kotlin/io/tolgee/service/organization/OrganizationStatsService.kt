@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.organization
 
 import org.springframework.stereotype.Service
 import java.math.BigDecimal

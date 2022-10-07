@@ -7,7 +7,7 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component

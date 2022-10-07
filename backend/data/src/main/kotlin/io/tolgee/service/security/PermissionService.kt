@@ -1,6 +1,6 @@
 @file:Suppress("SpringElInspection")
 
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
@@ -17,6 +17,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.PermissionRepository
+import io.tolgee.service.CachedPermissionService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy

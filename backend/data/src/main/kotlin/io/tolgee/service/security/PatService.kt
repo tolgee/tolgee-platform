@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator

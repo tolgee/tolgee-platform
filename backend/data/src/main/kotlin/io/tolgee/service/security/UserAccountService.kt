@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
@@ -20,6 +20,9 @@ import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.AvatarService
+import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.executeInNewTransaction
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator

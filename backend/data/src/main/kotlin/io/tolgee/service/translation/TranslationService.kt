@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.translation
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -22,7 +22,9 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld

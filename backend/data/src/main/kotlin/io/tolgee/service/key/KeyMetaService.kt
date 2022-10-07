@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.key
 
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import

@@ -15,7 +15,7 @@ import io.tolgee.model.Pat
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.patAuth.DenyPatAccess
-import io.tolgee.service.PatService
+import io.tolgee.service.security.PatService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

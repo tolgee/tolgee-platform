@@ -3,7 +3,7 @@ package io.tolgee.api.v2.hateoas.user_account
 import io.tolgee.model.UserAccount
 import io.tolgee.security.controllers.UserController
 import io.tolgee.service.AvatarService
-import io.tolgee.service.MfaService
+import io.tolgee.service.security.MfaService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 

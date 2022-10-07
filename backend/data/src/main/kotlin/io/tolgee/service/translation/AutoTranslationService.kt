@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.translation
 
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
@@ -9,6 +9,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.AutoTranslationConfigRepository
+import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -9,13 +9,14 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
+import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
-import io.tolgee.service.TagService
+import io.tolgee.service.key.TagService
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.*
 import java.util.*
@@ -111,17 +112,8 @@ class TranslationsViewBuilder(
     return this.lessThanOrEqualTo(expression, value as String?)
   }
 
-  private fun addScreenshotCounts() {
-    val screenshotSubquery = query.subquery(Long::class.java)
-    val screenshotRoot = screenshotSubquery.from(Screenshot::class.java)
-    val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
-    screenshotSubquery.select(screenshotCount)
-    val screenshotsJoin: Join<Screenshot, Key> = screenshotRoot.join(Screenshot_.key)
-    screenshotSubquery.where(cb.equal(root.get(Key_.id), screenshotsJoin.get(Key_.id)))
-    screenshotCountExpression = screenshotSubquery.selection
-  }
-
   private fun addLeftJoinedColumns() {
+    addNamespace()
     addScreenshotCounts()
     selection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
     for (language in languages) {
@@ -169,6 +161,23 @@ class TranslationsViewBuilder(
       translationsTextFields.add(translationTextField)
       applyTranslationFilters(language, translationTextField, translationStateField)
     }
+  }
+
+  private fun addScreenshotCounts() {
+    val screenshotSubquery = query.subquery(Long::class.java)
+    val screenshotRoot = screenshotSubquery.from(Screenshot::class.java)
+    val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
+    screenshotSubquery.select(screenshotCount)
+    val screenshotsJoin: Join<Screenshot, Key> = screenshotRoot.join(Screenshot_.key)
+    screenshotSubquery.where(cb.equal(root.get(Key_.id), screenshotsJoin.get(Key_.id)))
+    screenshotCountExpression = screenshotSubquery.selection
+  }
+
+  private fun addNamespace() {
+    val namespace = root.join(Key_.namespace, JoinType.LEFT)
+    val namespaceName = namespace.get(Namespace_.name)
+    selection[NAMESPACE_FIELD] = namespaceName
+    groupByExpressions.add(namespaceName)
   }
 
   private fun addNotFilteringTranslationFields(
@@ -326,6 +335,7 @@ class TranslationsViewBuilder(
 
   companion object {
     val KEY_NAME_FIELD = KeyWithTranslationsView::keyName.name
+    const val NAMESPACE_FIELD = "namespace"
 
     @JvmStatic
     fun getData(

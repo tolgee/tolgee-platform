@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.organization
 
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -12,6 +12,8 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserPreferencesService
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

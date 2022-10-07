@@ -50,6 +50,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
         isArray.hasSize(20)
         node("[0]") {
           node("keyName").isEqualTo("A key")
+          node("keyNamespace").isEqualTo(null)
           node("keyId").isValidId
           node("keyTags").isArray.hasSize(1)
           node("keyTags[0].name").isEqualTo("Cool tag")

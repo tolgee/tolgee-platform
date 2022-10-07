@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.translation
 
 import io.tolgee.dtos.request.translation.comment.ITranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto

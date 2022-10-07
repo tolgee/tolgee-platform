@@ -1,47 +1,30 @@
-package io.tolgee.service
+package io.tolgee.service.key
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.dtos.request.key.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.key.EditKeyDto
-import io.tolgee.dtos.request.key.OldEditKeyDto
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
+import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class KeyService(
   private val keyRepository: KeyRepository,
-  private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
   private val keyMetaService: KeyMetaService,
   private val tagService: TagService,
+  private val namespaceService: NamespaceService
 ) {
   private lateinit var translationService: TranslationService
-
-  @Transactional
-  fun getOrCreateKey(project: Project, keyName: String, namespace: String): Key {
-    val key = getOrCreateKeyNoPersist(project, keyName, namespace)
-    entityManager.persist(key)
-    return key
-  }
-
-  @Transactional
-  fun getOrCreateKeyNoPersist(project: Project, keyName: String, namespace: String): Key {
-    return findOptional(project.id, keyName, namespace).orElseGet {
-      Key(name = keyName, project = project)
-    }!!
-  }
 
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -79,12 +62,7 @@ class KeyService(
 
   @Transactional
   fun create(project: Project, dto: CreateKeyDto): Key {
-    if (this.findOptional(project.id, dto.name, dto.namespace).isPresent) {
-      throw BadRequestException(Message.KEY_EXISTS)
-    }
-
-    val key = save(Key(name = dto.name, project = project))
-
+    val key = create(project, dto.name, dto.namespace)
     dto.translations?.let {
       translationService.setForKey(key, it)
     }
@@ -100,24 +78,17 @@ class KeyService(
     return key
   }
 
-  @Deprecated("Ugly naming")
-  fun edit(project: Project, dto: DeprecatedEditKeyDTO) {
-    // do nothing on no change
-    if (dto.newFullPathString == dto.oldFullPathString) {
-      return
+  @Transactional
+  fun create(project: Project, name: String, namespace: String?): Key {
+    if (this.findOptional(project.id, name, namespace).isPresent) {
+      throw BadRequestException(Message.KEY_EXISTS)
     }
-    if (findOptional(project.id, dto.newPathDto.fullPathString, null).isPresent) {
-      throw ValidationException(Message.KEY_EXISTS)
-    }
-    val key = get(project.id, dto.oldPathDto.fullPathString, null)
-    val oldName = key.name
-    key.name = dto.newFullPathString
-    save(key)
-  }
 
-  fun edit(projectId: Long, dto: OldEditKeyDto): Key {
-    val key = get(projectId, dto.oldPathDto.fullPathString, null)
-    return edit(key, dto.newName, null)
+    val key = Key(name = name, project = project)
+    if (!namespace.isNullOrBlank()) {
+      key.namespace = namespaceService.findOrCreateNamespace(namespace, project.id)
+    }
+    return save(key)
   }
 
   fun edit(keyId: Long, dto: EditKeyDto): Key {
@@ -126,15 +97,24 @@ class KeyService(
   }
 
   fun edit(key: Key, newName: String, newNamespace: String?): Key {
-    // do nothing on no change
-    if (key.name == newName && key.namespace?.name == newNamespace) {
+    if (key.name != newName && key.namespace?.name == newNamespace) {
       return key
     }
-    if (findOptional(key.project.id, newName, newNamespace).isPresent) {
-      throw ValidationException(Message.KEY_EXISTS)
+
+    checkKeyNotExisting(key.project.id, newName, newNamespace)
+
+    if (key.namespace?.name != newNamespace) {
+      namespaceService.updateNamespace(key, newNamespace)
     }
+
     key.name = newName
     return save(key)
+  }
+
+  fun checkKeyNotExisting(projectId: Long, name: String, namespace: String?) {
+    if (findOptional(projectId, name, namespace).isPresent) {
+      throw ValidationException(Message.KEY_EXISTS)
+    }
   }
 
   @Transactional
@@ -144,6 +124,7 @@ class KeyService(
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
     keyRepository.delete(key)
+    namespaceService.deleteNamespaceIfUnused(key.namespace)
   }
 
   @Transactional
@@ -152,31 +133,15 @@ class KeyService(
     keyMetaService.deleteAllByKeyIdIn(ids)
     screenshotService.deleteAllByKeyId(ids)
     val keys = keyRepository.findAllByIdIn(ids)
-    keys.forEach {
-    }
+    val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
+    namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
   fun deleteAllByProject(projectId: Long) {
     val ids = keyRepository.getIdsByProjectId(projectId)
     keyMetaService.deleteAllByKeyIdIn(ids)
     keyRepository.deleteAllByIdIn(ids)
-  }
-
-  @Transactional
-  fun create(project: Project, dto: SetTranslationsWithKeyDto): Key {
-    val key = create(project, dto.key, dto.key)
-    translationService.setForKey(key, dto.translations)
-    return key
-  }
-
-  @Transactional
-  fun create(project: Project, name: String, namespace: String?): Key {
-    if (this.findOptional(project.id, name, namespace).isPresent) {
-      throw BadRequestException(Message.KEY_EXISTS)
-    }
-    val key = Key(name = name, project = project)
-    return save(key)
   }
 
   @Autowired

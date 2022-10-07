@@ -17,13 +17,13 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.ApiKeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.SlugGenerator
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service

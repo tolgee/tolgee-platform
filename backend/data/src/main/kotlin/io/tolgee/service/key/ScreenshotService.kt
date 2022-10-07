@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.service
+package io.tolgee.service.key
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -13,6 +13,7 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.ImageUploadService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
 import org.springframework.core.io.InputStreamSource

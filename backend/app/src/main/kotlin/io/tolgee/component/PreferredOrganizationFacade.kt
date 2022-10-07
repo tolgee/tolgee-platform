@@ -4,8 +4,8 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.UserPreferencesService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.security.UserPreferencesService
 import org.springframework.stereotype.Component
 
 @Component

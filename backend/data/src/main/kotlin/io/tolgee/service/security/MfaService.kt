@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.security
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator
 import io.tolgee.component.KeyGenerator
