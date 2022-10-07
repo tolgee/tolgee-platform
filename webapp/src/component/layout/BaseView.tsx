@@ -30,6 +30,7 @@ export interface BaseViewProps {
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   allCentered?: boolean;
   'data-cy'?: string;
+  initialSearch?: string;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -103,6 +104,7 @@ export const BaseView = (props: BaseViewProps) => {
                           <Box>
                             <SecondaryBarSearchField
                               onSearch={props.onSearch}
+                              initial={props.initialSearch}
                             />
                           </Box>
                         )}

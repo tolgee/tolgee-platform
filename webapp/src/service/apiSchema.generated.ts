@@ -534,6 +534,9 @@ export interface paths {
   "/v2/image-upload/{ids}": {
     delete: operations["delete_10"];
   };
+  "/v2/administration/users/{userId}": {
+    delete: operations["deleteUser"];
+  };
   "/api/project/{projectId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_3"];
   };
@@ -848,12 +851,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      updatedAt: number;
       createdAt: number;
-      id: number;
+      updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -924,15 +927,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
       username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     OldEditKeyDto: {
       currentName: string;
@@ -1339,6 +1342,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1350,7 +1354,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1578,15 +1581,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
       username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -7364,6 +7367,29 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  deleteUser: {
+    parameters: {
+      path: {
+        userId: number;
       };
     };
     responses: {

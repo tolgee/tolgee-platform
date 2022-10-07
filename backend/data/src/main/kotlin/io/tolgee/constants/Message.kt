@@ -108,7 +108,8 @@ enum class Message {
   CURRENT_PASSWORD_REQUIRED,
   CANNOT_CREATE_ORGANIZATION,
   WRONG_CURRENT_PASSWORD,
-  EXPIRED_SUPER_JWT_TOKEN;
+  EXPIRED_SUPER_JWT_TOKEN,
+  CANNOT_DELETE_YOUR_OWN_ACCOUNT;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
