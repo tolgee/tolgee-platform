@@ -1,3 +1,10 @@
+## [2.45.4](https://github.com/tolgee/tolgee-platform/compare/v2.45.3...v2.45.4) (2022-10-07)
+
+
+### Bug Fixes
+
+* Delete user account in administration & search persistent while … ([#1392](https://github.com/tolgee/tolgee-platform/issues/1392)) ([216370c](https://github.com/tolgee/tolgee-platform/commit/216370cdac13c74bbd2f3a0e3b527b02097171dd))
+
 ## [2.45.3](https://github.com/tolgee/tolgee-platform/compare/v2.45.2...v2.45.3) (2022-10-07)
 
 
