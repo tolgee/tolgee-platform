@@ -31,7 +31,7 @@ An open-source alternative to Crowdin, Phrase or Lokalise
 
 
 
-**Become part of the family. Join [slack channel <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-16l0sf7ae-**6fmAl2Fb9wqFCV0uzSa7bw)**
+**Become part of the family. Join [slack channel <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
 
 </div>
 
