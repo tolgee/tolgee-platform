@@ -4,7 +4,6 @@
 
 package io.tolgee.api.v2.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
@@ -17,8 +16,7 @@ import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModelAssembler
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
+import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
@@ -46,9 +44,7 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -60,8 +56,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.io.OutputStream
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -87,40 +81,6 @@ class V2ImportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
 ) {
-
-  @PostMapping("/with-streaming-response", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @RequestBody
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @Operation(summary = "Add files", description = "Prepares provided files to import, streams operation progress")
-  fun addFilesStreaming(
-    @RequestPart("files") files: Array<MultipartFile>,
-  ): ResponseEntity<StreamingResponseBody> {
-    val stream = StreamingResponseBody { responseStream: OutputStream ->
-      val messageClient = { type: ImportStreamingProgressMessageType, params: List<Any>? ->
-        responseStream.write(ImportStreamingProgressMessage(type, params).toJsonByteArray())
-        responseStream.write(";;;".toByteArray())
-        responseStream.flush()
-      }
-      val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
-      val errors = importService.addFiles(
-        files = fileDtos,
-        messageClient = messageClient,
-        project = projectHolder.projectEntity,
-        userAccount = authenticationFacade.userAccountEntity
-      )
-
-      val result = getImportAddFilesResultModel(errors)
-
-      val mapper = jacksonObjectMapper()
-      halMediaTypeConfiguration.configureObjectMapper(mapper)
-      val jsonByteResult = mapper.writeValueAsBytes(result)
-
-      responseStream.write(jsonByteResult)
-    }
-
-    return ResponseEntity(stream, HttpStatus.OK)
-  }
-
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
@@ -283,7 +243,22 @@ class V2ImportController(
     resolveAllOfLanguage(languageId, false)
   }
 
-  @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
+  @PutMapping("/result/languages/{fileId}/select-namespace")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @Operation(
+    description = "Sets namespace for file to import.",
+    summary = "Pair existing language"
+  )
+  fun selectNamespace(
+    @PathVariable fileId: Long,
+    @RequestBody req: SetFileNamespaceRequest
+  ) {
+    val file = checkFileFromProject(fileId)
+    this.importService.selectNamespace(file, req.nemspace)
+  }
+
+  @PutMapping("/result/files/{fileId}/select-existing/{existingLanguageId}")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   @Operation(

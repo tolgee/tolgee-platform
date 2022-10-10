@@ -33,6 +33,8 @@ class ImportFile(
   @ManyToOne
   var archive: ImportFile? = null
 
+  var namespace: String? = null
+
   fun addIssue(type: FileIssueType, params: Map<FileIssueParamType, String>) {
     ImportFileIssue(file = this, type = type).apply {
       this.params = params.map {

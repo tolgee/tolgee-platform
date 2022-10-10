@@ -107,6 +107,20 @@ class ImportService(
     dataManager.saveAllStoredTranslations()
   }
 
+  @Transactional
+  fun selectNamespace(file: ImportFile, namespace: String?) {
+    val import = file.import
+    val dataManager = ImportDataManager(applicationContext, import)
+    file.namespace = namespace
+    importFileRepository.save(file)
+    file.languages.forEach {
+      dataManager.populateStoredTranslations(it)
+      dataManager.resetConflicts(it)
+      dataManager.handleConflicts(false)
+      dataManager.saveAllStoredTranslations()
+    }
+  }
+
   fun save(import: Import): Import {
     return this.importRepository.save(import)
   }
