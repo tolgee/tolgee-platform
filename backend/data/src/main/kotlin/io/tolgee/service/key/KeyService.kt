@@ -86,7 +86,7 @@ class KeyService(
 
     val key = Key(name = name, project = project)
     if (!namespace.isNullOrBlank()) {
-      key.namespace = namespaceService.findOrCreateNamespace(namespace, project.id)
+      key.namespace = namespaceService.findOrCreate(namespace, project.id)
     }
     return save(key)
   }
@@ -104,7 +104,7 @@ class KeyService(
     checkKeyNotExisting(key.project.id, newName, newNamespace)
 
     if (key.namespace?.name != newNamespace) {
-      namespaceService.updateNamespace(key, newNamespace)
+      namespaceService.update(key, newNamespace)
     }
 
     key.name = newName
@@ -124,7 +124,7 @@ class KeyService(
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
     keyRepository.delete(key)
-    namespaceService.deleteNamespaceIfUnused(key.namespace)
+    namespaceService.deleteIfUnused(key.namespace)
   }
 
   @Transactional
@@ -135,7 +135,7 @@ class KeyService(
     val keys = keyRepository.findAllByIdIn(ids)
     val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
-    namespaceService.deleteUnusedNamespaces(namespaces)
+    namespaceService.deleteNamespaces(namespaces)
   }
 
   fun deleteAllByProject(projectId: Long) {

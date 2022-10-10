@@ -18,37 +18,37 @@ class NamespaceService(
     return namespaceRepository.getKeysInNamespaceCount(listOf(namespace.id)).firstOrNull()?.get(1)
   }
 
-  fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
+  fun deleteNamespaces(namespaces: List<Namespace?>) {
     val namespaceIds = namespaces.mapNotNull { it?.id }
     val counts = namespaceRepository.getKeysInNamespaceCount(namespaceIds).associate { it[0] to it[1] }
     namespaceIds.forEach {
       if (counts[it] == 0L || counts[it] == null) {
-        deleteNamespace(it)
+        delete(it)
       }
     }
   }
 
-  fun deleteNamespace(namespace: Namespace) {
+  fun delete(namespace: Namespace) {
     namespaceRepository.delete(namespace)
   }
 
-  fun deleteNamespace(namespaceId: Long) {
+  fun delete(namespaceId: Long) {
     namespaceRepository.deleteById(namespaceId)
   }
 
-  fun updateNamespace(key: Key, newNamespace: String?) {
+  fun update(key: Key, newNamespace: String?) {
     val oldNamespace = key.namespace
-    key.namespace = findOrCreateNamespace(newNamespace, key.project.id)
+    key.namespace = findOrCreate(newNamespace, key.project.id)
     if (oldNamespace != null) {
-      deleteNamespaceIfUnused(oldNamespace)
+      deleteIfUnused(oldNamespace)
     }
   }
 
-  fun deleteNamespaceIfUnused(namespace: Namespace?) {
+  fun deleteIfUnused(namespace: Namespace?) {
     namespace ?: return
     val count = getKeysInNamespaceCount(namespace)
     if (count == 0L) {
-      deleteNamespace(namespace)
+      delete(namespace)
     }
   }
 
@@ -56,19 +56,21 @@ class NamespaceService(
     namespaceRepository.save(namespace)
   }
 
-  private fun findNamespace(name: String?, projectId: Long): Namespace? {
+  fun find(name: String?, projectId: Long): Namespace? {
     name ?: return null
     return namespaceRepository.findByNameAndProjectId(name, projectId)
   }
 
-  fun findOrCreateNamespace(name: String?, projectId: Long): Namespace? {
+  fun findOrCreate(name: String?, projectId: Long): Namespace? {
     return tryUntilItDoesntBreakConstraint {
-      findNamespace(name, projectId) ?: createNamespace(name, projectId)
+      find(name, projectId) ?: create(name, projectId)
     }
   }
 
-  private fun createNamespace(name: String?, projectId: Long): Namespace? {
-    name ?: return null
+  private fun create(name: String?, projectId: Long): Namespace? {
+    if (name.isNullOrBlank()) {
+      return null
+    }
     return Namespace(
       name = name,
       project = entityManager.getReference(Project::class.java, projectId)

@@ -257,6 +257,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return SetTranslationsResponseModel(
       keyId = key.id,
       keyName = key.name,
+      keyNamespace = key.namespace?.name,
       translations = translations.entries.associate { (languageTag, translation) ->
         languageTag to translationModelAssembler.toModel(translation)
       }

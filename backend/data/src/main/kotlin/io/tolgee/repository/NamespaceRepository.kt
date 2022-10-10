@@ -11,7 +11,7 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
-    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceId group by ns.id
+    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
   """
   )
   fun getKeysInNamespaceCount(namespaceIds: List<Long>): List<Array<Long>>

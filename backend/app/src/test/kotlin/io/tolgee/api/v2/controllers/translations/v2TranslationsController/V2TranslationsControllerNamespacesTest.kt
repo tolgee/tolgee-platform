@@ -2,11 +2,13 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,5 +36,25 @@ class V2TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/pr
         node("[4].keyNamespace").isEqualTo("ns-1")
       }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates key in namespace on set or create`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthPost(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        key = "new_key_in_ns",
+        namespace = "heloo",
+        translations = mapOf("en" to "eeeen")
+      )
+    ).andPrettyPrint.andIsOk.andAssertThatJson {
+      node("keyNamespace").isEqualTo("heloo")
+    }
+    namespaceService.find("heloo", project.id).assert.isNotNull
   }
 }

@@ -19,6 +19,7 @@ class KeyWithDataModelAssembler(
   override fun toModel(entity: Key) = KeyWithDataModel(
     id = entity.id,
     name = entity.name,
+    namespace = entity.namespace?.name,
     translations = entity.translations.map {
       it.language.tag to translationModelAssembler.toModel(it)
     }.toMap(),
