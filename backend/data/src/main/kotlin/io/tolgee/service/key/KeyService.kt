@@ -97,7 +97,7 @@ class KeyService(
   }
 
   fun edit(key: Key, newName: String, newNamespace: String?): Key {
-    if (key.name != newName && key.namespace?.name == newNamespace) {
+    if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
 

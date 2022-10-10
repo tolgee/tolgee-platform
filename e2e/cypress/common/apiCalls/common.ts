@@ -134,7 +134,7 @@ export const createKey = (
   key: string,
   translations: { [lang: string]: string }
 ) =>
-  apiFetch(`project/${projectId}/keys/create`, {
+  v2apiFetch(`projects/${projectId}/keys`, {
     body: { key, translations },
     method: 'POST',
   });

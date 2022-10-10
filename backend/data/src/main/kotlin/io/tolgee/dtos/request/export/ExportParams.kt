@@ -59,7 +59,7 @@ When null, resulting file won't be structured.
   @field:Parameter(
     description = """Select one ore multiple namespaces to export"""
   )
-  var filterNamespace: List<String> = listOf(),
+  var filterNamespace: List<String?>? = null,
 
   @field:Parameter(
     description = """If false, it doesn't return zip of files, but it returns single file.
