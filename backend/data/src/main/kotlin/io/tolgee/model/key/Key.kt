@@ -34,7 +34,11 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name", "namespace_id"], name = "key_project_id_name")])
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(columnNames = ["project_id", "name", "namespace_id"], name = "key_project_id_name")
+  ]
+)
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 @EntityListeners(Key.Companion.KeyListeners::class)

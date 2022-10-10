@@ -62,6 +62,7 @@ class ExportDataProvider(
     query.multiselect(
       key.get(Key_.id),
       key.get(Key_.name),
+      key.get(Key_.namespace),
       languageJoin.get(Language_.id),
       languageJoin.get(Language_.tag),
       translationJoin.get(Translation_.id),
@@ -155,7 +156,7 @@ class ExportDataProvider(
     val keyMap = LinkedHashMap<Long, ExportKeyView>()
     resultList.forEach { dataView ->
       val keyView = keyMap.computeIfAbsent(dataView.keyId) {
-        ExportKeyView(dataView.keyId, dataView.keyName)
+        ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
       }
 
       keyView.translations[dataView.languageTag] = ExportTranslationView(

@@ -19,27 +19,14 @@ If null, all languages are exported""",
   var format: ExportFormat = ExportFormat.JSON,
 
   @field:Parameter(
-    description = """When true translations are split to directories by scopes""",
-  )
-  var splitByScope: Boolean = false,
-
-  @field:Parameter(
-    description = """Scope delimiter.
+    description = """Delimiter to split key name and structure file content when possible. 
 
 e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+
+When null, resulting file won't be structured.
     """,
   )
-  var splitByScopeDelimiter: Char = '.',
-
-  @field:Parameter(
-    description = """Maximum depth of scoping.
-
-e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
-
-For depth 2, resulting scopes are  "home" -> "header".
-    """,
-  )
-  var splitByScopeDepth: Int = 1,
+  var structureDelimiter: Char? = '.',
 
   @field:Parameter(
     description = """Filter key IDs to be contained in export""",
@@ -68,6 +55,11 @@ For depth 2, resulting scopes are  "home" -> "header".
     TranslationState.TRANSLATED,
     TranslationState.REVIEWED,
   ),
+
+  @field:Parameter(
+    description = """Select one ore multiple namespaces to export"""
+  )
+  var filterNamespace: List<String> = listOf(),
 
   @field:Parameter(
     description = """If false, it doesn't return zip of files, but it returns single file.
