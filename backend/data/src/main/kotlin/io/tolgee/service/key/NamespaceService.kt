@@ -20,7 +20,11 @@ class NamespaceService(
 
   fun deleteNamespaces(namespaces: List<Namespace?>) {
     val namespaceIds = namespaces.mapNotNull { it?.id }
-    val counts = namespaceRepository.getKeysInNamespaceCount(namespaceIds).associate { it[0] to it[1] }
+
+    val counts = namespaceRepository
+      .getKeysInNamespaceCount(namespaceIds)
+      .associate { it[0] to it[1] }
+
     namespaceIds.forEach {
       if (counts[it] == 0L || counts[it] == null) {
         delete(it)
@@ -78,4 +82,6 @@ class NamespaceService(
       namespaceRepository.save(this)
     }
   }
+
+  fun getAllInProject(id: Long) = namespaceRepository.getAllByProjectId(id)
 }

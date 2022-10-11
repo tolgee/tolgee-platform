@@ -16,8 +16,7 @@ class ImportKeyBuilder(
 
   val data = DATA()
 
-  override var self: ImportKey = ImportKey("testKey")
-    .also { it.files.add(importFileBuilder.self) }
+  override var self: ImportKey = ImportKey("testKey", importFileBuilder.self)
 
   fun addMeta(ft: FT<KeyMeta>) {
     data.meta = KeyMetaBuilder(this).apply {

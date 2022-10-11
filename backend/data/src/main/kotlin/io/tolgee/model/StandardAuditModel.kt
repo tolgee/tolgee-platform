@@ -40,7 +40,7 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
   }
 
   override fun hashCode(): Int {
-    return 31
+    return id.hashCode()
   }
 
   override fun toString() = "${this.javaClass.name}(id: $id)"

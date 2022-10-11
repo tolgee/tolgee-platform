@@ -25,7 +25,7 @@ class ImportDataManager(
   }
 
   val storedKeys by lazy {
-    importService.findKeys(import).asSequence().map { it.name to it }.toMap(mutableMapOf())
+    importService.findKeys(import).asSequence().map { (it.file to it.name) to it }.toMap(mutableMapOf())
   }
 
   val storedLanguages by lazy {
@@ -34,10 +34,27 @@ class ImportDataManager(
 
   val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
 
-  private val existingTranslations = mutableMapOf<Long, MutableMap<String, Translation>>()
+  /**
+   * LanguageId to (Map of Pair(Namespace,KeyName) to Translation)
+   */
+  private val existingTranslations: MutableMap<Long, MutableMap<Pair<String?, String>, Translation>> by lazy {
+    val result = mutableMapOf<Long, MutableMap<Pair<String?, String>, Translation>>()
+    this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
+      if (language != null && result[language.id] == null) {
+        result[language.id] = mutableMapOf<Pair<String?, String>, Translation>().apply {
+          translationService.getAllByLanguageId(language.id)
+            .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
+        }
+      }
+    }
+    result
+  }
 
-  val existingKeys: MutableMap<String, Key> by lazy {
-    keyService.getAll(import.project.id).asSequence().map { it.name to it }.toMap().toMutableMap()
+  val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
+    keyService.getAll(import.project.id)
+      .asSequence()
+      .map { (it.namespace?.name to it.name) to it }
+      .toMap(mutableMapOf())
   }
 
   private val translationService: TranslationService by lazy {
@@ -56,7 +73,7 @@ class ImportDataManager(
 
   /**
    * Returns list of translations provided for a language and a key.
-   * It returns collection since translations could collide, when an user uploads multiple files with different values
+   * It returns collection since translations could collide, when a user uploads multiple files with different values
    * for a key
    */
   fun getStoredTranslations(key: ImportKey, language: ImportLanguage): MutableList<ImportTranslation> {
@@ -96,39 +113,27 @@ class ImportDataManager(
    * @param removeEqual Whether translations with equal texts should be removed
    */
   fun handleConflicts(removeEqual: Boolean) {
-    populateExistingTranslations()
     this.storedTranslations.asSequence().flatMap { it.value.values }.forEach { languageTranslations ->
       val toRemove = mutableListOf<ImportTranslation>()
-      languageTranslations.forEach { importedTranslaton ->
-        val existingLanguage = importedTranslaton.language.existingLanguage
+      languageTranslations.forEach { importedTranslation ->
+        val existingLanguage = importedTranslation.language.existingLanguage
         if (existingLanguage != null) {
           val existingTranslation = existingTranslations[existingLanguage.id]
-            ?.let { it[importedTranslaton.key.name] }
+            ?.let { it[importedTranslation.language.file.namespace to importedTranslation.key.name] }
           if (existingTranslation != null) {
             // remove if text is the same
-            if (existingTranslation.text == importedTranslaton.text) {
-              toRemove.add(importedTranslaton)
+            if (existingTranslation.text == importedTranslation.text) {
+              toRemove.add(importedTranslation)
             } else {
-              importedTranslaton.conflict = existingTranslation
+              importedTranslation.conflict = existingTranslation
             }
           } else {
-            importedTranslaton.conflict = null
+            importedTranslation.conflict = null
           }
         }
       }
       if (removeEqual) {
         languageTranslations.removeAll(toRemove)
-      }
-    }
-  }
-
-  private fun populateExistingTranslations() {
-    this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
-      if (language != null && existingTranslations[language.id] == null) {
-        existingTranslations[language.id] = mutableMapOf<String, Translation>().apply {
-          translationService.getAllByLanguageId(language.id)
-            .forEach { translation -> put(translation.key.name, translation) }
-        }
       }
     }
   }
@@ -148,5 +153,14 @@ class ImportDataManager(
       it.conflict = null
       it.resolvedHash = null
     }
+  }
+
+  fun resetLanguage(
+    importLanguage: ImportLanguage
+  ) {
+    this.populateStoredTranslations(importLanguage)
+    this.resetConflicts(importLanguage)
+    this.handleConflicts(false)
+    this.saveAllStoredTranslations()
   }
 }

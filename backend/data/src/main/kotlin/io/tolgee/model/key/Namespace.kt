@@ -6,6 +6,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import org.hibernate.validator.constraints.Length
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.Table
@@ -20,6 +21,7 @@ class Namespace(
   @ActivityLoggedProp
   @ActivityDescribingProp
   @field:NotBlank
+  @field:Length(max = 100)
   var name: String = "",
 
   @ManyToOne

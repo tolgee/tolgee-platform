@@ -2221,4 +2221,27 @@
     <changeSet author="jenik (generated)" id="1665470383084-1">
         <addUniqueConstraint columnNames="project_id, name" constraintName="namespace_name_project" tableName="namespace"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-1">
+        <addColumn tableName="import_key">
+            <column name="file_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-2">
+        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_key" constraintName="FK2lyqy9kydj78d72iatgt0c509" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-3">
+        <dropForeignKeyConstraint baseTableName="import_file" constraintName="FK5yemkngk70scn7l0r4cwlmtn"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-4">
+        <dropForeignKeyConstraint baseTableName="import_file_keys" constraintName="FKikmqn4hh8e4fp8k4dj16fkh3y"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-5">
+        <dropForeignKeyConstraint baseTableName="import_file_keys" constraintName="FKjawljy0kpt4o2j8ix7qv1x196"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-6">
+        <dropTable tableName="import_file_keys"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431777-7">
+        <dropColumn columnName="archive_id" tableName="import_file"/>
+    </changeSet>
 </databaseChangeLog>

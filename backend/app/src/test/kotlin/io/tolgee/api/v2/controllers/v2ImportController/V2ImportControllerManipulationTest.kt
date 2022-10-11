@@ -108,6 +108,24 @@ class V2ImportControllerManipulationTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `it selects same language for different namespaces`() {
+    val testData = ImportTestData()
+    // assign the existing french to the import french
+    testData.importFrench.existingLanguage = testData.french
+    val nsData = testData.addFilesWithNamespaces()
+    testDataService.saveTestData(testData.root)
+    val user = testData.root.data.userAccounts[0].self
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+    // try to assign with another french but in different namespace
+    val path = "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
+      "select-existing/${testData.french.id}"
+    performAuthPut(path, null).andIsOk
+    assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
+      .isEqualTo(testData.french)
+  }
+
+  @Test
   fun `it resets selected language`() {
     val testData = ImportTestData()
     testData.setAllResolved()

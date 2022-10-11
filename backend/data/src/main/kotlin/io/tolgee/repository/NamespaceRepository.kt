@@ -15,4 +15,5 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   """
   )
   fun getKeysInNamespaceCount(namespaceIds: List<Long>): List<Array<Long>>
+  fun getAllByProjectId(id: Long): List<Namespace>
 }

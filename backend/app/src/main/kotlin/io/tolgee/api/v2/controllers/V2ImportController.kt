@@ -248,7 +248,7 @@ class V2ImportController(
   @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   @Operation(
     description = "Sets namespace for file to import.",
-    summary = "Pair existing language"
+    summary = "Select namespace"
   )
   fun selectNamespace(
     @PathVariable fileId: Long,
@@ -258,7 +258,7 @@ class V2ImportController(
     this.importService.selectNamespace(file, req.nemspace)
   }
 
-  @PutMapping("/result/files/{fileId}/select-existing/{existingLanguageId}")
+  @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   @Operation(

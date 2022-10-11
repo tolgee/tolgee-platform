@@ -152,19 +152,11 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-    var entity = importDataManager.storedKeys[name]
-    if (entity == null) {
-      entity = this.keys[name] ?: ImportKey(name = name)
-      importDataManager.storedKeys[name] = entity
-    }
-
-    if (!entity.files.any { this.fileEntity == it }) {
-      entity.files.add(fileEntity)
-      fileEntity.keys.add(entity)
+    return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
+      val entity = this.keys.computeIfAbsent(name) { ImportKey(name = name, this.fileEntity) }
+      importDataManager.storedKeys[this.fileEntity to name] = entity
       importService.saveKey(entity)
     }
-
-    return entity
   }
 
   private fun ImportLanguage.findMatchingExisting(): Language? {

@@ -24,6 +24,7 @@ class ImportTestData {
   lateinit var translationWithConflict: ImportTranslation
   var project: Project
   var userAccount: UserAccount
+  val projectBuilder get() = root.data.projects[0]
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     userAccount = addUserAccount {
@@ -260,7 +261,7 @@ class ImportTestData {
   }
 
   fun addKeyMetadata() {
-    root.data.projects[0].data.keys[2].addMeta {
+    projectBuilder.data.keys[2].addMeta {
       addComment(userAccount) {
         text = "Hello I am first comment (I exist)"
         fromImport = true
@@ -272,7 +273,7 @@ class ImportTestData {
       }
     }
 
-    root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
+    projectBuilder.data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
       addComment(userAccount) {
         text = "Hello I am first comment (I exist)"
         fromImport = true
@@ -296,7 +297,7 @@ class ImportTestData {
       }
     }
 
-    root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
+    projectBuilder.data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
       addComment(userAccount) {
         text = "Hello!"
         fromImport = true
@@ -308,4 +309,36 @@ class ImportTestData {
       }
     }
   }
+
+  fun addFilesWithNamespaces(): AddFilesWithNamespacesResult {
+    var importFrenchInNs: ImportLanguage? = null
+    importBuilder.addImportFile {
+      name = "file.json"
+      namespace = "homepage"
+    }.build {
+      addImportLanguage {
+        name = "fr"
+        importFrenchInNs = this
+      }.build addFrLang@{
+        addImportKey {
+          name = "what a key"
+        }.build addImportKey@{
+          addImportTranslation {
+            language = this@addFrLang.self
+            this.key = this@addImportKey.self
+            text = "Texto text"
+          }
+        }
+      }
+    }
+    importBuilder.addImportFile {
+      name = "file2.json"
+      namespace = "homepage"
+    }
+    return AddFilesWithNamespacesResult(importFrenchInNs!!)
+  }
+
+  data class AddFilesWithNamespacesResult(
+    val importFrenchInNs: ImportLanguage
+  )
 }

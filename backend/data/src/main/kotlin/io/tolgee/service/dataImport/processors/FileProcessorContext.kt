@@ -59,7 +59,7 @@ data class FileProcessorContext(
   }
 
   private fun getOrCreateKey(name: String): ImportKey {
-    return keys[name] ?: let { ImportKey(name).also { keys[name] = it } }
+    return keys[name] ?: let { ImportKey(name, this.fileEntity).also { keys[name] = it } }
   }
 
   private fun getOrCreateKeyMeta(key: String): KeyMeta {

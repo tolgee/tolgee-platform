@@ -92,19 +92,22 @@ class ImportService(
 
   @Transactional
   fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
+    if (importLanguage.existingLanguage == existingLanguage) {
+      return
+    }
     val import = importLanguage.file.import
     val dataManager = ImportDataManager(applicationContext, import)
     existingLanguage?.let {
-      if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
+      val langAlreadySelectedInTheSameNS = dataManager.storedLanguages.any {
+        it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
+      }
+      if (langAlreadySelectedInTheSameNS) {
         throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_ALREADY_SELECTED)
       }
     }
     importLanguage.existingLanguage = existingLanguage
     importLanguageRepository.save(importLanguage)
-    dataManager.populateStoredTranslations(importLanguage)
-    dataManager.resetConflicts(importLanguage)
-    dataManager.handleConflicts(false)
-    dataManager.saveAllStoredTranslations()
+    dataManager.resetLanguage(importLanguage)
   }
 
   @Transactional
@@ -114,10 +117,7 @@ class ImportService(
     file.namespace = namespace
     importFileRepository.save(file)
     file.languages.forEach {
-      dataManager.populateStoredTranslations(it)
-      dataManager.resetConflicts(it)
-      dataManager.handleConflicts(false)
-      dataManager.saveAllStoredTranslations()
+      dataManager.resetLanguage(it)
     }
   }
 
