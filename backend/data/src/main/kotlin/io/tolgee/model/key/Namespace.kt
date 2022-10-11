@@ -8,11 +8,14 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotBlank
 
 @Entity
 @ActivityLoggedEntity
 @ActivityReturnsExistence
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "namespace_name_project")])
 class Namespace(
   @ActivityLoggedProp
   @ActivityDescribingProp

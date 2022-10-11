@@ -2218,12 +2218,7 @@
             <column name="namespace" type="varchar(255)"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1665412053776-2">
-        <sql>
-            create unique index on public.namespace (project_id, namespace_id) where namespace_id is not null;
-        </sql>
-        <sql>
-            create unique index on public.namespace (project_id) where namespace_id is null;
-        </sql>
+    <changeSet author="jenik (generated)" id="1665470383084-1">
+        <addUniqueConstraint columnNames="project_id, name" constraintName="namespace_name_project" tableName="namespace"/>
     </changeSet>
 </databaseChangeLog>
