@@ -1,4 +1,4 @@
-package io.tolgee.development.testDataBuilder.data
+package io.tolgee.development.testDataBuilder.data.dataImport
 
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder

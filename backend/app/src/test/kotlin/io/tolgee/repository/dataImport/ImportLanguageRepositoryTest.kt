@@ -1,7 +1,7 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

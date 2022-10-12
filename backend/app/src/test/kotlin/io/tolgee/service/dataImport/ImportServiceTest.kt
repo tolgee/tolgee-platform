@@ -1,7 +1,9 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -59,5 +61,22 @@ class ImportServiceTest : AbstractSpringTest() {
     entityManager.flush()
     entityManager.clear()
     assertThat(importService.find(testData.import.project.id, testData.import.author.id)).isNull()
+  }
+
+  @Test
+  fun `imports namespaces and merges same keys from multiple files`() {
+    val testData = executeInNewTransaction {
+      val testData = ImportNamespacesTestData()
+      testDataService.saveTestData(testData.root)
+      testData
+    }
+    executeInNewTransaction {
+      importService.import(testData.import)
+    }
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "what a key", "homepage").assert.isNotNull
+      val whatAKey = keyService.find(testData.project.id, "what a key", null)
+      whatAKey!!.keyMeta!!.comments.assert.hasSize(2).anyMatch { it.text == "hello1" }.anyMatch { it.text == "hello2" }
+    }
   }
 }

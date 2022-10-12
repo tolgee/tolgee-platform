@@ -1,7 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions

@@ -193,13 +193,13 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.mergeKeyMetas() {
     val storedMetas = importDataManager.storedMetas
     this.keys.values.forEach { newKey ->
-      val storedMeta = storedMetas[newKey.name]
+      val storedMeta = storedMetas[newKey.file.namespace to newKey.name]
       val newMeta = newKey.keyMeta
       if (storedMeta != null && newMeta != null) {
         keyMetaService.import(storedMeta, newMeta)
       }
       if (storedMeta == null && newMeta != null) {
-        storedMetas[newKey.name] = newMeta
+        storedMetas[newKey.file.namespace to newKey.name] = newMeta
       }
     }
   }

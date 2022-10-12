@@ -84,4 +84,8 @@ class NamespaceService(
   }
 
   fun getAllInProject(id: Long) = namespaceRepository.getAllByProjectId(id)
+
+  fun saveAll(entities: Collection<Namespace>) {
+    namespaceRepository.saveAll(entities)
+  }
 }

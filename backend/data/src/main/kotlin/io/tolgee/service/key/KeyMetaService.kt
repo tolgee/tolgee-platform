@@ -56,13 +56,14 @@ class KeyMetaService(
     }
   }
 
+  @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(import: Import): List<KeyMeta> {
     var result: List<KeyMeta> = entityManager.createQuery(
       """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
-            join ik.files if
+            join ik.file if
             where if.import = :import 
             """
     )
@@ -75,7 +76,7 @@ class KeyMetaService(
             select distinct ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
-            join ik.files if
+            join ik.file if
             where ikm in :metas 
         """
     ).setParameter("metas", result)

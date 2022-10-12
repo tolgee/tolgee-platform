@@ -2,7 +2,7 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController

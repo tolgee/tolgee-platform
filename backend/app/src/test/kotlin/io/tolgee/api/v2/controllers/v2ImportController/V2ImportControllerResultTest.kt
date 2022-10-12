@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk

@@ -22,6 +22,7 @@ class StoredDataImporter(
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
+
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
   private val translationsToSave = mutableListOf<Translation>()
 
@@ -32,15 +33,13 @@ class StoredDataImporter(
    */
   private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
 
-  private val existingNamespaces by lazy {
-    namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
-  }
-
   /**
    * We need to persist data after everything is checked for resolved conflicts since
    * thrown ImportConflictNotResolvedException commits the transaction
    */
   private val translationService = applicationContext.getBean(TranslationService::class.java)
+
+  private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
   fun doImport() {
     importDataManager.storedLanguages.forEach {
@@ -48,13 +47,13 @@ class StoredDataImporter(
     }
 
     this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
-      val importedKeyMeta = importDataManager.storedMetas[importKey.name]
+      val importedKeyMeta = importDataManager.storedMetas[fileNamePair.first.namespace to importKey.name]
       // dont touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
-        keysToSave[fileNamePair.second to importKey.name]?.let { newKey ->
+        keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->
           // if key is obtained or created and meta exists, take it and import the data from the imported one
           // persist is cascaded on key, so it should be fine
-          val keyMeta = importDataManager.existingMetas[importKey.name]?.also {
+          val keyMeta = importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
             keyMetaService.import(it, importedKeyMeta)
           } ?: importedKeyMeta
           // also set key and remove import key
@@ -67,6 +66,8 @@ class StoredDataImporter(
         }
       }
     }
+
+    namespaceService.saveAll(namespacesToSave.values)
     keyService.saveAll(keysToSave.values)
     translationService.saveAll(translationsToSave)
 
@@ -108,7 +109,7 @@ class StoredDataImporter(
           ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
           ?: Key(name = this.key.name).apply {
             project = import.project
-            namespace = getNamespace(name)
+            namespace = getNamespace(this@existingKey.key.file.namespace)
           }
         newKey
       }
@@ -123,8 +124,9 @@ class StoredDataImporter(
     }
   }
 
-  private fun getNamespace(name: String): Namespace {
-    return existingNamespaces.computeIfAbsent(name) {
+  private fun getNamespace(name: String?): Namespace? {
+    name ?: return null
+    return importDataManager.existingNamespaces[name] ?: namespacesToSave.computeIfAbsent(name) {
       Namespace(name, import.project)
     }
   }

@@ -9,6 +9,7 @@ import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
@@ -16,9 +17,11 @@ class ImportDataManager(
   private val applicationContext: ApplicationContext,
   private val import: Import
 ) {
-  val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+  private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
-  val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+
+  private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
 
   private val keyMetaService: KeyMetaService by lazy {
     applicationContext.getBean(KeyMetaService::class.java)
@@ -61,14 +64,26 @@ class ImportDataManager(
     applicationContext.getBean(TranslationService::class.java)
   }
 
-  val storedMetas: MutableMap<String, KeyMeta> by lazy {
-    keyMetaService.getWithFetchedData(this.import).asSequence().map { it.importKey!!.name to it }
+  val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+    val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
+    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
+      val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
+      result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
+        keyMetaService.import(existingKeyMeta, currentKeyMeta)
+        existingKeyMeta
+      } ?: currentKeyMeta
+    }
+    result
+  }
+
+  val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+    keyMetaService.getWithFetchedData(this.import.project).asSequence()
+      .map { (it.key!!.namespace?.name to it.key!!.name) to it }
       .toMap().toMutableMap()
   }
 
-  val existingMetas: MutableMap<String, KeyMeta> by lazy {
-    keyMetaService.getWithFetchedData(this.import.project).asSequence().map { it.key!!.name to it }
-      .toMap().toMutableMap()
+  val existingNamespaces by lazy {
+    namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
   }
 
   /**
