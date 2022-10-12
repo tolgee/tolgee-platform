@@ -153,9 +153,9 @@ class CoreImportFilesProcessor(
 
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
-      val entity = this.keys.computeIfAbsent(name) { ImportKey(name = name, this.fileEntity) }
-      importDataManager.storedKeys[this.fileEntity to name] = entity
-      importService.saveKey(entity)
+      this.keys.computeIfAbsent(name) { ImportKey(name = name, this.fileEntity) }.also {
+        importService.saveKey(it)
+      }
     }
   }
 

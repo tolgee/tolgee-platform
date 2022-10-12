@@ -1,11 +1,5 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -17,19 +11,14 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import net.javacrumbs.jsonunit.assertj.JsonAssert
-import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.test.web.servlet.MvcResult
-import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
-import javax.servlet.DispatcherType
 
 @Transactional
 class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
@@ -67,11 +56,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performStreamingImport(projectId = base.project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
-      .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
-      .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
-        node("errors[2].code").isEqualTo("cannot_parse_file")
-      }
+    performImport(projectId = base.project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown))).andAssertThatJson {
+      node("errors[2].code").isEqualTo("cannot_parse_file")
+    }
   }
 
   @Test
@@ -142,9 +129,8 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performStreamingImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
-      .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
-      .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
+    performImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+      .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(3)
       }
     validateSavedJsonImportData(base.project, base.userAccount)
@@ -156,16 +142,20 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
-    performStreamingImport(
-      projectId = base.project.id,
-      mapOf(Pair("tooLongTranslation.json", tooLongTranslation))
-    ).andIsOk
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        mapOf(Pair("tooLongTranslation.json", tooLongTranslation))
+      ).andIsOk
+    }
 
-    importService.find(base.project.id, base.userAccount.id)?.let {
-      assertThat(it.files).hasSize(1)
-      assertThat(it.files[0].issues).hasSize(1)
-      assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
-      assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+    executeInNewTransaction {
+      importService.find(base.project.id, base.userAccount.id)?.let {
+        assertThat(it.files).hasSize(1)
+        assertThat(it.files[0].issues).hasSize(1)
+        assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
+        assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+      }
     }
   }
 
@@ -174,18 +164,22 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
-    performStreamingImport(
-      projectId = base.project.id,
-      mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue))
-    ).andIsOk
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue))
+      ).andIsOk
+    }
 
-    importService.find(base.project.id, base.userAccount.id)!!.let {
-      assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("not_string")
-      assertThat(it.files[0].issues[0].params?.get(2)?.value).isEqualTo(
-        "[Lorem ipsum dolor sit amet," +
-          " consectetur adipiscing elit. Suspendisse" +
-          " ac ultricies tortor. Integer ac..."
-      )
+    executeInNewTransaction {
+      importService.find(base.project.id, base.userAccount.id)!!.let {
+        assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("not_string")
+        assertThat(it.files[0].issues[0].params?.get(2)?.value).isEqualTo(
+          "[Lorem ipsum dolor sit amet," +
+            " consectetur adipiscing elit. Suspendisse" +
+            " ac ultricies tortor. Integer ac..."
+        )
+      }
     }
   }
 
@@ -193,17 +187,18 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     importService.find(project.id, userAccount.id)!!.let { importEntity ->
       entityManager.refresh(importEntity)
       assertThat(importEntity.files.size).isEqualTo(3)
-      assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json"))
+      val expectedFiles = listOf("en.json", "cs.json", "fr.json")
+      assertThat(importEntity.files.map { it.name }).containsAll(expectedFiles)
       val keys = importService.findKeys(importEntity)
       keys.forEach { key ->
         assertThat(keys.filter { it.name == key.name })
-          .describedAs("Each key is stored just once")
-          .hasSizeLessThan(2)
+          .describedAs("Each key is stored at max files.size times")
+          .hasSizeLessThan(expectedFiles.size + 1)
       }
       importEntity.files.forEach {
         assertThat(it.issues).hasSize(0)
       }
-      assertThat(keys).hasSize(206)
+      assertThat(keys).hasSize(540)
     }
   }
 
@@ -222,72 +217,5 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
     loginAsUser("admin")
     return mvc.perform(AuthorizedRequestFactory.addToken(builder))
-  }
-
-  private fun performStreamingImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
-    val builder = MockMvcRequestBuilders
-      .multipart("/v2/projects/$projectId/import/with-streaming-response")
-
-    files.forEach {
-      builder.file(
-        MockMultipartFile(
-          "files", it.key, "application/zip",
-          it.value.file.readBytes()
-        )
-      )
-    }
-
-    loginAsUser("admin")
-    mvc.perform(
-      AuthorizedRequestFactory.addToken(
-        builder
-      )
-    ).andReturn().let {
-      return mvc.perform(asyncDispatch(it))
-    }
-  }
-
-  private fun ResultActions.andAssertContainsMessage(
-    type: ImportStreamingProgressMessageType,
-    params: List<Any?>? = null
-  ): ResultActions {
-    this.andReturn().response.contentAsString.removeSuffix(";;;").split(";;;").any {
-      val mapped = jacksonObjectMapper().readValue<ImportStreamingProgressMessage>(it)
-      ImportStreamingProgressMessage(type, params) == mapped
-    }.let {
-      assertThat(it).describedAs(
-        """Streaming response contains message of type $type 
-                |with params $params
-            """.trimMargin()
-      ).isTrue
-    }
-    return this
-  }
-
-  private fun ResultActions.andAssertStreamingResultJson(
-    jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit
-  ): ResultActions {
-    val rawResult = this.andReturn().response.contentAsString
-      .removeSuffix(";;;").split(";;;").last()
-    jsonAssert(assertThatJson(rawResult))
-    return this
-  }
-
-  private fun ResultActions.andPrettyPrintStreamingResult(): ResultActions {
-    val rawResult = this.andReturn().response.contentAsString
-      .removeSuffix(";;;").split(";;;").last()
-    val parsed = jacksonObjectMapper().readValue<Any>(rawResult)
-    println(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
-    return this
-  }
-
-  private fun asyncDispatch(mvcResult: MvcResult): RequestBuilder {
-    mvcResult.getAsyncResult(10000)
-    return RequestBuilder {
-      val request = mvcResult.request
-      request.dispatcherType = DispatcherType.ASYNC
-      request.isAsyncStarted = false
-      request
-    }
   }
 }
