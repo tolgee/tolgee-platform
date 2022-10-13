@@ -80,14 +80,16 @@ class CoreImportFileProcessorUnitTest {
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
     whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }
     whenever(importMock.project).thenReturn(Project(1, "test repo"))
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(Optional.of(existingLanguage))
-    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(UserAccount()))
+    val userAccount = UserAccount()
+    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(userAccount))
+    whenever(authenticationFacadeMock.userAccountEntity).thenReturn(userAccount)
   }
 
   @Test

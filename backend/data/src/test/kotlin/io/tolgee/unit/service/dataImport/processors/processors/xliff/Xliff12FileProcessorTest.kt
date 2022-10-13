@@ -33,7 +33,7 @@ class Xliff12FileProcessorTest {
         .inputStream()
     )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 
   @Test
@@ -72,7 +72,7 @@ class Xliff12FileProcessorTest {
       File("src/test/resources/import/xliff/larger.xlf")
         .inputStream()
     )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
     val start = System.currentTimeMillis()
     Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
@@ -87,7 +87,7 @@ class Xliff12FileProcessorTest {
         .inputStream()
     )
     xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
     assertThat(fileProcessorContext.translations).hasSize(2)
     fileProcessorContext.fileEntity.issues.let { issues ->

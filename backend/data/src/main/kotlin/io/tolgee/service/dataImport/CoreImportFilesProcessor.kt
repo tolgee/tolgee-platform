@@ -31,7 +31,13 @@ class CoreImportFilesProcessor(
     applicationContext.getBean(AuthenticationFacade::class.java)
   }
 
-  private val importDataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
+  private val importDataManager by lazy {
+    ImportDataManager(
+      applicationContext = applicationContext,
+      import = import,
+      author = authenticationFacade.userAccountEntity
+    )
+  }
 
   fun processFiles(
     files: List<ImportFileDto>?,
@@ -96,12 +102,9 @@ class CoreImportFilesProcessor(
   private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
 
   private fun FileProcessorContext.processResult() {
-    val userAccount = authenticationFacade.userAccountEntity
 
     this.processLanguages()
     this.processTranslations()
-
-    importDataManager.saveAllStoredKeys()
 
     importService.saveAllFileIssues(this.fileEntity.issues)
     importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
