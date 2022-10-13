@@ -32,6 +32,18 @@ class PatAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `user authorizes with PAT with no expiration`() {
+    val pat = createUserWithPat(null)
+
+    performGet(
+      "/v2/user",
+      HttpHeaders().apply {
+        add("X-API-Key", "tgpat_${pat.token}")
+      }
+    ).andIsOk
+  }
+
+  @Test
   fun `user doesnt authorize with wrong PAT`() {
     performGet(
       "/v2/user",
@@ -63,7 +75,7 @@ class PatAuthTest : AbstractControllerTest() {
     ).andIsForbidden
   }
 
-  private fun createUserWithPat(expiresAt: Date = Date(Date().time + 10000)): Pat {
+  private fun createUserWithPat(expiresAt: Date? = Date(Date().time + 10000)): Pat {
     var pat: Pat? = null
     testDataService.saveTestData {
       addUserAccount {
