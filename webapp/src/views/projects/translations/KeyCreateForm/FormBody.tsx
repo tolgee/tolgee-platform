@@ -89,10 +89,6 @@ export const FormBody: React.FC<Props> = ({
     setEditedLang(lang);
   };
 
-  const onBlur = (lang: string | null) => {
-    setEditedLang((val) => (val === lang ? null : val));
-  };
-
   const baseLang = project.baseLanguage?.tag;
 
   const baseText = form.values?.translations?.[baseLang || ''];
@@ -213,7 +209,6 @@ export const FormBody: React.FC<Props> = ({
                         form.setFieldValue(field.name, val);
                       }}
                       direction={getLanguageDirection(lang.tag)}
-                      onBlur={() => onBlur(lang.tag)}
                       onFocus={() => onFocus(lang.tag)}
                       minHeight={50}
                       scrollMargins={{ bottom: 150 }}
