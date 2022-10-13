@@ -30,7 +30,7 @@ class PatAuthFilter(
       if (!patString.isNullOrEmpty()) {
         val hash = patService.hashToken(patString)
         val patEntity = patService.find(hash)
-        val isActive = patEntity?.expiresAt?.let { it > currentDateProvider.date } ?: false
+        val isActive = patEntity?.expiresAt?.let { it > currentDateProvider.date } ?: true
         if (isActive && patEntity != null) {
           val patAuthenticationToken = PatAuthenticationToken(patEntity)
           SecurityContextHolder.getContext().authentication = patAuthenticationToken

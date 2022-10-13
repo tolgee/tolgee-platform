@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,7 +29,6 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
-    this.projectSupplier = { testData.project }
   }
 
   @ProjectJWTAuthTestMethod
@@ -110,6 +111,19 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
+    ).andIsOk
+  }
+
+  @Test
+  fun `sets translations for new key with PAT`() {
+    testDataService.saveTestData(testData.root)
+    val pat = patService.create(CreatePatDto("hello"), testData.user)
+    performPut(
+      "/v2/projects/${testData.project.id}/translations",
+      SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English")),
+      HttpHeaders().apply {
+        add("X-API-Key", "tgpat_${pat.token}")
+      }
     ).andIsOk
   }
 
@@ -198,5 +212,6 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
   private fun saveTestData() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+    this.projectSupplier = { testData.project }
   }
 }
