@@ -2,10 +2,6 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_LANGUAGE
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.model.Language
@@ -20,7 +16,6 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
-import io.tolgee.service.key.KeyMetaService
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
@@ -28,7 +23,6 @@ class CoreImportFilesProcessor(
   val import: Import
 ) {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
-  private val keyMetaService: KeyMetaService by lazy { applicationContext.getBean(KeyMetaService::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
@@ -37,17 +31,17 @@ class CoreImportFilesProcessor(
     applicationContext.getBean(AuthenticationFacade::class.java)
   }
 
-  private val importDataManager = ImportDataManager(applicationContext, import)
+  private val importDataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
 
   fun processFiles(
     files: List<ImportFileDto>?,
-    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit
   ): MutableList<ErrorResponseBody> {
 
     val errors = mutableListOf<ErrorResponseBody>()
     files?.forEach {
       try {
-        errors.addAll(processFileOrArchive(it, messageClient))
+        val newErrors = processFileOrArchive(it)
+        errors.addAll(newErrors)
       } catch (e: ImportCannotParseFileException) {
         errors.add(ErrorResponseBody(e.code, e.params))
       }
@@ -57,27 +51,24 @@ class CoreImportFilesProcessor(
 
   private fun processFileOrArchive(
     file: ImportFileDto,
-    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit
   ): MutableList<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
 
     if (file.isArchive) {
-      return processArchive(messageClient, file, errors)
+      return processArchive(file, errors)
     }
 
-    return processFile(file, messageClient, errors)
+    return processFile(file, errors)
   }
 
   private fun processFile(
     file: ImportFileDto,
-    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
     errors: MutableList<ErrorResponseBody>
   ): MutableList<ErrorResponseBody> {
     val savedFileEntity = file.saveFileEntity()
     val fileProcessorContext = FileProcessorContext(
       file,
       savedFileEntity,
-      messageClient,
       tolgeeProperties.maxTranslationTextLength
     )
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
@@ -87,16 +78,13 @@ class CoreImportFilesProcessor(
   }
 
   private fun processArchive(
-    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
     archive: ImportFileDto,
     errors: MutableList<ErrorResponseBody>
   ): MutableList<ErrorResponseBody> {
-    messageClient(FOUND_ARCHIVE, null)
     val processor = processorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
 
-    messageClient(FOUND_FILES_IN_ARCHIVE, listOf(files.size))
-    errors.addAll(processFiles(files, messageClient))
+    errors.addAll(processFiles(files))
     return errors
   }
 
@@ -109,23 +97,11 @@ class CoreImportFilesProcessor(
 
   private fun FileProcessorContext.processResult() {
     val userAccount = authenticationFacade.userAccountEntity
-    this.processLanguages()
 
-    importDataManager.storedKeys // populate keys first
-    this.mergeKeyMetas()
-    importDataManager.storedMetas.values.forEach {
-      it.let { meta ->
-        if (meta.id == 0L) {
-          keyMetaService.save(meta)
-        }
-        meta.comments.onEach { comment -> comment.author = comment.author ?: userAccount }
-        keyMetaService.saveAllComments(meta.comments)
-        meta.codeReferences.onEach { ref -> ref.author = ref.author ?: userAccount }
-        keyMetaService.saveAllCodeReferences(meta.codeReferences)
-      }
-    }
-    importDataManager.saveAllStoredKeys()
+    this.processLanguages()
     this.processTranslations()
+
+    importDataManager.saveAllStoredKeys()
 
     importService.saveAllFileIssues(this.fileEntity.issues)
     importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
@@ -134,7 +110,6 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processLanguages() {
     this.languages.forEach { entry ->
       val languageEntity = entry.value
-      messageClient(FOUND_LANGUAGE, listOf(languageEntity.name))
       val matchingStoredLanguage = importDataManager.storedLanguages.find {
         it.name == entry.value.name && it.existingLanguage != null
       }
@@ -153,7 +128,9 @@ class CoreImportFilesProcessor(
 
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
-      this.keys.computeIfAbsent(name) { ImportKey(name = name, this.fileEntity) }.also {
+      this.keys.computeIfAbsent(name) {
+        ImportKey(name = name, this.fileEntity)
+      }.also {
         importService.saveKey(it)
       }
     }
@@ -188,19 +165,5 @@ class CoreImportFilesProcessor(
     importDataManager.saveAllStoredKeys()
     importDataManager.handleConflicts(false)
     importDataManager.saveAllStoredTranslations()
-  }
-
-  private fun FileProcessorContext.mergeKeyMetas() {
-    val storedMetas = importDataManager.storedMetas
-    this.keys.values.forEach { newKey ->
-      val storedMeta = storedMetas[newKey.file.namespace to newKey.name]
-      val newMeta = newKey.keyMeta
-      if (storedMeta != null && newMeta != null) {
-        keyMetaService.import(storedMeta, newMeta)
-      }
-      if (storedMeta == null && newMeta != null) {
-        storedMetas[newKey.file.namespace to newKey.name] = newMeta
-      }
-    }
   }
 }

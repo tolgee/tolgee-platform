@@ -92,7 +92,7 @@ class CoreImportFileProcessorUnitTest {
 
   @Test
   fun `finds proper existing language for imported language`() {
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(importServiceMock).saveLanguages(
       argThat {
         this.first().run {
@@ -116,7 +116,7 @@ class CoreImportFileProcessorUnitTest {
         }
       )
     )
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(importServiceMock).saveTranslations(
       argThat {
         assertThat(this[0].conflict).isEqualTo(existingTranslation)
@@ -135,7 +135,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addKeyComment("test_key", "test comment")
     whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(
       argThat {
         this.comments.any { it.text == "test comment" }

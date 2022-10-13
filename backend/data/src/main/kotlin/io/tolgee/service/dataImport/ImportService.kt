@@ -1,7 +1,6 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -26,6 +25,7 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.key.KeyMetaService
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -46,12 +46,12 @@ class ImportService(
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
-  private val removeExpiredImportService: RemoveExpiredImportService
+  private val removeExpiredImportService: RemoveExpiredImportService,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   @Transactional
   fun addFiles(
     files: List<ImportFileDto>,
-    messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null,
     project: Project,
     userAccount: UserAccount
   ): List<ErrorResponseBody> {
@@ -59,7 +59,6 @@ class ImportService(
       it.author = userAccount
     }
 
-    val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)
 
     if (languages.count() + files.size > 100) {
@@ -71,7 +70,7 @@ class ImportService(
       applicationContext = applicationContext,
       import = import
     )
-    val errors = fileProcessor.processFiles(files, nonNullMessageClient)
+    val errors = fileProcessor.processFiles(files)
 
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
@@ -96,7 +95,7 @@ class ImportService(
       return
     }
     val import = importLanguage.file.import
-    val dataManager = ImportDataManager(applicationContext, import)
+    val dataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
     existingLanguage?.let {
       val langAlreadySelectedInTheSameNS = dataManager.storedLanguages.any {
         it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
@@ -113,7 +112,7 @@ class ImportService(
   @Transactional
   fun selectNamespace(file: ImportFile, namespace: String?) {
     val import = file.import
-    val dataManager = ImportDataManager(applicationContext, import)
+    val dataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
     file.namespace = namespace
     importFileRepository.save(file)
     file.languages.forEach {

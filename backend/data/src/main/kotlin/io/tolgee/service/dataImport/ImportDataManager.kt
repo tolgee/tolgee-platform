@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -15,7 +16,8 @@ import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
   private val applicationContext: ApplicationContext,
-  private val import: Import
+  private val import: Import,
+  private val author: UserAccount
 ) {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
@@ -62,18 +64,6 @@ class ImportDataManager(
 
   private val translationService: TranslationService by lazy {
     applicationContext.getBean(TranslationService::class.java)
-  }
-
-  val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
-    val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
-    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
-      val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
-      result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
-        keyMetaService.import(existingKeyMeta, currentKeyMeta)
-        existingKeyMeta
-      } ?: currentKeyMeta
-    }
-    result
   }
 
   val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
@@ -161,9 +151,20 @@ class ImportDataManager(
 
   fun saveAllStoredKeys() {
     this.importService.saveAllKeys(this.storedKeys.values)
+    storeAllMetas()
   }
 
-  fun resetConflicts(importLanguage: ImportLanguage) {
+  private fun storeAllMetas() {
+    this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
+      keyMetaService.save(meta)
+      meta.comments.onEach { comment -> comment.author = comment.author ?: author }
+      keyMetaService.saveAllComments(meta.comments)
+      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: author }
+      keyMetaService.saveAllCodeReferences(meta.codeReferences)
+    }
+  }
+
+  private fun resetConflicts(importLanguage: ImportLanguage) {
     this.storedTranslations[importLanguage]?.values?.asSequence()?.flatMap { it }?.forEach {
       it.conflict = null
       it.resolvedHash = null

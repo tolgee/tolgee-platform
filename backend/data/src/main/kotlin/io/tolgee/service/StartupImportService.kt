@@ -64,7 +64,7 @@ class StartupImportService(
     project: Project,
     userAccount: UserAccount
   ) {
-    importService.addFiles(fileDtos, null, project, userAccount)
+    importService.addFiles(fileDtos, project, userAccount)
     val imports = importService.getAllByProject(project.id)
     imports.forEach {
       importService.import(it)

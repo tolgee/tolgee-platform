@@ -6,8 +6,10 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -19,7 +21,10 @@ class StoredDataImporter(
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE
 ) {
-  private val importDataManager = ImportDataManager(applicationContext, import)
+
+  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
+
+  private val importDataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 
@@ -41,13 +46,25 @@ class StoredDataImporter(
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
+  val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+    val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
+    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
+      val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
+      result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
+        keyMetaService.import(existingKeyMeta, currentKeyMeta)
+        existingKeyMeta
+      } ?: currentKeyMeta
+    }
+    result
+  }
+
   fun doImport() {
     importDataManager.storedLanguages.forEach {
       it.doImport()
     }
 
     this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
-      val importedKeyMeta = importDataManager.storedMetas[fileNamePair.first.namespace to importKey.name]
+      val importedKeyMeta = storedMetas[fileNamePair.first.namespace to importKey.name]
       // dont touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
         keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->

@@ -28,7 +28,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to json without scoping`() {
+  fun `it exports to json`() {
     initBaseData()
     val parsed = performExport()
 
