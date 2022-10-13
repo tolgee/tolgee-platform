@@ -1,3 +1,10 @@
+## [2.45.5](https://github.com/tolgee/tolgee-platform/compare/v2.45.4...v2.45.5) (2022-10-13)
+
+
+### Bug Fixes
+
+* Personal access token doesn't work when has no expiration ([#1394](https://github.com/tolgee/tolgee-platform/issues/1394)) ([974a3aa](https://github.com/tolgee/tolgee-platform/commit/974a3aa70b170def1973a42436f460c97f054d04))
+
 ## [2.45.4](https://github.com/tolgee/tolgee-platform/compare/v2.45.3...v2.45.4) (2022-10-07)
 
 
