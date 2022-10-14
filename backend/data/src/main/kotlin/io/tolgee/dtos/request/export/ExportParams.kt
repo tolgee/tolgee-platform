@@ -19,9 +19,9 @@ If null, all languages are exported""",
   var format: ExportFormat = ExportFormat.JSON,
 
   @field:Parameter(
-    description = """Delimiter to split key name and structure file content when possible. 
+    description = """Delimiter to structure file content. 
 
-e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
 
 When null, resulting file won't be structured.
     """,
