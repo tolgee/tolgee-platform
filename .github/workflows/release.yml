@@ -23,7 +23,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '18.x'
+          node-version: "16.x"
 
       - name: Set git globals
         run: |
