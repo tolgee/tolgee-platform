@@ -1,3 +1,10 @@
+## [2.45.6](https://github.com/tolgee/tolgee-platform/compare/v2.45.5...v2.45.6) (2022-10-14)
+
+
+### Bug Fixes
+
+* Fix translation tools hiding ([4e184a0](https://github.com/tolgee/tolgee-platform/commit/4e184a03f4fb20a50ce0982ef45fe14df04d6965))
+
 ## [2.45.5](https://github.com/tolgee/tolgee-platform/compare/v2.45.4...v2.45.5) (2022-10-13)
 
 
