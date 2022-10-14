@@ -21,13 +21,13 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build backend
         run: ./gradlew bootJar
@@ -70,14 +70,14 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - run: cat /home/runner/work/tolgee-platform/tolgee-platform/backend/app/src/test/kotlin/io/tolgee/api/v2/controllers/translations/v2TranslationsController/V2TranslationsControllerModificationTest.kt
       - name: Download backend build result
         uses: actions/download-artifact@v2
         with:
