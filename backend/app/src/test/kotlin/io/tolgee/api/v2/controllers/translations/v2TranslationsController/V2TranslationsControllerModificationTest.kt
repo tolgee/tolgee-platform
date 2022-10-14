@@ -120,7 +120,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     val pat = patService.create(CreatePatDto("hello"), testData.user)
     performPut(
       "/v2/projects/${testData.project.id}/translations",
-      SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English")),
+      SetTranslationsWithKeyDto("A key", null, mutableMapOf("en" to "English")),
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
       }

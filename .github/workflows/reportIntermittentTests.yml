@@ -18,7 +18,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '18.x'
 
       - name: Cache Gradle packages
         uses: actions/cache@v2
@@ -66,7 +66,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '18.x'
 
       - name: Cache Gradle packages
         uses: actions/cache@v2
@@ -159,7 +159,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '18.x'
 
       - name: Cache node modules
         uses: actions/cache@v2
@@ -188,7 +188,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '18.x'
 
       - name: Cache node modules
         uses: actions/cache@v2
