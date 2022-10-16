@@ -9,7 +9,6 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -19,12 +18,10 @@ import org.springframework.context.ApplicationContext
 class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
-  private val forceMode: ForceMode = ForceMode.NO_FORCE
+  private val forceMode: ForceMode = ForceMode.NO_FORCE,
 ) {
 
-  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
-
-  private val importDataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
+  private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 

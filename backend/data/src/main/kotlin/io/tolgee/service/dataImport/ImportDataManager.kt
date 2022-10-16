@@ -1,6 +1,5 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -17,7 +16,6 @@ import org.springframework.context.ApplicationContext
 class ImportDataManager(
   private val applicationContext: ApplicationContext,
   private val import: Import,
-  private val author: UserAccount
 ) {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
@@ -157,9 +155,9 @@ class ImportDataManager(
   private fun storeAllMetas() {
     this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
       keyMetaService.save(meta)
-      meta.comments.onEach { comment -> comment.author = comment.author ?: author }
+      meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
       keyMetaService.saveAllComments(meta.comments)
-      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: author }
+      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
       keyMetaService.saveAllCodeReferences(meta.codeReferences)
     }
   }

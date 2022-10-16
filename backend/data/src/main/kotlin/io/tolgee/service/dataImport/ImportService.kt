@@ -95,7 +95,7 @@ class ImportService(
       return
     }
     val import = importLanguage.file.import
-    val dataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
+    val dataManager = ImportDataManager(applicationContext, import)
     existingLanguage?.let {
       val langAlreadySelectedInTheSameNS = dataManager.storedLanguages.any {
         it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
@@ -112,7 +112,7 @@ class ImportService(
   @Transactional
   fun selectNamespace(file: ImportFile, namespace: String?) {
     val import = file.import
-    val dataManager = ImportDataManager(applicationContext, import, authenticationFacade.userAccountEntity)
+    val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = namespace
     importFileRepository.save(file)
     file.languages.forEach {

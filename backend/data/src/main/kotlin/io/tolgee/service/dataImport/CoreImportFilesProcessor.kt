@@ -12,7 +12,6 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
@@ -27,15 +26,10 @@ class CoreImportFilesProcessor(
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
 
-  private val authenticationFacade: AuthenticationFacade by lazy {
-    applicationContext.getBean(AuthenticationFacade::class.java)
-  }
-
   private val importDataManager by lazy {
     ImportDataManager(
       applicationContext = applicationContext,
       import = import,
-      author = authenticationFacade.userAccountEntity
     )
   }
 

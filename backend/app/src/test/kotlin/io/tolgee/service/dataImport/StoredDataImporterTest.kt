@@ -19,7 +19,10 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
-    storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import)
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+    )
   }
 
   @Test
@@ -67,7 +70,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
   @Test
   fun `it force replaces translations`() {
-    storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.OVERRIDE)
+    storedDataImporter = StoredDataImporter(
+      applicationContext!!,
+      importTestData.import,
+      ForceMode.OVERRIDE,
+    )
     testDataService.saveTestData(importTestData.root)
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
@@ -81,7 +88,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it imports metadata`() {
     importTestData.addKeyMetadata()
     testDataService.saveTestData(importTestData.root)
-    storedDataImporter = StoredDataImporter(applicationContext, importTestData.import, ForceMode.OVERRIDE)
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+      ForceMode.OVERRIDE,
+    )
     storedDataImporter.doImport()
     entityManager.flush()
     entityManager.clear()
@@ -104,7 +115,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it force keeps translations`() {
     importTestData.translationWithConflict.override = true
     importTestData.translationWithConflict.resolve()
-    storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.KEEP)
+    storedDataImporter = StoredDataImporter(
+      applicationContext,
+      importTestData.import,
+      ForceMode.KEEP,
+    )
     testDataService.saveTestData(importTestData.root)
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
