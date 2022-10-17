@@ -19,7 +19,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import org.hibernate.Transaction
 import org.hibernate.collection.internal.AbstractPersistentCollection
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -28,10 +28,8 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
 @Component
-@Scope(SCOPE_PROTOTYPE)
+@Scope(SCOPE_SINGLETON)
 class InterceptedEventsManager(
-  private val projectHolder: ProjectHolder,
-  private val activityHolder: ActivityHolder,
   private val applicationContext: ApplicationContext
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
@@ -189,7 +187,7 @@ class InterceptedEventsManager(
   }
 
   private fun shouldHandleActivity(entity: Any?): Boolean {
-    return entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>()
+    return entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() && !entity.disableActivityLogging
   }
 
   private val activityRevision: ActivityRevision
@@ -214,4 +212,10 @@ class InterceptedEventsManager(
 
   private val userAccount: UserAccountDto?
     get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull
+
+  private val activityHolder: ActivityHolder
+    get() = applicationContext.getBean(ActivityHolder::class.java)
+
+  private val projectHolder: ProjectHolder
+    get() = applicationContext.getBean(ProjectHolder::class.java)
 }

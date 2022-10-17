@@ -6,7 +6,6 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -51,11 +50,13 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletRequest
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -243,7 +244,7 @@ class V2ImportController(
     resolveAllOfLanguage(languageId, false)
   }
 
-  @PutMapping("/result/languages/{fileId}/select-namespace")
+  @PutMapping("/result/files/{fileId}/select-namespace")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   @Operation(
@@ -252,10 +253,11 @@ class V2ImportController(
   )
   fun selectNamespace(
     @PathVariable fileId: Long,
-    @RequestBody req: SetFileNamespaceRequest
+    @RequestBody req: SetFileNamespaceRequest,
+    request: HttpServletRequest
   ) {
     val file = checkFileFromProject(fileId)
-    this.importService.selectNamespace(file, req.nemspace)
+    this.importService.selectNamespace(file, req.namespace)
   }
 
   @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")

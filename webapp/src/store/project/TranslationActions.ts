@@ -39,66 +39,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     (state, action) =>
       <TranslationsState>{ ...state, selectedLanguages: action.payload }
   );
-  otherEditionConfirm = this.createAction(
-    'OTHER_EDITION_CONFIRM',
-    () => {}
-  ).build.on((state) => ({
-    ...state,
-    //@ts-ignore
-    editing: { ...state.editingAfterConfirmation },
-    editingAfterConfirmation: null,
-  }));
-  otherEditionCancel = this.createAction(
-    'OTHER_EDITION_CANCEL',
-    () => {}
-  ).build.on((state) => ({
-    ...state,
-    editingAfterConfirmation: null,
-  }));
-  setEditingValue = this.createAction(
-    'SET_EDITING_VALUE',
-    (val: string) => val
-    //@ts-ignore
-  ).build.on((state, action) => {
-    return {
-      ...state,
-      editing: {
-        ...state.editing,
-        data: { ...state.editing?.data, newValue: action.payload },
-      },
-    };
-  });
-  setTranslationEditing = this.createAction(
-    'SET_TRANSLATION_EDITING',
-    (data: { data: TranslationEditingType; skipConfirm?: boolean }) => data
-  ).build.on((state, action) => {
-    const needsConfirmation =
-      !action.payload.skipConfirm &&
-      state.editing &&
-      state.editing.data?.initialValue !== state.editing.data?.newValue;
-    return {
-      ...state,
-      [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
-        type: 'translation',
-        data: { ...action.payload.data },
-      },
-    };
-  });
-  setKeyEditing = this.createAction(
-    'SET_KEY_EDITING',
-    (data: SourceEditingType) => data
-  ).build.on((state, action) => {
-    const needsConfirmation =
-      state.editing &&
-      state.editing.data?.initialValue !== state.editing.data?.newValue;
-    return {
-      ...state,
-      [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
-        type: 'key',
-        data: { ...action.payload },
-      },
-    };
-  });
 
   readonly loadableDefinitions = {};
 

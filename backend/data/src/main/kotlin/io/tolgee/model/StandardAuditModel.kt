@@ -22,6 +22,9 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
   )
   override var id: Long = 0
 
+  @Transient
+  override var disableActivityLogging = false
+
   override fun equals(other: Any?): Boolean {
     other ?: return false
 

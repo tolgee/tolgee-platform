@@ -64,6 +64,9 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                   <T>import_result_language_name_header</T>
                 </TableCell>
                 <TableCell>
+                  <T>import_namespace_name_header</T>
+                </TableCell>
+                <TableCell>
                   <T>import_result_file_name_header</T>
                 </TableCell>
                 <TableCell align="center">

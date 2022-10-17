@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
-import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from './useImportDataHelper';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
 ) => {
   const [conflictNotResolvedDialogOpen, setConflictNotResolvedDialogOpen] =
     useState(false);
 
-  const importApplyLoadable = actions.useSelector(
-    (s) => s.loadables.applyImport
-  );
+  const importApplyLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/import/apply',
+    method: 'put',
+  });
+
   const project = useProject();
   const error = importApplyLoadable.error;
 
@@ -25,7 +25,7 @@ export const useApplyImportHelper = (
       0
     );
     if (unResolvedCount === 0) {
-      actions.loadableActions.applyImport.dispatch({
+      importApplyLoadable.mutate({
         path: {
           projectId: project.id,
         },
@@ -33,7 +33,7 @@ export const useApplyImportHelper = (
       });
       return;
     }
-    dataHelper.loadData();
+    dataHelper.refetchData();
     setConflictNotResolvedDialogOpen(true);
   };
 
@@ -46,10 +46,10 @@ export const useApplyImportHelper = (
   }, [importApplyLoadable.error]);
 
   useEffect(() => {
-    if (importApplyLoadable.loaded) {
-      dataHelper.loadData();
+    if (importApplyLoadable.isSuccess) {
+      dataHelper.refetchData();
     }
-  }, [importApplyLoadable.loading]);
+  }, [importApplyLoadable.isSuccess]);
 
   const onDialogClose = () => {
     setConflictNotResolvedDialogOpen(false);
@@ -60,7 +60,7 @@ export const useApplyImportHelper = (
     onApplyImport,
     conflictNotResolvedDialogOpen,
     error,
-    loading: importApplyLoadable.loading,
-    loaded: importApplyLoadable.loaded,
+    loading: importApplyLoadable.isLoading,
+    loaded: importApplyLoadable.isSuccess,
   };
 };

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Checkbox, styled, useTheme } from '@mui/material';
 import clsx from 'clsx';
 
@@ -18,8 +18,8 @@ import {
   StyledCell,
 } from './cell/styles';
 import {
-  useTranslationsSelector,
   useTranslationsDispatch,
+  useTranslationsSelector,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useDebounce } from 'use-debounce/lib';
@@ -204,7 +204,7 @@ export const CellKey: React.FC<Props> = ({
             )}
             <StyledKey>
               <LimitedHeightText width={width} maxLines={3} wrap="break-all">
-                {data.keyName}
+                {data.keyNamespace}:{data.keyName}
               </LimitedHeightText>
             </StyledKey>
             {!simple && (

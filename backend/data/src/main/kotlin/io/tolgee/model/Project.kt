@@ -81,6 +81,9 @@ class Project(
   @ActivityLoggedProp
   override var avatarHash: String? = null
 
+  @Transient
+  override var disableActivityLogging = false
+
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
       this.organizationOwner = organizationOwner

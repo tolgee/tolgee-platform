@@ -11,12 +11,13 @@ import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.Logging
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
   private val applicationContext: ApplicationContext,
   private val import: Import,
-) {
+) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
   private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
@@ -28,7 +29,10 @@ class ImportDataManager(
   }
 
   val storedKeys by lazy {
-    importService.findKeys(import).asSequence().map { (it.file to it.name) to it }.toMap(mutableMapOf())
+    importService.findKeys(import)
+      .asSequence()
+      .map { (it.file to it.name) to it }
+      .toMap(mutableMapOf())
   }
 
   val storedLanguages by lazy {
@@ -149,11 +153,12 @@ class ImportDataManager(
 
   fun saveAllStoredKeys() {
     this.importService.saveAllKeys(this.storedKeys.values)
-    storeAllMetas()
+    saveAllMetas()
   }
 
-  private fun storeAllMetas() {
+  private fun saveAllMetas() {
     this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
+      meta.disableActivityLogging = true
       keyMetaService.save(meta)
       meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
       keyMetaService.saveAllComments(meta.comments)

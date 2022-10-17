@@ -10,16 +10,13 @@ import { useTheme } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import SearchField from 'tg.component/common/form/fields/SearchField';
-import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
-
-const actions = container.resolve(ImportActions);
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const StyledAppBar = styled(AppBar)`
   position: relative;
@@ -44,6 +41,24 @@ export const ImportShowDataDialog: FunctionComponent<{
   const project = useProject();
   const theme = useTheme();
   const [search, setSearch] = useState(undefined as string | undefined);
+  const [page, setPage] = useState(0);
+
+  const loadable = useApiQuery({
+    url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+    method: 'get',
+    path: {
+      projectId: project.id,
+      languageId: props.row?.id as any,
+    },
+    options: {
+      enabled: !!props.row,
+    },
+    query: {
+      onlyConflicts: false,
+      page: page,
+      size: 50,
+    },
+  });
 
   return (
     <div>
@@ -74,25 +89,12 @@ export const ImportShowDataDialog: FunctionComponent<{
           <SearchField onSearch={setSearch} />
         </SecondaryBar>
         {!!props.row && (
-          <SimplePaginatedHateoasList
+          <PaginatedHateoasList
             wrapperComponent={Box}
             wrapperComponentProps={{ sx: { m: 2 } }}
-            actions={actions}
-            loadableName="translations"
             searchText={search}
-            sortBy={[]}
-            pageSize={50}
-            dispatchParams={[
-              {
-                path: {
-                  languageId: props.row?.id,
-                  projectId: project.id,
-                },
-                query: {
-                  onlyConflicts: false,
-                },
-              },
-            ]}
+            onPageChange={setPage}
+            loadable={loadable}
             renderItem={(i) => (
               <Box
                 pt={1}

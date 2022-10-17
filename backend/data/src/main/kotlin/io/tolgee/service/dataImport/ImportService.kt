@@ -25,14 +25,15 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.key.KeyMetaService
+import org.hibernate.annotations.QueryHints
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -47,7 +48,7 @@ class ImportService(
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
-  private val authenticationFacade: AuthenticationFacade
+  private val entityManager: EntityManager
 ) {
   @Transactional
   fun addFiles(
@@ -113,12 +114,14 @@ class ImportService(
   fun selectNamespace(file: ImportFile, namespace: String?) {
     val import = file.import
     val dataManager = ImportDataManager(applicationContext, import)
-    file.namespace = namespace
+    file.namespace = getSafeNamespace(namespace)
     importFileRepository.save(file)
     file.languages.forEach {
       dataManager.resetLanguage(it)
     }
   }
+
+  private fun getSafeNamespace(name: String?) = if (name.isNullOrBlank()) null else name
 
   fun save(import: Import): Import {
     return this.importRepository.save(import)
@@ -149,7 +152,36 @@ class ImportService(
 
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
-  fun findKeys(import: Import) = importKeyRepository.findAllByImport(import.id)
+  @Suppress("UNCHECKED_CAST")
+
+  fun findKeys(import: Import): List<ImportKey> {
+    var result: List<ImportKey> = entityManager.createQuery(
+      """
+            select distinct ik from ImportKey ik 
+            left join fetch ik.keyMeta ikm
+            left join fetch ikm.comments ikc
+            join ik.file if
+            where if.import = :import
+            """
+    )
+      .setParameter("import", import)
+      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
+      .resultList as List<ImportKey>
+
+    result = entityManager.createQuery(
+      """
+            select distinct ik from ImportKey ik 
+            left join fetch ik.keyMeta ikm
+            left join fetch ikm.codeReferences ikc
+            join ik.file if
+            where ik in :keys
+        """
+    ).setParameter("keys", result)
+      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
+      .resultList as List<ImportKey>
+
+    return result
+  }
 
   fun saveLanguages(entries: Collection<ImportLanguage>) {
     importLanguageRepository.saveAll(entries)

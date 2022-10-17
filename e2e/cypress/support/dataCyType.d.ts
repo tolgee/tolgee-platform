@@ -105,6 +105,7 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-namespace-select-option" |
         "import-resolution-dialog-accept-imported-button" |
         "import-resolution-dialog-accept-old-button" |
         "import-resolution-dialog-close-button" |
@@ -122,6 +123,7 @@ declare namespace DataCy {
         "import-result-file-cell" |
         "import-result-file-warnings" |
         "import-result-language-menu-cell" |
+        "import-result-namespace-cell" |
         "import-result-resolve-button" |
         "import-result-resolved-conflicts-cell" |
         "import-result-row" |

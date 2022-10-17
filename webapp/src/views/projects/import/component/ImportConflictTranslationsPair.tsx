@@ -1,14 +1,12 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Grid } from '@mui/material';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { ImportConflictTranslation } from './ImportConflictTranslation';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-const actions = container.resolve(ImportActions);
 export const ImportConflictTranslationsPair: FunctionComponent<{
   translation: components['schemas']['ImportTranslationModel'];
   languageId: number;
@@ -17,9 +15,25 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
   const [expanded, setExpanded] = useState(false);
   const [leftExpandable, setLeftExpandable] = useState(false);
   const [rightExpandable, setRightExpandable] = useState(false);
+  const [keepLoaded, setKeepLoaded] = useState(false);
+  const [overrideLoaded, setOverrideLoaded] = useState(false);
+
+  const setOverrideMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+  });
+
+  const setKeepMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+  });
 
   const setOverride = (translationId: number) => {
-    actions.loadableActions.resolveTranslationConflictOverride.dispatch({
+    setOverrideMutation.mutate({
       path: {
         projectId: project.id,
         languageId: languageId,
@@ -29,7 +43,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
   };
 
   const setKeepExisting = (translationId: number) => {
-    actions.loadableActions.resolveTranslationConflictKeep.dispatch({
+    setKeepMutation.mutate({
       path: {
         projectId: project.id,
         languageId: languageId,
@@ -38,41 +52,27 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
     });
   };
 
-  const isKeepExistingLoading = actions.useSelector(
-    (s) =>
-      s.loadables.resolveTranslationConflictKeep.dispatchParams?.[0].path
-        .translationId === translation.id &&
-      s.loadables.resolveTranslationConflictKeep.loading
-  );
+  useEffect(() => {
+    if (setKeepMutation.isSuccess) {
+      setKeepLoaded(true);
+    }
+    setTimeout(() => setKeepLoaded(false), 300);
+  }, [setKeepMutation.isSuccess]);
 
-  const isKeepExistingLoaded = actions.useSelector(
-    (s) =>
-      s.loadables.resolveTranslationConflictKeep.dispatchParams?.[0].path
-        .translationId === translation.id &&
-      s.loadables.resolveTranslationConflictKeep.loaded
-  );
-
-  const isOverrideLoading = actions.useSelector(
-    (s) =>
-      s.loadables.resolveTranslationConflictOverride.dispatchParams?.[0].path
-        .translationId === translation.id &&
-      s.loadables.resolveTranslationConflictOverride.loading
-  );
-
-  const isOverrideLoaded = actions.useSelector(
-    (s) =>
-      s.loadables.resolveTranslationConflictOverride.dispatchParams?.[0].path
-        .translationId === translation.id &&
-      s.loadables.resolveTranslationConflictOverride.loaded
-  );
+  useEffect(() => {
+    if (setOverrideMutation.isSuccess) {
+      setOverrideLoaded(true);
+    }
+    setTimeout(() => setOverrideLoaded(false), 300);
+  }, [setOverrideMutation.isSuccess]);
 
   return (
     <>
       <Grid item lg md sm={12} xs={12} zeroMinWidth>
         <ImportConflictTranslation
           data-cy="import-resolution-dialog-existing-translation"
-          loading={isKeepExistingLoading}
-          loaded={isKeepExistingLoaded}
+          loading={setKeepMutation.isLoading}
+          loaded={keepLoaded}
           text={translation.conflictText!}
           selected={!translation.override && translation.resolved}
           onSelect={() => setKeepExisting(translation.id)}
@@ -85,8 +85,8 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
       <Grid item lg md sm={12} xs={12} zeroMinWidth>
         <ImportConflictTranslation
           data-cy="import-resolution-dialog-new-translation"
-          loading={isOverrideLoading}
-          loaded={isOverrideLoaded}
+          loading={setOverrideMutation.isLoading}
+          loaded={overrideLoaded}
           text={translation.text}
           selected={
             (translation.override && translation.resolved) ||

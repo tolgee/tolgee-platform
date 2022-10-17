@@ -67,9 +67,11 @@ class NamespaceService(
 
   fun findOrCreate(name: String?, projectId: Long): Namespace? {
     return tryUntilItDoesntBreakConstraint {
-      find(name, projectId) ?: create(name, projectId)
+      find(getSafeName(name), projectId) ?: create(name, projectId)
     }
   }
+
+  private fun getSafeName(name: String?) = if (name.isNullOrBlank()) null else name
 
   private fun create(name: String?, projectId: Long): Namespace? {
     if (name.isNullOrBlank()) {

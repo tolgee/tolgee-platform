@@ -15,12 +15,13 @@ import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
+import io.tolgee.util.Logging
 import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
   val import: Import
-) {
+) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
@@ -96,10 +97,8 @@ class CoreImportFilesProcessor(
   private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
 
   private fun FileProcessorContext.processResult() {
-
     this.processLanguages()
     this.processTranslations()
-
     importService.saveAllFileIssues(this.fileEntity.issues)
     importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
   }
@@ -158,7 +157,6 @@ class CoreImportFilesProcessor(
         this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
       }
     }
-
     importDataManager.saveAllStoredKeys()
     importDataManager.handleConflicts(false)
     importDataManager.saveAllStoredTranslations()

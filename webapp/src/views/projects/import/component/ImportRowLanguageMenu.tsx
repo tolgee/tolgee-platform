@@ -11,18 +11,15 @@ import {
 import { Add, Clear } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
 
 import { useStateObject } from 'tg.fixtures/useStateObject';
-import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
-import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
 import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
-
-const actions = container.resolve(ImportActions);
+import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
+import { components } from 'tg.service/apiSchema.generated';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
@@ -44,36 +41,18 @@ const StyledInputAdornment = styled(InputAdornment)`
 const NEW_LANGUAGE_VALUE = '__new_language';
 export const ImportRowLanguageMenu: React.FC<{
   value?: number;
-  importLanguageId: number;
+  row: components['schemas']['ImportLanguageModel'];
 }> = (props) => {
   const queryClient = useQueryClient();
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();
+  const languageHelper = useImportLanguageHelper(props.row);
+
   const usedLanguages = importData
     .result!._embedded!.languages!.map((l) => l.existingLanguageId)
     .filter((l) => !!l);
-  const project = useProject();
-  const applyTouched = actions.useSelector((s) => s.applyTouched);
+
   const state = useStateObject({ addNewLanguageDialogOpen: false });
-
-  const dispatchChange = (value) => {
-    actions.loadableActions.selectLanguage.dispatch({
-      path: {
-        projectId: project.id,
-        importLanguageId: props.importLanguageId,
-        existingLanguageId: value,
-      },
-    });
-  };
-
-  const onReset = () => {
-    actions.loadableActions.resetExistingLanguage.dispatch({
-      path: {
-        projectId: project.id,
-        importLanguageId: props.importLanguageId,
-      },
-    });
-  };
 
   const onChange = (changeEvent: any) => {
     const value = changeEvent.target.value;
@@ -81,7 +60,7 @@ export const ImportRowLanguageMenu: React.FC<{
       state.addNewLanguageDialogOpen = true;
       return;
     }
-    dispatchChange(value);
+    languageHelper.onSelectExisting(value);
   };
 
   const availableLanguages = languages.filter(
@@ -106,7 +85,7 @@ export const ImportRowLanguageMenu: React.FC<{
       <FormControl
         fullWidth
         variant="standard"
-        error={applyTouched && !props.value}
+        error={importData.applyTouched && !props.value}
         data-cy="import-row-language-select-form-control"
       >
         <InputLabel shrink id="import_row_language_select">
@@ -118,7 +97,7 @@ export const ImportRowLanguageMenu: React.FC<{
             props.value ? (
               <StyledInputAdornment position="end">
                 <IconButton
-                  onClick={onReset}
+                  onClick={languageHelper.onResetExisting}
                   size="small"
                   data-cy="import-row-language-select-clear-button"
                 >
@@ -136,7 +115,7 @@ export const ImportRowLanguageMenu: React.FC<{
         >
           {items}
         </Select>
-        {applyTouched && !props.value && (
+        {importData.applyTouched && !props.value && (
           <FormHelperText>
             <T>import_existing_language_not_selected_error</T>
           </FormHelperText>
@@ -150,7 +129,7 @@ export const ImportRowLanguageMenu: React.FC<{
             queryClient,
             '/v2/projects/{projectId}/languages'
           );
-          dispatchChange(id);
+          languageHelper.onSelectExisting(id);
         }}
         onClose={() => (state.addNewLanguageDialogOpen = false)}
       />

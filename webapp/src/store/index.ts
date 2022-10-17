@@ -12,9 +12,7 @@ import { GlobalActions } from './global/GlobalActions';
 import { MessageActions } from './global/MessageActions';
 import { RedirectionActions } from './global/RedirectionActions';
 import { SignUpActions } from './global/SignUpActions';
-import { ImportActions } from './project/ImportActions';
 import { TranslationActions } from './project/TranslationActions';
-import { ProjectInvitationActions } from './project/invitations/ProjectInvitationActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
 const globalActions = container.resolve(GlobalActions);
@@ -32,10 +30,6 @@ const appReducer = (appState, action) =>
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
-    projectInvitation: implicitReducer.create(
-      container.resolve(ProjectInvitationActions)
-    ),
-    import: implicitReducer.create(container.resolve(ImportActions)),
   })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {

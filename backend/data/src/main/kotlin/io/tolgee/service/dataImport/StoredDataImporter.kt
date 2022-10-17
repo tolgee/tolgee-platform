@@ -43,7 +43,13 @@ class StoredDataImporter(
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
-  val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+  /**
+   * This metas are merged, so there is only one meta for one key!!!
+   *
+   * It can be used only when we are finally importing the data, before that we cannot merge it,
+   * since namespace can be changed
+   */
+  private val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
     val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
     keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
       val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name

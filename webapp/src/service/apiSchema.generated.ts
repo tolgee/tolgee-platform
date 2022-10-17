@@ -85,7 +85,7 @@ export interface paths {
     /** Resets existing language paired with language to import. */
     put: operations["resetExistingLanguage"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{fileId}/select-namespace": {
+  "/v2/projects/{projectId}/import/result/files/{fileId}/select-namespace": {
     /** Sets namespace for file to import. */
     put: operations["selectNamespace"];
   };
@@ -745,7 +745,7 @@ export interface components {
       usingMachineTranslation: boolean;
     };
     SetFileNamespaceRequest: {
-      nemspace?: string;
+      namespace?: string;
     };
     TranslationCommentModel: {
       /** Id of translation comment record */
@@ -828,8 +828,8 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
       id: number;
@@ -906,10 +906,10 @@ export interface components {
       key: string;
       projectName: string;
       userFullName?: string;
-      username?: string;
-      expiresAt?: number;
-      projectId: number;
       lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
+      username?: string;
       scopes: string[];
       id: number;
       description: string;
@@ -1302,7 +1302,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1314,6 +1313,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1545,10 +1545,10 @@ export interface components {
       permittedLanguageIds?: number[];
       projectName: string;
       userFullName?: string;
-      username?: string;
-      expiresAt?: number;
-      projectId: number;
       lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
+      username?: string;
       scopes: string[];
       id: number;
       description: string;
@@ -4049,9 +4049,9 @@ export interface operations {
         /** Format to export to */
         format?: "JSON" | "XLIFF";
         /**
-         * Delimiter to split key name and structure file content when possible.
+         * Delimiter to structure file content.
          *
-         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+         * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
          *
          * When null, resulting file won't be structured.
          */
