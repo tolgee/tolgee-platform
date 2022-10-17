@@ -24,7 +24,7 @@ export const useTranslationTools = ({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
     query: {
-      // @ts-ignore add keyId to url to reset data when key changes
+      // @ts-ignore add all dependencies to properly update query
       keyId,
       targetLanguageId,
       baseText,
@@ -40,17 +40,22 @@ export const useTranslationTools = ({
     url: '/v2/projects/{projectId}/suggest/machine-translations',
     method: 'post',
     path: { projectId },
-    // @ts-ignore add keyId to url to reset data when key changes
+    // @ts-ignore add all dependencies to properly update query
     query: {
       keyId,
+      targetLanguageId,
+      baseText,
     },
     content: {
-      'application/json': { keyId: keyId, targetLanguageId, baseText },
+      'application/json': { keyId, targetLanguageId, baseText },
     },
     fetchOptions: {
       disableBadRequestHandling: true,
     },
     options: {
+      // don't refetch this when not necessary, because of credits
+      staleTime: Infinity,
+      cacheTime: Infinity,
       enabled,
       onSettled(data) {
         if (data) {
