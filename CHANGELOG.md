@@ -1,3 +1,10 @@
+## [2.45.7](https://github.com/tolgee/tolgee-platform/compare/v2.45.6...v2.45.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* previous fix breaking refetching ([#1398](https://github.com/tolgee/tolgee-platform/issues/1398)) ([12de044](https://github.com/tolgee/tolgee-platform/commit/12de044f37a90afe905e90852ded962e8315c19c))
+
 ## [2.45.6](https://github.com/tolgee/tolgee-platform/compare/v2.45.5...v2.45.6) (2022-10-14)
 
 
