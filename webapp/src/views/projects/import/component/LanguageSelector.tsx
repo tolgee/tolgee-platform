@@ -39,7 +39,7 @@ const StyledInputAdornment = styled(InputAdornment)`
 `;
 
 const NEW_LANGUAGE_VALUE = '__new_language';
-export const ImportRowLanguageMenu: React.FC<{
+export const LanguageSelector: React.FC<{
   value?: number;
   row: components['schemas']['ImportLanguageModel'];
 }> = (props) => {
@@ -49,7 +49,10 @@ export const ImportRowLanguageMenu: React.FC<{
   const languageHelper = useImportLanguageHelper(props.row);
 
   const usedLanguages = importData
-    .result!._embedded!.languages!.map((l) => l.existingLanguageId)
+    .result!._embedded!.languages!.map((l) => ({
+      existingId: l.existingLanguageId,
+      namespace: l.namespace,
+    }))
     .filter((l) => !!l);
 
   const state = useStateObject({ addNewLanguageDialogOpen: false });
@@ -64,7 +67,13 @@ export const ImportRowLanguageMenu: React.FC<{
   };
 
   const availableLanguages = languages.filter(
-    (lang) => props.value == lang.id || usedLanguages.indexOf(lang.id) < 0
+    (lang) =>
+      props.value == lang.id ||
+      usedLanguages.findIndex(
+        (usedLanguage) =>
+          usedLanguage.existingId === lang.id &&
+          usedLanguage.namespace === props.row.namespace
+      ) < 0
   );
 
   const items = availableLanguages.map((l) => (

@@ -1,6 +1,8 @@
 package io.tolgee.repository
 
 import io.tolgee.model.key.Namespace
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -16,4 +18,6 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   )
   fun getKeysInNamespaceCount(namespaceIds: List<Long>): List<Array<Long>>
   fun getAllByProjectId(id: Long): List<Namespace>
+
+  fun getAllByProjectId(id: Long, pageable: Pageable): Page<Namespace>
 }

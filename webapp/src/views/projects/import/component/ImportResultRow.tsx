@@ -15,7 +15,7 @@ import clsx from 'clsx';
 import { ChipButton } from 'tg.component/common/buttons/ChipButton';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
+import { LanguageSelector } from './LanguageSelector';
 import { NamespaceSelector } from './NamespaceSelector';
 import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 
@@ -74,7 +74,7 @@ export const ImportResultRow = (props: {
     <React.Fragment>
       <StyledTableRow data-cy="import-result-row">
         <TableCell scope="row" data-cy="import-result-language-menu-cell">
-          <ImportRowLanguageMenu
+          <LanguageSelector
             value={props.row.existingLanguageId}
             row={props.row}
           />

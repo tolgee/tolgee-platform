@@ -5,6 +5,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 
@@ -85,7 +86,11 @@ class NamespaceService(
     }
   }
 
-  fun getAllInProject(id: Long) = namespaceRepository.getAllByProjectId(id)
+  fun getAllInProject(projectId: Long) = namespaceRepository.getAllByProjectId(projectId)
+  fun getAllInProject(
+    projectId: Long,
+    pageable: Pageable
+  ) = namespaceRepository.getAllByProjectId(projectId, pageable)
 
   fun saveAll(entities: Collection<Namespace>) {
     namespaceRepository.saveAll(entities)

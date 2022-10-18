@@ -1,8 +1,8 @@
 import { Autocomplete, MenuItem, TextField } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
 
@@ -27,17 +27,32 @@ export const NamespaceSelector = ({
     },
   });
 
+  const namespacesLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/import/all-namespaces',
+    method: 'get',
+    path: { projectId: project.id },
+  });
+
   const currentNamespace = row.namespace || '';
 
-  const existingOptions = ['', 'homepage'];
-
-  const getExistingOptions = () =>
-    existingOptions.map((o) => ({
+  const existingOptions = useMemo(() => {
+    const existing = namespacesLoadable?.data?._embedded?.namespaces?.map(
+      (ns) => ns.name
+    );
+    if (!existing) {
+      return [];
+    }
+    return ['', ...existing].map((o) => ({
       name: o,
       isNew: false,
     }));
+  }, [namespacesLoadable.data]);
 
-  const [options, setOptions] = useState(getExistingOptions);
+  const [options, setOptions] = useState(existingOptions);
+
+  useEffect(() => {
+    setOptions(existingOptions);
+  }, [namespacesLoadable.isFetched]);
 
   const applyNamespace = (namespace: string) => {
     mutation.mutate({
@@ -75,9 +90,9 @@ export const NamespaceSelector = ({
       inputValue={!inputFocus ? inputBlurredValue : inputValue}
       onInputChange={(_, value) => {
         if (options.findIndex((o) => o.name === value) < 0) {
-          setOptions([{ name: value, isNew: true }, ...getExistingOptions()]);
+          setOptions([{ name: value, isNew: true }, ...existingOptions]);
         } else {
-          setOptions(getExistingOptions());
+          setOptions(existingOptions);
         }
         setInputValue(value);
       }}

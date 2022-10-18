@@ -1,8 +1,10 @@
 package io.tolgee.service.query_builders
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.*
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
@@ -66,7 +68,8 @@ class TranslationsViewBuilder(
     var result: Predicate? = null
     cursor?.entries?.reversed()?.forEach { (property, value) ->
       val isUnique = property === KeyWithTranslationsView::keyId.name
-      val expression = selection[property] as Expression<String>
+      val expression = selection[property] as? Expression<String>
+        ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
 
       val strongCondition: Predicate
       val condition: Predicate
@@ -177,6 +180,7 @@ class TranslationsViewBuilder(
     val namespace = root.join(Key_.namespace, JoinType.LEFT)
     val namespaceName = namespace.get(Namespace_.name)
     selection[NAMESPACE_FIELD] = namespaceName
+    fullTextFields.add(namespaceName)
     groupByExpressions.add(namespaceName)
   }
 
@@ -335,7 +339,7 @@ class TranslationsViewBuilder(
 
   companion object {
     val KEY_NAME_FIELD = KeyWithTranslationsView::keyName.name
-    const val NAMESPACE_FIELD = "namespace"
+    val NAMESPACE_FIELD = KeyWithTranslationsView::keyNamespace.name
 
     @JvmStatic
     fun getData(

@@ -18,7 +18,7 @@ class KeyWithTranslationsModelAssembler(
   override fun toModel(view: KeyWithTranslationsView) = KeyWithTranslationsModel(
     keyId = view.keyId,
     keyName = view.keyName,
-    keyNamespace = view.namespace,
+    keyNamespace = view.keyNamespace,
     keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
     translations = view.translations.map {
       it.key to translationViewModelAssembler.toModel(it.value)

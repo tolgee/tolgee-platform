@@ -147,6 +147,10 @@ class ImportService(
     return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
   }
 
+  fun get(projectId: Long, authorId: Long): Import {
+    return this.find(projectId, authorId) ?: throw NotFoundException()
+  }
+
   fun findOrThrow(projectId: Long, authorId: Long) =
     this.find(projectId, authorId) ?: throw NotFoundException()
 
@@ -301,4 +305,6 @@ class ImportService(
 
   fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
     importFileIssueParamRepository.saveAll(params)
+
+  fun getAllNamespaces(importId: Long) = importRepository.getAllNamespaces(importId)
 }

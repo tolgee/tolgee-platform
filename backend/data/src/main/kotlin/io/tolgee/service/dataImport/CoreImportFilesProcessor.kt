@@ -4,11 +4,9 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
-import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -106,14 +104,9 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processLanguages() {
     this.languages.forEach { entry ->
       val languageEntity = entry.value
-      val matchingStoredLanguage = importDataManager.storedLanguages.find {
-        it.name == entry.value.name && it.existingLanguage != null
-      }
-      if (matchingStoredLanguage == null) {
-        languageEntity.existingLanguage = languageEntity.findMatchingExisting()
-      }
+      importDataManager.storedLanguages.add(languageEntity)
+      languageEntity.existingLanguage = importDataManager.findMatchingExistingLanguage(languageEntity)
       importService.saveLanguages(this.languages.values)
-      importDataManager.storedLanguages.addAll(this.languages.values)
       importDataManager.populateStoredTranslations(entry.value)
     }
   }
@@ -130,10 +123,6 @@ class CoreImportFilesProcessor(
         importService.saveKey(it)
       }
     }
-  }
-
-  private fun ImportLanguage.findMatchingExisting(): Language? {
-    return languageService.findByTag(this.name, import.project.id).orElse(null)
   }
 
   private fun FileProcessorContext.processTranslations() {

@@ -78,7 +78,7 @@ export const useTranslationsService = (props: Props) => {
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
-    sort: ['keyName'],
+    sort: ['keyNamespace', 'keyName'],
     languages: undefined,
   });
 

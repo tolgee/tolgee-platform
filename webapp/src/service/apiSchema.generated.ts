@@ -326,6 +326,9 @@ export interface paths {
   "/v2/projects/{projectId}/stats": {
     get: operations["getProjectStats"];
   };
+  "/v2/projects/{projectId}/namespaces": {
+    get: operations["getAllNamespaces"];
+  };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
@@ -349,6 +352,10 @@ export interface paths {
   "/v2/projects/{projectId}/import/result": {
     /** Returns the result of preparation. */
     get: operations["getImportResult"];
+  };
+  "/v2/projects/{projectId}/import/all-namespaces": {
+    /** Returns all existing and imported namespaces */
+    get: operations["getAllNamespaces_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -828,8 +835,8 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       id: number;
@@ -906,10 +913,10 @@ export interface components {
       key: string;
       projectName: string;
       userFullName?: string;
-      lastUsedAt?: number;
-      projectId: number;
-      expiresAt?: number;
       username?: string;
+      expiresAt?: number;
+      projectId: number;
+      lastUsedAt?: number;
       scopes: string[];
       id: number;
       description: string;
@@ -1206,6 +1213,17 @@ export interface components {
       tagCount: number;
       languageStats: components["schemas"]["LanguageStatsModel"][];
     };
+    NamespaceModel: {
+      /** The id of namespace */
+      id: number;
+      name: string;
+    };
+    PagedModelNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     CreditBalanceModel: {
       creditBalance: number;
       bucketSize: number;
@@ -1331,6 +1349,16 @@ export interface components {
         importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelImportNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["ImportNamespaceModel"][];
+      };
+    };
+    ImportNamespaceModel: {
+      /** The id of namespace. When null, namespace doesn't exist and will be created by import. */
+      id?: number;
+      name: string;
     };
     PagedModelTranslationCommentModel: {
       _embedded?: {
@@ -1545,10 +1573,10 @@ export interface components {
       permittedLanguageIds?: number[];
       projectName: string;
       userFullName?: string;
-      lastUsedAt?: number;
-      projectId: number;
-      expiresAt?: number;
       username?: string;
+      expiresAt?: number;
+      projectId: number;
+      lastUsedAt?: number;
       scopes: string[];
       id: number;
       description: string;
@@ -5244,6 +5272,41 @@ export interface operations {
       };
     };
   };
+  getAllNamespaces: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getProjectCredits: {
     parameters: {
       path: {
@@ -5457,6 +5520,34 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns all existing and imported namespaces */
+  getAllNamespaces_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
         };
       };
       /** Bad Request */

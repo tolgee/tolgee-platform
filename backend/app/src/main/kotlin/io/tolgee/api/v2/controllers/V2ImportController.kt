@@ -12,6 +12,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.dataImport.ImportAddFilesResultModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
+import io.tolgee.api.v2.hateoas.dataImport.ImportNamespaceModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModelAssembler
 import io.tolgee.dtos.dataImport.ImportFileDto
@@ -35,14 +36,16 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.NamespaceService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
-import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -76,11 +79,10 @@ class V2ImportController(
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedImportFileIssueResourcesAssembler: PagedResourcesAssembler<ImportFileIssueView>,
-
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val halMediaTypeConfiguration: HalMediaTypeConfiguration,
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
+  private val namespaceService: NamespaceService,
+
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -296,7 +298,7 @@ class V2ImportController(
   @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   @Operation(
     description = "Returns issues for uploaded file.",
-    summary = "Get file issues."
+    summary = "Get file issues"
   )
   fun getImportFileIssues(
     @PathVariable("importFileId") importFileId: Long,
@@ -305,6 +307,43 @@ class V2ImportController(
     checkFileFromProject(importFileId)
     val page = importService.getFileIssues(importFileId, pageable)
     return pagedImportFileIssueResourcesAssembler.toModel(page)
+  }
+
+  @GetMapping("/all-namespaces")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @Operation(
+    description = "Returns all existing and imported namespaces",
+    summary = "Get namespaces"
+  )
+  fun getAllNamespaces(): CollectionModel<ImportNamespaceModel> {
+    val import = importService.get(
+      projectId = projectHolder.project.id,
+      authorId = authenticationFacade.userAccount.id
+    )
+    val importNamespaces = importService.getAllNamespaces(import.id)
+    val existingNamespaces = namespaceService.getAllInProject(projectId = projectHolder.project.id)
+    val result = existingNamespaces
+      .map { it.name to ImportNamespaceModel(it.id, it.name) }
+      .toMap(mutableMapOf())
+    importNamespaces.filterNotNull().forEach { importNamespace ->
+      result.computeIfAbsent(importNamespace) {
+        ImportNamespaceModel(id = null, name = importNamespace)
+      }
+    }
+
+    return getNamespacesCollectionModel(result)
+  }
+
+  private fun getNamespacesCollectionModel(result: MutableMap<String, ImportNamespaceModel>): CollectionModel<ImportNamespaceModel> {
+    val assembler = object : RepresentationModelAssemblerSupport<ImportNamespaceModel, ImportNamespaceModel>(
+      this::class.java,
+      ImportNamespaceModel::class.java
+    ) {
+      override fun toModel(entity: ImportNamespaceModel): ImportNamespaceModel = entity
+    }
+
+    return assembler.toCollectionModel(result.values.sortedBy { it.name })
   }
 
   private fun resolveAllOfLanguage(languageId: Long, override: Boolean) {

@@ -47,6 +47,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             $VIEW_BASE_QUERY
             where if.import.id = :importId
             $VIEW_GROUP_BY
+            order by il.id
             """
   )
   fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>

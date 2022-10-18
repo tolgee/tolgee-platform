@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -7,6 +8,7 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -23,6 +25,8 @@ class ImportDataManager(
   private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
 
   private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
+
+  private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
   private val keyMetaService: KeyMetaService by lazy {
     applicationContext.getBean(KeyMetaService::class.java)
@@ -180,6 +184,29 @@ class ImportDataManager(
     this.populateStoredTranslations(importLanguage)
     this.resetConflicts(importLanguage)
     this.handleConflicts(false)
+    if (isExistingLanguageUsed(importLanguage.existingLanguage, importLanguage)) {
+      importLanguage.existingLanguage = null
+    }
+    this.importService.saveLanguages(listOf(importLanguage))
     this.saveAllStoredTranslations()
+  }
+
+  private fun isExistingLanguageUsed(existing: Language?, imported: ImportLanguage): Boolean {
+    existing ?: return false
+    return this.storedLanguages.any { storedLang ->
+      imported != storedLang && // ignore when is assigned to self
+        storedLang.existingLanguage?.id == existing.id &&
+        storedLang.file.namespace == imported.file.namespace
+    }
+  }
+
+  fun findMatchingExistingLanguage(importLanguage: ImportLanguage): Language? {
+    val candidate = languageService.findByTag(importLanguage.name, import.project.id).orElse(null) ?: return null
+
+    if (!isExistingLanguageUsed(candidate, importLanguage)) {
+      return candidate
+    }
+
+    return null
   }
 }
