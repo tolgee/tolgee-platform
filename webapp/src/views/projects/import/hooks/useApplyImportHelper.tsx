@@ -25,15 +25,21 @@ export const useApplyImportHelper = (
       0
     );
     if (unResolvedCount === 0) {
-      importApplyLoadable.mutate({
-        path: {
-          projectId: project.id,
+      importApplyLoadable.mutate(
+        {
+          path: {
+            projectId: project.id,
+          },
+          query: {},
         },
-        query: {},
-      });
+        {
+          onSuccess() {
+            dataHelper.refetchData();
+          },
+        }
+      );
       return;
     }
-    dataHelper.refetchData();
     setConflictNotResolvedDialogOpen(true);
   };
 

@@ -31,6 +31,9 @@ export const NamespaceSelector = ({
     url: '/v2/projects/{projectId}/import/all-namespaces',
     method: 'get',
     path: { projectId: project.id },
+    fetchOptions: {
+      disableNotFoundHandling: true,
+    },
   });
 
   const currentNamespace = row.namespace || '';

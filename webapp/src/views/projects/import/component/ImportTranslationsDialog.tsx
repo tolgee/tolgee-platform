@@ -34,7 +34,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const ImportShowDataDialog: FunctionComponent<{
+export const ImportTranslationsDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
 }> = (props) => {
@@ -57,6 +57,7 @@ export const ImportShowDataDialog: FunctionComponent<{
       onlyConflicts: false,
       page: page,
       size: 50,
+      search: search,
     },
   });
 
@@ -94,6 +95,7 @@ export const ImportShowDataDialog: FunctionComponent<{
             wrapperComponentProps={{ sx: { m: 2 } }}
             searchText={search}
             onPageChange={setPage}
+            onSearchChange={setSearch}
             loadable={loadable}
             renderItem={(i) => (
               <Box

@@ -27,14 +27,14 @@ export const ImportConflictsDataHeader: FunctionComponent<{
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
   });
 
   const setKeepMutation = useApiMutation({
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
   });
 
   const keepAllExisting = () => {

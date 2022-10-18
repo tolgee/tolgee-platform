@@ -96,7 +96,11 @@ export const ImportView: FunctionComponent = () => {
         />
 
         {dataHelper.addFilesMutation.data?.errors?.map((e, idx) => (
-          <ImportAlertError key={idx} error={e} />
+          <ImportAlertError
+            key={idx}
+            error={e}
+            addFilesMutation={dataHelper.addFilesMutation}
+          />
         ))}
         <ImportResult
           onResolveRow={setResolveRow}

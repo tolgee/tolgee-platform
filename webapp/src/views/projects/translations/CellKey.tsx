@@ -204,7 +204,8 @@ export const CellKey: React.FC<Props> = ({
             )}
             <StyledKey>
               <LimitedHeightText width={width} maxLines={3} wrap="break-all">
-                {data.keyNamespace}:{data.keyName}
+                {data.keyNamespace && `${data.keyNamespace}:`}
+                {data.keyName}
               </LimitedHeightText>
             </StyledKey>
             {!simple && (

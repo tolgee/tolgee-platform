@@ -186,9 +186,9 @@ class InterceptedEventsManager(
     return applicationContext.getBean(providerClass.java)
   }
 
-  private fun shouldHandleActivity(entity: Any?): Boolean {
-    return entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() && !entity.disableActivityLogging
-  }
+  private fun shouldHandleActivity(entity: Any?) =
+    entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() &&
+      !entity.disableActivityLogging
 
   private val activityRevision: ActivityRevision
     get() {

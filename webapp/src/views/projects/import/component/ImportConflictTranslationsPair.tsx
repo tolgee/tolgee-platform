@@ -22,14 +22,14 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
   });
 
   const setKeepMutation = useApiMutation({
     url: '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/import/result/languages/{languageId}/translations',
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
   });
 
   const setOverride = (translationId: number) => {

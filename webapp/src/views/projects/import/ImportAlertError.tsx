@@ -20,10 +20,10 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 
 export const ImportAlertError: FunctionComponent<{
   error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
+  addFilesMutation: ReturnType<typeof useImportDataHelper>['addFilesMutation'];
 }> = (props) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const importDataHelper = useImportDataHelper();
 
   let text = undefined as ReactNode | undefined;
   let params = [] as string[];
@@ -35,14 +35,11 @@ export const ImportAlertError: FunctionComponent<{
 
   useEffect(() => {
     setCollapsed(true);
-    if (
-      importDataHelper.addFilesMutation.isSuccess &&
-      !importDataHelper.addFilesMutation.isLoading
-    ) {
+    if (props.addFilesMutation.isSuccess && !props.addFilesMutation.isLoading) {
       setCollapsed(false);
       setMoreOpen(false);
     }
-  }, [importDataHelper.addFilesMutation.isLoading]);
+  }, [props.addFilesMutation.isLoading]);
 
   const open = !collapsed && !!text;
 
