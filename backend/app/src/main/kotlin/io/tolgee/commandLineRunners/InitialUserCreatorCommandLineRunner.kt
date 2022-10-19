@@ -25,7 +25,10 @@ class InitialUserCreatorCommandLineRunner(
 
   override fun run(vararg args: String) {
     val initialUsername = properties.authentication.initialUsername
-    if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
+    if (
+      properties.authentication.enabled &&
+      properties.authentication.createInitialUser &&
+      !userAccountService.isAnyUserAccount &&
       userAccountService.find(initialUsername) == null
     ) {
       logger.info("Creating initial user...")
