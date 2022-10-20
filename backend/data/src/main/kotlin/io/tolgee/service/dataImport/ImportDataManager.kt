@@ -201,7 +201,11 @@ class ImportDataManager(
   }
 
   fun findMatchingExistingLanguage(importLanguage: ImportLanguage): Language? {
-    val candidate = languageService.findByTag(importLanguage.name, import.project.id).orElse(null) ?: return null
+    val possibleTag = """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
+      .matchEntire(importLanguage.name)?.groups?.get(1)?.value
+      ?: return null
+
+    val candidate = languageService.findByTag(possibleTag, import.project.id).orElse(null) ?: return null
 
     if (!isExistingLanguageUsed(candidate, importLanguage)) {
       return candidate

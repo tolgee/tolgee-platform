@@ -33,7 +33,7 @@ class CoreImportFilesProcessor(
   }
 
   fun processFiles(
-    files: List<ImportFileDto>?,
+    files: Collection<ImportFileDto>?,
   ): MutableList<ErrorResponseBody> {
 
     val errors = mutableListOf<ErrorResponseBody>()
@@ -95,10 +95,18 @@ class CoreImportFilesProcessor(
   private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
 
   private fun FileProcessorContext.processResult() {
+    this.fileEntity.preselectNamespace()
     this.processLanguages()
     this.processTranslations()
     importService.saveAllFileIssues(this.fileEntity.issues)
     importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
+  }
+
+  private fun ImportFile.preselectNamespace() {
+    val namespace = """^([^/]+)/.*""".toRegex().matchEntire(this.name!!)?.groups?.get(1)?.value
+    if (!namespace.isNullOrBlank()) {
+      this.namespace = namespace
+    }
   }
 
   private fun FileProcessorContext.processLanguages() {

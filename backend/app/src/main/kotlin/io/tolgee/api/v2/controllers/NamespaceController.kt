@@ -13,6 +13,7 @@ import io.tolgee.service.key.NamespaceService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -40,7 +41,7 @@ class NamespaceController(
   @AccessWithAnyProjectPermission
   @AccessWithApiKey
   fun getAllNamespaces(
-    @ParameterObject pageable: Pageable
+    @ParameterObject @SortDefault("id") pageable: Pageable
   ): PagedModel<NamespaceModel> {
     val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable)
     return pagedResourcesAssembler.toModel(namespaces, namespaceModelAssembler)

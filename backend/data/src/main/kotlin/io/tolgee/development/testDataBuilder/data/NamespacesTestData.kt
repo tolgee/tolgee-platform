@@ -4,8 +4,8 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.key.Key
 
 class NamespacesTestData : BaseTestData() {
-  lateinit var keyInNs1: Key
-  lateinit var singleKeyInNs2: Key
+  var keyInNs1: Key
+  var singleKeyInNs2: Key
 
   init {
     projectBuilder.apply {

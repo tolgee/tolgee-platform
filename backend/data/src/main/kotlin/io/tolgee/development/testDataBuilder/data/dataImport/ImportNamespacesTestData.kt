@@ -7,8 +7,10 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.KeyComment
+import io.tolgee.model.translation.Translation
 
 class ImportNamespacesTestData {
   lateinit var import: Import
@@ -16,10 +18,15 @@ class ImportNamespacesTestData {
   lateinit var german: Language
   lateinit var importEnglish: ImportLanguage
   lateinit var importGerman: ImportLanguage
-
+  lateinit var homepageImportEnglish: ImportLanguage
+  lateinit var homepageImportGerman: ImportLanguage
   lateinit var project: Project
   lateinit var userAccount: UserAccount
   lateinit var projectBuilder: ProjectBuilder
+  lateinit var defaultNsFile: ImportFile
+  lateinit var defaultNsFile2: ImportFile
+  lateinit var homepageNsFile2: ImportFile
+  lateinit var existingTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     createProject()
@@ -28,9 +35,9 @@ class ImportNamespacesTestData {
         author = userAccount
         import = this
       }.build {
-
         addImportFile {
           name = "multilang.json"
+          defaultNsFile = this
         }.build {
           importEnglish = addImportLanguage {
             name = "en"
@@ -55,12 +62,16 @@ class ImportNamespacesTestData {
               text = "hello"
               language = importGerman
               key = this@key.self
+              conflict = existingTranslation
+              override = true
+              resolve()
             }
           }
         }
 
         addImportFile {
           name = "multilang2.json"
+          defaultNsFile2 = this
         }.build {
           addImportKey {
             name = "what a key"
@@ -79,12 +90,13 @@ class ImportNamespacesTestData {
         addImportFile {
           name = "another.json"
           namespace = "homepage"
+          homepageNsFile2 = this
         }.build {
-          importEnglish = addImportLanguage {
+          homepageImportEnglish = addImportLanguage {
             name = "en"
             existingLanguage = english
           }.self
-          importGerman = addImportLanguage {
+          homepageImportGerman = addImportLanguage {
             name = "de"
             existingLanguage = german
           }.self
@@ -124,20 +136,27 @@ class ImportNamespacesTestData {
         user = this@ImportNamespacesTestData.userAccount
         type = Permission.ProjectPermissionType.MANAGE
       }
-      val key = addKey {
+      english = addEnglish().self
+      german = addGerman().self
+      addKey {
         name = "what a key"
-      }.self
+      }.setNamespace("existing-namespace")
+      addKey {
+        name = "what a key"
+      }.setNamespace("existing-namespace2")
+      addKey {
+        name = "what a key"
+      }.build {
+        addTranslation {
+          existingTranslation = this
+          language = german
+          this.key = this@build.self
+          text = "some text!"
+        }
+      }
       addKey {
         name = "what a nice key"
-      }.self
-      english = addLanguage {
-        name = "English"
-        tag = "en"
-      }.self
-      german = addLanguage {
-        name = "German"
-        tag = "de"
-      }.self
+      }
     }
   }
 }

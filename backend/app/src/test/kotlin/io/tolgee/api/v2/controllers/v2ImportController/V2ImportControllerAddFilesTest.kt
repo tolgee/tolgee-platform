@@ -10,6 +10,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -45,6 +46,12 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Value("classpath:import/tooLongErrorParamValue.json")
   lateinit var tooLongErrorParamValue: Resource
+
+  @Value("classpath:import/namespaces.zip")
+  lateinit var namespacesZip: Resource
+
+  @Value("classpath:import/namespacesMac.zip")
+  lateinit var namespacesMacZip: Resource
 
   @AfterEach
   fun resetProps() {
@@ -125,7 +132,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it saves proper data and returns correct response (streamed)`() {
+  fun `it saves proper data and returns correct respons`() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
@@ -155,6 +162,50 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
         assertThat(it.files[0].issues).hasSize(1)
         assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
         assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+      }
+    }
+  }
+
+  @Test
+  fun `pre-selects namespaces and languages correctly`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+    tolgeeProperties.maxTranslationTextLength = 20
+
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        mapOf(Pair("namespaces.zip", namespacesZip))
+      ).andIsOk
+    }
+
+    executeInNewTransaction {
+      importService.find(base.project.id, base.userAccount.id)?.let {
+        assertThat(it.files).hasSize(4)
+        val homepageEn = it.files.find { it.namespace == "homepage" && it.name == "homepage/en.json" }
+        homepageEn!!.languages[0].existingLanguage?.tag.assert.isEqualTo("en")
+        val movies = it.files.find { it.namespace == "movies" && it.name == "movies/de.json" }
+        movies!!.languages[0].existingLanguage?.tag.assert.isEqualTo("de")
+      }
+    }
+  }
+
+  @Test
+  fun `works fine with Mac generated zip)`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+    tolgeeProperties.maxTranslationTextLength = 20
+
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        mapOf(Pair("namespaces.zip", namespacesMacZip))
+      ).andIsOk
+    }
+
+    executeInNewTransaction {
+      importService.find(base.project.id, base.userAccount.id)?.let {
+        assertThat(it.files).hasSize(4)
       }
     }
   }
