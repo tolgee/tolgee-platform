@@ -128,7 +128,6 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
         .isEqualTo("new-ns")
       val importLanguage = file.languages
         .find { it.name == "de" }!!
-      importLanguage.existingLanguage.assert.isNull()
       importLanguage.translations
         .any { it.conflict != null }
         .assert.isEqualTo(false)

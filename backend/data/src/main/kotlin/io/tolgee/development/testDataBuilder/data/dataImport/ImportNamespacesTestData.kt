@@ -113,7 +113,7 @@ class ImportNamespacesTestData {
             }
             addImportTranslation {
               text = "hello"
-              language = importGerman
+              language = homepageImportGerman
               key = this@key.self
             }
           }
