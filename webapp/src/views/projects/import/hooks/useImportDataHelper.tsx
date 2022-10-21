@@ -133,7 +133,7 @@ export const useImportDataHelper = () => {
     touchApply: () => setApplyTouched(true),
     applyTouched,
     onCancel,
-    refetchData: resultLoadable.refetch,
+    refetchData: () => resultLoadable.refetch({ cancelRefetch: true }),
     get isValid() {
       return !!result?._embedded?.languages?.every(
         (il) => il.existingLanguageId

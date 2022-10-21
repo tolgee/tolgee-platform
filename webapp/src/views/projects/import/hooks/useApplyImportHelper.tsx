@@ -4,6 +4,8 @@ import { useProject } from 'tg.hooks/useProject';
 
 import { useImportDataHelper } from './useImportDataHelper';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { T } from '@tolgee/react';
 
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
@@ -18,6 +20,8 @@ export const useApplyImportHelper = (
 
   const project = useProject();
   const error = importApplyLoadable.error;
+
+  const message = useMessage();
 
   const onApplyImport = () => {
     const unResolvedCount = dataHelper.result?._embedded?.languages?.reduce(
@@ -35,6 +39,7 @@ export const useApplyImportHelper = (
         {
           onSuccess() {
             dataHelper.refetchData();
+            message.success(<T>import-successful-message</T>);
           },
         }
       );

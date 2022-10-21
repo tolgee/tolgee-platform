@@ -116,6 +116,9 @@ class ImportE2eDataController(
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           name = "Repo"
         }.build buildProject@{
+          val english = addEnglish()
+          addGerman()
+          self.baseLanguage = english.self
           addPermission {
             type = Permission.ProjectPermissionType.MANAGE
             user = this@buildUserAccount.self

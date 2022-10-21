@@ -122,6 +122,7 @@ export const NamespaceSelector = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          data-cy="import-namespaces-text-field"
           size={'small'}
           variant="standard"
           label={<T>import_namespace_autocomplete_label</T>}

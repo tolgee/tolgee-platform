@@ -30,6 +30,9 @@ export const importTestData = {
     internalFetch('e2e-data/import/generate-with-long-text'),
 };
 
+export const importNamespacesTestData =
+  generateTestDataObject('import-namespaces');
+
 export const projectListdData = generateTestDataObject(
   'projects-list-dashboard'
 );

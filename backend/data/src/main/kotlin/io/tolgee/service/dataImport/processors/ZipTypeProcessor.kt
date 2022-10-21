@@ -34,7 +34,7 @@ class ZipTypeProcessor : ImportArchiveProcessor {
           )
       }
     }
-    return files.values
+    return files.values.sortedBy { it.name }
   }
 
   private fun String.replaceRootSlash() = this.replace("^/".toRegex(), "")

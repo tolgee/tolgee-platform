@@ -94,12 +94,11 @@ export const useApiQuery = <
 
   return useQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
-    () =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(
-        url,
-        method,
-        fetchOptions
-      )(request),
+    ({ signal }) =>
+      apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+        signal,
+        ...fetchOptions,
+      })(request),
     options
   );
 };

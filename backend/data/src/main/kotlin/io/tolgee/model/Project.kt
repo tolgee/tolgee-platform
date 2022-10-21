@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Namespace
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -77,6 +78,9 @@ class Project(
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var mtServiceConfig: MutableList<MtServiceConfig> = mutableListOf()
+
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
+  var namespaces: MutableList<Namespace> = mutableListOf()
 
   @ActivityLoggedProp
   override var avatarHash: String? = null
