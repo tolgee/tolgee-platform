@@ -148,7 +148,7 @@ describe('Import result & manipulation', () => {
     });
   });
 
-  describe.only('With namespaces', () => {
+  describe('With namespaces', () => {
     let importData: TestDataStandardResponse;
 
     beforeEach(() => {

@@ -9,19 +9,19 @@ jobs:
     name: Build backend 🏗️
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-java@v1
         with:
           java-version: 11
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: "16.x"
 
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -57,19 +57,19 @@ jobs:
         total_jobs: [ 10 ]
         job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-java@v1
         with:
           java-version: 11
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: "16.x"
 
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -77,7 +77,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -142,14 +142,14 @@ jobs:
     name: Build frontend 🏗️
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-java@v1
         with:
           java-version: 11
 
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -157,12 +157,12 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: "16.x"
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -183,15 +183,15 @@ jobs:
     name: Install E2E dependencies ⬇️
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: "16.x"
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
