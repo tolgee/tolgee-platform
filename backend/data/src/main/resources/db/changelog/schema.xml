@@ -1421,15 +1421,6 @@
     <changeSet author="jenik (generated)" id="1626957302292-4">
         <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation" validate="true"/>
     </changeSet>
-    <changeSet author="jenik" id="1626957302295-0">
-        <preConditions onFail="CONTINUE">
-            <changeLogPropertyDefined property="isCockroach" value="true"/>
-        </preConditions>
-        <sql>
-            set
-            enable_experimental_alter_column_type_general = true
-        </sql>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1626957302295-1">
         <preConditions onFail="CONTINUE">
             <not>

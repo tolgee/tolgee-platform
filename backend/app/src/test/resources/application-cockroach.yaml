@@ -3,5 +3,7 @@ spring:
     url: jdbc:postgresql://localhost:26257/postgres
     username: root
 tolgee:
+  database:
+    type: COCKROACH
   postgres-autostart:
     enabled: false
