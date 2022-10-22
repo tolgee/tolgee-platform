@@ -191,7 +191,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `works fine with Mac generated zip)`() {
+  fun `works fine with Mac generated zip`() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
