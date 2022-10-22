@@ -132,7 +132,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it saves proper data and returns correct respons`() {
+  fun `it saves proper data and returns correct response`() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
 
