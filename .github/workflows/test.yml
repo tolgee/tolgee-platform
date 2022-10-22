@@ -58,7 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test" ]
-        profile: [ "default, cockroach" ]
+        profile: [ "default", "cockroach" ]
     steps:
       - uses: actions/checkout@v2
 
