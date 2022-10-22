@@ -193,7 +193,7 @@ task runStandardTests(type: Test, group: 'verification') {
 
 task startCockroachDb(type: Exec){
     onlyIf { System.getenv("SPRING_PROFILES_ACTIVE") == "cockroach" }
-    commandLine "bash", "-c", "docker run --rm -d --name=roach -p 8086:8080 -p 26257:26257 cockroachdb/cockroach:v22.1.9 start-single-node --insecure"
+    commandLine "bash", "-c", "docker run --rm -d --name=roach -p 26257:26257 cockroachdb/cockroach:v22.1.9 start-single-node --insecure"
 }
 
 task stopCockroachDb(type: Exec){
