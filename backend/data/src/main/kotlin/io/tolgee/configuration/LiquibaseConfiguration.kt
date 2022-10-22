@@ -16,7 +16,7 @@ class LiquibaseConfiguration {
     liquibase.dataSource = dataSource
     liquibase.changeLog = "classpath:db/changelog/schema.xml"
     liquibase.defaultSchema = "public"
-
+    liquibase.setChangeLogParameters(mapOf("isCockroach" to "true"))
     return liquibase
   }
 }

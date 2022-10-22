@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:26257/postgres
+    username: root
+tolgee:
+  postgres-autostart:
+    enabled: false
