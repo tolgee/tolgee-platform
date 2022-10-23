@@ -55,14 +55,14 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         }
       }
       (1..20).forEach { keyNum ->
-        val keyNumString = keyNum.toString().padEnd(2, '0')
+        val keyNumString = keyNum.toString().padStart(2, '0')
         addKey {
           name = "test key $keyNumString"
         }.build {
           addMeta {
             self {
               (1..20).forEach { tagNum ->
-                val tagNumString = tagNum.toString().padEnd(2, '0')
+                val tagNumString = tagNum.toString().padStart(2, '0')
                 tags.add(
                   Tag().apply {
                     project = projectBuilder.self

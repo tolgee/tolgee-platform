@@ -105,7 +105,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: backend_test_reports_${{ steps.version.outputs.reportName }}
+          name: backend_test_reports_${{ matrix.profile }}
           path: |
             ./**/build/reports/**/*
 

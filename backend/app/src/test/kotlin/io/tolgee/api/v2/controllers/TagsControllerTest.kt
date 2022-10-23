@@ -48,8 +48,8 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthGet("tags?page=5").andAssertThatJson {
       node("_embedded.tags") {
         isArray.hasSize(20)
-        node("[0].name").isEqualTo("tag 14 12")
-        node("[19].name").isEqualTo("tag 15 10")
+        node("[0].name").isEqualTo("tag 05 19")
+        node("[19].name").isEqualTo("tag 06 18")
       }
     }
   }
@@ -61,7 +61,7 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("_embedded.tags") {
         isArray.hasSize(20)
         node("[0].id").isValidId
-        node("[0].name").isEqualTo("tag 11 3")
+        node("[0].name").isEqualTo("tag 02 19")
       }
     }
   }
