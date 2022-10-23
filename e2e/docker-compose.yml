@@ -26,5 +26,6 @@ services:
     command:
       - start-single-node
       - --insecure
+      - --store=type=mem,size=0.25
 volumes:
   e2e-db-data:
