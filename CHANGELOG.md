@@ -1,3 +1,10 @@
+## [2.45.8](https://github.com/tolgee/tolgee-platform/compare/v2.45.7...v2.45.8) (2022-10-26)
+
+
+### Bug Fixes
+
+* Healthcheck endpoint checking DB connection ([#1408](https://github.com/tolgee/tolgee-platform/issues/1408)) ([546a05a](https://github.com/tolgee/tolgee-platform/commit/546a05a49765b026263a0ecb897fe8c635f41af6))
+
 ## [2.45.7](https://github.com/tolgee/tolgee-platform/compare/v2.45.6...v2.45.7) (2022-10-18)
 
 
