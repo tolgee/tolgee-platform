@@ -20,43 +20,25 @@ import {
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import { useActiveFilters } from '../Filters/useActiveFilters';
 import { FiltersMenu } from '../Filters/FiltersMenu';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import { StickyHeader } from './StickyHeader';
 
 const StyledControls = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: -12px -5px;
   margin-left: ${({ theme }) => theme.spacing(-2)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
   padding: ${({ theme }) => theme.spacing(0, 1.5)};
   position: sticky;
   top: 50px;
-  height: 50px;
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   background: ${({ theme }) => theme.palette.background.default};
   transition: transform 0.2s ease-in-out;
   padding-bottom: 4px;
-  padding-top: 7px;
-`;
-
-const StyledShadow = styled('div')`
-  background: ${({ theme }) => theme.palette.background.default};
-  height: 1px;
-  position: sticky;
-  z-index: ${({ theme }) => theme.zIndex.appBar};
-  margin-left: ${({ theme }) => theme.spacing(-1)};
-  margin-right: ${({ theme }) => theme.spacing(-1)};
-  -webkit-box-shadow: 0px -1px 7px 0px #000000;
-  box-shadow: ${({ theme }) =>
-    theme.palette.mode === 'dark'
-      ? '0px 1px 6px 0px #000000, 0px 1px 6px 0px #000000'
-      : '0px -1px 7px 0px #000000'};
-  top: 99px;
-  transition: all 0.25s;
+  padding-top: 9px;
 `;
 
 const StyledSpaced = styled('div')`
@@ -136,15 +118,9 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     onDialogOpen();
   };
 
-  const trigger = useTopBarHidden();
-
   return (
-    <>
-      <StyledControls
-        style={{
-          transform: trigger ? 'translate(0px, -50px)' : 'translate(0px, 0px)',
-        }}
-      >
+    <StickyHeader height={45}>
+      <StyledControls>
         {searchOpen ? (
           <StyledSearchSpaced>
             <StyledSearch
@@ -243,11 +219,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
           </>
         )}
       </StyledControls>
-      <StyledShadow
-        style={{
-          transform: trigger ? 'translate(0px, -50px)' : 'translate(0px, 0px)',
-        }}
-      />
-    </>
+    </StickyHeader>
   );
 };

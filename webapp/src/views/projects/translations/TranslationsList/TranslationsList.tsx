@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
 import ReactList from 'react-list';
 import { styled } from '@mui/material';
 
@@ -11,6 +17,7 @@ import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
 import { TranslationsToolbar } from '../TranslationsToolbar';
+import { NamespaceBanner } from '../NamespaceBanner';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -141,14 +148,27 @@ export const TranslationsList = () => {
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
+          const previousNamespace = translations[index - 1]?.keyNamespace;
+          const renderNamespace =
+            row.keyNamespace && previousNamespace !== row.keyNamespace;
+
           return (
-            <RowList
-              key={row.keyId}
-              data={row}
-              languages={languagesRow}
-              columnSizes={columnSizesPercent}
-              onResize={handleResize}
-            />
+            <div key={row.keyId}>
+              {renderNamespace && (
+                <NamespaceBanner
+                  index={index}
+                  nsBefore={translations[index - 1]?.keyNamespace}
+                  namespace={row.keyNamespace!}
+                  columnSizes={columnSizes}
+                />
+              )}
+              <RowList
+                data={row}
+                languages={languagesRow}
+                columnSizes={columnSizesPercent}
+                onResize={handleResize}
+              />
+            </div>
           );
         }}
       />
