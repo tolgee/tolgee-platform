@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ReactList from 'react-list';
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
@@ -12,6 +18,7 @@ import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
 import { TranslationsToolbar } from '../TranslationsToolbar';
+import { NamespaceBanner } from '../NamespaceBanner';
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -191,14 +198,28 @@ export const TranslationsTable = () => {
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
+
+          const previousNamespace = translations[index - 1]?.keyNamespace;
+          const renderNamespace =
+            row.keyNamespace && previousNamespace !== row.keyNamespace;
+
           return (
-            <RowTable
-              key={row.keyId}
-              data={row}
-              languages={languageCols}
-              columnSizes={columnSizesPercent}
-              onResize={handleResize}
-            />
+            <div key={row.keyId}>
+              {renderNamespace && (
+                <NamespaceBanner
+                  index={index}
+                  nsBefore={translations[index - 1]?.keyNamespace}
+                  namespace={row.keyNamespace!}
+                  columnSizes={columnSizesPercent}
+                />
+              )}
+              <RowTable
+                data={row}
+                languages={languageCols}
+                columnSizes={columnSizesPercent}
+                onResize={handleResize}
+              />
+            </div>
           );
         }}
       />

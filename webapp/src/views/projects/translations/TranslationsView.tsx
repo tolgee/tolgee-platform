@@ -1,6 +1,7 @@
 import { Translations } from './Translations';
 import { TranslationsContextProvider } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
+import { HeaderNsContext } from './context/HeaderNsContext';
 
 export const TranslationsView = () => {
   const project = useProject();
@@ -11,7 +12,9 @@ export const TranslationsView = () => {
       baseLang={project.baseLanguage?.tag}
       updateLocalStorageLanguages
     >
-      <Translations />
+      <HeaderNsContext>
+        <Translations />
+      </HeaderNsContext>
     </TranslationsContextProvider>
   );
 };
