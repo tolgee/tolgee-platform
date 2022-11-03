@@ -4,6 +4,9 @@ import { cleanTestData, generateTestDataObject } from './generator';
 
 export const organizationTestData = generateTestDataObject('organizations');
 
+export const organizationNewTestData =
+  generateTestDataObject('organization-new');
+
 export const languagesTestData = generateTestDataObject('languages');
 
 export const commentsTestData = generateTestDataObject('translation-comments');
@@ -27,11 +30,15 @@ export const importTestData = {
     internalFetch('e2e-data/import/generate-with-long-text'),
 };
 
-export const projectsDashboardData = generateTestDataObject(
+export const projectListdData = generateTestDataObject(
   'projects-list-dashboard'
 );
 
 export const projectTestData = generateTestDataObject('projects');
+
+export const apiKeysTestData = generateTestDataObject('api-keys');
+
+export const patsTestData = generateTestDataObject('pat');
 
 export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
@@ -67,3 +74,19 @@ export const projectTransferringTestData = generateTestDataObject(
 );
 
 export const avatarTestData = generateTestDataObject('avatars');
+
+export const administrationTestData = generateTestDataObject('administration');
+
+export const translationWebsocketsTestData = generateTestDataObject(
+  'websocket-translations'
+);
+
+export const userDeletionTestData = generateTestDataObject('user-deletion');
+
+export const formerUserTestData = generateTestDataObject('former-user');
+
+export const sensitiveOperationProtectionTestData = {
+  ...generateTestDataObject('sensitive-operation-protection'),
+  getOtp: () =>
+    internalFetch(`e2e-data/sensitive-operation-protection/get-totp`),
+};

@@ -39,15 +39,13 @@ class OrganizationE2eDataController(
     data.forEach {
       val organization = organizationService.find(it.dto.slug!!)
       it.members.forEach { memberUserName ->
-        userAccountService.findOptional(memberUserName).orElseThrow { NotFoundException() }.let { user ->
-          organizationRoleService.grantMemberRoleToUser(user, organization!!)
-        }
+        val user = userAccountService.find(memberUserName) ?: throw NotFoundException()
+        organizationRoleService.grantMemberRoleToUser(user, organization!!)
       }
 
       it.otherOwners.forEach { memberUserName ->
-        userAccountService.findOptional(memberUserName).orElseThrow { NotFoundException() }.let { user ->
-          organizationRoleService.grantOwnerRoleToUser(user, organization!!)
-        }
+        val user = userAccountService.find(memberUserName) ?: throw NotFoundException()
+        organizationRoleService.grantOwnerRoleToUser(user, organization!!)
       }
     }
   }
@@ -61,6 +59,11 @@ class OrganizationE2eDataController(
     data.forEach {
       organizationService.find(it.dto.slug!!)?.let { organization ->
         organizationService.delete(organization.id)
+      }
+      userAccountService.find(it.owner.email)?.let { userAccount ->
+        if (userAccount.name != "admin") {
+          userAccountService.delete(userAccount)
+        }
       }
     }
   }

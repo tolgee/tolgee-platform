@@ -10,11 +10,15 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { Usage } from 'tg.component/billing/Usage';
 
 const StyledWrapper = styled('div')`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
   & .listWrapper > * > * + * {
     border-top: 1px solid ${({ theme }) => theme.palette.divider1.main};
   }
@@ -23,33 +27,52 @@ const StyledWrapper = styled('div')`
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const { preferredOrganization } = usePreferredOrganization();
 
   const listPermitted = useApiQuery({
-    url: '/v2/projects/with-stats',
+    url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    options: {
-      keepPreviousData: true,
-    },
+    path: { slug: preferredOrganization?.slug || '' },
     query: {
       page,
       size: 20,
       search,
       sort: ['id,desc'],
     },
+    options: {
+      keepPreviousData: true,
+      enabled: Boolean(preferredOrganization?.slug),
+    },
   });
 
   const t = useTranslate();
 
+  const isOrganizationOwner =
+    preferredOrganization?.currentUserRole === 'OWNER';
+
+  const isAdmin = useIsAdmin();
+
+  const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
+
   return (
     <StyledWrapper>
-      <DashboardPage>
+      <DashboardPage isAdminAccess={isAdminAccess}>
         <BaseView
-          title={<T>projects_title</T>}
           windowTitle={t('projects_title')}
           onSearch={setSearch}
           containerMaxWidth="lg"
-          addLinkTo={LINKS.PROJECT_ADD.build()}
+          allCentered
+          addLinkTo={
+            isOrganizationOwner || isAdminAccess
+              ? LINKS.PROJECT_ADD.build()
+              : undefined
+          }
           hideChildrenOnLoading={false}
+          navigation={[
+            [<OrganizationSwitch key={0} />],
+            [t('projects_title'), LINKS.PROJECTS.build()],
+          ]}
+          navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList
@@ -61,13 +84,15 @@ export const ProjectListView = () => {
               <EmptyListMessage
                 loading={listPermitted.isFetching}
                 hint={
-                  <Button
-                    component={Link}
-                    to={LINKS.PROJECT_ADD.build()}
-                    color="primary"
-                  >
-                    <T>projects_empty_action</T>
-                  </Button>
+                  isOrganizationOwner ? (
+                    <Button
+                      component={Link}
+                      to={LINKS.PROJECT_ADD.build()}
+                      color="primary"
+                    >
+                      <T>projects_empty_action</T>
+                    </Button>
+                  ) : undefined
                 }
               >
                 <T>projects_empty</T>

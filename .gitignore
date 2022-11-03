@@ -2,7 +2,9 @@ build
 *.iml
 **/application-dev.properties
 **/application-dev.yaml
+**/application-local.yaml
 **/application-postgres.yaml
+**/application-testing.yaml
 
 bin
 server.iml

@@ -22,7 +22,8 @@ class ProjectActivityModelAssembler(
           id = view.authorId!!,
           name = view.authorName,
           username = view.authorUsername!!,
-          avatar = avatarService.getAvatarLinks(view.authorAvatarHash)
+          avatar = avatarService.getAvatarLinks(view.authorAvatarHash),
+          deleted = view.authorDeleted
         )
       },
       modifiedEntities = getModifiedEntities(view),

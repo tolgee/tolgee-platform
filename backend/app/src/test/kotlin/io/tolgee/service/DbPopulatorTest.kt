@@ -7,7 +7,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.AbstractTransactionalTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,19 +49,9 @@ class DbPopulatorTest : AbstractTransactionalTest() {
 
   @Test
   @Transactional
-  fun createsProject() {
-    entityManager.refresh(userAccount)
-    val found = projectRepository.findAll().asSequence()
-      .flatMap { it!!.permissions.map { it.user } }
-      .find { it == userAccount }
-    assertThat(found).isNotNull
-  }
-
-  @Test
-  @Transactional
   fun createsApiKey() {
     val key = apiKeyService.getAllByUser(userAccount.id).stream().findFirst()
     Assertions.assertThat(key).isPresent
-    Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")
+    Assertions.assertThat(key.get().key).isEqualTo(null)
   }
 }

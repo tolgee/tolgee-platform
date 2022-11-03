@@ -3,14 +3,15 @@ import { Box, IconButton, Slide, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { LightMode, DarkMode } from '@mui/icons-material';
+import { DarkMode, LightMode } from '@mui/icons-material';
 
 import { LocaleMenu } from '../../LocaleMenu';
-import { UserMenu } from '../../security/UserMenu';
-import { useConfig } from 'tg.hooks/useConfig';
+import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
 import { useThemeContext } from '../../../ThemeProvider';
+import { AdminInfo } from './AdminInfo';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -42,7 +43,7 @@ const StyledVersion = styled(Typography)`
 const StyledLogoTitle = styled(Typography)`
   font-size: 20px;
   font-weight: 500;
-  font-family: Righteous, Rubik, Arial;
+  font-family: Righteous, Rubik, Arial, sans-serif;
   transition: filter 0.2s ease-in-out;
 `;
 
@@ -54,11 +55,13 @@ const StyledTolgeeLink = styled(Link)`
   color: inherit;
   text-decoration: inherit;
   outline: 0;
+
   &:focus ${StyledLogoWrapper} {
     filter: brightness(95%);
   }
+
   ,
-  &:focus ${StyledLogoTitle} {
+&: focus ${StyledLogoTitle} {
     filter: brightness(95%);
   }
 `;
@@ -70,9 +73,15 @@ const StyledIconButton = styled(IconButton)`
 
 type Props = {
   autoHide?: boolean;
+  isAdminAccess?: boolean;
+  isDebuggingCustomerAccount?: boolean;
 };
 
-export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
+export const TopBar: React.FC<Props> = ({
+  autoHide = false,
+  isAdminAccess = false,
+  isDebuggingCustomerAccount = false,
+}) => {
   const config = useConfig();
 
   const trigger = useTopBarHidden() && autoHide;
@@ -113,6 +122,10 @@ export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
                 </Box>
               </StyledTolgeeLink>
             </Box>
+            <AdminInfo
+              adminAccess={isAdminAccess}
+              debuggingCustomerAccount={isDebuggingCustomerAccount}
+            />
           </Box>
           <StyledIconButton onClick={toggleTheme} color="inherit">
             {mode === 'dark' ? <LightMode /> : <DarkMode />}

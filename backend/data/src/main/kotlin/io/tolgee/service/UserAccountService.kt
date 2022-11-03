@@ -4,17 +4,25 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
+import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.util.executeInNewTransaction
+import org.apache.commons.lang3.time.DateUtils
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -22,11 +30,13 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(
@@ -34,6 +44,11 @@ class UserAccountService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
+  private val passwordEncoder: PasswordEncoder,
+  @Lazy
+  private val organizationService: OrganizationService,
+  private val transactionManager: PlatformTransactionManager,
+  private val entityManager: EntityManager
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -42,27 +57,27 @@ class UserAccountService(
   @Lazy
   lateinit var permissionService: PermissionService
 
-  fun findOptional(username: String?): Optional<UserAccount> {
-    return userAccountRepository.findByUsername(username)
-  }
+  private val emailValidator = EmailValidator()
 
   fun find(username: String): UserAccount? {
-    return userAccountRepository.findByUsername(username).orElse(null)
+    return userAccountRepository.findNotDeleted(username)
   }
 
-  fun get(username: String): UserAccount {
-    return userAccountRepository
-      .findByUsername(username)
-      .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
+  operator fun get(username: String): UserAccount {
+    return this.find(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
-  operator fun get(id: Long): Optional<UserAccount> {
-    return userAccountRepository.findById(id)
+  fun find(id: Long): UserAccount? {
+    return userAccountRepository.findNotDeleted(id)
+  }
+
+  fun get(id: Long): UserAccount {
+    return this.find(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
-  fun getDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findById(id).orElse(null)?.let {
+  fun findDto(id: Long): UserAccountDto? {
+    return userAccountRepository.findNotDeleted(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }
@@ -74,20 +89,53 @@ class UserAccountService(
     return userAccount
   }
 
-  fun createUser(request: SignUpDto): UserAccount {
+  fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
     dtoToEntity(request).let {
+      it.role = role
       this.createUser(it)
       return it
     }
   }
 
+  @CacheEvict(Caches.USER_ACCOUNTS, key = "#id")
+  @Transactional
+  fun delete(id: Long) {
+    val user = this.get(id)
+    delete(user)
+  }
+
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
+  @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccountRepository.delete(userAccount)
+    userAccount.emailVerification?.let {
+      entityManager.remove(it)
+    }
+    userAccount.apiKeys?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.pats?.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.permissions.forEach {
+      entityManager.remove(it)
+    }
+    userAccount.preferences?.let {
+      entityManager.remove(it)
+    }
+    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+      it.prefereredBy.removeIf { preferences ->
+        preferences.userAccount.id == userAccount.id
+      }
+      organizationService.delete(it.id)
+    }
+    userAccount.organizationRoles.forEach {
+      entityManager.remove(it)
+    }
+    userAccountRepository.softDeleteUser(userAccount)
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
-    val encodedPassword = encodePassword(request.password!!)
+    val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
 
@@ -95,43 +143,87 @@ class UserAccountService(
   val implicitUser: UserAccount
     get() {
       val username = "___implicit_user"
-      return userAccountRepository.findByUsername(username).orElseGet {
-        val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
-        this.createUser(account)
-        account
+      return executeInNewTransaction(transactionManager) {
+        userAccountRepository.findByUsername(username).orElseGet {
+          val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
+          this.createUser(account)
+          this.organizationService.create(OrganizationDto(name = account.name), account)
+          account
+        }
       }
     }
 
-  fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
-    return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type!!, id!!)
+  fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
+    return userAccountRepository.findThirdByThirdParty(id, type)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun setAccountType(userAccount: UserAccount, accountType: UserAccount.AccountType): UserAccount {
+    userAccount.accountType = accountType
+    return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setResetPasswordCode(userAccount: UserAccount, code: String?): UserAccount {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    userAccount.resetPasswordCode = bCryptPasswordEncoder.encode(code)
+    userAccount.resetPasswordCode = passwordEncoder.encode(code)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun setUserPassword(userAccount: UserAccount, password: String?): UserAccount {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    userAccount.password = bCryptPasswordEncoder.encode(password)
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
 
   @Transactional
   fun isResetCodeValid(userAccount: UserAccount, code: String?): Boolean {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    return bCryptPasswordEncoder.matches(code, userAccount.resetPasswordCode)
+    return passwordEncoder.matches(code, userAccount.resetPasswordCode)
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun removeResetCode(userAccount: UserAccount): UserAccount {
     userAccount.resetPasswordCode = null
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun enableMfaTotp(userAccount: UserAccount, key: ByteArray): UserAccount {
+    userAccount.totpKey = key
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun disableMfaTotp(userAccount: UserAccount): UserAccount {
+    userAccount.totpKey = null
+    // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
+    userAccount.mfaRecoveryCodes = emptyList()
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun consumeMfaRecoveryCode(userAccount: UserAccount, token: String): UserAccount {
+    if (!userAccount.mfaRecoveryCodes.contains(token)) {
+      throw AuthenticationException(Message.INVALID_OTP_CODE)
+    }
+
+    userAccount.mfaRecoveryCodes = userAccount.mfaRecoveryCodes.minus(token)
+    return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun setMfaRecoveryCodes(userAccount: UserAccount, codes: List<String>): UserAccount {
+    userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
   }
 
@@ -188,28 +280,39 @@ class UserAccountService(
     }
   }
 
-  fun encodePassword(rawPassword: String): String {
-    val bCryptPasswordEncoder = BCryptPasswordEncoder()
-    return bCryptPasswordEncoder.encode(rawPassword)
-  }
-
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
+    // Current password required to change email or password
+    if (dto.email != userAccount.username) {
+      if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+        throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+      }
+
+      if (dto.currentPassword?.isNotEmpty() != true) throw BadRequestException(Message.CURRENT_PASSWORD_REQUIRED)
+      val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
+      if (!matches) throw BadRequestException(Message.WRONG_CURRENT_PASSWORD)
+    }
+
     val old = UserAccountDto.fromEntity(userAccount)
     updateUserEmail(userAccount, dto)
-    updatePassword(dto, userAccount)
     userAccount.name = dto.name
+
     publishUserInfoUpdatedEvent(old, userAccount)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun updatePassword(dto: UserUpdateRequestDto, userAccount: UserAccount) {
-    dto.password?.let {
-      if (!it.isEmpty()) {
-        userAccount.password = encodePassword(it)
-      }
+  fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
+    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
+
+    val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
+    if (!matches) throw PermissionException()
+
+    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    userAccount.password = passwordEncoder.encode(dto.password)
+    return userAccountRepository.save(userAccount)
   }
 
   private fun updateUserEmail(
@@ -217,7 +320,12 @@ class UserAccountService(
     dto: UserUpdateRequestDto
   ) {
     if (userAccount.username != dto.email) {
-      findOptional(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+      if (!emailValidator.isValid(dto.email, null)) {
+        // todo: Allow to specify STANDARD_VALIDATION typed errors to show errors on specific fields
+        throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
+      }
+
+      this.find(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
       } else {
@@ -247,8 +355,12 @@ class UserAccountService(
     return userAccountRepository.saveAndFlush(user)
   }
 
-  fun getAllByIds(ids: Set<Long>): MutableList<UserAccount> {
-    return userAccountRepository.findAllById(ids)
+  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount> {
+    return userAccountRepository.getAllByIdsIncludingDeleted(ids)
+  }
+
+  fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {
+    return userAccountRepository.findAllPaged(search, pageable)
   }
 
   val isAnyUserAccount: Boolean

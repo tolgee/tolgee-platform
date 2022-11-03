@@ -101,8 +101,9 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     createActivity(5)
     mockDate("2022-04-20")
     createActivity(2)
-    performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson.isEqualTo(
-      """
+    performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson {
+      isEqualTo(
+        """
       {
         "2022-03-20" : 1,
         "2022-04-01" : 1,
@@ -110,11 +111,12 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "2022-04-20" : 2
       }
       """
-    )
+      )
+    }
   }
 
   private fun mockDate(stringDate: String) {
-    whenever(currentDateProvider.getDate()).thenReturn(format.parse(stringDate))
+    whenever(currentDateProvider.date).thenReturn(format.parse(stringDate))
   }
 
   private fun createActivity(times: Int) {

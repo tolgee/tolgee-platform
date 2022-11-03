@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { styled } from '@mui/material';
 import { SmoothProgress } from './SmoothProgress';
 
@@ -6,7 +6,10 @@ const LoadingContext = React.createContext({ loading: 0, spinners: 0 });
 const LoadingSetterContext = React.createContext<{
   setLoading: React.Dispatch<React.SetStateAction<number>>;
   setSpinners: React.Dispatch<React.SetStateAction<number>>;
-}>({ setLoading: () => {}, setSpinners: () => {} });
+}>({
+  setLoading: () => {},
+  setSpinners: () => {},
+});
 
 const StyledSmoothProgress = styled(SmoothProgress)`
   position: fixed;

@@ -55,7 +55,9 @@ class ImportService(
     project: Project,
     userAccount: UserAccount
   ): List<ErrorResponseBody> {
-    val import = findNotExpired(project.id, userAccount.id) ?: Import(userAccount, project)
+    val import = findNotExpired(project.id, userAccount.id) ?: Import(project).also {
+      it.author = userAccount
+    }
 
     val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)
@@ -208,7 +210,6 @@ class ImportService(
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
     val import = language.file.import
-    this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
     if (this.findLanguages(import = language.file.import).isEmpty()) {
       deleteImport(import)

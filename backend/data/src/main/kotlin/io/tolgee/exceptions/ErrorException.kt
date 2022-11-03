@@ -14,7 +14,7 @@ abstract class ErrorException : RuntimeException {
 
   constructor(message: io.tolgee.constants.Message) : this(message, null)
 
-  constructor(code: String, params: List<Serializable>? = null) {
+  constructor(code: String, params: List<Serializable>? = null) : super(code + params.toString()) {
     this.code = code
     this.params = params
   }

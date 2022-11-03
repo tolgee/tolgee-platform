@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { formatDiff } from '../formatTools';
 import { Field } from '../types';
@@ -29,6 +29,7 @@ export const ActivityFields: React.FC<Props> = ({ fields, diffEnabled }) => {
               value: field.value,
               options: field.options,
               diffEnabled,
+              languageTag: field.languageTag,
             })}
           </StyledField>
         );

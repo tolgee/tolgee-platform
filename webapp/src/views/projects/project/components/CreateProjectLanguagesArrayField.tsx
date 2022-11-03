@@ -12,7 +12,7 @@ import { CreateProjectValueType } from '../ProjectCreateView';
 export const CreateProjectLanguagesArrayField: FC = () => {
   const formikContext = useFormikContext<CreateProjectValueType>();
   const hasUnfinishedLanguage =
-    formikContext.values.languages.findIndex((l) => l === null || !l?.name) >
+    formikContext.values.languages!.findIndex((l) => l === null || !l?.name) >
     -1;
   const languagesMeta = formikContext.getFieldMeta('languages');
 

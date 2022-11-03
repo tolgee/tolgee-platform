@@ -10,21 +10,18 @@ import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
-import OwnerSelect from './components/OwnerSelect';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 
 const messageService = container.resolve(MessageService);
 
-export type CreateProjectValueType =
-  components['schemas']['CreateProjectDTO'] & {
-    owner: number;
-  };
+export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
 
 export const ProjectCreateView: FunctionComponent = () => {
   const createProjectLoadable = useApiMutation({
@@ -32,37 +29,43 @@ export const ProjectCreateView: FunctionComponent = () => {
     method: 'post',
   });
   const t = useTranslate();
-
-  const config = useConfig();
+  const { preferredOrganization, updatePreferredOrganization } =
+    usePreferredOrganization();
 
   const onSubmit = (values: CreateProjectValueType) => {
-    const { owner, ...data } = {
-      ...values,
-    } as components['schemas']['CreateProjectDTO'] & { owner: number };
-    if (values.owner !== 0) {
-      data.organizationId = owner;
-      data.languages = data.languages.filter((l) => !!l);
-    }
+    values.languages = values.languages.filter((l) => !!l);
     createProjectLoadable.mutate(
       {
         content: {
-          'application/json': data,
+          'application/json': values,
         },
       },
       {
         onSuccess() {
+          updatePreferredOrganization(values.organizationId);
           messageService.success(<T>project_created_message</T>);
         },
       }
     );
   };
 
+  const organizationsLoadable = useApiQuery({
+    url: '/v2/organizations',
+    method: 'get',
+    query: {
+      size: 100,
+      params: {
+        filterCurrentUserOwner: true,
+      },
+    },
+  });
+
   const initialValues: CreateProjectValueType = {
     name: '',
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    owner: 0,
+    organizationId: preferredOrganization.id,
     baseLanguageTag: 'en',
   };
 
@@ -80,10 +83,12 @@ export const ProjectCreateView: FunctionComponent = () => {
         windowTitle={t('create_project_view')}
         title={t('create_project_view')}
         initialValues={initialValues}
+        loading={organizationsLoadable.isLoading}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
+        switcher={<OrganizationSwitch ownedOnly />}
       >
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
@@ -99,11 +104,6 @@ export const ProjectCreateView: FunctionComponent = () => {
                     required={true}
                   />
                 </Grid>
-                {config.authentication && (
-                  <Grid item lg md sm xs={12}>
-                    <OwnerSelect />
-                  </Grid>
-                )}
               </Grid>
               <Box mb={2}>
                 <Typography variant="h6">
@@ -118,7 +118,7 @@ export const ProjectCreateView: FunctionComponent = () => {
                 <BaseLanguageSelect
                   valueKey="tag"
                   name="baseLanguageTag"
-                  languages={props.values.languages}
+                  languages={props.values.languages!}
                 />
               </Box>
             </Box>

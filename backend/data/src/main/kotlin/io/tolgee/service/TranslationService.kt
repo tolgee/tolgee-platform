@@ -26,7 +26,6 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
-import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
@@ -45,7 +44,6 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val importService: ImportService,
-  private val translationsSocketIoModule: ITranslationsSocketIoModule,
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val translationCommentService: TranslationCommentService,
@@ -191,15 +189,14 @@ class TranslationService(
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
       translation.state = TranslationState.TRANSLATED
     }
-    if (translation.id == 0L) {
-      key.translations.add(translation)
-    }
     if (text == null || text.isEmpty()) {
       translation.state = TranslationState.UNTRANSLATED
       translation.text = null
     }
     dismissAutoTranslated(translation)
-    return save(translation)
+    val t = save(translation)
+    key.translations.add(t)
+    return t
   }
 
   fun save(translation: Translation): Translation {
@@ -207,18 +204,12 @@ class TranslationService(
     if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
-    val wasCreated = translation.id == 0L
-    return translationRepository.save(translation).also {
-      if (wasCreated) {
-        translationsSocketIoModule.onTranslationsCreated(listOf(translation))
-      } else {
-        translationsSocketIoModule.onTranslationsModified(listOf(translation))
-      }
-    }
+    return translationRepository.save(translation)
   }
 
   @Transactional
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+    val myKey = keyService.get(key.id)
     val languages = languageService.findByTags(translations.keys, key.project.id)
     val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
 
@@ -228,23 +219,12 @@ class TranslationService(
       applicationEventPublisher.publishEvent(
         OnTranslationsSet(
           source = this,
-          key = key,
+          key = myKey,
           oldValues = oldTranslations,
           translations = it.values.toList()
         )
       )
     }
-  }
-
-  fun deleteIfExists(key: Key, languageTag: String) {
-    val language = languageService.findByTag(languageTag, key.project)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    translationRepository.findOneByKeyAndLanguage(key, language)
-      .ifPresent { entity: Translation ->
-        translationsSocketIoModule.onTranslationsDeleted(listOf(entity))
-        translationCommentService.deleteByTranslationIdIn(listOf(entity.id))
-        translationRepository.delete(entity)
-      }
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -271,12 +251,6 @@ class TranslationService(
     translationRepository.deleteByIdIn(ids)
   }
 
-  fun deleteAllByProject(projectId: Long) {
-    val ids = translationRepository.selectIdsByProject(projectId)
-    deleteByIdIn(ids)
-    entityManager.flush()
-  }
-
   fun deleteAllByLanguage(languageId: Long) {
     val translations = translationRepository.getAllByLanguageId(languageId)
     val ids = translations.map { it.id }
@@ -285,7 +259,6 @@ class TranslationService(
 
   fun deleteAllByKeys(ids: Collection<Long>) {
     val translations = translationRepository.getAllByKeyIdIn(ids)
-    translationsSocketIoModule.onTranslationsDeleted(translations)
     val translationIds = translations.map { it.id }
     translationCommentService.deleteByTranslationIdIn(translationIds)
     deleteByIdIn(translationIds)

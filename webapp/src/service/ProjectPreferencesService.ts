@@ -25,7 +25,7 @@ export class ProjectPreferencesService {
     return localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
   }
 
-  getUpdated(projectId, allLanguages: string[]): string[] {
+  getFiltered(projectId, allLanguages: string[]): string[] {
     let filtered = [...this.getForProject(projectId)].filter((f) =>
       allLanguages.includes(f)
     );
@@ -34,9 +34,6 @@ export class ProjectPreferencesService {
     if (filtered.length == 0 && allLanguages.length) {
       filtered = allLanguages.slice(0, 1);
     }
-
-    //update id on db change
-    this.setForProject(projectId, filtered);
 
     return filtered;
   }

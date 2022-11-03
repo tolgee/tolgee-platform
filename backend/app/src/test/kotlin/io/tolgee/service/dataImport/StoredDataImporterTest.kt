@@ -81,8 +81,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun `it imports metadata`() {
     importTestData.addKeyMetadata()
     testDataService.saveTestData(importTestData.root)
-    storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.OVERRIDE)
-    testDataService.saveTestData(importTestData.root)
+    storedDataImporter = StoredDataImporter(applicationContext, importTestData.import, ForceMode.OVERRIDE)
     storedDataImporter.doImport()
     entityManager.flush()
     entityManager.clear()

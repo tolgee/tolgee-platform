@@ -36,9 +36,14 @@ export const useTagsService = ({ translations }: Props) => {
           (key) => key.keyId === data.keyId
         )?.keyTags;
         invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/tags');
-        translations.updateTranslationKey(data.keyId, {
-          keyTags: previousTags?.filter((t) => t.id !== data.tagId),
-        });
+        translations.updateTranslationKeys([
+          {
+            keyId: data.keyId,
+            value: {
+              keyTags: previousTags?.filter((t) => t.id !== data.tagId),
+            },
+          },
+        ]);
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
@@ -56,9 +61,14 @@ export const useTagsService = ({ translations }: Props) => {
           translations.fixedTranslations
             ?.find((key) => key.keyId === data.keyId)
             ?.keyTags.filter((t) => t.id !== response.id) || [];
-        translations.updateTranslationKey(data.keyId, {
-          keyTags: [...previousTags, response!],
-        });
+        translations.updateTranslationKeys([
+          {
+            keyId: data.keyId,
+            value: {
+              keyTags: [...previousTags, response!],
+            },
+          },
+        ]);
         invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/tags');
         data.onSuccess?.();
       })

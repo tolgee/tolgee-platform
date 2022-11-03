@@ -28,6 +28,8 @@ class PermissionService(
   private val permissionRepository: PermissionRepository,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService,
 ) {
   @set:Autowired
   @set:Lazy
@@ -116,7 +118,10 @@ class PermissionService(
   }
 
   fun delete(permission: Permission) {
-    return cachedPermissionService.delete(permission)
+    cachedPermissionService.delete(permission)
+    permission.user?.let {
+      userPreferencesService.refreshPreferredOrganization(it.id)
+    }
   }
 
   /**
@@ -185,6 +190,8 @@ class PermissionService(
   }
 
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
+    // switch user to the organization when accepted invitation
+    userPreferencesService.setPreferredOrganization(permission.project.organizationOwner, userAccount)
     return cachedPermissionService.acceptInvitation(permission, userAccount)
   }
 
@@ -218,7 +225,7 @@ class PermissionService(
     }
 
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
-      val userAccount = userAccountService[userId].get()
+      val userAccount = userAccountService.get(userId)
       val project = projectService.get(data.project.id)
       Permission(user = userAccount, project = project, type = newPermissionType)
     }
@@ -226,17 +233,6 @@ class PermissionService(
     permission.type = newPermissionType
     permission.languages = languages?.toMutableSet() ?: mutableSetOf()
     return cachedPermissionService.save(permission)
-  }
-
-  fun onProjectTransferredToUser(project: Project, userAccount: UserAccount) {
-    val permission = findOneByProjectIdAndUserId(project.id, userAccount.id)
-      ?: Permission().also {
-        it.user = userAccount
-        it.project = project
-      }
-    permission.type = ProjectPermissionType.MANAGE
-    permission.languages = mutableSetOf()
-    cachedPermissionService.save(permission)
   }
 
   private fun validateLanguagePermissions(
@@ -263,6 +259,8 @@ class PermissionService(
         cachedPermissionService.delete(found)
       }
     } ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+
+    userPreferencesService.refreshPreferredOrganization(userId)
   }
 
   fun onLanguageDeleted(language: Language) {
@@ -281,5 +279,21 @@ class PermissionService(
       permission.languages.removeIf { it.id == language.id }
       cachedPermissionService.save(permission)
     }
+  }
+
+  @Transactional
+  fun leave(project: Project, userId: Long) {
+    val permissionData = this.getProjectPermissionData(project.id, userId)
+    if (permissionData.organizationRole != null) {
+      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
+    }
+
+    val directPermissions = permissionData.directPermissions
+      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
+
+    val permissionEntity = this.findById(directPermissions.id)
+      ?: throw NotFoundException()
+
+    this.delete(permissionEntity)
   }
 }

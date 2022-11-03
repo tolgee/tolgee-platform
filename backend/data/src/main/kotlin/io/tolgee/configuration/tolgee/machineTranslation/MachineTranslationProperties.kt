@@ -7,5 +7,6 @@ open class MachineTranslationProperties(
   var google: GoogleMachineTranslationProperties = GoogleMachineTranslationProperties(),
   var aws: AwsMachineTranslationProperties = AwsMachineTranslationProperties(),
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
+  var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
   var freeCreditsAmount: Long = -1,
 )

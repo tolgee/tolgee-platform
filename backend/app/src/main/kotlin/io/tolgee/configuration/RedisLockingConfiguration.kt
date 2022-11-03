@@ -1,6 +1,6 @@
 package io.tolgee.configuration
 
-import io.tolgee.component.lockingProvider.LockingProvider
+import io.tolgee.component.LockingProvider
 import io.tolgee.component.lockingProvider.RedissonLockingProvider
 import org.redisson.Redisson
 import org.redisson.api.RedissonClient

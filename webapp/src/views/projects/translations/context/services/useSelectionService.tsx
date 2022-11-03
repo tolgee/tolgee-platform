@@ -8,6 +8,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useDeleteKeys } from 'tg.service/TranslationHooks';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useTranslationsService } from './useTranslationsService';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
@@ -16,6 +17,7 @@ type Props = {
 const messaging = container.resolve(MessageService);
 
 export const useSelectionService = ({ translations }: Props) => {
+  const { refetchUsage } = useOrganizationUsageMethods();
   const [selection, setSelection] = useState<number[]>([]);
   const t = useTranslate();
   const deleteKeys = useDeleteKeys();
@@ -52,6 +54,7 @@ export const useSelectionService = ({ translations }: Props) => {
             {
               onSuccess() {
                 translations.refetchTranslations();
+                refetchUsage();
                 messaging.success(
                   t('Translation grid - Successfully deleted!')
                 );

@@ -10,6 +10,7 @@ interface TranslationHistoryView {
   var authorName: String?
   var authorAvatarHash: String?
   var authorEmail: String?
+  var authorDeletedAt: Date?
   var authorId: Long?
   var revisionType: RevisionType
 }

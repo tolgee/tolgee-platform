@@ -1,12 +1,12 @@
 import { default as React, FC, useState } from 'react';
 import { Box, FormControl, MenuItem, Select, styled } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Add } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { AddApiKeyFormDialog } from 'tg.views/userSettings/apiKeys/AddApiKeyFormDialog';
 import { useProject } from 'tg.hooks/useProject';
+import { GenerateApiKeyDialog } from '../../../userSettings/apiKeys/GenerateApiKeyDialog';
 
 const StyledItemWrapper = styled('div')`
   max-width: 400;
@@ -23,6 +23,8 @@ const StyledItemWrapper = styled('div')`
 const StyledScopes = styled('div')`
   font-size: 11px;
   white-space: normal;
+  max-width: 400px;
+  font-style: italic;
 `;
 
 const StyledAddIcon = styled(Add)`
@@ -50,6 +52,8 @@ export const ApiKeySelector: FC<{
 
   const project = useProject();
 
+  const t = useTranslate();
+
   return (
     <>
       {!props.keysLoading ? (
@@ -64,7 +68,7 @@ export const ApiKeySelector: FC<{
             renderValue={(id) => {
               return (
                 <span data-openreplay-masked="">
-                  {findKey(id as number)?.key}
+                  {findKey(id as number)?.description}
                 </span>
               );
             }}
@@ -77,7 +81,7 @@ export const ApiKeySelector: FC<{
                 data-cy="integrate-api-key-selector-item"
               >
                 <StyledItemWrapper>
-                  <Box data-openreplay-masked="">{k.key}</Box>
+                  <Box data-openreplay-masked="">{k.description}</Box>
                   <StyledScopes>{k.scopes.join(', ')}</StyledScopes>
                 </StyledItemWrapper>
               </MenuItem>
@@ -97,12 +101,15 @@ export const ApiKeySelector: FC<{
         <BoxLoading p={1} />
       )}
       {addDialogOpen && (
-        <AddApiKeyFormDialog
+        <GenerateApiKeyDialog
           project={project}
+          initialDescriptionValue={t(
+            'integrate-initial-api-key-description-value'
+          )}
           onClose={() => {
             setAddDialogOpen(false);
           }}
-          onSaved={(key) => {
+          onGenerated={(key) => {
             setAddDialogOpen(false);
             props.onNewCreated(key);
           }}

@@ -25,13 +25,11 @@ import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
-import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.util.SlugGenerator
@@ -54,10 +52,8 @@ class ProjectService constructor(
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
-  private val organizationRoleService: OrganizationRoleService,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
-  private val userAccountService: UserAccountService,
   private val avatarService: AvatarService,
   private val activityHolder: ActivityHolder,
   @Lazy
@@ -128,19 +124,14 @@ class ProjectService constructor(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectDTO, userAccount: UserAccount? = null): Project {
+  fun createProject(dto: CreateProjectDTO): Project {
     val project = Project()
     project.name = dto.name
-    dto.organizationId?.also {
-      organizationRoleService.checkUserIsOwner(it)
-      project.organizationOwner = organizationService.find(it) ?: throw NotFoundException()
 
-      if (dto.slug == null) {
-        project.slug = generateSlug(dto.name, null)
-      }
-    } ?: let {
-      project.userOwner = userAccount ?: authenticationFacade.userAccountEntity
-      securityService.grantFullAccessToRepo(project, project.userOwner!!.id)
+    project.organizationOwner = organizationService.get(dto.organizationId)
+
+    if (dto.slug == null) {
+      project.slug = generateSlug(dto.name, null)
     }
 
     save(project)
@@ -241,13 +232,15 @@ class ProjectService constructor(
     importService.getAllByProject(id).forEach {
       importService.deleteImport(it)
     }
-    permissionService.deleteAllByProject(project.id)
-    translationService.deleteAllByProject(project.id)
-    screenshotService.deleteAllByProject(project.id)
-    keyService.deleteAllByProject(project.id)
+
+    // otherwise we cannot delete the languages
+    project.baseLanguage = null
+    projectRepository.saveAndFlush(project)
     apiKeyService.deleteAllByProject(project.id)
+    permissionService.deleteAllByProject(project.id)
+    screenshotService.deleteAllByProject(project.id)
     languageService.deleteAllByProject(project.id)
-    mtServiceConfigService.deleteAllByProjectId(project.id)
+    keyService.deleteAllByProject(project.id)
     avatarService.unlinkAvatarFiles(project)
     projectRepository.delete(project)
   }
@@ -299,11 +292,16 @@ class ProjectService constructor(
     }
   }
 
-  fun findPermittedPaged(pageable: Pageable, search: String?): Page<ProjectWithLanguagesView> {
+  fun findPermittedPaged(
+    pageable: Pageable,
+    search: String?,
+    organizationId: Long? = null
+  ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages = projectRepository.findAllPermitted(
       authenticationFacade.userAccount.id,
       pageable,
-      search
+      search,
+      organizationId
     )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages)
   }
@@ -341,24 +339,12 @@ class ProjectService constructor(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun transferToOrganization(projectId: Long, organizationId: Long) {
     val project = get(projectId)
-    project.userOwner = null
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
     save(project)
   }
 
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  @Transactional
-  fun transferToUser(projectId: Long, userId: Long) {
-    val project = get(projectId)
-    val userAccount = userAccountService[userId].orElseThrow { NotFoundException() }
-    project.organizationOwner = null
-    project.userOwner = userAccount
-    save(project)
-    permissionService.onProjectTransferredToUser(project, userAccount)
-  }
-
-  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project> {
-    return projectRepository.findAllByNameAndUserOwner(name, userOwner)
+  fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project> {
+    return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
 }

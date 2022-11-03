@@ -1,8 +1,5 @@
 import { ReactNode } from 'react';
-import { Add } from '@mui/icons-material';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
+import { Box, Container, Grid, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { Navigation } from 'tg.component/navigation/Navigation';
@@ -10,6 +7,7 @@ import { Navigation } from 'tg.component/navigation/Navigation';
 import { SecondaryBar } from './SecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
+import { BaseViewAddButton } from './BaseViewAddButton';
 
 export interface BaseViewProps {
   windowTitle: string;
@@ -26,9 +24,13 @@ export interface BaseViewProps {
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
   customHeader?: ReactNode;
+  navigationRight?: ReactNode;
+  switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  allCentered?: boolean;
   'data-cy'?: string;
+  initialSearch?: string;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -39,9 +41,18 @@ export const BaseView = (props: BaseViewProps) => {
 
   useWindowTitle(props.windowTitle);
 
+  const displayNavigation = props.customNavigation || props.navigation;
+
+  const displayHeader =
+    props.title ||
+    props.customHeader ||
+    props.onSearch ||
+    props.onAdd ||
+    props.addLinkTo;
+
   return (
     <Container
-      maxWidth={false}
+      maxWidth={props.allCentered ? props.containerMaxWidth : false}
       style={{
         position: 'relative',
         padding: 0,
@@ -49,21 +60,27 @@ export const BaseView = (props: BaseViewProps) => {
       }}
     >
       <Box minHeight="100%" data-cy={props['data-cy']}>
-        {props.customNavigation ||
-          (props.navigation && (
-            <SecondaryBar
-              height={49}
+        {displayNavigation && (
+          <SecondaryBar
+            height={49}
+            display="flex"
+            flexDirection="column"
+            alignItems="stretch"
+            justifyContent="center"
+          >
+            <Box
+              style={{ padding: 0, margin: 0 }}
               display="flex"
-              alignItems="center"
-              justifyContent="center"
+              align-items="center"
+              justifyContent="space-between"
             >
-              <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
-                <Navigation path={props.navigation} />
-              </Container>
-            </SecondaryBar>
-          ))}
-        {(props.title || props.customHeader) && (
-          <SecondaryBar>
+              <Navigation path={props.navigation!} />
+              {props.navigationRight}
+            </Box>
+          </SecondaryBar>
+        )}
+        {displayHeader && (
+          <SecondaryBar noBorder={Boolean(displayNavigation)}>
             <Container
               maxWidth={props.containerMaxWidth || false}
               style={{ padding: 0 }}
@@ -79,31 +96,30 @@ export const BaseView = (props: BaseViewProps) => {
                 >
                   {props.customHeader || (
                     <Box display="flex" justifyContent="space-between">
-                      <Box display="flex" alignItems={'center'}>
-                        <Typography variant="h4">{props.title}</Typography>
+                      <Box display="flex" alignItems="center" gap="8px">
+                        {props.title && (
+                          <Typography variant="h4">{props.title}</Typography>
+                        )}
                         {typeof props.onSearch === 'function' && (
-                          <Box ml={2}>
+                          <Box>
                             <SecondaryBarSearchField
                               onSearch={props.onSearch}
+                              initial={props.initialSearch}
                             />
                           </Box>
                         )}
                       </Box>
-                      <Box display="flex">
+                      <Box display="flex" gap={2}>
+                        {props.switcher && (
+                          <Box display="flex" alignItems="center">
+                            {props.switcher}
+                          </Box>
+                        )}
                         {(props.onAdd || props.addLinkTo) && (
-                          <Button
-                            data-cy="global-plus-button"
-                            component={props.addLinkTo ? Link : Button}
-                            to={props.addLinkTo}
-                            startIcon={<Add />}
-                            color="primary"
-                            size="small"
-                            variant="contained"
-                            aria-label="add"
+                          <BaseViewAddButton
+                            addLinkTo={props.addLinkTo}
                             onClick={props.onAdd}
-                          >
-                            <T>global_add_button</T>
-                          </Button>
+                          />
                         )}
                       </Box>
                     </Box>

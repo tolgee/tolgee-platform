@@ -1,29 +1,22 @@
 import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useField } from 'formik';
+import { components } from 'tg.service/apiSchema.generated';
 
-import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { useUser } from 'tg.hooks/useUser';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-
-const OwnerSelect = () => {
-  const user = useUser();
-
-  const organizationsLoadable = useApiQuery({
-    url: '/v2/organizations',
-    method: 'get',
-    query: {
-      size: 100,
-      params: {
-        filterCurrentUserOwner: true,
-      },
+const OwnerSelect = (props: {
+  organizations: components['schemas']['PagedModelOrganizationModel'];
+}) => {
+  const data = props.organizations._embedded?.organizations?.map((i) => ({
+    value: i.id,
+    key: i.id,
+    render: <>{i.name}</>,
+  })) || [
+    {
+      value: 0,
+      key: 0,
+      render: <T>project_create_select_owner_no_organization</T>,
     },
-  });
-
-  const data = [{ value: 0, render: user?.name, key: 0 }];
-  organizationsLoadable.data?._embedded?.organizations?.forEach((i) =>
-    data.push({ value: i.id, key: i.id, render: i.name })
-  );
+  ];
   const items = data.map((item) => (
     <MenuItem
       data-cy="project-owner-select-item"
@@ -33,7 +26,7 @@ const OwnerSelect = () => {
       {item.render}
     </MenuItem>
   ));
-  const [fieldProps, _fieldMeta, fieldHelpers] = useField('owner');
+  const [fieldProps, _fieldMeta, fieldHelpers] = useField('organizationId');
 
   return (
     <Box mt={2}>
@@ -52,7 +45,7 @@ const OwnerSelect = () => {
             return data.find((i) => i.value === v)?.render;
           }}
         >
-          {organizationsLoadable.isLoading ? <BoxLoading /> : items}
+          {items}
         </Select>
       </FormControl>
     </Box>

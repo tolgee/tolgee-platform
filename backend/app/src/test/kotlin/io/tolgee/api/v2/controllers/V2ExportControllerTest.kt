@@ -8,11 +8,11 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.retry
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.assertThatJson
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
@@ -23,15 +23,6 @@ import kotlin.system.measureTimeMillis
 @ContextRecreatingTest
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
-
-  @AfterEach
-  fun after() {
-    commitTransaction()
-    // cleanup
-    projectService.deleteProject(project.id)
-    userAccountService.delete(testData.user)
-    commitTransaction()
-  }
 
   @Test
   @Transactional
@@ -50,15 +41,17 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it exports to single json`() {
     initBaseData()
-    val response = performProjectAuthGet("export?languages=en&zip=false")
-      .andDo { obj: MvcResult -> obj.asyncResult }
-    response.andPrettyPrint.andAssertThatJson {
-      node("Z key").isEqualTo("A translation")
+    retry {
+      val response = performProjectAuthGet("export?languages=en&zip=false")
+        .andDo { obj: MvcResult -> obj.asyncResult }
+      response.andPrettyPrint.andAssertThatJson {
+        node("Z key").isEqualTo("A translation")
+      }
+      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+        .isEqualTo("application/json")
+      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+        .isEqualTo("""attachment; filename="en.json"""")
     }
-    assertThat(response.andReturn().response.getHeaderValue("content-type"))
-      .isEqualTo("application/json")
-    assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
-      .isEqualTo("""attachment; filename="en.json"""")
   }
 
   @Test
@@ -66,13 +59,15 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it exports to single xliff`() {
     initBaseData()
-    val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
-      .andDo { obj: MvcResult -> obj.asyncResult }
+    retry {
+      val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
+        .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
-    assertThat(response.andReturn().response.getHeaderValue("content-type"))
-      .isEqualTo("application/x-xliff+xml")
-    assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
-      .isEqualTo("""attachment; filename="en.xlf"""")
+      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+        .isEqualTo("application/x-xliff+xml")
+      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+        .isEqualTo("""attachment; filename="en.xlf"""")
+    }
   }
 
   @Test

@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.key.Key
 import java.util.*
@@ -25,9 +24,8 @@ import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 @Entity
-@EntityListeners(Project.Companion.ProjectListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
-@ActivityLoggedEntity
+@EntityListeners(Project.Companion.ProjectListener::class)
 class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,37 +60,30 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
+  @Suppress("SetterBackingFieldAssignment")
   @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
 
   @ManyToOne(optional = true)
-  var organizationOwner: Organization? = null
+  lateinit var organizationOwner: Organization
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
   var autoTranslationConfig: AutoTranslationConfig? = null
 
+  @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
+  var mtServiceConfig: MutableList<MtServiceConfig> = mutableListOf()
+
   @ActivityLoggedProp
   override var avatarHash: String? = null
 
-  constructor(name: String, description: String? = null, slug: String?, userOwner: UserAccount?) :
-    this(id = 0L, name, description, slug) {
-      this.userOwner = userOwner
-    }
-
-  constructor(
-    name: String,
-    description: String? = null,
-    slug: String?,
-    organizationOwner: Organization?,
-    userOwner: UserAccount? = null
-  ) :
+  constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
     this(id = 0L, name, description, slug) {
       this.organizationOwner = organizationOwner
-      this.userOwner = userOwner
     }
 
   fun getLanguage(tag: String): Optional<Language> {
@@ -104,7 +95,7 @@ class Project(
       @PrePersist
       @PreUpdate
       fun preSave(project: Project) {
-        if (!(project.organizationOwner == null).xor(project.userOwner == null)) {
+        if (!(!project::organizationOwner.isInitialized).xor(project.userOwner == null)) {
           throw Exception("Exactly one of organizationOwner or userOwner must be set!")
         }
       }

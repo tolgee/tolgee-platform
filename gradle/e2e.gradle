@@ -4,6 +4,7 @@ import java.time.Duration
 
 ext {
     E2E_DIR = "${project.projectDir}/e2e"
+    BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
 
@@ -13,7 +14,7 @@ def getE2eTestsToRun() {
     def jobIndex = System.getenv("E2E_JOB_INDEX")
     def list = []
 
-    def dir = new File("$E2E_DIR/cypress/integration")
+    def dir = new File("$E2E_DIR/cypress/e2e")
     dir.eachFileRecurse(FileType.FILES) { file ->
         if (file.path.matches("^.*\\.tsx?${'$'}")) {
             list.add(file.path.replace("$E2E_DIR/", ""))
@@ -76,7 +77,12 @@ task runE2e(type: Exec, group: "e2e") {
 
     workingDir E2E_DIR
 
-    finalizedBy "stopDockerE2e", "cleanupDockerE2e"
+    finalizedBy "saveServerLogs", "stopDockerE2e", "cleanupDockerE2e"
+}
+
+task saveServerLogs(type: Exec, group: "e2E"){
+    commandLine "bash", "-c", "docker-compose logs > server.log"
+    workingDir E2E_DIR
 }
 
 task openE2e(type: Exec, group: "e2e") {
@@ -95,6 +101,14 @@ task openE2eDev(type: Exec, group: "e2e") {
     environment "CYPRESS_HOST", "http://localhost:8081"
 
     workingDir E2E_DIR
+}
+
+task openBillingE2eDev(type: Exec, group: "e2e") {
+    commandLine "npm", "run", "cy:open"
+
+    environment "CYPRESS_HOST", "http://localhost:8081"
+
+    workingDir BILLING_E2E_DIR
 }
 
 task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {

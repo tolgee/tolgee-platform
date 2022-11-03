@@ -16,7 +16,8 @@ class SignUpService(
   private val userAccountService: UserAccountService,
   private val tolgeeProperties: TolgeeProperties,
   private val tokenProvider: JwtTokenProvider,
-  private val emailVerificationService: EmailVerificationService
+  private val emailVerificationService: EmailVerificationService,
+  private val organizationService: OrganizationService
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
@@ -27,7 +28,7 @@ class SignUpService(
       invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
     }
 
-    userAccountService.findOptional(dto.email).ifPresent {
+    userAccountService.find(dto.email)?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
@@ -36,8 +37,13 @@ class SignUpService(
       invitationService.accept(invitation.code, user)
     }
 
+    if (invitation == null || !dto.organizationName.isNullOrBlank()) {
+      val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
+      organizationService.createPreferred(user, name)
+    }
+
     if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)

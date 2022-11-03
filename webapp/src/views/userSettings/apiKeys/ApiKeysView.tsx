@@ -1,41 +1,43 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { Box } from '@mui/material';
-
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { Link, Route } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
-import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
-import { ApiKeysList } from './ApiKeysList';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { ApiKeyListItem } from './ApiKeyListItem';
+import { ApiKeysEmptyListMessage } from './ApiKeysEmptyListMessage';
+import { GenerateApiKeyDialog } from './GenerateApiKeyDialog';
+import { NewTokenType } from '../pats/PatListItem';
+import { components } from 'tg.service/apiSchema.generated';
+import { EditApiKeyDialog } from './EditApiKeyDialog';
+import { RegenerateApiKeyDialog } from './RegenerateApiKeyDialog';
+import { Box, styled } from '@mui/material';
+
+const StyledLink = styled(Link)`
+  color: ${({ theme }) => theme.palette.primary.main};
+  text-decoration: none;
+`;
 
 export const ApiKeysView: FunctionComponent = () => {
   const t = useTranslate();
+  const [page, setPage] = useState(0);
   const list = useApiQuery({
     url: '/v2/api-keys',
     query: {
       pageable: {
         size: 1000,
+        page,
+        sort: ['createdAt,desc'],
       },
     },
     method: 'get',
   });
 
-  const EditForm = () => (
-    <>
-      {list.isSuccess && (
-        <AddApiKeyFormDialog
-          editKey={list.data?._embedded?.apiKeys?.find(
-            (key) =>
-              key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID])
-          )}
-        />
-      )}
-    </>
-  );
+  const [newApiKey, setNewApiKey] = useState({
+    type: undefined as NewTokenType,
+    apiKey: null as components['schemas']['RevealedApiKeyModel'] | null,
+  });
 
   return (
     <>
@@ -43,35 +45,58 @@ export const ApiKeysView: FunctionComponent = () => {
         windowTitle={t('api_keys_title')}
         title={t('api_keys_title')}
         loading={list.isFetching}
+        navigation={[[t('user_menu_api_keys'), LINKS.USER_API_KEYS.build()]]}
         hideChildrenOnLoading={false}
+        containerMaxWidth="md"
+        addLinkTo={LINKS.USER_API_KEYS_GENERATE.build()}
       >
-        <>
-          {!list.data?.page?.totalElements ? (
-            <EmptyListMessage loading={list.isFetching}>
-              <T>No api keys yet!</T>
-            </EmptyListMessage>
-          ) : (
-            <ApiKeysList data={list.data._embedded!.apiKeys!} />
-          )}
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="flex-end"
-            mt={2}
-            pr={2}
-          >
-            <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
-          </Box>
-        </>
+        <Box sx={{ my: 2 }}>
+          <T parameters={{ link: <StyledLink to={LINKS.USER_PATS.build()} /> }}>
+            api-keys-description
+          </T>
+        </Box>
+        <PaginatedHateoasList
+          wrapperComponentProps={{ className: 'listWrapper' }}
+          onPageChange={setPage}
+          loadable={list}
+          renderItem={(apiKey) => {
+            const isNew = newApiKey.apiKey?.id === apiKey.id;
+            return (
+              <ApiKeyListItem
+                apiKey={apiKey}
+                newTokenType={isNew ? newApiKey.type : undefined}
+                newTokenValue={isNew ? newApiKey.apiKey?.key : undefined}
+              />
+            );
+          }}
+          emptyPlaceholder={
+            <ApiKeysEmptyListMessage loading={list.isFetching} />
+          }
+        />
       </BaseUserSettingsView>
-      <Switch>
-        <Route exact path={LINKS.USER_API_KEYS_EDIT.template}>
-          <EditForm />
-        </Route>
-        <Route exact path={LINKS.USER_API_KEYS_GENERATE.template}>
-          <AddApiKeyFormDialog />
-        </Route>
-      </Switch>
+      <Route exact path={LINKS.USER_API_KEYS_EDIT.template}>
+        <EditApiKeyDialog />
+      </Route>
+      <Route exact path={LINKS.USER_API_KEYS_GENERATE.template}>
+        <GenerateApiKeyDialog
+          onGenerated={(key) =>
+            setNewApiKey({
+              type: 'created',
+              apiKey: key,
+            })
+          }
+        />
+      </Route>
+      <Route exact path={LINKS.USER_API_KEYS_REGENERATE.template}>
+        <RegenerateApiKeyDialog
+          onGenerated={(key) =>
+            setNewApiKey({
+              type: 'regenerated',
+              apiKey: key,
+            })
+          }
+        />
+      </Route>
     </>
   );
 };

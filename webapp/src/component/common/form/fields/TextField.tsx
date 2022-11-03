@@ -30,7 +30,7 @@ export const TextField: FunctionComponent<Props> = (props) => {
       fullWidth={props.fullWidth ? props.fullWidth : true}
       {...field}
       {...otherProps}
-      helperText={meta.touched && meta.error}
+      helperText={(meta.touched && meta.error) || props.helperText}
       error={!!meta.error && meta.touched}
     />
   );

@@ -90,7 +90,7 @@ class ActivityRevision : java.io.Serializable {
 
       @PrePersist
       fun preRemove(activityRevision: ActivityRevision) {
-        activityRevision.timestamp = provider.`object`.getDate()
+        activityRevision.timestamp = provider.`object`.date
       }
     }
   }

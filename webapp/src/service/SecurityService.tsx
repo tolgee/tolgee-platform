@@ -49,6 +49,7 @@ export class SecurityService {
   logout() {
     this.removeAfterLoginLink();
     this.tokenService.disposeToken();
+    this.tokenService.disposeAdminToken();
   }
 
   async login(v: { username: string; password: string }): Promise<TokenDTO> {
@@ -61,6 +62,10 @@ export class SecurityService {
     });
 
     return this.handleLoginResponse(response);
+  }
+
+  setToken(token: string) {
+    this.tokenService.setToken(token);
   }
 
   public resetPasswordRequest = (email: string) => {

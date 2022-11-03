@@ -4,15 +4,19 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
+import io.tolgee.model.UserAccount
 import org.springframework.core.io.ClassPathResource
 
-class OrganizationBuilder(
+class
+OrganizationBuilder(
   val testDataBuilder: TestDataBuilder
 ) : BaseEntityDataBuilder<Organization, OrganizationBuilder>() {
   class DATA {
     var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
     var avatarFile: ClassPathResource? = null
   }
+
+  var defaultOrganizationOfUser: UserAccount? = null
 
   val data = DATA()
 

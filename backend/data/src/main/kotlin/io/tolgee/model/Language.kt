@@ -5,11 +5,14 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.events.OnLanguagePrePersist
+import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -18,6 +21,8 @@ import javax.persistence.FetchType
 import javax.persistence.Index
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
+import javax.persistence.PrePersist
 import javax.persistence.PreRemove
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
@@ -55,7 +60,7 @@ class Language : StandardAuditModel() {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
   var translations: MutableSet<Translation>? = null
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
   @Column(nullable = false)
@@ -76,6 +81,12 @@ class Language : StandardAuditModel() {
   @ActivityLoggedProp
   @ActivityDescribingProp
   var flagEmoji: String? = null
+
+  @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
+  var mtServiceConfig: MtServiceConfig? = null
+
+  @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var stats: LanguageStats? = null
 
   fun updateByDTO(dto: LanguageDto) {
     name = dto.name
@@ -102,12 +113,21 @@ class Language : StandardAuditModel() {
     @Configurable
     class LanguageListeners {
       @Autowired
-      lateinit var provider: ObjectFactory<ImportService>
+      lateinit var importServiceProvider: ObjectFactory<ImportService>
+
+      @Autowired
+      lateinit var eventPublisherProvider: ObjectFactory<ApplicationEventPublisher>
+
+      @PrePersist
+      fun prePersist(language: Language) {
+        eventPublisherProvider.`object`.publishEvent(OnLanguagePrePersist(source = this, language))
+      }
 
       @PreRemove
       @Transactional
       fun preRemove(language: Language) {
-        provider.`object`.onExistingLanguageRemoved(language)
+        importServiceProvider.`object`.onExistingLanguageRemoved(language)
+        eventPublisherProvider.`object`.publishEvent(OnLanguagePreRemove(source = this, language))
       }
     }
   }

@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -24,7 +25,7 @@ class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
 ) {
   @set:Autowired
   @set:Lazy
@@ -47,9 +48,9 @@ class LanguageService(
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByLanguage(language.id)
-    mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
+    entityManager.flush()
   }
 
   @Transactional
@@ -73,6 +74,15 @@ class LanguageService(
     return languageRepository.findAllByProjectId(projectId).toSet()
   }
 
+  fun get(id: Long): Language {
+    return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  fun find(id: Long): Language? {
+    return languageRepository.findById(id).orElse(null)
+  }
+
+  @Deprecated("use find method", replaceWith = ReplaceWith("find"))
   fun findById(id: Long): Optional<Language> {
     return languageRepository.findById(id)
   }
@@ -88,7 +98,7 @@ class LanguageService(
   fun findByTags(tags: Collection<String>, projectId: Long): Set<Language> {
     val languages = languageRepository.findAllByTagInAndProjectId(tags, projectId)
     if (languages.size < tags.size) {
-      throw NotFoundException(io.tolgee.constants.Message.LANGUAGE_NOT_FOUND)
+      throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     }
     val sortedByTagsParam = languages.sortedBy { language ->
       tags.indexOfFirst { tag -> language.tag == tag }
@@ -96,6 +106,7 @@ class LanguageService(
     return sortedByTagsParam.toSet()
   }
 
+  @Transactional
   fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long): Set<Language> {
     return if (languages == null) {
       getImplicitLanguages(projectId)
@@ -106,8 +117,14 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
-  fun deleteAllByProject(projectId: Long?) {
-    languageRepository.deleteAllByProjectId(projectId)
+  fun deleteAllByProject(projectId: Long) {
+    findAll(projectId).forEach {
+      deleteLanguage(it.id)
+    }
+  }
+
+  fun save(language: Language): Language {
+    return this.languageRepository.save(language)
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {

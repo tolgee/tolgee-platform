@@ -47,7 +47,7 @@ export const ProjectLanguagesProvider: FunctionComponent = (props) => {
     translationActions.select.dispatch(null);
     if (languagesLoadable.data) {
       if (languagesLoadable.data._embedded?.languages?.length) {
-        const selection = selectedLanguagesService.getUpdated(
+        const selection = selectedLanguagesService.getFiltered(
           projectDTO.id,
           languagesLoadable.data._embedded.languages.map((l) => l.tag) || []
         );

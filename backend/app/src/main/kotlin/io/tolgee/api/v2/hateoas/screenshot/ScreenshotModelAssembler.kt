@@ -19,23 +19,41 @@ class ScreenshotModelAssembler(
   V2TranslationsController::class.java, ScreenshotModel::class.java
 ) {
   override fun toModel(entity: Screenshot): ScreenshotModel {
-    var filename = entity.filename
-    if (tolgeeProperties.authentication.securedImageRetrieval) {
-      filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
-    }
+    val filenameWithSignature = getFilenameWithSignature(entity.filename)
+    val thumbnailFilenameWithSignature = getFilenameWithSignature(entity.thumbnailFilename)
 
+    val fileUrl = getFileUrl(filenameWithSignature)
+    val thumbnailUrl = getFileUrl(thumbnailFilenameWithSignature)
+
+    return ScreenshotModel(
+      id = entity.id,
+      filename = filenameWithSignature,
+      thumbnail = thumbnailFilenameWithSignature,
+      fileUrl = fileUrl,
+      thumbnailUrl = thumbnailUrl,
+      createdAt = entity.createdAt
+    )
+      .add(Link.of(fileUrl, "file"))
+      .add(Link.of(thumbnailUrl, "thumbnail"))
+  }
+
+  private fun getFileUrl(filename: String): String {
     var fileUrl = "${tolgeeProperties.fileStorageUrl}/${FileStoragePath.SCREENSHOTS}/$filename"
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl = builder.replacePath(fileUrl)
         .replaceQuery("").build().toUriString()
     }
+    return fileUrl
+  }
 
-    return ScreenshotModel(
-      id = entity.id,
-      filename = filename,
-      fileUrl = fileUrl,
-      createdAt = entity.createdAt
-    ).add(Link.of(fileUrl, "file"))
+  private fun getFilenameWithSignature(filename: String): String {
+    var filenameWithSignature = filename
+    if (tolgeeProperties.authentication.securedImageRetrieval) {
+      filenameWithSignature = "$filenameWithSignature?timestamp=${
+      timestampValidation.encryptTimeStamp(filename, Date().time)
+      }"
+    }
+    return filenameWithSignature
   }
 }

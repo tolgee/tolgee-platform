@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -6,12 +8,12 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  MenuItem,
   TextField,
   Typography,
 } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { T } from '@tolgee/react';
-import { Alert, Autocomplete } from '@mui/material';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
@@ -19,7 +21,6 @@ import { useDebounce } from 'use-debounce/lib';
 import { Warning } from '@mui/icons-material';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
-import { MenuItem } from '@mui/material';
 
 const messaging = container.resolve(MessageService);
 
@@ -43,49 +44,23 @@ export const ProjectTransferModal: FC<{
     invalidatePrefix: '/v2/projects',
   });
 
-  const transferToUser = useApiMutation({
-    url: '/v2/projects/{projectId}/transfer-to-user/{userId}',
-    method: 'put',
-    invalidatePrefix: '/v2/projects',
-  });
-
   const onTransfer = () => {
-    if (newOwner?.type === 'ORGANIZATION') {
-      transferToOrganization.mutate(
-        {
-          path: {
-            projectId: project.id,
-            organizationId: newOwner.id,
-          },
+    transferToOrganization.mutate(
+      {
+        path: {
+          projectId: project.id,
+          organizationId: newOwner!.id,
         },
-        {
-          onSuccess() {
-            messaging.success(<T>project_transferred_message</T>);
-          },
-          onError(e) {
-            throw new Error(e);
-          },
-        }
-      );
-    }
-    if (newOwner?.type === 'USER') {
-      transferToUser.mutate(
-        {
-          path: {
-            projectId: project.id,
-            userId: newOwner.id,
-          },
+      },
+      {
+        onSuccess() {
+          messaging.success(<T>project_transferred_message</T>);
         },
-        {
-          onSuccess() {
-            messaging.success(<T>project_transferred_message</T>);
-          },
-          onError(e) {
-            throw new Error(e);
-          },
-        }
-      );
-    }
+        onError(e) {
+          throw new Error(e);
+        },
+      }
+    );
     props.onClose();
   };
 
@@ -138,13 +113,7 @@ export const ProjectTransferModal: FC<{
             renderOption={(props, option) => (
               <MenuItem {...props}>
                 <span data-cy="project-transfer-autocomplete-suggested-option">
-                  {option.name} (
-                  {option.type === 'ORGANIZATION' ? (
-                    <T>transfer_option_organization</T>
-                  ) : (
-                    <T>transfer_option_user</T>
-                  )}
-                  )
+                  {option.name} (<T>transfer_option_organization</T>)
                 </span>
               </MenuItem>
             )}

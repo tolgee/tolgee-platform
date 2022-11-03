@@ -20,7 +20,9 @@ class UserAccountModelAssembler(
       username = entity.username,
       name = entity.name,
       emailAwaitingVerification = entity.emailVerification?.newEmail,
-      avatar = avatar
+      avatar = avatar,
+      globalServerRole = entity.role ?: UserAccount.Role.USER,
+      deleted = entity.deletedAt != null
     )
   }
 }

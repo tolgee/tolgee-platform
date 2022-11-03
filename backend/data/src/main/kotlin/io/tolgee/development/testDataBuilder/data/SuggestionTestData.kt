@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
-import com.github.javafaker.Faker
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import net.datafaker.Faker
 import java.util.*
 
 class SuggestionTestData : BaseTestData() {
@@ -30,7 +30,6 @@ class SuggestionTestData : BaseTestData() {
           text = "Beautiful"
         }
         addTranslation {
-
           language = germanLanguage
           key = this@keyBuilder.self
           text = "Wunderschönen"
@@ -105,7 +104,8 @@ class SuggestionTestData : BaseTestData() {
   fun enableAll() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
+      this.enabledServices =
+        mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE)
       this.primaryService = MtServiceType.AWS
     }
   }
@@ -113,7 +113,8 @@ class SuggestionTestData : BaseTestData() {
   fun enableAllGooglePrimary() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
+      this.enabledServices =
+        mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE)
       this.primaryService = MtServiceType.GOOGLE
     }
   }
@@ -145,6 +146,13 @@ class SuggestionTestData : BaseTestData() {
           }
         }
       }
+    }
+  }
+
+  fun addBucketWithExtraCredits() {
+    userAccountBuilder.defaultOrganizationBuilder.addMtCreditBucket {
+      credits = 1000
+      extraCredits = 1000
     }
   }
 }

@@ -4,6 +4,7 @@ import { StyledEngineProvider } from '@mui/material/styles';
 import { TolgeeProvider } from '@tolgee/react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
 import 'reflect-metadata';
@@ -14,6 +15,7 @@ import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
 import { TopBarProvider } from 'tg.component/layout/TopBar/TopBarContext';
+import { GlobalProvider } from 'tg.globalContext/GlobalContext';
 import { App } from './component/App';
 import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
@@ -22,6 +24,7 @@ import { ThemeProvider } from './ThemeProvider';
 import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
+import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 
 const store = configureStore();
 
@@ -55,34 +58,40 @@ const MainWrapper = () => {
           es: () => import('./i18n/es.json'),
           cs: () => import('./i18n/cs.json'),
           fr: () => import('./i18n/fr.json'),
-          de: () => import('./i18n/de.json'),
+          de: () => import('./i18n/de.json') as any,
         }}
         loadingFallback={<FullPageLoading />}
       >
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider>
-            <CssBaseline />
-            <Provider store={store}>
-              <QueryClientProvider client={queryClient}>
-                {/* @ts-ignore */}
-                <ErrorBoundary>
-                  <SnackbarProvider data-cy="global-snackbars">
-                    <LoadingProvider>
-                      <BottomPanelProvider>
-                        <TopBarProvider>
-                          <GlobalLoading />
-                          <App />
-                          <GlobalErrorModal />
-                        </TopBarProvider>
-                      </BottomPanelProvider>
-                    </LoadingProvider>
-                  </SnackbarProvider>
-                </ErrorBoundary>
-                <ReactQueryDevtools />
-              </QueryClientProvider>
-            </Provider>
-          </ThemeProvider>
-        </StyledEngineProvider>
+        <BrowserRouter>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider>
+              <CssBaseline />
+              <Provider store={store}>
+                <QueryClientProvider client={queryClient}>
+                  {/* @ts-ignore */}
+                  <ErrorBoundary>
+                    <SnackbarProvider data-cy="global-snackbars">
+                      <LoadingProvider>
+                        <GlobalProvider>
+                          <BottomPanelProvider>
+                            <TopBarProvider>
+                              <GlobalLoading />
+                              <MuiLocalizationProvider>
+                                <App />
+                              </MuiLocalizationProvider>
+                              <GlobalErrorModal />
+                            </TopBarProvider>
+                          </BottomPanelProvider>
+                        </GlobalProvider>
+                      </LoadingProvider>
+                    </SnackbarProvider>
+                  </ErrorBoundary>
+                  <ReactQueryDevtools />
+                </QueryClientProvider>
+              </Provider>
+            </ThemeProvider>
+          </StyledEngineProvider>{' '}
+        </BrowserRouter>
       </TolgeeProvider>
     </React.Suspense>
   );

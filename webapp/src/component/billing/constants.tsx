@@ -1,0 +1,1 @@
+export const BILLING_CRITICAL_PERCENT = 15;

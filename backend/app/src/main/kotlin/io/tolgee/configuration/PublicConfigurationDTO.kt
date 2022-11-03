@@ -4,13 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 import io.tolgee.util.VersionProvider
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
   @Schema(hidden = true)
   properties: TolgeeProperties,
-  val machineTranslationServices: MtServicesDTO
+  val machineTranslationServices: MtServicesDTO,
+  val billing: PublicBillingConfigurationDTO
 ) {
 
   val authentication: Boolean = properties.authentication.enabled
@@ -21,14 +23,7 @@ class PublicConfigurationDTO(
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = properties.sentry.clientDsn
   val needsEmailVerification = properties.authentication.needsEmailVerification
-  val userCanCreateProjects = properties.authentication.userCanCreateProjects
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
-  val socket = SocketIo(
-    enabled = properties.socketIo.enabled,
-    port = properties.socketIo.port,
-    serverUrl = properties.socketIo.externalUrl,
-    allowedTransports = properties.socketIo.allowedTransports
-  )
   val appName = properties.appName
   val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
@@ -64,8 +59,6 @@ class PublicConfigurationDTO(
     val enabled: Boolean,
     val defaultEnabledForProject: Boolean
   )
-
-  data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?, val allowedTransports: List<String>)
 
   init {
     if (authentication) {

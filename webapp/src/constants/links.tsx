@@ -55,6 +55,7 @@ export enum PARAMS {
   PROJECT_ID = 'projectId',
   LANGUAGE_ID = 'languageId',
   API_KEY_ID = 'languageId',
+  PAT_ID = 'patId',
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
@@ -94,11 +95,15 @@ export class LINKS {
     'accept_invitation/' + p(PARAMS.INVITATION_CODE)
   );
 
+  static GO_TO_ORGANIZATION = Link.ofRoot('billing');
+
   /**
    * Authenticated user stuff
    */
 
-  static USER_API_KEYS = Link.ofRoot('apiKeys');
+  static USER_SETTINGS = Link.ofRoot('account');
+
+  static USER_API_KEYS = Link.ofParent(LINKS.USER_SETTINGS, 'apiKeys');
 
   static USER_API_KEYS_GENERATE = Link.ofParent(
     LINKS.USER_API_KEYS,
@@ -110,7 +115,59 @@ export class LINKS {
     'edit/' + p(PARAMS.API_KEY_ID)
   );
 
-  static USER_SETTINGS = Link.ofRoot('user');
+  static USER_API_KEYS_REGENERATE = Link.ofParent(
+    LINKS.USER_API_KEYS,
+    `regenerate/${p(PARAMS.API_KEY_ID)}`
+  );
+
+  static USER_PATS = Link.ofParent(
+    LINKS.USER_SETTINGS,
+    'personal-access-tokens'
+  );
+
+  static USER_PATS_GENERATE = Link.ofParent(LINKS.USER_PATS, 'generate');
+
+  static USER_PATS_REGENERATE = Link.ofParent(
+    LINKS.USER_PATS,
+    `regenerate/${p(PARAMS.PAT_ID)}`
+  );
+
+  static USER_PATS_EDIT = Link.ofParent(
+    LINKS.USER_PATS,
+    `edit/${p(PARAMS.PAT_ID)}`
+  );
+
+  static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');
+
+  static USER_ACCOUNT_SECURITY = Link.ofParent(LINKS.USER_SETTINGS, 'security');
+
+  static USER_ACCOUNT_SECURITY_MFA_ENABLE = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'enable-mfa'
+  );
+
+  static USER_ACCOUNT_SECURITY_MFA_RECOVERY = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'mfa-recovery-codes'
+  );
+
+  static USER_ACCOUNT_SECURITY_MFA_DISABLE = Link.ofParent(
+    LINKS.USER_ACCOUNT_SECURITY,
+    'disable-mfa'
+  );
+
+  /**
+   * Administration
+   */
+
+  static ADMINISTRATION = Link.ofRoot('administration');
+
+  static ADMINISTRATION_ORGANIZATIONS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'organizations'
+  );
+
+  static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
   /**
    * Organizations
@@ -138,7 +195,7 @@ export class LINKS {
     'invitations'
   );
 
-  static ORGANIZATION_PROJECTS = Link.ofParent(LINKS.ORGANIZATION, 'projects');
+  static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
   /**
    * Project stuff
@@ -165,9 +222,9 @@ export class LINKS {
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
-  static PROJECT_SOCKET_IO_PREVIEW = Link.ofParent(
+  static PROJECT_WEBSOCKETS_PREVIEW = Link.ofParent(
     LINKS.PROJECT,
-    'socket_io_preview'
+    'websockets'
   );
 
   static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');

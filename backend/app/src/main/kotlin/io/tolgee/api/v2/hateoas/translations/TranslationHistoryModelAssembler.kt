@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TranslationHistoryModelAssembler(
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
 ) : RepresentationModelAssemblerSupport<TranslationHistoryView, TranslationHistoryModel>(
   V2TranslationsController::class.java, TranslationHistoryModel::class.java
 ) {
@@ -23,7 +23,8 @@ class TranslationHistoryModelAssembler(
           id = it,
           name = view.authorName,
           username = view.authorEmail ?: "",
-          avatar = avatar
+          avatar = avatar,
+          deleted = view.authorDeletedAt != null
         )
       },
       timestamp = view.timestamp.time,

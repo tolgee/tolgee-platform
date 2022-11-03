@@ -25,6 +25,8 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+  jmx:
+    enabled: false
 tolgee:
   postgres-autostart:
     enabled: true
@@ -47,6 +49,7 @@ tolgee:
       user-url: "https://example.com/userinfo"
   internal:
     fake-mt-providers: true
+    mock-free-plan: true
   socket-io:
     port: 19090
     enabled: false
@@ -59,6 +62,8 @@ tolgee:
     aws:
       accessKey: aaa
       secretKey: aaa
+  billing:
+    enabled: false
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG

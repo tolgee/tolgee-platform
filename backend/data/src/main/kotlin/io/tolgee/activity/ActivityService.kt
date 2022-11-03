@@ -3,16 +3,16 @@ package io.tolgee.activity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewDataProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
+import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import javax.persistence.EntityManager
 
 @Service
@@ -22,22 +22,21 @@ class ActivityService(
   private val applicationContext: ApplicationContext,
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
 ) {
+  @Transactional
   fun storeActivityData(activityHolder: ActivityHolder) {
     val activityRevision = activityHolder.activityRevision ?: return
-    val modifiedEntities = activityHolder.modifiedEntities
+    activityRevision.modifiedEntities = activityHolder.modifiedEntities.values.flatMap { it.values }.toMutableList()
 
-    val tt = TransactionTemplate(transactionManager)
-    tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
-
-    tt.executeWithoutResult {
+    executeInNewTransaction(transactionManager) {
       entityManager.persist(activityRevision)
       activityRevision.describingRelations.forEach {
         entityManager.persist(it)
       }
-      modifiedEntities.values.flatMap { it.values }.forEach { activityModifiedEntity ->
+      activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
         entityManager.persist(activityModifiedEntity)
       }
     }
+    applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }
 
   @Transactional

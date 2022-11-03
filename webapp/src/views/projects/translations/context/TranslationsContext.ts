@@ -9,25 +9,26 @@ import { useTranslationsService } from './services/useTranslationsService';
 import { useEditService } from './services/useEditService';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
-  CellPosition,
   AddTag,
   AddTranslation,
+  CellPosition,
+  ChangeScreenshotNum,
   ChangeValue,
+  Edit,
+  Filters,
   KeyElement,
   RemoveTag,
   ScrollToElement,
+  SetTranslationState,
   UpdateTranslation,
   ViewMode,
-  Filters,
-  ChangeScreenshotNum,
-  SetTranslationState,
-  Edit,
 } from './types';
 import { useRefsService } from './services/useRefsService';
 import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
+import { useWebsocketListener } from './services/useWebsocketListener';
 
 type ActionType =
   | { type: 'SET_SEARCH'; payload: string }
@@ -113,6 +114,8 @@ export const [
     baseLang: props.baseLang,
   });
 
+  useWebsocketListener(translationService);
+
   const viewRefs = useRefsService();
 
   const editService = useEditService({
@@ -165,7 +168,7 @@ export const [
       case 'CHANGE_FIELD':
         return editService.changeField(action.payload);
       case 'SELECT_LANGUAGES':
-        translationService.updateQuery({ languages: action.payload });
+        translationService.setLanguages(action.payload);
         return handleTranslationsReset();
       case 'UPDATE_LANGUAGES':
         translationService.updateQuery({});

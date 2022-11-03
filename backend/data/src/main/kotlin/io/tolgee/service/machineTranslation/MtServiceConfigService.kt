@@ -99,22 +99,31 @@ class MtServiceConfigService(
   }
 
   fun getProjectSettings(project: Project): List<MtServiceConfig> {
-    return getStoredConfigs(project.id).sortedBy { it.targetLanguage == null }.toMutableList().also { configs ->
-      if (configs.find { it.targetLanguage == null } == null) {
-        val defaultConfig = MtServiceConfig().apply {
-          enabledServices = services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
-            .keys.toMutableSet()
-          this.project = project
-          primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
+    return getStoredConfigs(project.id)
+      .sortedBy { it.targetLanguage?.tag }
+      .sortedBy { it.targetLanguage != null }
+      .toMutableList()
+      .also { configs ->
+        val thereIsNoDefaultConfig = configs.find { it.targetLanguage == null } == null
+        if (thereIsNoDefaultConfig) {
+          val defaultConfig = getDefaultConfig(project)
+          configs.add(0, defaultConfig)
         }
-        configs.add(0, defaultConfig)
+        configs.forEach { config ->
+          // put primary service first
+          config.enabledServices = config.enabledServices
+            .sortedByDescending { config.primaryService == it }
+            .toSortedSet()
+        }
       }
-      configs.forEach { config ->
-        // put primary service first
-        config.enabledServices = config.enabledServices
-          .sortedByDescending { config.primaryService == it }
-          .toSortedSet()
-      }
+  }
+
+  private fun getDefaultConfig(project: Project): MtServiceConfig {
+    return MtServiceConfig().apply {
+      enabledServices = services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
+        .keys.toMutableSet()
+      this.project = project
+      primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
     }
   }
 

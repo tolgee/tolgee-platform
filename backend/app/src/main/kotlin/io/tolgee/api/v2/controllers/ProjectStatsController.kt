@@ -6,15 +6,12 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModel
+import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
-import io.tolgee.model.views.projectStats.ProjectStatsView
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
 import org.springframework.hateoas.MediaTypes
@@ -32,7 +29,9 @@ import java.time.LocalDate
 class ProjectStatsController(
   private val projectStatsService: ProjectStatsService,
   private val projectHolder: ProjectHolder,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
+  private val languageStatsService: LanguageStatsService,
+  private val languageStatsModelAssembler: LanguageStatsModelAssembler
 ) {
   @Operation(summary = "Returns project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -40,32 +39,23 @@ class ProjectStatsController(
   @AccessWithApiKey
   fun getProjectStats(): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
-    val languageStats = projectStatsService.getLanguageStats(projectHolder.project.id)
-
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
-    val baseStats = languageStats.find { it.languageId == baseLanguage?.id }
-      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+    val languageStats = languageStatsService.getLanguageStats(projectHolder.project.id)
+      .sortedBy { it.language.name }
+      .sortedBy { it.language.id != baseLanguage?.id }
 
-    val nonBaseLanguages = languageStats.filter { it.languageId != baseStats.languageId }
-    val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
-
-    val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
-    val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
-    val allNonBaseTotalReviewedWords = nonBaseLanguages.sumOf { it.reviewedWords }
-
-    val translatedPercent = (allNonBaseTotalTranslatedWords.toDouble() / allNonBaseTotalBaseWords) * 100
-    val reviewedPercent = (allNonBaseTotalReviewedWords.toDouble() / allNonBaseTotalBaseWords) * 100
+    val totals = projectStatsService.computeProjectTotals(baseLanguage, languageStats)
 
     return ProjectStatsModel(
       projectId = projectStats.id,
       languageCount = languageStats.size,
       keyCount = projectStats.keyCount,
-      baseWordsCount = baseWordsCount,
-      translatedPercentage = translatedPercent,
-      reviewedPercentage = reviewedPercent,
+      baseWordsCount = totals.baseWordsCount,
+      translatedPercentage = totals.translatedPercent,
+      reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = getSortedLanguageStatModels(languageStats, baseStats, projectStats)
+      languageStats = languageStats.map { languageStatsModelAssembler.toModel(it) }
     )
   }
 
@@ -75,32 +65,5 @@ class ProjectStatsController(
   @AccessWithApiKey
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
-  }
-
-  private fun getSortedLanguageStatModels(
-    languageStats: List<ProjectLanguageStatsResultView>,
-    baseStats: ProjectLanguageStatsResultView,
-    projectStats: ProjectStatsView
-  ) = languageStats.sortedBy { it.languageName }.sortedBy { it.languageId != baseStats.languageId }.map {
-    val baseWords = baseStats.translatedWords + baseStats.reviewedWords
-    val translatedOrReviewedKeys = it.translatedKeys + it.reviewedKeys
-    val translatedOrReviewedWords = it.translatedWords + it.reviewedWords
-    val untranslatedWords = baseWords - translatedOrReviewedWords
-    LanguageStatsModel(
-      languageId = it.languageId,
-      languageTag = it.languageTag,
-      languageName = it.languageName,
-      languageOriginalName = it.languageOriginalName,
-      languageFlagEmoji = it.languageFlagEmoji,
-      translatedKeyCount = it.translatedKeys,
-      translatedWordCount = it.translatedWords,
-      translatedPercentage = it.translatedWords.toDouble() / baseWords * 100,
-      reviewedKeyCount = it.reviewedKeys,
-      reviewedWordCount = it.reviewedWords,
-      reviewedPercentage = it.reviewedWords.toDouble() / baseWords * 100,
-      untranslatedKeyCount = projectStats.keyCount - translatedOrReviewedKeys,
-      untranslatedWordCount = baseWords - translatedOrReviewedWords,
-      untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100,
-    )
   }
 }

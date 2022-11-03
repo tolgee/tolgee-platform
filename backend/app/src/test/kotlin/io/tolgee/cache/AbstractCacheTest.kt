@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
+import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -64,16 +65,17 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       name = "Account"
       id = 10
     }
-    whenever(userAccountRepository.findById(user.id)).then { Optional.of(user) }
-    userAccountService.getDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findById(user.id)
-    userAccountService.getDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findById(user.id)
+    whenever(userAccountRepository.findNotDeleted(user.id)).then { user }
+    userAccountService.findDto(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
+    userAccountService.findDto(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
   }
 
   @Test
   fun `caches project`() {
     val project = Project(id = 1)
+    project.organizationOwner = Organization()
     whenever(projectRepository.findById(project.id)).then { Optional.of(project) }
     projectService.findDto(project.id)
     Mockito.verify(projectRepository, times(1)).findById(project.id)

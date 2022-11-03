@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.ApiScope
+import org.hibernate.validator.constraints.Length
 import java.util.stream.Collectors
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotEmpty
@@ -22,7 +23,18 @@ data class CreateApiKeyDto(
     ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
     """
   )
-  var scopes: Set<ApiScope> = setOf()
+  var scopes: Set<ApiScope> = setOf(),
+
+  @Schema(description = "Description of the project API key")
+  @field:Length(max = 250, min = 1)
+  var description: String? = null,
+
+  @Schema(
+    description = "Expiration date in epoch format (milliseconds)." +
+      " When null key never expires.",
+    example = "1661172869000"
+  )
+  val expiresAt: Long? = null
 ) {
 
   @Suppress("unused")

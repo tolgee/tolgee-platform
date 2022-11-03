@@ -15,6 +15,7 @@ class AuthenticationProperties(
   var enabled: Boolean = true,
   var jwtSecret: String? = null,
   var jwtExpiration: Int = 604800000,
+  var jwtSuperExpiration: Int = 60 * 60 * 1000, // one hour,
   var nativeEnabled: Boolean = true,
   var registrationsAllowed: Boolean = false,
   @E2eRuntimeMutable
@@ -28,9 +29,8 @@ class AuthenticationProperties(
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
   var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
-  var userCanCreateProjects: Boolean = true,
+  @E2eRuntimeMutable
   var userCanCreateOrganizations: Boolean = true
-
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {

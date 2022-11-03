@@ -2,12 +2,12 @@ import { FunctionComponent, useEffect } from 'react';
 import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { CompactView } from 'tg.component/layout/CompactView';
@@ -17,6 +17,7 @@ import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
+import { useLogout } from 'tg.hooks/useLogout';
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -28,8 +29,12 @@ type ValueType = {
 const PasswordResetSetView: FunctionComponent = () => {
   const t = useTranslate();
   const match = useRouteMatch();
+  const user = useUser();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];
   const [code, email] = atob(encodedData).split(',');
+
+  const logout = useLogout();
+  const history = useHistory();
 
   useEffect(() => {
     globalActions.resetPasswordValidate.dispatch(email, code);
@@ -53,11 +58,16 @@ const PasswordResetSetView: FunctionComponent = () => {
 
   if (
     !remoteConfig.authentication ||
-    security.allowPrivate ||
+    (security.allowPrivate && user && user.accountType !== 'THIRD_PARTY') ||
     !remoteConfig.passwordResettable ||
     success
   ) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+    logout();
+    history.push(LINKS.AFTER_LOGIN.build());
+  }
+
+  if (passwordResetSetError && !passwordResetSetValidated) {
+    history.push(LINKS.AFTER_LOGIN.build());
   }
 
   return (

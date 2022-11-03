@@ -5,6 +5,7 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { MessageService } from '../MessageService';
 import { TokenService } from '../TokenService';
 import { paths } from '../apiSchema.generated';
+
 import { ApiHttpService, RequestOptions } from './ApiHttpService';
 
 @singleton()
@@ -19,26 +20,30 @@ export class ApiSchemaHttpService extends ApiHttpService {
 
   apiUrl = process.env.REACT_APP_API_URL as string;
 
-  schemaRequest<Url extends keyof paths, Method extends keyof paths[Url]>(
-    url: Url,
-    method: Method,
-    options?: RequestOptions
-  ) {
-    return async (request: RequestParamsType<Url, Method>) => {
+  schemaRequest<
+    Url extends keyof Paths,
+    Method extends keyof Paths[Url],
+    Paths = paths
+  >(url: Url, method: Method, options?: RequestOptions) {
+    return async (request: RequestParamsType<Url, Method, Paths>) => {
       const response = await ApiHttpService.getResObject(
-        await this.schemaRequestRaw(url, method, options)(request),
+        await this.schemaRequestRaw<Url, Method, Paths>(
+          url,
+          method,
+          options
+        )(request),
         options
       );
-      return response as Promise<ResponseContent<Url, Method>>;
+      return response as Promise<ResponseContent<Url, Method, Paths>>;
     };
   }
 
-  schemaRequestRaw<Url extends keyof paths, Method extends keyof paths[Url]>(
-    url: Url,
-    method: Method,
-    options?: RequestOptions
-  ) {
-    return async (request: RequestParamsType<Url, Method>) => {
+  schemaRequestRaw<
+    Url extends keyof Paths,
+    Method extends keyof Paths[Url],
+    Paths
+  >(url: Url, method: Method, options?: RequestOptions) {
+    return async (request: RequestParamsType<Url, Method, Paths>) => {
       const pathParams = request?.path;
       let urlResult = url as string;
 
@@ -116,28 +121,48 @@ const flattenParams = (params: Params | null | undefined) => {
 };
 
 export type RequestParamsType<
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
-> = OperationSchema<Url, Method>['parameters'] &
-  OperationSchema<Url, Method>['requestBody'];
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = OperationSchema<Url, Method, Paths>['parameters'] &
+  OperationSchema<Url, Method, Paths>['requestBody'];
 
 export type ResponseContent<
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
-> = OperationSchema<Url, Method>['responses'][200] extends NotNullAnyContent
-  ? OperationSchema<Url, Method>['responses'][200]['content']['*/*']
-  : OperationSchema<Url, Method>['responses'][200] extends NotNullJsonHalContent
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths
+> = OperationSchema<
+  Url,
+  Method,
+  Paths
+>['responses'][200] extends NotNullAnyContent
+  ? OperationSchema<Url, Method, Paths>['responses'][200]['content']['*/*']
+  : OperationSchema<
+      Url,
+      Method,
+      Paths
+    >['responses'][200] extends NotNullJsonHalContent
   ? OperationSchema<
       Url,
-      Method
+      Method,
+      Paths
     >['responses'][200]['content']['application/hal+json']
-  : OperationSchema<Url, Method>['responses'][200] extends NotNullJsonContent
+  : OperationSchema<
+      Url,
+      Method,
+      Paths
+    >['responses'][200] extends NotNullJsonContent
   ? OperationSchema<
       Url,
-      Method
+      Method,
+      Paths
     >['responses'][200]['content']['application/json']
-  : OperationSchema<Url, Method>['responses'][201] extends NotNullAnyContent
-  ? OperationSchema<Url, Method>['responses'][201]['content']['*/*']
+  : OperationSchema<
+      Url,
+      Method,
+      Paths
+    >['responses'][201] extends NotNullAnyContent
+  ? OperationSchema<Url, Method, Paths>['responses'][201]['content']['*/*']
   : void;
 
 type NotNullAnyContent = {
@@ -192,6 +217,7 @@ type OperationSchemaType = {
 };
 
 type OperationSchema<
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
-> = paths[Url][Method] extends OperationSchemaType ? paths[Url][Method] : never;
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = Paths[Url][Method] extends OperationSchemaType ? Paths[Url][Method] : never;

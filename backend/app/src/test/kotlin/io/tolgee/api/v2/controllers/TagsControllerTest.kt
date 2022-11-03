@@ -36,9 +36,21 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("_embedded.tags") {
         isArray.hasSize(20)
         node("[0].id").isValidId
-        node("[0].name").isEqualTo("test")
+        node("[0].name").isEqualTo("existing tag")
       }
       node("page.totalElements").isNumber.isGreaterThan(BigDecimal(390))
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `project tags are returned in order`() {
+    performProjectAuthGet("tags?page=5").andAssertThatJson {
+      node("_embedded.tags") {
+        isArray.hasSize(20)
+        node("[0].name").isEqualTo("tag 14 12")
+        node("[19].name").isEqualTo("tag 15 10")
+      }
     }
   }
 
@@ -49,7 +61,7 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("_embedded.tags") {
         isArray.hasSize(20)
         node("[0].id").isValidId
-        node("[0].name").isEqualTo("tag 2 18")
+        node("[0].name").isEqualTo("tag 11 3")
       }
     }
   }
@@ -122,11 +134,6 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   fun Key.refresh(): Key {
-    entityManager.flush()
-    entityManager.clear()
-    val key = entityManager.merge(this)
-    entityManager.refresh(key)
-    entityManager.refresh(key.keyMeta)
-    return key
+    return keyService.get(this.id)
   }
 }

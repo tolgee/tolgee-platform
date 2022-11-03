@@ -3,6 +3,7 @@ import { Box, styled } from '@mui/material';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useCurrentLanguage } from '@tolgee/react';
 import { ActivityModel } from './types';
+import { UserName } from '../common/UserName';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -49,11 +50,18 @@ export const ActivityUser: React.FC<Props> = ({ item, onlyTime }) => {
               type: 'USER',
               id: item.author.id,
               avatar: item.author.avatar,
+              deleted: item.author.deleted,
             }}
           />
         </StyledAvatar>
       )}
-      <StyledUser gridArea="user">{item.author?.name}</StyledUser>
+      <StyledUser gridArea="user">
+        {item.author?.deleted ? (
+          <UserName {...item.author} />
+        ) : (
+          item.author?.name
+        )}
+      </StyledUser>
       <Box gridArea="time">
         <StyledTime>
           {!onlyTime && date.toLocaleDateString(lang()) + ' '}

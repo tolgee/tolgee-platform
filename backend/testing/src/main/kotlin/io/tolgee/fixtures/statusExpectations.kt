@@ -8,6 +8,7 @@ import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.BigDecimalAssert
+import org.assertj.core.api.ListAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
@@ -15,6 +16,9 @@ import java.nio.charset.StandardCharsets
 
 val ResultActions.andIsOk: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isOk) }
+
+val ResultActions.andIsUnauthorized: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isUnauthorized) }
 
 val ResultActions.andIsNotFound: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isNotFound) }
@@ -39,8 +43,10 @@ val ResultActions.andIsForbidden: ResultActions
 val ResultActions.andAssertResponse: MvcResultAssert
   get() = assertThat(this.andReturn())
 
-val ResultActions.andAssertThatJson
-  get() = assertThatJson(this.andReturn().response.contentAsString)
+val ResultActions.andAssertThatJson: JsonAssert.ConfigurableJsonAssert
+  get() {
+    return assertThatJson(this.andReturn().response.contentAsString)
+  }
 
 fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit): ResultActions {
   tryPrettyPrinting {
@@ -85,3 +91,19 @@ val JsonAssert.isValidId: BigDecimalAssert
   get() {
     return this.asNumber().isGreaterThan(BigDecimal(10000000))
   }
+
+inline fun <T> ListAssert<T>.containsAny(crossinline fn: T.() -> Boolean) {
+  this.satisfies { list ->
+    assertThat(list.any { fn(it as T) })
+      .describedAs("List contains matching element!")
+      .isTrue
+  }
+}
+
+inline fun <T> ListAssert<T>.doesNotContainAny(crossinline fn: T.() -> Boolean) {
+  this.satisfies { list ->
+    assertThat(list.any { fn(it as T) })
+      .describedAs("List does not contains matching element!")
+      .isFalse
+  }
+}

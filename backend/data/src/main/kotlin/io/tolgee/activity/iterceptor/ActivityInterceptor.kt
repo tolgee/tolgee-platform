@@ -2,6 +2,7 @@ package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.data.RevisionType
 import org.hibernate.EmptyInterceptor
+import org.hibernate.Transaction
 import org.hibernate.type.Type
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -13,6 +14,10 @@ class ActivityInterceptor : EmptyInterceptor() {
 
   @Autowired
   lateinit var applicationContext: ApplicationContext
+
+  override fun afterTransactionCompletion(tx: Transaction) {
+    interceptedEventsManager.onAfterTransactionCompleted(tx)
+  }
 
   override fun onSave(
     entity: Any?,

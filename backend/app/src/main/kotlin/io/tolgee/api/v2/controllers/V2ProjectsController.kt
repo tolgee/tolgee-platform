@@ -16,10 +16,8 @@ import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.api.v2.hateoas.project.ProjectTransferOptionModel
 import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
-import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
@@ -28,17 +26,15 @@ import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
+import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.NeedsSuperJwtToken
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -53,9 +49,7 @@ import io.tolgee.service.SecurityService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.project.ProjectStatsService
 import org.springdoc.api.annotations.ParameterObject
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -78,29 +72,23 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 
-@Suppress("MVCPathVariableInspection")
+@Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
-class V2ProjectsController(
+class
+V2ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectWithLanguagesView>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
-  private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val arrayWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
-  private val tolgeeProperties: TolgeeProperties,
   private val securityService: SecurityService,
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
@@ -110,7 +98,7 @@ class V2ProjectsController(
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
   private val languageService: LanguageService,
-  private val projectStatsService: ProjectStatsService
+  private val projectWithStatsFacade: ProjectWithStatsFacade
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -129,13 +117,7 @@ class V2ProjectsController(
     @RequestParam("search") search: String?
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
-    val projectIds = projects.content.map { it.id }
-    val stats = projectStatsService.getProjectsTotals(projectIds).associateBy { it.projectId }
-    val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
-      .associate { it.id to it.languages.toList() }
-    val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
-    val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
-    return arrayWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
+    return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
   @GetMapping("/{projectId}")
@@ -151,6 +133,7 @@ class V2ProjectsController(
   @GetMapping("/{projectId}/users")
   @Operation(summary = "Returns project all users, who have permission to access project")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
@@ -161,37 +144,38 @@ class V2ProjectsController(
     }
   }
 
-  @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     imageUploadService.validateIsImage(avatar)
     projectService.setAvatar(projectHolder.projectEntity, avatar.inputStream)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
-  @DeleteMapping("/{id:[0-9]+}/avatar")
+  @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
   fun removeAvatar(
-    @PathVariable id: Long
+    @PathVariable projectId: Long
   ): ProjectModel {
     projectService.removeAvatar(projectHolder.projectEntity)
-    return projectModelAssembler.toModel(projectService.getView(id))
+    return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @Operation(summary = "Sets user's direct permission")
+  @NeedsSuperJwtToken
   fun setUsersPermissions(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
-    @RequestParam languages: MutableSet<Long>?
+    @RequestParam languages: MutableSet<Long>?,
   ) {
     checkNotCurrentUser(userId)
     val languageEntities = getLanguagesAndCheckFromProject(languages, projectId)
@@ -228,6 +212,7 @@ class V2ProjectsController(
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @Operation(summary = "Revokes user's access")
+  @NeedsSuperJwtToken
   fun revokePermission(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long
@@ -242,12 +227,7 @@ class V2ProjectsController(
   @Operation(summary = "Creates project with specified languages")
   @RequestActivity(ActivityType.CREATE_PROJECT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
-    val userAccount = authenticationFacade.userAccount
-    if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
-      userAccount.role != UserAccount.Role.ADMIN
-    ) {
-      throw PermissionException()
-    }
+    organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
@@ -256,6 +236,7 @@ class V2ProjectsController(
   @PutMapping(value = ["/{projectId}"])
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @RequestActivity(ActivityType.EDIT_PROJECT)
+  @NeedsSuperJwtToken
   fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
@@ -263,6 +244,7 @@ class V2ProjectsController(
 
   @DeleteMapping(value = ["/{projectId}"])
   @Operation(summary = "Deletes project by id")
+  @NeedsSuperJwtToken
   fun deleteProject(@PathVariable projectId: Long) {
     securityService.checkProjectPermission(projectId, ProjectPermissionType.MANAGE)
     projectService.deleteProject(projectId)
@@ -271,39 +253,18 @@ class V2ProjectsController(
   @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-organization/{organizationId:[0-9]+}"])
   @Operation(summary = "Transfers project's ownership to organization")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun transferProjectToOrganization(@PathVariable projectId: Long, @PathVariable organizationId: Long) {
     organizationRoleService.checkUserIsOwner(organizationId)
     projectService.transferToOrganization(projectId, organizationId)
   }
 
-  @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-user/{userId:[0-9]+}"])
-  @Operation(summary = "Transfers project's ownership to user")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
-  fun transferProjectToUser(@PathVariable projectId: Long, @PathVariable userId: Long) {
-    securityService.checkAnyProjectPermission(projectId, userId)
-    projectService.transferToUser(projectId, userId)
-  }
-
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
   @Operation(summary = "Leave project")
+  @NeedsSuperJwtToken
   @AccessWithProjectPermission(ProjectPermissionType.VIEW)
-  fun leaveProject(@PathVariable projectId: Long) {
-    val project = projectHolder.projectEntity
-    if (project.userOwner?.id == authenticationFacade.userAccount.id) {
-      throw BadRequestException(Message.CANNOT_LEAVE_OWNING_PROJECT)
-    }
-    val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
-    if (permissionData.organizationRole != null) {
-      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
-    }
-
-    val directPermissions = permissionData.directPermissions
-      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
-
-    val permissionEntity = permissionService.findById(directPermissions.id)
-      ?: throw NotFoundException()
-
-    permissionService.delete(permissionEntity)
+  fun leaveProject() {
+    permissionService.leave(projectHolder.projectEntity, authenticationFacade.userAccount.id)
   }
 
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
@@ -320,26 +281,10 @@ class V2ProjectsController(
     val options = organizations.content.map {
       ProjectTransferOptionModel(
         name = it.name,
+        slug = it.slug,
         id = it.id,
-        type = ProjectTransferOptionModel.TransferOptionType.ORGANIZATION
       )
     }.toMutableList()
-    val users = userAccountService.getAllInProject(
-      projectId = project.id,
-      PageRequest.of(0, 10),
-      search,
-      project.userOwnerId
-    )
-    options.addAll(
-      users.content.map {
-        ProjectTransferOptionModel(
-          name = it.name,
-          username = it.username,
-          id = it.id,
-          type = ProjectTransferOptionModel.TransferOptionType.USER
-        )
-      }
-    )
     options.sortBy { it.name }
     return CollectionModel.of(options)
   }
@@ -347,6 +292,7 @@ class V2ProjectsController(
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
     val languages = getLanguagesAndCheckFromProject(invitation.languages, projectHolder.project.id)
     val params = CreateProjectInvitationParams(
@@ -362,6 +308,7 @@ class V2ProjectsController(
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
     securityService.checkProjectPermission(id, ProjectPermissionType.MANAGE)

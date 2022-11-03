@@ -1,13 +1,15 @@
 import { API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
+type AccountType =
+  components['schemas']['PrivateUserAccountModel']['accountType'];
+
 let token = null;
 
-const v2apiFetch = (
+export const v2apiFetch = (
   input: string,
   init?: ArgumentTypes<typeof cy.request>[0],
   headers = {}
@@ -16,7 +18,7 @@ const v2apiFetch = (
     url: API_URL + '/v2/' + input,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
+      Authorization: token ? 'Bearer ' + token : undefined,
       ...headers,
     },
     ...init,
@@ -32,7 +34,7 @@ const apiFetch = (
     url: API_URL + '/api/' + input,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
+      Authorization: token ? 'Bearer ' + token : undefined,
       ...headers,
     },
     ...init,
@@ -52,7 +54,11 @@ export const internalFetch = (
   });
 };
 
-export const login = (username = USERNAME, password = PASSWORD) => {
+export const login = (
+  username = USERNAME,
+  password = PASSWORD,
+  otp: string = undefined
+) => {
   return cy
     .request({
       url: API_URL + '/api/public/generatetoken',
@@ -63,6 +69,7 @@ export const login = (username = USERNAME, password = PASSWORD) => {
       body: JSON.stringify({
         username,
         password,
+        otp,
       }),
     })
     .then((res) => {
@@ -71,15 +78,34 @@ export const login = (username = USERNAME, password = PASSWORD) => {
     });
 };
 
+export const logout = () => {
+  window.localStorage.removeItem('jwtToken');
+};
+
+export const getDefaultOrganization = () => {
+  return v2apiFetch('organizations').then((res) => {
+    const organizations =
+      res.body as components['schemas']['PagedModelOrganizationModel'];
+    const org = organizations._embedded.organizations[0];
+    if (!org) {
+      throw Error('No default organization found!');
+    }
+    return org;
+  });
+};
+
 export const createProject = (createProjectDto: {
   name: string;
   languages: Partial<components['schemas']['LanguageDto']>[];
-}): Chainable<Cypress.Response> => {
-  const create = () =>
-    v2apiFetch('projects', {
-      body: JSON.stringify(createProjectDto),
-      method: 'POST',
+}): Chainable<Cypress.Response<any>> => {
+  const create = () => {
+    return getDefaultOrganization().then((org) => {
+      return v2apiFetch('projects', {
+        body: JSON.stringify({ ...createProjectDto, organizationId: org.id }),
+        method: 'POST',
+      });
     });
+  };
   return v2apiFetch('projects').then((res) => {
     const projects = res.body?._embedded?.projects.filter(
       (i) => i.name === createProjectDto.name
@@ -89,7 +115,7 @@ export const createProject = (createProjectDto: {
     if (deletePromises) {
       return Cypress.Promise.all(deletePromises).then(() =>
         create()
-      ) as any as Chainable<Cypress.Response>;
+      ) as any as Chainable<Cypress.Response<any>>;
     }
     return create();
   });
@@ -103,12 +129,22 @@ export const createTestProject = () =>
     ],
   });
 
-export const setTranslations = (
+export const createKey = (
   projectId,
   key: string,
   translations: { [lang: string]: string }
 ) =>
   apiFetch(`project/${projectId}/keys/create`, {
+    body: { key, translations },
+    method: 'POST',
+  });
+
+export const setTranslations = (
+  projectId,
+  key: string,
+  translations: { [lang: string]: string }
+) =>
+  v2apiFetch(`projects/${projectId}/translations`, {
     body: { key, translations },
     method: 'POST',
   });
@@ -124,27 +160,30 @@ export const createUser = (
 ) => {
   password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
-  return deleteUser(username).then(() => {
+  return deleteUserSql(username).then(() => {
     const sql = `insert into user_account (username, name, password, created_at, updated_at)
                  values ('${username}', '${fullName}', '${password}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
     return internalFetch(`sql/execute`, { method: 'POST', body: sql });
   });
 };
 
-export const deleteUser = (username: string) => {
-  const deleteUserSql = `delete
-                         from user_account
-                         where username = '${username}'`;
-  return internalFetch(`sql/execute`, { method: 'POST', body: deleteUserSql });
+export const deleteUser = () => {
+  return v2apiFetch('user', { method: 'delete' });
 };
 
-export const deleteUserWithEmailVerification = (username: string) => {
+export const deleteUserSql = (username: string) => {
   const sql = `
       delete
       from permission
       where user_id in (select id from user_account where username = '${username}');
       delete
       from email_verification
+      where user_account_id in (select id from user_account where username = '${username}');
+      delete
+      from organization_role
+      where user_id in (select id from user_account where username = '${username}');
+      delete
+      from user_preferences
       where user_account_id in (select id from user_account where username = '${username}');
       delete
       from user_account
@@ -164,10 +203,42 @@ export const getUser = (username: string) => {
   });
 };
 
+export const userEnableMfa = (
+  username: string,
+  key: number[],
+  recoveryCodes: string[] = []
+) => {
+  const encodedKey = key
+    .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
+    .join('');
+  const joinedCodes = recoveryCodes.join(',');
+
+  const sql = `UPDATE user_account
+               SET totp_key           = '\\x${encodedKey}',
+                   mfa_recovery_codes = '{${joinedCodes}}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const userDisableMfa = (username: string) => {
+  const sql = `UPDATE user_account
+               SET totp_key           = NULL,
+                   mfa_recovery_codes = '{}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
+export const setUserType = (username: string, type: AccountType) => {
+  const sql = `UPDATE user_account
+               SET account_type = '${type}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
-  ) as any as Promise<ApiKeyDTO>;
+  ) as any as Promise<components['schemas']['ApiKeyDTO']>;
 
 export const getAllProjectApiKeys = (projectId: number) =>
   // Cypress Promise implementation is so clever
@@ -176,14 +247,14 @@ export const getAllProjectApiKeys = (projectId: number) =>
   // so we need to wrap the whole fn with another promise to actually
   // resolve empty array
   // thanks Cypress!
-  new Promise((resolve) =>
+  new Promise<components['schemas']['ApiKeyModel'][]>((resolve) =>
     v2apiFetch(`api-keys`, {
       method: 'GET',
       qs: {
         filterProjectId: projectId,
       },
     }).then((r) => resolve(r.body?._embedded?.apiKeys || []))
-  ) as any as Promise<components['schemas']['ApiKeyModel'][]>;
+  );
 
 export const deleteAllProjectApiKeys = (projectId: number) =>
   getAllProjectApiKeys(projectId).then((keys) => {
@@ -229,7 +300,8 @@ export const getParsedEmailVerification = () =>
 
 export const getParsedEmailInvitationLink = () =>
   getAllEmails().then(
-    (r) => r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+    (emails) =>
+      emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
   );
 
 export const getAllEmails = () =>
@@ -240,7 +312,7 @@ export const deleteAllEmails = () =>
 export const getParsedResetPasswordEmail = () =>
   getAllEmails().then((r) => {
     return {
-      resetLink: r[0].text.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
+      resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
       text: r[0].text,

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.language.LanguageModel
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModel
-import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
 import io.tolgee.dtos.Avatar
 import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.model.Permission
@@ -20,7 +19,6 @@ open class ProjectWithStatsModel(
   val description: String?,
   val slug: String?,
   val avatar: Avatar?,
-  val userOwner: UserAccountModel?,
   val organizationOwner: SimpleOrganizationModel?,
   val baseLanguage: LanguageModel?,
   @Schema(deprecated = true, description = "Use organizationOwner field")

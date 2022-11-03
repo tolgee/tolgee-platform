@@ -28,12 +28,14 @@ type Props = {
   anchorEl: HTMLDivElement | undefined;
   cellPosition?: string;
   data: TranslationToolsProps['data'];
+  languageTag: TranslationToolsProps['languageTag'];
 };
 
 export const ToolsPopup: React.FC<Props> = ({
   anchorEl,
   cellPosition,
   data,
+  languageTag,
 }) => {
   const [width, setWidth] = useState<number | undefined>();
 
@@ -56,7 +58,11 @@ export const ToolsPopup: React.FC<Props> = ({
       <StyledPopper>
         <PopupArrow position={cellPosition || '75%'} />
         <StyledPopperContent>
-          <TranslationTools width={width} data={data} />
+          <TranslationTools
+            languageTag={languageTag}
+            width={width}
+            data={data}
+          />
         </StyledPopperContent>
       </StyledPopper>
     </Popper>

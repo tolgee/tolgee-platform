@@ -2,10 +2,12 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.PatBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
@@ -13,25 +15,32 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.PatService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
+import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import javax.persistence.EntityManager
 
 @Service
 class TestDataService(
+  private val passwordEncoder: PasswordEncoder,
   private val userAccountService: UserAccountService,
   private val projectService: ProjectService,
   private val languageService: LanguageService,
@@ -51,7 +60,11 @@ class TestDataService(
   private val mtCreditBucketService: MtCreditBucketService,
   private val autoTranslateService: AutoTranslationService,
   private val transactionManager: PlatformTransactionManager,
-) {
+  private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
+  private val userPreferencesService: UserPreferencesService,
+  private val languageStatsService: LanguageStatsService,
+  private val patService: PatService
+) : Logging {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     prepare()
@@ -61,15 +74,36 @@ class TestDataService(
     //
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
-    executeInNewTransaction {
-      saveAllUsers(builder)
+    executeInNewTransaction(transactionManager) {
       saveOrganizationData(builder)
+      saveAllUsers(builder)
     }
 
-    saveAllMtCreditBuckets(builder)
-    saveProjectData(builder)
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach { it.save(builder) }
+    }
+    entityManager.flush()
+    entityManager.clear()
 
-    finalize()
+    executeInNewTransaction(transactionManager) {
+      saveProjectData(builder)
+      finalize()
+    }
+
+    updateLanguageStats(builder)
+  }
+
+  private fun updateLanguageStats(builder: TestDataBuilder) {
+    builder.data.projects.forEach {
+      try {
+        executeInNewTransaction(transactionManager) {
+          languageStatsService.refreshLanguageStats(it.self.id)
+          entityManager.flush()
+        }
+      } catch (e: DataIntegrityViolationException) {
+        logger.info(e.stackTraceToString())
+      }
+    }
   }
 
   private fun saveOrganizationData(builder: TestDataBuilder) {
@@ -84,6 +118,7 @@ class TestDataService(
   private fun saveOrganizationDependants(builder: TestDataBuilder) {
     saveOrganizationRoles(builder)
     saveOrganizationAvatars(builder)
+    saveAllMtCreditBuckets(builder)
   }
 
   private fun saveOrganizationAvatars(builder: TestDataBuilder) {
@@ -110,9 +145,9 @@ class TestDataService(
   }
 
   private fun saveAllProjectDependants(builder: ProjectBuilder) {
-    savePermissions(builder)
     saveApiKeys(builder)
     saveLanguages(builder)
+    savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveKeyData(builder)
     saveTranslationData(builder)
@@ -156,7 +191,7 @@ class TestDataService(
 
   private fun saveTranslationDependants(translationBuilders: List<TranslationBuilder>) {
     val translationComments = translationBuilders.flatMap { it.data.comments.map { it.self } }
-    translationCommentService.createAll(translationComments)
+    translationCommentService.saveAll(translationComments)
   }
 
   private fun saveTranslations(builder: ProjectBuilder): List<TranslationBuilder> {
@@ -178,7 +213,10 @@ class TestDataService(
   }
 
   private fun saveLanguages(builder: ProjectBuilder) {
-    val languages = builder.data.languages.map { it.self }
+    val languages = builder.data.languages.map {
+      // refresh entity if updating to get new stats
+      if (it.self.id != 0L) languageService.get(it.self.id) else it.self
+    }
     languageService.saveAll(languages)
   }
 
@@ -192,8 +230,8 @@ class TestDataService(
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
-    keyMetaService.saveAll(metas)
     tagService.saveAll(metas.flatMap { it.tags })
+    keyMetaService.saveAll(metas)
     screenshotService.saveAll(keyBuilders.flatMap { it.data.screenshots.map { it.self } }.toList())
   }
 
@@ -216,19 +254,10 @@ class TestDataService(
   private fun saveAllProjects(builder: TestDataBuilder) {
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
-      executeInNewTransaction {
+      executeInNewTransaction(transactionManager) {
         projectService.save(projectBuilder.self)
         saveAllProjectDependants(projectBuilder)
       }
-    }
-  }
-
-  private fun executeInNewTransaction(fn: () -> Unit) {
-    val tt = TransactionTemplate(transactionManager)
-    tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
-
-    tt.executeWithoutResult {
-      fn()
     }
   }
 
@@ -241,7 +270,7 @@ class TestDataService(
       builder.data.organizations.map {
         it.self.apply {
           val slug = this.slug
-          if (slug == null || slug.isEmpty()) {
+          if (slug.isEmpty()) {
             this.slug = organizationService.generateSlug(this.name!!)
           }
         }
@@ -253,11 +282,21 @@ class TestDataService(
     val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
       userAccountBuilders.map {
-        it.self.password = userAccountService.encodePassword(it.rawPassword)
+        it.self.password = passwordEncoder.encode(it.rawPassword)
         it.self
       }
     )
     saveUserAvatars(userAccountBuilders)
+    saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
+    saveUserPats(userAccountBuilders.flatMap { it.data.pats })
+  }
+
+  private fun saveUserPats(data: List<PatBuilder>) {
+    data.forEach { patService.save(it.self) }
+  }
+
+  private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
+    data.forEach { userPreferencesService.save(it.self) }
   }
 
   private fun saveUserAvatars(userAccountBuilders: MutableList<UserAccountBuilder>) {

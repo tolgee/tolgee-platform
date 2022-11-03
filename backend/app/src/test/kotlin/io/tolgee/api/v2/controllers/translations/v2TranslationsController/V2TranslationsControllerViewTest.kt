@@ -156,6 +156,73 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `works with cursor and no sort specified`() {
+    // Reference: https://github.com/tolgee/tolgee-platform/issues/1345
+    testData.generateCursorTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
+    val seenKeys = mutableListOf<String>()
+    var cursor: String? = null
+    do {
+      var url = "/translations?size=2"
+      if (cursor != null) {
+        url += "&cursor=$cursor"
+      }
+
+      performProjectAuthGet(url)
+        .andAssertThatJson {
+          try {
+            node("nextCursor").isString.satisfies { cursor = it }
+          } catch (_: AssertionError) {
+            cursor = null
+            node("_embedded").isAbsent()
+            return@andAssertThatJson
+          }
+
+          node("_embedded.keys[0].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+          node("_embedded.keys[1].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+        }
+    } while (cursor != null)
+
+    assertThat(seenKeys).hasSize(8)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with cursor on duplicate items sort`() {
+    testData.generateCursorWithDupeTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
+    val seenKeys = mutableListOf<String>()
+    var cursor: String? = null
+    do {
+      var url = "/translations?sort=translations.de.text&size=2"
+      if (cursor != null) {
+        url += "&cursor=$cursor"
+      }
+
+      performProjectAuthGet(url)
+        .andAssertThatJson {
+          try {
+            node("nextCursor").isString.satisfies { cursor = it }
+          } catch (_: AssertionError) {
+            cursor = null
+            node("_embedded").isAbsent()
+            return@andAssertThatJson
+          }
+
+          node("_embedded.keys[0].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+          node("_embedded.keys[1].keyName").isString.isNotIn(seenKeys).satisfies { seenKeys.add(it) }
+        }
+    } while (cursor != null)
+
+    assertThat(seenKeys).hasSize(8)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `sorts data by translation text`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)

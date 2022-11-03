@@ -1,25 +1,17 @@
 package io.tolgee.service.project
 
-import io.tolgee.dtos.query_results.ProjectStatistics
+import io.tolgee.model.Language
+import io.tolgee.model.LanguageStats
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
-import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.key.Key
-import io.tolgee.model.key.Key_
-import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.Translation_
-import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
-import io.tolgee.service.query_builders.LanguageStatsProvider
 import io.tolgee.service.query_builders.ProjectStatsProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import javax.persistence.EntityManager
-import javax.persistence.criteria.Expression
 import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.SetJoin
 
 @Transactional
 @Service
@@ -27,9 +19,6 @@ class ProjectStatsService(
   private val entityManager: EntityManager,
   private val activityRevisionRepository: ActivityRevisionRepository
 ) {
-  fun getLanguageStats(projectId: Long): List<ProjectLanguageStatsResultView> {
-    return LanguageStatsProvider(entityManager, projectId).getResult()
-  }
 
   fun getProjectStats(projectId: Long): ProjectStatsView {
     return ProjectStatsProvider(entityManager, projectId).getResult()
@@ -42,42 +31,58 @@ class ProjectStatsService(
     }.toMap()
   }
 
-  fun getProjectsTotals(projectIds: Iterable<Long>): List<ProjectStatistics> {
+  fun getProjectsTotals(projectIds: Iterable<Long>): Map<Long, ProjectTotals> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createTupleQuery()
     val root = query.from(Project::class.java)
     val languages = root.join(Project_.languages, JoinType.LEFT)
     val keys = root.join(Project_.keys, JoinType.LEFT)
-    val stateJoins = mutableMapOf<TranslationState, SetJoin<Key, Translation>>()
-    val stateSelects = linkedMapOf<TranslationState, Expression<Long>>()
-    TranslationState.values().forEach { translationState ->
-      val stateJoin = keys.join(Key_.translations, JoinType.LEFT)
-      stateJoin.on(cb.equal(stateJoin.get(Translation_.state), translationState))
-      stateJoins[translationState] = stateJoin
-      stateSelects[translationState] = cb.countDistinct(stateJoin)
-    }
     val keyCountSelect = cb.countDistinct(keys)
     val languageCountSelect = cb.countDistinct(languages)
     query.multiselect(
       root.get(Project_.id),
       keyCountSelect,
       languageCountSelect,
-      *stateSelects.values.toTypedArray()
     )
     query.where(root.get(Project_.id).`in`(*projectIds.toList().toTypedArray()))
     query.groupBy(root.get(Project_.id))
-    return entityManager.createQuery(query).resultList.map { tuple ->
-      val stateMap = stateSelects.map { (state, select) ->
-        state to tuple.get(select)
-      }.toMap().toMutableMap()
-      val untranslatedNotStored = tuple.get(languageCountSelect) * tuple.get(keyCountSelect) - stateMap.values.sum()
-      stateMap[TranslationState.UNTRANSLATED] = (stateMap[TranslationState.UNTRANSLATED] ?: 0) + untranslatedNotStored
-      ProjectStatistics(
-        projectId = tuple.get(root.get(Project_.id)),
-        languageCount = tuple.get(languageCountSelect),
-        keyCount = tuple.get(keyCountSelect),
-        translationStateCounts = stateMap,
-      )
+    return entityManager.createQuery(query).resultList.associate { tuple ->
+      tuple.get(root.get(Project_.id)) to ProjectTotals(tuple.get(languageCountSelect), tuple.get(keyCountSelect))
     }
   }
+
+  fun computeProjectTotals(
+    baseLanguage: Language?,
+    languageStats: List<LanguageStats>
+  ): ProjectStateTotals {
+    val baseStats = languageStats.find { it.language.id == baseLanguage?.id }
+      ?: return ProjectStateTotals(0, 0.0, 0.0)
+
+    val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
+    val nonBaseLanguages = languageStats.filterNot { it.language.id == baseLanguage?.id }
+
+    val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
+    val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
+    val allNonBaseTotalReviewedWords = nonBaseLanguages.sumOf { it.reviewedWords }
+
+    val translatedPercent = (allNonBaseTotalTranslatedWords.toDouble() / allNonBaseTotalBaseWords) * 100
+    val reviewedPercent = (allNonBaseTotalReviewedWords.toDouble() / allNonBaseTotalBaseWords) * 100
+
+    return ProjectStateTotals(
+      baseWordsCount = baseWordsCount,
+      translatedPercent = translatedPercent,
+      reviewedPercent = reviewedPercent
+    )
+  }
+
+  data class ProjectStateTotals(
+    val baseWordsCount: Long,
+    val translatedPercent: Double,
+    val reviewedPercent: Double
+  )
+
+  data class ProjectTotals(
+    val languageCount: Long,
+    val keyCount: Long
+  )
 }

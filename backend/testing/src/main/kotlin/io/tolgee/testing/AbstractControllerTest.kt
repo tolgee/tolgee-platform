@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.AbstractSpringTest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
-import io.tolgee.security.payload.LoginRequest
+import io.tolgee.security.LoginRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -41,16 +41,16 @@ abstract class AbstractControllerTest :
     }
   }
 
-  protected fun login(userName: String?, password: String?): DefaultAuthenticationResult {
+  protected fun login(userName: String, password: String): DefaultAuthenticationResult {
     val response = doAuthentication(userName, password)
-      .response.contentAsString
-    val userAccount = userAccountService.findOptional(userName).orElseThrow { NotFoundException() }
+      .andReturn().response.contentAsString
+    val userAccount = userAccountService.find(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
       mapper.readValue(response, HashMap::class.java)["accessToken"] as String, userAccount
     )
   }
 
-  protected fun doAuthentication(username: String?, password: String?): MvcResult {
+  protected fun doAuthentication(username: String, password: String): ResultActions {
     val request = LoginRequest()
     request.username = username
     request.password = password
@@ -61,7 +61,6 @@ abstract class AbstractControllerTest :
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON)
     )
-      .andReturn()
   }
 
   protected fun <T> mapResponse(result: MvcResult, type: JavaType?): T {
@@ -106,18 +105,18 @@ abstract class AbstractControllerTest :
   }
 
   override fun performPut(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performPut(url, content)
+    return requestPerformer.performPut(url, content, httpHeaders)
   }
 
   override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performPost(url, content)
+    return requestPerformer.performPost(url, content, httpHeaders)
   }
 
   override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performGet(url)
+    return requestPerformer.performGet(url, httpHeaders)
   }
 
   override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
-    return requestPerformer.performDelete(url, content)
+    return requestPerformer.performDelete(url, content, httpHeaders)
   }
 }

@@ -43,9 +43,9 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
   @Test
   fun `imports data on startup`() {
-    val user = dbPopulator.createUserIfNotExists("admin")
+    val base = dbPopulator.createBase("labaala", "admin")
     startupImportCommandLineRunner.run()
-    val projects = projectService.findAllByNameAndUserOwner("examples", user)
+    val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
     assertThat(projects).isNotEmpty
     assertThat(projects[0].name).isEqualTo("examples")
     val languages = languageService.findAll(projects[0].id)

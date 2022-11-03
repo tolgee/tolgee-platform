@@ -12,5 +12,9 @@ declare namespace Cypress {
     nextUntilDcy(dataCy: Value): Chainable;
 
     findInputByName(name: string): Chainable;
+
+    waitForDom(): Chainable;
+
+    chooseDatePicker(selector: string, value: string): void;
   }
 }

@@ -1,60 +1,53 @@
-import { FunctionComponent, PropsWithChildren } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { BaseViewProps } from 'tg.component/layout/BaseView';
+import { LINKS } from 'tg.constants/links';
 
-import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { useConfig } from 'tg.hooks/useConfig';
-import { useUser } from 'tg.hooks/useUser';
+import { useTranslate } from '@tolgee/react';
+import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
+import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
+import { useConfig } from 'tg.globalContext/helpers';
 
-import UserOrganizationSettingsSubtitleLink from '../organizations/components/UserOrganizationSettingsSubtitleLink';
-import { UserSettingsMenu } from './UserSettingsMenu';
+type Props = BaseViewProps;
 
-export const BaseUserSettingsView: FunctionComponent<BaseViewProps> = ({
+export const BaseUserSettingsView: React.FC<Props> = ({
   children,
-  title,
+  navigation,
   ...otherProps
-}: PropsWithChildren<BaseViewProps>) => {
-  const user = useUser();
-  const config = useConfig();
+}) => {
+  const t = useTranslate();
+  const { authentication } = useConfig();
+  const menuItems: SettingsMenuItem[] = authentication
+    ? [
+        {
+          link: LINKS.USER_PROFILE.build(),
+          label: t('user_profile_title'),
+        },
+        {
+          link: LINKS.USER_ACCOUNT_SECURITY.build(),
+          label: t('user-account-security-title'),
+        },
+      ]
+    : [];
 
-  const pageHeader = config.authentication ? (
-    <>
-      <Typography variant="h5">{user?.name}</Typography>
-      <UserOrganizationSettingsSubtitleLink isUser={true} />
-    </>
-  ) : (
-    <>
-      <Typography variant="h5">{title}</Typography>
-    </>
-  );
+  menuItems.push({
+    link: LINKS.USER_API_KEYS.build(),
+    label: t('user_menu_api_keys'),
+  });
+
+  menuItems.push({
+    link: LINKS.USER_PATS.build(),
+    label: t('user_menu_pats'),
+  });
 
   return (
-    <DashboardPage>
-      <BaseView
-        {...otherProps}
-        containerMaxWidth="md"
-        customHeader={pageHeader}
-      >
-        <Grid container>
-          {config.authentication && (
-            <Grid item lg={3} md={4} sm={12} xs={12}>
-              <Box mr={4} mb={4}>
-                <UserSettingsMenu />
-              </Box>
-            </Grid>
-          )}
-          <Grid item lg md sm xs>
-            <Box>
-              {config.authentication && (
-                <Box mb={2}>
-                  <Typography variant="h6">{title}</Typography>
-                </Box>
-              )}
-              {children}
-            </Box>
-          </Grid>
-        </Grid>
-      </BaseView>
-    </DashboardPage>
+    <BaseSettingsView
+      {...otherProps}
+      navigation={[
+        [t('user_settings'), LINKS.USER_PROFILE.build()],
+        ...(navigation || []),
+      ]}
+      menuItems={menuItems}
+    >
+      {children}
+    </BaseSettingsView>
   );
 };

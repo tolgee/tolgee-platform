@@ -178,7 +178,7 @@ jobs:
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        run: ./gradlew runE2e || ./gradlew runE2e
+        run: ./gradlew runE2e
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
@@ -191,10 +191,18 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: e2e ${{ matrix.job_index }}
+          name: e2e
           path: |
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
+            ./e2e/server
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: e2e_server_log_${{ matrix.job_index }}
+          path: |
+            ./e2e/server.log
 
   frontend-build:
     name: Build frontend 🏗️

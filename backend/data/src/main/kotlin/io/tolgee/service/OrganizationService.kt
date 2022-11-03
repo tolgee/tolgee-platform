@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -14,7 +15,9 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -29,27 +32,33 @@ class OrganizationService(
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val invitationService: InvitationService,
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService,
+  private val tolgeeProperties: TolgeeProperties
 ) {
 
   @set:Autowired
   lateinit var projectService: ProjectService
 
   @Transactional
-  fun create(createDto: OrganizationDto): Organization {
-    return this.create(createDto, authenticationFacade.userAccountEntity)
+  fun create(
+    createDto: OrganizationDto,
+  ): Organization {
+    return create(createDto, authenticationFacade.userAccountEntity)
   }
 
   @Transactional
-  fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
+  fun create(
+    createDto: OrganizationDto,
+    userAccount: UserAccount
+  ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
-      throw ValidationException(io.tolgee.constants.Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
     val slug = createDto.slug
-      ?: slugGenerator.generate(createDto.name!!, 3, 60) {
-        this.validateSlugUniqueness(it)
-      }
+      ?: generateSlug(createDto.name)
 
     Organization(
       name = createDto.name,
@@ -61,6 +70,56 @@ class OrganizationService(
       organizationRoleService.grantOwnerRoleToUser(userAccount, it)
       return it
     }
+  }
+
+  fun createPreferred(userAccount: UserAccount, name: String = userAccount.name): Organization {
+    val safeName = if (name.isNotEmpty() || name.length >= 3)
+      name
+    else
+      "${userAccount.username.take(3)} Organization"
+    return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
+  }
+
+  private fun generateSlug(name: String) =
+    slugGenerator.generate(name, 3, 60) {
+      @Suppress("BlockingMethodInNonBlockingContext") // this is bug in IDEA
+      this.validateSlugUniqueness(it)
+    }
+
+  /**
+   * Returns any organizations accessible by user.
+   */
+  fun findPreferred(userAccountId: Long, exceptOrganizationId: Long = 0): Organization? {
+    return organizationRepository.findPreferred(
+      userId = userAccountId,
+      exceptOrganizationId,
+      PageRequest.of(0, 1)
+    ).content.firstOrNull()
+  }
+
+  /**
+   * Returns existing or created organization which seems to be potentially preferred.
+   */
+  fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization? {
+    return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
+      if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
+        return@let createPreferred(userAccount)
+      }
+      null
+    }
+  }
+
+  fun findPermittedPaged(
+    pageable: Pageable,
+    requestParamsDto: OrganizationRequestParamsDto,
+    exceptOrganizationId: Long? = null
+  ): Page<OrganizationView> {
+    return findPermittedPaged(
+      pageable,
+      requestParamsDto.filterCurrentUserOwner,
+      requestParamsDto.search,
+      exceptOrganizationId
+    )
   }
 
   fun findPermittedPaged(
@@ -76,15 +135,6 @@ class OrganizationService(
       search = search,
       exceptOrganizationId = exceptOrganizationId
     )
-  }
-
-  fun findPermittedPaged(
-    pageable: Pageable,
-    requestParamsDto: OrganizationRequestParamsDto,
-    search: String? = null,
-    exceptOrganizationId: Long? = null
-  ): Page<OrganizationView> {
-    return findPermittedPaged(pageable, requestParamsDto.filterCurrentUserOwner, search, exceptOrganizationId)
   }
 
   fun get(id: Long): Organization {
@@ -106,17 +156,18 @@ class OrganizationService(
   fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
     val organization = this.find(id) ?: throw NotFoundException()
 
-    if (editDto.slug == null) {
+    val newSlug = editDto.slug
+    if (newSlug == null) {
       editDto.slug = organization.slug
     }
 
-    if (editDto.slug != organization.slug && !validateSlugUniqueness(editDto.slug!!)) {
-      throw ValidationException(io.tolgee.constants.Message.ADDRESS_PART_NOT_UNIQUE)
+    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug!!)) {
+      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
     organization.name = editDto.name
     organization.description = editDto.description
-    organization.slug = editDto.slug
+    organization.slug = newSlug
     organization.basePermissions = editDto.basePermissions
     organizationRepository.save(organization)
     return OrganizationView.of(organization, OrganizationRoleType.OWNER)
@@ -133,6 +184,16 @@ class OrganizationService(
     invitationService.getForOrganization(organization).forEach { invitation ->
       invitationService.delete(invitation)
     }
+
+    organization.prefereredBy
+      .toList() // we need to clone it so hibernate doesn't change it concurrently
+      .forEach {
+        it.preferredOrganization = findOrCreatePreferred(
+          userAccount = it.userAccount,
+          exceptOrganizationId = organization.id
+        )
+        userPreferencesService.save(it)
+      }
 
     organizationRoleService.deleteAllInOrganization(organization)
 
@@ -171,6 +232,17 @@ class OrganizationService(
     }
   }
 
+  /**
+   * Returns all organizations which are owned only by the specified user
+   */
+  fun getAllSingleOwnedByUser(userAccount: UserAccount) = organizationRepository.getAllSingleOwnedByUser(userAccount)
+
+  fun getOrganizationAndCheckUserIsOwner(organizationId: Long): Organization {
+    val organization = this.get(organizationId)
+    organizationRoleService.checkUserIsOwner(organization.id)
+    return organization
+  }
+
   fun deleteAllByName(name: String) {
     organizationRepository.findAllByName(name).forEach {
       this.delete(it.id)
@@ -179,5 +251,9 @@ class OrganizationService(
 
   fun saveAll(organizations: List<Organization>) {
     organizationRepository.saveAll(organizations)
+  }
+
+  fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
+    return organizationRepository.findAllViews(pageable, search, userId)
   }
 }

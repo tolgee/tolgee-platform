@@ -97,7 +97,9 @@ class ImportTestData {
         this.key = this@project.data.keys[1].self
         this.text = "What a french text 2"
       }.self
-      importBuilder = addImport {}.build {
+      importBuilder = addImport {
+        author = userAccount
+      }.build {
         addImportFile {
           name = "multilang.json"
         }.build {

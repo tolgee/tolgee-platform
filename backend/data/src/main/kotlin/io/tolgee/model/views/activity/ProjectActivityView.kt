@@ -10,6 +10,7 @@ class ProjectActivityView(
   var authorName: String? = null,
   var authorUsername: String? = null,
   var authorAvatarHash: String? = null,
+  val authorDeleted: Boolean = false,
   var modifications: List<ModifiedEntityView>? = null,
   val meta: Map<String, Any?>? = null,
   val counts: MutableMap<String, Long>? = null

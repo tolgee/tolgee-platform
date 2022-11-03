@@ -7,7 +7,6 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -18,25 +17,16 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ExportControllerTest : ProjectAuthControllerTest() {
-
-  @AfterEach
-  fun cleanup() {
-    projectService.deleteProject(project.id)
-    userAccount?.let { userAccountService.delete(it) }
-  }
-
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun exportZipJson() {
-    projectSupplier = {
-      dbPopulator.populate(generateUniqueString()).also {
-        commitTransaction()
-      }
-    }
-    userAccount = project.userOwner
+    val base = dbPopulator.populate(generateUniqueString())
+    commitTransaction()
+    projectSupplier = { base.project }
+    userAccount = base.userAccount
     val mvcResult = performProjectAuthGet("export/jsonZip")
-      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
     mvcResult.response
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
     project.languages.forEach(
@@ -51,11 +41,9 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectApiKeyAuthTestMethod
   fun exportZipJsonWithApiKey() {
-    projectSupplier = {
-      dbPopulator.populate(generateUniqueString()).also {
-        commitTransaction()
-      }
-    }
+    val base = dbPopulator.populate(generateUniqueString())
+    commitTransaction()
+    projectSupplier = { base.project }
     val mvcResult = performProjectAuthGet("export/jsonZip")
       .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)

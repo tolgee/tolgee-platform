@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Box, FormHelperText } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { container } from 'tsyringe';
@@ -11,7 +11,11 @@ import { OrganizationService } from 'tg.service/OrganizationService';
 
 const organizationService = container.resolve(OrganizationService);
 
-export const OrganizationFields = () => {
+type Props = {
+  disabled?: boolean;
+};
+
+export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
   const [slugDisabled, setSlugDisabled] = useState(true);
 
   const formik = useFormikContext();
@@ -52,6 +56,7 @@ export const OrganizationFields = () => {
         label={<T>create_organization_name_label</T>}
         name="name"
         required={true}
+        disabled={disabled}
       />
       <Box
         onClick={() => setSlugDisabled(false)}
@@ -60,23 +65,23 @@ export const OrganizationFields = () => {
         <TextField
           variant="standard"
           data-cy={'organization-address-part-field'}
-          disabled={slugDisabled}
+          disabled={slugDisabled || disabled}
           fullWidth
           label={<T>create_organization_slug_label</T>}
           name="slug"
           required={true}
+          helperText={
+            <T
+              parameters={{
+                address: LINKS.ORGANIZATION.buildWithOrigin({
+                  [PARAMS.ORGANIZATION_SLUG]: slugValue,
+                }),
+              }}
+            >
+              organization_your_address_to_access_organization
+            </T>
+          }
         />
-        <FormHelperText>
-          <T
-            parameters={{
-              address: LINKS.ORGANIZATION.buildWithOrigin({
-                [PARAMS.ORGANIZATION_SLUG]: slugValue,
-              }),
-            }}
-          >
-            organization_your_address_to_access_organization
-          </T>
-        </FormHelperText>
       </Box>
 
       <TextField
@@ -85,6 +90,7 @@ export const OrganizationFields = () => {
         fullWidth
         label={<T>create_organization_description_label</T>}
         name="description"
+        disabled={disabled}
       />
     </>
   );

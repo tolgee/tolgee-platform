@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
@@ -41,7 +41,7 @@ class ExportController @Autowired constructor(
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
-  @Operation(summary = "Exports data as ZIP of jsons")
+  @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
     securityService.checkProjectPermission(projectHolder.project.id, Permission.ProjectPermissionType.VIEW)
     val languages = languageService.findAll(projectHolder.project.id)

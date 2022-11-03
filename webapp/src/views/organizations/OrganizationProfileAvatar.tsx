@@ -1,9 +1,12 @@
 import { ProfileAvatar } from 'tg.component/common/avatar/ProfileAvatar';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import React from 'react';
 import { useOrganization } from './useOrganization';
 
-export const OrganizationProfileAvatar = () => {
+type Props = {
+  disabled?: boolean;
+};
+
+export const OrganizationProfileAvatar: React.FC<Props> = ({ disabled }) => {
   const uploadLoadable = useApiMutation({
     url: '/v2/organizations/{id}/avatar',
     method: 'put',
@@ -30,6 +33,7 @@ export const OrganizationProfileAvatar = () => {
         id: organization.id,
         name: organization.name,
       }}
+      disabled={disabled}
       onUpload={(blob: Blob) =>
         uploadLoadable.mutateAsync({
           path: {

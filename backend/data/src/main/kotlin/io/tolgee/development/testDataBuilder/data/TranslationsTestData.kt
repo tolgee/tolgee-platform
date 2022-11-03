@@ -23,13 +23,13 @@ class TranslationsTestData {
   lateinit var aKeyGermanTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    addUserAccount {
+    val userAccountBuilder = addUserAccount {
       username = "franta"
       user = this
     }
     addProject {
       name = "Franta's project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
       project = this
     }.build project@{
       addPermission {
@@ -295,6 +295,25 @@ class TranslationsTestData {
         addTranslation {
           language = germanLanguage
           text = "a"
+        }
+      }
+    }
+  }
+
+  fun generateCursorWithDupeTestData() {
+    root.data.projects[0].apply {
+      addKey { name = "a" }.build {
+        addTranslation {
+          language = germanLanguage
+          text = "a"
+        }
+      }
+      (1..5).forEach {
+        addKey { name = "key-$it" }.build {
+          addTranslation {
+            language = germanLanguage
+            text = "Key text..."
+          }
         }
       }
     }

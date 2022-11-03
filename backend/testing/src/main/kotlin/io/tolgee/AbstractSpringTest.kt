@@ -8,6 +8,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
@@ -25,24 +26,30 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.MfaService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.PatService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
@@ -139,6 +146,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var deeplMachineTranslationProperties: DeeplMachineTranslationProperties
 
   @Autowired
+  lateinit var azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties
+
+  @Autowired
   lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -166,6 +176,24 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var activityService: ActivityService
 
   @Autowired
+  lateinit var userPreferencesService: UserPreferencesService
+
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
+
+  @Autowired
+  lateinit var languageStatsService: LanguageStatsService
+
+  @Autowired
+  lateinit var platformTransactionManager: PlatformTransactionManager
+
+  @Autowired
+  lateinit var patService: PatService
+
+  @Autowired
+  lateinit var mfaService: MfaService
+
+  @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
     initialUsername = authenticationProperties.initialUsername
     initialPassword = initialPasswordManager.initialPassword
@@ -180,6 +208,12 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     googleMachineTranslationProperties.defaultEnabled = true
     deeplMachineTranslationProperties.defaultEnabled = false
     deeplMachineTranslationProperties.authKey = "dummy"
+    azureCognitiveTranslationProperties.defaultEnabled = false
+    azureCognitiveTranslationProperties.authKey = "dummy"
     internalProperties.fakeMtProviders = false
+  }
+
+  fun <T> executeInNewTransaction(fn: () -> T): T {
+    return io.tolgee.util.executeInNewTransaction(platformTransactionManager, fn)
   }
 }

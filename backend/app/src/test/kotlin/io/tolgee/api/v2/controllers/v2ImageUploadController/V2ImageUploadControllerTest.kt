@@ -4,6 +4,7 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
+import io.tolgee.component.MaxUploadedFilesByUserProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import java.io.File
@@ -28,6 +32,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   @BeforeAll
   fun before() {
     initialFileStorageUrl = tolgeeProperties.fileStorageUrl
+    whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 100L }
   }
 
   @AfterAll
@@ -35,22 +40,27 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     tolgeeProperties.fileStorageUrl = initialFileStorageUrl
   }
 
+  @MockBean
+  @Autowired
+  lateinit var maxUploadedFilesByUserProvider: MaxUploadedFilesByUserProvider
+
   @Test
   fun `uploads single image`() {
     tolgeeProperties.fileStorageUrl = ""
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
-      node("fileUrl").isString.startsWith("http://").endsWith(".jpg")
+      node("fileUrl").isString.startsWith("http://").endsWith(".png")
       node("requestFilename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it)
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isLessThan(1024 * 100)
+        assertThat(file.readBytes().size).isEqualTo(138412)
       }
     }
   }
 
   @Test
-  fun `does not upload more then 100`() {
-    repeat((1..101).count()) {
+  fun `does not upload more then user limit`() {
+    whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 3L }
+    repeat((1..4).count()) {
       performStoreImage().andIsCreated
     }
     performStoreImage().andIsBadRequest
@@ -61,7 +71,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
     tolgeeProperties.fileStorageUrl = "https://hello.com/upload"
 
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
-      node("fileUrl").isString.startsWith("https://hello.com/upload").endsWith(".jpg")
+      node("fileUrl").isString.startsWith("https://hello.com/upload").endsWith(".png")
     }
   }
 
@@ -69,8 +79,8 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   fun `returns file`() {
     val image = imageUploadService.store(screenshotFile, userAccount!!)
 
-    val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filename}.jpg""")
-    val result = performAuthGet("/uploaded-images/${image.filename}.jpg").andIsOk
+    val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filenameWithExtension}""")
+    val result = performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
       .andExpect(
         header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
       )
@@ -80,6 +90,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   @Test
   fun delete() {
+    whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
     val list = (1..20).map {
       imageUploadService.store(screenshotFile, userAccount!!)
     }.toCollection(mutableListOf())
@@ -88,7 +99,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
     list.asSequence().take(10).forEach {
       assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filename}.jpg""")
+        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
       ).exists()
     }
 
@@ -98,7 +109,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
     list.asSequence().take(10).forEach {
       assertThat(
-        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filename}.jpg""")
+        File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${it.filenameWithExtension}""")
       ).doesNotExist()
     }
   }

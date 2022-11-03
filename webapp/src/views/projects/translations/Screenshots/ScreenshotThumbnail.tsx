@@ -5,7 +5,6 @@ import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
-import { useConfig } from 'tg.hooks/useConfig';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
@@ -74,7 +73,6 @@ const StyledDeleteIcon = styled(ClearIcon)`
 
 export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
   (props) => {
-    const config = useConfig();
     const [hover, setHover] = useState(false);
     const projectPermissions = useProjectPermissions();
 
@@ -122,7 +120,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
           >
             <StyledScreenshot
               onMouseDown={(e) => e.preventDefault()}
-              src={`${config.screenshotsUrl}/${props.screenshotData.filename}`}
+              src={`${props.screenshotData.thumbnailUrl}`}
               alt="Screenshot"
             />
           </StyledScreenshotOverflowWrapper>

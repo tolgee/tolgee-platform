@@ -12,6 +12,7 @@ import { ErrorResponseDto } from 'tg.service/response.types';
 import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 
 const messageService = container.resolve(MessageService);
 
@@ -23,6 +24,7 @@ export const CreateSingleLanguage: FunctionComponent<{
   autoFocus?: boolean;
 }> = (props) => {
   const project = useProject();
+  const { refetchUsage } = useOrganizationUsageMethods();
   const createLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages',
     method: 'post',
@@ -44,6 +46,7 @@ export const CreateSingleLanguage: FunctionComponent<{
       },
       {
         onSuccess(data) {
+          refetchUsage();
           props.onCreated && props.onCreated(data);
           setValue(null);
           messageService.success(<T>language_created_message</T>);

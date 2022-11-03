@@ -11,7 +11,8 @@ import java.util.*
 
 @Repository
 interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
-  fun findByKey(key: String): Optional<ApiKey>
+  fun findByKeyHash(hash: String): Optional<ApiKey>
+
   fun getAllByUserAccountIdOrderById(userAccountId: Long): LinkedHashSet<ApiKey>
   fun getAllByProjectId(projectId: Long): Set<ApiKey>
   fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<ApiKey>

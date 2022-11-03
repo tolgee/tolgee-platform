@@ -9,8 +9,10 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -21,11 +23,30 @@ class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val organizationRepository: OrganizationRepository,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService,
 ) {
 
+  fun checkUserCanView(organizationId: Long) {
+    checkUserCanView(
+      authenticationFacade.userAccount.id,
+      organizationId,
+      authenticationFacade.userAccount.role == UserAccount.Role.ADMIN
+    )
+  }
+
+  private fun checkUserCanView(userId: Long, organizationId: Long, isAdmin: Boolean = false) {
+    if (canUserView(userId, organizationId) || isAdmin) return else throw PermissionException()
+  }
+
+  fun canUserView(userId: Long, organizationId: Long) =
+    this.organizationRepository.canUserView(userId, organizationId)
+
   fun checkUserIsOwner(userId: Long, organizationId: Long) {
-    if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
+    val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
+    if (this.isUserOwner(userId, organizationId) || isServerAdmin) return else throw PermissionException()
   }
 
   fun checkUserIsOwner(organizationId: Long) {
@@ -33,7 +54,8 @@ class OrganizationRoleService(
   }
 
   fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
-    if (isUserMemberOrOwner(userId, organizationId)) {
+    val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
+    if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
       return
     }
     throw PermissionException()
@@ -59,6 +81,10 @@ class OrganizationRoleService(
     return false
   }
 
+  fun find(id: Long): OrganizationRole? {
+    return organizationRoleRepository.findById(id).orElse(null)
+  }
+
   fun getType(userId: Long, organizationId: Long): OrganizationRoleType {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type!! }
@@ -67,6 +93,10 @@ class OrganizationRoleService(
 
   fun getType(organizationId: Long): OrganizationRoleType {
     return getType(authenticationFacade.userAccount.id, organizationId)
+  }
+
+  fun findType(organizationId: Long): OrganizationRoleType? {
+    return findType(authenticationFacade.userAccount.id, organizationId)
   }
 
   fun findType(userId: Long, organizationId: Long): OrganizationRoleType? {
@@ -83,8 +113,6 @@ class OrganizationRoleService(
     OrganizationRole(user = user, organization = organization, type = organizationRoleType)
       .let {
         organizationRoleRepository.save(it)
-        organization.memberRoles.add(it)
-        entityManager.merge(user).organizationRoles.add(it)
       }
   }
 
@@ -96,6 +124,7 @@ class OrganizationRoleService(
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
       organizationRoleRepository.delete(it)
     }
+    userPreferencesService.refreshPreferredOrganization(userId)
   }
 
   fun deleteAllInOrganization(organization: Organization) {
@@ -115,7 +144,7 @@ class OrganizationRoleService(
   }
 
   fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
-    val user = userAccountService[userId].orElseThrow { NotFoundException() }!!
+    val user = userAccountService.find(userId) ?: throw NotFoundException()
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)
@@ -136,6 +165,10 @@ class OrganizationRoleService(
     organizationRole.invitation = null
     organizationRole.user = userAccount
     organizationRoleRepository.save(organizationRole)
+    // switch user to the organization when accepted invitation
+    organizationRole.organization?.let {
+      userPreferencesService.setPreferredOrganization(it, userAccount)
+    }
   }
 
   fun isAnotherOwnerInOrganization(id: Long): Boolean {

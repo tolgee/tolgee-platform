@@ -81,18 +81,12 @@ class ProjectsE2eDataController(
     }
 
     projects.forEach { projectData ->
-
-      val userOwner = if (projectData.userOwner != null)
-        createdUsers[projectData.userOwner]!! else null
-
-      val organizationOwner = if (projectData.organizationOwner != null)
-        organizationService.find(projectData.organizationOwner) else null
+      val organizationOwner = organizationService.get(projectData.organizationOwner)
 
       val project = projectRepository.save(
         Project(
           name = projectData.name,
           slug = projectService.generateSlug(projectData.name),
-          userOwner = userOwner,
           organizationOwner = organizationOwner
         )
       )
@@ -130,7 +124,7 @@ class ProjectsE2eDataController(
     }
 
     users.forEach {
-      userAccountService.findOptional(username = it.email).orElse(null)?.let {
+      userAccountService.find(username = it.email)?.let {
         userAccountRepository.delete(it)
       }
     }
@@ -156,8 +150,7 @@ class ProjectsE2eDataController(
 
     data class ProjectDataItem(
       val name: String,
-      val organizationOwner: String? = null,
-      val userOwner: String? = null,
+      val organizationOwner: String,
       val permittedUsers: MutableList<PermittedUserData> = mutableListOf(),
       val keyData: Map<String, Map<String, String>> = mutableMapOf()
     )
@@ -182,6 +175,11 @@ class ProjectsE2eDataController(
         basePermission = Permission.ProjectPermissionType.EDIT,
         owners = mutableListOf("gates@microsoft.com"),
         members = mutableListOf("john@doe.com", "cukrberg@facebook.com")
+      ),
+      OrganizationData(
+        name = "Vaclav organization",
+        basePermission = Permission.ProjectPermissionType.EDIT,
+        owners = mutableListOf("vaclav.novak@fake.com"),
       )
     )
 
@@ -244,18 +242,18 @@ class ProjectsE2eDataController(
       ),
       ProjectDataItem(
         name = "Vaclav's cool project",
-        userOwner = "vaclav.novak@fake.com",
         permittedUsers = mutableListOf(
           PermittedUserData(
             "cukrberg@facebook.com",
             Permission.ProjectPermissionType.VIEW
           )
         ),
-        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!")))),
+        organizationOwner = "vaclav-organization"
       ),
       ProjectDataItem(
         name = "Vaclav's funny project",
-        userOwner = "vaclav.novak@fake.com",
+        organizationOwner = "vaclav-organization",
         permittedUsers = mutableListOf(
           PermittedUserData(
             "cukrberg@facebook.com",

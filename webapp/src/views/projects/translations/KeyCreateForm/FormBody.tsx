@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
 import { Box, Button, styled, Typography } from '@mui/material';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
@@ -10,8 +10,9 @@ import { FieldLabel } from '../KeySingle/FieldLabel';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { ToolsPottomPanel } from '../TranslationTools/ToolsBottomPanel';
+import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
+import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -25,16 +26,20 @@ const StyledField = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.emphasis[400]};
   overflow: hidden;
   border-radius: 4px;
+
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.emphasis[900]};
   }
+
   &:focus-within {
     border-color: ${({ theme }) => theme.palette.primary.main};
     border-width: 2px;
   }
+
   & > * {
     padding: 10px;
   }
+
   &:focus-within > * {
     padding: 9px;
   }
@@ -51,9 +56,11 @@ const StyledTags = styled('div')`
   flex-wrap: wrap;
   align-items: flex-start;
   overflow: hidden;
+
   & > * {
     margin: 0px 3px 3px 0px;
   }
+
   position: relative;
 `;
 
@@ -80,10 +87,6 @@ export const FormBody: React.FC<Props> = ({
 
   const onFocus = (lang: string | null) => {
     setEditedLang(lang);
-  };
-
-  const onBlur = (lang: string | null) => {
-    setEditedLang((val) => (val === lang ? null : val));
   };
 
   const baseLang = project.baseLanguage?.tag;
@@ -205,7 +208,7 @@ export const FormBody: React.FC<Props> = ({
                       onChange={(val) => {
                         form.setFieldValue(field.name, val);
                       }}
-                      onBlur={() => onBlur(lang.tag)}
+                      direction={getLanguageDirection(lang.tag)}
                       onFocus={() => onFocus(lang.tag)}
                       minHeight={50}
                       scrollMargins={{ bottom: 150 }}
@@ -241,7 +244,9 @@ export const FormBody: React.FC<Props> = ({
           </LoadingButton>
         </Box>
       </Box>
-      {hintDisplayed && <ToolsPottomPanel data={toolsData} />}
+      {hintDisplayed && targetLang && (
+        <ToolsBottomPanel data={toolsData} languageTag={targetLang.tag} />
+      )}
     </>
   );
 };

@@ -2,8 +2,12 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
+import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
+
+type AccountType =
+  components['schemas']['PrivateUserAccountModel']['accountType'];
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -33,7 +37,7 @@ Yup.setLocale({
 });
 
 export class Validation {
-  static readonly USER_PASSWORD = Yup.string().min(8).max(100).required();
+  static readonly USER_PASSWORD = Yup.string().min(8).max(50).required();
 
   static readonly USER_PASSWORD_WITH_REPEAT_NAKED = {
     password: Validation.USER_PASSWORD,
@@ -62,7 +66,10 @@ export class Validation {
       }
     }, container.resolve(SignUpService).validateEmail);
 
-  static readonly SIGN_UP = (t: (key: string) => string) =>
+  static readonly SIGN_UP = (
+    t: (key: string) => string,
+    orgRequired: boolean
+  ) =>
     Yup.object().shape({
       ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
       name: Yup.string().required(),
@@ -74,15 +81,46 @@ export class Validation {
           t('validation_email_not_unique'),
           Validation.createEmailValidation()
         ),
+      organizationName: orgRequired
+        ? Yup.string().min(3).max(50).required()
+        : Yup.string(),
     });
 
-  static readonly USER_SETTINGS = Yup.object().shape({
-    password: Yup.string().min(8).max(100),
+  static readonly USER_SETTINGS = (
+    accountType: AccountType,
+    currentEmail: string
+  ) =>
+    Yup.object().shape({
+      currentPassword: Yup.string()
+        .max(50)
+        .when('email', {
+          is: (email) => email !== currentEmail,
+          then: Yup.string().required('Current password is required'),
+        }),
+      name: Yup.string().required(),
+      email:
+        accountType === 'LDAP' ? Yup.string() : Yup.string().email().required(),
+    });
+
+  static readonly USER_PASSWORD_CHANGE = Yup.object().shape({
+    currentPassword: Yup.string().max(50).required(),
+    password: Validation.USER_PASSWORD,
     passwordRepeat: Yup.string()
       .notRequired()
       .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-    name: Yup.string().required(),
-    email: Yup.string().email().required(),
+  });
+
+  static readonly USER_MFA_ENABLE = Yup.object().shape({
+    password: Yup.string().max(50).required(),
+    otp: Yup.string().required().min(6).max(6),
+  });
+
+  static readonly USER_MFA_VIEW_RECOVERY = Yup.object().shape({
+    password: Yup.string().max(50).required(),
+  });
+
+  static readonly USER_MFA_DISABLE = Yup.object().shape({
+    password: Yup.string().max(50).required(),
   });
 
   static readonly API_KEY_SCOPES = Yup.mixed().test(
@@ -93,6 +131,11 @@ export class Validation {
 
   static readonly EDIT_API_KEY = Yup.object().shape({
     scopes: Validation.API_KEY_SCOPES,
+    description: Yup.string().required().min(1).max(250),
+  });
+
+  static readonly REGENERATE_API_KEY = Yup.object().shape({
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
   });
 
   static readonly CREATE_API_KEY = Yup.object().shape({
@@ -102,6 +145,13 @@ export class Validation {
       'Set at least one scope',
       (v) => !!(v as Set<string>).size
     ),
+    description: Yup.string().required().min(1).max(250),
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
+  });
+
+  static readonly CREATE_PAT = Yup.object().shape({
+    description: Yup.string().required().min(1).max(250),
+    expiresAt: Yup.number().min(new Date().getTime()).nullable(true),
   });
 
   static readonly TRANSLATION_KEY = Yup.string().required();
@@ -230,6 +280,10 @@ export class Validation {
           : Yup.string().required(t('Validation - required field'))
       ),
     });
+
+  static readonly BILLING_RECIPIENT_EMAIL = Yup.object({
+    emailRecipient: Yup.string().required().email(),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

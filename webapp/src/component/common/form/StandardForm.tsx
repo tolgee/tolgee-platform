@@ -1,5 +1,5 @@
 import { default as React, FunctionComponent, ReactNode } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, SxProps } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { T } from '@tolgee/react';
 import { Form, Formik, FormikProps } from 'formik';
@@ -28,11 +28,16 @@ interface FormProps<T> {
   customActions?: ReactNode;
   submitButtonInner?: ReactNode;
   saveActionLoadable?: LoadableType;
+  disabled?: boolean;
+  children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
+  rootSx?: SxProps;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
   initialValues,
   validationSchema,
+  disabled,
+  rootSx = { mb: 2 },
   ...props
 }) => {
   const history = useHistory();
@@ -65,15 +70,14 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                 props.children(formikProps)) ||
                 props.children}
               {props.submitButtons || (
-                <Box display="flex" justifyContent="flex-end">
+                <Box display="flex" justifyContent="flex-end" sx={rootSx}>
                   <React.Fragment>
                     {props.customActions && (
                       <Box flexGrow={1}>{props.customActions}</Box>
                     )}
-                    <Box display="flex" alignItems="flex-end" mb={2}>
+                    <Box display="flex" alignItems="flex-end">
                       <Button
                         data-cy="global-form-cancel-button"
-                        disabled={props.loading}
                         onClick={onCancel}
                       >
                         <T>global_form_cancel</T>
@@ -84,7 +88,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                           loading={actionLoading}
                           color="primary"
                           variant="contained"
-                          disabled={props.loading}
+                          disabled={props.loading || disabled}
                           type="submit"
                         >
                           {props.submitButtonInner || <T>global_form_save</T>}

@@ -14,7 +14,7 @@ const StyledWrapper = styled('div')`
 
 type Props = {
   type: 'placeholder' | 'error';
-  message: string;
+  message: React.ReactNode;
 };
 
 export const TabMessage: React.FC<Props> = ({ type, message }) => {

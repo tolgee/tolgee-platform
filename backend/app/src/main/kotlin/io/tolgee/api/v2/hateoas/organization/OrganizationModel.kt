@@ -21,7 +21,12 @@ open class OrganizationModel(
   val description: String?,
   val basePermissions: Permission.ProjectPermissionType,
 
-  val currentUserRole: OrganizationRoleType,
+  @Schema(
+    description = """The role of currently authorized user. 
+    
+Can be null when user has direct access to one of the projects owned by the organization."""
+  )
+  val currentUserRole: OrganizationRoleType?,
 
   @Schema(example = "Links to avatar images")
   var avatar: Avatar?

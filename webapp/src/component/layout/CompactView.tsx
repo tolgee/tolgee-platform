@@ -81,7 +81,7 @@ export const CompactView: React.FC<Props> = ({
         <StyledPaper>
           <StyledVerticalSpace>
             {backLink && (
-              <IconButton to={backLink} component={Link} size="large">
+              <IconButton to={backLink} component={Link} size="medium">
                 <ArrowBack />
               </IconButton>
             )}

@@ -3,7 +3,6 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationSingleTestData
-import io.tolgee.model.Project
 import io.tolgee.security.InternalController
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.project.ProjectService
@@ -26,10 +25,10 @@ class TranslationSingleE2eDataController(
 ) {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun generateBasicTestData(): Project {
+  fun generateBasicTestData(): Map<String, Any> {
     val data = TranslationSingleTestData()
     testDataService.saveTestData(data.root)
-    return data.project
+    return mapOf<String, Any>("id" to data.project.id)
   }
 
   @GetMapping(value = ["/clean"])
@@ -38,7 +37,7 @@ class TranslationSingleE2eDataController(
     val data = TranslationSingleTestData()
 
     listOf(data.user.username, data.pepa.username, "jindra", "vojta").forEach { user ->
-      userAccountService.findOptional(user).orElse(null)?.let {
+      userAccountService.find(user)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

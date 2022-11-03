@@ -8,19 +8,23 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModel
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModelAssembler
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyWithLanguagesModel
+import io.tolgee.api.v2.hateoas.apiKey.RevealedApiKeyModel
+import io.tolgee.api.v2.hateoas.apiKey.RevealedApiKeyModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
+import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.UserAccount
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.NeedsSuperJwtToken
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.LanguageService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.project.ProjectService
@@ -50,20 +54,29 @@ class V2ApiKeyController(
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
   private val apiKeyModelAssembler: ApiKeyModelAssembler,
+  private val revealedApiKeyModelAssembler: RevealedApiKeyModelAssembler,
   private val projectHolder: ProjectHolder,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
-  private val languageService: LanguageService
 ) {
 
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Creates new API key with provided scopes")
-  fun create(@RequestBody @Valid dto: CreateApiKeyDto): ApiKeyModel {
+  @NeedsSuperJwtToken
+  fun create(@RequestBody @Valid dto: CreateApiKeyDto): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
-    securityService.checkApiKeyScopes(dto.scopes, project)
-    return apiKeyService.create(authenticationFacade.userAccountEntity, dto.scopes, project!!).let {
-      apiKeyModelAssembler.toModel(it)
+    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+      securityService.checkApiKeyScopes(dto.scopes, project)
+    }
+    return apiKeyService.create(
+      userAccount = authenticationFacade.userAccountEntity,
+      scopes = dto.scopes,
+      project = project,
+      expiresAt = dto.expiresAt,
+      description = dto.description
+    ).let {
+      revealedApiKeyModelAssembler.toModel(it)
     }
   }
 
@@ -78,7 +91,7 @@ class V2ApiKeyController(
   @Operation(summary = "Returns specific API key info")
   @GetMapping(path = ["/api-keys/{keyId:[0-9]+}"])
   fun get(@PathVariable keyId: Long): ApiKeyModel {
-    val apiKey = apiKeyService.getApiKey(keyId).orElseThrow { NotFoundException() }
+    val apiKey = apiKeyService.findOptional(keyId).orElseThrow { NotFoundException() }
     if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {
       securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)
     }
@@ -92,13 +105,7 @@ class V2ApiKeyController(
     val apiKey = authenticationFacade.apiKey
 
     return ApiKeyWithLanguagesModel(
-      id = apiKey.id,
-      key = apiKey.key,
-      username = apiKey.userAccount.username,
-      userFullName = apiKey.userAccount.name,
-      projectId = apiKey.project.id,
-      projectName = apiKey.project.name,
-      scopes = apiKey.scopesEnum.map { it.value }.toSet(),
+      apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = getProjectPermittedLanguages()?.toList()
     )
   }
@@ -122,17 +129,43 @@ class V2ApiKeyController(
 
   @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Edits existing API key")
+  @NeedsSuperJwtToken
   fun update(@RequestBody @Valid dto: V2EditApiKeyDto, @PathVariable apiKeyId: Long): ApiKeyModel {
-    val apiKey = apiKeyService.getApiKey(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
+    val apiKey = apiKeyService.get(apiKeyId)
+    checkOwner(apiKey)
     securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
     apiKey.scopesEnum = dto.scopes.toMutableSet()
-    return apiKeyService.editApiKey(apiKey).let { apiKeyModelAssembler.toModel(it) }
+    return apiKeyService.editApiKey(apiKey, dto).let { apiKeyModelAssembler.toModel(it) }
+  }
+
+  @PutMapping(value = ["/api-keys/{apiKeyId:[0-9]+}/regenerate"])
+  @Operation(
+    summary = "Regenerates API key. " +
+      "It generates new API key value and updates its time of expiration."
+  )
+  @NeedsSuperJwtToken
+  fun regenerate(
+    @RequestBody @Valid dto: RegenerateApiKeyDto,
+    @PathVariable apiKeyId: Long
+  ): RevealedApiKeyModel {
+    checkOwner(apiKeyId)
+    return revealedApiKeyModelAssembler.toModel(apiKeyService.regenerate(apiKeyId, dto.expiresAt))
   }
 
   @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Deletes API key")
+  @NeedsSuperJwtToken
   fun delete(@PathVariable apiKeyId: Long) {
-    val apiKey = apiKeyService.getApiKey(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
+    val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
+    checkOwner(apiKey)
+    apiKeyService.deleteApiKey(apiKey)
+  }
+
+  private fun checkOwner(id: Long) {
+    checkOwner(apiKeyService.get(id))
+  }
+
+  private fun checkOwner(apiKey: ApiKey) {
     try {
       securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)
     } catch (e: PermissionException) {
@@ -141,7 +174,6 @@ class V2ApiKeyController(
         throw e
       }
     }
-    apiKeyService.deleteApiKey(apiKey)
   }
 
   @get:GetMapping(path = ["/api-keys/availableScopes"])

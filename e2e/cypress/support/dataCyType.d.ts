@@ -1,10 +1,31 @@
 declare namespace DataCy {
     export type Value = 
+        "account-security-initial-password-set" |
+        "account-security-set-password-instructions-sent" |
         "activity-compact" |
         "activity-detail" |
         "add-box" |
+        "administration-access-message" |
+        "administration-debug-customer-account-message" |
+        "administration-debug-customer-exit-button" |
+        "administration-frame" |
+        "administration-organizations-list-item" |
+        "administration-organizations-projects-button" |
+        "administration-organizations-settings-button" |
+        "administration-tabs-organizations" |
+        "administration-tabs-users" |
+        "administration-user-debug-account" |
+        "administration-user-delete-user" |
+        "administration-user-role-select" |
+        "administration-users-list-item" |
+        "api-key-expiry-info" |
+        "api-key-list-item" |
+        "api-key-list-item-delete-button" |
+        "api-key-list-item-description" |
+        "api-key-list-item-last-used" |
+        "api-key-list-item-new-token-input" |
+        "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
-        "api-keys-edit-button" |
         "api-keys-project-select-item" |
         "auto-avatar-img" |
         "avatar-image" |
@@ -13,6 +34,18 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "billing-actual-extra-credits" |
+        "billing-actual-period" |
+        "billing-actual-period-end" |
+        "billing-extra-credits-buy" |
+        "billing-invoice-number" |
+        "billing-limit-exceeded-popover" |
+        "billing-period-switch" |
+        "billing-plan" |
+        "billing-plan-action-button" |
+        "billing-plan-subtitle" |
+        "billing-plan-title" |
+        "billing-upgrade-preview-confirm-button" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
@@ -21,8 +54,15 @@ declare namespace DataCy {
         "comment-text" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |
+        "delete-user-button" |
         "dropzone" |
         "dropzone-inner" |
+        "edit-pat-dialog-content" |
+        "edit-pat-dialog-description-input" |
+        "edit-pat-dialog-title" |
+        "expiration-date-field" |
+        "expiration-date-picker" |
+        "expiration-select" |
         "export-format-selector" |
         "export-format-selector-item" |
         "export-language-selector" |
@@ -30,6 +70,11 @@ declare namespace DataCy {
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
+        "former-user-name" |
+        "generate-api-key-dialog-description-input" |
+        "generate-pat-dialog-content" |
+        "generate-pat-dialog-description-input" |
+        "generate-pat-dialog-title" |
         "global-base-view-content" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
@@ -41,7 +86,6 @@ declare namespace DataCy {
         "global-form-save-button" |
         "global-form-select" |
         "global-list-item" |
-        "global-list-item-text" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -96,7 +140,6 @@ declare namespace DataCy {
         "integrate-choose-your-weapon-step-label" |
         "integrate-go-to-docs-button" |
         "integrate-guide" |
-        "integrate-navigation-title" |
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
@@ -119,10 +162,27 @@ declare namespace DataCy {
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
-        "leave-organization-button" |
         "login-button" |
+        "mfa-disable-button" |
+        "mfa-disable-dialog" |
+        "mfa-disable-dialog-content" |
+        "mfa-disable-dialog-password-input" |
+        "mfa-disable-dialog-title" |
+        "mfa-enable-button" |
+        "mfa-enable-dialog" |
+        "mfa-enable-dialog-content" |
+        "mfa-enable-dialog-otp-input" |
+        "mfa-enable-dialog-password-input" |
+        "mfa-enable-dialog-title" |
+        "mfa-enable-dialog-totp-key" |
+        "mfa-recovery-button" |
+        "mfa-recovery-codes-dialog" |
+        "mfa-recovery-codes-dialog-close" |
+        "mfa-recovery-codes-dialog-content" |
+        "mfa-recovery-codes-dialog-password-input" |
+        "mfa-recovery-codes-dialog-title" |
+        "navigation-item" |
         "organization-address-part-field" |
-        "organization-delete-button" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
@@ -132,11 +192,24 @@ declare namespace DataCy {
         "organization-members-remove-user-button" |
         "organization-name-field" |
         "organization-profile" |
+        "organization-profile-delete-button" |
+        "organization-profile-leave-button" |
         "organization-role-menu" |
         "organization-role-menu-button" |
         "organization-role-select-item" |
-        "organization-settings-button" |
         "organization-side-menu" |
+        "organization-switch" |
+        "organization-switch-item" |
+        "organization-switch-new" |
+        "organization-switch-search" |
+        "pat-expiry-info" |
+        "pat-list-item" |
+        "pat-list-item-alert" |
+        "pat-list-item-delete-button" |
+        "pat-list-item-description" |
+        "pat-list-item-last-used" |
+        "pat-list-item-new-token-input" |
+        "pat-list-item-regenerate-button" |
         "permission-select-item" |
         "permissions-language-menu-button" |
         "permissions-languages-menu" |
@@ -158,6 +231,7 @@ declare namespace DataCy {
         "project-dashboard-reviewed-percentage" |
         "project-dashboard-tags" |
         "project-dashboard-translated-percentage" |
+        "project-delete-button" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
@@ -172,6 +246,7 @@ declare namespace DataCy {
         "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
+        "project-settings-delete-button" |
         "project-settings-languages" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
@@ -185,7 +260,13 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "regenerate-pat-dialog-content" |
+        "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "sensitive-dialog-otp-input" |
+        "sensitive-dialog-password-input" |
+        "sensitive-protection-dialog" |
+        "settings-menu-item" |
         "sign-up-submit-button" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
@@ -241,7 +322,11 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
-        "user-account-side-menu" |
-        "user-organizations-settings-subtitle-link" |
+        "user-delete-organization-message-item" |
+        "user-menu-logout" |
+        "user-menu-organization-settings" |
+        "user-menu-organization-switch" |
+        "user-menu-server-administration" |
+        "user-menu-user-settings" |
         "user-profile"
 }

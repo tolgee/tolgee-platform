@@ -36,13 +36,13 @@ class SqlControllerTest : AbstractControllerTest() {
 
   @Test
   fun delete() {
-    val repo = dbPopulator.createBase("Test")
+    val project = dbPopulator.createBase("Test").project
     mvc.perform(
       post("/internal/sql/execute")
         .content("delete from permission")
     )
       .andExpect(status().isOk).andReturn()
 
-    assertThat(permissionService.getAllOfProject(repo)).isEmpty()
+    assertThat(permissionService.getAllOfProject(project)).isEmpty()
   }
 }

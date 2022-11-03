@@ -56,14 +56,14 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     emailVerificationService.createForUser(createUser)
 
     val response = doAuthentication(initialUsername, initialPassword)
-    assertThat(response).error().hasCode("email_not_verified")
+    assertThat(response.andReturn()).error().hasCode("email_not_verified")
   }
 
   @Test
   fun doesLoginWhenVerified() {
     dbPopulator.createUserIfNotExists(initialUsername)
     val result = doAuthentication(initialUsername, initialPassword)
-    assertThat(result.response.status).isEqualTo(200)
+    assertThat(result.andReturn().response.status).isEqualTo(200)
   }
 
   @Test
@@ -84,7 +84,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
       .andExpect(status().isOk).andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-    assertThat(userAccountService.findOptional(createUser.username).get().username).isEqualTo("this.is@new.email")
+    assertThat(userAccountService.find(createUser.username)!!.username).isEqualTo("this.is@new.email")
   }
 
   @Test
@@ -108,7 +108,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
   }
 
-  val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+  val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", null, "testtest")
 
   protected fun perform(): MvcResult {
     return mvc.perform(
@@ -123,25 +123,25 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   @Test
   fun signUpSavesVerification() {
     perform()
-    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
+    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
     verify(javaMailSender).send(messageArgumentCaptor.capture())
 
     assertThat(messageArgumentCaptor.value.subject).isEqualTo("Tolgee e-mail verification")
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService[user.id]).isNotNull
+    assertThat(userAccountService.find(user.id)).isNotNull
   }
 
   @Test
   fun `uses frontend url over provided callback url`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
     perform()
-    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
+    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService[user.id]).isNotNull
+    assertThat(userAccountService.find(user.id)).isNotNull
   }
 
   private fun getMessageContent(): String {
@@ -160,7 +160,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     tolgeeProperties.frontEndUrl = null
     perform()
 
-    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
+    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
   }

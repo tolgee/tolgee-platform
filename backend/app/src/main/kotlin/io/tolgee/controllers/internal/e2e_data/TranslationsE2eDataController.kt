@@ -31,7 +31,7 @@ class TranslationsE2eDataController(
   @Transactional
   fun generateKeys(@PathVariable projectId: Long, @PathVariable number: Long) {
     val project = projectService.get(projectId)
-    (0..99).forEach { num ->
+    (0..(number - 1)).forEach { num ->
       val paddedNum = num.toString().padStart(2, '0')
       keyService.create(
         project,
@@ -59,7 +59,7 @@ class TranslationsE2eDataController(
   @GetMapping(value = ["/cleanup-for-filters"])
   @Transactional
   fun cleanupForFilters() {
-    userAccountService.findOptional("franta").orElse(null)?.let {
+    userAccountService.find("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

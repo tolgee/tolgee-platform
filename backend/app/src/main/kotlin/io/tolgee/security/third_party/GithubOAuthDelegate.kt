@@ -61,14 +61,15 @@ class GithubOAuthDelegate(
 
       val verifiedEmails = Arrays.stream(emails).filter { it.verified }.collect(Collectors.toList())
 
-      val githubEmail = verifiedEmails.stream().filter { it.primary }
-        .findFirst().orElse(null)
-        ?: verifiedEmails.stream().findFirst().orElse(null)
+      val githubEmail = (
+        verifiedEmails.firstOrNull { it.primary }
+          ?: verifiedEmails.firstOrNull()
+        )?.email
         ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-      val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id)
+      val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id!!)
       val user = userAccountOptional.orElseGet {
-        userAccountService.findOptional(githubEmail.email).ifPresent {
+        userAccountService.find(githubEmail)?.let {
           throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
         }
 
@@ -82,10 +83,11 @@ class GithubOAuthDelegate(
         }
 
         val newUserAccount = UserAccount()
-        newUserAccount.username = githubEmail.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+        newUserAccount.username = githubEmail
         newUserAccount.name = userResponse.name ?: userResponse.login
         newUserAccount.thirdPartyAuthId = userResponse.id
         newUserAccount.thirdPartyAuthType = "github"
+        newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
         userAccountService.createUser(newUserAccount)
         if (invitation != null) {
           invitationService.accept(invitation.code, newUserAccount)

@@ -7,7 +7,7 @@ import { container } from 'tsyringe';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.globalContext/helpers';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
@@ -26,7 +26,7 @@ type ValueType = {
   email: string;
 };
 
-const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
+const PasswordResetView: FunctionComponent<LoginProps> = () => {
   const t = useTranslate();
   const security = useSelector((state: AppState) => state.global.security);
   const remoteConfig = useConfig();
@@ -35,6 +35,15 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
     (state: AppState) => state.global.loadables.resetPasswordRequest
   );
 
+  useEffect(
+    () => () => globalActions.loadableReset.resetPasswordRequest.dispatch(),
+    []
+  );
+
+  if (loadable.error) {
+    return <Redirect to={LINKS.LOGIN.build()} />;
+  }
+
   if (
     !remoteConfig.authentication ||
     security.allowPrivate ||
@@ -42,11 +51,6 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
   ) {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
-
-  useEffect(
-    () => () => globalActions.loadableReset.resetPasswordRequest.dispatch(),
-    []
-  );
 
   return (
     <DashboardPage>
@@ -83,7 +87,6 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
                   </Box>
                 </>
               }
-              // @ts-ignore
               onSubmit={(v: ValueType) => {
                 globalActions.loadableActions.resetPasswordRequest.dispatch(
                   v.email

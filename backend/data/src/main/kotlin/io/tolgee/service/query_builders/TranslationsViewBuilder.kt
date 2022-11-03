@@ -124,15 +124,9 @@ class TranslationsViewBuilder(
   private fun addLeftJoinedColumns() {
     addScreenshotCounts()
     selection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
-    val project = root.join(Key_.project)
     for (language in languages) {
-      val languagesJoin = project.join(Project_.languages)
-      languagesJoin.on(cb.equal(languagesJoin.get(Language_.tag), language.tag))
       val translation = root.join(Key_.translations, JoinType.LEFT)
-      translation.on(cb.equal(translation.get(Translation_.language), languagesJoin))
-      val languageTag = languagesJoin.get(Language_.tag)
-      selection[KeyWithTranslationsView::translations.name + "." + language.tag] = languageTag
-      groupByExpressions.add(languageTag)
+      translation.on(cb.equal(translation.get(Translation_.language), language))
       val translationId = translation.get(Translation_.id)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
         translationId
@@ -226,7 +220,7 @@ class TranslationsViewBuilder(
       whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
     }
     if (params.filterKeyName != null) {
-      whereConditions.add(cb.equal(keyNameExpression, params.filterKeyName))
+      whereConditions.add(keyNameExpression.`in`(params.filterKeyName))
     } else if (params.filterKeyId != null) {
       whereConditions.add(keyIdExpression.`in`(params.filterKeyId))
     } else {
@@ -264,7 +258,6 @@ class TranslationsViewBuilder(
     }
   }
 
-  @Suppress("UNCHECKED_CAST")
   private val dataQuery: CriteriaQuery<Array<Any?>>
     get() {
       val query = getBaseQuery(cb.createQuery(Array<Any?>::class.java))
@@ -345,19 +338,16 @@ class TranslationsViewBuilder(
     ): Page<KeyWithTranslationsView> {
       val em = applicationContext.getBean(EntityManager::class.java)
       val tagService = applicationContext.getBean(TagService::class.java)
-      var sort = if (pageable.sort.isSorted)
-        pageable.sort
-      else
-        Sort.by(Sort.Order.asc(KEY_NAME_FIELD))
 
-      sort = sort.and(Sort.by(Sort.Direction.ASC, KeyWithTranslationsView::keyId.name))
+      // otherwise it takes forever for postgres to plan the execution
+      em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
 
       var translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
         projectId = projectId,
         languages = languages,
         params = params,
-        sort = sort,
+        sort = pageable.sort,
         cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
@@ -367,14 +357,18 @@ class TranslationsViewBuilder(
         projectId = projectId,
         languages = languages,
         params = params,
-        sort = sort,
+        sort = pageable.sort,
         cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val query = em.createQuery(translationsViewBuilder.dataQuery).setMaxResults(pageable.pageSize)
       if (cursor == null) {
         query.firstResult = pageable.offset.toInt()
       }
-      val views = query.resultList.map { KeyWithTranslationsView.of(it) }
+      val views = query.resultList.map { KeyWithTranslationsView.of(it, languages.toList()) }
+
+      // reset the value
+      em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
+
       val keyIds = views.map { it.keyId }
       tagService.getTagsForKeyIds(keyIds).let { tagMap ->
         views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }

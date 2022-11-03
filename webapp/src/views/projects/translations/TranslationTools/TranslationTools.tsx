@@ -11,7 +11,7 @@ import { useTranslationTools } from './useTranslationTools';
 import { TranslationMemory } from './TranslationMemory';
 import { MachineTranslation } from './MachineTranslation';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.globalContext/helpers';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
@@ -40,11 +40,13 @@ const StyledSmoothProgress = styled(SmoothProgress)`
 export type Props = {
   width: number | string;
   data: ReturnType<typeof useTranslationTools>;
+  languageTag: string;
 };
 
 const TranslationTools = React.memo(function TranslationTools({
   width,
   data,
+  languageTag,
 }: Props) {
   const t = useTranslate();
   const config = useConfig();
@@ -92,6 +94,7 @@ const TranslationTools = React.memo(function TranslationTools({
             data={data.machine}
           >
             <MachineTranslation
+              languageTag={languageTag}
               data={data.machine?.data}
               operationsRef={data.operationsRef}
             />

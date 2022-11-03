@@ -19,8 +19,11 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.model.enums.ApiScope
+import io.tolgee.security.NeedsSuperJwtToken
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
+import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.SecurityService
@@ -43,7 +46,6 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@Tag(name = "Import")
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/languages",
@@ -68,12 +70,13 @@ class V2LanguagesController(
   @PostMapping(value = [""])
   @Operation(summary = "Creates language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
+  @AccessWithApiKey(scopes = [ApiScope.LANGUAGES_EDIT])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid dto: LanguageDto
   ): LanguageModel {
     val project = projectService.get(projectId)
-    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
     languageValidator.validateCreate(dto, project)
     val language = languageService.createLanguage(dto, project)
     return languageModelAssembler.toModel(language)
@@ -82,20 +85,21 @@ class V2LanguagesController(
   @Operation(summary = "Edits language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
+  @AccessWithApiKey(scopes = [ApiScope.LANGUAGES_EDIT])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
   fun editLanguage(
     @RequestBody @Valid dto: LanguageDto,
     @PathVariable("languageId") languageId: Long
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
     val language = languageService.findById(languageId).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
     return languageModelAssembler.toModel(languageService.editLanguage(languageId, dto))
   }
 
   @GetMapping(value = [""])
   @AccessWithApiKey
   @AccessWithAnyProjectPermission
-  @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
+  @Operation(summary = "Returns all project languages", tags = ["Languages"])
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
     @ParameterObject pageable: Pageable
@@ -116,6 +120,8 @@ class V2LanguagesController(
   @Operation(summary = "Deletes specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
+  @AccessWithApiKey(scopes = [ApiScope.LANGUAGES_EDIT])
+  @NeedsSuperJwtToken
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.findById(languageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }

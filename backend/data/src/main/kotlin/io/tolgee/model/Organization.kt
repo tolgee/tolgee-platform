@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -21,45 +22,44 @@ import javax.validation.constraints.Size
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique"),
-    UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
-
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
 
   @field:NotBlank @field:Size(min = 3, max = 50)
-  open var name: String? = null,
+  open var name: String = "",
 
   open var description: String? = null,
 
   @Column(name = "address_part")
   @field:NotBlank @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
-  open var slug: String? = null,
+  open var slug: String = "",
 
   @Enumerated(EnumType.STRING)
   open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
 
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
-) : ModelWithAvatar {
+) : ModelWithAvatar, AuditModel() {
   constructor(
-    name: String?,
+    name: String,
     description: String? = null,
-    slug: String?,
+    slug: String = "",
     basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
   ) : this(0, name, description, slug, basePermissions)
 
+  @JsonIgnore
   @OneToMany(mappedBy = "organization")
   var memberRoles: MutableList<OrganizationRole> = mutableListOf()
 
   @OneToMany(mappedBy = "organizationOwner")
   var projects: MutableList<Project> = mutableListOf()
 
-  @Column(name = "third_party_billing_id")
-  var thirdPartyBillingId: String? = null
+  @OneToMany(mappedBy = "preferredOrganization")
+  var prefereredBy: MutableList<UserPreferences> = mutableListOf()
 
   override var avatarHash: String? = null
 }

@@ -13,9 +13,15 @@ type Props = {
   value: DiffValue<any>;
   options: FieldOptionsObj;
   diffEnabled: boolean;
+  languageTag?: string | undefined;
 };
 
-export const formatDiff = ({ value, options, diffEnabled }: Props) => {
+export const formatDiff = ({
+  value,
+  options,
+  diffEnabled,
+  languageTag,
+}: Props) => {
   switch (options.type) {
     case 'translation_auto':
       return getAutoChange(value);
@@ -26,7 +32,9 @@ export const formatDiff = ({ value, options, diffEnabled }: Props) => {
     case 'key_tags':
       return getKeyTagsChange(value);
     case 'text':
-      return diffEnabled ? getTextDiff(value) : getNoDiffChange(value);
+      return diffEnabled
+        ? getTextDiff(value, languageTag)
+        : getNoDiffChange(value, languageTag);
     case 'language_flag':
       return getLanguageFlagChange(value);
     case 'project_language':

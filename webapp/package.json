@@ -12,13 +12,15 @@
     "@mui/icons-material": "^5.5.1",
     "@mui/lab": "^5.0.0-alpha.75",
     "@mui/material": "^5.5.3",
+    "@mui/x-date-pickers": "5.0.0-beta.6",
     "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^6.10.0",
-    "@tolgee/react": "^4.6.0",
+    "@tolgee/react": "^4.8.5",
     "@tolgee/socketio-client": "^4.0.0",
     "clsx": "^1.1.1",
     "codemirror": "^5.62.0",
     "copy-to-clipboard": "^3.3.1",
+    "date-fns": "2.29.2",
     "diff": "^5.0.0",
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
@@ -35,6 +37,7 @@
     "react-google-recaptcha-v3": "1.9.5",
     "react-helmet": "^6.1.0",
     "react-list": "^0.8.16",
+    "react-qr-code": "^2.0.7",
     "react-query": "^3.19.1",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
@@ -48,14 +51,18 @@
     "use-context-selector": "^1.3.9",
     "use-debounce": "^7.0.1",
     "web-vitals": "^2.1.0",
-    "yup": "^0.32.9"
+    "yup": "^0.32.9",
+    "sockjs-client": "^1.6.1",
+    "@stomp/stompjs": "^6.1.2"
   },
   "scripts": {
     "start": "craco start",
+    "develop": "start",
     "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.generated.ts",
+    "billing-schema": "openapi-typescript http://localhost:8080/v3/api-docs/V2%20Billing --output ./src/service/billingApiSchema.generated.ts",
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc"
@@ -102,7 +109,7 @@
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
     "concurrently": "^6.2.0",
     "copy-webpack-plugin": "6.4.1",
-    "craco": "^0.0.3",
+    "@craco/craco": "^6.4.5",
     "craco-alias": "^3.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^3.4.0",
@@ -114,6 +121,7 @@
     "react-scripts": "4.0.3",
     "redux-devtools-extension": "^2.13.9",
     "typescript": "^4.3.2",
-    "webpack": "4.44.2"
+    "webpack": "4.44.2",
+    "@stomp/stompjs": "^6.1.2"
   }
 }

@@ -3,7 +3,6 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.security.InternalController
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.project.ProjectService
@@ -26,7 +25,7 @@ class LanguageE2eDataController(
 ) {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun generateBaseData(): Project {
+  fun generateBaseData(): Map<String, Any> {
     val data = testDataService.saveTestData {
       val userAccountBuilder = addUserAccount {
         username = "franta"
@@ -35,7 +34,7 @@ class LanguageE2eDataController(
       val userAccount = userAccountBuilder.self
       userAccountBuilder.build {
         val projectBuilder = addProject {
-          userOwner = userAccount
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           name = "Project"
         }
 
@@ -62,15 +61,13 @@ class LanguageE2eDataController(
         }
       }
     }
-
-    testDataService.saveTestData(data)
-    return data.data.projects[0].self
+    return mapOf<String, Any>("id" to data.data.projects[0].self.id)
   }
 
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanup() {
-    userAccountService.findOptional("franta").orElse(null)?.let {
+    userAccountService.find("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

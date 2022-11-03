@@ -11,7 +11,7 @@ import io.tolgee.api.v2.hateoas.activity.ProjectActivityModel
 import io.tolgee.api.v2.hateoas.activity.ProjectActivityModelAssembler
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.views.activity.ProjectActivityView
-import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import org.springdoc.api.annotations.ParameterObject
