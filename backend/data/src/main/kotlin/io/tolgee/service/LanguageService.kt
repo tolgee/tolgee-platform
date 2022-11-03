@@ -47,7 +47,6 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    translationService.deleteAllByLanguage(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
     entityManager.flush()

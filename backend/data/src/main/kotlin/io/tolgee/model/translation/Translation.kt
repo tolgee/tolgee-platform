@@ -68,7 +68,7 @@ class Translation(
   @ActivityLoggedProp
   var mtProvider: MtServiceType? = null
 
-  @OneToMany(mappedBy = "translation")
+  @OneToMany(mappedBy = "translation", orphanRemoval = true)
   var comments: MutableList<TranslationComment> = mutableListOf()
 
   var wordCount: Int? = null

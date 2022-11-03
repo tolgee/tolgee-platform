@@ -246,21 +246,13 @@ class TranslationService(
   }
 
   fun deleteByIdIn(ids: Collection<Long>) {
-    translationCommentService.deleteByTranslationIdIn(ids)
     importService.onExistingTranslationsRemoved(ids)
     translationRepository.deleteByIdIn(ids)
-  }
-
-  fun deleteAllByLanguage(languageId: Long) {
-    val translations = translationRepository.getAllByLanguageId(languageId)
-    val ids = translations.map { it.id }
-    deleteByIdIn(ids)
   }
 
   fun deleteAllByKeys(ids: Collection<Long>) {
     val translations = translationRepository.getAllByKeyIdIn(ids)
     val translationIds = translations.map { it.id }
-    translationCommentService.deleteByTranslationIdIn(translationIds)
     deleteByIdIn(translationIds)
   }
 
