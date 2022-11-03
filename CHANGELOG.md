@@ -1,3 +1,10 @@
+## [2.45.9](https://github.com/tolgee/tolgee-platform/compare/v2.45.8...v2.45.9) (2022-11-03)
+
+
+### Bug Fixes
+
+* Access project stats with API key - Closes [#1134](https://github.com/tolgee/tolgee-platform/issues/1134) ([#1206](https://github.com/tolgee/tolgee-platform/issues/1206)) ([526cf0c](https://github.com/tolgee/tolgee-platform/commit/526cf0c190d74a0c7b4dc82aa0c7aeda261dfccb))
+
 ## [2.45.8](https://github.com/tolgee/tolgee-platform/compare/v2.45.7...v2.45.8) (2022-10-26)
 
 
