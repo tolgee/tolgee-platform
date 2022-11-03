@@ -1,13 +1,11 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.constants.Message
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
-import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -72,7 +70,8 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `does not create key when not unique in ns`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "key", "ns-1"))
-      .andIsBadRequest.andHasErrorMessage(Message.KEY_EXISTS)
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
