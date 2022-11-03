@@ -15,14 +15,13 @@ import { Filters } from '../Filters/Filters';
 import { ViewMode } from '../context/types';
 import { StickyHeader } from './StickyHeader';
 
-const StyledControls = styled('div')`
+const StyledContainer = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
   padding-bottom: 8px;
   padding-top: 13px;
-  background: ${({ theme }) => theme.palette.background.default};
 `;
 
 const StyledSpaced = styled('div')`
@@ -75,7 +74,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
 
   return (
     <StickyHeader height={55}>
-      <StyledControls>
+      <StyledContainer>
         <StyledSpaced>
           <StyledTranslationsSearchField
             value={search || ''}
@@ -125,7 +124,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </Button>
           )}
         </StyledSpaced>
-      </StyledControls>
+      </StyledContainer>
     </StickyHeader>
   );
 };
