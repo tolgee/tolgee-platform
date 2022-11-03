@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useTranslationsSelector } from './TranslationsContext';
 import { useDebouncedCallback } from 'use-debounce';
+import { useNsBanners } from './useNsBanners';
 
 type ActionType =
   | {
@@ -26,66 +27,50 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
 
     const nsElements = useRef<Record<number, HTMLElement | undefined>>({});
 
-    const bannersRef = useRef([] as { name: string; row: number }[]);
+    const bannersRef = useRef(
+      [] as { name: string | undefined; row: number }[]
+    );
 
-    bannersRef.current = useMemo(() => {
-      const nsBanners = [] as { name: string; row: number }[];
-      let lastNamespace: undefined | string = undefined;
-      translations?.forEach((translation, i) => {
-        const keyNamespace = translation.keyNamespace;
-        if (lastNamespace !== keyNamespace && keyNamespace) {
-          nsBanners.push({
-            name: keyNamespace,
-            row: i,
-          });
-        }
-        lastNamespace = keyNamespace;
-      });
-      return nsBanners;
-    }, [translations]);
+    bannersRef.current = useNsBanners();
 
     const calculateTopNamespace = useDebouncedCallback(() => {
       const nsBanners = bannersRef.current;
-      function isVisible(el: HTMLElement, isFirst: boolean) {
-        const advance = !isFirst ? 10 : 0;
-        if (!el.isConnected) {
+      const [start, end] = reactList?.getVisibleRange() || [0, 0];
+
+      function isAfterTreshold(
+        row: number,
+        el: HTMLElement | undefined,
+        isFirst: boolean
+      ) {
+        if (row < start) {
+          // is before current sliding window
           return false;
         }
+        if (row > end) {
+          // is after current sliding window
+          return true;
+        }
+        if (!el || !el.isConnected) {
+          // element doesn't exist
+          return false;
+        }
+        const advance = !isFirst ? 10 : 0;
         const top = el.getBoundingClientRect()!.top;
+        // check exact location
         return top > topBarHeight + advance;
       }
 
-      const [start] = reactList?.getVisibleRange() || [0, 0];
-
       // take first banner that is after `start`
-      let index = nsBanners.findIndex(({ row }) => row >= start);
+      let index = nsBanners.findIndex(({ row }, i) =>
+        isAfterTreshold(row, nsElements.current[row], i === 0)
+      );
 
       if (index === -1) {
         // if not found put the last in
-        index = nsBanners.length - 1;
+        index = nsBanners.length;
       }
 
-      const banner = nsBanners[index];
-      if (banner) {
-        if (nsElements.current[banner.row]) {
-          // banner is rendered
-          if (isVisible(nsElements.current[banner.row]!, index === 0)) {
-            // banner is still visible, use previous
-            index -= 1;
-          }
-        } else {
-          // banner not rendered
-          if (banner.row > start) {
-            // banner is below or in current view
-            index -= 1;
-          } else {
-            // wait until rendered
-            index = -1;
-          }
-        }
-      } else {
-        index = -1;
-      }
+      index -= 1;
 
       const topBanner = nsBanners[index];
 

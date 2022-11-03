@@ -18,6 +18,7 @@ import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
 import { TranslationsToolbar } from '../TranslationsToolbar';
 import { NamespaceBanner } from '../NamespaceBanner';
+import { useNsBanners } from '../context/useNsBanners';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -104,6 +105,8 @@ export const TranslationsList = () => {
     }
   }, [reactListRef.current]);
 
+  const nsBanners = useNsBanners();
+
   if (!translations) {
     return null;
   }
@@ -148,17 +151,14 @@ export const TranslationsList = () => {
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
-          const previousNamespace = translations[index - 1]?.keyNamespace;
-          const renderNamespace =
-            row.keyNamespace && previousNamespace !== row.keyNamespace;
+          const nsBanner = nsBanners.find((b) => b.row === index)?.name;
 
           return (
             <div key={row.keyId}>
-              {renderNamespace && (
+              {nsBanner && (
                 <NamespaceBanner
+                  namespace={nsBanner}
                   index={index}
-                  nsBefore={translations[index - 1]?.keyNamespace}
-                  namespace={row.keyNamespace!}
                   columnSizes={columnSizes}
                 />
               )}
