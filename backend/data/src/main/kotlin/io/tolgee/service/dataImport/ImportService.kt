@@ -151,9 +151,6 @@ class ImportService(
     return this.find(projectId, authorId) ?: throw NotFoundException()
   }
 
-  fun findOrThrow(projectId: Long, authorId: Long) =
-    this.find(projectId, authorId) ?: throw NotFoundException()
-
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
   @Suppress("UNCHECKED_CAST")
@@ -254,7 +251,7 @@ class ImportService(
 
   @Transactional
   fun deleteImport(projectId: Long, authorId: Long) =
-    this.deleteImport(findOrThrow(projectId, authorId))
+    this.deleteImport(get(projectId, authorId))
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {

@@ -80,9 +80,7 @@ class KeyService(
 
   @Transactional
   fun create(project: Project, name: String, namespace: String?): Key {
-    if (this.findOptional(project.id, name, namespace).isPresent) {
-      throw BadRequestException(Message.KEY_EXISTS)
-    }
+    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
 
     val key = Key(name = name, project = project)
     if (!namespace.isNullOrBlank()) {
@@ -135,7 +133,7 @@ class KeyService(
     val keys = keyRepository.findAllByIdIn(ids)
     val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
-    namespaceService.deleteNamespaces(namespaces)
+    namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
   fun deleteAllByProject(projectId: Long) {
