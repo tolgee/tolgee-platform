@@ -4,16 +4,16 @@ import { useTranslationsSelector } from './TranslationsContext';
 export const useNsBanners = () => {
   const translations = useTranslationsSelector((c) => c.translations);
   return useMemo(() => {
-    const nsBanners = [] as { name: string | undefined; row: number }[];
-    let lastNamespace: null | undefined | string = null;
+    const nsBanners = [] as { name: string; row: number }[];
+    let lastNamespace: undefined | string = undefined;
     translations?.forEach((translation, i) => {
       const keyNamespace = translation.keyNamespace;
       if (
         lastNamespace !== keyNamespace &&
-        (keyNamespace || lastNamespace !== null)
+        (keyNamespace || lastNamespace !== undefined)
       ) {
         nsBanners.push({
-          name: keyNamespace || '<default>',
+          name: keyNamespace || '',
           row: i,
         });
       }

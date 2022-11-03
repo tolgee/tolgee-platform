@@ -6,6 +6,7 @@ import {
   useHeaderNsDispatch,
   useHeaderNsContext,
 } from '../context/HeaderNsContext';
+import { useTranslate } from '@tolgee/react';
 
 const NS_HEIGHT = 18;
 
@@ -20,6 +21,7 @@ const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   transition: transform 0.2s ease-in-out;
   overflow: visible;
+  display: grid;
 `;
 
 const StyledControls = styled('div')`
@@ -28,12 +30,22 @@ const StyledControls = styled('div')`
 `;
 
 const StyledNs = styled('div')`
-  padding: ${({ theme }) => theme.spacing(0, 2)};
-  box-sizing: border-box;
-  height: ${NS_HEIGHT + 5}px;
+  position: absolute;
+  top: 100%;
+  padding: ${({ theme }) => theme.spacing(0, 1, 1, 0)};
+  height: ${NS_HEIGHT + 10}px;
   overflow: hidden;
-  background: ${({ theme }) => theme.palette.background.default};
+`;
+
+const StyledNsWithShadow = styled('div')`
+  padding: ${({ theme }) => theme.spacing(0, 2, 0, 2)};
   box-sizing: border-box;
+  background: ${({ theme }) => theme.palette.background.default};
+  border-radius: 0px 0px 10px 0px;
+  box-shadow: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? '0px 1px 6px -1px #000000, 0px 1px 6px -1px #000000'
+      : '0px -1px 7px -2px #000000'};
 `;
 
 const StyledShadow = styled('div')`
@@ -58,7 +70,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const topBarDispatch = useHeaderNsDispatch();
   const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
-  const nsSpace = topNamespace ? NS_HEIGHT : 0;
+  const t = useTranslate();
 
   useEffect(() => {
     topBarDispatch({
@@ -78,11 +90,17 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         }}
       >
         <StyledControls style={{ height }}>{children}</StyledControls>
-        {topNamespace && <StyledNs>{topNamespace}</StyledNs>}
+        {topNamespace !== undefined && (
+          <StyledNs>
+            <StyledNsWithShadow>
+              {topNamespace || t('namespace_default')}
+            </StyledNsWithShadow>
+          </StyledNs>
+        )}
       </StyledContainer>
       <StyledShadow
         style={{
-          top: 55 + height + nsSpace,
+          top: 54 + height,
           transform: topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,
