@@ -19,6 +19,7 @@ import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
 import { TranslationsToolbar } from '../TranslationsToolbar';
 import { NamespaceBanner } from '../NamespaceBanner';
+import { useNsBanners } from '../context/useNsBanners';
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -134,6 +135,8 @@ export const TranslationsTable = () => {
     }
   }, [reactListRef.current]);
 
+  const nsBanners = useNsBanners();
+
   if (!translations) {
     return null;
   }
@@ -199,18 +202,15 @@ export const TranslationsTable = () => {
             handleFetchMore();
           }
 
-          const previousNamespace = translations[index - 1]?.keyNamespace;
-          const renderNamespace =
-            row.keyNamespace && previousNamespace !== row.keyNamespace;
+          const nsBanner = nsBanners.find((b) => b.row === index)?.name;
 
           return (
             <div key={row.keyId}>
-              {renderNamespace && (
+              {nsBanner && (
                 <NamespaceBanner
+                  namespace={nsBanner}
                   index={index}
-                  nsBefore={translations[index - 1]?.keyNamespace}
-                  namespace={row.keyNamespace!}
-                  columnSizes={columnSizesPercent}
+                  columnSizes={columnSizes}
                 />
               )}
               <RowTable
