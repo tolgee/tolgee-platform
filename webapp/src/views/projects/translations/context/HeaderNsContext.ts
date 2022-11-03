@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useState } from 'react';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useTranslationsSelector } from './TranslationsContext';
+import { useDebouncedCallback } from 'use-debounce';
 
 type ActionType =
   | {
@@ -23,68 +24,79 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
     );
     const [topBarHeight, setTopBarHeight] = useState(0);
 
-    // ns banners keeps structure of where the banners are
-    const nsBanners = useRef<
-      Map<number, { name: string; index: number; ref: HTMLElement | undefined }>
-    >(new Map());
+    const nsElements = useRef<Record<number, HTMLElement | undefined>>({});
 
-    // recalculate the structure in effect
-    useEffect(() => {
-      nsBanners.current = new Map();
+    const bannersRef = useRef([] as { name: string; row: number }[]);
+
+    bannersRef.current = useMemo(() => {
+      const nsBanners = [] as { name: string; row: number }[];
       let lastNamespace: undefined | string = undefined;
       translations?.forEach((translation, i) => {
         const keyNamespace = translation.keyNamespace;
         if (lastNamespace !== keyNamespace && keyNamespace) {
-          nsBanners.current.set(i, {
+          nsBanners.push({
             name: keyNamespace,
-            ref: undefined,
-            index: i,
+            row: i,
           });
         }
         lastNamespace = keyNamespace;
       });
+      return nsBanners;
     }, [translations]);
 
-    useEffect(() => {
+    const calculateTopNamespace = useDebouncedCallback(() => {
+      const nsBanners = bannersRef.current;
       function isVisible(el: HTMLElement, isFirst: boolean) {
         const advance = !isFirst ? 10 : 0;
+        if (!el.isConnected) {
+          return false;
+        }
         const top = el.getBoundingClientRect()!.top;
         return top > topBarHeight + advance;
       }
 
-      function calculateTopNamespace() {
-        const [start, end] = reactList?.getVisibleRange() || [0, 0];
-        const sortedByIndex = [...nsBanners.current]
-          .sort((a, b) => a[0] - b[0])
-          .map((i) => i[1]);
+      const [start] = reactList?.getVisibleRange() || [0, 0];
 
-        // take first banner that is after `start`
-        let bannerIndex = sortedByIndex.findIndex(
-          ({ index }) => index >= start
-        );
+      // take first banner that is after `start`
+      let index = nsBanners.findIndex(({ row }) => row >= start);
 
-        if (bannerIndex === -1) {
-          // if not found put the last in
-          bannerIndex = sortedByIndex.length - 1;
-        }
-
-        // check if banner is visible
-        const candidateVisible =
-          sortedByIndex[bannerIndex]?.ref &&
-          isVisible(sortedByIndex[bannerIndex].ref!, bannerIndex === 0);
-
-        // if visible put previous in
-        const index = candidateVisible ? bannerIndex - 1 : bannerIndex;
-        const banner = sortedByIndex[index];
-
-        // banner needs to be before `end` of visible range
-        const topNamespace =
-          banner && banner.index < end ? banner.name : undefined;
-
-        setTopNamespace(topNamespace);
+      if (index === -1) {
+        // if not found put the last in
+        index = nsBanners.length - 1;
       }
-      calculateTopNamespace();
 
+      const banner = nsBanners[index];
+      if (banner) {
+        if (nsElements.current[banner.row]) {
+          // banner is rendered
+          if (isVisible(nsElements.current[banner.row]!, index === 0)) {
+            // banner is still visible, use previous
+            index -= 1;
+          }
+        } else {
+          // banner not rendered
+          if (banner.row > start) {
+            // banner is below or in current view
+            index -= 1;
+          } else {
+            // wait until rendered
+            index = -1;
+          }
+        }
+      } else {
+        index = -1;
+      }
+
+      const topBanner = nsBanners[index];
+
+      setTopNamespace(topBanner?.name);
+    });
+
+    useEffect(() => {
+      calculateTopNamespace();
+    }, [reactList, topBarHeight, nsElements, translations]);
+
+    useEffect(() => {
       window.addEventListener('scroll', calculateTopNamespace, {
         passive: true,
       });
@@ -95,20 +107,15 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
         window.removeEventListener('scroll', calculateTopNamespace);
         window.removeEventListener('resize', calculateTopNamespace);
       };
-    }, [reactList, topBarHeight]);
+    }, []);
 
     const dispatch = async (action: ActionType) => {
       switch (action.type) {
-        case 'NS_REF_REGISTER': {
-          const value = nsBanners.current.get(action.payload.index);
-          if (value) {
-            nsBanners.current.set(action.payload.index, {
-              ...value,
-              ref: action.payload.el,
-            });
-          }
+        case 'NS_REF_REGISTER':
+          nsElements.current[action.payload.index] = action.payload.el;
+          calculateTopNamespace();
           break;
-        }
+
         case 'TOP_BAR_HEIGHT':
           return setTopBarHeight(action.payload);
       }

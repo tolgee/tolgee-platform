@@ -25,17 +25,14 @@ import { FiltersMenu } from '../Filters/FiltersMenu';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { StickyHeader } from './StickyHeader';
 
-const StyledControls = styled('div')`
+const StyledContainer = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-left: ${({ theme }) => theme.spacing(-2)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
   padding: ${({ theme }) => theme.spacing(0, 1.5)};
-  position: sticky;
-  top: 50px;
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
-  background: ${({ theme }) => theme.palette.background.default};
   transition: transform 0.2s ease-in-out;
   padding-bottom: 4px;
   padding-top: 9px;
@@ -120,7 +117,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
 
   return (
     <StickyHeader height={45}>
-      <StyledControls>
+      <StyledContainer>
         {searchOpen ? (
           <StyledSearchSpaced>
             <StyledSearch
@@ -218,7 +215,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
             </StyledSpaced>
           </>
         )}
-      </StyledControls>
+      </StyledContainer>
     </StickyHeader>
   );
 };
