@@ -1,16 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
-import {
-  useHeaderNsContext,
-  useHeaderNsDispatch,
-} from './context/HeaderNsContext';
+import { useHeaderNsDispatch } from './context/HeaderNsContext';
+import { useTranslate } from '@tolgee/react';
 
 const StyledNamespace = styled('div')`
   background: ${({ theme }) => theme.palette.emphasis[50]};
 `;
 
 type Props = {
-  nsBefore?: string | undefined;
   namespace: string;
   columnSizes: any;
   index: number;
@@ -18,12 +15,12 @@ type Props = {
 
 export const NamespaceBanner: React.FC<Props> = ({
   namespace,
-  columnSizes,
   index,
+  columnSizes,
 }) => {
+  const t = useTranslate();
   const elRef = useRef<HTMLDivElement>(null);
   const dispatch = useHeaderNsDispatch();
-  const topBarHeight = useHeaderNsContext((c) => c.topBarHeight);
 
   useEffect(() => {
     dispatch({
@@ -37,7 +34,11 @@ export const NamespaceBanner: React.FC<Props> = ({
         payload: { index, el: undefined },
       });
     };
-  }, [topBarHeight, columnSizes, namespace]);
+  }, [columnSizes, namespace, index]);
 
-  return <StyledNamespace ref={elRef}>{namespace}</StyledNamespace>;
+  return (
+    <StyledNamespace ref={elRef}>
+      {namespace || t('namespace_default')}
+    </StyledNamespace>
+  );
 };
