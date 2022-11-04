@@ -18,11 +18,14 @@ import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { FieldLabel } from './FieldLabel';
+import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 
 const messaging = container.resolve(MessageService);
 
@@ -80,7 +83,9 @@ export const KeyEditForm: React.FC = () => {
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const history = useHistory();
 
+  const urlId = useUrlSearch().id as string | undefined;
   const [_urlKey, setUrlKey] = useUrlSearchState('key');
+  const [_urlNamespace, setUrlNamespace] = useUrlSearchState('ns');
 
   const handleAddTag = (name: string) => {
     dispatch({
@@ -102,6 +107,49 @@ export const KeyEditForm: React.FC = () => {
     url: '/v2/projects/{projectId}/keys/{ids}',
     method: 'delete',
   });
+
+  const updateNamespace = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{id}/complex-update',
+    method: 'put',
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
+  });
+
+  const cacheUpdateNs = (namespace: string) => {
+    dispatch({
+      type: 'UPDATE_KEY',
+      payload: {
+        keyId: translation!.keyId,
+        value: { keyNamespace: namespace },
+      },
+    });
+  };
+
+  const handleNamespaceChange = (namespace: string | undefined = '') => {
+    const previousNs = translation!.keyNamespace;
+    cacheUpdateNs(namespace);
+    updateNamespace.mutate(
+      {
+        path: { projectId: project.id, id: translation!.keyId },
+        content: {
+          'application/json': { name: translation!.keyName, namespace },
+        },
+      },
+      {
+        onError(e) {
+          cacheUpdateNs(previousNs || '');
+        },
+        onSuccess() {
+          if (urlId === undefined) {
+            setUrlNamespace(namespace || undefined);
+          }
+        },
+      }
+    );
+  };
+
+  useGlobalLoading(updateNamespace.isLoading);
 
   const editEnabled = permissions.satisfiesPermission(
     ProjectPermissionType.EDIT
@@ -148,9 +196,19 @@ export const KeyEditForm: React.FC = () => {
             editEnabled={editEnabled}
             active={true}
             simple={true}
-            onSaveSuccess={(key) => setUrlKey(key)}
+            onSaveSuccess={(key) => urlId === undefined && setUrlKey(key)}
           />
         </StyledField>
+      </div>
+
+      <div>
+        <FieldLabel>
+          <T>translation_single_label_namespace</T>
+        </FieldLabel>
+        <NamespaceSelector
+          value={translation.keyNamespace}
+          onChange={handleNamespaceChange}
+        />
       </div>
 
       <div>

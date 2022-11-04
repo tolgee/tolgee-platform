@@ -66,6 +66,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       className={clsx(data.deleted && 'deleted')}
     >
       <CellKey
+        editInDialog
         editEnabled={permissions.satisfiesPermission(
           ProjectPermissionType.EDIT
         )}

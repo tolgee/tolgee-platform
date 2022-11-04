@@ -5,6 +5,13 @@ import { useTranslate } from '@tolgee/react';
 
 const StyledNamespace = styled('div')`
   background: ${({ theme }) => theme.palette.emphasis[50]};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
+  border-width: 1px 0px 1px 0px;
+  padding: ${({ theme }) => theme.spacing(0, 1)};
+  margin-bottom: -1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 type Props = {
