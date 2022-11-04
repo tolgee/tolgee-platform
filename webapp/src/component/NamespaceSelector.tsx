@@ -9,27 +9,37 @@ type OptionType = { name: string; value: string; isNew: boolean };
 type Props = {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
+  namespaceData?: string[];
 };
 
-export const NamespaceSelector: React.FC<Props> = ({ value, onChange }) => {
+export const NamespaceSelector: React.FC<Props> = ({
+  value,
+  onChange,
+  namespaceData,
+}) => {
   const project = useProject();
 
   const namespacesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/namespaces',
     method: 'get',
     path: { projectId: project.id },
-    query: {},
+    query: {
+      size: 1000,
+    },
     fetchOptions: {
       disableNotFoundHandling: true,
+    },
+    options: {
+      enabled: !namespaceData,
     },
   });
 
   const currentNamespace = value || '';
 
   const existingOptions = useMemo(() => {
-    const existing = namespacesLoadable?.data?._embedded?.namespaces?.map(
-      (ns) => ns.name
-    );
+    const existing =
+      namespaceData ||
+      namespacesLoadable?.data?._embedded?.namespaces?.map((ns) => ns.name);
     if (!existing) {
       return [];
     }
@@ -38,13 +48,13 @@ export const NamespaceSelector: React.FC<Props> = ({ value, onChange }) => {
       name: o,
       isNew: false,
     }));
-  }, [namespacesLoadable.data]);
+  }, [namespacesLoadable.data, namespaceData]);
 
   const [options, setOptions] = useState(existingOptions);
 
   useEffect(() => {
     setOptions(existingOptions);
-  }, [namespacesLoadable.isFetched]);
+  }, [namespacesLoadable.isFetched, namespaceData]);
 
   const t = useTranslate();
 
@@ -70,8 +80,8 @@ export const NamespaceSelector: React.FC<Props> = ({ value, onChange }) => {
       onInputChange={(_, value) => {
         if (options.findIndex((o) => o.name === value) < 0) {
           setOptions([
-            { name: `Add "${value}"`, value, isNew: true },
             ...existingOptions,
+            { name: `Add "${value}"`, value, isNew: true },
           ]);
         } else {
           setOptions(existingOptions);
