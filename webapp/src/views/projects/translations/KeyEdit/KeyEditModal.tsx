@@ -140,7 +140,9 @@ export const KeyEditModal: React.FC<Props> = ({
                   <FieldError error={errors.namespace} />
                 </div>
                 <div>
-                  <FieldLabel>{t('translation_single_label_tags')}</FieldLabel>
+                  <FieldLabel>
+                    {t('translations_key_edit_label_tags')}
+                  </FieldLabel>
                   <StyledTags>
                     {values.tags.map((tag, index) => {
                       return (
@@ -162,7 +164,7 @@ export const KeyEditModal: React.FC<Props> = ({
                         !values.tags.includes(name) &&
                         setFieldValue('tags', [...values.tags, name])
                       }
-                      placeholder={t('translation_single_tag_placeholder')}
+                      placeholder={t('translations_key_edit_placeholder')}
                     />
                   </StyledTags>
                   <FieldError error={errors.tags} />
