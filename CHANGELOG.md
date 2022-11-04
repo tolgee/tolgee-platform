@@ -1,3 +1,10 @@
+## [2.45.10](https://github.com/tolgee/tolgee-platform/compare/v2.45.9...v2.45.10) (2022-11-04)
+
+
+### Bug Fixes
+
+* Orphan removal of Translations & Comments, Retry intermittent E2… ([#1414](https://github.com/tolgee/tolgee-platform/issues/1414)) ([71a1830](https://github.com/tolgee/tolgee-platform/commit/71a183042162eb4d4e8bd886c314010bb2d0f6e5))
+
 ## [2.45.9](https://github.com/tolgee/tolgee-platform/compare/v2.45.8...v2.45.9) (2022-11-03)
 
 
