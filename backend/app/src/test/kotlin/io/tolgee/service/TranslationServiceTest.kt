@@ -38,23 +38,27 @@ class TranslationServiceTest : AbstractSpringTest() {
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
   }
 
-  @Transactional
   @Test
   fun `adds stats on translation save and update`() {
-    val testData = TranslationsTestData()
-    testDataService.saveTestData(testData.root)
-    val translation = testData.aKeyGermanTranslation
-    assertThat(translation.wordCount).isEqualTo(2)
-    assertThat(translation.characterCount).isEqualTo(translation.text!!.length)
+    val testData = executeInNewTransaction {
+      val testData = TranslationsTestData()
+      testDataService.saveTestData(testData.root)
+      val translation = testData.aKeyGermanTranslation
+      assertThat(translation.wordCount).isEqualTo(2)
+      assertThat(translation.characterCount).isEqualTo(translation.text!!.length)
+      testData
+    }
+    executeInNewTransaction {
+      val translation = translationService.get(testData.aKeyGermanTranslation.id)
+      translation.text = "My dog is cool!"
+      translationService.save(translation)
+    }
 
-    translation.text = "My dog is cool!"
-    translationService.save(translation)
-
-    commitTransaction()
-
-    val updated = translationService.get(translation.id)
-    assertThat(updated.wordCount).isEqualTo(4)
-    assertThat(updated.characterCount).isEqualTo(translation.text!!.length)
+    executeInNewTransaction {
+      val updated = translationService.get(testData.aKeyGermanTranslation.id)
+      assertThat(updated.wordCount).isEqualTo(4)
+      assertThat(updated.characterCount).isEqualTo(updated.text!!.length)
+    }
   }
 
   @Transactional
