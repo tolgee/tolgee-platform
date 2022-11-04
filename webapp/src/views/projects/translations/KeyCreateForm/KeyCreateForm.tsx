@@ -93,6 +93,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: keyName,
         translations: translationValues,
         tags: [],
+        namespace: '',
       }}
       onSubmit={handleSubmit}
       validationSchema={Yup.object().shape({

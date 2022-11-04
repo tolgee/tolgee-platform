@@ -202,13 +202,13 @@ export const TranslationsTable = () => {
             handleFetchMore();
           }
 
-          const nsBanner = nsBanners.find((b) => b.row === index)?.name;
+          const nsBanner = nsBanners.find((b) => b.row === index);
 
           return (
             <div key={row.keyId}>
               {nsBanner && (
                 <NamespaceBanner
-                  namespace={nsBanner}
+                  namespace={nsBanner.name}
                   index={index}
                   columnSizes={columnSizes}
                 />

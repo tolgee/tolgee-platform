@@ -80,6 +80,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
       type: 'INSERT_TRANSLATION',
       payload: {
         keyId: data.id,
+        keyNamespace: data.namespace,
         keyName: data.name,
         keyTags: data.tags,
         screenshotCount: 0,

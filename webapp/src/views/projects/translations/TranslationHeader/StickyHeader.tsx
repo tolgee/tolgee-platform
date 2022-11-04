@@ -35,10 +35,11 @@ const StyledNs = styled('div')`
   padding: ${({ theme }) => theme.spacing(0, 1, 1, 0)};
   height: ${NS_HEIGHT + 10}px;
   overflow: hidden;
+  max-width: 100%;
 `;
 
 const StyledNsWithShadow = styled('div')`
-  padding: ${({ theme }) => theme.spacing(0, 2, 0, 2)};
+  padding: ${({ theme }) => theme.spacing(0, 2, 0, 3)};
   box-sizing: border-box;
   background: ${({ theme }) => theme.palette.background.default};
   border-radius: 0px 0px 10px 0px;
@@ -46,6 +47,9 @@ const StyledNsWithShadow = styled('div')`
     theme.palette.mode === 'dark'
       ? '0px 1px 6px -1px #000000, 0px 1px 6px -1px #000000'
       : '0px -1px 7px -2px #000000'};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StyledShadow = styled('div')`

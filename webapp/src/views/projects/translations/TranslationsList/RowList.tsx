@@ -61,6 +61,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
       className={clsx(data.deleted && 'deleted')}
     >
       <CellKey
+        editInDialog
         editEnabled={permissions.satisfiesPermission(
           ProjectPermissionType.EDIT
         )}

@@ -12,7 +12,11 @@ import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
-import { ChangeScreenshotNum, UpdateTranslation } from '../types';
+import {
+  ChangeScreenshotNum,
+  KeyUpdateData,
+  UpdateTranslation,
+} from '../types';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 const MAX_LANGUAGES = 10;
@@ -41,6 +45,7 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 type Props = {
   projectId: number;
   keyName?: string;
+  keyNamespace?: string;
   keyId?: number;
   initialLangs: string[] | null | undefined;
   pageSize?: number;
@@ -116,6 +121,8 @@ export const useTranslationsService = (props: Props) => {
     ...query,
     ...parsedFilters,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
+    filterNamespace:
+      props.keyNamespace !== undefined ? [props.keyNamespace] : undefined,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
   };
@@ -240,12 +247,7 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateTranslationKeys = (
-    data: {
-      keyId: number;
-      value: Partial<DeletableKeyWithTranslationsModelType>;
-    }[]
-  ) => {
+  const updateTranslationKeys = (data: KeyUpdateData[]) => {
     setFixedTranslations((fixedTranslations) => {
       let result = fixedTranslations;
       data.forEach((mod) => {

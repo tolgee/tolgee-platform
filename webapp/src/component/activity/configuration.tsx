@@ -76,19 +76,21 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     label: 'activity_entity_key',
     fields: {
       name: true,
+      namespace: true,
     },
-    references: ({ modifications, entityId, exists }) => {
+    references: ({ modifications, entityId, exists, description }) => {
       const result: Reference[] = [];
       const newData = getDiffVersion('new', modifications);
       const data = newData.name
         ? newData
         : getDiffVersion('old', modifications);
-      if (data.name) {
+      const keyName = data.name || description?.name;
+      if (keyName) {
         result.push({
           type: 'key',
           exists,
           id: entityId,
-          keyName: data.name,
+          keyName: keyName,
         });
       }
       return result;

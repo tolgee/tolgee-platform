@@ -6,6 +6,7 @@ import { KeySingle } from './KeySingle/KeySingle';
 export const SingleKeyView = () => {
   const project = useProject();
   const keyName = useUrlSearch().key as string;
+  const keyNamespace = (useUrlSearch().ns as string) || '';
   const keyId = Number(useUrlSearch().id as string);
 
   return (
@@ -14,6 +15,7 @@ export const SingleKeyView = () => {
       baseLang={project.baseLanguage?.tag}
       keyId={keyId}
       keyName={keyName}
+      keyNamespace={keyNamespace}
       pageSize={1}
     >
       <KeySingle keyName={keyName} keyId={keyId} />
