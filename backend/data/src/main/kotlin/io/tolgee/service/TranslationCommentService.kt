@@ -78,10 +78,6 @@ class TranslationCommentService(
     translationCommentRepository.saveAll(entities)
   }
 
-  fun deleteByTranslationIdIn(translationIds: Collection<Long>) {
-    translationCommentRepository.deleteAllByTranslationIdIn(translationIds)
-  }
-
   fun update(
     entity: TranslationComment,
     updatedBy: UserAccount = authenticationFacade.userAccountEntity

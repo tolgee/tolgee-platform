@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.retry
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
@@ -117,28 +118,30 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it invalidates tokens generated prior a mfa status change`() {
-    loginAsAdminIfNotLogged()
-    Thread.sleep(2000)
+    retry {
+      loginAsAdminIfNotLogged()
+      Thread.sleep(1000)
 
-    val enableRequestDto = UserTotpEnableRequestDto(
-      totpKey = TOTP_KEY,
-      otp = mfaService.generateStringCode(encodedKey),
-      password = initialPassword
-    )
+      val enableRequestDto = UserTotpEnableRequestDto(
+        totpKey = TOTP_KEY,
+        otp = mfaService.generateStringCode(encodedKey),
+        password = initialPassword
+      )
 
-    performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsOk
-    refreshUser()
-    performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+      performAuthPut("/v2/user/mfa/totp", enableRequestDto).andIsOk
+      refreshUser()
+      performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
 
-    logout()
-    loginAsAdminIfNotLogged()
-    Thread.sleep(2000)
+      logout()
+      loginAsAdminIfNotLogged()
+      Thread.sleep(1000)
 
-    val disableRequestDto = UserTotpDisableRequestDto(
-      password = initialPassword
-    )
-    performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsOk
-    refreshUser()
-    performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+      val disableRequestDto = UserTotpDisableRequestDto(
+        password = initialPassword
+      )
+      performAuthDelete("/v2/user/mfa/totp", disableRequestDto).andIsOk
+      refreshUser()
+      performAuthGet("/v2/user").andExpect(MockMvcResultMatchers.status().isUnauthorized)
+    }
   }
 }

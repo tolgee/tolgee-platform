@@ -57,7 +57,7 @@ import javax.validation.constraints.Size
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 class Language : StandardAuditModel() {
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
   var translations: MutableSet<Translation>? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
