@@ -14,6 +14,7 @@ import { StateSelector } from './StateSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { NsSelector } from './NsSelector';
 
 const messaging = container.resolve(MessageService);
 
@@ -41,6 +42,7 @@ const StyledForm = styled('form')`
   grid-template-areas:
     'states states'
     'langs  format'
+    'ns     ns    '
     '.      submit';
 
   & .states {
@@ -55,6 +57,9 @@ const StyledForm = styled('form')`
   & .submit {
     grid-area: submit;
     justify-self: end;
+  }
+  & .ns {
+    grid-area: ns;
   }
 `;
 
@@ -75,7 +80,22 @@ export const ExportForm = () => {
     query: { size: 1000 },
   });
 
+  const namespacesLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/namespaces',
+    method: 'get',
+    path: { projectId: project.id },
+    query: {},
+    fetchOptions: {
+      disableNotFoundHandling: true,
+    },
+  });
+
   const t = useTranslate();
+
+  const allNamespaces = useMemo(
+    () => namespacesLoadable.data?._embedded?.namespaces?.map((n) => n.name),
+    [namespacesLoadable.data]
+  );
 
   const allLangs = useMemo(
     () => languagesLoadable.data?._embedded?.languages?.map((l) => l.tag) || [],
@@ -97,7 +117,7 @@ export const ExportForm = () => {
     defaultVal: EXPORT_DEFAULT_FORMAT,
   });
 
-  if (languagesLoadable.isFetching) {
+  if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
     return (
       <Box mt={2} justifyContent="center" display="flex">
         <CircularProgress />
@@ -113,6 +133,7 @@ export const ExportForm = () => {
           : EXPORT_DEFAULT_STATES) as StateType[],
         languages: (languages?.length ? languages : allLangs) as string[],
         format: (format || EXPORT_DEFAULT_FORMAT) as typeof FORMATS[number],
+        namespaces: allNamespaces || [],
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -143,7 +164,9 @@ export const ExportForm = () => {
                 filterState: values.states,
                 languages: values.languages,
                 structureDelimiter: '.',
-                zip: values.languages.length > 1,
+                filterNamespace: values.namespaces,
+                zip:
+                  values.languages.length > 1 || values.namespaces.length > 1,
               },
             },
           },
@@ -179,6 +202,10 @@ export const ExportForm = () => {
             languages={languagesLoadable.data?._embedded?.languages}
           />
           <FormatSelector className="format" />
+          <NsSelector
+            className="ns"
+            namespaces={namespacesLoadable.data?._embedded?.namespaces}
+          />
           <div className="submit">
             <LoadingButton
               data-cy="export-submit-button"

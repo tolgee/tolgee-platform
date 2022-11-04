@@ -67,6 +67,8 @@ declare namespace DataCy {
         "export-format-selector-item" |
         "export-language-selector" |
         "export-language-selector-item" |
+        "export-namespace-selector" |
+        "export-namespace-selector-item" |
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
