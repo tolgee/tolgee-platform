@@ -72,6 +72,16 @@ describe('Translations Base', () => {
     }
   );
 
+  it('will create translation with namespace', () => {
+    cy.wait(100);
+    cy.gcy('global-empty-list').should('be.visible');
+    createTranslation('Test key', 'Translated test key', undefined, 'test-ns');
+
+    cy.gcy('translations-namespace-banner')
+      .contains('test-ns')
+      .should('be.visible');
+  });
+
   const visit = () => {
     visitTranslations(project.id);
   };

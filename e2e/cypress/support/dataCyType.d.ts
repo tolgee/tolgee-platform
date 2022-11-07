@@ -107,8 +107,6 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
-        "import-namespace-select-option" |
-        "import-namespaces-text-field" |
         "import-resolution-dialog-accept-imported-button" |
         "import-resolution-dialog-accept-old-button" |
         "import-resolution-dialog-close-button" |
@@ -186,6 +184,9 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "namespaces-select" |
+        "namespaces-select-option" |
+        "namespaces-select-text-field" |
         "navigation-item" |
         "organization-address-part-field" |
         "organization-description-field" |
@@ -310,6 +311,7 @@ declare namespace DataCy {
         "translations-key-count" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
+        "translations-namespace-banner" |
         "translations-row" |
         "translations-row-checkbox" |
         "translations-select-all-button" |

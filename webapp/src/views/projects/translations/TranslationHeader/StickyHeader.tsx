@@ -95,7 +95,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
       >
         <StyledControls style={{ height }}>{children}</StyledControls>
         {topNamespace !== undefined && (
-          <StyledNs>
+          <StyledNs data-cy="translations-namespace-banner">
             <StyledNsWithShadow>
               {topNamespace || t('namespace_default')}
             </StyledNsWithShadow>

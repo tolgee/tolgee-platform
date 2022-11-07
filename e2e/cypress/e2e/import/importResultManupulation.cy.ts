@@ -194,7 +194,9 @@ describe('Import result & manipulation', () => {
       gcy('import-result-row').should('have.length', 0);
       visitTranslations(importData.projects[0].id);
       cy.contains('what a key').should('be.visible');
-      cy.contains('homepage:what a key').should('be.visible');
+      gcy('translations-namespace-banner')
+        .contains('homepage')
+        .should('be.visible');
     });
   });
 });

@@ -25,11 +25,16 @@ export const getCell = (value: string) => {
 export function createTranslation(
   testKey: string,
   translation?: string,
-  tag?: string
+  tag?: string,
+  namespace?: string
 ) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
   cy.gcy('translation-create-key-input').type(testKey);
+  if (namespace) {
+    cy.gcy('namespaces-select-text-field').find('input').type(namespace);
+    cy.gcy('namespaces-select-option').contains('test-ns').click();
+  }
   if (tag) {
     cy.gcy('translations-tag-input').type(tag);
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
