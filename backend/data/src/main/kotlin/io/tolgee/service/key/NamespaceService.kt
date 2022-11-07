@@ -20,7 +20,7 @@ class NamespaceService(
   }
 
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
-    val namespaceIds = namespaces.mapNotNull { it?.id }
+    val namespaceIds = namespaces.mapNotNull { it?.id }.toSet()
 
     val counts = namespaceRepository
       .getKeysInNamespaceCount(namespaceIds)

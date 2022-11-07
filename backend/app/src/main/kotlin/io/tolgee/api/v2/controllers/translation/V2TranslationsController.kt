@@ -5,6 +5,7 @@
 package io.tolgee.api.v2.controllers.translation
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -112,8 +113,12 @@ class V2TranslationsController(
       )
     ]
   )
-  fun getAllTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
-    return translationService.getTranslations(languages, projectHolder.project.id)
+  fun getAllTranslations(
+    @PathVariable("languages") languages: Set<String>,
+    @Parameter(description = "Namespace to return")
+    ns: String? = ""
+  ): Map<String, Any> {
+    return translationService.getTranslations(languages, ns, projectHolder.project.id)
   }
 
   @PutMapping("")

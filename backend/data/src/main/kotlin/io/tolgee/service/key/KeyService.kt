@@ -47,6 +47,10 @@ class KeyService(
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
 
+  fun find(id: Long): Key? {
+    return keyRepository.findById(id).orElse(null)
+  }
+
   fun findOptional(id: Long): Optional<Key> {
     return keyRepository.findById(id)
   }

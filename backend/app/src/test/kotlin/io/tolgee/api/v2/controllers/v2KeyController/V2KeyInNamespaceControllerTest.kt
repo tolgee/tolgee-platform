@@ -6,9 +6,9 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -39,7 +39,7 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `creates key and namespace`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = "new_ns"))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andAssertThatJson {
         node("name").isEqualTo("super_key")
         node("namespace").isEqualTo("new_ns")
       }
@@ -59,7 +59,7 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `creates key in existing namespace`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = "ns-1"))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andAssertThatJson {
         node("name").isEqualTo("super_key")
         node("namespace").isEqualTo("ns-1")
       }
@@ -78,7 +78,7 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `updates key in ns`() {
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", "ns-2"))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_k")
         node("namespace").isEqualTo("ns-2")
@@ -91,7 +91,7 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `changes namespace to default`() {
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", null))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andAssertThatJson {
         node("namespace").isNull()
       }
   }
@@ -100,10 +100,19 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `blank namespace doesn't create ns on update`() {
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", ""))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andAssertThatJson {
         node("namespace").isNull()
       }
     namespaceService.find("", project.id).assert.isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `does not create key when exists empty ns`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "key2", namespace = ""))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -112,5 +121,17 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthDelete("keys/${testData.singleKeyInNs2.id}").andIsOk
     keyService.find(project.id, "super_k", "ns-2").assert.isNull()
     namespaceService.find("ns-2", project.id).assert.isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `deletes all keys`() {
+    val ids = testData.projectBuilder.data.keys.map { it.self.id }
+    performProjectAuthDelete("keys/${ids.joinToString(",")}").andIsOk
+    executeInNewTransaction {
+      ids.forEach { keyService.find(it).assert.isNull() }
+    }
+
+    namespaceService.getAllInProject(testData.projectBuilder.self.id).assert.isEmpty()
   }
 }

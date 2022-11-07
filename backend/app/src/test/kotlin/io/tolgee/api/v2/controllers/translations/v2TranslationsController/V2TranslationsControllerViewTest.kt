@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -190,6 +191,45 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations/en,de").andPrettyPrint.andIsForbidden
+  }
+
+  @ProjectApiKeyAuthTestMethod()
+  @Test
+  fun `returns all translations by ns`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations/en,de?ns=ns-1").andAssertThatJson {
+      node("en") {
+        isObject.hasSize(2)
+        node("key").isEqualTo("hello")
+        node("key2").isEqualTo("hello")
+      }
+    }
+    performProjectAuthGet("/translations/en,de?ns=ns-2").andAssertThatJson {
+      node("en").isObject.hasSize(1)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod()
+  @Test
+  fun `returns all translations by default ns`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations/en,de").andAssertThatJson {
+      node("en") {
+        isObject.hasSize(2)
+        node("key").isEqualTo("hello")
+        node("key2").isEqualTo("hello")
+      }
+    }
+
+    performProjectAuthGet("/translations/en,de?ns=").andAssertThatJson {
+      node("en").isObject.hasSize(2)
+    }
   }
 
   @ProjectJWTAuthTestMethod

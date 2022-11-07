@@ -56,8 +56,9 @@ class TranslationService(
 
   @Transactional
   @Suppress("UNCHECKED_CAST")
-  fun getTranslations(languageTags: Set<String>, projectId: Long): Map<String, Any> {
-    val allByLanguages = translationRepository.getTranslations(languageTags, projectId)
+  fun getTranslations(languageTags: Set<String>, namespace: String?, projectId: Long): Map<String, Any> {
+    val safeNamespace = if (namespace == "") null else namespace
+    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
     for (translation in allByLanguages) {
       val map = langTranslations

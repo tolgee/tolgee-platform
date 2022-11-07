@@ -16,7 +16,7 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
     select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
   """
   )
-  fun getKeysInNamespaceCount(namespaceIds: List<Long>): List<Array<Long>>
+  fun getKeysInNamespaceCount(namespaceIds: Collection<Long>): List<Array<Long>>
   fun getAllByProjectId(id: Long): List<Namespace>
 
   fun getAllByProjectId(id: Long, pageable: Pageable): Page<Namespace>
