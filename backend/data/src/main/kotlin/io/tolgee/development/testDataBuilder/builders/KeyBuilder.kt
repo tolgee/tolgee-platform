@@ -32,5 +32,15 @@ class KeyBuilder(
     data.meta = KeyMetaBuilder(keyBuilder = this).apply { ft(this.self) }
   }
 
+  fun setNamespace(name: String?) {
+    if (name == null) {
+      this.self.namespace = null
+      return
+    }
+    val ns = projectBuilder.data.namespaces.singleOrNull { it.self.name === name }?.self
+      ?: projectBuilder.addNamespace { this.name = name }.self
+    this.self.namespace = ns
+  }
+
   fun addScreenshot(ft: FT<Screenshot>) = addOperation(data.screenshots, ft)
 }

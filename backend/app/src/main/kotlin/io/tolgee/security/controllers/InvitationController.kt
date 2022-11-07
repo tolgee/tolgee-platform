@@ -7,8 +7,8 @@ import io.tolgee.dtos.response.InvitationDTO
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.service.InvitationService
-import io.tolgee.service.SecurityService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

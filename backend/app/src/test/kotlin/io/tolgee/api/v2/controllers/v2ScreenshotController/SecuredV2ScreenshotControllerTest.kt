@@ -5,7 +5,7 @@
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
 import io.tolgee.component.TimestampValidation
-import io.tolgee.dtos.response.DeprecatedKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
@@ -37,7 +37,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun getScreenshotFileNoTimestamp() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val result = performAuthGet("/screenshots/${screenshot.filename}")
@@ -51,7 +51,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun getScreenshotFileInvalidTimestamp() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
@@ -68,7 +68,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun getScreenshotFile() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
@@ -82,7 +82,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadScreenshot() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
 
     performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
       val screenshots = screenshotService.findAll(key = key)
@@ -100,7 +100,7 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun findAll() {
-    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key = keyService.create(project, CreateKeyDto("test"))
     screenshotService.store(screenshotFile, key)
     performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
       node("_embedded.screenshots[0].filename").isString.satisfies {

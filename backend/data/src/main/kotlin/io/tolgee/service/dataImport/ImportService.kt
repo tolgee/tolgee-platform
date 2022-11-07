@@ -1,7 +1,6 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -26,13 +25,15 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.service.KeyMetaService
+import io.tolgee.service.key.KeyMetaService
+import org.hibernate.annotations.QueryHints
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -46,12 +47,12 @@ class ImportService(
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
-  private val removeExpiredImportService: RemoveExpiredImportService
+  private val removeExpiredImportService: RemoveExpiredImportService,
+  private val entityManager: EntityManager
 ) {
   @Transactional
   fun addFiles(
     files: List<ImportFileDto>,
-    messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null,
     project: Project,
     userAccount: UserAccount
   ): List<ErrorResponseBody> {
@@ -59,7 +60,6 @@ class ImportService(
       it.author = userAccount
     }
 
-    val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)
 
     if (languages.count() + files.size > 100) {
@@ -71,7 +71,7 @@ class ImportService(
       applicationContext = applicationContext,
       import = import
     )
-    val errors = fileProcessor.processFiles(files, nonNullMessageClient)
+    val errors = fileProcessor.processFiles(files)
 
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
@@ -92,20 +92,36 @@ class ImportService(
 
   @Transactional
   fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
+    if (importLanguage.existingLanguage == existingLanguage) {
+      return
+    }
     val import = importLanguage.file.import
     val dataManager = ImportDataManager(applicationContext, import)
     existingLanguage?.let {
-      if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
+      val langAlreadySelectedInTheSameNS = dataManager.storedLanguages.any {
+        it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
+      }
+      if (langAlreadySelectedInTheSameNS) {
         throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_ALREADY_SELECTED)
       }
     }
     importLanguage.existingLanguage = existingLanguage
     importLanguageRepository.save(importLanguage)
-    dataManager.populateStoredTranslations(importLanguage)
-    dataManager.resetConflicts(importLanguage)
-    dataManager.handleConflicts(false)
-    dataManager.saveAllStoredTranslations()
+    dataManager.resetLanguage(importLanguage)
   }
+
+  @Transactional
+  fun selectNamespace(file: ImportFile, namespace: String?) {
+    val import = file.import
+    val dataManager = ImportDataManager(applicationContext, import)
+    file.namespace = getSafeNamespace(namespace)
+    importFileRepository.save(file)
+    file.languages.forEach {
+      dataManager.resetLanguage(it)
+    }
+  }
+
+  private fun getSafeNamespace(name: String?) = if (name.isNullOrBlank()) null else name
 
   fun save(import: Import): Import {
     return this.importRepository.save(import)
@@ -131,12 +147,42 @@ class ImportService(
     return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
   }
 
-  fun findOrThrow(projectId: Long, authorId: Long) =
-    this.find(projectId, authorId) ?: throw NotFoundException()
+  fun get(projectId: Long, authorId: Long): Import {
+    return this.find(projectId, authorId) ?: throw NotFoundException()
+  }
 
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
-  fun findKeys(import: Import) = importKeyRepository.findAllByImport(import.id)
+  @Suppress("UNCHECKED_CAST")
+
+  fun findKeys(import: Import): List<ImportKey> {
+    var result: List<ImportKey> = entityManager.createQuery(
+      """
+            select distinct ik from ImportKey ik 
+            left join fetch ik.keyMeta ikm
+            left join fetch ikm.comments ikc
+            join ik.file if
+            where if.import = :import
+            """
+    )
+      .setParameter("import", import)
+      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
+      .resultList as List<ImportKey>
+
+    result = entityManager.createQuery(
+      """
+            select distinct ik from ImportKey ik 
+            left join fetch ik.keyMeta ikm
+            left join fetch ikm.codeReferences ikc
+            join ik.file if
+            where ik in :keys
+        """
+    ).setParameter("keys", result)
+      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
+      .resultList as List<ImportKey>
+
+    return result
+  }
 
   fun saveLanguages(entries: Collection<ImportLanguage>) {
     importLanguageRepository.saveAll(entries)
@@ -205,7 +251,7 @@ class ImportService(
 
   @Transactional
   fun deleteImport(projectId: Long, authorId: Long) =
-    this.deleteImport(findOrThrow(projectId, authorId))
+    this.deleteImport(get(projectId, authorId))
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
@@ -256,4 +302,6 @@ class ImportService(
 
   fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
     importFileIssueParamRepository.saveAll(params)
+
+  fun getAllNamespaces(importId: Long) = importRepository.getAllNamespaces(importId)
 }

@@ -6,9 +6,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.PermissionService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory

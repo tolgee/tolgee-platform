@@ -31,6 +31,7 @@ export class RequestOptions {
   disableAuthHandling? = false;
   disableBadRequestHandling? = false;
   asBlob? = false;
+  signal?: any;
 }
 
 @singleton()
@@ -130,6 +131,12 @@ export class ApiHttpService {
             resolve(r);
           })
           .catch((e) => {
+            if (e instanceof DOMException) {
+              if (e.name === 'AbortError') {
+                reject('aborted');
+                return;
+              }
+            }
             // eslint-disable-next-line no-console
             console.error(e);
             errorActions.globalError.dispatch(

@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.response.UserResponseDTO
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

@@ -13,7 +13,7 @@ import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.EntityUtil
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page

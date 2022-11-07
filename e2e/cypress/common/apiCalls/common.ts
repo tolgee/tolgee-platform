@@ -25,6 +25,24 @@ export const v2apiFetch = (
   });
 };
 
+export const v2apiFetchPromise = (
+  input: string,
+  init?: Request,
+  headers = {}
+) => {
+  return fetch(API_URL + '/v2/' + input, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token ? 'Bearer ' + token : undefined,
+      ...headers,
+    },
+    ...init,
+  }).then((r) => ({
+    ...r,
+    body: r.json(),
+  }));
+};
+
 const apiFetch = (
   input: string,
   init?: ArgumentTypes<typeof cy.request>[0],
@@ -133,10 +151,24 @@ export const createKey = (
   projectId,
   key: string,
   translations: { [lang: string]: string }
-) =>
-  apiFetch(`project/${projectId}/keys/create`, {
-    body: { key, translations },
+): Chainable<components['schemas']['KeyModel']> =>
+  v2apiFetch(`projects/${projectId}/keys`, {
+    body: { name: key, translations },
     method: 'POST',
+  }).then((r) => {
+    return r.body;
+  });
+
+export const createKeyPromise = (
+  projectId,
+  key: string,
+  translations: { [lang: string]: string }
+): Promise<components['schemas']['KeyModel']> =>
+  v2apiFetchPromise(`projects/${projectId}/keys`, {
+    body: JSON.stringify({ name: key, translations }),
+    method: 'POST',
+  } as any).then((r) => {
+    return r.body;
   });
 
 export const setTranslations = (
@@ -265,25 +297,30 @@ export const deleteAllProjectApiKeys = (projectId: number) =>
     );
   });
 
-export const addScreenshot = (projectId: number, key: string, path: string) => {
+export const addScreenshot = (
+  projectId: number,
+  keyId: number,
+  path: string
+) => {
   return cy.fixture(path).then((f) => {
     const blob = Cypress.Blob.base64StringToBlob(f, 'image/png');
     const data = new FormData();
     data.append('screenshot', blob);
-    data.append('key', key);
-    cy.log('Uploading screenshot: ' + path);
-    return fetch(`${API_URL}/api/project/${projectId}/screenshots`, {
-      headers: {
-        Authorization: 'Bearer ' + token,
-      },
-      method: 'POST',
-      body: data,
-    }).then((r) => {
-      if (r.status > 200) {
-        r.text().then((t) => cy.log(t));
+    return fetch(
+      `${API_URL}/v2/projects/${projectId}/keys/${keyId}/screenshots`,
+      {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+        method: 'POST',
+        body: data,
+      }
+    ).then((r) => {
+      if (r.status >= 400) {
+        // eslint-disable-next-line no-console
+        r.text().then((t) => console.error(t));
         throw new Error('Error response from server');
       }
-      cy.log('Image uploaded');
     });
   });
 };

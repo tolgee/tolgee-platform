@@ -60,6 +60,14 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "Selects only keys without screenshots")
   var filterHasNoScreenshot: Boolean = false
 
+  @field:Parameter(
+    description = """Filter namespaces. 
+
+To filter default namespace, set to empty string.
+  """
+  )
+  var filterNamespace: List<String>? = null
+
   @field:Parameter(description = "Selects only keys with provided tag")
   var filterTag: List<String>? = null
 }

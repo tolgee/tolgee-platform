@@ -3,7 +3,7 @@ package io.tolgee.api.v2.hateoas.user_account
 import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.controllers.UserController
-import io.tolgee.service.PermissionService
+import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 

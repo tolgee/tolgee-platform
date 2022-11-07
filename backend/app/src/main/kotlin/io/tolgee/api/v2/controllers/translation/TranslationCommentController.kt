@@ -29,9 +29,9 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.SecurityService
-import io.tolgee.service.TranslationCommentService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationCommentService
+import io.tolgee.service.translation.TranslationService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

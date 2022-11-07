@@ -16,7 +16,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
 import { ImportResultRow } from './ImportResultRow';
-import { ImportShowDataDialog } from './ImportShowDataDialog';
+import { ImportTranslationsDialog } from './ImportTranslationsDialog';
 
 type ImportResultProps = {
   result?: components['schemas']['PagedModelImportLanguageModel'];
@@ -45,7 +45,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
 
   return (
     <ProjectLanguagesProvider>
-      <ImportShowDataDialog
+      <ImportTranslationsDialog
         row={showDataRow}
         onClose={() => setShowDataRow(undefined)}
       />
@@ -62,6 +62,9 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
               <TableRow>
                 <TableCell>
                   <T>import_result_language_name_header</T>
+                </TableCell>
+                <TableCell>
+                  <T>import_namespace_name_header</T>
                 </TableCell>
                 <TableCell>
                   <T>import_result_file_name_header</T>

@@ -20,7 +20,7 @@ class ImportFileBuilder(importBuilder: ImportBuilder) : BaseEntityDataBuilder<Im
   fun addImportKey(ft: FT<ImportKey>) = addOperation(data.importKeys, ft).also {
     it.self {
       this@ImportFileBuilder.self.keys.add(this)
-      this.files.add(this@ImportFileBuilder.self)
+      this.file = this@ImportFileBuilder.self
     }
   }
 

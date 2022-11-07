@@ -15,7 +15,7 @@ import { ResourceErrorComponent } from './ResourceErrorComponent';
 export interface LoadableType {
   loading?: boolean;
   isLoading?: boolean;
-  error?: ErrorResponseDto;
+  error?: ErrorResponseDto | null;
 }
 
 interface FormProps<T> {

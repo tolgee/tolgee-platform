@@ -3,11 +3,11 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.security.InternalController
-import io.tolgee.service.KeyService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,8 +35,9 @@ class TranslationsE2eDataController(
       val paddedNum = num.toString().padStart(2, '0')
       keyService.create(
         project,
-        SetTranslationsWithKeyDto(
+        CreateKeyDto(
           "Cool key $paddedNum",
+          null,
           mapOf(
             Pair("en", "Cool translated text $paddedNum"),
             Pair("cs", "Studený přeložený text $paddedNum")

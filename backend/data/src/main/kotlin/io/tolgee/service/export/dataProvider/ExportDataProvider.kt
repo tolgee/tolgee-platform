@@ -10,6 +10,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
+import io.tolgee.model.key.Namespace
+import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation
@@ -28,7 +30,7 @@ class ExportDataProvider(
   private val exportParams: ExportParams,
   private val projectId: Long
 ) {
-  val cb: CriteriaBuilder = entityManager.criteriaBuilder
+  private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ExportDataView> = cb.createQuery(ExportDataView::class.java)
 
   private var key: Root<Key> = query.from(Key::class.java)
@@ -37,6 +39,7 @@ class ExportDataProvider(
   private lateinit var translationJoin: SetJoin<Key, Translation>
   private lateinit var languageJoin: SetJoin<Project, Language>
   private lateinit var projectJoin: Join<Key, Project>
+  private lateinit var namespaceJoin: Join<Key, Namespace>
 
   private var whereConditions: MutableList<Predicate> = mutableListOf()
 
@@ -52,6 +55,7 @@ class ExportDataProvider(
 
   private fun addJoins() {
     projectJoin = key.join(Key_.project)
+    namespaceJoin = key.join(Key_.namespace, JoinType.LEFT)
     languageJoin = joinLanguage()
     translationJoin = joinTranslation(key, languageJoin)
     keyMetaJoin = key.join(Key_.keyMeta, JoinType.LEFT)
@@ -62,6 +66,7 @@ class ExportDataProvider(
     query.multiselect(
       key.get(Key_.id),
       key.get(Key_.name),
+      namespaceJoin.get(Namespace_.name),
       languageJoin.get(Language_.id),
       languageJoin.get(Language_.tag),
       translationJoin.get(Translation_.id),
@@ -77,6 +82,7 @@ class ExportDataProvider(
     filterKeyIdNot()
     filterKeyPrefix()
     filterState()
+    filterNamespaces()
 
     query.where(*whereConditions.toTypedArray())
     query.orderBy(cb.asc(key.get(Key_.name)))
@@ -122,6 +128,20 @@ class ExportDataProvider(
     }
   }
 
+  private fun filterNamespaces() {
+    val hasNull = exportParams.filterNamespace?.contains(null) ?: false
+
+    if (!exportParams.filterNamespace.isNullOrEmpty()) {
+      val withoutNull = exportParams.filterNamespace?.filterNotNull()
+      val namespaceName = namespaceJoin.get(Namespace_.name)
+      var condition = namespaceName.`in`(withoutNull)
+      if (hasNull) {
+        condition = cb.or(condition, namespaceName.isNull)
+      }
+      whereConditions.add(condition)
+    }
+  }
+
   private fun joinTranslation(
     key: Root<Key>,
     language: SetJoin<Project, Language>
@@ -155,7 +175,7 @@ class ExportDataProvider(
     val keyMap = LinkedHashMap<Long, ExportKeyView>()
     resultList.forEach { dataView ->
       val keyView = keyMap.computeIfAbsent(dataView.keyId) {
-        ExportKeyView(dataView.keyId, dataView.keyName)
+        ExportKeyView(dataView.keyId, dataView.keyName, dataView.namespace)
       }
 
       keyView.translations[dataView.languageTag] = ExportTranslationView(

@@ -2,7 +2,7 @@ package io.tolgee.component
 
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.testing.AbstractControllerTest
@@ -32,8 +32,8 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
       projectHolder.project = ProjectDto.fromEntity(testData.project)
       keyService.create(
         testData.project,
-        SetTranslationsWithKeyDto(
-          key = "ho ho ho new key",
+        CreateKeyDto(
+          name = "ho ho ho new key",
           translations = mapOf("en" to "hello")
         )
       )

@@ -4,11 +4,10 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.key.KeyMeta
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
 
 @Entity
@@ -17,10 +16,10 @@ class ImportKey(
   @field:Size(max = 2000)
   @Column(length = 2000)
   var name: String,
+
+  @ManyToOne
+  var file: ImportFile
 ) : StandardAuditModel(), WithKeyMeta {
-  @ManyToMany(mappedBy = "keys")
-  @field:NotEmpty
-  var files: MutableList<ImportFile> = mutableListOf()
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<ImportTranslation> = mutableListOf()

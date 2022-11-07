@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -52,6 +53,27 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(2)
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by namespace`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterNamespace=&filterNamespace=ns-2")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(3)
+        }
+      }
+    performProjectAuthGet("/translations?filterNamespace=ns-2&filterNamespace=ns-1")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(3)
         }
       }
   }

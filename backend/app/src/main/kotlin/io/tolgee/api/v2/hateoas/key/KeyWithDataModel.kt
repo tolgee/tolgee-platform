@@ -16,6 +16,9 @@ open class KeyWithDataModel(
   @Schema(description = "Name of key", example = "this_is_super_key")
   val name: String,
 
+  @Schema(description = "Namespace of key", example = "homepage")
+  val namespace: String?,
+
   @Schema(
     description = "Translations object containing values updated in this request",
     example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}"

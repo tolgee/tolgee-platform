@@ -1,0 +1,286 @@
+package io.tolgee.service.translation
+
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
+import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.request.translation.GetTranslationsParams
+import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.events.OnTranslationsSet
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
+import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.model.views.SimpleTranslationView
+import io.tolgee.model.views.TranslationMemoryItemView
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.LanguageService
+import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.*
+
+@Service
+@Transactional
+class TranslationService(
+  private val translationRepository: TranslationRepository,
+  private val importService: ImportService,
+  private val applicationContext: ApplicationContext,
+  private val tolgeeProperties: TolgeeProperties,
+  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val translationViewDataProvider: TranslationViewDataProvider
+) {
+  @set:Autowired
+  @set:Lazy
+  lateinit var languageService: LanguageService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var keyService: KeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var projectService: ProjectService
+
+  @Transactional
+  @Suppress("UNCHECKED_CAST")
+  fun getTranslations(languageTags: Set<String>, namespace: String?, projectId: Long): Map<String, Any> {
+    val safeNamespace = if (namespace == "") null else namespace
+    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
+    val langTranslations: HashMap<String, Any> = LinkedHashMap()
+    for (translation in allByLanguages) {
+      val map = langTranslations
+        .computeIfAbsent(
+          translation.languageTag
+        ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
+      addToMap(translation, map)
+    }
+    return langTranslations
+  }
+
+  fun getAllByLanguageId(languageId: Long): List<Translation> {
+    return translationRepository.getAllByLanguageId(languageId)
+  }
+
+  fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
+    return if (key != null) {
+      translationRepository.getTranslations(key, project, languages)
+    } else LinkedHashSet()
+  }
+
+  fun getOrCreate(key: Key, language: Language): Translation {
+    return find(key, language).orElseGet {
+      Translation(language = language, key = key)
+    }
+  }
+
+  fun getOrCreate(keyId: Long, languageId: Long): Translation {
+    return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
+      ?: let {
+        val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
+        val language = languageService.findById(languageId).orElseThrow { NotFoundException() }
+        Translation().apply {
+          this.key = key
+          this.language = language
+        }
+      }
+  }
+
+  fun find(key: Key, language: Language): Optional<Translation> {
+    return translationRepository.findOneByKeyAndLanguage(key, language)
+  }
+
+  fun get(id: Long): Translation {
+    return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+  }
+
+  fun find(id: Long): Translation? {
+    return this.translationRepository.findById(id).orElse(null)
+  }
+
+  fun getViewData(
+    projectId: Long,
+    pageable: Pageable,
+    params: GetTranslationsParams,
+    languages: Set<Language>
+  ): Page<KeyWithTranslationsView> {
+    return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
+  }
+
+  fun getSelectAllKeys(
+    projectId: Long,
+    params: TranslationFilters,
+    languages: Set<Language>
+  ): List<Long> {
+    return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
+  }
+
+  fun setTranslation(key: Key, languageTag: String?, text: String?): Translation? {
+    val language = languageService.findByTag(languageTag!!, key.project)
+      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    return setTranslation(key, language, text)
+  }
+
+  fun setTranslation(key: Key, language: Language, text: String?): Translation? {
+    val translation = getOrCreate(key, language)
+    translation.text = text
+    if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
+      translation.state = TranslationState.TRANSLATED
+    }
+    if (text == null || text.isEmpty()) {
+      translation.state = TranslationState.UNTRANSLATED
+      translation.text = null
+    }
+    dismissAutoTranslated(translation)
+    val t = save(translation)
+    key.translations.add(t)
+    return t
+  }
+
+  fun save(translation: Translation): Translation {
+    val translationTextLength = translation.text?.length ?: 0
+    if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
+      throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
+    }
+    return translationRepository.save(translation)
+  }
+
+  @Transactional
+  fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+    val myKey = keyService.get(key.id)
+    val languages = languageService.findByTags(translations.keys, key.project.id)
+    val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
+
+    return translations.entries.associate { (languageTag, value) ->
+      languageTag to setTranslation(key, languageTag, value)
+    }.filterValues { it != null }.mapValues { it.value as Translation }.also {
+      applicationEventPublisher.publishEvent(
+        OnTranslationsSet(
+          source = this,
+          key = myKey,
+          oldValues = oldTranslations,
+          translations = it.values.toList()
+        )
+      )
+    }
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>) {
+    var currentMap = map
+    val path = PathDTO.fromFullPath(translation.key)
+    for (folderName in path.path) {
+      val childMap = currentMap.computeIfAbsent(folderName) { LinkedHashMap<Any, Any>() }
+      if (childMap is Map<*, *>) {
+        currentMap = childMap as MutableMap<String, Any?>
+        continue
+      }
+      // there is already string value, so we cannot replace it by map,
+      // we have to save the key directly without nesting
+      map[translation.key] = translation.text
+      return
+    }
+    currentMap[path.name] = translation.text
+  }
+
+  fun deleteByIdIn(ids: Collection<Long>) {
+    importService.onExistingTranslationsRemoved(ids)
+    translationRepository.deleteByIdIn(ids)
+  }
+
+  fun deleteAllByKeys(ids: Collection<Long>) {
+    val translations = translationRepository.getAllByKeyIdIn(ids)
+    val translationIds = translations.map { it.id }
+    deleteByIdIn(translationIds)
+  }
+
+  fun deleteAllByKey(id: Long) {
+    this.deleteAllByKeys(listOf(id))
+  }
+
+  fun saveAll(entities: Iterable<Translation>) {
+    entities.map { save(it) }
+  }
+
+  fun setState(translation: Translation, state: TranslationState): Translation {
+    translation.state = state
+    return this.save(translation)
+  }
+
+  fun findBaseTranslation(key: Key): Translation? {
+    projectService.getOrCreateBaseLanguage(key.project.id)?.let {
+      return find(key, it).orElse(null)
+    }
+    return null
+  }
+
+  fun getTranslationMemoryValue(
+    key: Key,
+    targetLanguage: Language,
+  ): TranslationMemoryItemView? {
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
+      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+
+    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
+
+    return translationRepository.getTranslationMemoryValue(
+      baseTranslationText,
+      key,
+      baseLanguage,
+      targetLanguage
+    ).firstOrNull()
+  }
+
+  fun getTranslationMemorySuggestions(
+    key: Key,
+    targetLanguage: Language,
+    pageable: Pageable
+  ): Page<TranslationMemoryItemView> {
+    val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
+
+    val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
+
+    return getTranslationMemorySuggestions(baseTranslationText, key, targetLanguage, pageable)
+  }
+
+  fun getTranslationMemorySuggestions(
+    baseTranslationText: String,
+    key: Key?,
+    targetLanguage: Language,
+    pageable: Pageable
+  ): Page<TranslationMemoryItemView> {
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
+      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+
+    if ((baseTranslationText.length) < 3) {
+      return Page.empty(pageable)
+    }
+
+    return translationRepository.getTranslateMemorySuggestions(
+      baseTranslationText = baseTranslationText,
+      key = key,
+      baseLanguage = baseLanguage,
+      targetLanguage = targetLanguage,
+      pageable = pageable
+    )
+  }
+
+  @Transactional
+  fun dismissAutoTranslated(translation: Translation) {
+    translation.auto = false
+    translation.mtProvider = null
+    save(translation)
+  }
+}

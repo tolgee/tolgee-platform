@@ -11,6 +11,7 @@ class KeyModelAssembler : RepresentationModelAssemblerSupport<Key, KeyModel>(
 ) {
   override fun toModel(entity: Key) = KeyModel(
     id = entity.id,
-    name = entity.name
+    name = entity.name,
+    namespace = entity.namespace?.name
   )
 }

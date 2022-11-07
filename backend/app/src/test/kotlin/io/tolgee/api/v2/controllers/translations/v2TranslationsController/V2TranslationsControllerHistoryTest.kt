@@ -127,7 +127,7 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
-        testTranslation.key.name, mutableMapOf(testTranslation.language.tag to newText)
+        testTranslation.key.name, null, mutableMapOf(testTranslation.language.tag to newText)
       )
     ).andIsOk
   }

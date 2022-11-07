@@ -1,7 +1,7 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.CleanDbBeforeClass
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
