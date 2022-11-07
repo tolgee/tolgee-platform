@@ -172,12 +172,15 @@ export const KeyEditModal: React.FC<Props> = ({
               </StyledContainer>
             </DialogContent>
             <DialogActions>
-              <Button data-cy="global-form-cancel-button" onClick={onClose}>
+              <Button
+                data-cy="translations-cell-cancel-button"
+                onClick={onClose}
+              >
                 <T>global_cancel_button</T>
               </Button>
               <Box ml={1}>
                 <LoadingButton
-                  data-cy="global-form-save-button"
+                  data-cy="translations-cell-save-button"
                   loading={updateKey.isLoading}
                   color="primary"
                   variant="contained"
