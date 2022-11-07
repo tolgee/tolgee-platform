@@ -1,10 +1,8 @@
-package io.tolgee.service.query_builders
+package io.tolgee.service.query_builders.translationViewBuilder
 
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.*
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
@@ -18,25 +16,30 @@ import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
-import io.tolgee.service.key.TagService
-import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.*
 import java.util.*
-import javax.persistence.EntityManager
 import javax.persistence.criteria.*
 
-class TranslationsViewBuilder(
+class TranslationsViewQueryBuilder(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
   private val languages: Set<Language>,
   private val params: TranslationFilters,
   private val sort: Sort,
-  private val cursor: Map<String, CursorValue>? = null,
+  cursor: Map<String, CursorValue>? = null,
 ) {
-  private var selection: LinkedHashMap<String, Selection<*>> = LinkedHashMap()
+  companion object {
+    val KEY_NAME_FIELD = KeyWithTranslationsView::keyName.name
+    val NAMESPACE_FIELD = KeyWithTranslationsView::keyNamespace.name
+  }
+
+  private val selection: LinkedHashMap<String, Selection<*>> = LinkedHashMap()
+  private val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, selection)
+
   private var fullTextFields: MutableSet<Expression<String>> = HashSet()
   private var whereConditions: MutableSet<Predicate> = HashSet()
   private lateinit var keyNameExpression: Path<String>
+  private lateinit var namespaceNameExpression: Path<String>
   private lateinit var keyIdExpression: Path<Long>
   private var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   private lateinit var root: Root<Key>
@@ -57,62 +60,6 @@ class TranslationsViewBuilder(
     addLeftJoinedColumns()
     applyGlobalFilters()
     return query
-  }
-
-  @Suppress("UNCHECKED_CAST", "TYPE_MISMATCH_WARNING")
-  /**
-   * This function body is inspired by this thread
-   * https://stackoverflow.com/questions/38017054/mysql-cursor-based-pagination-with-multiple-columns
-   */
-  private fun getCursorPredicate(): Predicate? {
-    var result: Predicate? = null
-    cursor?.entries?.reversed()?.forEach { (property, value) ->
-      val isUnique = property === KeyWithTranslationsView::keyId.name
-      val expression = selection[property] as? Expression<String>
-        ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
-
-      val strongCondition: Predicate
-      val condition: Predicate
-      if (value.direction == Sort.Direction.ASC) {
-        condition = if (isUnique)
-          cb.greaterThan(expression, value.value)
-        else
-          cb.greaterThanOrEqualToNullable(expression, value.value)
-        strongCondition = cb.greaterThan(expression, value.value)
-      } else {
-        condition = if (isUnique)
-          cb.lessThan(expression, value.value)
-        else
-          cb.lessThanOrEqualToNullable(expression, value.value)
-        strongCondition = cb.lessThan(expression, value.value)
-      }
-      result = result?.let {
-        cb.and(condition, cb.or(strongCondition, result))
-      } ?: condition
-    }
-    return result
-  }
-
-  @Suppress("TYPE_MISMATCH_WARNING")
-  private fun CriteriaBuilder.greaterThanOrEqualToNullable(
-    expression: Expression<String>,
-    value: String?
-  ): Predicate {
-    if (value == null) {
-      return this.or(this.isNull(expression), this.greaterThan(expression, value as String?))
-    }
-    return this.greaterThanOrEqualTo(expression, value as String?)
-  }
-
-  @Suppress("TYPE_MISMATCH_WARNING")
-  private fun CriteriaBuilder.lessThanOrEqualToNullable(
-    expression: Expression<String>,
-    value: String?
-  ): Predicate {
-    if (value == null) {
-      return this.or(this.isNull(expression), this.lessThan(expression, value as String?))
-    }
-    return this.lessThanOrEqualTo(expression, value as String?)
   }
 
   private fun addLeftJoinedColumns() {
@@ -179,6 +126,7 @@ class TranslationsViewBuilder(
   private fun addNamespace() {
     val namespace = root.join(Key_.namespace, JoinType.LEFT)
     val namespaceName = namespace.get(Namespace_.name)
+    namespaceNameExpression = namespaceName
     selection[NAMESPACE_FIELD] = namespaceName
     fullTextFields.add(namespaceName)
     groupByExpressions.add(namespaceName)
@@ -255,6 +203,18 @@ class TranslationsViewBuilder(
       if (params.filterHasNoScreenshot) {
         whereConditions.add(cb.lt(screenshotCountExpression, 1))
       }
+
+      val filterNamespace = params.filterNamespace
+      if (filterNamespace !== null) {
+        val inCondition = namespaceNameExpression.`in`(filterNamespace)
+        val hasDefaultNamespace = filterNamespace.contains("")
+        val condition = if (hasDefaultNamespace)
+          cb.or(inCondition, namespaceNameExpression.isNull)
+        else
+          inCondition
+        whereConditions.add(condition)
+      }
+
       val search = params.search
       if (!search.isNullOrEmpty()) {
         val fullTextRestrictions: MutableSet<Predicate> = HashSet()
@@ -271,7 +231,7 @@ class TranslationsViewBuilder(
     }
   }
 
-  private val dataQuery: CriteriaQuery<Array<Any?>>
+  val dataQuery: CriteriaQuery<Array<Any?>>
     get() {
       val query = getBaseQuery(cb.createQuery(Array<Any?>::class.java))
       val paths = selection.values.toTypedArray()
@@ -288,7 +248,7 @@ class TranslationsViewBuilder(
         orderList.add(cb.asc(selection[KEY_NAME_FIELD] as Expression<*>))
       }
       val where = whereConditions.toMutableList()
-      getCursorPredicate()?.let {
+      cursorPredicateProvider()?.let {
         where.add(it)
       }
       val groupBy = listOf(keyIdExpression, *groupByExpressions.toTypedArray())
@@ -302,7 +262,7 @@ class TranslationsViewBuilder(
 
   private val Expression<String>.isNullOrBlank get() = cb.or(cb.isNull(this), cb.equal(this, ""))
 
-  private val countQuery: CriteriaQuery<Long>
+  val countQuery: CriteriaQuery<Long>
     get() {
       val query = getBaseQuery(cb.createQuery(Long::class.java))
       val file = query.roots.iterator().next() as Root<*>
@@ -311,7 +271,7 @@ class TranslationsViewBuilder(
       return query
     }
 
-  private val keyIdsQuery: CriteriaQuery<Long>
+  val keyIdsQuery: CriteriaQuery<Long>
     get() {
       isKeyIdsQuery = true
       val query = getBaseQuery(cb.createQuery(Long::class.java))
@@ -335,77 +295,5 @@ class TranslationsViewBuilder(
         }
         return@lazy filterByStateMap
       }
-  }
-
-  companion object {
-    val KEY_NAME_FIELD = KeyWithTranslationsView::keyName.name
-    val NAMESPACE_FIELD = KeyWithTranslationsView::keyNamespace.name
-
-    @JvmStatic
-    fun getData(
-      applicationContext: ApplicationContext,
-      projectId: Long,
-      languages: Set<Language>,
-      pageable: Pageable,
-      params: TranslationFilters = TranslationFilters(),
-      cursor: String? = null
-    ): Page<KeyWithTranslationsView> {
-      val em = applicationContext.getBean(EntityManager::class.java)
-      val tagService = applicationContext.getBean(TagService::class.java)
-
-      // otherwise it takes forever for postgres to plan the execution
-      em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
-
-      var translationsViewBuilder = TranslationsViewBuilder(
-        cb = em.criteriaBuilder,
-        projectId = projectId,
-        languages = languages,
-        params = params,
-        sort = pageable.sort,
-        cursor = cursor?.let { CursorUtil.parseCursor(it) }
-      )
-      val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
-
-      translationsViewBuilder = TranslationsViewBuilder(
-        cb = em.criteriaBuilder,
-        projectId = projectId,
-        languages = languages,
-        params = params,
-        sort = pageable.sort,
-        cursor = cursor?.let { CursorUtil.parseCursor(it) }
-      )
-      val query = em.createQuery(translationsViewBuilder.dataQuery).setMaxResults(pageable.pageSize)
-      if (cursor == null) {
-        query.firstResult = pageable.offset.toInt()
-      }
-      val views = query.resultList.map { KeyWithTranslationsView.of(it, languages.toList()) }
-
-      // reset the value
-      em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
-
-      val keyIds = views.map { it.keyId }
-      tagService.getTagsForKeyIds(keyIds).let { tagMap ->
-        views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }
-      }
-      return PageImpl(views, pageable, count)
-    }
-
-    fun getSelectAllKeys(
-      applicationContext: ApplicationContext,
-      projectId: Long,
-      languages: Set<Language>,
-      params: TranslationFilters = TranslationFilters(),
-    ): MutableList<Long> {
-      val em = applicationContext.getBean(EntityManager::class.java)
-
-      val translationsViewBuilder = TranslationsViewBuilder(
-        cb = em.criteriaBuilder,
-        projectId = projectId,
-        languages = languages,
-        params = params,
-        sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name))
-      )
-      return em.createQuery(translationsViewBuilder.keyIdsQuery).resultList
-    }
   }
 }

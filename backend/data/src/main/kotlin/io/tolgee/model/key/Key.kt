@@ -1,6 +1,7 @@
 package io.tolgee.model.key
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
@@ -19,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EntityListeners
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -34,7 +34,7 @@ import javax.validation.constraints.Size
 @Entity
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-@EntityListeners(Key.Companion.KeyListeners::class)
+@ActivityEntityDescribingPaths(["namespace"])
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)
@@ -48,6 +48,7 @@ class Key(
   lateinit var project: Project
 
   @ManyToOne
+  @ActivityLoggedProp
   var namespace: Namespace? = null
 
   @OneToMany(mappedBy = "key")

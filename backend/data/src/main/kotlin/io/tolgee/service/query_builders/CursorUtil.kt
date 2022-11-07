@@ -26,6 +26,7 @@ class CursorUtil {
       val path = property.split(".")
       return when (path[0]) {
         KeyWithTranslationsView::keyId.name -> item?.keyId.toString()
+        KeyWithTranslationsView::keyNamespace.name -> item?.keyNamespace
         KeyWithTranslationsView::keyName.name -> item?.keyName
         KeyWithTranslationsView::screenshotCount.name -> item?.screenshotCount.toString()
         KeyWithTranslationsView::translations.name -> {

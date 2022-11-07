@@ -3,20 +3,25 @@ package io.tolgee.service.query_builders
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.GetTranslationsParams
+import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class TranslationsViewBuilderTest : AbstractSpringTest() {
+class TranslationViewDataProviderTest : AbstractSpringTest() {
+
+  @Autowired
+  private lateinit var translationViewDataProvider: TranslationViewDataProvider
+
   @Test
   fun `returns correct page size and page meta`() {
     val testData = prepareLotOfData()
-    val result = TranslationsViewBuilder.getData(
-      applicationContext = applicationContext,
+    val result = translationViewDataProvider.getData(
       projectId = testData.project.id,
       languages = setOf(testData.englishLanguage, testData.germanLanguage),
       PageRequest.of(0, 10),
@@ -28,8 +33,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   @Test
   fun `selects languages`() {
     val testData = prepareLotOfData()
-    val result = TranslationsViewBuilder.getData(
-      applicationContext = applicationContext,
+    val result = translationViewDataProvider.getData(
       projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(
@@ -42,8 +46,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   @Test
   fun `searches in data`() {
     val testData = prepareLotOfData()
-    val result = TranslationsViewBuilder.getData(
-      applicationContext = applicationContext,
+    val result = translationViewDataProvider.getData(
       projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(0, 10),
@@ -59,8 +62,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   fun `returns correct comment counts`() {
     val testData = generateCommentStatesTestData()
 
-    val result = TranslationsViewBuilder.getData(
-      applicationContext = applicationContext,
+    val result = translationViewDataProvider.getData(
       projectId = testData.project.id,
       languages = setOf(testData.germanLanguage),
       PageRequest.of(0, 10),
