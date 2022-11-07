@@ -277,6 +277,7 @@ declare namespace DataCy {
         "tag-autocomplete-option" |
         "transfer-project-apply-button" |
         "translation-create-key-input" |
+        "translation-create-namespace-input" |
         "translation-create-translation-input" |
         "translation-edit-delete-button" |
         "translation-edit-key-field" |

@@ -141,7 +141,7 @@ export const FormBody: React.FC<Props> = ({
                 <FieldLabel>
                   <T>translation_single_label_namespace</T>
                 </FieldLabel>
-                <StyledEdtorWrapper data-cy="translation-create-key-input">
+                <StyledEdtorWrapper data-cy="translation-create-namespace-input">
                   <NamespaceSelector
                     value={field.value}
                     onChange={(value) => form.setFieldValue(field.name, value)}
