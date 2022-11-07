@@ -31,6 +31,8 @@ data class CreateKeyDto(
   fun setJsonNamespace(namespace: String?) {
     if (namespace == "") {
       this.namespace = null
+      return
     }
+    this.namespace = namespace
   }
 }
