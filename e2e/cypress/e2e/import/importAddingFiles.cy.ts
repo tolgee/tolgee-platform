@@ -35,10 +35,10 @@ describe('Import Adding files', () => {
       subjectType: 'drag-n-drop',
     });
     cy.xpath(
-      './/*[@data-cy="import-namespaces-text-field"]//input[@value="movies"]'
+      './/*[@data-cy="namespaces-select"]//input[@value="movies"]'
     ).should('have.length', 2);
     cy.xpath(
-      './/*[@data-cy="import-namespaces-text-field"]//input[@value="homepage"]'
+      './/*[@data-cy="namespaces-select"]//input[@value="homepage"]'
     ).should('have.length', 2);
 
     cy.xpath(

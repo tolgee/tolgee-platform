@@ -162,16 +162,7 @@ describe('Import result & manipulation', () => {
     });
 
     it('selects namespace', () => {
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .clear()
-        .type('hello{enter}');
-
-      getLanguageRow('multilang.json (en)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .should('have.value', 'hello');
+      selectNamespace('multilang.json (de)', 'hello');
 
       getLanguageRow('multilang.json (de)')
         .findDcy('import-result-resolved-conflicts-cell')
@@ -182,6 +173,7 @@ describe('Import result & manipulation', () => {
         .find('input')
         .clear()
         .type('{downArrow}{enter}');
+
       cy.waitForDom();
       getLanguageRow('multilang.json (de)')
         .findDcy('import-result-resolve-button')
@@ -199,4 +191,19 @@ describe('Import result & manipulation', () => {
         .should('be.visible');
     });
   });
+
+  function selectNamespace(row: string, namespace: string) {
+    getLanguageRow(row)
+      .findDcy('namespaces-select')
+      .find('input')
+      .clear()
+      .type(namespace);
+
+    gcy('namespaces-select-option').first().click();
+
+    getLanguageRow(row)
+      .findDcy('namespaces-select')
+      .find('input')
+      .should('have.value', namespace);
+  }
 });
