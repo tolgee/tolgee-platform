@@ -75,6 +75,7 @@ export const NamespaceSelector: React.FC<Props> = ({
   return (
     <Autocomplete
       id="namespace-autocomplete"
+      data-cy="namespaces-select"
       onChange={(_, option) => {
         onChange(typeof option === 'string' ? option : option?.value);
       }}
@@ -82,7 +83,7 @@ export const NamespaceSelector: React.FC<Props> = ({
       onBlur={handleBlur}
       inputValue={!inputFocus ? inputBlurredValue : inputValue}
       onInputChange={(_, value) => {
-        if (options.findIndex((o) => o.name === value) < 0) {
+        if (options.findIndex((o) => o.name === value) < 0 && value) {
           setOptions([
             ...existingOptions,
             { name: `Add "${value}"`, value, isNew: true },
@@ -98,7 +99,7 @@ export const NamespaceSelector: React.FC<Props> = ({
       options={options}
       renderOption={(props, option: OptionType) => (
         <MenuItem {...props}>
-          <span data-cy="import-namespace-select-option">
+          <span data-cy="namespaces-select-option">
             {option.name === '' ? t('namespace_select_default') : option.name}
           </span>
         </MenuItem>
@@ -106,7 +107,7 @@ export const NamespaceSelector: React.FC<Props> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          data-cy="import-namespaces-text-field"
+          data-cy="namespaces-select-text-field"
           size={'small'}
           variant="outlined"
           onSubmit={() => {}}
