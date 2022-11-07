@@ -5,10 +5,13 @@ import {
   create4Translations,
   editCell,
   forEachView,
+  getCell,
   getCellCancelButton,
+  getCellSaveButton,
   translationsBeforeEach,
   visitTranslations,
 } from '../../../common/translations';
+import { gcy } from '../../../common/shared';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -45,15 +48,21 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool translated text 2').should('be.visible');
       });
 
-      it('will edit translation namespace', () => {
-        editCell('Cool translated text 1', 'Super cool changed text...');
-        cy.xpath(
-          `${getAnyContainingText(
-            'Super cool changed text...'
-          )}/parent::*//button[@type='submit']`
-        ).should('not.exist');
-        cy.contains('Super cool changed text...').should('be.visible');
-        cy.contains('Cool translated text 2').should('be.visible');
+      it('will edit key namespace', () => {
+        getCell('Cool key 01').click();
+
+        gcy('namespaces-select').find('input').clear().type('test-ns');
+        gcy('namespaces-select-option').contains('test-ns').click();
+
+        getCellSaveButton().click();
+
+        gcy('translations-namespace-banner')
+          .contains('test-ns')
+          .should('be.visible');
+
+        gcy('translations-namespace-banner')
+          .contains('<default>')
+          .should('be.visible');
       });
 
       it('will cancel key edit without confirmation', () => {
