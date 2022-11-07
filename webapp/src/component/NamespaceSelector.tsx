@@ -67,15 +67,19 @@ export const NamespaceSelector: React.FC<Props> = ({
 
   const [inputValue, setInputValue] = useState('');
 
+  const handleBlur = () => {
+    setInputFocus(false);
+    setInputValue('');
+  };
+
   return (
     <Autocomplete
       id="namespace-autocomplete"
       onChange={(_, option) => {
         onChange(typeof option === 'string' ? option : option?.value);
       }}
-      freeSolo
       onFocus={() => setInputFocus(true)}
-      onBlur={() => setInputFocus(false)}
+      onBlur={handleBlur}
       inputValue={!inputFocus ? inputBlurredValue : inputValue}
       onInputChange={(_, value) => {
         if (options.findIndex((o) => o.name === value) < 0) {
@@ -99,13 +103,6 @@ export const NamespaceSelector: React.FC<Props> = ({
           </span>
         </MenuItem>
       )}
-      componentsProps={{
-        paper: {
-          sx: {
-            width: '300px',
-          },
-        },
-      }}
       renderInput={(params) => (
         <TextField
           {...params}
