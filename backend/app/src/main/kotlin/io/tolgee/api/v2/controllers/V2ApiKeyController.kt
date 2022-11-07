@@ -25,9 +25,10 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.PermissionService
-import io.tolgee.service.SecurityService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -49,7 +50,7 @@ import javax.validation.Valid
 @RequestMapping("/v2")
 @Tag(name = "API keys")
 class V2ApiKeyController(
-  private val apiKeyService: io.tolgee.service.ApiKeyService,
+  private val apiKeyService: ApiKeyService,
   private val projectService: ProjectService,
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,

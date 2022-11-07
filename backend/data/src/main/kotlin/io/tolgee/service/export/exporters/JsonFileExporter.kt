@@ -25,18 +25,16 @@ class JsonFileExporter(
 
   private fun prepare() {
     translations.forEach { translation ->
-      val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.splitByScopeDelimiter)
-      val fileContentResultMap = getFileContentResultMap(path, translation)
-      val pathItems = path.asSequence().drop(getRealScopeDepth(path)).toList()
-      addToMap(fileContentResultMap, pathItems.toMutableList(), translation)
+      val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.structureDelimiter)
+      val fileContentResultMap = getFileContentResultMap(translation)
+      addToMap(fileContentResultMap, path, translation)
     }
   }
 
   private fun getFileContentResultMap(
-    path: List<String>,
     translation: ExportTranslationView
   ): LinkedHashMap<String, Any?> {
-    val absolutePath = translation.getFileAbsolutePath(path)
+    val absolutePath = translation.getFilePath(translation.key.namespace)
     return result[absolutePath] ?: let {
       LinkedHashMap<String, Any?>().also { result[absolutePath] = it }
     }
@@ -72,7 +70,8 @@ class JsonFileExporter(
     content: LinkedHashMap<String, Any?>,
     translation: ExportTranslationView
   ) {
-    val last2joined = pathItems.takeLast(2).joinToString(exportParams.splitByScopeDelimiter + "")
+    val delimiter = exportParams.structureDelimiter.toString()
+    val last2joined = pathItems.takeLast(2).joinToString(delimiter)
     val joinedPathItems = pathItems.dropLast(2) + last2joined
     addToMap(content, joinedPathItems, translation)
   }

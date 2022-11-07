@@ -69,7 +69,7 @@ class V2TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest
   private fun performUpdate(lang: String) = performProjectAuthPut(
     "/translations",
     SetTranslationsWithKeyDto(
-      "key", mutableMapOf(lang to lang)
+      "key", null, mutableMapOf(lang to lang)
     )
   )
 

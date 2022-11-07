@@ -9,13 +9,9 @@ import { styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
 import { ImportConflictsData } from './ImportConflictsData';
-
-container.resolve(ImportActions);
 
 const StyledAppBar = styled(AppBar)`
   position: relative;

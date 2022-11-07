@@ -10,7 +10,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProviderImpl
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.InvitationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

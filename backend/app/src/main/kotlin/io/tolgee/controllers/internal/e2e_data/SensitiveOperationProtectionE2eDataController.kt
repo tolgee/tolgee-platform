@@ -6,7 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.security.InternalController
 import io.tolgee.security.JwtTokenProvider
-import io.tolgee.service.MfaService
+import io.tolgee.service.security.MfaService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
 import java.util.stream.Collectors
@@ -150,31 +149,11 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
   }
 
   @Test
-  fun getScopes() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
-    mvc.perform(MockMvcRequestBuilders.get("/uaa/scopes?ak=" + apiKey.key))
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-  }
-
-  @Test
-  fun getLanguages() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
-    val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
-  }
-
-  @Test
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
   fun getApiKeyScopes() {
     val scopes = performGet("/api/apiKeys/scopes?ak=" + apiKey.key)
       .andIsOk.andReturn().mapResponseTo<Set<String>>()
     assertThat(scopes).containsAll(setOf(ApiScope.TRANSLATIONS_EDIT.value, ApiScope.KEYS_EDIT.value))
-  }
-
-  private fun checkKey(key: String?) {
-    Assertions.assertThat(arrayDistinctCount(key!!.chars().boxed().toArray())).isGreaterThan(10)
   }
 
   private fun <T> arrayDistinctCount(array: Array<T>): Int {

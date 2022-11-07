@@ -6,19 +6,25 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.KeyMetaService
-import io.tolgee.service.KeyService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
-  private val forceMode: ForceMode = ForceMode.NO_FORCE
+  private val forceMode: ForceMode = ForceMode.NO_FORCE,
 ) {
+
   private val importDataManager = ImportDataManager(applicationContext, import)
   private val keyService = applicationContext.getBean(KeyService::class.java)
+  private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
+
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
   private val translationsToSave = mutableListOf<Translation>()
 
@@ -27,7 +33,7 @@ class StoredDataImporter(
    * thrown ImportConflictNotResolvedException commits the transaction,
    * looking for key in this map is also faster then querying database
    */
-  private val keysToSave = mutableMapOf<String, Key>()
+  private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
 
   /**
    * We need to persist data after everything is checked for resolved conflicts since
@@ -35,19 +41,39 @@ class StoredDataImporter(
    */
   private val translationService = applicationContext.getBean(TranslationService::class.java)
 
+  private val namespacesToSave = mutableMapOf<String?, Namespace>()
+
+  /**
+   * This metas are merged, so there is only one meta for one key!!!
+   *
+   * It can be used only when we are finally importing the data, before that we cannot merge it,
+   * since namespace can be changed
+   */
+  private val storedMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+    val result: MutableMap<Pair<String?, String>, KeyMeta> = mutableMapOf()
+    keyMetaService.getWithFetchedData(this.import).forEach { currentKeyMeta ->
+      val mapKey = currentKeyMeta.importKey!!.file.namespace to currentKeyMeta.importKey!!.name
+      result[mapKey] = result[mapKey]?.let { existingKeyMeta ->
+        keyMetaService.import(existingKeyMeta, currentKeyMeta)
+        existingKeyMeta
+      } ?: currentKeyMeta
+    }
+    result
+  }
+
   fun doImport() {
     importDataManager.storedLanguages.forEach {
       it.doImport()
     }
 
-    this.importDataManager.storedKeys.values.onEach { importKey ->
-      val importedKeyMeta = importDataManager.storedMetas[importKey.name]
+    this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
+      val importedKeyMeta = storedMetas[fileNamePair.first.namespace to importKey.name]
       // dont touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
-        keysToSave[importKey.name]?.let { newKey ->
+        keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->
           // if key is obtained or created and meta exists, take it and import the data from the imported one
           // persist is cascaded on key, so it should be fine
-          val keyMeta = importDataManager.existingMetas[importKey.name]?.also {
+          val keyMeta = importDataManager.existingMetas[fileNamePair.first.namespace to importKey.name]?.also {
             keyMetaService.import(it, importedKeyMeta)
           } ?: importedKeyMeta
           // also set key and remove import key
@@ -60,6 +86,8 @@ class StoredDataImporter(
         }
       }
     }
+
+    namespaceService.saveAll(namespacesToSave.values)
     keyService.saveAll(keysToSave.values)
     translationService.saveAll(translationsToSave)
 
@@ -95,15 +123,16 @@ class StoredDataImporter(
   private val ImportTranslation.existingKey: Key
     get() {
       // get key from already saved keys to save
-      val key = keysToSave[this.key.name] ?: let {
+      return keysToSave.computeIfAbsent(this.key.file.namespace to this.key.name) {
         // or get it from conflict or create new one
-        val newKey = this.conflict?.key ?: importDataManager.existingKeys[this.key.name]
-          ?: Key(name = this.key.name).apply { project = import.project }
+        val newKey = this.conflict?.key
+          ?: importDataManager.existingKeys[this.key.file.namespace to this.key.name]
+          ?: Key(name = this.key.name).apply {
+            project = import.project
+            namespace = getNamespace(this@existingKey.key.file.namespace)
+          }
         newKey
       }
-      val keyName = key.name
-      keysToSave[keyName] = key
-      return key
     }
 
   private fun ImportTranslation.checkConflictResolved() {
@@ -112,6 +141,13 @@ class StoredDataImporter(
       throw ImportConflictNotResolvedException(
         mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList()
       )
+    }
+  }
+
+  private fun getNamespace(name: String?): Namespace? {
+    name ?: return null
+    return importDataManager.existingNamespaces[name] ?: namespacesToSave.computeIfAbsent(name) {
+      Namespace(name, import.project)
     }
   }
 }

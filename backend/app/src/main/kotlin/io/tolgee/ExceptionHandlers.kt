@@ -23,7 +23,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
+import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
 import javax.persistence.EntityNotFoundException
@@ -46,6 +48,18 @@ class ExceptionHandlers {
     )
     return ResponseEntity(
       Collections.singletonMap<String, Map<String, String>>(ValidationErrorType.STANDARD_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+  fun handleValidationExceptions(
+    ex: MethodArgumentTypeMismatchException
+  ): ResponseEntity<ErrorResponseBody> {
+    ex.parameter.parameterName
+
+    return ResponseEntity(
+      ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
       HttpStatus.BAD_REQUEST
     )
   }

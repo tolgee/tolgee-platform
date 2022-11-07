@@ -18,10 +18,17 @@ import java.util.*
 @Repository
 interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
-    """select t.text as text, l.tag as languageTag, k.name as key from Translation t 
-        join t.key k join t.language l where t.key.project.id = :projectId and l.tag in :languages"""
+    """select t.text as text, l.tag as languageTag, k.name as key 
+        from Translation t 
+        join t.key k
+        left join k.namespace n
+        join t.language l 
+        where t.key.project.id = :projectId 
+         and l.tag in :languages
+         and ((n.name is null and :namespace is null) or n.name = :namespace)
+   """
   )
-  fun getTranslations(languages: Set<String>, projectId: Long): List<SimpleTranslationView>
+  fun getTranslations(languages: Set<String>, namespace: String?, projectId: Long): List<SimpleTranslationView>
 
   @Query(
     "from Translation t " +

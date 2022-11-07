@@ -15,6 +15,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.EmailVerification
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
+import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy

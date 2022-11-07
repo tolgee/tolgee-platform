@@ -7,7 +7,7 @@ import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.controllers.ConfigurationController
 import io.tolgee.controllers.IController
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.UserPreferencesService
+import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

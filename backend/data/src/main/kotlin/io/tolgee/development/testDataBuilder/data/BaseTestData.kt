@@ -20,11 +20,14 @@ open class BaseTestData(
     userAccountBuilder = addUserAccount {
       username = userName
     }
+
     user = userAccountBuilder.self
+
     projectBuilder = addProject {
       name = projectName
       organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
     }.build buildProject@{
+
       addPermission {
         project = this@buildProject.self
         user = this@BaseTestData.user

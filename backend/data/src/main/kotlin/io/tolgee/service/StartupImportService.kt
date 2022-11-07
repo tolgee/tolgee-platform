@@ -14,6 +14,8 @@ import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -62,7 +64,7 @@ class StartupImportService(
     project: Project,
     userAccount: UserAccount
   ) {
-    importService.addFiles(fileDtos, null, project, userAccount)
+    importService.addFiles(fileDtos, project, userAccount)
     val imports = importService.getAllByProject(project.id)
     imports.forEach {
       importService.import(it)

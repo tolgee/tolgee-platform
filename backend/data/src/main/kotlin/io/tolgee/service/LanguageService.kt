@@ -9,6 +9,8 @@ import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -47,7 +49,6 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    translationService.deleteAllByLanguage(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
     entityManager.flush()

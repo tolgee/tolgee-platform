@@ -1,6 +1,7 @@
 package io.tolgee.model.key
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
@@ -19,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EntityListeners
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -27,17 +27,14 @@ import javax.persistence.OneToOne
 import javax.persistence.OrderBy
 import javax.persistence.PrePersist
 import javax.persistence.PreRemove
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-@EntityListeners(Key.Companion.KeyListeners::class)
+@ActivityEntityDescribingPaths(["namespace"])
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)
@@ -49,6 +46,10 @@ class Key(
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
+
+  @ManyToOne
+  @ActivityLoggedProp
+  var namespace: Namespace? = null
 
   @OneToMany(mappedBy = "key")
   var translations: MutableSet<Translation> = mutableSetOf()

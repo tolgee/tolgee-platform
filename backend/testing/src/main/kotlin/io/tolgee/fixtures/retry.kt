@@ -21,5 +21,5 @@ fun retry(retries: Int = 3, fn: () -> Unit) {
 }
 
 class RetryException(val retryCount: Int, val causes: List<Throwable>) : Exception(
-  "Test in $retryCount retries", causes.last()
+  "Test failed in $retryCount retries", causes.last()
 )

@@ -17,7 +17,6 @@ import io.tolgee.service.project.ProjectStatsService
 import org.springframework.hateoas.MediaTypes
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -25,7 +24,7 @@ import java.time.LocalDate
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId}/stats", "/v2/projects/stats"])
+@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/stats", "/v2/projects/stats"])
 @Tag(name = "Projects")
 class ProjectStatsController(
   private val projectStatsService: ProjectStatsService,
@@ -38,10 +37,10 @@ class ProjectStatsController(
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey
-  fun getProjectStats(@PathVariable projectId: Long): ProjectStatsModel {
-    val projectStats = projectStatsService.getProjectStats(projectId)
+  fun getProjectStats(): ProjectStatsModel {
+    val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
-    val languageStats = languageStatsService.getLanguageStats(projectId)
+    val languageStats = languageStatsService.getLanguageStats(projectHolder.project.id)
       .sortedBy { it.language.name }
       .sortedBy { it.language.id != baseLanguage?.id }
 
@@ -64,7 +63,7 @@ class ProjectStatsController(
   @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey
-  fun getProjectDailyActivity(@PathVariable projectId: Long): Map<LocalDate, Long> {
-    return projectStatsService.getProjectDailyActivity(projectId)
+  fun getProjectDailyActivity(): Map<LocalDate, Long> {
+    return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
   }
 }

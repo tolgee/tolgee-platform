@@ -2,13 +2,13 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
-import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -116,6 +116,9 @@ class ImportE2eDataController(
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           name = "Repo"
         }.build buildProject@{
+          val english = addEnglish()
+          addGerman()
+          self.baseLanguage = english.self
           addPermission {
             type = Permission.ProjectPermissionType.MANAGE
             user = this@buildUserAccount.self

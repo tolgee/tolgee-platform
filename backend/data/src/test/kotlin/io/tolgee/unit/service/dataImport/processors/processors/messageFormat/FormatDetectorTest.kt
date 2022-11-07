@@ -27,7 +27,7 @@ class FormatDetectorTest {
       File("src/test/resources/import/po/example.po")
         .inputStream()
     )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 
   @Test

@@ -1,7 +1,6 @@
 package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -13,7 +12,6 @@ import io.tolgee.model.key.KeyMeta
 data class FileProcessorContext(
   val file: ImportFileDto,
   val fileEntity: ImportFile,
-  val messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
   val maxTranslationTextLength: Long = 200L
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
@@ -59,7 +57,7 @@ data class FileProcessorContext(
   }
 
   private fun getOrCreateKey(name: String): ImportKey {
-    return keys[name] ?: let { ImportKey(name).also { keys[name] = it } }
+    return keys[name] ?: let { ImportKey(name, this.fileEntity).also { keys[name] = it } }
   }
 
   private fun getOrCreateKeyMeta(key: String): KeyMeta {

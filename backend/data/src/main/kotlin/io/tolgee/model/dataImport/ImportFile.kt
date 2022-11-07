@@ -7,7 +7,6 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.validation.constraints.Size
@@ -24,14 +23,13 @@ class ImportFile(
   @OneToMany(mappedBy = "file")
   var issues: MutableList<ImportFileIssue> = mutableListOf()
 
-  @ManyToMany
+  @OneToMany(mappedBy = "file")
   var keys: MutableList<ImportKey> = mutableListOf()
 
   @OneToMany(mappedBy = "file")
   var languages: MutableList<ImportLanguage> = mutableListOf()
 
-  @ManyToOne
-  var archive: ImportFile? = null
+  var namespace: String? = null
 
   fun addIssue(type: FileIssueType, params: Map<FileIssueParamType, String>) {
     ImportFileIssue(file = this, type = type).apply {

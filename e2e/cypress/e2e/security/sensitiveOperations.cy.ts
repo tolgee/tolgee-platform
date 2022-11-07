@@ -10,7 +10,7 @@ import {
 } from '../../common/shared';
 import { loginWithFakeGithub } from '../../common/login';
 
-context('Sensitive operations', () => {
+context('Sensitive operations', { retries: { runMode: 3 } }, () => {
   let data: {
     frantasProjectId: number;
     pepasProjectId: number;

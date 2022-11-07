@@ -95,6 +95,7 @@ export class ApiSchemaHttpService extends ApiHttpService {
                 'Content-Type': 'application/json',
               }
             : undefined,
+          signal: options?.signal,
         },
         options
       );

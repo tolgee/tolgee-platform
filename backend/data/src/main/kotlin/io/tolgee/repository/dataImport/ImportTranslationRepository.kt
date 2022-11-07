@@ -60,7 +60,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Transactional
   @Query(
     """delete from ImportTranslation it where it.key.id in 
-        (select k.id from ImportKey k join k.files f where f.import = :import)"""
+        (select k.id from ImportKey k join k.file f where f.import = :import)"""
   )
   @Modifying
   fun deleteAllByImport(import: Import)

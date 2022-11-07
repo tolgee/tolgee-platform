@@ -1,3 +1,24 @@
+## [2.45.10](https://github.com/tolgee/tolgee-platform/compare/v2.45.9...v2.45.10) (2022-11-04)
+
+
+### Bug Fixes
+
+* Orphan removal of Translations & Comments, Retry intermittent E2… ([#1414](https://github.com/tolgee/tolgee-platform/issues/1414)) ([71a1830](https://github.com/tolgee/tolgee-platform/commit/71a183042162eb4d4e8bd886c314010bb2d0f6e5))
+
+## [2.45.9](https://github.com/tolgee/tolgee-platform/compare/v2.45.8...v2.45.9) (2022-11-03)
+
+
+### Bug Fixes
+
+* Access project stats with API key - Closes [#1134](https://github.com/tolgee/tolgee-platform/issues/1134) ([#1206](https://github.com/tolgee/tolgee-platform/issues/1206)) ([526cf0c](https://github.com/tolgee/tolgee-platform/commit/526cf0c190d74a0c7b4dc82aa0c7aeda261dfccb))
+
+## [2.45.8](https://github.com/tolgee/tolgee-platform/compare/v2.45.7...v2.45.8) (2022-10-26)
+
+
+### Bug Fixes
+
+* Healthcheck endpoint checking DB connection ([#1408](https://github.com/tolgee/tolgee-platform/issues/1408)) ([546a05a](https://github.com/tolgee/tolgee-platform/commit/546a05a49765b026263a0ecb897fe8c635f41af6))
+
 ## [2.45.7](https://github.com/tolgee/tolgee-platform/compare/v2.45.6...v2.45.7) (2022-10-18)
 
 

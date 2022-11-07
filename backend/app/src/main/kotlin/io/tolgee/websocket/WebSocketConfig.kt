@@ -2,7 +2,7 @@ package io.tolgee.websocket
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.security.JwtTokenProvider
-import io.tolgee.service.SecurityService
+import io.tolgee.service.security.SecurityService
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
