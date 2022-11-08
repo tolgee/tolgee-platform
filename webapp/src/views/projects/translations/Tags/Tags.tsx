@@ -4,7 +4,7 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { encodeFilter, toggleFilter } from '../Filters/useAvailableFilters';
+import { encodeFilter, toggleFilter } from '../Filters/tools';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];

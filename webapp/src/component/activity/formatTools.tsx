@@ -8,6 +8,7 @@ import { getKeyTagsChange } from './types/getKeyTagsChange';
 import { getLanguageFlagChange } from './types/getLanguageFlagChange';
 import { getProjectLanguageChange } from './types/getProjectLanguageChange';
 import { getNoDiffChange } from './types/getNoDiffChange';
+import { getNamespaceChange } from './types/getNamespaceChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -39,6 +40,8 @@ export const formatDiff = ({
       return getLanguageFlagChange(value);
     case 'project_language':
       return getProjectLanguageChange(value);
+    case 'namespace':
+      return getNamespaceChange(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }

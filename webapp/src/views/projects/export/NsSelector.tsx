@@ -11,12 +11,9 @@ import {
 import { useTranslate } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
-import { components } from 'tg.service/apiSchema.generated';
-
-type NamespaceModel = components['schemas']['NamespaceModel'];
 
 type Props = {
-  namespaces: NamespaceModel[] | undefined;
+  namespaces: string[] | undefined;
   className: string;
 };
 
@@ -45,18 +42,20 @@ export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
                 if (values.length === namespaces.length) {
                   return t('export_translations_namespaces_all');
                 }
-                return values.join(', ');
+                return values
+                  .map((ns) => ns || t('namespace_default'))
+                  .join(', ');
               }}
               multiple
             >
               {namespaces?.map((ns) => (
                 <MenuItem
-                  key={ns.id}
-                  value={ns.name}
+                  key={ns}
+                  value={ns}
                   data-cy="export-namespace-selector-item"
                 >
-                  <Checkbox checked={field.value.includes(ns.name)} />
-                  <ListItemText primary={ns.name || t('namespace_default')} />
+                  <Checkbox checked={field.value.includes(ns)} />
+                  <ListItemText primary={ns || t('namespace_default')} />
                 </MenuItem>
               ))}
             </Select>

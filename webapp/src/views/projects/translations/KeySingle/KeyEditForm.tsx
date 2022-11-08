@@ -109,11 +109,8 @@ export const KeyEditForm: React.FC = () => {
   });
 
   const updateNamespace = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{id}/complex-update',
+    url: '/v2/projects/{projectId}/keys/{id}',
     method: 'put',
-    fetchOptions: {
-      disableBadRequestHandling: true,
-    },
   });
 
   const cacheUpdateNs = (namespace: string) => {

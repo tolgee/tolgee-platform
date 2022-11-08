@@ -48,7 +48,8 @@ export type FieldTypeEnum =
   | 'comment_state'
   | 'key_tags'
   | 'language_flag'
-  | 'project_language';
+  | 'project_language'
+  | 'namespace';
 
 export type FieldOptionsObj = {
   label?: string;

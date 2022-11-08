@@ -7,7 +7,8 @@ import {
 import { SubmenuStates } from './SubmenuStates';
 import { SubmenuTags } from './SubmenuTags';
 import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
-import { toggleFilter, useAvailableFilters } from './useAvailableFilters';
+import { useAvailableFilters } from './useAvailableFilters';
+import { toggleFilter } from './tools';
 import { useActiveFilters } from './useActiveFilters';
 
 export const FiltersMenuContent = () => {

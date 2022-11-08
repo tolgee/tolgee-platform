@@ -17,7 +17,7 @@ import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
 import { TranslationsToolbar } from '../TranslationsToolbar';
-import { NamespaceBanner } from '../NamespaceBanner';
+import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
 
 type LanguageModel = components['schemas']['LanguageModel'];

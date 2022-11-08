@@ -3,7 +3,7 @@ import { Checkbox, ListItemText, Menu, MenuItem, styled } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
 import { translationStates } from 'tg.constants/translationStates';
-import { decodeFilter, OptionType } from './useAvailableFilters';
+import { decodeFilter, OptionType } from './tools';
 import { CompactMenuItem } from './FiltersComponents';
 
 const StyledDot = styled('div')`

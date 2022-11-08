@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { Checkbox, ListItemText, Menu, MenuItem } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
-import { OptionType } from './useAvailableFilters';
+import { OptionType } from './tools';
 
 type Props = {
   item: OptionType;

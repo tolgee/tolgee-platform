@@ -7,6 +7,7 @@ import {
   useHeaderNsContext,
 } from '../context/HeaderNsContext';
 import { useTranslate } from '@tolgee/react';
+import { useNamespaceFilter } from '../Namespace/useNamespaceFilter';
 
 const NS_HEIGHT = 18;
 
@@ -39,6 +40,7 @@ const StyledNs = styled('div')`
 `;
 
 const StyledNsWithShadow = styled('div')`
+  cursor: pointer;
   padding: ${({ theme }) => theme.spacing(0, 2, 0, 3)};
   box-sizing: border-box;
   background: ${({ theme }) => theme.palette.background.default};
@@ -76,6 +78,8 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
   const t = useTranslate();
 
+  const { toggle } = useNamespaceFilter(topNamespace);
+
   useEffect(() => {
     topBarDispatch({
       type: 'TOP_BAR_HEIGHT',
@@ -96,7 +100,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         <StyledControls style={{ height }}>{children}</StyledControls>
         {topNamespace !== undefined && (
           <StyledNs data-cy="translations-namespace-banner">
-            <StyledNsWithShadow>
+            <StyledNsWithShadow onClick={toggle} role="button">
               {topNamespace || t('namespace_default')}
             </StyledNsWithShadow>
           </StyledNs>
