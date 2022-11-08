@@ -20,4 +20,11 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   fun getAllByProjectId(id: Long): List<Namespace>
 
   fun getAllByProjectId(id: Long, pageable: Pageable): Page<Namespace>
+
+  @Query(
+    """
+    select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId
+  """
+  )
+  fun isDefaultUsed(projectId: Long): Boolean
 }
