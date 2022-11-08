@@ -95,4 +95,8 @@ class NamespaceService(
   fun saveAll(entities: Collection<Namespace>) {
     namespaceRepository.saveAll(entities)
   }
+
+  fun isDefaultUsed(projectId: Long): Boolean {
+    return namespaceRepository.isDefaultUsed(projectId)
+  }
 }

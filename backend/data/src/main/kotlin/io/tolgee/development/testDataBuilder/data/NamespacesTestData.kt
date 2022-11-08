@@ -1,11 +1,13 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 
 class NamespacesTestData : BaseTestData() {
   var keyInNs1: Key
   var singleKeyInNs2: Key
+  lateinit var defaultUnusedProject: Project
 
   init {
     projectBuilder.apply {
@@ -20,6 +22,14 @@ class NamespacesTestData : BaseTestData() {
         name = "Project 2"
       }.build {
         addKey("key", null)
+        addKey("key", "ns-1")
+      }
+    }
+    root.apply {
+      addProject {
+        name = "Project 3"
+        defaultUnusedProject = this
+      }.build {
         addKey("key", "ns-1")
       }
     }
