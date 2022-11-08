@@ -43,4 +43,21 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns used namespaces`() {
+    performProjectAuthGet("used-namespaces").andIsOk.andAssertThatJson {
+      node("_embedded.namespaces") {
+        isArray.hasSize(3)
+      }
+    }
+    projectSupplier = { testData.defaultUnusedProject }
+    performProjectAuthGet("used-namespaces").andIsOk.andAssertThatJson {
+      node("_embedded.namespaces") {
+        isArray.hasSize(1)
+        node("[0].name").isEqualTo("ns-1")
+      }
+    }
+  }
 }
