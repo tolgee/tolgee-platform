@@ -47,6 +47,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const { refetchUsage } = useOrganizationUsageMethods();
 
   const keyName = useUrlSearch().key as string;
+  const namespace = useUrlSearch().ns as string;
 
   const createKey = useApiMutation({
     url: '/v2/projects/{projectId}/keys/create',
@@ -93,7 +94,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: keyName,
         translations: translationValues,
         tags: [],
-        namespace: '',
+        namespace: namespace,
       }}
       onSubmit={handleSubmit}
       validationSchema={Yup.object().shape({

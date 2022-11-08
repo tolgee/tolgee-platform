@@ -72,6 +72,11 @@ export const NamespaceSelector: React.FC<Props> = ({
     setInputValue('');
   };
 
+  const handleFocus = () => {
+    setInputFocus(true);
+    setInputValue('');
+  };
+
   return (
     <Autocomplete
       id="namespace-autocomplete"
@@ -79,7 +84,7 @@ export const NamespaceSelector: React.FC<Props> = ({
       onChange={(_, option) => {
         onChange(typeof option === 'string' ? option : option?.value);
       }}
-      onFocus={() => setInputFocus(true)}
+      onFocus={handleFocus}
       onBlur={handleBlur}
       inputValue={!inputFocus ? inputBlurredValue : inputValue}
       onInputChange={(_, value) => {

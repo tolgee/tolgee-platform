@@ -75,8 +75,8 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
   Key: {
     label: 'activity_entity_key',
     fields: {
-      name: true,
-      namespace: true,
+      name: { label: 'activity_entity_key.name' },
+      namespace: { type: 'namespace', label: 'activity_entity_key.namespace' },
     },
     references: ({ modifications, entityId, exists, description }) => {
       const result: Reference[] = [];
@@ -184,7 +184,7 @@ export const actionsConfiguration: Partial<
   },
   KEY_NAME_EDIT: {
     label: 'activity_key_name_edit',
-    entities: { Key: true },
+    entities: { Key: ['name'] },
   },
   CREATE_KEY: {
     label: 'activity_create_key',
@@ -198,7 +198,7 @@ export const actionsConfiguration: Partial<
     label: 'activity_complex_edit',
     entities: {
       Translation: true,
-      Key: true,
+      Key: ['name'],
       Screenshot: true,
     },
   },

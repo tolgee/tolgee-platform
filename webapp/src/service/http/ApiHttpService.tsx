@@ -232,18 +232,24 @@ export class ApiHttpService {
   }
 
   buildQuery(object: { [key: string]: any }): string {
-    return Object.keys(object)
+    const query = Object.keys(object)
       .filter((k) => !!object[k])
       .map((k) => {
         if (Array.isArray(object[k])) {
           return object[k]
-            .map((v) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+            .map(
+              (v) =>
+                encodeURIComponent(k) +
+                '=' +
+                (v === '' ? '%02%03' : encodeURIComponent(v))
+            )
             .join('&');
         } else {
           return encodeURIComponent(k) + '=' + encodeURIComponent(object[k]);
         }
       })
       .join('&');
+    return query;
   }
 
   static async getResObject(r: Response, o?: RequestOptions) {

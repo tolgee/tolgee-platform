@@ -81,10 +81,9 @@ export const ExportForm = () => {
   });
 
   const namespacesLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/namespaces',
+    url: '/v2/projects/{projectId}/used-namespaces',
     method: 'get',
     path: { projectId: project.id },
-    query: {},
     fetchOptions: {
       disableNotFoundHandling: true,
     },
@@ -93,7 +92,8 @@ export const ExportForm = () => {
   const t = useTranslate();
 
   const allNamespaces = useMemo(
-    () => namespacesLoadable.data?._embedded?.namespaces?.map((n) => n.name),
+    () =>
+      namespacesLoadable.data?._embedded?.namespaces?.map((n) => n.name || ''),
     [namespacesLoadable.data]
   );
 
@@ -202,10 +202,7 @@ export const ExportForm = () => {
             languages={languagesLoadable.data?._embedded?.languages}
           />
           <FormatSelector className="format" />
-          <NsSelector
-            className="ns"
-            namespaces={namespacesLoadable.data?._embedded?.namespaces}
-          />
+          <NsSelector className="ns" namespaces={allNamespaces} />
           <div className="submit">
             <LoadingButton
               data-cy="export-submit-button"

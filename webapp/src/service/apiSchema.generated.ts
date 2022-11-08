@@ -317,14 +317,11 @@ export interface paths {
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
   };
+  "/v2/projects/{projectId}/used-namespaces": {
+    get: operations["getUsedNamespaces"];
+  };
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
-  };
-  "/v2/projects/{projectId}/stats/daily-activity": {
-    get: operations["getProjectDailyActivity"];
-  };
-  "/v2/projects/{projectId}/stats": {
-    get: operations["getProjectStats"];
   };
   "/v2/projects/{projectId}/namespaces": {
     get: operations["getAllNamespaces"];
@@ -368,6 +365,12 @@ export interface paths {
   };
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
+  };
+  "/v2/projects/{projectId}/stats/daily-activity": {
+    get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/stats": {
+    get: operations["getProjectStats"];
   };
   "/v2/projects/{projectId}/invitations": {
     get: operations["getProjectInvitations"];
@@ -835,12 +838,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      id: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      id: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -911,15 +914,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
+      id: number;
       username?: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
-      scopes: string[];
-      id: number;
       description: string;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1180,38 +1183,22 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       computedPermissions: components["schemas"]["UserPermissionModel"];
     };
+    CollectionModelUsedNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["UsedNamespaceModel"][];
+      };
+    };
+    UsedNamespaceModel: {
+      /** The id of namespace. Null for default namespace. */
+      id?: number;
+      /** Name of namespace. Null if default. */
+      name?: string;
+    };
     PagedModelTagModel: {
       _embedded?: {
         tags?: components["schemas"]["TagModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    LanguageStatsModel: {
-      languageId?: number;
-      languageTag?: string;
-      languageName?: string;
-      languageOriginalName?: string;
-      languageFlagEmoji?: string;
-      translatedKeyCount: number;
-      translatedWordCount: number;
-      translatedPercentage: number;
-      reviewedKeyCount: number;
-      reviewedWordCount: number;
-      reviewedPercentage: number;
-      untranslatedKeyCount: number;
-      untranslatedWordCount: number;
-      untranslatedPercentage: number;
-    };
-    ProjectStatsModel: {
-      projectId: number;
-      languageCount: number;
-      keyCount: number;
-      baseWordsCount: number;
-      translatedPercentage: number;
-      reviewedPercentage: number;
-      membersCount: number;
-      tagCount: number;
-      languageStats: components["schemas"]["LanguageStatsModel"][];
     };
     NamespaceModel: {
       /** The id of namespace */
@@ -1320,6 +1307,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1331,7 +1319,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1449,6 +1436,33 @@ export interface components {
       name: string;
       slug: string;
       id: number;
+    };
+    LanguageStatsModel: {
+      languageId?: number;
+      languageTag?: string;
+      languageName?: string;
+      languageOriginalName?: string;
+      languageFlagEmoji?: string;
+      translatedKeyCount: number;
+      translatedWordCount: number;
+      translatedPercentage: number;
+      reviewedKeyCount: number;
+      reviewedWordCount: number;
+      reviewedPercentage: number;
+      untranslatedKeyCount: number;
+      untranslatedWordCount: number;
+      untranslatedPercentage: number;
+    };
+    ProjectStatsModel: {
+      projectId: number;
+      languageCount: number;
+      keyCount: number;
+      baseWordsCount: number;
+      translatedPercentage: number;
+      reviewedPercentage: number;
+      membersCount: number;
+      tagCount: number;
+      languageStats: components["schemas"]["LanguageStatsModel"][];
     };
     PagedModelLanguageModel: {
       _embedded?: {
@@ -1571,15 +1585,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
+      id: number;
       username?: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
-      scopes: string[];
-      id: number;
       description: string;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2710,6 +2724,12 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Zero-based page index (0..N) */
@@ -5182,6 +5202,33 @@ export interface operations {
       };
     };
   };
+  getUsedNamespaces: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelUsedNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAll_1: {
     parameters: {
       query: {
@@ -5202,60 +5249,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelTagModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getProjectDailyActivity: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": { [key: string]: number };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getProjectStats: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["ProjectStatsModel"];
         };
       };
       /** Bad Request */
@@ -5606,6 +5599,10 @@ export interface operations {
         languages: string[];
         projectId: number;
       };
+      query: {
+        /** Namespace to return */
+        ns?: string;
+      };
     };
     responses: {
       /** OK */
@@ -5663,6 +5660,12 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
       };
@@ -5705,6 +5708,60 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelProjectTransferOptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectStatsModel"];
         };
       };
       /** Bad Request */

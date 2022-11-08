@@ -18,7 +18,7 @@ import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
 import { TranslationsToolbar } from '../TranslationsToolbar';
-import { NamespaceBanner } from '../NamespaceBanner';
+import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
 
 const StyledContainer = styled('div')`

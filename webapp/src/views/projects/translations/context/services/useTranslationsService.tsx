@@ -38,6 +38,7 @@ type FiltersType = Pick<
   | 'filterUntranslatedAny'
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
+  | 'filterNamespace'
 >;
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
@@ -66,6 +67,7 @@ export const useTranslationsService = (props: Props) => {
     () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
     [filters]
   );
+
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
@@ -117,12 +119,16 @@ export const useTranslationsService = (props: Props) => {
     [props.projectId]
   );
 
+  const filterNamespace =
+    props.keyNamespace !== undefined
+      ? [props.keyNamespace]
+      : parsedFilters.filterNamespace;
+
   const requestQuery = {
     ...query,
     ...parsedFilters,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
-    filterNamespace:
-      props.keyNamespace !== undefined ? [props.keyNamespace] : undefined,
+    filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
   };

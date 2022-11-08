@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
-import { useHeaderNsDispatch } from './context/HeaderNsContext';
+import { useHeaderNsDispatch } from '../context/HeaderNsContext';
 import { useTranslate } from '@tolgee/react';
+import { useNamespaceFilter } from './useNamespaceFilter';
 
 const StyledNamespace = styled('div')`
+  cursor: pointer;
   background: ${({ theme }) => theme.palette.emphasis[50]};
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 0px 1px 0px;
@@ -29,6 +31,8 @@ export const NamespaceBanner: React.FC<Props> = ({
   const elRef = useRef<HTMLDivElement>(null);
   const dispatch = useHeaderNsDispatch();
 
+  const { toggle } = useNamespaceFilter(namespace);
+
   useEffect(() => {
     dispatch({
       type: 'NS_REF_REGISTER',
@@ -44,7 +48,12 @@ export const NamespaceBanner: React.FC<Props> = ({
   }, [columnSizes, namespace, index]);
 
   return (
-    <StyledNamespace ref={elRef} data-cy="translations-namespace-banner">
+    <StyledNamespace
+      role="button"
+      onClick={toggle}
+      ref={elRef}
+      data-cy="translations-namespace-banner"
+    >
       {namespace || t('namespace_default')}
     </StyledNamespace>
   );
