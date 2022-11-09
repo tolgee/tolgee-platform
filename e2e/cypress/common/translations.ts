@@ -33,7 +33,7 @@ export function createTranslation(
   cy.gcy('translation-create-key-input').type(testKey);
   if (namespace) {
     cy.gcy('namespaces-select-text-field').find('input').type(namespace);
-    cy.gcy('namespaces-select-option').contains('test-ns').click();
+    cy.gcy('namespaces-select-option').contains(namespace).click();
   }
   if (tag) {
     cy.gcy('translations-tag-input').type(tag);
