@@ -55,8 +55,8 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
   const updatePosition = (newPos: Partial<Edit>) =>
     setPosition((pos) => (pos ? { ...pos, ...newPos } : pos));
 
-  const getTranslationKeyName = (keyId: number) =>
-    translations!.fixedTranslations!.find((t) => t.keyId === keyId)!.keyName;
+  const getTranslation = (keyId: number) =>
+    translations!.fixedTranslations!.find((t) => t.keyId === keyId)!;
 
   const moveEditToDirection = (direction: Direction | undefined) => {
     const currentIndex =
@@ -115,7 +115,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     languagesToReturn?: string[]
   ) => {
     const { language, value, keyId } = payload;
-    const keyName = getTranslationKeyName(keyId);
+    const { keyName, keyNamespace } = getTranslation(keyId);
 
     const newVal =
       payload.value !== getEditOldValue()
@@ -124,6 +124,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
             content: {
               'application/json': {
                 key: keyName,
+                namespace: keyNamespace,
                 translations: {
                   [language!]: value,
                 },
