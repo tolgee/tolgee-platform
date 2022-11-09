@@ -88,6 +88,8 @@ export const userDeletionTestData = generateTestDataObject('user-deletion');
 
 export const formerUserTestData = generateTestDataObject('former-user');
 
+export const namespaces = generateTestDataObject('namespaces');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>
