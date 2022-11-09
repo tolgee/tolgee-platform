@@ -39,10 +39,9 @@ export const NamespaceSelector: React.FC<Props> = ({
   const existingOptions = useMemo(() => {
     const existing =
       namespaceData ||
-      namespacesLoadable?.data?._embedded?.namespaces?.map((ns) => ns.name);
-    if (!existing) {
-      return [];
-    }
+      namespacesLoadable?.data?._embedded?.namespaces?.map((ns) => ns.name) ||
+      [];
+
     return ['', ...existing].map((o) => ({
       value: o,
       name: o,
@@ -54,7 +53,7 @@ export const NamespaceSelector: React.FC<Props> = ({
 
   useEffect(() => {
     setOptions(existingOptions);
-  }, [namespacesLoadable.isFetched, namespaceData]);
+  }, [namespaceData]);
 
   const t = useTranslate();
 
