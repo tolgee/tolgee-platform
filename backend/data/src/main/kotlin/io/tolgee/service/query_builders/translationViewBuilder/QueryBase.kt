@@ -28,13 +28,12 @@ import javax.persistence.criteria.SetJoin
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
-  query: CriteriaQuery<T>,
+  private val query: CriteriaQuery<T>,
   private val languages: Set<Language>,
   params: TranslationFilters
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
-  lateinit var query: CriteriaQuery<*>
   val keyNameExpression: Path<String> = root.get(Key_.name)
   val keyIdExpression: Path<Long> = root.get(Key_.id)
   val querySelection = QuerySelection()
@@ -143,15 +142,8 @@ class QueryBase<T>(
     translation: SetJoin<Key, Translation>
   ) {
     if (!isKeyIdsQuery) {
-      this.querySelection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::auto.name] =
-        translation.get(Translation_.auto)
-
-      this.querySelection[
-        KeyWithTranslationsView::translations.name + "." +
-          language.tag + "." +
-          TranslationView::mtProvider.name
-      ] =
-        translation.get(Translation_.mtProvider)
+      this.querySelection[language to TranslationView::auto] = translation.get(Translation_.auto)
+      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
     }
   }
 

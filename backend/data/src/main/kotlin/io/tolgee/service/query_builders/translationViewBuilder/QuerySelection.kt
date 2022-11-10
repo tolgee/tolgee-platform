@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty1
 class QuerySelection : LinkedHashMap<String, Selection<*>>() {
 
   operator fun set(field: Pair<Language, KProperty1<TranslationView, *>>, value: Selection<*>) {
-    this[KeyWithTranslationsView::translations.name + "." + field.first + "." + field.second::name] =
+    this[KeyWithTranslationsView::translations.name + "." + field.first.tag + "." + field.second.name] =
       value
   }
 }
