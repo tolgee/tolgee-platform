@@ -125,6 +125,14 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `deletes ns when empty on update`() {
+    performProjectAuthPut("keys/${testData.singleKeyInNs2.id}", EditKeyDto(name = "super_k", "ns-1"))
+      .andIsOk
+    namespaceService.find("ns-2", project.id).assert.isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `deletes all keys`() {
     val ids = testData.projectBuilder.data.keys.map { it.self.id }
     performProjectAuthDelete("keys/${ids.joinToString(",")}").andIsOk

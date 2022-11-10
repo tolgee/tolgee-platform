@@ -1,7 +1,6 @@
 package io.tolgee.service.key
 
 import io.tolgee.model.Project
-import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
@@ -12,11 +11,11 @@ import javax.persistence.EntityManager
 @Service
 class NamespaceService(
   private val entityManager: EntityManager,
-  private val namespaceRepository: NamespaceRepository
+  private val namespaceRepository: NamespaceRepository,
 ) {
   private fun getKeysInNamespaceCount(namespace: Namespace?): Long? {
     namespace ?: return null
-    return namespaceRepository.getKeysInNamespaceCount(listOf(namespace.id)).firstOrNull()?.get(1)
+    return namespaceRepository.getKeysInNamespaceCount(listOf(namespace.id)).firstOrNull()?.get(1) ?: 0
   }
 
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
@@ -39,14 +38,6 @@ class NamespaceService(
 
   fun delete(namespaceId: Long) {
     namespaceRepository.deleteById(namespaceId)
-  }
-
-  fun update(key: Key, newNamespace: String?) {
-    val oldNamespace = key.namespace
-    key.namespace = findOrCreate(newNamespace, key.project.id)
-    if (oldNamespace != null) {
-      deleteIfUnused(oldNamespace)
-    }
   }
 
   fun deleteIfUnused(namespace: Namespace?) {
