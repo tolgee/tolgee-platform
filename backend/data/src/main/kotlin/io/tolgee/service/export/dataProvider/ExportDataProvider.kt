@@ -129,10 +129,11 @@ class ExportDataProvider(
   }
 
   private fun filterNamespaces() {
-    val hasNull = exportParams.filterNamespace?.contains(null) ?: false
+    val filterNamespace = exportParams.filterNamespace
+    if (!filterNamespace.isNullOrEmpty()) {
+      val hasNull = filterNamespace.contains(null) || filterNamespace.contains("")
 
-    if (!exportParams.filterNamespace.isNullOrEmpty()) {
-      val withoutNull = exportParams.filterNamespace?.filterNotNull()
+      val withoutNull = filterNamespace.filterNotNull()
       val namespaceName = namespaceJoin.get(Namespace_.name)
       var condition = namespaceName.`in`(withoutNull)
       if (hasNull) {
