@@ -1,0 +1,15 @@
+package io.tolgee.service.query_builders.translationViewBuilder
+
+import io.tolgee.model.Language
+import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.model.views.TranslationView
+import javax.persistence.criteria.Selection
+import kotlin.reflect.KProperty1
+
+class QuerySelection : LinkedHashMap<String, Selection<*>>() {
+
+  operator fun set(field: Pair<Language, KProperty1<TranslationView, *>>, value: Selection<*>) {
+    this[KeyWithTranslationsView::translations.name + "." + field.first + "." + field.second::name] =
+      value
+  }
+}
