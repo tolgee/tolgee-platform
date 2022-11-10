@@ -41,7 +41,7 @@ export const formatDiff = ({
     case 'project_language':
       return getProjectLanguageChange(value);
     case 'namespace':
-      return getNamespaceChange(value);
+      return getNamespaceChange(value, diffEnabled);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }

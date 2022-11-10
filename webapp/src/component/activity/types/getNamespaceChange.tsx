@@ -1,12 +1,14 @@
 import { DiffValue } from '../types';
-import { getNoDiffChange } from './getNoDiffChange';
 import { useTranslate } from '@tolgee/react';
+import { getNoDiffChange } from './getNoDiffChange';
+import { getGeneralChange } from './getGeneralChange';
 
 type Props = {
   input: DiffValue<any>;
+  diffEnabled: boolean;
 };
 
-const NamespaceComponent: React.FC<Props> = ({ input }) => {
+const NamespaceComponent: React.FC<Props> = ({ input, diffEnabled }) => {
   const t = useTranslate();
 
   function getName(namespace: string | undefined) {
@@ -21,9 +23,18 @@ const NamespaceComponent: React.FC<Props> = ({ input }) => {
     new: getName(input?.new?.data?.name),
   };
 
-  return <>{getNoDiffChange(transformed)}</>;
+  return (
+    <>
+      {diffEnabled
+        ? getGeneralChange(transformed)
+        : getNoDiffChange(transformed)}
+    </>
+  );
 };
 
-export const getNamespaceChange = (input: DiffValue<any>) => {
-  return <NamespaceComponent input={input} />;
+export const getNamespaceChange = (
+  input: DiffValue<any>,
+  diffEnabled: boolean
+) => {
+  return <NamespaceComponent input={input} diffEnabled={diffEnabled} />;
 };
