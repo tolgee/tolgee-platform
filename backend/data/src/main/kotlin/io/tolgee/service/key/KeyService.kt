@@ -93,6 +93,7 @@ class KeyService(
     return save(key)
   }
 
+  @Transactional
   fun edit(keyId: Long, dto: EditKeyDto): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
     return edit(key, dto.name, dto.namespace)
@@ -105,12 +106,21 @@ class KeyService(
 
     checkKeyNotExisting(key.project.id, newName, newNamespace)
 
-    if (key.namespace?.name != newNamespace) {
-      namespaceService.update(key, newNamespace)
+    key.name = newName
+
+    val oldNamespace = key.namespace
+    val namespaceModified = key.namespace?.name != newNamespace
+    if (namespaceModified) {
+      key.namespace = namespaceService.findOrCreate(newNamespace, key.project.id)
     }
 
-    key.name = newName
-    return save(key)
+    save(key)
+
+    if (namespaceModified && oldNamespace != null) {
+      namespaceService.deleteIfUnused(oldNamespace)
+    }
+
+    return key
   }
 
   fun checkKeyNotExisting(projectId: Long, name: String, namespace: String?) {
