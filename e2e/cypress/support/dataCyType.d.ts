@@ -186,6 +186,7 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-title" |
         "namespaces-select" |
         "namespaces-select-option" |
+        "namespaces-select-option-new" |
         "namespaces-select-text-field" |
         "navigation-item" |
         "organization-address-part-field" |

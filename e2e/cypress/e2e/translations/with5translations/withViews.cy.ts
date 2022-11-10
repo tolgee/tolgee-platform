@@ -12,6 +12,7 @@ import {
   visitTranslations,
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
+import { selectNamespace } from '../../../common/namespace';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -51,8 +52,7 @@ describe('Views with 5 Translations', () => {
       it('will edit key namespace', () => {
         getCell('Cool key 01').click();
 
-        gcy('namespaces-select').find('input').clear().type('test-ns');
-        gcy('namespaces-select-option').contains('test-ns').click();
+        selectNamespace('test-ns');
 
         getCellSaveButton().click();
 

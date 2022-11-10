@@ -9,6 +9,7 @@ import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
 import { assertMessage } from './shared';
 import Chainable = Cypress.Chainable;
+import { selectNamespace } from './namespace';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -32,8 +33,7 @@ export function createTranslation(
   cy.gcy('translations-add-button').click();
   cy.gcy('translation-create-key-input').type(testKey);
   if (namespace) {
-    cy.gcy('namespaces-select-text-field').find('input').type(namespace);
-    cy.gcy('namespaces-select-option').contains(namespace).click();
+    selectNamespace(namespace);
   }
   if (tag) {
     cy.gcy('translations-tag-input').type(tag);

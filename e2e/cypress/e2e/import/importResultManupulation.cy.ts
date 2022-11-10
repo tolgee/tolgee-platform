@@ -162,17 +162,15 @@ describe('Import result & manipulation', () => {
     });
 
     it('selects namespace', () => {
-      selectNamespace('multilang.json (de)', 'hello');
+      selectNamespaceOnRow('multilang.json (de)', 'hello');
+
+      cy.waitForDom();
 
       getLanguageRow('multilang.json (de)')
         .findDcy('import-result-resolved-conflicts-cell')
         .should('contain', '0 / 0');
 
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .clear()
-        .type('{downArrow}{enter}');
+      selectNamespaceOnRow('multilang.json (de)', '{backspace}');
 
       cy.waitForDom();
       getLanguageRow('multilang.json (de)')
@@ -192,18 +190,11 @@ describe('Import result & manipulation', () => {
     });
   });
 
-  function selectNamespace(row: string, namespace: string) {
-    getLanguageRow(row)
-      .findDcy('namespaces-select')
-      .find('input')
-      .clear()
-      .type(namespace);
-
-    gcy('namespaces-select-option').first().click();
-
-    getLanguageRow(row)
-      .findDcy('namespaces-select')
-      .find('input')
-      .should('have.value', namespace);
+  function selectNamespaceOnRow(row: string, namespace: string) {
+    const langRow = getLanguageRow(row);
+    langRow.findDcy('namespaces-select').click();
+    cy.gcy('namespaces-select-option-new').click();
+    cy.gcy('namespaces-select-text-field').clear().type(namespace);
+    cy.gcy('global-confirmation-confirm').click();
   }
 });

@@ -6,6 +6,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { gcy } from '../../common/shared';
+import { selectNamespace } from '../../common/namespace';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
@@ -64,8 +65,7 @@ describe('namespaces in translations', () => {
       .first()
       .click();
 
-    cy.gcy('namespaces-select-text-field').find('input').type('new-ns');
-    cy.gcy('namespaces-select-option').contains('new-ns').click();
+    selectNamespace('new-ns');
 
     cy.gcy('translations-cell-save-button').click();
 
