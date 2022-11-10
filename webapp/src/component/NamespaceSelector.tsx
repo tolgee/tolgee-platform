@@ -54,14 +54,25 @@ export const NamespaceSelector: React.FC<Props> = ({
       namespaceData ||
       namespacesLoadable?.data?._embedded?.namespaces?.map((ns) => ns.name) ||
       []
-    );
+    ).map((v) => v || '');
   }, [namespacesLoadable.data, namespaceData]);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [customOption, setCustomOption] = useState('');
 
   const existingOptions = useMemo(() => {
     let options = usedNamespaces;
 
-    if (!options.find((val) => val === undefined || val === null)) {
+    if (!options.includes('')) {
       options = ['', ...options];
+    }
+
+    if (!options.includes(customOption)) {
+      options = [...options, customOption];
+    }
+
+    if (!options.includes(currentNamespace)) {
+      options = [...options, currentNamespace];
     }
 
     return options.map((o) => ({
@@ -69,9 +80,6 @@ export const NamespaceSelector: React.FC<Props> = ({
       name: o || t('namespace_select_default'),
     }));
   }, [usedNamespaces]);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [customOption, setCustomOption] = useState('');
 
   const handleClose = () => {
     setDialogOpen(false);
@@ -107,20 +115,6 @@ export const NamespaceSelector: React.FC<Props> = ({
             {o.name}
           </MenuItem>
         ))}
-        {customOption && (
-          <MenuItem value={customOption} data-cy="namespaces-select-option">
-            {customOption}
-          </MenuItem>
-        )}
-        {!existingOptions.find((o) => o.value === currentNamespace) &&
-          currentNamespace !== customOption && (
-            <MenuItem
-              value={currentNamespace}
-              data-cy="namespaces-select-option"
-            >
-              {currentNamespace}
-            </MenuItem>
-          )}
         <MenuItem
           onClick={() => setDialogOpen(true)}
           sx={{ display: 'flex', gap: 1 }}

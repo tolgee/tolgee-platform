@@ -5,7 +5,7 @@ import {
   createTranslation,
   visitTranslations,
 } from '../../common/translations';
-import { gcy } from '../../common/shared';
+import { gcy, getPopover, selectInSelect } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
 
 describe('namespaces in translations', () => {
@@ -72,5 +72,32 @@ describe('namespaces in translations', () => {
     cy.gcy('translations-namespace-banner')
       .contains('new-ns')
       .should('be.visible');
+  });
+
+  it('filters by clicking on banner', () => {
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-namespace-banner').contains('ns-1').click();
+    gcy('translations-key-count').contains('2 Keys').should('be.visible');
+    gcy('translations-namespace-banner').contains('ns-1').click();
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+  });
+
+  it('filters by empty namespace', () => {
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    selectInSelect(gcy('translations-filter-select'), 'Namespaces');
+    getPopover().contains('<default>').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    gcy('translations-key-count').contains('2 Keys').should('be.visible');
+  });
+
+  it('filters by multiple namespaces', () => {
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    selectInSelect(gcy('translations-filter-select'), 'Namespaces');
+    getPopover().contains('ns-1').click();
+    getPopover().contains('ns-2').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    gcy('translations-key-count').contains('3 Keys').should('be.visible');
   });
 });
