@@ -20,7 +20,7 @@ services:
       - "21080:1080"
   cockroachdb:
     container_name: tolgee_cockroach_e2e
-    image: cockroachdb/cockroach-unstable:v22.2.0-beta.4
+    image: cockroachdb/cockroach-unstable:v22.2.0-rc.1
     ports:
       - 26257:26257
     command:
