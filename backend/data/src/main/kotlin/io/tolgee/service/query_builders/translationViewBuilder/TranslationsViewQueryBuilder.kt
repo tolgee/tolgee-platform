@@ -13,11 +13,9 @@ class TranslationsViewQueryBuilder(
   private val languages: Set<Language>,
   private val params: TranslationFilters,
   private val sort: Sort,
-  cursor: Map<String, CursorValue>? = null,
+  private val cursor: Map<String, CursorValue>? = null,
 ) {
   private lateinit var queryBase: QueryBase<*>
-
-  private val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, queryBase.querySelection)
 
   private fun <T> getBaseQuery(query: CriteriaQuery<T>): CriteriaQuery<T> {
     queryBase = QueryBase(cb, projectId, query, languages, params)
@@ -41,6 +39,8 @@ class TranslationsViewQueryBuilder(
         orderList.add(cb.asc(queryBase.keyNameExpression))
       }
       val where = queryBase.whereConditions.toMutableList()
+
+      val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, queryBase.querySelection)
       cursorPredicateProvider()?.let {
         where.add(it)
       }
