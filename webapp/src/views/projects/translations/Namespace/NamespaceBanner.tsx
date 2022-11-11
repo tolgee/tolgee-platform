@@ -1,19 +1,25 @@
 import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
 import { useHeaderNsDispatch } from '../context/HeaderNsContext';
-import { useTranslate } from '@tolgee/react';
-import { useNamespaceFilter } from './useNamespaceFilter';
+import { NamespaceContent } from './NamespaceContent';
 
-const StyledNamespace = styled('div')`
-  cursor: pointer;
+const StyledNsRow = styled('div')`
+  display: flex;
   background: ${({ theme }) => theme.palette.emphasis[50]};
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
-  border-width: 1px 0px 1px 0px;
-  padding: ${({ theme }) => theme.spacing(0, 1)};
+  height: 17px;
+  overflow: visible;
+  position: relative;
   margin-bottom: -1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background: ${({ theme }) => theme.palette.emphasis[100]};
+  ::after {
+    content: '';
+    position: absolute;
+    height: 24px;
+    width: 20px;
+    top: -3px;
+    left: 0px;
+    background: ${({ theme }) => theme.palette.background.default};
+  }
 `;
 
 type Props = {
@@ -27,11 +33,8 @@ export const NamespaceBanner: React.FC<Props> = ({
   index,
   columnSizes,
 }) => {
-  const t = useTranslate();
   const elRef = useRef<HTMLDivElement>(null);
   const dispatch = useHeaderNsDispatch();
-
-  const { toggle } = useNamespaceFilter(namespace);
 
   useEffect(() => {
     dispatch({
@@ -48,13 +51,8 @@ export const NamespaceBanner: React.FC<Props> = ({
   }, [columnSizes, namespace, index]);
 
   return (
-    <StyledNamespace
-      role="button"
-      onClick={toggle}
-      ref={elRef}
-      data-cy="translations-namespace-banner"
-    >
-      {namespace || t('namespace_default')}
-    </StyledNamespace>
+    <StyledNsRow>
+      <NamespaceContent namespace={namespace} ref={elRef} />
+    </StyledNsRow>
   );
 };

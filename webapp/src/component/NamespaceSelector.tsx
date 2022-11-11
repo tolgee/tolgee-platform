@@ -127,7 +127,7 @@ export const NamespaceSelector: React.FC<Props> = ({
 
       {dialogOpen && (
         <Dialog open onClose={handleClose} fullWidth>
-          <DialogTitle>New namespace</DialogTitle>
+          <DialogTitle>{t('namespae_select_title')}</DialogTitle>
 
           <DialogContent>
             <TextField

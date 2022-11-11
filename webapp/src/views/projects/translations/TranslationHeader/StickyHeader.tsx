@@ -6,10 +6,7 @@ import {
   useHeaderNsDispatch,
   useHeaderNsContext,
 } from '../context/HeaderNsContext';
-import { useTranslate } from '@tolgee/react';
-import { useNamespaceFilter } from '../Namespace/useNamespaceFilter';
-
-const NS_HEIGHT = 18;
+import { NamespaceContent } from '../Namespace/NamespaceContent';
 
 const StyledContainer = styled('div')`
   position: sticky;
@@ -32,30 +29,16 @@ const StyledControls = styled('div')`
 
 const StyledNs = styled('div')`
   position: absolute;
-  top: 100%;
-  padding: ${({ theme }) => theme.spacing(0, 1, 1, 0)};
-  height: ${NS_HEIGHT + 10}px;
+  top: calc(100% + 1px);
+  padding: ${({ theme }) => theme.spacing(0, 2, 2, 2)};
   overflow: hidden;
-  max-width: 100%;
-`;
-
-const StyledNsWithShadow = styled('div')`
-  cursor: pointer;
-  padding: ${({ theme }) => theme.spacing(0, 2, 0, 3)};
-  box-sizing: border-box;
-  background: ${({ theme }) => theme.palette.background.default};
-  border-radius: 0px 0px 10px 0px;
-  box-shadow: ${({ theme }) =>
-    theme.palette.mode === 'dark'
-      ? '0px 1px 6px -1px #000000, 0px 1px 6px -1px #000000'
-      : '0px -1px 7px -2px #000000'};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 `;
 
 const StyledShadow = styled('div')`
-  background: ${({ theme }) => theme.palette.background.default};
+  background: ${({ theme }) => theme.palette.emphasis[200]};
   height: 1px;
   position: sticky;
   z-index: ${({ theme }) => theme.zIndex.appBar};
@@ -76,9 +59,6 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const topBarDispatch = useHeaderNsDispatch();
   const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
-  const t = useTranslate();
-
-  const { toggle } = useNamespaceFilter(topNamespace);
 
   useEffect(() => {
     topBarDispatch({
@@ -100,15 +80,13 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         <StyledControls style={{ height }}>{children}</StyledControls>
         {topNamespace !== undefined && (
           <StyledNs data-cy="translations-namespace-banner">
-            <StyledNsWithShadow onClick={toggle} role="button">
-              {topNamespace || t('namespace_default')}
-            </StyledNsWithShadow>
+            <NamespaceContent namespace={topNamespace} sticky={true} />
           </StyledNs>
         )}
       </StyledContainer>
       <StyledShadow
         style={{
-          top: 54 + height,
+          top: 55 + height,
           transform: topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,
