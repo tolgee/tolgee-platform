@@ -38,12 +38,6 @@ export const NamespaceSelector: React.FC<Props> = ({
     },
     options: {
       enabled: !namespaceData,
-      onSuccess(data) {
-        const firstOption = data._embedded?.namespaces?.[0];
-        if (value === undefined && firstOption) {
-          onChange(firstOption.name || '');
-        }
-      },
     },
   });
 
