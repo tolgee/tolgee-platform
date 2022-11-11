@@ -17,14 +17,21 @@ class TranslationsViewQueryBuilder(
 ) {
   private lateinit var queryBase: QueryBase<*>
 
-  private fun <T> getBaseQuery(query: CriteriaQuery<T>): CriteriaQuery<T> {
-    queryBase = QueryBase(cb, projectId, query, languages, params)
-    return query
+  private fun <T> getBaseQuery(query: CriteriaQuery<T>, isKeyIdsQuery: Boolean = false): QueryBase<T> {
+    return QueryBase(
+      cb = cb,
+      projectId = projectId,
+      query = query,
+      languages = languages,
+      params = params,
+      isKeyIdsQuery = isKeyIdsQuery
+    )
   }
 
   val dataQuery: CriteriaQuery<Array<Any?>>
     get() {
-      val query = getBaseQuery(cb.createQuery(Array<Any?>::class.java))
+      val query = cb.createQuery(Array<Any?>::class.java)
+      val queryBase = getBaseQuery(query)
       val paths = queryBase.querySelection.values.toTypedArray()
       query.multiselect(*paths)
       val orderList = sort.asSequence().filter { queryBase.querySelection[it.property] != null }.map {
@@ -53,7 +60,8 @@ class TranslationsViewQueryBuilder(
 
   val countQuery: CriteriaQuery<Long>
     get() {
-      val query = getBaseQuery(cb.createQuery(Long::class.java))
+      val query = cb.createQuery(Long::class.java)
+      val queryBase = getBaseQuery(query)
       val file = query.roots.iterator().next() as Root<*>
       query.select(cb.countDistinct(file))
       query.where(*queryBase.whereConditions.toTypedArray())
@@ -62,8 +70,8 @@ class TranslationsViewQueryBuilder(
 
   val keyIdsQuery: CriteriaQuery<Long>
     get() {
-      queryBase.isKeyIdsQuery = true
-      val query = getBaseQuery(cb.createQuery(Long::class.java))
+      val query = cb.createQuery(Long::class.java)
+      val queryBase = getBaseQuery(query = query, isKeyIdsQuery = true)
       query.select(queryBase.keyIdExpression)
       query.where(*queryBase.whereConditions.toTypedArray())
       query.distinct(true)
