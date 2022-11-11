@@ -8,7 +8,6 @@ import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
-import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
@@ -50,8 +49,6 @@ export const ProjectMembersView: FunctionComponent = () => {
     project.organizationOwnerBasePermissions!,
     true
   );
-
-  const invitations = invitationsLoadable.data?._embedded?.invitations;
 
   useGlobalLoading(invitationsLoadable.isFetching);
 
@@ -112,12 +109,6 @@ export const ProjectMembersView: FunctionComponent = () => {
           }
         />
 
-        {invitations?.length && (
-          <SimpleList
-            data={invitations}
-            renderItem={(i) => <InvitationItem invitation={i} />}
-          />
-        )}
         <InviteDialog onClose={() => setInviteOpen(false)} open={inviteOpen} />
 
         <Box mt={4} />
