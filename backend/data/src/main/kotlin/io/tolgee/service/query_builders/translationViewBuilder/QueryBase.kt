@@ -30,7 +30,8 @@ class QueryBase<T>(
   private val projectId: Long,
   private val query: CriteriaQuery<T>,
   private val languages: Set<Language>,
-  params: TranslationFilters
+  params: TranslationFilters,
+  private var isKeyIdsQuery: Boolean = false
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
@@ -44,7 +45,6 @@ class QueryBase<T>(
   val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb)
   var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb)
-  var isKeyIdsQuery = false
 
   init {
     querySelection[KeyWithTranslationsView::keyId.name] = keyIdExpression
