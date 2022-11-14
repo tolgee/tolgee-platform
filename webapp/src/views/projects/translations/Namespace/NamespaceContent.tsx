@@ -53,15 +53,14 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
       <>
         <StyledNamespace
           ref={ref}
-          role="button"
           onClick={toggle}
           style={{
             top: sticky ? 0 : -4,
             borderRadius: sticky ? '0px 0px 12px 12px' : 12,
           }}
         >
-          <div>{namespace || t('namespace_default')}</div>
-          <StyledMoreArrow>
+          <div role="button">{namespace || t('namespace_default')}</div>
+          <StyledMoreArrow role="button">
             <ArrowDropDown
               fontSize="small"
               onClick={(e) => {
@@ -91,7 +90,9 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
             >
               {isActive
                 ? t('namespace_menu_filter_cancel')
-                : t('namespace_menu_filter', { namespace })}
+                : t('namespace_menu_filter', {
+                    namespace: namespace || t('namespace_default'),
+                  })}
             </MenuItem>
             <MenuItem
               onClick={() => {
