@@ -1,3 +1,10 @@
+## [2.45.11](https://github.com/tolgee/tolgee-platform/compare/v2.45.10...v2.45.11) (2022-11-14)
+
+
+### Bug Fixes
+
+* Invitation list twice in the Members view ([d412abd](https://github.com/tolgee/tolgee-platform/commit/d412abdd0199a13d27a4d4b12db10b25884807ec))
+
 ## [2.45.10](https://github.com/tolgee/tolgee-platform/compare/v2.45.9...v2.45.10) (2022-11-04)
 
 
