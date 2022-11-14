@@ -11,11 +11,8 @@ const StyledNamespace = styled('div')`
   align-items: center;
   cursor: pointer;
   background: ${({ theme }) => theme.palette.background.default};
-  padding: ${({ theme }) => theme.spacing(0, 1)};
+  padding: ${({ theme }) => theme.spacing(0, 1, 0, 1.5)};
   padding-bottom: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   height: 24px;
   position: relative;
   top: -4px;
@@ -25,6 +22,13 @@ const StyledNamespace = styled('div')`
       ? '0px 0px 7px -1px #000000'
       : '0px 0px 7px -2px #000000'};
   z-index: 1;
+  max-width: 100%;
+`;
+
+const StyledContent = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StyledMoreArrow = styled('div')`
@@ -59,7 +63,9 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
             borderRadius: sticky ? '0px 0px 12px 12px' : 12,
           }}
         >
-          <div role="button">{namespace || t('namespace_default')}</div>
+          <StyledContent role="button">
+            {namespace || t('namespace_default')}
+          </StyledContent>
           <StyledMoreArrow role="button">
             <ArrowDropDown
               fontSize="small"

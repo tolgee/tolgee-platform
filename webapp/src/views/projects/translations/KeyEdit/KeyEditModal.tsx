@@ -13,7 +13,7 @@ import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { FieldLabel } from 'tg.component/FormField';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
@@ -23,10 +23,11 @@ import { Button } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FieldError } from 'tg.component/FormField';
 
-const StyledContainer = styled('div')`
+const StyledDialogContent = styled(DialogContent)`
   display: grid;
   row-gap: ${({ theme }) => theme.spacing(2)};
   margin-bottom: ${({ theme }) => theme.spacing(2)};
+  justify-content: stretch;
 `;
 
 const StyledTags = styled('div')`
@@ -113,64 +114,60 @@ export const KeyEditModal: React.FC<Props> = ({
         return (
           <Dialog open={true} onClose={onClose} fullWidth>
             <DialogTitle>{t('translations_key_edit_title')}</DialogTitle>
-            <DialogContent>
-              <StyledContainer>
-                <div>
-                  <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
-                  <EditorWrapper>
-                    <Editor
-                      autofocus
-                      value={values.name}
-                      onChange={(val) => setFieldValue('name', val)}
-                      onSave={submitForm}
-                      plaintext
-                      minHeight="unset"
-                    />
-                  </EditorWrapper>
-                  <FieldError error={errors.name} />
-                </div>
-                <div>
-                  <FieldLabel>
-                    {t('translations_key_edit_label_namespace')}
-                  </FieldLabel>
-                  <NamespaceSelector
-                    value={values.namespace}
-                    onChange={(value) => setFieldValue('namespace', value)}
+            <StyledDialogContent>
+              <div>
+                <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
+                <EditorWrapper>
+                  <Editor
+                    autofocus
+                    value={values.name}
+                    onChange={(val) => setFieldValue('name', val)}
+                    onSave={submitForm}
+                    plaintext
+                    minHeight="unset"
                   />
-                  <FieldError error={errors.namespace} />
-                </div>
-                <div>
-                  <FieldLabel>
-                    {t('translations_key_edit_label_tags')}
-                  </FieldLabel>
-                  <StyledTags>
-                    {values.tags.map((tag, index) => {
-                      return (
-                        <Tag
-                          key={tag}
-                          name={tag}
-                          onDelete={() =>
-                            setFieldValue(
-                              'tags',
-                              values.tags.filter((val) => val !== tag)
-                            )
-                          }
-                        />
-                      );
-                    })}
-                    <TagInput
-                      existing={values.tags}
-                      onAdd={(name) =>
-                        !values.tags.includes(name) &&
-                        setFieldValue('tags', [...values.tags, name])
-                      }
-                      placeholder={t('translations_key_edit_placeholder')}
-                    />
-                  </StyledTags>
-                  <FieldError error={errors.tags} />
-                </div>
-              </StyledContainer>
-            </DialogContent>
+                </EditorWrapper>
+                <FieldError error={errors.name} />
+              </div>
+              <div>
+                <FieldLabel>
+                  {t('translations_key_edit_label_namespace')}
+                </FieldLabel>
+                <NamespaceSelector
+                  value={values.namespace}
+                  onChange={(value) => setFieldValue('namespace', value)}
+                />
+                <FieldError error={errors.namespace} />
+              </div>
+              <div>
+                <FieldLabel>{t('translations_key_edit_label_tags')}</FieldLabel>
+                <StyledTags>
+                  {values.tags.map((tag, index) => {
+                    return (
+                      <Tag
+                        key={tag}
+                        name={tag}
+                        onDelete={() =>
+                          setFieldValue(
+                            'tags',
+                            values.tags.filter((val) => val !== tag)
+                          )
+                        }
+                      />
+                    );
+                  })}
+                  <TagInput
+                    existing={values.tags}
+                    onAdd={(name) =>
+                      !values.tags.includes(name) &&
+                      setFieldValue('tags', [...values.tags, name])
+                    }
+                    placeholder={t('translations_key_edit_placeholder')}
+                  />
+                </StyledTags>
+                <FieldError error={errors.tags} />
+              </div>
+            </StyledDialogContent>
             <DialogActions>
               <Button
                 data-cy="translations-cell-cancel-button"

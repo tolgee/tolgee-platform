@@ -13,7 +13,7 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { FieldError } from 'tg.component/FormField';
 

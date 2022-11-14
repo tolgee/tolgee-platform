@@ -1,19 +1,10 @@
-import {
-  MenuItem,
-  TextField,
-  Select,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  ListItemText,
-} from '@mui/material';
+import { MenuItem, Select, ListItemText } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import { useMemo, useState } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+import { NamespaceNewDialog } from './NamespaceNewDialog';
 
 type Props = {
   value: string | undefined;
@@ -79,9 +70,10 @@ export const NamespaceSelector: React.FC<Props> = ({
     setDialogOpen(false);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (value: string) => {
     setDialogOpen(false);
-    onChange(customOption);
+    setCustomOption(value);
+    onChange(value);
   };
 
   return (
@@ -97,8 +89,8 @@ export const NamespaceSelector: React.FC<Props> = ({
         renderValue={(value) => value || t('namespace_select_default')}
         displayEmpty
         value={currentNamespace}
-        fullWidth
         size="small"
+        fullWidth
       >
         {existingOptions.map((o) => (
           <MenuItem
@@ -120,40 +112,11 @@ export const NamespaceSelector: React.FC<Props> = ({
       </Select>
 
       {dialogOpen && (
-        <Dialog open onClose={handleClose} fullWidth>
-          <DialogTitle>{t('namespae_select_title')}</DialogTitle>
-
-          <DialogContent>
-            <TextField
-              data-cy="namespaces-select-text-field"
-              onChange={(e) => {
-                setCustomOption(e.target.value);
-              }}
-              placeholder={t('namespace_select_placeholder')}
-              value={customOption}
-              fullWidth
-              size="small"
-              autoFocus
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleConfirm();
-                }
-              }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button data-cy="global-confirmation-cancel" onClick={handleClose}>
-              {t('namespace_select_cancel')}
-            </Button>
-            <Button
-              data-cy="global-confirmation-confirm"
-              color="primary"
-              onClick={handleConfirm}
-            >
-              {t('namespace_select_confirm')}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <NamespaceNewDialog
+          namespace={customOption}
+          onChange={handleConfirm}
+          onClose={handleClose}
+        />
       )}
     </>
   );
