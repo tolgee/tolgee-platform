@@ -59,7 +59,6 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
             top: sticky ? 0 : -4,
             borderRadius: sticky ? '0px 0px 12px 12px' : 12,
           }}
-          data-cy="translations-namespace-banner"
         >
           <div>{namespace || t('namespace_default')}</div>
           <StyledMoreArrow>
