@@ -51,7 +51,7 @@ export const NamespaceBanner: React.FC<Props> = ({
   }, [columnSizes, namespace, index]);
 
   return (
-    <StyledNsRow>
+    <StyledNsRow data-cy="translations-namespace-banner">
       <NamespaceContent namespace={namespace} ref={elRef} />
     </StyledNsRow>
   );

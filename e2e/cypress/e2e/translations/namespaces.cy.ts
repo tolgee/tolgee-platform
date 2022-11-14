@@ -24,9 +24,9 @@ describe('namespaces in translations', () => {
     waitForGlobalLoading();
   });
 
-  afterEach(() => {
-    namespaces.clean();
-  });
+  // afterEach(() => {
+  //   namespaces.clean();
+  // });
 
   it('displays keys with namespaces correctly', () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
@@ -45,10 +45,10 @@ describe('namespaces in translations', () => {
 
   it('edits namespaced correctly', () => {
     gcy('translations-namespace-banner')
-      .contains('ns-1')
+      .should('be.visible')
       .nextUntilDcy('translations-namespace-banner')
       .findDcy('translations-table-cell')
-      .contains('hello')
+      .first()
       .click();
     cy.gcy('global-editor').type(' edited translation').type('{enter}');
     waitForGlobalLoading();
@@ -59,7 +59,6 @@ describe('namespaces in translations', () => {
 
   it('updates namespace correctly', () => {
     gcy('translations-namespace-banner')
-      .contains('ns-1')
       .nextUntilDcy('translations-namespace-banner')
       .findDcy('translations-table-cell')
       .first()
