@@ -2,7 +2,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 
 export const ImportNamespaceSelector = ({
   row,

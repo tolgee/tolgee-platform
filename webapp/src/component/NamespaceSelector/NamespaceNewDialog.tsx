@@ -1,25 +1,27 @@
 import {
+  TextField,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
-  TextField,
   DialogActions,
-  Button,
   Box,
 } from '@mui/material';
-import { Field, Formik, Form } from 'formik';
 import { useTranslate } from '@tolgee/react';
+import { Formik, Form, Field } from 'formik';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { FieldError } from 'tg.component/FormField';
 
 type Props = {
   namespace: string;
   onClose: () => void;
+  onChange: (value: string) => void;
 };
 
-export const NamespaceRenameDialog: React.FC<Props> = ({
+export const NamespaceNewDialog: React.FC<Props> = ({
   namespace,
   onClose,
+  onChange,
 }) => {
   const t = useTranslate();
 
@@ -29,19 +31,18 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
         initialValues={{ namespace }}
         validationSchema={Validation.NAMESPACE_FORM}
         onSubmit={(values) => {
-          // missing endpoint for renaming
+          onChange(values.namespace);
         }}
       >
         <Form>
-          <DialogTitle>{t('namespace_rename_title')}</DialogTitle>
-
+          <DialogTitle>{t('namespae_select_title')}</DialogTitle>
           <DialogContent>
             <Field name="namespace">
               {({ field, meta }) => (
                 <Box mt={1}>
                   <TextField
-                    data-cy="namespaces-rename-text-field"
-                    placeholder={t('namespace_rename_placeholder')}
+                    data-cy="namespaces-select-text-field"
+                    placeholder={t('namespace_select_placeholder')}
                     fullWidth
                     size="small"
                     autoFocus
@@ -54,14 +55,14 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
           </DialogContent>
           <DialogActions>
             <Button data-cy="global-confirmation-cancel" onClick={onClose}>
-              {t('namespace_rename_cancel')}
+              {t('namespace_select_cancel')}
             </Button>
             <Button
               data-cy="global-confirmation-confirm"
               color="primary"
               type="submit"
             >
-              {t('namespace_rename_confirm')}
+              {t('namespace_select_confirm')}
             </Button>
           </DialogActions>
         </Form>

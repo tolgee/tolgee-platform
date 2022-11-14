@@ -23,7 +23,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 
