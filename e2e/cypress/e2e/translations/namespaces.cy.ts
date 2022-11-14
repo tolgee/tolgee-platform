@@ -33,13 +33,13 @@ describe('namespaces in translations', () => {
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
   });
 
-  it('displays <default>', () => {
+  it('displays <none>', () => {
     createTranslation('new-key', undefined, undefined, 'new-ns');
     gcy('translations-namespace-banner')
       .contains('new-ns')
       .should('be.visible');
     gcy('translations-namespace-banner')
-      .contains('<default>')
+      .contains('<none>')
       .should('be.visible');
   });
 
@@ -84,7 +84,7 @@ describe('namespaces in translations', () => {
   it('filters by empty namespace', () => {
     gcy('translations-key-count').contains('5 Keys').should('be.visible');
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
-    getPopover().contains('<default>').click();
+    getPopover().contains('<none>').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
     gcy('translations-key-count').contains('2 Keys').should('be.visible');

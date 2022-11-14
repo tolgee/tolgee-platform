@@ -61,7 +61,7 @@ describe('Views with 5 Translations', () => {
           .should('be.visible');
 
         gcy('translations-namespace-banner')
-          .contains('<default>')
+          .contains('<none>')
           .should('be.visible');
       });
 
