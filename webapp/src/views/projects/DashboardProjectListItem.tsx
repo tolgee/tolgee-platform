@@ -13,11 +13,11 @@ import { Link, useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
-import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { ProjectLanguages } from './ProjectLanguages';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -112,13 +112,9 @@ const StyledProjectName = styled(Typography)`
   word-break: break-word;
 `;
 
-const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
-  cursor: default;
-`;
+type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
-const DashboardProjectListItem = (
-  p: components['schemas']['ProjectWithStatsModel']
-) => {
+const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
   const t = useTranslate();
   const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: p.id,
@@ -164,15 +160,7 @@ const DashboardProjectListItem = (
       </StyledStats>
       <StyledLanguages data-cy="project-list-languages">
         <Grid container>
-          {p.languages.map((l) => (
-            <Grid key={l.id} item onClick={stopBubble()}>
-              <Tooltip title={`${l.name} | ${l.originalName}`}>
-                <Box m={0.125} data-cy="project-list-languages-item">
-                  <StyledCircledLanguageIcon size={20} flag={l.flagEmoji} />
-                </Box>
-              </Tooltip>
-            </Grid>
-          ))}
+          <ProjectLanguages p={p} />
         </Grid>
       </StyledLanguages>
       <StyledControls>
