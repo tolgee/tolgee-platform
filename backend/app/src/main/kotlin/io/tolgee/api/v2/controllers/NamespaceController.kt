@@ -82,4 +82,15 @@ class NamespaceController(
     namespaceService.update(namespace, dto)
     return namespaceModelAssembler.toModel(namespace)
   }
+
+  @GetMapping(value = ["/namespace-by-name/{name}"])
+  @Operation(summary = "Update namespace")
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey
+  fun getByName(
+    @PathVariable name: String,
+  ): NamespaceModel {
+    val namespace = namespaceService.get(projectId = projectHolder.project.id, name)
+    return namespaceModelAssembler.toModel(namespace)
+  }
 }

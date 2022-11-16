@@ -34,4 +34,11 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   """
   )
   fun findOneByProjectIdAndId(projectId: Long, namespaceId: Long): Namespace?
+
+  @Query(
+    """
+    from Namespace n where n.name = :name and n.project.id = :projectId
+  """
+  )
+  fun findOneByProjectIdAndName(projectId: Long, name: String): Namespace?
 }
