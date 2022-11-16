@@ -286,7 +286,7 @@ export class Validation {
   });
 
   static readonly NAMESPACE_FORM = Yup.object({
-    namespace: Yup.string().max(100),
+    namespace: Yup.string().required().max(100),
   });
 }
 

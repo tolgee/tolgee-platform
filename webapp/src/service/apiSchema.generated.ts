@@ -41,6 +41,9 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/namespaces/{id}": {
+    put: operations["update"];
+  };
   "/v2/projects/{projectId}/machine-translation-service-settings": {
     get: operations["getMachineTranslationSettings"];
     put: operations["setMachineTranslationSettings"];
@@ -101,7 +104,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
-    put: operations["update"];
+    put: operations["update_1"];
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
@@ -138,7 +141,7 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_7"];
-    put: operations["update_2"];
+    put: operations["update_3"];
     delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
@@ -172,16 +175,16 @@ export interface paths {
   };
   "/v2/organizations/{id}": {
     get: operations["get_10"];
-    put: operations["update_3"];
+    put: operations["update_4"];
     delete: operations["delete_8"];
   };
   "/api/organizations/{id}": {
     get: operations["get_11"];
-    put: operations["update_4"];
+    put: operations["update_5"];
     delete: operations["delete_9"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_5"];
+    put: operations["update_6"];
     delete: operations["delete_11"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
@@ -325,6 +328,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/namespaces": {
     get: operations["getAllNamespaces"];
+  };
+  "/v2/projects/{projectId}/namespace-by-name/{name}": {
+    get: operations["getByName"];
   };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
@@ -616,6 +622,14 @@ export interface components {
       /** The type of permission. */
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    UpdateNamespaceDto: {
+      name: string;
+    };
+    NamespaceModel: {
+      /** The id of namespace */
+      id: number;
+      name: string;
+    };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
@@ -842,8 +856,8 @@ export interface components {
       expiresAt?: number;
       lastUsedAt?: number;
       description: string;
-      createdAt: number;
       updatedAt: number;
+      createdAt: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -915,13 +929,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      username?: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
+      username?: string;
       description: string;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1200,11 +1214,6 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    NamespaceModel: {
-      /** The id of namespace */
-      id: number;
-      name: string;
-    };
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
@@ -1385,6 +1394,8 @@ export interface components {
       keyId: number;
       /** Name of key */
       keyName: string;
+      /** The namespace id of the key */
+      keyNamespaceId?: number;
       /** The namespace of the key */
       keyNamespace?: string;
       /** Tags of key */
@@ -1586,13 +1597,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      username?: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
+      username?: string;
       description: string;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -2053,6 +2064,39 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  update: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNamespaceDto"];
       };
     };
   };
@@ -2602,7 +2646,7 @@ export interface operations {
       };
     };
   };
-  update: {
+  update_1: {
     parameters: {
       path: {
         commentId: number;
@@ -3087,7 +3131,7 @@ export interface operations {
       };
     };
   };
-  update_2: {
+  update_3: {
     parameters: {
       path: {
         id: number;
@@ -3491,7 +3535,7 @@ export interface operations {
       };
     };
   };
-  update_3: {
+  update_4: {
     parameters: {
       path: {
         id: number;
@@ -3573,7 +3617,7 @@ export interface operations {
       };
     };
   };
-  update_4: {
+  update_5: {
     parameters: {
       path: {
         id: number;
@@ -3628,7 +3672,7 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  update_6: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -5284,6 +5328,34 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getByName: {
+    parameters: {
+      path: {
+        name: string;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["NamespaceModel"];
         };
       };
       /** Bad Request */

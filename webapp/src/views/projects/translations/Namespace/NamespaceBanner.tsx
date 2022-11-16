@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
 import { useHeaderNsDispatch } from '../context/HeaderNsContext';
 import { NamespaceContent } from './NamespaceContent';
+import { NsBannerRecord } from '../context/useNsBanners';
 
 const StyledNsRow = styled('div')`
   display: flex;
@@ -23,32 +24,31 @@ const StyledNsRow = styled('div')`
 `;
 
 type Props = {
-  namespace: string;
+  namespace: NsBannerRecord;
   columnSizes: any;
-  index: number;
 };
 
 export const NamespaceBanner: React.FC<Props> = ({
   namespace,
-  index,
   columnSizes,
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
   const dispatch = useHeaderNsDispatch();
+  const { name, row } = namespace;
 
   useEffect(() => {
     dispatch({
       type: 'NS_REF_REGISTER',
-      payload: { index, el: elRef.current || undefined },
+      payload: { index: row, el: elRef.current || undefined },
     });
 
     return () => {
       dispatch({
         type: 'NS_REF_REGISTER',
-        payload: { index, el: undefined },
+        payload: { index: row, el: undefined },
       });
     };
-  }, [columnSizes, namespace, index]);
+  }, [columnSizes, name, row]);
 
   return (
     <StyledNsRow data-cy="translations-namespace-banner">

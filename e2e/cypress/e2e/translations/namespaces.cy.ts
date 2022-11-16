@@ -5,7 +5,12 @@ import {
   createTranslation,
   visitTranslations,
 } from '../../common/translations';
-import { gcy, getPopover, selectInSelect } from '../../common/shared';
+import {
+  confirmStandard,
+  gcy,
+  getPopover,
+  selectInSelect,
+} from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
 
 describe('namespaces in translations', () => {
@@ -23,10 +28,6 @@ describe('namespaces in translations', () => {
       });
     waitForGlobalLoading();
   });
-
-  // afterEach(() => {
-  //   namespaces.clean();
-  // });
 
   it('displays keys with namespaces correctly', () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
@@ -98,5 +99,43 @@ describe('namespaces in translations', () => {
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
     gcy('translations-key-count').contains('3 Keys').should('be.visible');
+  });
+
+  it('rename namespace', () => {
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('namespaces-banner-content')
+      .contains('ns-1')
+      .closestDcy('translations-namespace-banner')
+      .findDcy('namespaces-banner-menu-button')
+      .click();
+
+    gcy('namespaces-banner-menu-option').contains('Rename namespace').click();
+
+    gcy('namespaces-rename-text-field')
+      .click()
+      .clear()
+      .type('renamed-namespace');
+
+    gcy('namespaces-rename-confirm').click();
+
+    confirmStandard();
+
+    gcy('translations-namespace-banner')
+      .contains('renamed-namespace')
+      .should('be.visible');
+  });
+
+  it("franta doesn't have permission to rename namespace", () => {
+    login('franta');
+    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('namespaces-banner-content')
+      .contains('ns-1')
+      .closestDcy('translations-namespace-banner')
+      .findDcy('namespaces-banner-menu-button')
+      .click();
+
+    gcy('namespaces-banner-menu-option')
+      .contains('Rename namespace')
+      .should('not.exist');
   });
 });

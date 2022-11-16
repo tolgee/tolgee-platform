@@ -10,9 +10,11 @@ import io.tolgee.api.v2.hateoas.key.namespace.UsedNamespaceModel
 import io.tolgee.api.v2.hateoas.key.namespace.UsedNamespaceModelAssembler
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.key.UpdateNamespaceDto
+import io.tolgee.model.Permission
 import io.tolgee.model.key.Namespace
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
+import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.NamespaceService
 import org.springdoc.api.annotations.ParameterObject
@@ -74,7 +76,7 @@ class NamespaceController(
 
   @PutMapping(value = ["/namespaces/{id}"])
   @Operation(summary = "Update namespace")
-  @AccessWithAnyProjectPermission
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey
   @RequestActivity(ActivityType.NAMESPACE_EDIT)
   fun update(

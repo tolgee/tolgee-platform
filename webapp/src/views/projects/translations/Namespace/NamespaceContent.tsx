@@ -5,13 +5,16 @@ import { useTranslate } from '@tolgee/react';
 
 import { useNamespaceFilter } from './useNamespaceFilter';
 import { NamespaceRenameDialog } from './NamespaceRenameDialog';
+import { NsBannerRecord } from '../context/useNsBanners';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 const StyledNamespace = styled('div')`
   display: flex;
   align-items: center;
   cursor: pointer;
   background: ${({ theme }) => theme.palette.background.default};
-  padding: ${({ theme }) => theme.spacing(0, 1, 0, 1.5)};
+  padding: ${({ theme }) => theme.spacing(0, 1.5, 0, 1.5)};
   padding-bottom: 1px;
   height: 24px;
   position: relative;
@@ -35,19 +38,24 @@ const StyledMoreArrow = styled('div')`
   display: flex;
   align-items: center;
   padding-left: 2px;
+  margin-right: ${({ theme }) => theme.spacing(-0.5)};
 `;
 
 type Props = {
-  namespace: string;
+  namespace: NsBannerRecord;
   sticky?: boolean;
 };
 
 export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
   function NamespaceContent({ namespace, sticky }, ref) {
     const t = useTranslate();
-    const { toggle, isActive } = useNamespaceFilter(namespace);
+    const { toggle, isActive } = useNamespaceFilter(namespace.name);
     const [open, setOpen] = useState<undefined | HTMLElement>(undefined);
     const [renameOpen, setRenameOpen] = useState(false);
+    const permission = useProjectPermissions();
+    const canRename = permission.satisfiesPermission(
+      ProjectPermissionType.EDIT
+    );
 
     const handleClose = () => {
       setOpen(undefined);
@@ -63,19 +71,24 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
             borderRadius: sticky ? '0px 0px 12px 12px' : 12,
           }}
         >
-          <StyledContent role="button">
-            {namespace || t('namespace_default')}
+          <StyledContent role="button" data-cy="namespaces-banner-content">
+            {namespace.name || t('namespace_default')}
           </StyledContent>
-          <StyledMoreArrow role="button">
-            <ArrowDropDown
-              fontSize="small"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setOpen(e.target as HTMLDivElement);
-              }}
-            />
-          </StyledMoreArrow>
+          {namespace.id !== undefined && (
+            <StyledMoreArrow
+              role="button"
+              data-cy="namespaces-banner-menu-button"
+            >
+              <ArrowDropDown
+                fontSize="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setOpen(e.target as HTMLDivElement);
+                }}
+              />
+            </StyledMoreArrow>
+          )}
         </StyledNamespace>
         {open && (
           <Menu
@@ -87,8 +100,10 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
             MenuListProps={{
               'aria-labelledby': 'basic-button',
             }}
+            data-cy="namespaces-banner-menu"
           >
             <MenuItem
+              data-cy="namespaces-banner-menu-option"
               onClick={() => {
                 toggle();
                 handleClose();
@@ -97,17 +112,20 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
               {isActive
                 ? t('namespace_menu_filter_cancel')
                 : t('namespace_menu_filter', {
-                    namespace: namespace || t('namespace_default'),
+                    namespace: namespace.name || t('namespace_default'),
                   })}
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setRenameOpen(true);
-                handleClose();
-              }}
-            >
-              {t('namespace_menu_rename')}
-            </MenuItem>
+            {canRename && (
+              <MenuItem
+                data-cy="namespaces-banner-menu-option"
+                onClick={() => {
+                  setRenameOpen(true);
+                  handleClose();
+                }}
+              >
+                {t('namespace_menu_rename')}
+              </MenuItem>
+            )}
           </Menu>
         )}
         {renameOpen && (

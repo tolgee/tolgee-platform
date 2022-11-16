@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useTranslationsSelector } from './TranslationsContext';
 import { useDebouncedCallback } from 'use-debounce';
-import { useNsBanners } from './useNsBanners';
+import { NsBannerRecord, useNsBanners } from './useNsBanners';
 
 type ActionType =
   | {
@@ -20,16 +20,14 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
   createProvider(() => {
     const translations = useTranslationsSelector((c) => c.translations);
     const reactList = useTranslationsSelector((c) => c.reactList);
-    const [topNamespace, setTopNamespace] = useState<string | undefined>(
-      undefined
-    );
+    const [topNamespace, setTopNamespace] = useState<
+      NsBannerRecord | undefined
+    >(undefined);
     const [topBarHeight, setTopBarHeight] = useState(0);
 
     const nsElements = useRef<Record<number, HTMLElement | undefined>>({});
 
-    const bannersRef = useRef(
-      [] as { name: string | undefined; row: number }[]
-    );
+    const bannersRef = useRef([] as NsBannerRecord[]);
 
     bannersRef.current = useNsBanners();
 
@@ -74,7 +72,7 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
 
       const topBanner = nsBanners[index];
 
-      setTopNamespace(topBanner?.name);
+      setTopNamespace(topBanner);
     });
 
     useEffect(() => {

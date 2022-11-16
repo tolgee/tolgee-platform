@@ -184,6 +184,12 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "namespaces-banner-content" |
+        "namespaces-banner-menu" |
+        "namespaces-banner-menu-button" |
+        "namespaces-banner-menu-option" |
+        "namespaces-rename-cancel" |
+        "namespaces-rename-confirm" |
         "namespaces-rename-text-field" |
         "namespaces-select" |
         "namespaces-select-option" |

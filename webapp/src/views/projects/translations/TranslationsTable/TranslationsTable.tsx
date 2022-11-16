@@ -208,8 +208,7 @@ export const TranslationsTable = () => {
             <div key={row.keyId}>
               {nsBanner && (
                 <NamespaceBanner
-                  namespace={nsBanner.name}
-                  index={index}
+                  namespace={nsBanner}
                   columnSizes={columnSizes}
                 />
               )}
