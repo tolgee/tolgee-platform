@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -60,4 +61,44 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `updates namespace name`() {
+    performProjectAuthPut(
+      "namespaces/${testData.namespaces[getNs1Def()]?.id}",
+      mapOf("name" to "ns-new")
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("ns-new")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot rename to existing`() {
+    performProjectAuthPut(
+      "namespaces/${testData.namespaces[getNs1Def()]?.id}",
+      mapOf("name" to "ns-2")
+    ).andAssertError.hasCode("namespace_exists")
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates rename`() {
+    val nsId = testData.namespaces[getNs1Def()]?.id
+    performProjectAuthPut(
+      "namespaces/$nsId",
+      mapOf("name" to "")
+    ).andAssertError.isStandardValidation.onField("name")
+    performProjectAuthPut(
+      "namespaces/$nsId",
+      mapOf("name" to null)
+    ).andAssertError.isStandardValidation.onField("name")
+    performProjectAuthPut(
+      "namespaces/$nsId",
+      mapOf("name" to "  ")
+    ).andAssertError.isStandardValidation.onField("name")
+  }
+
+  private fun getNs1Def() = testData.projectBuilder.self to "ns-1"
 }

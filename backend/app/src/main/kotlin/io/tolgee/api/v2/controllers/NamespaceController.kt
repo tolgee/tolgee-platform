@@ -7,6 +7,7 @@ import io.tolgee.api.v2.hateoas.key.namespace.NamespaceModelAssembler
 import io.tolgee.api.v2.hateoas.key.namespace.UsedNamespaceModel
 import io.tolgee.api.v2.hateoas.key.namespace.UsedNamespaceModelAssembler
 import io.tolgee.controllers.IController
+import io.tolgee.dtos.request.key.UpdateNamespaceDto
 import io.tolgee.model.key.Namespace
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -20,8 +21,12 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -63,5 +68,18 @@ class NamespaceController(
       namespaces.add(0, null to null)
     }
     return usedNamespaceModelAssembler.toCollectionModel(namespaces)
+  }
+
+  @PutMapping(value = ["/namespaces/{id}"])
+  @Operation(summary = "Update namespace")
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey
+  fun update(
+    @PathVariable id: Long,
+    @RequestBody @Valid dto: UpdateNamespaceDto
+  ): NamespaceModel {
+    val namespace = namespaceService.get(projectHolder.project.id, id)
+    namespaceService.update(namespace, dto)
+    return namespaceModelAssembler.toModel(namespace)
   }
 }
