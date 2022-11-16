@@ -15,6 +15,9 @@ open class KeyWithTranslationsModel(
   @Schema(description = "Name of key", example = "this_is_super_key")
   val keyName: String,
 
+  @Schema(description = "The namespace id of the key", example = "100000282")
+  val keyNamespaceId: Long?,
+
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
 

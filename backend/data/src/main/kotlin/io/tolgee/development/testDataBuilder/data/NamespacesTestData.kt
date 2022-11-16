@@ -10,6 +10,7 @@ class NamespacesTestData : BaseTestData() {
   var singleKeyInNs2: Key
   lateinit var defaultUnusedProject: Project
   var namespaces = mutableMapOf<Pair<Project, String>, Namespace>()
+  lateinit var dotProject: Project
 
   init {
     projectBuilder.apply {
@@ -33,6 +34,14 @@ class NamespacesTestData : BaseTestData() {
         defaultUnusedProject = this
       }.build {
         addKey("key", "ns-1")
+      }
+    }
+    root.apply {
+      addProject {
+        name = "Project 4"
+        dotProject = this
+      }.build {
+        addKey("key", "ns.1")
       }
     }
   }

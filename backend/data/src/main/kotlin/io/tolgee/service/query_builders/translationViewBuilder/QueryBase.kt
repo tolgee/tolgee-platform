@@ -149,10 +149,13 @@ class QueryBase<T>(
 
   private fun addNamespace() {
     val namespace = this.root.join(Key_.namespace, JoinType.LEFT)
+    val namespaceId = namespace.get(Namespace_.id)
     val namespaceName = namespace.get(Namespace_.name)
     namespaceNameExpression = namespaceName
+    this.querySelection[KeyWithTranslationsView::keyNamespaceId.name] = namespaceId
     this.querySelection[KeyWithTranslationsView::keyNamespace.name] = namespaceName
     this.fullTextFields.add(namespaceName)
+    groupByExpressions.add(namespaceId)
     groupByExpressions.add(namespaceName)
   }
 

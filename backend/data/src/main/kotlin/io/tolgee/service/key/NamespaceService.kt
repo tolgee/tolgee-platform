@@ -99,6 +99,14 @@ class NamespaceService(
     return this.find(projectId, namespaceId) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
   }
 
+  fun get(projectId: Long, name: String): Namespace {
+    return this.find(projectId, name) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
+  }
+
+  fun find(projectId: Long, name: String): Namespace? {
+    return namespaceRepository.findOneByProjectIdAndName(projectId, name)
+  }
+
   fun find(projectId: Long, namespaceId: Long): Namespace? {
     return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
   }
