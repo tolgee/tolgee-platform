@@ -3,11 +3,13 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Namespace
 
 class NamespacesTestData : BaseTestData() {
   var keyInNs1: Key
   var singleKeyInNs2: Key
   lateinit var defaultUnusedProject: Project
+  var namespaces = mutableMapOf<Pair<Project, String>, Namespace>()
 
   init {
     projectBuilder.apply {
@@ -39,7 +41,9 @@ class NamespacesTestData : BaseTestData() {
     val keyBuilder = this.addKey {
       name = keyName
     }.build {
-      setNamespace(namespace)
+      setNamespace(namespace)?.self?.let {
+        namespaces[it.project to it.name] = it
+      }
       addTranslation {
         language = englishLanguage
         text = "hello"

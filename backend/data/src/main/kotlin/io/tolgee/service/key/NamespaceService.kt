@@ -1,5 +1,9 @@
 package io.tolgee.service.key
 
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.key.UpdateNamespaceDto
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
@@ -89,5 +93,21 @@ class NamespaceService(
 
   fun isDefaultUsed(projectId: Long): Boolean {
     return namespaceRepository.isDefaultUsed(projectId)
+  }
+
+  fun get(projectId: Long, namespaceId: Long): Namespace {
+    return this.find(projectId, namespaceId) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
+  }
+
+  fun find(projectId: Long, namespaceId: Long): Namespace? {
+    return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
+  }
+
+  fun update(namespace: Namespace, dto: UpdateNamespaceDto) {
+    this.find(dto.name, namespace.project.id)?.let {
+      throw BadRequestException(Message.NAMESPACE_EXISTS)
+    }
+    namespace.name = dto.name!!
+    return save(namespace)
   }
 }
