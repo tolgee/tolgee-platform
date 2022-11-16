@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -30,6 +31,7 @@ class V2TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/pr
       node("_embedded.keys") {
         isArray.hasSize(5)
         node("[0].keyNamespace").isEqualTo(null)
+        node("[1].keyNamespaceId").isValidId
         node("[1].keyNamespace").isEqualTo("ns-1")
         node("[2].keyNamespace").isEqualTo("ns-2")
         node("[3].keyNamespace").isEqualTo(null)
