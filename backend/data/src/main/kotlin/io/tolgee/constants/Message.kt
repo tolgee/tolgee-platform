@@ -111,7 +111,9 @@ enum class Message {
   WRONG_PARAM_TYPE,
   EXPIRED_SUPER_JWT_TOKEN,
   CANNOT_DELETE_YOUR_OWN_ACCOUNT,
-  CANNOT_SORT_BY_THIS_COLUMN;
+  CANNOT_SORT_BY_THIS_COLUMN,
+  NAMESPACE_NOT_FOUND,
+  NAMESPACE_EXISTS;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

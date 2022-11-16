@@ -27,4 +27,11 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   """
   )
   fun isDefaultUsed(projectId: Long): Boolean
+
+  @Query(
+    """
+    from Namespace n where n.id = :namespaceId and n.project.id = :projectId
+  """
+  )
+  fun findOneByProjectIdAndId(projectId: Long, namespaceId: Long): Namespace?
 }
