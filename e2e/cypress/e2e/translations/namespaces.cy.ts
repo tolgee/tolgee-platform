@@ -127,6 +127,7 @@ describe('namespaces in translations', () => {
 
   it("franta doesn't have permission to rename namespace", () => {
     login('franta');
+    cy.reload();
     gcy('translations-key-count').contains('5 Keys').should('be.visible');
     gcy('namespaces-banner-content')
       .contains('ns-1')

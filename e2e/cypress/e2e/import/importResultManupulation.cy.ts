@@ -170,7 +170,9 @@ describe('Import result & manipulation', () => {
         .findDcy('import-result-resolved-conflicts-cell')
         .should('contain', '0 / 0');
 
-      selectNamespaceOnRow('multilang.json (de)', '{backspace}');
+      const langRow = getLanguageRow('multilang.json (de)');
+      langRow.findDcy('namespaces-select').click();
+      cy.gcy('namespaces-select-option').contains('<none>').click();
 
       cy.waitForDom();
       getLanguageRow('multilang.json (de)')
