@@ -29,4 +29,5 @@ enum class ActivityType(
   DELETE_LANGUAGE(restrictEntitiesInList = arrayOf(Language::class)),
   CREATE_PROJECT,
   EDIT_PROJECT,
+  NAMESPACE_EDIT
 }
