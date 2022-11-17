@@ -16,12 +16,13 @@ class NamespacesTestData : BaseTestData() {
   lateinit var translator: UserAccount
 
   init {
-    projectBuilder.testDataBuilder.apply {
+    root.apply {
       addUserAccount {
         username = "franta"
         translator = this
       }
     }
+
     projectBuilder.apply {
       addKey("key", null)
       keyInNs1 = addKey("key", "ns-1")
