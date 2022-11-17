@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.namespace.NamespaceModel
 import io.tolgee.api.v2.hateoas.key.namespace.NamespaceModelAssembler
 import io.tolgee.api.v2.hateoas.key.namespace.UsedNamespaceModel
@@ -74,6 +76,7 @@ class NamespaceController(
   @Operation(summary = "Update namespace")
   @AccessWithAnyProjectPermission
   @AccessWithApiKey
+  @RequestActivity(ActivityType.NAMESPACE_EDIT)
   fun update(
     @PathVariable id: Long,
     @RequestBody @Valid dto: UpdateNamespaceDto
