@@ -9,6 +9,7 @@ import { Message } from 'tg.store/global/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { ImportFileDropzone } from './ImportFileDropzone';
+import { useState } from 'react';
 
 export const MAX_FILE_COUNT = 20;
 
@@ -32,6 +33,10 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
   const ALLOWED_EXTENSIONS = ['json', 'zip', 'po', 'xliff', 'xlf'];
+  const [resetKey, setResetKey] = useState(0);
+  function resetInput() {
+    setResetKey((key) => key + 1);
+  }
 
   React.useEffect(() => {
     const listener = (e) => {
@@ -79,6 +84,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   }
 
   const onNewFiles = (files: File[]) => {
+    resetInput();
     const validation = validate(files);
     if (validation.valid) {
       props.onNewFiles(files);
@@ -136,6 +142,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
         }}
       >
         <input
+          key={resetKey}
           data-cy={'import-file-input'}
           type="file"
           style={{ display: 'none' }}
