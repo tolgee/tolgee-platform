@@ -78,6 +78,34 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
       }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it filters by empty namespace`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterNamespace=").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it doesn't filter when no namespace is provided`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(5)
+      }
+    }
+  }
+
   @ProjectJWTAuthTestMethod
   @Test
   fun `filters by keyId`() {
