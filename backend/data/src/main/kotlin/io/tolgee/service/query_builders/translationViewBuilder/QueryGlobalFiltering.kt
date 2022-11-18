@@ -86,7 +86,7 @@ class QueryGlobalFiltering(
   }
 
   private fun filterNamespace() {
-    val filterNamespace = params.filterNamespace
+    val filterNamespace = getFilterNamespace()
     if (filterNamespace != null) {
       val inCondition = queryBase.namespaceNameExpression.`in`(filterNamespace)
       val hasDefaultNamespace = filterNamespace.contains("")
@@ -96,6 +96,14 @@ class QueryGlobalFiltering(
         inCondition
       queryBase.whereConditions.add(condition)
     }
+  }
+
+  private fun getFilterNamespace(): List<String>? {
+    val filterNamespace = params.filterNamespace
+    if (filterNamespace != null && filterNamespace.isEmpty()) {
+      return listOf("")
+    }
+    return filterNamespace
   }
 
   private fun filterTag() {
