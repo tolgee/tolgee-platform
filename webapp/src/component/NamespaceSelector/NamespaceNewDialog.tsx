@@ -26,7 +26,7 @@ export const NamespaceNewDialog: React.FC<Props> = ({
   const t = useTranslate();
 
   return (
-    <Dialog open onClose={onClose} fullWidth>
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <Formik
         initialValues={{ namespace }}
         validationSchema={Validation.NAMESPACE_FORM}

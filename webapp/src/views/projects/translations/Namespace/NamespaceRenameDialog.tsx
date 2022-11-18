@@ -53,7 +53,7 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
   });
 
   return (
-    <Dialog open onClose={onClose} fullWidth>
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <Formik
         initialValues={{ namespace: name }}
         validationSchema={Validation.NAMESPACE_FORM}
