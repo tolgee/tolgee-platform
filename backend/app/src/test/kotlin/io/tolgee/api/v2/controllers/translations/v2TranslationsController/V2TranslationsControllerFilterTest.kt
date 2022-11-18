@@ -76,6 +76,12 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
           isArray.hasSize(3)
         }
       }
+    performProjectAuthGet("/translations?filterNamespace=ns-2&filterNamespace=")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(3)
+        }
+      }
   }
 
   @Test
