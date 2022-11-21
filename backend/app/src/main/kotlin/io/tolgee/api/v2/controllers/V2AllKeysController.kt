@@ -24,10 +24,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/all-keys",
-    "/v2/projects/keys"
   ]
 )
-@Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
+@Tag(name = "All localization keys", description = "All localization keys in the project")
 class V2AllKeysController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,

@@ -10,22 +10,12 @@ import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.io.Resource
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class V2AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-  companion object {
-    val MAX_OK_NAME = (1..2000).joinToString("") { "a" }
-    val LONGER_NAME = (1..2001).joinToString("") { "a" }
-  }
-
-  @Value("classpath:screenshot.png")
-  lateinit var screenshotFile: Resource
-
   lateinit var testData: KeysTestData
 
   @BeforeEach
