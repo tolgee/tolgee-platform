@@ -28,6 +28,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
   )
   fun getAllByProjectId(projectId: Long): Set<Key>
 
+  @Query(
+    """
+      from Key k left join fetch k.namespace where k.project.id = :projectId order by k.id
+    """
+  )
+  fun getAllByProjectIdSortedById(projectId: Long): List<Key>
+
   @Query("select k.id from Key k where k.project.id = :projectId")
   fun getIdsByProjectId(projectId: Long?): List<Long>
   fun deleteAllByIdIn(ids: Collection<Long>)

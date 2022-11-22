@@ -30,6 +30,10 @@ class KeyService(
     return keyRepository.getAllByProjectId(projectId)
   }
 
+  fun getAllSortedById(projectId: Long): List<Key> {
+    return keyRepository.getAllByProjectIdSortedById(projectId)
+  }
+
   fun get(projectId: Long, name: String, namespace: String?): Key {
     return keyRepository.getByNameAndNamespace(projectId, name, namespace)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
