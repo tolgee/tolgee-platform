@@ -104,7 +104,22 @@ class XliffFileExporter(
     try {
       string.parseHtml().forEach { node ->
         node.parent = null
-        this.add(node)
+        val regex = "\\{[^\\{]+?\\}".toRegex()
+        if(regex.containsMatchIn(node.text)) {
+          var nodeTextToProcess = node.text
+          regex.findAll(node.text).forEach { placeholder ->
+            val placeholderText = placeholder.value
+            this.addText(nodeTextToProcess.split(placeholderText).first())
+            this.addElement("x").addAttribute("id", "INTERPOLATION").addAttribute("equiv-text", "{$placeholderText}")
+            nodeTextToProcess = nodeTextToProcess.split(placeholderText).last()
+          }
+          if(nodeTextToProcess.isNotEmpty()) {
+            this.addText(nodeTextToProcess)
+          }
+        }
+        else {
+          this.add(node)
+        }
       }
     } catch (e: DocumentException) {
       this.addText(string)
