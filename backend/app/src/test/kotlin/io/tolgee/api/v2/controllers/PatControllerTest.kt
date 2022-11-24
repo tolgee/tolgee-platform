@@ -130,6 +130,7 @@ class PatControllerTest : AuthorizedControllerTest() {
 
     performGet("/v2/pats/current", headers).andPrettyPrint.andAssertThatJson {
       node("id").isValidId.isEqualTo(BigDecimal(testData.pat.id))
+      node("user.id").asNumber().isEqualTo(BigDecimal(testData.user.id))
     }
   }
 
