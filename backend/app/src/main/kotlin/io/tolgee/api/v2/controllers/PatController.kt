@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.pat.PatModel
 import io.tolgee.api.v2.hateoas.pat.PatModelAssembler
-import io.tolgee.api.v2.hateoas.pat.RevealedPatModel
-import io.tolgee.api.v2.hateoas.pat.RevealedPatModelAssembler
 import io.tolgee.api.v2.hateoas.pat.PatWithUserModel
 import io.tolgee.api.v2.hateoas.pat.PatWithUserModelAssembler
+import io.tolgee.api.v2.hateoas.pat.RevealedPatModel
+import io.tolgee.api.v2.hateoas.pat.RevealedPatModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.pat.CreatePatDto
