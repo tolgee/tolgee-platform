@@ -107,11 +107,15 @@ class XliffFileExporter(
         val regex = "\\{[^\\{]+?\\}".toRegex()
         if(regex.containsMatchIn(node.text)) {
           var nodeTextToProcess = node.text
+          var paramSeqId = 0
           regex.findAll(node.text).forEach { placeholder ->
             val placeholderText = placeholder.value
             this.addText(nodeTextToProcess.split(placeholderText).first())
-            this.addElement("x").addAttribute("id", "INTERPOLATION").addAttribute("equiv-text", "{$placeholderText}")
+            this.addElement("x").addAttribute("id",
+              if (paramSeqId > 0)  "INTERPOLATION_$paramSeqId" else "INTERPOLATION")
+              .addAttribute("equiv-text", "{$placeholderText}")
             nodeTextToProcess = nodeTextToProcess.split(placeholderText).last()
+            paramSeqId++
           }
           if(nodeTextToProcess.isNotEmpty()) {
             this.addText(nodeTextToProcess)
