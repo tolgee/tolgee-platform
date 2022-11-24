@@ -4,13 +4,7 @@ import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -19,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import java.math.BigDecimal
 import java.util.*
 
@@ -211,10 +206,25 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `returns correct with get (current)`() {
-    performAuthGet("/v2/api-keys/current?ak=${testData.usersKey.key}").andPrettyPrint.andAssertThatJson {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = testData.usersKey.key!!
+    performGet("/v2/api-keys/current", headers).andPrettyPrint.andAssertThatJson {
       node("id").isValidId
       node("key").isAbsent()
     }
+  }
+
+  @Test
+  fun `returns 400 when trying to get current key with Bearer auth`() {
+    loginAsUser(testData.frantisekDobrota)
+    performAuthGet("/v2/api-keys/current").andIsBadRequest
+  }
+
+  @Test
+  fun `returns 400 when trying to get current key with PAT auth`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current", headers).andIsBadRequest
   }
 
   @Test

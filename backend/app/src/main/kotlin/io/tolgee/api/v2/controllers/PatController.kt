@@ -6,10 +6,12 @@ import io.tolgee.api.v2.hateoas.pat.PatModel
 import io.tolgee.api.v2.hateoas.pat.PatModelAssembler
 import io.tolgee.api.v2.hateoas.pat.RevealedPatModel
 import io.tolgee.api.v2.hateoas.pat.RevealedPatModelAssembler
+import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.pat.RegeneratePatDto
 import io.tolgee.dtos.request.pat.UpdatePatDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Pat
 import io.tolgee.security.AuthenticationFacade
@@ -109,6 +111,17 @@ class PatController(
   ) {
     checkOwner(id)
     return patService.delete(id)
+  }
+
+  @GetMapping(path = ["/current"])
+  @Operation(summary = "Returns current Personal Access Token info")
+  fun getCurrent(): PatModel {
+    if (!authenticationFacade.isPatAuthentication) {
+      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
+
+    val pat = authenticationFacade.pat
+    return patModelAssembler.toModel(pat)
   }
 
   private fun checkOwner(id: Long) {

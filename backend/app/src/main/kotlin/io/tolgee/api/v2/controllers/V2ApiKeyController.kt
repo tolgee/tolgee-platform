@@ -14,6 +14,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
@@ -102,8 +103,11 @@ class V2ApiKeyController(
   @Operation(summary = "Returns current API key info")
   @AccessWithApiKey
   fun getCurrent(): ApiKeyWithLanguagesModel {
-    val apiKey = authenticationFacade.apiKey
+    if (!authenticationFacade.isApiKeyAuthentication) {
+      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
 
+    val apiKey = authenticationFacade.apiKey
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = getProjectPermittedLanguages()?.toList()

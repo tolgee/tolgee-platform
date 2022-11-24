@@ -1,12 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.PatTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsCreated
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -14,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
+import java.math.BigDecimal
 import java.util.*
 
 @SpringBootTest
@@ -124,5 +121,21 @@ class PatControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("description").isString.isEqualTo(description)
     }
+  }
+
+  @Test
+  fun `returns current PAT information`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = "tgpat_${testData.pat.token!!}"
+
+    performGet("/v2/pats/current", headers).andPrettyPrint.andAssertThatJson {
+      node("id").isValidId.isEqualTo(BigDecimal(testData.pat.id))
+    }
+  }
+
+  @Test
+  fun `returns 400 on get current PAT info with Bearer auth`() {
+    loginAsUser(testData.user)
+    performAuthGet("/v2/pats/current").andIsBadRequest
   }
 }
