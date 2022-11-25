@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
-import { useHeaderNsDispatch } from '../context/HeaderNsContext';
+import {
+  useHeaderNsActions,
+  useHeaderNsContext,
+} from '../context/HeaderNsContext';
 import { NamespaceContent } from './NamespaceContent';
 import { NsBannerRecord } from '../context/useNsBanners';
 
 const StyledNsRow = styled('div')`
   display: flex;
-  background: ${({ theme }) => theme.palette.emphasis[50]};
-  height: 17px;
+  height: 0px;
   overflow: visible;
   position: relative;
   margin-bottom: -1px;
@@ -25,34 +27,33 @@ const StyledNsRow = styled('div')`
 
 type Props = {
   namespace: NsBannerRecord;
-  columnSizes: any;
+  maxWidth: number | undefined;
+  topSpacing?: boolean;
 };
 
-export const NamespaceBanner: React.FC<Props> = ({
-  namespace,
-  columnSizes,
-}) => {
+export const NamespaceBanner: React.FC<Props> = ({ namespace, maxWidth }) => {
   const elRef = useRef<HTMLDivElement>(null);
-  const dispatch = useHeaderNsDispatch();
+  const { nsRefRegister } = useHeaderNsActions();
   const { name, row } = namespace;
+  const topNamespace = useHeaderNsContext((c) => c.topNamespace);
+  const isTopBanner = topNamespace?.row === namespace.row;
 
   useEffect(() => {
-    dispatch({
-      type: 'NS_REF_REGISTER',
-      payload: { index: row, el: elRef.current || undefined },
-    });
+    nsRefRegister(row, elRef.current || undefined);
 
     return () => {
-      dispatch({
-        type: 'NS_REF_REGISTER',
-        payload: { index: row, el: undefined },
-      });
+      nsRefRegister(row, undefined);
     };
-  }, [columnSizes, name, row]);
+  }, [maxWidth, name, row]);
 
   return (
     <StyledNsRow data-cy="translations-namespace-banner">
-      <NamespaceContent namespace={namespace} ref={elRef} />
+      <NamespaceContent
+        maxWidth={maxWidth}
+        namespace={namespace}
+        ref={elRef}
+        hideShadow={isTopBanner}
+      />
     </StyledNsRow>
   );
 };

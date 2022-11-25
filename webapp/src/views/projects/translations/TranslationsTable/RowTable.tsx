@@ -9,6 +9,7 @@ import { CellTranslation } from './CellTranslation';
 import { styled } from '@mui/material';
 import clsx from 'clsx';
 import { DeletableKeyWithTranslationsModelType } from '../context/services/useTranslationsService';
+import { CELL_SPACE_BOTTOM, CELL_SPACE_TOP } from '../cell/styles';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -35,6 +36,8 @@ type Props = {
   languages: LanguageModel[];
   columnSizes: string[];
   onResize: (colIndex: number) => void;
+  bannerBefore: boolean;
+  bannerAfter: boolean;
 };
 
 export const RowTable: React.FC<Props> = React.memo(function RowTable({
@@ -42,6 +45,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   columnSizes,
   languages,
   onResize,
+  bannerBefore,
+  bannerAfter,
 }) {
   const permissions = useProjectPermissions();
   const [hover, setHover] = useState(false);
@@ -55,6 +60,11 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
+
+  const allClassName = clsx({
+    [CELL_SPACE_TOP]: bannerBefore,
+    [CELL_SPACE_BOTTOM]: bannerAfter,
+  });
 
   return (
     <StyledContainer
@@ -74,6 +84,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
         width={columnSizes[0]}
         active={relaxedActive}
         position="left"
+        className={allClassName}
       />
       {languages.map((language, index) => {
         const allWidth = 100 - colSizesNum[0];
@@ -103,6 +114,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             // render last focusable button on last item, so it's focusable
             lastFocusable={index === languages.length - 1}
             containerRef={containerRef}
+            className={allClassName}
           />
         );
       })}

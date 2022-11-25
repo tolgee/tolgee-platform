@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 
-export const useResize = (myRef, dependency) => {
-  const [width, setWidth] = useState(undefined);
+export const useResize = (
+  myRef: HTMLDivElement | undefined | null,
+  dependency: any
+) => {
+  const [width, setWidth] = useState<number>();
 
   const handleResize = () => {
-    const newWidth = myRef.current?.offsetWidth;
+    const newWidth = myRef?.offsetWidth;
     if (newWidth && width !== newWidth) {
       setWidth(newWidth);
     }

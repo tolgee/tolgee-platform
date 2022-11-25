@@ -69,6 +69,7 @@ type Props = {
   active: boolean;
   lastFocusable: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
+  className?: string;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -82,6 +83,7 @@ export const CellTranslation: React.FC<Props> = ({
   active,
   lastFocusable,
   containerRef,
+  className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
 
@@ -162,7 +164,7 @@ export const CellTranslation: React.FC<Props> = ({
           cellPosition={cellPosition}
         />
       ) : (
-        <>
+        <div className={className}>
           <StyledTranslation>
             <div data-cy="translations-table-cell">
               <TranslationVisual
@@ -196,7 +198,7 @@ export const CellTranslation: React.FC<Props> = ({
               />
             )}
           </StyledControls>
-        </>
+        </div>
       )}
 
       <CellStateBar state={state} onResize={handleResize} />

@@ -1,23 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import { createProvider } from 'tg.fixtures/createProvider';
 import { useTranslationsSelector } from './TranslationsContext';
 import { useDebouncedCallback } from 'use-debounce';
 import { NsBannerRecord, useNsBanners } from './useNsBanners';
-
-type ActionType =
-  | {
-      type: 'NS_REF_REGISTER';
-      payload: { index: number; el: HTMLElement | undefined };
-    }
-  | { type: 'TOP_BAR_HEIGHT'; payload: number };
+import { createProviderNew } from 'tg.fixtures/createProviderNew';
 
 /**
  * Context responsible for top namespace banner in translations header
  * keeps track of banner elements and decides which one should be displayed
  */
-export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
-  createProvider(() => {
+export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
+  createProviderNew(() => {
     const translations = useTranslationsSelector((c) => c.translations);
     const reactList = useTranslationsSelector((c) => c.reactList);
     const [topNamespace, setTopNamespace] = useState<
@@ -52,7 +45,7 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
           // element doesn't exist
           return false;
         }
-        const advance = !isFirst ? 10 : 0;
+        const advance = !isFirst ? 5 : 0;
         const top = el.getBoundingClientRect()!.top;
         // check exact location
         return top > topBarHeight + advance;
@@ -92,16 +85,14 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
       };
     }, []);
 
-    const dispatch = async (action: ActionType) => {
-      switch (action.type) {
-        case 'NS_REF_REGISTER':
-          nsElements.current[action.payload.index] = action.payload.el;
-          calculateTopNamespace();
-          break;
-
-        case 'TOP_BAR_HEIGHT':
-          return setTopBarHeight(action.payload);
-      }
+    const actions = {
+      nsRefRegister(index: number, el: HTMLElement | undefined) {
+        nsElements.current[index] = el;
+        calculateTopNamespace();
+      },
+      setTopBarHeight(height: number) {
+        setTopBarHeight(height);
+      },
     };
 
     const contextData = {
@@ -109,5 +100,5 @@ export const [HeaderNsContext, useHeaderNsDispatch, useHeaderNsContext] =
       topNamespace,
     };
 
-    return [contextData, dispatch];
+    return [contextData, actions];
   });

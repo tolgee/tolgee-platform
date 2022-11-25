@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import { useCallback, useMemo, useEffect, useRef } from 'react';
 import ReactList from 'react-list';
 import { styled } from '@mui/material';
 
@@ -13,12 +7,16 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
 import { TranslationsToolbar } from '../TranslationsToolbar';
 import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
+import {
+  useColumnsActions,
+  useColumnsContext,
+} from '../context/ColumnsContext';
+import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -36,7 +34,6 @@ const StyledContainer = styled('div')`
 
 export const TranslationsList = () => {
   const tableRef = useRef<HTMLDivElement>(null);
-  const resizersCallbacksRef = useRef<(() => void)[]>([]);
   const reactListRef = useRef<ReactList>(null);
   const dispatch = useTranslationsDispatch();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -48,31 +45,16 @@ export const TranslationsList = () => {
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
 
-  const [columnSizes, setColumnSizes] = useState([1, 3]);
+  const columnSizes = useColumnsContext((c) => c.columnSizes);
+  const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
+  const totalWidth = useColumnsContext((c) => c.totalWidth);
 
-  const { width } = useResize(tableRef, translations);
-
-  const handleColumnResize = (i: number) => (size: number) => {
-    setColumnSizes(resizeColumn(columnSizes, i, size, 0.25));
-  };
-
-  const columnSizesPercent = useMemo(() => {
-    const columnsSum = columnSizes.reduce((a, b) => a + b, 0);
-    return columnSizes.map((size) => (size / columnsSum) * 100 + '%');
-  }, [columnSizes]);
-
-  const handleResize = useCallback(
-    (colIndex: number) => {
-      resizersCallbacksRef.current[colIndex]?.();
-    },
-    [resizersCallbacksRef]
-  );
+  const { startResize, resizeColumn, addResizer, resetColumns } =
+    useColumnsActions();
 
   useEffect(() => {
-    const previousWidth = columnSizes.reduce((a, b) => a + b, 0) || 1;
-    const newSizes = columnSizes.map((w) => (w / previousWidth) * (width || 1));
-    setColumnSizes(newSizes);
-  }, [width]);
+    resetColumns([1, 3], tableRef.current);
+  }, [tableRef]);
 
   const handleFetchMore = useCallback(() => {
     dispatch({
@@ -121,13 +103,11 @@ export const TranslationsList = () => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
         return (
           <ColumnResizer
-            passResizeCallback={(callback) =>
-              (resizersCallbacksRef.current[i] = callback)
-            }
+            passResizeCallback={(callback) => addResizer(i, callback)}
             key={i}
             size={w}
             left={left}
-            onResize={handleColumnResize(i)}
+            onResize={(size) => resizeColumn(i, size)}
           />
         );
       })}
@@ -151,27 +131,38 @@ export const TranslationsList = () => {
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
+          const nsBannerAfter = nsBanners.find((b) => b.row === index + 1);
           const nsBanner = nsBanners.find((b) => b.row === index);
+          const bannerSpacing = nsBanner?.row === 0;
 
           return (
-            <div key={row.keyId}>
+            <div
+              key={row.keyId}
+              style={{
+                paddingTop: bannerSpacing
+                  ? NAMESPACE_BANNER_SPACING
+                  : undefined,
+              }}
+            >
               {nsBanner && (
                 <NamespaceBanner
                   namespace={nsBanner}
-                  columnSizes={columnSizes}
+                  maxWidth={columnSizes[0]}
                 />
               )}
               <RowList
+                bannerBefore={Boolean(nsBanner)}
+                bannerAfter={Boolean(nsBannerAfter)}
                 data={row}
                 languages={languagesRow}
                 columnSizes={columnSizesPercent}
-                onResize={handleResize}
+                onResize={startResize}
               />
             </div>
           );
         }}
       />
-      <TranslationsToolbar width={width} />
+      <TranslationsToolbar width={totalWidth} />
     </StyledContainer>
   );
 };

@@ -3,10 +3,11 @@ import { styled } from '@mui/material';
 
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import {
-  useHeaderNsDispatch,
+  useHeaderNsActions,
   useHeaderNsContext,
 } from '../context/HeaderNsContext';
 import { NamespaceContent } from '../Namespace/NamespaceContent';
+import { useColumnsContext } from '../context/ColumnsContext';
 
 const StyledContainer = styled('div')`
   position: sticky;
@@ -56,15 +57,13 @@ type Props = {
 };
 
 export const StickyHeader: React.FC<Props> = ({ height, children }) => {
-  const topBarDispatch = useHeaderNsDispatch();
+  const { setTopBarHeight } = useHeaderNsActions();
   const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
+  const columnSizes = useColumnsContext((c) => c.columnSizes);
 
   useEffect(() => {
-    topBarDispatch({
-      type: 'TOP_BAR_HEIGHT',
-      payload: height + (topBarHidden ? 0 : 50),
-    });
+    setTopBarHeight(height + (topBarHidden ? 0 : 50));
   }, [topBarHidden]);
 
   return (
@@ -80,7 +79,11 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         <StyledControls style={{ height }}>{children}</StyledControls>
         {topNamespace !== undefined && (
           <StyledNs data-cy="translations-namespace-banner">
-            <NamespaceContent namespace={topNamespace} sticky={true} />
+            <NamespaceContent
+              maxWidth={columnSizes[0]}
+              namespace={topNamespace}
+              sticky={true}
+            />
           </StyledNs>
         )}
       </StyledContainer>

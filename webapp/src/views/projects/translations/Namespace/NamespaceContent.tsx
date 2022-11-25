@@ -18,7 +18,6 @@ const StyledNamespace = styled('div')`
   padding-bottom: 1px;
   height: 24px;
   position: relative;
-  top: -4px;
   border-radius: 12px;
   box-shadow: ${({ theme }) =>
     theme.palette.mode === 'dark'
@@ -44,10 +43,12 @@ const StyledMoreArrow = styled('div')`
 type Props = {
   namespace: NsBannerRecord;
   sticky?: boolean;
+  maxWidth: number | undefined;
+  hideShadow?: boolean;
 };
 
 export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
-  function NamespaceContent({ namespace, sticky }, ref) {
+  function NamespaceContent({ namespace, sticky, maxWidth, hideShadow }, ref) {
     const t = useTranslate();
     const { toggle, isActive } = useNamespaceFilter(namespace.name);
     const [open, setOpen] = useState<undefined | HTMLElement>(undefined);
@@ -65,10 +66,16 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
       <>
         <StyledNamespace
           ref={ref}
-          onClick={toggle}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(e.currentTarget as HTMLDivElement);
+          }}
           style={{
-            top: sticky ? 0 : -4,
+            top: sticky ? 0 : -12,
             borderRadius: sticky ? '0px 0px 12px 12px' : 12,
+            maxWidth: `calc(${maxWidth}px - 5px)`,
+            boxShadow: hideShadow ? 'none' : undefined,
           }}
         >
           <StyledContent role="button" data-cy="namespaces-banner-content">
@@ -79,14 +86,7 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
               role="button"
               data-cy="namespaces-banner-menu-button"
             >
-              <ArrowDropDown
-                fontSize="small"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setOpen(e.target as HTMLDivElement);
-                }}
-              />
+              <ArrowDropDown fontSize="small" />
             </StyledMoreArrow>
           )}
         </StyledNamespace>

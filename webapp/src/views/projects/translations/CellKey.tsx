@@ -117,6 +117,7 @@ type Props = {
   active: boolean;
   simple?: boolean;
   position?: PositionType;
+  className?: string;
   onSaveSuccess?: (value: string) => void;
   editInDialog?: boolean;
 };
@@ -130,6 +131,7 @@ export const CellKey: React.FC<Props> = ({
   position,
   onSaveSuccess,
   editInDialog,
+  className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
@@ -181,13 +183,16 @@ export const CellKey: React.FC<Props> = ({
     <>
       <StyledContainer
         position={position}
-        className={clsx({
-          [CELL_PLAIN]: true,
-          [CELL_HOVER]: !isEditing,
-          [CELL_CLICKABLE]: editEnabled && !displayEditor,
-          [CELL_RAISED]: displayEditor,
-          [CELL_SELECTED]: isEditing,
-        })}
+        className={clsx(
+          {
+            [CELL_PLAIN]: true,
+            [CELL_HOVER]: !isEditing,
+            [CELL_CLICKABLE]: editEnabled && !displayEditor,
+            [CELL_RAISED]: displayEditor,
+            [CELL_SELECTED]: isEditing,
+          },
+          className
+        )}
         style={{ width }}
         onClick={
           !displayEditor && editEnabled ? () => handleOpen('editor') : undefined

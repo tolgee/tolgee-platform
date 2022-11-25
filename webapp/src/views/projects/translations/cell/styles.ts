@@ -4,6 +4,8 @@ import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 
 export type PositionType = 'left' | 'right';
 
+export const NAMESPACE_BANNER_SPACING = 8;
+
 const getCellGradientBackground = (
   position: PositionType | undefined,
   color: string
@@ -22,7 +24,7 @@ const getOpacityAnimation = (start: number, end: number) => keyframes`
   100% {
     opacity: ${end};
   }
-`;
+  `;
 
 const easeIn = getOpacityAnimation(0, 1);
 const highlightIn = getOpacityAnimation(0.5, 1);
@@ -35,6 +37,8 @@ export const CELL_SELECTED = 'cellSelected';
 export const CELL_SHOW_ON_HOVER = 'cellShowOnHover';
 export const CELL_HIGHLIGHT_ON_HOVER = 'cellhighlightOnHover';
 export const CELL_CLICKABLE = 'cellClickable';
+export const CELL_SPACE_TOP = 'cellSpaceTop';
+export const CELL_SPACE_BOTTOM = 'cellSpaceBottom';
 
 const combine = (first: string, second: string) =>
   `${first}.${second}, ${first} .${second}`;
@@ -114,5 +118,13 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
     &:focus {
       opacity: 1;
     }
+  }
+
+  ${combine('&', CELL_SPACE_TOP)} {
+    padding-top: ${NAMESPACE_BANNER_SPACING}px;
+  }
+
+  ${combine('&', CELL_SPACE_BOTTOM)} {
+    padding-bottom: ${NAMESPACE_BANNER_SPACING}px;
   }
 `;
