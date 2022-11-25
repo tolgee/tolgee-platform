@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -11,6 +12,7 @@ class ApiKeysTestData : BaseTestData() {
   lateinit var frantisekDobrota: UserAccount
   lateinit var frantasProject: Project
   lateinit var frantasKey: ApiKey
+  lateinit var frantasPat: Pat
   lateinit var usersKey: ApiKey
   lateinit var expiredKey: ApiKey
 
@@ -20,6 +22,11 @@ class ApiKeysTestData : BaseTestData() {
         name = "Franta Dobrota"
         username = "franta"
         frantisekDobrota = this
+      }.build {
+        addPat {
+          description = "cool pat"
+          frantasPat = this
+        }
       }
 
       addProject {

@@ -8,6 +8,7 @@ import java.util.*
 class PatTestData {
   lateinit var user: UserAccount
   lateinit var user2: UserAccount
+  lateinit var pat: Pat
   lateinit var expiredPat: Pat
 
   val root = TestDataBuilder().apply {
@@ -32,6 +33,7 @@ class PatTestData {
       }
       addPat {
         description = "Yee2"
+        pat = this
       }
       addPat {
         description = "Yeey3"

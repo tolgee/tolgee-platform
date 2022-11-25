@@ -4,12 +4,16 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.pat.PatModel
 import io.tolgee.api.v2.hateoas.pat.PatModelAssembler
+import io.tolgee.api.v2.hateoas.pat.PatWithUserModel
+import io.tolgee.api.v2.hateoas.pat.PatWithUserModelAssembler
 import io.tolgee.api.v2.hateoas.pat.RevealedPatModel
 import io.tolgee.api.v2.hateoas.pat.RevealedPatModelAssembler
+import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.pat.RegeneratePatDto
 import io.tolgee.dtos.request.pat.UpdatePatDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Pat
 import io.tolgee.security.AuthenticationFacade
@@ -41,7 +45,8 @@ class PatController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<Pat>,
   private val authenticationFacade: AuthenticationFacade,
-  private val revealedPatModelAssembler: RevealedPatModelAssembler
+  private val revealedPatModelAssembler: RevealedPatModelAssembler,
+  private val patWithUserModelAssembler: PatWithUserModelAssembler,
 ) : IController {
 
   @GetMapping(value = [""])
@@ -109,6 +114,17 @@ class PatController(
   ) {
     checkOwner(id)
     return patService.delete(id)
+  }
+
+  @GetMapping(path = ["/current"])
+  @Operation(summary = "Returns current Personal Access Token info")
+  fun getCurrent(): PatWithUserModel {
+    if (!authenticationFacade.isPatAuthentication) {
+      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
+
+    val pat = authenticationFacade.pat
+    return patWithUserModelAssembler.toModel(pat)
   }
 
   private fun checkOwner(id: Long) {

@@ -4,8 +4,10 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.security.apiKeyAuth.ApiKeyAuthenticationToken
+import io.tolgee.security.patAuth.PatAuthenticationToken
 import io.tolgee.service.UserAccountService
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -40,5 +42,14 @@ class AuthenticationFacade(
     get() {
       val authentication = authentication as ApiKeyAuthenticationToken
       return authentication.apiKey
+    }
+
+  val isPatAuthentication: Boolean
+    get() = authentication is PatAuthenticationToken
+
+  val pat: Pat
+    get() {
+      val authentication = authentication as PatAuthenticationToken
+      return authentication.pat
     }
 }
