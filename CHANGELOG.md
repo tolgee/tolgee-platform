@@ -1,3 +1,10 @@
+# [2.46.0](https://github.com/tolgee/tolgee-platform/compare/v2.45.11...v2.46.0) (2022-11-25)
+
+
+### Features
+
+* get current PAT info endpoint ([#1441](https://github.com/tolgee/tolgee-platform/issues/1441)) ([6c002c5](https://github.com/tolgee/tolgee-platform/commit/6c002c538315880694aa99794109b920499cfdb2))
+
 ## [2.45.11](https://github.com/tolgee/tolgee-platform/compare/v2.45.10...v2.45.11) (2022-11-14)
 
 
