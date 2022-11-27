@@ -42,7 +42,9 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     // field is also focused, which breaks the scrolling
     // so we need to make it async
     setTimeout(() => {
-      if (position) {
+      // avoiding scrolling to keys when edited
+      // as they are edited in dialog
+      if (position && position.language) {
         viewRefs.scrollToElement({
           keyId: position.keyId,
           language: position.language,
