@@ -197,6 +197,6 @@ describe('Import result & manipulation', () => {
     langRow.findDcy('namespaces-select').click();
     cy.gcy('namespaces-select-option-new').click();
     cy.gcy('namespaces-select-text-field').clear().type(namespace);
-    cy.gcy('global-confirmation-confirm').click();
+    cy.gcy('namespaces-select-confirm').click();
   }
 });
