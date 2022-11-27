@@ -120,6 +120,7 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
                   data-cy="namespaces-rename-confirm"
                   color="primary"
                   type="submit"
+                  variant="contained"
                 >
                   {t('namespace_rename_confirm')}
                 </LoadingButton>
