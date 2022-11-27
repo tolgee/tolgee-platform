@@ -28,6 +28,7 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
   const content = (
     <>
       <span className="referenceText">
+        <i>{data.namespace && data.namespace + ': '}</i>
         {data.keyName}
         {data.languages && ' '}
       </span>

@@ -39,7 +39,8 @@ export type EntityEnum =
   | 'KeyMeta'
   | 'TranslationComment'
   | 'Screenshot'
-  | 'Project';
+  | 'Project'
+  | 'Namespace';
 
 export type FieldTypeEnum =
   | 'text'
@@ -68,6 +69,7 @@ export type LanguageReferenceType = {
 export type KeyReferenceData = {
   type: 'key';
   keyName: string;
+  namespace: string;
   languages?: LanguageReferenceType[];
   id?: number;
   exists?: boolean;

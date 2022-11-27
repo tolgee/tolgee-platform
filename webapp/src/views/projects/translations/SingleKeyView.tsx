@@ -5,9 +5,9 @@ import { KeySingle } from './KeySingle/KeySingle';
 
 export const SingleKeyView = () => {
   const project = useProject();
-  const keyName = useUrlSearch().key as string;
-  const keyNamespace = (useUrlSearch().ns as string) || '';
   const keyId = Number(useUrlSearch().id as string);
+  const keyName = useUrlSearch().key as string;
+  const keyNamespace = !keyId ? (useUrlSearch().ns as string) || '' : undefined;
 
   return (
     <TranslationsContextProvider

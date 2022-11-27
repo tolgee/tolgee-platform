@@ -1,5 +1,4 @@
 import { DiffValue } from '../types';
-import { useTranslate } from '@tolgee/react';
 import { getNoDiffChange } from './getNoDiffChange';
 import { getGeneralChange } from './getGeneralChange';
 
@@ -9,12 +8,7 @@ type Props = {
 };
 
 const NamespaceComponent: React.FC<Props> = ({ input, diffEnabled }) => {
-  const t = useTranslate();
-
   function getName(namespace: string | undefined) {
-    if (namespace === undefined) {
-      return t({ key: 'namespace_default', noWrap: true });
-    }
     return namespace;
   }
 

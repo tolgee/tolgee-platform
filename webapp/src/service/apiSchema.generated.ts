@@ -335,6 +335,9 @@ export interface paths {
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
+  "/v2/projects/{projectId}/all-keys": {
+    get: operations["getAllKeys"];
+  };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
   };
@@ -853,11 +856,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
       expiresAt?: number;
       lastUsedAt?: number;
-      description: string;
-      updatedAt: number;
-      createdAt: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -929,11 +932,11 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      username?: string;
+      description: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
-      username?: string;
-      description: string;
       userFullName?: string;
       projectName: string;
       scopes: string[];
@@ -1225,6 +1228,11 @@ export interface components {
       bucketSize: number;
       extraCreditBalance: number;
     };
+    CollectionModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
+    };
     EntityDescriptionWithRelations: {
       entityClass: string;
       entityId: number;
@@ -1287,7 +1295,8 @@ export interface components {
         | "EDIT_LANGUAGE"
         | "DELETE_LANGUAGE"
         | "CREATE_PROJECT"
-        | "EDIT_PROJECT";
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -1597,11 +1606,11 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      username?: string;
+      description: string;
       expiresAt?: number;
       projectId: number;
       lastUsedAt?: number;
-      username?: string;
-      description: string;
       userFullName?: string;
       projectName: string;
       scopes: string[];
@@ -5383,6 +5392,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelKeyModel"];
         };
       };
       /** Bad Request */
