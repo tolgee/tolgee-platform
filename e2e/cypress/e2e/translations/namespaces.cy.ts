@@ -46,7 +46,7 @@ describe('namespaces in translations', () => {
 
   it('edits namespaced correctly', () => {
     gcy('translations-namespace-banner')
-      .should('be.visible')
+      .should('exist')
       .nextUntilDcy('translations-namespace-banner')
       .findDcy('translations-table-cell')
       .first()
@@ -76,9 +76,9 @@ describe('namespaces in translations', () => {
 
   it('filters by clicking on banner', () => {
     gcy('translations-key-count').contains('5 Keys').should('be.visible');
-    gcy('translations-namespace-banner').contains('ns-1').click();
+    filterByNsBanner('ns-1');
     gcy('translations-key-count').contains('2 Keys').should('be.visible');
-    gcy('translations-namespace-banner').contains('ns-1').click();
+    removeFilterNsBanner('ns-1');
     gcy('translations-key-count').contains('5 Keys').should('be.visible');
   });
 
@@ -122,7 +122,7 @@ describe('namespaces in translations', () => {
 
     gcy('translations-namespace-banner')
       .contains('renamed-namespace')
-      .should('be.visible');
+      .should('exist');
   });
 
   it("franta doesn't have permission to rename namespace", () => {
@@ -139,4 +139,14 @@ describe('namespaces in translations', () => {
       .contains('Rename namespace')
       .should('not.exist');
   });
+
+  function filterByNsBanner(namespace: string) {
+    gcy('translations-namespace-banner').contains(namespace).click();
+    getPopover().contains('Filter by namespace').click();
+  }
+
+  function removeFilterNsBanner(namespace: string) {
+    gcy('translations-namespace-banner').contains(namespace).click();
+    getPopover().contains('Remove filter').click();
+  }
 });
