@@ -54,13 +54,14 @@ export const NamespaceNewDialog: React.FC<Props> = ({
             </Field>
           </DialogContent>
           <DialogActions>
-            <Button data-cy="global-confirmation-cancel" onClick={onClose}>
+            <Button data-cy="namespaces-select-cancel" onClick={onClose}>
               {t('namespace_select_cancel')}
             </Button>
             <Button
-              data-cy="global-confirmation-confirm"
+              data-cy="namespaces-select-confirm"
               color="primary"
               type="submit"
+              variant="contained"
             >
               {t('namespace_select_confirm')}
             </Button>

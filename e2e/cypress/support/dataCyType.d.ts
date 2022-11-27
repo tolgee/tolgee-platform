@@ -192,6 +192,8 @@ declare namespace DataCy {
         "namespaces-rename-confirm" |
         "namespaces-rename-text-field" |
         "namespaces-select" |
+        "namespaces-select-cancel" |
+        "namespaces-select-confirm" |
         "namespaces-select-option" |
         "namespaces-select-option-new" |
         "namespaces-select-text-field" |
