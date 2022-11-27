@@ -215,7 +215,7 @@ export const actionsConfiguration: Partial<
     label: 'activity_complex_edit',
     entities: {
       Translation: true,
-      Key: ['name'],
+      Key: ['name', 'namespace'],
       Screenshot: true,
     },
   },

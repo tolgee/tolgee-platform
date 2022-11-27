@@ -19,6 +19,7 @@ export const ImportNamespaceSelector = ({
     options: {
       onSuccess() {
         dataHelper.refetchData();
+        namespacesLoadable.refetch();
       },
     },
   });
