@@ -1,10 +1,9 @@
-import { MenuItem, Select, ListItemText } from '@mui/material';
-import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import { useMemo, useState } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { NamespaceNewDialog } from './NamespaceNewDialog';
+import { SearchSelect } from 'tg.component/searchSelect/SearchSelect';
 
 type Props = {
   value: string | undefined;
@@ -19,6 +18,7 @@ export const NamespaceSelector: React.FC<Props> = ({
 }) => {
   const project = useProject();
   const t = useTranslate();
+  const [lastSearch, setLastSearch] = useState('');
 
   const namespacesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/used-namespaces',
@@ -43,28 +43,23 @@ export const NamespaceSelector: React.FC<Props> = ({
   }, [namespacesLoadable.data, namespaceData]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [customOption, setCustomOption] = useState('');
 
   const existingOptions = useMemo(() => {
-    let options = usedNamespaces;
+    let options = [...usedNamespaces].sort();
+
+    if (!options.includes(currentNamespace)) {
+      options = [currentNamespace, ...options];
+    }
 
     if (!options.includes('')) {
       options = ['', ...options];
-    }
-
-    if (!options.includes(customOption)) {
-      options = [...options, customOption];
-    }
-
-    if (!options.includes(currentNamespace)) {
-      options = [...options, currentNamespace];
     }
 
     return options.map((o) => ({
       value: o || '',
       name: o || t('namespace_select_default'),
     }));
-  }, [usedNamespaces]);
+  }, [usedNamespaces, currentNamespace]);
 
   const handleClose = () => {
     setDialogOpen(false);
@@ -72,52 +67,29 @@ export const NamespaceSelector: React.FC<Props> = ({
 
   const handleConfirm = (value: string) => {
     setDialogOpen(false);
-    setCustomOption(value);
     onChange(value);
   };
 
   return (
-    <>
-      <Select
-        data-cy="namespaces-select"
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value !== undefined) {
-            onChange(e.target.value);
-          }
+    <div data-cy="namespaces-selector">
+      <SearchSelect
+        onAddNew={(searchValue) => {
+          setLastSearch(searchValue);
+          setDialogOpen(true);
         }}
-        renderValue={(value) => value || t('namespace_select_default')}
-        displayEmpty
-        value={currentNamespace}
-        size="small"
-        fullWidth
-      >
-        {existingOptions.map((o) => (
-          <MenuItem
-            key={o.value}
-            value={o.value}
-            data-cy="namespaces-select-option"
-          >
-            {o.name}
-          </MenuItem>
-        ))}
-        <MenuItem
-          onClick={() => setDialogOpen(true)}
-          sx={{ display: 'flex', gap: 1 }}
-          data-cy="namespaces-select-option-new"
-        >
-          <Add fontSize="small" />
-          <ListItemText primary={t('namespace_select_new')} />
-        </MenuItem>
-      </Select>
-
-      {dialogOpen && (
+        searchPlaceholder={t('namespace_select_search')}
+        addNewTooltip={t('namespace_select_new')}
+        onSelect={onChange}
+        items={existingOptions}
+        value={value}
+      />
+      {Boolean(dialogOpen) && (
         <NamespaceNewDialog
-          namespace={customOption}
+          namespace={lastSearch}
           onChange={handleConfirm}
           onClose={handleClose}
         />
       )}
-    </>
+    </div>
   );
 };

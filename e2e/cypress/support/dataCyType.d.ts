@@ -191,12 +191,10 @@ declare namespace DataCy {
         "namespaces-rename-cancel" |
         "namespaces-rename-confirm" |
         "namespaces-rename-text-field" |
-        "namespaces-select" |
         "namespaces-select-cancel" |
         "namespaces-select-confirm" |
-        "namespaces-select-option" |
-        "namespaces-select-option-new" |
         "namespaces-select-text-field" |
+        "namespaces-selector" |
         "navigation-item" |
         "organization-address-part-field" |
         "organization-description-field" |
@@ -279,6 +277,9 @@ declare namespace DataCy {
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "search-select-item" |
+        "search-select-new" |
+        "search-select-search" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
