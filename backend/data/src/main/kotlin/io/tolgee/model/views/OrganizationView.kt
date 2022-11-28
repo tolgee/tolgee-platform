@@ -9,7 +9,7 @@ interface OrganizationView {
   val name: String
   val description: String?
   val slug: String
-  val basePermissions: Permission.ProjectPermissionType
+  val basePermission: Permission
   val currentUserRole: OrganizationRoleType?
   val avatarHash: String?
 
@@ -20,7 +20,7 @@ interface OrganizationView {
         override val name = entity.name
         override val description = entity.description
         override val slug = entity.slug
-        override val basePermissions = entity.basePermissions
+        override val basePermission = entity.basePermission!!
         override val currentUserRole = currentUserRole
         override val avatarHash = entity.avatarHash
       }

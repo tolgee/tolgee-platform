@@ -3,8 +3,7 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -39,11 +38,11 @@ class ExportController @Autowired constructor(
   private val projectHolder: ProjectHolder
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
+  @Deprecated("Use v2 export controller")
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
-    securityService.checkProjectPermission(projectHolder.project.id, Permission.ProjectPermissionType.VIEW)
     val languages = languageService.findAll(projectHolder.project.id)
     return ResponseEntity
       .ok()

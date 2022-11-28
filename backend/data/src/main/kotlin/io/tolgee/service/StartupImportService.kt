@@ -9,7 +9,7 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
@@ -110,7 +110,7 @@ class StartupImportService(
     if (properties.import.createImplicitApiKey) {
       val apiKey = ApiKey(
         key = "${project.name.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
-        scopesEnum = ApiScope.values().toMutableSet(),
+        scopesEnum = Scope.values().toMutableSet(),
         userAccount = userAccount,
         project = project
       )

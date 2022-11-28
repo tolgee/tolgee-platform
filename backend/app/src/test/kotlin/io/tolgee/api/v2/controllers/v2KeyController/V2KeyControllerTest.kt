@@ -14,7 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -69,7 +69,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
   @Test
   fun `creates key with keys edit scope`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
@@ -156,10 +156,10 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectApiKeyAuthTestMethod(
     scopes = [
-      ApiScope.KEYS_EDIT,
-      ApiScope.TRANSLATIONS_EDIT,
-      ApiScope.SCREENSHOTS_UPLOAD,
-      ApiScope.SCREENSHOTS_DELETE
+      Scope.KEYS_EDIT,
+      Scope.TRANSLATIONS_EDIT,
+      Scope.SCREENSHOTS_UPLOAD,
+      Scope.SCREENSHOTS_DELETE
     ]
   )
   @Test

@@ -111,8 +111,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     expectedType: Permission.ProjectPermissionType
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
-    assertThat(permissionService.getProjectPermissionType(project.id, newUser)).isNotNull
-    val type = permissionService.getProjectPermissionType(project.id, newUser)!!
+    assertThat(permissionService.getProjectPermissionScopes(project.id, newUser)).isNotNull
+    val type = permissionService.getProjectPermissionScopes(project.id, newUser)!!
     assertThat(type).isEqualTo(expectedType)
   }
 

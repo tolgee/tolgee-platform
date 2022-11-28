@@ -16,11 +16,12 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
-        o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
+        bp as basePermission, r.type as currentUserRole, o.avatarHash as avatarHash
         from Organization o 
         left join OrganizationRole r on r.user.id = :userId
         and r.organization = o and (r.type = :roleType or :roleType is null)
         left join o.projects p
+        join o.basePermission bp
         left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))

@@ -28,8 +28,8 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
@@ -132,7 +132,7 @@ V2ProjectsController(
 
   @GetMapping("/{projectId}/users")
   @Operation(summary = "Returns project all users, who have permission to access project")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.MEMBERS_VIEW)
   @NeedsSuperJwtToken
   fun getAllUsers(
     @PathVariable("projectId") projectId: Long,
@@ -147,7 +147,7 @@ V2ProjectsController(
   @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
     @PathVariable projectId: Long
@@ -160,6 +160,7 @@ V2ProjectsController(
   @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   fun removeAvatar(
     @PathVariable projectId: Long
   ): ProjectModel {
@@ -168,7 +169,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
@@ -210,7 +211,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Revokes user's access")
   @NeedsSuperJwtToken
   fun revokePermission(
@@ -234,7 +235,7 @@ V2ProjectsController(
 
   @Operation(summary = "Modifies project")
   @PutMapping(value = ["/{projectId}"])
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @NeedsSuperJwtToken
   fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
@@ -244,15 +245,15 @@ V2ProjectsController(
 
   @DeleteMapping(value = ["/{projectId}"])
   @Operation(summary = "Deletes project by id")
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @NeedsSuperJwtToken
   fun deleteProject(@PathVariable projectId: Long) {
-    securityService.checkProjectPermission(projectId, ProjectPermissionType.MANAGE)
     projectService.deleteProject(projectId)
   }
 
   @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-organization/{organizationId:[0-9]+}"])
   @Operation(summary = "Transfers project's ownership to organization")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @NeedsSuperJwtToken
   fun transferProjectToOrganization(@PathVariable projectId: Long, @PathVariable organizationId: Long) {
     organizationRoleService.checkUserIsOwner(organizationId)
@@ -262,12 +263,11 @@ V2ProjectsController(
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
   @Operation(summary = "Leave project")
   @NeedsSuperJwtToken
-  @AccessWithProjectPermission(ProjectPermissionType.VIEW)
   fun leaveProject() {
     permissionService.leave(projectHolder.projectEntity, authenticationFacade.userAccount.id)
   }
 
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @Operation(summary = "Returns transfer option")
   @GetMapping(value = ["/{projectId:[0-9]+}/transfer-options"])
   fun getTransferOptions(@RequestParam search: String? = ""): CollectionModel<ProjectTransferOptionModel> {
@@ -291,7 +291,7 @@ V2ProjectsController(
 
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @NeedsSuperJwtToken
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
     val languages = getLanguagesAndCheckFromProject(invitation.languages, projectHolder.project.id)
@@ -307,25 +307,24 @@ V2ProjectsController(
 
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
-    securityService.checkProjectPermission(id, ProjectPermissionType.MANAGE)
     val invitations = invitationService.getForProject(project)
     return projectInvitationModelAssembler.toCollectionModel(invitations)
   }
 
   @GetMapping("/{projectId}/machine-translation-service-settings")
   @Operation(summary = "Returns machine translation settings for project")
-  @AccessWithProjectPermission(ProjectPermissionType.VIEW)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
     val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
   @PutMapping("/{projectId}/machine-translation-service-settings")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @Operation(summary = "Sets machine translation settings for project")
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto
@@ -335,7 +334,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/auto-translation-settings")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
   @Operation(summary = "Sets auto translation settings for project")
   fun setAutoTranslationSettings(
     @RequestBody dto: AutoTranslationSettingsDto
@@ -345,7 +344,6 @@ V2ProjectsController(
   }
 
   @GetMapping("/{projectId}/auto-translation-settings")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @Operation(summary = "Returns auto translation settings for project")
   fun getAutoTranslationSettings(): AutoTranslationSettingsDto {
     val config = autoTranslateService.getConfig(projectHolder.projectEntity)

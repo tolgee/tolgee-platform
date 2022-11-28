@@ -1,11 +1,29 @@
 package io.tolgee.dtos
 
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.Scope
 
 data class ComputedPermissionDto(
-  val type: Permission.ProjectPermissionType?,
-  val languageIds: Set<Long>?
+  val scopes: Array<Scope>?,
+  val translateLanguageIds: Set<Long>?
 ) {
-  val allLanguagesPermitted: Boolean
-    get() = type != Permission.ProjectPermissionType.TRANSLATE || languageIds.isNullOrEmpty()
+  val allTranslateLanguagesPermitted: Boolean
+    get() {
+      if (scopes.isNullOrEmpty()) {
+        return false
+      }
+
+      if (translateLanguageIds.isNullOrEmpty()) {
+        return true
+      }
+
+      if (scopes.contains(Scope.ADMIN)) {
+        return true
+      }
+
+      if (scopes.contains(Scope.TRANSLATIONS_EDIT)) {
+        return translateLanguageIds.isNullOrEmpty()
+      }
+
+      return false
+    }
 }

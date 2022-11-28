@@ -15,9 +15,8 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -58,8 +57,8 @@ class V2KeyController(
   private val applicationContext: ApplicationContext,
 ) : IController {
   @PostMapping(value = ["/create", ""])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
@@ -73,9 +72,9 @@ class V2KeyController(
 
   @PutMapping(value = ["/{id}/complex-update"])
   @Operation(summary = "More")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   // key permissions are checked separately in method body
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexEdit()
@@ -83,8 +82,8 @@ class V2KeyController(
 
   @PutMapping(value = ["/{id}"])
   @Operation(summary = "Edits key name")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
@@ -95,8 +94,8 @@ class V2KeyController(
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
@@ -106,8 +105,8 @@ class V2KeyController(
   @DeleteMapping(value = [""])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
     delete(dto.ids.toSet())

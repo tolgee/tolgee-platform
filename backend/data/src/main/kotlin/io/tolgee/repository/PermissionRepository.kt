@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
   fun findOneByProjectIdAndUserId(projectId: Long?, userId: Long?): Permission?
-
+  fun findOneByOrganizationId(organizationId: Long): Permission?
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
   @Query("from Permission p join Project r on r = p.project where p.user = ?1 order by r.name")

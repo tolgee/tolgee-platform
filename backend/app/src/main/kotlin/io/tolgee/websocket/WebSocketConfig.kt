@@ -1,6 +1,7 @@
 package io.tolgee.websocket
 
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.annotation.Configuration
@@ -53,7 +54,7 @@ class WebSocketConfig(
               ?: throw MessagingException("Forbidden")
 
             try {
-              securityService.getProjectPermission(projectId = projectId, user.id)
+              securityService.checkProjectPermission(projectId = projectId, Scope.TRANSLATIONS_VIEW)
             } catch (e: Exception) {
               null
             } ?: throw MessagingException("Forbidden")

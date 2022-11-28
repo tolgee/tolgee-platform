@@ -13,7 +13,6 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -153,7 +152,9 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("name").isEqualTo(dummyDto.name)
         node("id").isEqualTo(organization.id)
         node("description").isEqualTo(dummyDto.description)
-        node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
+        node("basePermission") {
+          node("scopes").isArray.contains("translations.view")
+        }
         node("slug").isEqualTo(dummyDto.slug)
       }
     }
@@ -257,7 +258,6 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         dummyDto.also { organization ->
           organization.name = "Hello"
           organization.slug = "hello-1"
-          organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
           organization.description = "This is changed description"
         }
       ).andIsOk.andPrettyPrint.andAssertThatJson {

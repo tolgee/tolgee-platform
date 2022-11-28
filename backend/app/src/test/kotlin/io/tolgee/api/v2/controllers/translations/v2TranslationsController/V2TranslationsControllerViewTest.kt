@@ -9,7 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -241,7 +241,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
       .andAssertThatJson { node("de").isObject }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns all translations map API key`() {
     testDataService.saveTestData(testData.root)
@@ -266,7 +266,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns select all keys`() {
     testData.generateLotOfData(2000)
@@ -280,7 +280,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     assertThat(time).isLessThan(3000)
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns unresolved comment count`() {
     testData.addCommentStatesData()

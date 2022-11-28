@@ -9,8 +9,7 @@ import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.key.TagKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -55,8 +54,8 @@ class TagsController(
 
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
@@ -66,8 +65,8 @@ class TagsController(
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
   @Operation(summary = "Removes tag with provided id from key with provided id")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
@@ -79,8 +78,8 @@ class TagsController(
 
   @GetMapping(value = ["tags"])
   @Operation(summary = "Returns project tags")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
   fun getAll(
     @RequestParam search: String? = null,
     @SortDefault("name") @ParameterObject pageable: Pageable

@@ -2,9 +2,10 @@ package io.tolgee.api.v2.hateoas.project
 
 import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
-import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
+import io.tolgee.api.v2.hateoas.permission.PermissionModel
+import io.tolgee.api.v2.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
@@ -19,7 +20,8 @@ class ProjectWithStatsModelAssembler(
   private val projectService: ProjectService,
   private val languageModelAssembler: LanguageModelAssembler,
   private val avatarService: AvatarService,
-  private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler
+  private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
+  private val permissionModelAssembler: PermissionModelAssembler
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
   V2ProjectsController::class.java, ProjectWithStatsModel::class.java
 ) {
@@ -28,24 +30,26 @@ class ProjectWithStatsModelAssembler(
     val baseLanguage = view.baseLanguage ?: let {
       projectService.getOrCreateBaseLanguage(view.id)
     }
+    val computedPermissions = permissionService.computeProjectPermissionType(
+      view.organizationRole,
+      view.organizationOwner?.basePermission?.scopes,
+      view.directPermissions?.scopes,
+      view.directPermissions?.languages?.map { it.id }?.toMutableSet()
+    )
+
     return ProjectWithStatsModel(
       id = view.id,
       name = view.name,
       description = view.description,
       slug = view.slug,
       avatar = avatarService.getAvatarLinks(view.avatarHash),
-      organizationOwnerSlug = view.organizationOwner?.slug,
-      organizationOwnerName = view.organizationOwner?.name,
-      organizationOwnerBasePermissions = view.organizationOwner?.basePermissions,
       organizationRole = view.organizationRole,
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
       organizationOwner = view.organizationOwner?.let { simpleOrganizationModelAssembler.toModel(it) },
-      directPermissions = view.directPermissions,
-      computedPermissions = UserPermissionModel(
-        type = permissionService.computeProjectPermissionType(
-          view.organizationRole, view.organizationOwner?.basePermissions, view.directPermissions, null
-        ).type,
-        permittedLanguageIds = view.permittedLanguageIds
+      directPermissions = view.directPermissions?.let { permissionModelAssembler.toModel(it) },
+      computedPermissions = PermissionModel(
+        scopes = computedPermissions.scopes!!,
+        permittedLanguageIds = computedPermissions.translateLanguageIds?.toList()
       ),
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },

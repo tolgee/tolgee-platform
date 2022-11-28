@@ -65,16 +65,19 @@ class LanguageServiceTest : AbstractSpringTest() {
     languageService.find(testData.englishLanguage.id).assert.isNull()
 
     val enUserData = permissionService.getProjectPermissionData(testData.project.id, testData.enOnlyUser.id)
-    assertThat(enUserData.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.VIEW)
+    assertThat(enUserData.computedPermissions.scopes)
+      .containsAll(Permission.ProjectPermissionType.VIEW.availableScopes.toList())
 
     val allLangUserData = permissionService.getProjectPermissionData(testData.project.id, testData.allLangUser.id)
-    assertThat(allLangUserData.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
+    assertThat(allLangUserData.computedPermissions.scopes)
+      .containsAll(Permission.ProjectPermissionType.TRANSLATE.availableScopes.toList())
 
     val explicitBothLangsUserData = permissionService.getProjectPermissionData(
       testData.project.id,
       testData.bothLangsExplicitUser.id
     )
-    assertThat(explicitBothLangsUserData.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
-    assertThat(explicitBothLangsUserData.computedPermissions.languageIds).hasSize(1)
+    assertThat(explicitBothLangsUserData.computedPermissions.scopes)
+      .containsAll(Permission.ProjectPermissionType.TRANSLATE.availableScopes.toList())
+    assertThat(explicitBothLangsUserData.computedPermissions.translateLanguageIds).hasSize(1)
   }
 }

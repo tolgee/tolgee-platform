@@ -12,9 +12,8 @@ import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -55,8 +54,8 @@ class V2ScreenshotController(
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload screenshot for specific key")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
+  @AccessWithProjectPermission(Scope.SCREENSHOTS_UPLOAD)
+  @AccessWithApiKey([Scope.SCREENSHOTS_UPLOAD])
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
   fun uploadScreenshot(
@@ -76,7 +75,7 @@ class V2ScreenshotController(
   @GetMapping("")
   @Operation(summary = "Returns all screenshots for specified key")
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
+  @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
@@ -84,9 +83,9 @@ class V2ScreenshotController(
   }
 
   @DeleteMapping("/{ids}")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithProjectPermission(Scope.SCREENSHOTS_DELETE)
   @Operation(summary = "Deletes multiple screenshots by ids")
-  @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
+  @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
   fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
     val screenshots = screenshotService.findByIdIn(ids)

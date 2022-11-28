@@ -16,6 +16,7 @@ import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -54,11 +55,12 @@ class PermissionService(
     return cachedPermissionService.findById(id)
   }
 
-  fun getProjectPermissionType(projectId: Long, userAccount: UserAccount) =
-    getProjectPermissionType(projectId, userAccount.id)
+  fun getProjectPermissionScopes(projectId: Long, userAccount: UserAccount) =
+    getProjectPermissionScopes(projectId, userAccount.id)
 
-  fun getProjectPermissionType(projectId: Long, userAccountId: Long): ProjectPermissionType? {
-    return getProjectPermissionData(projectId, userAccountId).computedPermissions.type
+  fun getProjectPermissionScopes(projectId: Long, userAccountId: Long): Array<Scope>? {
+    val scopes = getProjectPermissionData(projectId, userAccountId).computedPermissions.scopes ?: return null
+    return Scope.getUnpackedScopes(scopes)
   }
 
   fun getProjectPermissionData(project: ProjectDto, userAccountId: Long): ProjectPermissionData {
@@ -67,21 +69,18 @@ class PermissionService(
     val organizationRole = project.organizationOwnerId
       ?.let { organizationRoleService.findType(userAccountId, it) }
 
-    val organizationBasePermissionType = project.organizationOwnerId?.let {
-      organizationService.find(it)?.basePermissions ?: throw NotFoundException()
-    }
+    val organizationBasePermission = project.organizationOwnerId?.let { findOneDtoByOrganizationId(it) }
 
     val computed = computeProjectPermissionType(
       organizationRole = organizationRole,
-      organizationBasePermissionType = organizationBasePermissionType,
-      projectPermissionType = projectPermission?.type,
+      organizationBasePermissionScopes = organizationBasePermission?.scopes,
+      directPermissionScopes = projectPermission?.scopes,
       projectPermission?.languageIds
     )
 
     return ProjectPermissionData(
-      project = project,
       organizationRole = organizationRole,
-      organizationBasePermissions = organizationBasePermissionType,
+      organizationBasePermissions = organizationBasePermission,
       computedPermissions = computed,
       directPermissions = projectPermission
     )
@@ -148,31 +147,28 @@ class PermissionService(
 
   fun computeProjectPermissionType(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermissionType: ProjectPermissionType?,
-    projectPermissionType: ProjectPermissionType?,
+    organizationBasePermissionScopes: Array<Scope>?,
+    directPermissionScopes: Array<Scope>?,
     projectPermissionLanguages: Set<Long>?
   ): ComputedPermissionDto {
     if (organizationRole == null) {
-      return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
+      return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
     }
 
     if (organizationRole == OrganizationRoleType.OWNER) {
-      return ComputedPermissionDto(ProjectPermissionType.MANAGE, null)
+      return ComputedPermissionDto(arrayOf(Scope.ADMIN), null)
     }
 
     if (organizationRole == OrganizationRoleType.MEMBER) {
-      if (projectPermissionType == null) {
-        return ComputedPermissionDto(organizationBasePermissionType, null)
-      }
-      if (organizationBasePermissionType == null) {
-        return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
+      if (directPermissionScopes == null) {
+        return ComputedPermissionDto(organizationBasePermissionScopes, null)
       }
 
-      if (projectPermissionType.power > organizationBasePermissionType.power) {
-        return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
+      if (organizationBasePermissionScopes.isNullOrEmpty()) {
+        return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
       }
     }
-    return ComputedPermissionDto(organizationBasePermissionType, null)
+    throw IllegalStateException("Unexpected organization role")
   }
 
   fun createForInvitation(
@@ -192,9 +188,13 @@ class PermissionService(
     return cachedPermissionService.findOneDtoByProjectIdAndUserId(projectId, userId)
   }
 
+  fun findOneDtoByOrganizationId(organizationId: Long): PermissionDto? {
+    return cachedPermissionService.findOneDtoByOrganizationId(organizationId)
+  }
+
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
     // switch user to the organization when accepted invitation
-    userPreferencesService.setPreferredOrganization(permission.project.organizationOwner, userAccount)
+    userPreferencesService.setPreferredOrganization(permission.project!!.organizationOwner, userAccount)
     return cachedPermissionService.acceptInvitation(permission, userAccount)
   }
 
@@ -208,28 +208,17 @@ class PermissionService(
 
     val data = this.getProjectPermissionData(projectId, userId)
 
-    data.computedPermissions.type ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    data.computedPermissions.scopes ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     data.organizationRole?.let {
       if (data.organizationRole == OrganizationRoleType.OWNER) {
         throw BadRequestException(Message.USER_IS_ORGANIZATION_OWNER)
       }
-
-      if (data.organizationBasePermissions!!.power > newPermissionType.power) {
-        throw BadRequestException(Message.CANNOT_SET_LOWER_THAN_ORGANIZATION_BASE_PERMISSIONS)
-      }
-
-      if (data.organizationBasePermissions == newPermissionType && data.directPermissions != null) {
-        findById(data.directPermissions.id)?.let {
-          delete(it)
-        }
-        return null
-      }
     }
 
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
       val userAccount = userAccountService.get(userId)
-      val project = projectService.get(data.project.id)
+      val project = projectService.get(projectId)
       Permission(user = userAccount, project = project, type = newPermissionType)
     }
 
@@ -248,7 +237,7 @@ class PermissionService(
   }
 
   fun saveAll(permissions: Iterable<Permission>) {
-    cachedPermissionService.saveAll(permissions)
+    permissions.forEach { cachedPermissionService.save(it) }
   }
 
   fun revoke(projectId: Long, userId: Long) {

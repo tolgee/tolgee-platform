@@ -13,7 +13,6 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -53,7 +52,6 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
       "Test org",
       "This is description",
       "test-org",
-      Permission.ProjectPermissionType.VIEW
     )
     tolgeeProperties.frontEndUrl = null
   }

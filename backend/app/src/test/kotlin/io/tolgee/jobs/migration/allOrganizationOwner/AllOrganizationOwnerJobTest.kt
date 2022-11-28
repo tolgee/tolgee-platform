@@ -122,7 +122,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
       val user2 = userAccountRepository.findByUsername("user2").get()
-      assertThat(user2.permissions!!.single().project.name).isEqualTo("Project 2")
+      assertThat(user2.permissions.single().project?.name).isEqualTo("Project 2")
     }
   }
 

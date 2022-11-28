@@ -7,14 +7,12 @@ import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.LanguageService
@@ -40,14 +38,13 @@ class DbPopulatorReal(
   private val languageService: LanguageService,
   private val tolgeeProperties: TolgeeProperties,
   private val initialPasswordManager: InitialPasswordManager,
-  private val organizationRepository: OrganizationRepository,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val apiKeyService: ApiKeyService,
   private val languageStatsService: LanguageStatsService,
-  private val platformTransactionManager: PlatformTransactionManager
+  private val platformTransactionManager: PlatformTransactionManager,
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -73,10 +70,7 @@ class DbPopulatorReal(
 
   fun createOrganization(name: String, userAccount: UserAccount): Organization {
     val slug = slugGenerator.generate(name, 3, 100) { true }
-    val organization = Organization(name = name, slug = slug, basePermissions = Permission.ProjectPermissionType.VIEW)
-    return organizationRepository.save(organization).also {
-      organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
-    }
+    return organizationService.create(OrganizationDto(name, slug), userAccount)
   }
 
   @Transactional
@@ -219,7 +213,7 @@ class DbPopulatorReal(
         project = project,
         key = API_KEY,
         userAccount = user!!,
-        scopesEnum = ApiScope.values().toSet()
+        scopesEnum = Scope.values().toSet()
       )
       project.apiKeys.add(apiKey)
       apiKeyService.save(apiKey)

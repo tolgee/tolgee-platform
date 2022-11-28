@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
 import io.tolgee.api.v2.hateoas.activity.ProjectActivityModel
 import io.tolgee.api.v2.hateoas.activity.ProjectActivityModelAssembler
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -37,7 +37,7 @@ class ProjectActivityController(
 ) {
   @Operation(summary = "Returns project history")
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.ACTIVITY_VIEW])
+  @AccessWithApiKey(scopes = [Scope.ACTIVITY_VIEW])
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getActivity(
     @ParameterObject pageable: Pageable,
