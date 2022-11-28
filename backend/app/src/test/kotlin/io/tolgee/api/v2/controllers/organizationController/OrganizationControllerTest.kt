@@ -1,21 +1,21 @@
 package io.tolgee.api.v2.controllers.organizationController
 
-import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isPermissionScopes
 import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 @AutoConfigureMockMvc
 class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
-  fun testGetAll() {
+  fun `returns all`() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[1].name)
 
@@ -35,8 +35,21 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("_embedded.organizations") {
           isArray.hasSize(6)
           node("[0].name").isEqualTo("user-2's organization 1")
-          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].basePermissions.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           node("[0].currentUserRole").isEqualTo("OWNER")
+        }
+      }
+  }
+
+  @Test
+  fun `return all with pagination`() {
+    val users = dbPopulator.createUsersAndOrganizations()
+    loginAsUser(users[1].name)
+
+    performAuthGet("/v2/organizations?size=4")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(4)
         }
       }
   }
@@ -85,7 +98,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
           it.node("[0].name").isEqualTo("user-2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
+          it.node("[0].basePermissions.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
@@ -97,26 +110,11 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     loginAsUser(users[1].name)
 
-    performAuthGet("/v2/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
+    performAuthGet("/v2/organizations?sort=name,desc")
+      .andIsOk
       .andPrettyPrint
       .andAssertThatJson
       .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")
-  }
-
-  @Test
-  fun testGetAllUsers() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[0].username)
-    val organizationId = users[1].organizationRoles[0].organization!!.id
-    performAuthGet("/v2/organizations/$organizationId/users").andIsOk
-      .also { println(it.andReturn().response.contentAsString) }
-      .andAssertThatJson {
-        node("_embedded.usersInOrganization") {
-          isArray.hasSize(2)
-          node("[0].organizationRole").isEqualTo("MEMBER")
-          node("[1].organizationRole").isEqualTo("OWNER")
-        }
-      }
   }
 
   @Test
@@ -154,7 +152,9 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("name").isEqualTo(dummyDto.name)
         node("id").isEqualTo(organization.id)
         node("description").isEqualTo(dummyDto.description)
-        node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
+        node("basePermissions") {
+          node("scopes").isArray.contains("translations.view")
+        }
         node("slug").isEqualTo(dummyDto.slug)
       }
     }
@@ -167,13 +167,6 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       node("name").isEqualTo(dummyDto.name)
       node("description").isEqualTo(dummyDto.description)
     }
-  }
-
-  @Test
-  fun testGetAllUsersNotPermitted() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    val organizationId = users[1].organizationRoles[0].organization!!.id
-    performAuthGet("/v2/organizations/$organizationId/users").andIsForbidden
   }
 
   @Test
@@ -250,22 +243,26 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
-  fun `edits organization`() {
-    val organization = createOrganization(dummyDto)
-    performAuthPut(
-      "/v2/organizations/${organization.id}",
-      dummyDto.also { dto ->
-        dto.name = "Hello"
-        dto.slug = "hello-1"
-        dto.basePermissions = Permission.ProjectPermissionType.TRANSLATE
-        dto.description = "This is changed description"
+  fun testEdit() {
+    executeInNewTransaction {
+      this.organizationService.create(dummyDto, userAccount!!).let {
+        performAuthPut(
+          "/v2/organizations/${it.id}",
+          dummyDto.also { organization ->
+            organization.name = "Hello"
+            organization.slug = "hello-1"
+            organization.description = "This is changed description"
+          }
+        ).andIsOk.andPrettyPrint.andAssertThatJson {
+          node("name").isEqualTo("Hello")
+          node("slug").isEqualTo("hello-1")
+          node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+          node("basePermissions") {
+            node("scopes").isPermissionScopes(ProjectPermissionType.VIEW)
+          }
+          node("description").isEqualTo("This is changed description")
+        }
       }
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("name").isEqualTo("Hello")
-      node("slug").isEqualTo("hello-1")
-      node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-      node("basePermissions").isEqualTo("TRANSLATE")
-      node("description").isEqualTo("This is changed description")
     }
   }
 
@@ -311,13 +308,15 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   @Transactional
-  fun `cannot set own permission`() {
+  fun `sets base permissions`() {
     withOwnerInOrganization { organization, owner, role ->
       loginAsUser(owner)
       performAuthPut(
-        "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
+        "/v2/organizations/${organization.id}/set-base-permissions/REVIEW",
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
-      ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
+      ).andIsOk
+
+      organizationService.get(organization.id).basePermission.type.assert.isEqualTo(ProjectPermissionType.REVIEW)
     }
   }
 }

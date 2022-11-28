@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.fixtures.andAssertThatJson

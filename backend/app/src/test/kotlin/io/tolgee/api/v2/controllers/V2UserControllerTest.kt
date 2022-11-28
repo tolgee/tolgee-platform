@@ -5,7 +5,7 @@ import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTe
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -17,17 +17,13 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
-import javax.mail.internet.MimeMessage
 
 @ContextRecreatingTest
 @SpringBootTest(
@@ -35,11 +31,7 @@ import javax.mail.internet.MimeMessage
     "tolgee.front-end-url=https://fake.frontend.url"
   ]
 )
-class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
-
-  @MockBean
-  @Autowired
-  override lateinit var javaMailSender: JavaMailSender
+class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
@@ -47,7 +39,13 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   @Autowired
   lateinit var passwordEncoder: PasswordEncoder
 
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
+
+  @BeforeEach
+  fun init() {
+    emailTestUtil.initMocks()
+  }
 
   @Test
   fun `it updates the user profile`() {
@@ -57,7 +55,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.find(requestDTO.email)
+    val fromDb = userAccountService.findActive(requestDTO.email)
     Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
   }
 
@@ -68,7 +66,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.find(initialUsername)
+    val fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
       .describedAs("Password is changed").isTrue
   }
@@ -121,8 +119,8 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     )
     performAuthPut("/v2/user", requestDTO).andIsOk
 
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
-    assertThat(messageArgumentCaptor.value.tolgeeStandardMessageContent)
+    emailTestUtil.verifyEmailSent()
+    assertThat(emailTestUtil.messageContents.single())
       .contains(tolgeeProperties.frontEndUrl.toString())
 
     tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification
@@ -184,7 +182,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     testDataService.saveTestData(testData.root)
     userAccount = testData.franta
     performAuthDelete("/v2/user").andIsOk
-    userAccountService.find(testData.franta.id).assert.isNull()
+    userAccountService.findActive(testData.franta.id).assert.isNull()
     permissionService.findById(testData.frantasPermissionInOlgasProject.id).assert.isNull()
     translationCommentService.find(testData.frantasComment.id).assert.isNotNull
     patService.find(testData.frantasPat.id).assert.isNull()
@@ -220,7 +218,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     testDataService.saveTestData(testData.root)
     userAccount = testData.olga
     performAuthDelete("/v2/user").andIsOk
-    userAccountService.find(testData.olga.id).assert.isNull()
+    userAccountService.findActive(testData.olga.id).assert.isNull()
     organizationService.find(testData.pepaFrantaOrganization.id).assert.isNotNull
   }
 

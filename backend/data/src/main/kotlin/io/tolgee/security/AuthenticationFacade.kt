@@ -33,7 +33,7 @@ class AuthenticationFacade(
     get() = userAccountEntityOrNull ?: throw NotFoundException()
 
   val userAccountEntityOrNull: UserAccount?
-    get() = userAccountService.find(userAccount.id)
+    get() = userAccountService.findActive(userAccount.id)
 
   val isApiKeyAuthentication: Boolean
     get() = authentication is ApiKeyAuthenticationToken
@@ -42,6 +42,12 @@ class AuthenticationFacade(
     get() {
       val authentication = authentication as ApiKeyAuthenticationToken
       return authentication.apiKey
+    }
+
+  val apiKeyOrNull: ApiKey?
+    get() {
+      val authentication = authentication as? ApiKeyAuthenticationToken
+      return authentication?.apiKey
     }
 
   val isPatAuthentication: Boolean

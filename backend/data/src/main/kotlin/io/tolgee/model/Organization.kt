@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -38,18 +36,12 @@ class Organization(
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
   open var slug: String = "",
 
-  @Enumerated(EnumType.STRING)
-  open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
 ) : ModelWithAvatar, AuditModel() {
-  constructor(
-    name: String,
-    description: String? = null,
-    slug: String = "",
-    basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-  ) : this(0, name, description, slug, basePermissions)
+
+  @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true)
+  lateinit var basePermission: Permission
 
   @JsonIgnore
   @OneToMany(mappedBy = "organization")
@@ -59,7 +51,7 @@ class Organization(
   var projects: MutableList<Project> = mutableListOf()
 
   @OneToMany(mappedBy = "preferredOrganization")
-  var prefereredBy: MutableList<UserPreferences> = mutableListOf()
+  var preferredBy: MutableList<UserPreferences> = mutableListOf()
 
   override var avatarHash: String? = null
 }

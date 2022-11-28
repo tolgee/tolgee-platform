@@ -52,6 +52,7 @@ class ScreenshotService(
         listOf(tolgeeProperties.maxScreenshotsPerKey)
       )
     }
+
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
     val thumbnail = converter.getThumbnail()
@@ -79,7 +80,6 @@ class ScreenshotService(
     originalDimension: Dimension?,
     targetDimension: Dimension?
   ): Screenshot {
-
     val reference = KeyScreenshotReference()
     reference.key = key
     reference.screenshot = screenshot
@@ -189,9 +189,13 @@ class ScreenshotService(
     screenshot.width = dimension.width
     screenshot.height = dimension.height
     screenshotRepository.save(screenshot)
-    fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
-    fileStorage.storeFile(screenshot.getFilePath(), image)
+    storeFiles(screenshot, image, thumbnail)
     return screenshot
+  }
+
+  fun storeFiles(screenshot: Screenshot, image: ByteArray?, thumbnail: ByteArray?) {
+    thumbnail?.let { fileStorage.storeFile(screenshot.getThumbnailPath(), it) }
+    image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
   fun findAll(key: Key): List<Screenshot> {

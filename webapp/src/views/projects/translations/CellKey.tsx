@@ -63,11 +63,10 @@ const StyledContainer = styled(StyledCell)`
 `;
 
 const StyledCheckbox = styled(Checkbox)`
-    grid-area: checkbox;
-    width: 38px;
-    height: 38px;
-    margin: 3px -9px -9px 3px;
-  }
+  grid-area: checkbox;
+  width: 38px;
+  height: 38px;
+  margin: 3px -9px -9px 3px;
 `;
 
 const StyledKey = styled('div')`
@@ -200,7 +199,7 @@ export const CellKey: React.FC<Props> = ({
       >
         {!displayEditor ? (
           <>
-            {editEnabled && !simple && (
+            {!simple && (
               <StyledCheckbox
                 size="small"
                 checked={isSelected}

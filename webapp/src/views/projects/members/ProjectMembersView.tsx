@@ -13,6 +13,7 @@ import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
@@ -45,6 +46,10 @@ export const ProjectMembersView: FunctionComponent = () => {
     },
   });
 
+  const { satisfiesPermission } = useProjectPermissions();
+
+  const isAdmin = satisfiesPermission('admin');
+
   const translatePermission = usePermissionTranslation();
 
   useGlobalLoading(invitationsLoadable.isFetching);
@@ -66,11 +71,13 @@ export const ProjectMembersView: FunctionComponent = () => {
       loading={membersLoadable.isFetching}
       hideChildrenOnLoading={false}
     >
-      {project.organizationOwnerSlug && (
+      {project.organizationOwner?.slug && (
         <Box mb={2}>
           <Typography component={Box} alignItems={'center'} variant={'body1'}>
             <T keyName="project_permission_information_text_base_permission_before" />{' '}
-            {translatePermission(project.organizationOwnerBasePermissions!)}
+            {translatePermission(
+              project.organizationOwner.basePermissions.type!
+            )}
           </Typography>
 
           <T keyName="project_permission_information_text_base_permission_after" />
@@ -84,14 +91,16 @@ export const ProjectMembersView: FunctionComponent = () => {
           alignItems="center"
         >
           <Typography variant="h6">{t('invitations_title')}</Typography>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={() => setInviteOpen(true)}
-            data-cy="invite-generate-button"
-          >
-            {t('invitations_invite_button')}
-          </Button>
+          {isAdmin && (
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => setInviteOpen(true)}
+              data-cy="invite-generate-button"
+            >
+              {t('invitations_invite_button')}
+            </Button>
+          )}
         </Box>
 
         <PaginatedHateoasList

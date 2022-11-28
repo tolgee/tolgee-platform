@@ -118,7 +118,7 @@ class ProjectService constructor(
       ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
-      perms.directPermissions?.languageIds?.toList()
+      perms.directPermissions?.translateLanguageIds?.toList()
     )
   }
 
@@ -176,19 +176,18 @@ class ProjectService constructor(
       .map { result ->
         val project = result[0] as Project
         val permission = result[1] as Permission?
-        val organization = result[2] as Organization?
+        val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
-        val permissionType = permissionService.computeProjectPermissionType(
+        val scopes = permissionService.computeProjectPermission(
           organizationRole?.type,
-          organization?.basePermissions,
-          permission?.type,
-          permission?.languages?.map { it.id }?.toSet()
-        ).type
+          organization.basePermission,
+          permission,
+        ).scopes
           ?: throw IllegalStateException(
             "Project project should not" +
               " return project with no permission for provided user"
           )
-        fromEntityAndPermission(project, permissionType)
+        fromEntityAndPermission(project, scopes)
       }.toList()
   }
 
@@ -347,5 +346,13 @@ class ProjectService constructor(
 
   fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project> {
     return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
+  }
+
+  fun getProjectsWithDirectPermissions(id: Long, userIds: List<Long>): Map<Long, List<Project>> {
+    val result = projectRepository.getProjectsWithDirectPermissions(id, userIds)
+    return result
+      .map { it[0] as Long to it[1] as Project }
+      .groupBy { it.first }
+      .mapValues { it.value.map { it.second } }
   }
 }

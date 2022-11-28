@@ -2,7 +2,7 @@ package io.tolgee.controllers
 
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.UserApiAppAction
 import org.springframework.test.web.servlet.MvcResult
@@ -22,10 +22,10 @@ abstract class AbstractApiKeyTest : AbstractControllerTest() {
     }
   }
 
-  protected fun createBaseWithApiKey(vararg scopes: ApiScope): ApiKeyDTO {
+  protected fun createBaseWithApiKey(vararg scopes: Scope): ApiKeyDTO {
     var scopesSet = scopes.toSet()
     if (scopesSet.isEmpty()) {
-      scopesSet = ApiScope.values().toSet()
+      scopesSet = Scope.values().toSet()
     }
     val base = dbPopulator.createBase(generateUniqueString())
     return ApiKeyDTO.fromEntity(apiKeyService.create(base.userAccount, scopesSet, base.project))

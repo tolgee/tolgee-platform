@@ -4,7 +4,9 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
+import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import org.springframework.core.io.ClassPathResource
 
 class
@@ -30,7 +32,12 @@ OrganizationBuilder(
     return builder
   }
 
-  override var self: Organization = Organization()
+  override var self: Organization = Organization().also {
+    it.basePermission = Permission(
+      organization = it,
+      type = VIEW
+    )
+  }
 
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)

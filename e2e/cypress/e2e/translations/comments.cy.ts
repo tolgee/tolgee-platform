@@ -33,11 +33,6 @@ describe('Translation comments', () => {
     userCanDeleteComment(2, 'en', 'Second comment');
   });
 
-  it('pepa can add comment (edit)', () => {
-    logInAs('pepa');
-    createComment('Cool comment 1', 0, 'en');
-  });
-
   it('pepa can load more comments (edit)', () => {
     logInAs('pepa');
     commentsButton(3, 'en').click();
@@ -76,12 +71,6 @@ describe('Translation comments', () => {
     logInAs('jindra');
     userCanResolveComment(2, 'en', 'First comment');
     userCanUnresolveComment(2, 'en', 'First comment');
-  });
-
-  it('jindra is not able to add comment (translate cs)', () => {
-    logInAs('jindra');
-    commentsButton(0, 'cs').click();
-    cy.gcy('translations-comments-input').should('not.exist');
   });
 
   it('jindra can resolve comment (translate cs)', () => {

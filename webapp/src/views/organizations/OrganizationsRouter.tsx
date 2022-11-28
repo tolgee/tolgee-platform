@@ -13,6 +13,9 @@ import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
 import { OrganizationBillingView } from './billing/OrganizationBillingView';
+import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
+import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
+import { OrganizationBillingTestClockHelperView } from './billing/Subscriptions/OrganizationBillingTestClockHelperView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -38,9 +41,24 @@ const SpecificOrganizationRouter = () => {
             <OrganizationMemberPrivilegesView />
           </PrivateRoute>
           {config.billing.enabled && (
-            <PrivateRoute exact path={LINKS.ORGANIZATION_BILLING.template}>
-              <OrganizationBillingView />
-            </PrivateRoute>
+            <>
+              <PrivateRoute path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
+                <OrganizationSubscriptionsView />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.ORGANIZATION_INVOICES.template}>
+                <OrganizationInvoicesView />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
+                <OrganizationBillingView />
+              </PrivateRoute>
+              {config.internalControllerEnabled && (
+                <PrivateRoute
+                  path={LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.template}
+                >
+                  <OrganizationBillingTestClockHelperView />
+                </PrivateRoute>
+              )}
+            </>
           )}
         </>
       ) : (

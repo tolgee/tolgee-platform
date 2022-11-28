@@ -241,7 +241,7 @@ class KeyService(
           if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
             val ns = namespaceService.create(safeNamespace, project.id)
             if (ns != null) {
-              namespaces.put(safeNamespace, ns)
+              namespaces[safeNamespace] = ns
             }
           }
           this.namespace = namespaces[safeNamespace]

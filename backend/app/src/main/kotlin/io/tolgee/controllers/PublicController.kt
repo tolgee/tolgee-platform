@@ -82,7 +82,7 @@ class PublicController(
   @Operation(summary = "Reset password request")
   @PostMapping("/reset_password_request")
   fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
-    val userAccount = userAccountService.find(request.email!!) ?: return
+    val userAccount = userAccountService.findActive(request.email!!) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
 
@@ -155,7 +155,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Validates if email is not in use")
   fun validateEmail(@RequestBody email: TextNode): Boolean {
-    return userAccountService.find(email.asText()) == null
+    return userAccountService.findActive(email.asText()) == null
   }
 
   @GetMapping("/authorize_oauth/{serviceType}")
@@ -192,7 +192,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
 
   private fun getFakeGithubUser(): UserAccount {
     val username = "johndoe@doe.com"
-    val user = userAccountService.find(username) ?: let {
+    val user = userAccountService.findActive(username) ?: let {
       UserAccount().apply {
         this.username = username
         name = "john"
@@ -204,7 +204,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   private fun validateEmailCode(code: String, email: String): UserAccount {
-    val userAccount = userAccountService.find(email) ?: throw BadRequestException(Message.BAD_CREDENTIALS)
+    val userAccount = userAccountService.findActive(email) ?: throw BadRequestException(Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {
       throw BadRequestException(Message.BAD_CREDENTIALS)

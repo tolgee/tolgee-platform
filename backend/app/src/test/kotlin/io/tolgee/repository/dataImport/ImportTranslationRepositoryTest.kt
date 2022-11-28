@@ -21,7 +21,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
 
     val result = importTranslationRepository
       .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
-    assertThat(result.content).hasSize(6)
+    assertThat(result.content).hasSize(5)
 
     result.content[0].let {
       assertThat(it.id).isNotNull
@@ -41,6 +41,6 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
 
     val result = importTranslationRepository
       .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
-    assertThat(result.content).hasSize(4)
+    assertThat(result.content).hasSize(3)
   }
 }

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -9,7 +9,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -104,7 +104,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
       .andIsBadRequest
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `sets translations for existing key API key forbidden`() {
     saveTestData()
@@ -114,7 +114,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     ).andIsForbidden
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT, Scope.TRANSLATIONS_EDIT])
   @Test
   fun `sets translations for new key with API key`() {
     saveTestData()
@@ -137,7 +137,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     ).andIsOk
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_EDIT])
   @Test
   fun `sets translations for new key forbidden with api key`() {
     saveTestData()

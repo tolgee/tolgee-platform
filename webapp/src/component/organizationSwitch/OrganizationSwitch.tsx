@@ -40,7 +40,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
     handleClose();
-    updatePreferredOrganization(organization);
+    updatePreferredOrganization(organization.id);
     onSelect?.(organization);
   };
 

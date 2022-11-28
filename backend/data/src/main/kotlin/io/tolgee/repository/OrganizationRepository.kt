@@ -15,11 +15,22 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   fun getOneBySlug(slug: String): Organization?
 
   @Query(
-    """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
-        o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
+    """select distinct o as organization, r.type as currentUserRole
+        from Organization o 
+        join fetch o.basePermission as bp
+        left join OrganizationRole r on r.user.id = :userId
+          and r.organization = o and (r.type = :roleType or :roleType is null)
+        left join o.projects p
+        left join p.permissions perm on perm.user.id = :userId
+        where (perm is not null or r is not null)
+        and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId))
+        """,
+    countQuery =
+    """select count(o)
         from Organization o 
         left join OrganizationRole r on r.user.id = :userId
-        and r.organization = o and (r.type = :roleType or :roleType is null)
+          and r.organization = o and (r.type = :roleType or :roleType is null)
         left join o.projects p
         left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
@@ -80,12 +91,15 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   fun findUsersDefaultOrganization(user: UserAccount): Organization?
 
   @Query(
-    """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
-        o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
-        from Organization o 
+    """select distinct o as organization, r.type as currentUserRole
+        from Organization o
+        join fetch o.basePermission bp
         left join OrganizationRole r on r.user.id = :userId and r.organization = o
-        left join o.projects p
-        left join p.permissions perm on perm.user.id = :userId
+        where (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        """,
+    countQuery =
+    """select count(o)
+        from Organization o
         where (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         """
   )
@@ -104,4 +118,13 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     userAccount: UserAccount,
     type: OrganizationRoleType = OrganizationRoleType.OWNER
   ): List<Organization>
+
+  @Query(
+    """
+    from Organization o 
+    join o.projects p on p.id = :projectId
+    join fetch o.basePermission
+  """
+  )
+  fun getProjectOwner(projectId: Long): Organization
 }

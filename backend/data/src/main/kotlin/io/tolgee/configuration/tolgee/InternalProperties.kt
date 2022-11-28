@@ -3,8 +3,7 @@ package io.tolgee.configuration.tolgee
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.internal")
-class
-InternalProperties {
+class InternalProperties {
   var controllerEnabled = false
   var fakeGithubLogin = false
   var showVersion: Boolean = false

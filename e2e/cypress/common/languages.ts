@@ -1,5 +1,4 @@
 import { confirmHardMode, gcy, getInputByName } from './shared';
-import { HOST } from './constants';
 
 export const selectFlag = (emoji: string) => {
   gcy('languages-flag-selector-open-button').click();
@@ -20,18 +19,6 @@ export const setLanguageData = (data: {
 
 export const getCustomNameInput = () =>
   gcy('language-modify-form').xpath(".//input[@name='name']");
-
-export const visitProjectSettings = (projectId: number) => {
-  cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
-};
-
-export const visitProjectLanguages = (projectId: number) => {
-  cy.visit(`${HOST}/projects/${projectId}/languages`);
-};
-
-export const visitProjectDashboard = (projectId: number) => {
-  cy.visit(`${HOST}/projects/${projectId}`);
-};
 
 export const typeToAutocomplete = (text: string) => {
   gcy('languages-create-autocomplete-field').find('input').type(text);

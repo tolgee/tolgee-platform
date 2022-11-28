@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Badge, styled } from '@mui/material';
-import { Edit, Comment, Check } from '@mui/icons-material';
+import { Check, Comment, Edit } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -59,6 +59,7 @@ const StyledCheckIcon = styled(Check)`
 type ControlsProps = {
   state?: State;
   editEnabled?: boolean;
+  stateChangeEnabled?: boolean;
   onEdit?: () => void;
   onStateChange?: (state: StateType) => void;
   onComments?: () => void;
@@ -72,6 +73,7 @@ type ControlsProps = {
 export const ControlsTranslation: React.FC<ControlsProps> = ({
   state,
   editEnabled,
+  stateChangeEnabled,
   onEdit,
   onStateChange,
   onComments,
@@ -82,7 +84,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
 }) => {
   const spots: string[] = [];
 
-  const displayTransitionButtons = editEnabled && state;
+  const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
@@ -103,10 +105,9 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const inDomComments = displayComments || active || lastFocusable;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = `auto ${spots
-    .slice(1)
-    .map(() => '28px')
-    .join(' ')}`;
+  const gridTemplateColumns = spots
+    .map((spot) => (spot === 'state' ? 'auto' : '28px'))
+    .join(' ');
 
   return (
     <StyledControlsWrapper

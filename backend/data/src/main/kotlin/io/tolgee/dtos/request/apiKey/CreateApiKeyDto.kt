@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import org.hibernate.validator.constraints.Length
 import java.util.stream.Collectors
 import javax.validation.constraints.Min
@@ -23,7 +23,7 @@ data class CreateApiKeyDto(
     ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
     """
   )
-  var scopes: Set<ApiScope> = setOf(),
+  var scopes: Set<Scope> = setOf(),
 
   @Schema(description = "Description of the project API key")
   @field:Length(max = 250, min = 1)
@@ -40,12 +40,12 @@ data class CreateApiKeyDto(
   @Suppress("unused")
   @JsonSetter("scopes")
   fun jsonSetScopes(scopes: Set<String>) {
-    this.scopes = scopes.map { value -> ApiScope.fromValue(value) }.toSet()
+    this.scopes = scopes.map { value -> Scope.fromValue(value) }.toSet()
   }
 
   @Suppress("unused")
   @JsonGetter("scopes")
   fun jsonGetScopes(): Set<String> {
-    return scopes.stream().map { obj: ApiScope -> obj.value }.collect(Collectors.toSet())
+    return scopes.stream().map { obj: Scope -> obj.value }.collect(Collectors.toSet())
   }
 }

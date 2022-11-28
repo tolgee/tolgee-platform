@@ -16,7 +16,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
         bl as baseLanguage, o as organizationOwner,
-        role.type as organizationRole, p.type as directPermissions
+        role.type as organizationRole, p as directPermission
         from Project r
         left join r.baseLanguage bl
         left join Permission p on p.project = r and p.user.id = :userAccountId
@@ -113,4 +113,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """
   )
   fun findAllWithUserOwnerIds(): List<Long>
+
+  @Query(
+    """
+    select pp.user.id, p 
+    from Project p
+    join p.permissions pp on pp.user.id in :userIds
+    join fetch p.baseLanguage
+    where p.organizationOwner.id = :organizationId
+  """
+  )
+  fun getProjectsWithDirectPermissions(organizationId: Long, userIds: List<Long>): List<Array<Any>>
 }

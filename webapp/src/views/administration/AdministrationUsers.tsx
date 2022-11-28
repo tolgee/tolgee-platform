@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
+import { Box, ListItem, ListItemText, styled } from '@mui/material';
+
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { Box, ListItem, ListItemSecondaryAction, styled } from '@mui/material';
-import ListItemText from '@mui/material/ListItemText';
-import { AdministrationNav } from './AdministrationNav';
-import { DebugCustomerAccountButton } from './DebugCustomerAccountButton';
-import { RoleSelector } from './RoleSelector';
-import { DeleteUserButton } from './DeleteUserButton';
+import { LINKS } from 'tg.constants/links';
+import { DebugCustomerAccountButton } from './components/DebugCustomerAccountButton';
+import { RoleSelector } from './components/RoleSelector';
+import { BaseAdministrationView } from './components/BaseAdministrationView';
+import { OptionsButton } from './components/OptionsButton';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -49,40 +49,41 @@ export const AdministrationUsers = ({
   return (
     <StyledWrapper>
       <DashboardPage>
-        <BaseView
+        <BaseAdministrationView
           windowTitle={t('administration_users')}
-          onSearch={setSearch}
+          navigation={[
+            [t('administration_users'), LINKS.ADMINISTRATION_USERS.build()],
+          ]}
           initialSearch={search}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
         >
-          <AdministrationNav />
           <PaginatedHateoasList
+            onSearchChange={setSearch}
             onPageChange={setPage}
             loadable={listPermitted}
             renderItem={(u) => (
-              <ListItem data-cy="administration-users-list-item">
+              <ListItem
+                data-cy="administration-users-list-item"
+                sx={{ display: 'grid', gridTemplateColumns: '1fr auto' }}
+              >
                 <ListItemText>
                   {u.name} | {u.username}
                 </ListItemText>
-                <ListItemSecondaryAction>
-                  <Box display="flex" justifyContent="center">
-                    <DeleteUserButton user={u} />
-                    <DebugCustomerAccountButton userId={u.id} />
-                    <Box display="flex" ml={1}>
-                      <RoleSelector
-                        user={u}
-                        onSuccess={() => listPermitted.refetch()}
-                      />
-                    </Box>
-                  </Box>
-                </ListItemSecondaryAction>
+                <Box display="flex" justifyContent="center" gap={1}>
+                  <DebugCustomerAccountButton userId={u.id} />
+                  <RoleSelector
+                    user={u}
+                    onSuccess={() => listPermitted.refetch()}
+                  />
+                  <OptionsButton user={u} />
+                </Box>
               </ListItem>
             )}
           />
-        </BaseView>
+        </BaseAdministrationView>
       </DashboardPage>
     </StyledWrapper>
   );

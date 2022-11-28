@@ -3,8 +3,8 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
-import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.security.InternalController
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
@@ -120,7 +120,7 @@ class ImportE2eDataController(
           addGerman()
           self.baseLanguage = english.self
           addPermission {
-            type = Permission.ProjectPermissionType.MANAGE
+            type = ProjectPermissionType.MANAGE
             user = this@buildUserAccount.self
             project = this@buildProject.self
           }
@@ -136,7 +136,7 @@ class ImportE2eDataController(
     entityManager.createQuery("select i from Import i").resultList.forEach {
       importService.deleteImport(it as Import)
     }
-    userAccountService.find("franta")?.let {
+    userAccountService.findActive("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

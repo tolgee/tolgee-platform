@@ -3,7 +3,6 @@ import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import { styled } from '@mui/material';
@@ -18,6 +17,7 @@ const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 0px 0px 0px;
   position: relative;
+
   &.deleted {
     text-decoration: line-through;
     pointer-events: none;
@@ -48,7 +48,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   bannerBefore,
   bannerAfter,
 }) {
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -77,9 +78,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
+        editEnabled={satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
@@ -100,6 +99,16 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
           ((prevWidth + cellWidth / 2) / allWidth) * 100
         }%`;
 
+        const canChangeState = satisfiesLanguageAccess(
+          'translations.state-edit',
+          language.id
+        );
+
+        const canEdit = satisfiesLanguageAccess(
+          'translations.edit',
+          language.id
+        );
+
         return (
           <CellTranslation
             key={language.tag}
@@ -107,7 +116,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
+            stateChangeEnabled={canChangeState}
+            editEnabled={canEdit}
             width={columnSizes[index + 1]}
             cellPosition={cellPosition}
             active={relaxedActive}

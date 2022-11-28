@@ -29,7 +29,7 @@ class InitialUserCreatorCommandLineRunner(
       properties.authentication.enabled &&
       properties.authentication.createInitialUser &&
       !userAccountService.isAnyUserAccount &&
-      userAccountService.find(initialUsername) == null
+      userAccountService.findActive(initialUsername) == null
     ) {
       logger.info("Creating initial user...")
       val initialPassword = initialPasswordManager.initialPassword

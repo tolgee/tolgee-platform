@@ -6,7 +6,7 @@ import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -57,7 +57,7 @@ class PublicControllerTest :
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val invitation = invitationService.create(
-      CreateProjectInvitationParams(project, Permission.ProjectPermissionType.EDIT)
+      CreateProjectInvitationParams(project, ProjectPermissionType.EDIT)
     )
     val dto = SignUpDto(
       name = "Pavel Novak",

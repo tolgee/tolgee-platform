@@ -2390,4 +2390,96 @@
     <changeSet author="jenik (generated)" id="1678365585479-1">
         <addUniqueConstraint columnNames="project_id, name" constraintName="UKsyjijfmo4txo7n7qvpu5so0ej" tableName="tag"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-1">
+        <addColumn tableName="permission">
+            <column name="organization_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-0">
+        <sql>
+            create unique index permission_null_idx on permission(organization_id);
+            insert into permission (id, type, organization_id, created_at, updated_at)
+            select nextval('permission_id_seq'), base_permissions, id, current_date, current_date
+            from organization;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-2">
+        <addColumn tableName="permission">
+            <column name="scopes" type="varchar[]"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-3">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="permission" constraintName="FKodqlqlhjgsfwnq418388o4vy7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1670236174754-1">
+        <dropColumn columnName="base_permissions" tableName="organization"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-1">
+        <createTable tableName="permission_state_change_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="state_change_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-2">
+        <createTable tableName="permission_view_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="view_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-3">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_view_languages" constraintName="FK47vi2uyggca3biukk3ioigqsb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-4">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_state_change_languages" constraintName="FKbey9cdt2e6bhl7kp0u5ojguwp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-5">
+        <addForeignKeyConstraint baseColumnNames="view_languages_id" baseTableName="permission_view_languages" constraintName="FKc75c8vhx7rx4ls4oqh373lsv7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672937726613-6">
+        <addForeignKeyConstraint baseColumnNames="state_change_languages_id" baseTableName="permission_state_change_languages" constraintName="FKpxsgkx94rrmdmqocvliirtevo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-2">
+        <sql>
+            alter table api_key_scopes_enum alter column scopes_enum type varchar(255)
+                using case
+                    when scopes_enum = 0 then 'TRANSLATIONS_VIEW'
+                    when scopes_enum = 1 then 'TRANSLATIONS_EDIT'
+                    when scopes_enum = 2 then 'KEYS_EDIT'
+                    when scopes_enum = 3 then 'SCREENSHOTS_UPLOAD'
+                    when scopes_enum = 4 then 'SCREENSHOTS_DELETE'
+                    when scopes_enum = 5 then 'SCREENSHOTS_VIEW'
+                    when scopes_enum = 6 then 'ACTIVITY_VIEW'
+                    when scopes_enum = 7 then 'LANGUAGES_EDIT'
+                end;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-3">
+        <sql>
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_CREATE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_DELETE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1678110170883-1">
+        <addColumn tableName="user_account">
+            <column name="disabled_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1682325130880-1">
+        <createTable tableName="forced_server_date_time">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="forced_server_date_timePK"/>
+            </column>
+            <column name="time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
