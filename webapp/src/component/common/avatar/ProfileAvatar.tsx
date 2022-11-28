@@ -80,7 +80,7 @@ export const ProfileAvatar: FC<{
         await props.onUpload(blob);
         setUploaded(undefined);
         setAvatarMenuAnchorEl(undefined);
-      } catch (e) {
+      } catch (e: any) {
         // eslint-disable-next-line no-console
         console.error(e);
         if (e.code == 'file_too_big') {

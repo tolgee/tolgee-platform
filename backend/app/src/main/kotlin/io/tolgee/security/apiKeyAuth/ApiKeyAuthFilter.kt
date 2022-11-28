@@ -4,6 +4,7 @@ import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.SecurityService
@@ -46,9 +47,11 @@ class ApiKeyAuthFilter(
             val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(apiKeyEntity)
             SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
 
-            val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
+            val scopes = this.getProjectPermissionAnnotation(request)?.scope?.let { setOf(it) }
+              ?: emptySet()
+
             try {
-              securityService.checkApiKeyScopes(setOf(*apiScopes), apiKeyEntity)
+              securityService.checkApiKeyScopes(scopes, apiKeyEntity)
               projectHolder.project = ProjectDto.fromEntity(apiKeyEntity.project)
               apiKeyService.updateLastUsedAsync(apiKeyEntity)
             } catch (e: PermissionException) {
@@ -75,9 +78,16 @@ class ApiKeyAuthFilter(
   }
 
   private fun getAccessAllowedAnnotation(request: HttpServletRequest): AccessWithApiKey? {
-    return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-      ?.getMethodAnnotation(AccessWithApiKey::class.java) ?: return null
+    return getHandlerMethodAnnotation(request, AccessWithApiKey::class.java)
   }
+
+  private fun getProjectPermissionAnnotation(request: HttpServletRequest): AccessWithProjectPermission? {
+    return getHandlerMethodAnnotation(request, AccessWithProjectPermission::class.java)
+  }
+
+  private fun <T : Annotation> getHandlerMethodAnnotation(request: HttpServletRequest, annotation: Class<T>) =
+    (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+      ?.getMethodAnnotation(annotation)
 
   private fun getRequestProjectId(request: HttpServletRequest): Long? {
     val requestURI = request.requestURI

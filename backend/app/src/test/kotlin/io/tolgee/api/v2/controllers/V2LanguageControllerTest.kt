@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
@@ -10,7 +10,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -38,7 +38,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun editLanguage() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+    val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
     val languageDTO = LanguageDto(
       name = "newEnglish", tag = "newEn", originalName = "newOriginalEnglish",
       flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
@@ -72,20 +72,20 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
       val project = base.project
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
     }
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.LANGUAGES_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.LANGUAGES_EDIT])
   fun `deletes language with API key`() {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
       this.userAccount = base.userAccount
       this.projectSupplier = { base.project }
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performProjectAuthDelete("languages/${deutsch.id}", null)
         .andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
@@ -93,13 +93,13 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
-  fun `does not deletes language with API key (permissions)`() {
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  fun `does not delete language with API key (permissions)`() {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
       this.userAccount = base.userAccount
       this.projectSupplier = { base.project }
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performProjectAuthDelete("languages/${deutsch.id}", null).andIsForbidden
     }
   }
@@ -109,7 +109,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase(generateUniqueString())
     executeInNewTransaction {
       val project = projectService.get(base.project.id)
-      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
       project.baseLanguage = en
       projectService.save(project)
 
@@ -124,7 +124,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase(generateUniqueString())
     executeInNewTransaction {
       val project = projectService.get(base.project.id)
-      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
       project.baseLanguage = null
       projectService.save(project)
       performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {

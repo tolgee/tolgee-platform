@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
@@ -17,15 +18,12 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -48,16 +46,15 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   @MockBean
   lateinit var contactsApi: ContactsApi
 
-  @Autowired
-  @MockBean
-  lateinit var javaMailSender: JavaMailSender
-
   lateinit var createContactArgumentCaptor: ArgumentCaptor<CreateContact>
   lateinit var updateContactArgumentCaptor: ArgumentCaptor<UpdateContact>
 
   @MockBean
   @Autowired
   private val restTemplate: RestTemplate? = null
+
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @Autowired
   private var authMvc: MockMvc? = null
@@ -74,15 +71,15 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
       currentPassword = initialPassword
     )
   }
+
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(contactsApi)
-    Mockito.clearInvocations(javaMailSender)
     tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.smtp.from = "aa@aa.com"
-    whenever(javaMailSender.createMimeMessage()).thenReturn(mock())
     createContactArgumentCaptor = ArgumentCaptor.forClass(CreateContact::class.java)
     updateContactArgumentCaptor = ArgumentCaptor.forClass(UpdateContact::class.java)
+    emailTestUtil.initMocks()
   }
 
   @AfterEach

@@ -44,7 +44,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Tooltip title={translateRole(props.role, true)}>
+      <Tooltip title={translateRole(props.role!, true)}>
         <span>
           <Button
             data-cy="organization-role-menu-button"
@@ -55,7 +55,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
             aria-haspopup="true"
             onClick={handleClick}
           >
-            {translateRole(props.role)} <ArrowDropDown fontSize="small" />
+            {translateRole(props.role!)} <ArrowDropDown fontSize="small" />
           </Button>
         </span>
       </Tooltip>

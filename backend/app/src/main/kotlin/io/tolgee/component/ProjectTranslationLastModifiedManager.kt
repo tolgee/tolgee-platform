@@ -26,7 +26,7 @@ class ProjectTranslationLastModifiedManager(
 
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
-    event.source.activityRevision?.projectId?.let { projectId ->
+    event.activityHolder.activityRevision?.projectId?.let { projectId ->
       getCache()?.put(projectId, currentDateProvider.date.time)
     }
   }

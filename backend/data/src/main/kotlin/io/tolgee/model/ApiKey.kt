@@ -1,6 +1,6 @@
 package io.tolgee.model
 
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.ElementCollection
@@ -30,9 +30,9 @@ class ApiKey(
 
   @NotNull
   @NotEmpty
-  @Enumerated(EnumType.ORDINAL)
-  @field:ElementCollection(targetClass = ApiScope::class, fetch = FetchType.EAGER)
-  var scopesEnum: MutableSet<ApiScope>
+  @Enumerated(EnumType.STRING)
+  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  var scopesEnum: MutableSet<Scope>
 ) : StandardAuditModel() {
 
   @field:NotBlank
@@ -63,7 +63,7 @@ class ApiKey(
 
   constructor(
     key: String,
-    scopesEnum: Set<ApiScope>,
+    scopesEnum: Set<Scope>,
     userAccount: UserAccount,
     project: Project
   ) : this(key, scopesEnum.toMutableSet()) {

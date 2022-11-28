@@ -6,7 +6,6 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.containsAny
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -166,7 +165,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     entityManager.clear()
 
     importService.find(base.project.id, base.userAccount.id)?.let {
-      assertThat(it.files[0].keys).containsAny { this.name == "this;nested;a" }
+      it.files[0].keys.find { it.name == "this;nested;a" }.assert.isNotNull
     }
   }
 

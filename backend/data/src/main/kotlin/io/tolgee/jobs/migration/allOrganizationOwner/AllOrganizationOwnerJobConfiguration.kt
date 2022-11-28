@@ -90,11 +90,11 @@ class AllOrganizationOwnerJobConfiguration {
           )
         }
 
-      val permission = permissionService.findOneByProjectIdAndUserId(
+      val permission = permissionService.find(
         projectId = project.id,
         userId = project.userOwner!!.id
       )
-      permission?.let { permissionService.delete(it) }
+      permission?.let { permissionService.delete(it.id) }
 
       project.organizationOwner = organization
       project.userOwner = null

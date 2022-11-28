@@ -5,10 +5,11 @@ import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -23,6 +24,7 @@ class TranslationsTestData {
   lateinit var aKey: Key
   lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
+  lateinit var keysOnlyUser: UserAccount
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     val userAccountBuilder = addUserAccount {
@@ -36,7 +38,7 @@ class TranslationsTestData {
     }.build project@{
       addPermission {
         user = this@TranslationsTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
       englishLanguage = addLanguage {
         name = "English"
@@ -64,6 +66,7 @@ class TranslationsTestData {
           aKeyGermanTranslation = this
         }.build {
           addComment {
+            author = user
             text = "Comment"
           }
         }
@@ -85,6 +88,23 @@ class TranslationsTestData {
       }
       projectBuilder = this
     }.self
+  }
+
+  fun addKeysViewOnlyUser() {
+    root.apply {
+      addUserAccountWithoutOrganization {
+        username = "pepa"
+        keysOnlyUser = this
+      }
+    }
+
+    projectBuilder.build {
+      addPermission {
+        user = this@TranslationsTestData.keysOnlyUser
+        type = null
+        scopes = arrayOf(Scope.KEYS_VIEW)
+      }
+    }
   }
 
   fun addTranslationsWithStates() {
@@ -310,6 +330,7 @@ class TranslationsTestData {
         }.build {
           (1..5).forEach {
             addComment {
+              author = user
               text = "Comment $it"
             }
           }
@@ -321,6 +342,7 @@ class TranslationsTestData {
           .build {
             (1..3).forEach {
               addComment {
+                author = user
                 text = "Comment $it"
               }
             }
@@ -374,18 +396,22 @@ class TranslationsTestData {
           text = "Nice"
         }.build {
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.RESOLVED
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.RESOLVED
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.NEEDS_RESOLUTION
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.NEEDS_RESOLUTION
           }

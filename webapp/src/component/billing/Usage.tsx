@@ -11,7 +11,7 @@ import {
 } from 'tg.globalContext/helpers';
 import { UsageDetailed } from './UsageDetailed';
 import { getProgressData } from './utils';
-import { BILLING_CRITICAL_PERCENT } from './constants';
+import { BILLING_CRITICAL_FRACTION } from './constants';
 
 export const USAGE_ELEMENT_ID = 'billing_organization_usage';
 
@@ -82,10 +82,12 @@ export const Usage: FC = () => {
 
   const progressData = usage && getProgressData(usage);
 
+  const limit = progressData?.isPayAsYouGo ? 1 : BILLING_CRITICAL_FRACTION;
+
   const showStats =
     planLimitErrors ||
-    Number(progressData?.creditProgress) < BILLING_CRITICAL_PERCENT ||
-    Number(progressData?.translationsProgress) < BILLING_CRITICAL_PERCENT;
+    Number(progressData?.creditProgress) > limit ||
+    Number(progressData?.translationsProgress) > limit;
 
   previousShown.current = Boolean(showStats);
 
@@ -118,10 +120,8 @@ export const Usage: FC = () => {
           >
             <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
               <CircularBillingProgress
-                percent={Math.min(
-                  progressData.translationsProgress,
-                  progressData.creditProgress
-                )}
+                canGoOver={progressData.isPayAsYouGo}
+                percent={progressData.biggerProgress}
               />
             </StyledContent>
           </Tooltip>

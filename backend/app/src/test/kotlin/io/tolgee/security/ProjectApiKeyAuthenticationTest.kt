@@ -8,7 +8,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.retry
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.testing.assertions.UserApiAppAction
@@ -32,7 +32,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Test
   fun `access with legacy key works`() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
+    val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=" + apiKey.key)).andIsOk
   }
 
@@ -45,7 +45,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Test
   fun accessWithApiKey_failure_api_path() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
+    val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     performAction(
       UserApiAppAction(
         apiKey = apiKey.key,

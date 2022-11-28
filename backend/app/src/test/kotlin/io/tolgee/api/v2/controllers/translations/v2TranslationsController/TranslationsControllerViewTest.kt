@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -9,7 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -104,6 +104,17 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns empty translations when user has no view permissions`() {
+    testData.addKeysViewOnlyUser()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.keysOnlyUser
+    performProjectAuthGet("/translations?sort=id").andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].translations.de").isAbsent()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns correct screenshot data`() {
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
@@ -179,6 +190,24 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
         node("[0].tag").isEqualTo("en")
       }
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't fail when language doesn't exist (view)`() {
+    testData.generateLotOfData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?languages=en&languages=br&languages=fr").andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't fail when language doesn't exist (all)`() {
+    testData.generateLotOfData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations/en,br,fr").andIsOk
   }
 
   @ProjectJWTAuthTestMethod
@@ -277,7 +306,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
       .andAssertThatJson { node("de").isObject }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns all translations map API key`() {
     testDataService.saveTestData(testData.root)
@@ -285,7 +314,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthGet("/translations/en,de").andIsOk
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `delimiter can be configured`() {
     testData.generateScopedData()
@@ -302,7 +331,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
   @Test
   fun `returns select all keys`() {
     testData.generateLotOfData(2000)
@@ -316,13 +345,13 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     assertThat(time).isLessThan(3000)
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns unresolved comment count`() {
     testData.addCommentStatesData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?search=commented_key").andAssertThatJson {
+    performProjectAuthGet("/translations?search=commented_key").andIsOk.andAssertThatJson {
       node("""_embedded.keys[0].translations.de.unresolvedCommentCount""").isEqualTo(2)
     }
   }

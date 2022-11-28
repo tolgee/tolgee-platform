@@ -181,7 +181,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
           </Tooltip>
           <ProjectListItemMenu
             projectId={p.id}
-            computedPermissions={p.computedPermissions}
+            computedPermission={p.computedPermission}
             projectName={p.name}
           />
         </Box>

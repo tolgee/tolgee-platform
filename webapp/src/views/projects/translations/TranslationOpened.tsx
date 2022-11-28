@@ -95,6 +95,7 @@ type Props = {
   mode: EditMode;
   onModeChange: (mode: EditMode) => void;
   editEnabled: boolean;
+  stateChangeEnabled: boolean;
   cellRef: React.RefObject<HTMLDivElement>;
   cellPosition?: string;
 };
@@ -110,6 +111,7 @@ export const TranslationOpened: React.FC<Props> = ({
   onCmdSave,
   onCancel,
   onStateChange,
+  stateChangeEnabled,
   state,
   autofocus,
   className,
@@ -146,7 +148,7 @@ export const TranslationOpened: React.FC<Props> = ({
     keyId: keyData.keyId,
     targetLanguageId: language.id,
     baseText: baseText,
-    enabled: !language.base,
+    enabled: !language.base && mode === 'editor',
     onValueUpdate: (value) => {
       updateEdit({
         value,
@@ -226,6 +228,7 @@ export const TranslationOpened: React.FC<Props> = ({
             <ControlsEditor
               state={state}
               isBaseLanguage={language.base}
+              stateChangeEnabled={stateChangeEnabled}
               onSave={onSave}
               onInsertBase={() => onInsertBase(baseText)}
               onCancel={() => onCancel(true)}

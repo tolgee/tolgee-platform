@@ -8,7 +8,7 @@ export const enterProjectSettings = (
 ) => {
   visitList();
   selectInProjectMoreMenu(projectName, 'project-settings-button', organization);
-  waitForGlobalLoading();
+  return waitForGlobalLoading();
 };
 
 export const selectInProjectMoreMenu = (
@@ -41,7 +41,7 @@ export const enterProject = (projectName: string, organization?: string) => {
     .closestDcy('dashboard-projects-list-item')
     .findDcy('project-list-translations-button')
     .click();
-  gcy('global-base-view-content').should('be.visible');
+  return gcy('global-base-view-content').should('be.visible');
 };
 
 export const createProject = (name: string, owner: string) => {

@@ -1,21 +1,21 @@
 import { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { BaseView } from 'tg.component/layout/BaseView';
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
 import {
   Box,
   Button,
   ListItem,
   ListItemSecondaryAction,
+  ListItemText,
   styled,
 } from '@mui/material';
+
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import ListItemText from '@mui/material/ListItemText';
-import { Link, useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { AdministrationNav } from './AdministrationNav';
+import { BaseAdministrationView } from './components/BaseAdministrationView';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -59,20 +59,24 @@ export const AdministrationOrganizations = ({
   return (
     <StyledWrapper>
       <DashboardPage>
-        <BaseView
+        <BaseAdministrationView
           windowTitle={t('administration_organizations')}
-          onSearch={setSearch}
+          navigation={[
+            [
+              t('administration_organizations'),
+              LINKS.ADMINISTRATION_ORGANIZATIONS.build(),
+            ],
+          ]}
           initialSearch={search}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
         >
-          <AdministrationNav />
-
           <PaginatedHateoasList
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}
+            onSearchChange={setSearch}
             loadable={listPermitted}
             renderItem={(o) => (
               <ListItem data-cy="administration-organizations-list-item">
@@ -83,7 +87,7 @@ export const AdministrationOrganizations = ({
                       data-cy="administration-organizations-projects-button"
                       variant="contained"
                       onClick={() => {
-                        updatePreferredOrganization(o);
+                        updatePreferredOrganization(o.id);
                         history.push(LINKS.PROJECTS.build());
                       }}
                     >
@@ -106,7 +110,7 @@ export const AdministrationOrganizations = ({
               </ListItem>
             )}
           />
-        </BaseView>
+        </BaseAdministrationView>
       </DashboardPage>
     </StyledWrapper>
   );

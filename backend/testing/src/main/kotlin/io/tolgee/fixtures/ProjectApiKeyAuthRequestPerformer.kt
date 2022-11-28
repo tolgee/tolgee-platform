@@ -3,11 +3,9 @@ package io.tolgee.fixtures
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
@@ -16,10 +14,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
-@Scope("prototype")
+@org.springframework.context.annotation.Scope("prototype")
 class ProjectApiKeyAuthRequestPerformer(
   private val userAccountProvider: () -> UserAccount,
-  private val scopes: Array<ApiScope>,
+  private val scopes: Array<io.tolgee.model.enums.Scope>,
   projectUrlPrefix: String = "/api/project",
   private val apiKeyPresentMode: ApiKeyPresentMode = ApiKeyPresentMode.HEADER
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {

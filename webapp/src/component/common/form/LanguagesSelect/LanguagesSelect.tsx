@@ -32,6 +32,7 @@ const StyledTypography = styled(Typography)`
 export type Props = {
   onChange: (value: string[]) => void;
   languages: LanguageModel[];
+  disabledLanguages?: number[] | undefined;
   value: string[];
   context: string;
 };
@@ -70,6 +71,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           onChange: props.onChange,
           languages: props.languages,
           value: props.value,
+          disabledLanguages: props.disabledLanguages,
         })}
       </StyledSelect>
     </FormControl>

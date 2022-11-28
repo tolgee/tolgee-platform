@@ -1,8 +1,9 @@
 import { Box, Typography, InputBase, styled, MenuItem } from '@mui/material';
 
 export const StyledInput = styled(InputBase)`
-  padding: 6px 4px 3px 16px;
+  padding: 4px 4px 0px 16px;
   flex-grow: 1;
+  font-size: 16px;
 `;
 
 export const StyledInputWrapper = styled(Box)`
@@ -25,7 +26,6 @@ export const StyledInputContent = styled('div')`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  contain: size;
   height: 23px;
   width: 100%;
 `;

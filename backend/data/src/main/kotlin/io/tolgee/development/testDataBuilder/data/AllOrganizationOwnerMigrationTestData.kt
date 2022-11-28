@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.ProjectPermissionType
 
 class AllOrganizationOwnerMigrationTestData {
   val root = TestDataBuilder().apply {
@@ -16,7 +16,7 @@ class AllOrganizationOwnerMigrationTestData {
         addPermission {
           user = this@userAccount.self
           project = this@project.self
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
       }
       addProject {
@@ -26,7 +26,7 @@ class AllOrganizationOwnerMigrationTestData {
         addPermission {
           user = this@userAccount.self
           project = this@project.self
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
       }
     }

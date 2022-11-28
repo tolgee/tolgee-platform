@@ -38,7 +38,7 @@ class TranslationCommentsE2eDataController(
     data.addE2eTestData()
 
     listOf(data.user.username, data.pepa.username, "jindra", "vojta").forEach { user ->
-      userAccountService.find(user)?.let {
+      userAccountService.findActive(user)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

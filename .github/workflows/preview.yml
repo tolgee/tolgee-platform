@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: adopt
@@ -40,7 +40,7 @@ jobs:
 
       - name: Set version
         id: version
-        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')
+        run: echo "VERSION=$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')" >> $GITHUB_OUTPUT
 
       - name: Prepare for docker build
         run: ./gradlew dockerPrepare

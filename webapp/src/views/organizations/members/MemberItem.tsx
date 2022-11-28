@@ -1,12 +1,25 @@
+import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, styled, Tooltip } from '@mui/material';
-import { Clear } from '@mui/icons-material';
+import {
+  IconButton,
+  styled,
+  Tooltip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Link as MuiLink,
+} from '@mui/material';
+import { Clear, Info } from '@mui/icons-material';
 import { useUser } from 'tg.globalContext/helpers';
+import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from './RemoveUserButton';
 import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -36,6 +49,17 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
+const StyledInfo = styled(Info)`
+  opacity: 0.5;
+`;
+
+const StyledItemUser = styled('div')`
+  display: flex;
+  margin-left: 8px;
+  flex-grow: 1;
+  align-items: center;
+`;
+
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
   organizationId: number;
@@ -46,13 +70,29 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();
 
+  const [projectsOpen, setProjectsOpen] = useState(false);
+
   return (
     <StyledListItem data-cy="organization-member-item">
-      <StyledItemText>
-        {user.name} ({user.username}){' '}
-      </StyledItemText>
+      <StyledItemUser>
+        <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
+        <StyledItemText>
+          {user.name} ({user.username}){' '}
+        </StyledItemText>
+      </StyledItemUser>
       <StyledItemActions>
-        <UpdateRoleButton user={user} />
+        {user.organizationRole ? (
+          <UpdateRoleButton user={user} />
+        ) : (
+          <>
+            <Tooltip title={t('organization_users_project_access_hint')}>
+              <StyledInfo fontSize="small" />
+            </Tooltip>
+            <Button size="small" onClick={() => setProjectsOpen(true)}>
+              {t('organization_users_project_access')}
+            </Button>
+          </>
+        )}
 
         {currentUser?.id === user.id ? (
           <Tooltip title={t('organization_users_leave')}>
@@ -68,6 +108,28 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
           <RemoveUserButton userId={user.id} userName={user.username} />
         )}
       </StyledItemActions>
+      {projectsOpen && (
+        <Dialog open={true} onClose={() => setProjectsOpen(false)} fullWidth>
+          <DialogTitle>{t('organization_users_projects_title')}</DialogTitle>
+          <DialogContent sx={{ minHeight: 200 }}>
+            <p>{t('organization_users_projects_description')}</p>
+            <ul>
+              {user.projectsWithDirectPermission.map((project) => (
+                <li key={project.id}>
+                  <Link
+                    component={MuiLink}
+                    to={LINKS.PROJECT.build({
+                      [PARAMS.PROJECT_ID]: project.id,
+                    })}
+                  >
+                    {project.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </DialogContent>
+        </Dialog>
+      )}
     </StyledListItem>
   );
 };

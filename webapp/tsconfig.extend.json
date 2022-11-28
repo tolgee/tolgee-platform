@@ -12,7 +12,8 @@
       "tg.views/*": ["views/*"],
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
-      "tg.translationTools/*": ["translationTools/*"]
+      "tg.translationTools/*": ["translationTools/*"],
+      "tg.ee/*": ["ee/*"]
     }
   }
 }

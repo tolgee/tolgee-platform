@@ -67,6 +67,15 @@ class TestDataService(
   private val patService: PatService,
   private val namespaceService: NamespaceService
 ) : Logging {
+
+  @Transactional
+  fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
+    val builder = TestDataBuilder()
+    ft(builder)
+    saveTestData(builder)
+    return builder
+  }
+
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     prepare()
@@ -93,6 +102,19 @@ class TestDataService(
     }
 
     updateLanguageStats(builder)
+  }
+
+  @Transactional
+  fun cleanTestData(builder: TestDataBuilder) {
+    builder.data.userAccounts.forEach {
+      userAccountService.findActive(it.self.username)?.let { user ->
+        userAccountService.delete(user)
+      }
+    }
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
+    }
+    additionalTestDataSavers.forEach { it.clean(builder) }
   }
 
   private fun updateLanguageStats(builder: TestDataBuilder) {
@@ -161,7 +183,11 @@ class TestDataService(
   }
 
   private fun saveScreenshotData(builder: ProjectBuilder) {
-    screenshotService.saveAll(builder.data.screenshots.map { it.self })
+    val screenshotBuilders = builder.data.screenshots
+    screenshotService.saveAll(screenshotBuilders.map { it.self })
+    screenshotBuilders.forEach {
+      screenshotService.storeFiles(it.self, it.image?.toByteArray(), it.thumbnail?.toByteArray())
+    }
     screenshotService.saveAllReferences(builder.data.keyScreenshotReferences.map { it.self })
   }
 
@@ -260,7 +286,8 @@ class TestDataService(
     importService.saveAllFiles(importFiles)
     val fileIssues = importFiles.flatMap { it.issues }
     importService.saveAllFileIssues(fileIssues)
-    importService.saveAllFileIssueParams(fileIssues.flatMap { it.params ?: emptyList() })
+    val params = fileIssues.flatMap { it.params ?: emptyList() }
+    importService.saveAllFileIssueParams(params)
     importService.saveTranslations(importFileBuilders.flatMap { it.data.importTranslations.map { it.self } })
     importService.saveLanguages(importFileBuilders.flatMap { it.data.importLanguages.map { it.self } })
   }
@@ -280,15 +307,19 @@ class TestDataService(
   }
 
   private fun saveAllOrganizations(builder: TestDataBuilder) {
-    organizationService.saveAll(
-      builder.data.organizations.map {
-        it.self.apply {
-          val slug = this.slug
-          if (slug.isEmpty()) {
-            this.slug = organizationService.generateSlug(this.name!!)
-          }
+    val organizationsToSave = builder.data.organizations.map {
+      it.self.apply {
+        val slug = this.slug
+        if (slug.isEmpty()) {
+          this.slug = organizationService.generateSlug(this.name)
         }
       }
+    }
+
+    permissionService.saveAll(organizationsToSave.map { it.basePermission }.filterNotNull())
+
+    organizationService.saveAll(
+      organizationsToSave
     )
   }
 
@@ -323,13 +354,5 @@ class TestDataService(
 
   private fun clearEntityManager() {
     entityManager.clear()
-  }
-
-  @Transactional
-  fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
-    val builder = TestDataBuilder()
-    ft(builder)
-    saveTestData(builder)
-    return builder
   }
 }

@@ -2,10 +2,10 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 
 class ProjectTransferringTestData {
   lateinit var user2: UserAccount
@@ -64,7 +64,7 @@ class ProjectTransferringTestData {
         }.build {
           addPermission {
             user = this@ProjectTransferringTestData.user2
-            type = Permission.ProjectPermissionType.VIEW
+            type = ProjectPermissionType.VIEW
           }
         }
       }

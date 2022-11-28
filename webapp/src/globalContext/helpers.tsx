@@ -1,4 +1,11 @@
-import { useGlobalContext, useGlobalActions } from './GlobalContext';
+import { components } from 'tg.service/apiSchema.generated';
+
+import { useGlobalActions, useGlobalContext } from './GlobalContext';
+
+export type Feature =
+  components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
+
+export type FeaturesSource = 'EE_LICENSE' | 'ORGANIZATION';
 
 export const useConfig = () => useGlobalContext((v) => v.serverConfiguration);
 
@@ -23,4 +30,16 @@ export const usePreferredOrganization = () => {
 
 export const useOrganizationUsage = () => {
   return useGlobalContext((v) => v.organizationUsage!);
+};
+
+export const useEnabledFeatures = () => {
+  const features =
+    useGlobalContext((c) => c.preferredOrganization?.enabledFeatures) || [];
+
+  return {
+    features,
+    isEnabled(feature: Feature) {
+      return features.includes(feature);
+    },
+  };
 };

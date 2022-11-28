@@ -24,6 +24,8 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
+import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
+import { ProjectModel } from 'tg.fixtures/permissions';
 
 interface Value {
   scopes: string[];
@@ -63,26 +65,11 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     },
   });
 
-  const scopes = useApiQuery({
-    url: '/v2/api-keys/availableScopes',
-    method: 'get',
-  });
-
   const generateMutation = useApiMutation({
     url: '/v2/api-keys',
     method: 'post',
     invalidatePrefix: '/v2/api-keys',
   });
-
-  const getAvailableScopes = (projectId?: number): Set<string> => {
-    const userPermissionType =
-      projects?.data?._embedded?.projects?.find((r) => r.id === projectId)
-        ?.computedPermissions.type || props.project?.computedPermissions.type;
-    if (!userPermissionType || !scopes?.data) {
-      return new Set();
-    }
-    return new Set(scopes.data[userPermissionType]);
-  };
 
   const handleGenerate = (value) => {
     if (props.project) {
@@ -111,22 +98,21 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const expirationDateOptions = useExpirationDateOptions();
 
-  const getInitialValues = () => {
-    const projectId =
-      projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
+  const getProject = () => {
+    return projects.data?._embedded?.projects?.[0] || props.project;
+  };
 
-    const availableScopes = getAvailableScopes(projectId);
-
+  const getInitialValues = (project: ProjectModel) => {
     return {
-      projectId: projectId,
+      projectId: project.id,
       //all scopes checked by default
-      scopes: availableScopes,
+      scopes: new Set(project.computedPermission.scopes),
       description: props.initialDescriptionValue || '',
       expiresAt: expirationDateOptions[0].time,
     };
   };
 
-  if (projects.isLoading || scopes.isLoading) {
+  if (projects.isLoading) {
     return <FullPageLoading />;
   }
 
@@ -147,21 +133,31 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
         )) || (
           <>
             {props.loading && <BoxLoading />}
-            {(projects.data || props.project) && scopes.data && (
+            {(projects.data || props.project) && (
               <StandardForm
                 onSubmit={handleGenerate}
                 saveActionLoadable={generateMutation}
                 onCancel={() => onDialogClose()}
-                initialValues={getInitialValues()}
+                initialValues={getInitialValues(getProject()!)}
                 validationSchema={Validation.CREATE_API_KEY}
               >
                 {(formikProps: FormikProps<Value>) => {
+                  const project = getProject()!;
+
+                  const projectPermissions = getPermissionTools(
+                    project.computedPermission
+                  );
+
+                  const availableScopes = new Set(
+                    projectPermissions.scopes ?? []
+                  );
+
                   useEffect(() => {
                     formikProps.setFieldValue(
                       'scopes',
                       setsIntersection(
-                        getAvailableScopes(formikProps.values.projectId),
-                        formikProps.values.scopes as any
+                        availableScopes,
+                        new Set(formikProps.values.scopes)
                       )
                     );
                   }, [formikProps.values.projectId]);
@@ -206,9 +202,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                         <CheckBoxGroupMultiSelect
                           label="Scopes"
                           name="scopes"
-                          options={getAvailableScopes(
-                            formikProps.values.projectId
-                          )}
+                          options={availableScopes}
                         />
                       </Box>
                     </>

@@ -3,13 +3,12 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.LanguageService
-import io.tolgee.service.security.SecurityService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,17 +33,21 @@ import java.util.zip.ZipOutputStream
 @Tag(name = "Export")
 class ExportController @Autowired constructor(
   private val translationService: TranslationService,
-  private val securityService: SecurityService,
-  private val languageService: LanguageService,
-  private val projectHolder: ProjectHolder
+  private val permissionService: PermissionService,
+  private val projectHolder: ProjectHolder,
+  private val authenticationFacade: AuthenticationFacade
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
+  @Deprecated("Use v2 export controller")
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
-    securityService.checkProjectPermission(projectHolder.project.id, Permission.ProjectPermissionType.VIEW)
-    val languages = languageService.findAll(projectHolder.project.id)
+    val allLanguages = permissionService.getPermittedViewLanguages(
+      projectHolder.project.id,
+      authenticationFacade.userAccount.id
+    )
+
     return ResponseEntity
       .ok()
       .header(
@@ -55,7 +58,7 @@ class ExportController @Autowired constructor(
         StreamingResponseBody { out: OutputStream ->
           val zipOutputStream = ZipOutputStream(out)
           val translations = translationService.getTranslations(
-            languages.map { it.tag }.toSet(),
+            allLanguages.map { it.tag }.toSet(),
             null,
             projectHolder.project.id,
             '.'

@@ -13,6 +13,7 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import org.hibernate.QueryException
 import org.slf4j.LoggerFactory
+import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -56,8 +57,6 @@ class ExceptionHandlers {
   fun handleValidationExceptions(
     ex: MethodArgumentTypeMismatchException
   ): ResponseEntity<ErrorResponseBody> {
-    ex.parameter.parameterName
-
     return ResponseEntity(
       ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
       HttpStatus.BAD_REQUEST
@@ -143,6 +142,19 @@ class ExceptionHandlers {
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
     return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
+  }
+
+  @ExceptionHandler(InvalidDataAccessApiUsageException::class)
+  fun handleFileSizeLimitExceeded(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
+    Sentry.captureException(ex)
+    val contains = ex.message?.contains("could not resolve property", true) ?: false
+    if (contains) {
+      return ResponseEntity(
+        ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
+        HttpStatus.BAD_REQUEST
+      )
+    }
+    throw ex
   }
 
   @ExceptionHandler(QueryException::class)

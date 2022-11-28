@@ -4,6 +4,7 @@ import { Scope } from './types';
 import { waitForGlobalLoading } from './loading';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
+import { HOST } from './constants';
 
 export const allScopes: Scope[] = [
   'keys.edit',
@@ -146,4 +147,20 @@ export const switchToOrganization = (name: string): Chainable => {
 export const assertSwitchedToOrganization = (name: string) => {
   cy.waitForDom();
   return cy.gcy('organization-switch').contains(name).should('be.visible');
+};
+
+export const visitProjectSettings = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+};
+
+export const visitProjectLanguages = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/languages`);
+};
+
+export const visitProjectMembers = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}/manage/permissions`);
+};
+
+export const visitProjectDashboard = (projectId: number) => {
+  return cy.visit(`${HOST}/projects/${projectId}`);
 };

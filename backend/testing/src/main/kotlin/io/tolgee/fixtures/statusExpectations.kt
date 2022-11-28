@@ -3,12 +3,13 @@ package io.tolgee.fixtures
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Message
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.BigDecimalAssert
-import org.assertj.core.api.ListAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
@@ -86,8 +87,9 @@ val ResultActions.andPrettyPrint: ResultActions
     return this
   }
 
-fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit) {
+fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit): JsonAssert {
   rfn(node(node))
+  return this
 }
 
 val JsonAssert.isValidId: BigDecimalAssert
@@ -95,18 +97,8 @@ val JsonAssert.isValidId: BigDecimalAssert
     return this.asNumber().isGreaterThan(BigDecimal(10000000))
   }
 
-inline fun <T> ListAssert<T>.containsAny(crossinline fn: T.() -> Boolean) {
-  this.satisfies { list ->
-    assertThat(list.any { fn(it as T) })
-      .describedAs("List contains matching element!")
-      .isTrue
-  }
-}
-
-inline fun <T> ListAssert<T>.doesNotContainAny(crossinline fn: T.() -> Boolean) {
-  this.satisfies { list ->
-    assertThat(list.any { fn(it as T) })
-      .describedAs("List does not contains matching element!")
-      .isFalse
-  }
+fun JsonAssert.isPermissionScopes(type: ProjectPermissionType): JsonAssert {
+  val expanded = Scope.expand(type.availableScopes).toList()
+  this.isArray.containsAll(expanded).hasSize(expanded.size)
+  return this
 }

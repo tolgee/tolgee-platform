@@ -95,7 +95,8 @@ export class LINKS {
     'accept_invitation/' + p(PARAMS.INVITATION_CODE)
   );
 
-  static GO_TO_ORGANIZATION = Link.ofRoot('billing');
+  static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
+  static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
 
   /**
    * Authenticated user stuff
@@ -169,6 +170,11 @@ export class LINKS {
 
   static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
+  static ADMINISTRATION_EE_LICENSE = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'ee-license'
+  );
+
   /**
    * Organizations
    */
@@ -196,6 +202,23 @@ export class LINKS {
   );
 
   static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
+
+  static ORGANIZATION_SUBSCRIPTIONS = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'subscriptions'
+  );
+
+  static ORGANIZATION_INVOICES = Link.ofParent(LINKS.ORGANIZATION, 'invoices');
+
+  static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'billing-test-clock-helper'
+  );
+
+  static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(
+    LINKS.ORGANIZATION_SUBSCRIPTIONS,
+    'self-hosted-ee'
+  );
 
   /**
    * Project stuff

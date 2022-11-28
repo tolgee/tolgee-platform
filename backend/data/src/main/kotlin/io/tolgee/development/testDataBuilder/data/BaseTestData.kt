@@ -4,8 +4,8 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 
 open class BaseTestData(
   userName: String = "test_username",
@@ -31,7 +31,7 @@ open class BaseTestData(
       addPermission {
         project = this@buildProject.self
         user = this@BaseTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       addLanguage {

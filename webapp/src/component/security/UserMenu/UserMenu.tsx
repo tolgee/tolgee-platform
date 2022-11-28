@@ -73,7 +73,7 @@ export const UserMenu: React.FC = () => {
   const logout = useLogout();
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
-    updatePreferredOrganization(organization);
+    updatePreferredOrganization(organization.id);
     setAnchorEl(null);
     history.push(LINKS.PROJECTS.build());
   };

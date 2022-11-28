@@ -5,6 +5,7 @@ import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
@@ -12,6 +13,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
@@ -26,6 +28,9 @@ class StoredDataImporter(
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
+
+  private val securityService = applicationContext.getBean(SecurityService::class.java)
+
   private val translationsToSave = mutableListOf<Translation>()
 
   /**
@@ -70,23 +75,57 @@ class StoredDataImporter(
     importDataManager.storedLanguages.forEach {
       it.doImport()
     }
-    addAllKeys()
+
+    addKeysAndCheckPermissions()
+
     handleKeyMetas()
 
     namespaceService.saveAll(namespacesToSave.values)
-    keyService.saveAll(keysToSave.values)
 
-    translationService.saveAll(translationsToSave)
+    val keyEntitiesToSave = saveKeys()
 
-    keysToSave.values.flatMap {
-      it.keyMeta?.comments ?: emptyList()
-    }.also { keyMetaService.saveAllComments(it) }
+    saveTranslations()
 
-    keysToSave.values.flatMap {
-      it.keyMeta?.codeReferences ?: emptyList()
-    }.also { keyMetaService.saveAllCodeReferences(it) }
+    saveMetaData(keyEntitiesToSave)
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
+  }
+
+  private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
+    keyEntitiesToSave.flatMap {
+      it.keyMeta?.comments ?: emptyList()
+    }.also { keyMetaService.saveAllComments(it) }
+    keyEntitiesToSave.flatMap {
+      it.keyMeta?.codeReferences ?: emptyList()
+    }.also { keyMetaService.saveAllCodeReferences(it) }
+  }
+
+  private fun saveTranslations() {
+    checkTranslationPermissions()
+    translationService.saveAll(translationsToSave)
+  }
+
+  private fun saveKeys(): MutableCollection<Key> {
+    val keyEntitiesToSave = keysToSave.values
+    keyService.saveAll(keyEntitiesToSave)
+    return keyEntitiesToSave
+  }
+
+  private fun addKeysAndCheckPermissions() {
+    addAllKeys()
+    checkKeyPermissions()
+  }
+
+  private fun checkTranslationPermissions() {
+    val langs = translationsToSave.map { it.language }.toSet().map { it.id }
+    securityService.checkLanguageTranslatePermission(import.project.id, langs)
+  }
+
+  private fun checkKeyPermissions() {
+    val isCreatingKey = keysToSave.values.any { it.id == 0L }
+    if (isCreatingKey) {
+      securityService.checkProjectPermission(import.project.id, Scope.KEYS_EDIT)
+    }
   }
 
   private fun handleKeyMetas() {

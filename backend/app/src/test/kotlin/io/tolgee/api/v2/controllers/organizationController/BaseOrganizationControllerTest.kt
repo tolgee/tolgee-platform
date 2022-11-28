@@ -3,7 +3,6 @@ package io.tolgee.api.v2.controllers.organizationController
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
-import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -23,14 +22,12 @@ class BaseOrganizationControllerTest : AuthorizedControllerTest() {
       "Test org",
       "This is description",
       "test-org",
-      Permission.ProjectPermissionType.VIEW
     )
 
     dummyDto2 = OrganizationDto(
       "Test org 2",
       "This is description 2",
       "test-org-2",
-      Permission.ProjectPermissionType.VIEW
     )
   }
 

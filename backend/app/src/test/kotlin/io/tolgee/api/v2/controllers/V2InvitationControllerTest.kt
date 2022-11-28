@@ -1,37 +1,34 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.dtos.request.project.LanguagePermissions
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Invitation
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
-class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
+class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
     loginAsUser(initialUsername)
+    emailTestUtil.initMocks()
   }
 
-  @MockBean
   @Autowired
-  override lateinit var javaMailSender: JavaMailSender
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @Test
   fun `does not return when has no project permission`() {
@@ -61,7 +58,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT
       )
     )
 
@@ -76,7 +73,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT
       )
     ).code
 
@@ -84,7 +81,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     loginAsUser(newUser.username)
     performAuthGet("/v2/invitations/$code/accept").andIsOk
 
-    assertInvitationAccepted(project, newUser, Permission.ProjectPermissionType.EDIT)
+    assertInvitationAccepted(project, newUser, ProjectPermissionType.EDIT)
   }
 
   @Test
@@ -94,36 +91,37 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.TRANSLATE,
-        project.languages.toList()
+        ProjectPermissionType.TRANSLATE,
+        LanguagePermissions(translate = project.languages, null, null), null
       )
     ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
 
     performAuthGet("/v2/invitations/$code/accept").andIsOk
-    assertInvitationAccepted(project, newUser, Permission.ProjectPermissionType.TRANSLATE)
+    assertInvitationAccepted(project, newUser, ProjectPermissionType.TRANSLATE)
   }
 
   private fun assertInvitationAccepted(
     project: Project,
     newUser: UserAccount,
-    expectedType: Permission.ProjectPermissionType
+    expectedType: ProjectPermissionType
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
-    assertThat(permissionService.getProjectPermissionType(project.id, newUser)).isNotNull
-    val type = permissionService.getProjectPermissionType(project.id, newUser)!!
-    assertThat(type).isEqualTo(expectedType)
+    assertThat(permissionService.getProjectPermissionScopes(project.id, newUser)).isNotNull
+    val type = permissionService.getProjectPermissionScopes(project.id, newUser)!!
+    type.assert.equalsPermissionType(expectedType)
   }
 
   private fun createTranslateInvitation(project: Project): Invitation {
     return invitationService.create(
       CreateProjectInvitationParams(
         project = project,
-        type = Permission.ProjectPermissionType.TRANSLATE,
-        languages = project.languages.toList(),
+        type = ProjectPermissionType.TRANSLATE,
+        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
-        email = "a@a.a"
+        email = "a@a.a",
+        scopes = null
       )
     )
   }

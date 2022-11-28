@@ -31,14 +31,14 @@ function PaperComponent(props) {
   return <Box {...other} style={{ width: '100%' }} />;
 }
 
-type Props = {
+type Props<T> = {
   open: boolean;
   onClose?: () => void;
-  onSelect?: (value: string) => void;
+  onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
   selected: string | undefined;
   onAddNew?: (searchValue: string) => void;
-  items: SelectItem[];
+  items: SelectItem<T>[];
   displaySearch?: boolean;
   searchPlaceholder?: string;
   title?: string;
@@ -46,7 +46,7 @@ type Props = {
   minWidth?: number | string;
 };
 
-export const SearchSelectContent: React.FC<Props> = ({
+export function SearchSelectContent<T extends React.Key>({
   open,
   onClose,
   onSelect,
@@ -59,7 +59,7 @@ export const SearchSelectContent: React.FC<Props> = ({
   title,
   addNewTooltip,
   minWidth = 250,
-}) => {
+}: Props<T>) {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
 
@@ -141,4 +141,4 @@ export const SearchSelectContent: React.FC<Props> = ({
       </FormControl>
     </StyledWrapper>
   );
-};
+}

@@ -1,6 +1,5 @@
 package io.tolgee.activity
 
-import io.sentry.Sentry
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
@@ -26,15 +25,12 @@ open class ActivityHolder(
 
   open var transactionRollbackOnly = false
 
+  open var organizationId: Long? = null
+
   @PreDestroy
   open fun preDestroy() {
-    try {
-      if (!transactionRollbackOnly) {
-        applicationContext.publishEvent(OnProjectActivityEvent(this))
-      }
-    } catch (e: Exception) {
-      Sentry.captureException(e)
-      logger.error(e.stackTraceToString())
+    if (!transactionRollbackOnly) {
+      applicationContext.publishEvent(OnProjectActivityEvent(this))
     }
   }
 
