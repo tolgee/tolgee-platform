@@ -69,7 +69,7 @@ class GithubOAuthDelegate(
 
       val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id!!)
       val user = userAccountOptional.orElseGet {
-        userAccountService.find(githubEmail)?.let {
+        userAccountService.findActive(githubEmail)?.let {
           throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
         }
 

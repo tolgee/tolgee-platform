@@ -13,6 +13,7 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
+import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -25,8 +26,10 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
@@ -38,8 +41,10 @@ import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
@@ -73,7 +78,9 @@ import javax.validation.Valid
 class OrganizationController(
   private val organizationService: OrganizationService,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
-  private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
+  private val arrayUserResourcesAssembler: PagedResourcesAssembler<
+    Pair<UserAccountWithOrganizationRoleView, List<Project>>
+    >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
@@ -86,6 +93,8 @@ class OrganizationController(
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
+  private val projectService: ProjectService,
+  private val mtBucketSizeProvider: MtBucketSizeProvider
 ) {
   @PostMapping
   @Transactional
@@ -154,12 +163,20 @@ class OrganizationController(
   @DenyPatAccess
   fun getAllUsers(
     @PathVariable("id") id: Long,
-    @ParameterObject @SortDefault(sort = ["name"], direction = Sort.Direction.ASC) pageable: Pageable,
+    @ParameterObject @SortDefault(sort = ["name", "username"], direction = Sort.Direction.ASC) pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<UserAccountWithOrganizationRoleModel> {
     organizationRoleService.checkUserIsMemberOrOwner(id)
     val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
-    return arrayUserResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
+    val userIds = allInOrganization.content.map { it.id }
+    val projectsWithDirectPermission = projectService.getProjectsWithDirectPermissions(id, userIds)
+    val pairs = allInOrganization.content.map { user ->
+      user to (projectsWithDirectPermission[user.id] ?: emptyList())
+    }
+
+    val data = PageImpl(pairs, allInOrganization.pageable, allInOrganization.totalElements)
+
+    return arrayUserResourcesAssembler.toModel(data, userAccountWithOrganizationRoleModelAssembler)
   }
 
   @PutMapping("/{id:[0-9]+}/leave")
@@ -170,7 +187,6 @@ class OrganizationController(
       if (!organizationService.isThereAnotherOwner(id)) {
         throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
-      organizationRoleService.checkUserIsMemberOrOwner(id)
       organizationRoleService.leave(id)
     } ?: throw NotFoundException()
   }
@@ -264,6 +280,16 @@ class OrganizationController(
     return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
   }
 
+  @PutMapping("/{organizationId:[0-9]+}/set-base-permissions/{permissionType}")
+  @Operation(summary = "Sets organization base permission")
+  fun setBasePermissions(
+    @PathVariable organizationId: Long,
+    @PathVariable permissionType: ProjectPermissionType,
+  ) {
+    organizationRoleService.checkUserIsOwner(organizationId)
+    organizationService.setBasePermission(organizationId, permissionType)
+  }
+
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
   @Operation(description = "Returns current organization usage")
   fun getUsage(
@@ -272,6 +298,9 @@ class OrganizationController(
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
+    val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
+    val currentPayAsYouGoMtCredits = mtBucketSizeProvider.getUsedPayAsYouGoCredits(organization)
+    val availablePayAsYouGoMtCredits = mtBucketSizeProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return UsageModel(
       organizationId = organizationId,
@@ -280,8 +309,13 @@ class OrganizationController(
       extraCreditBalance = creditBalances.extraCreditBalance,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
+      currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,
+      availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
       currentTranslations = currentTranslations,
-      translationLimit = translationsLimitProvider.get(organization)
+      currentTranslationSlots = currentTranslationSlots,
+      includedTranslations = translationsLimitProvider.getPlanTranslations(organization),
+      translationSlotsLimit = translationsLimitProvider.getTranslationSlotsLimit(organization),
+      translationsLimit = translationsLimitProvider.getTranslationLimit(organization)
     )
   }
 

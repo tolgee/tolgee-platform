@@ -4,10 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.machineTranslation.CreditBalanceModel
 import io.tolgee.dtos.MtCreditBalanceDto
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -31,8 +29,8 @@ class MtCreditsController(
 ) {
   @GetMapping("/projects/{projectId}/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for specified project")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey
+  @AccessWithAnyProjectPermission
   fun getProjectCredits(@PathVariable projectId: Long): CreditBalanceModel {
     return mtCreditBucketService.getCreditBalances(projectHolder.projectEntity).model
   }

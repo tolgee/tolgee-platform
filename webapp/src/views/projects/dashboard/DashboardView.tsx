@@ -13,6 +13,7 @@ import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -48,6 +49,9 @@ const StyledProjectId = styled('div')`
 export const DashboardView = () => {
   const project = useProject();
   const { t } = useTranslate();
+  const { satisfiesPermission } = useProjectPermissions();
+
+  const canViewActivity = satisfiesPermission('activity.view');
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'] };
@@ -57,6 +61,7 @@ export const DashboardView = () => {
     path,
     query,
     options: {
+      enabled: canViewActivity,
       getNextPageParam: (lastPage) => {
         if (
           lastPage.page &&
@@ -89,6 +94,9 @@ export const DashboardView = () => {
     method: 'get',
     path: {
       projectId: project.id,
+    },
+    options: {
+      enabled: canViewActivity,
     },
   });
 
@@ -136,12 +144,24 @@ export const DashboardView = () => {
                 wordCount={statsLoadable.data!.baseWordsCount}
               />
             </Box>
-            <Box gridArea="activityList">
-              <ActivityList activityLoadable={activityLoadable} />
-            </Box>
-            <Box gridArea="activityChart">
-              <DailyActivityChart dailyActivity={dailyActivityLoadable.data} />
-            </Box>
+            {canViewActivity && (
+              <>
+                <Box
+                  gridArea="activityList"
+                  data-cy="project-dashboard-activity-list"
+                >
+                  <ActivityList activityLoadable={activityLoadable} />
+                </Box>
+                <Box
+                  gridArea="activityChart"
+                  data-cy="project-dashboard-activity-chart"
+                >
+                  <DailyActivityChart
+                    dailyActivity={dailyActivityLoadable.data}
+                  />
+                </Box>
+              </>
+            )}
           </StyledContainer>
         )}
       </BaseProjectView>

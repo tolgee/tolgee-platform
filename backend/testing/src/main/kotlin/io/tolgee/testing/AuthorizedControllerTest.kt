@@ -49,7 +49,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   }
 
   fun loginAsUser(userName: String) {
-    val account = userAccountService.find(userName) ?: dbPopulator.createUserIfNotExists("admin")
+    val account = userAccountService.findActive(userName) ?: dbPopulator.createUserIfNotExists("admin")
     loginAsUser(account)
   }
 
@@ -59,7 +59,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   }
 
   fun refreshUser() {
-    _userAccount = userAccountService.find(_userAccount!!.id)
+    _userAccount = userAccountService.findActive(_userAccount!!.id)
   }
 
   fun logout() {

@@ -61,14 +61,7 @@ abstract class AbstractE2eDataController {
       ) {
         entityManager.clear()
         try {
-          testData.data.userAccounts.forEach {
-            userAccountService.find(it.self.username)?.let { user ->
-              userAccountService.delete(user)
-            }
-          }
-          testData.data.organizations.forEach { organizationBuilder ->
-            organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
-          }
+          testDataService.cleanTestData(this.testData)
         } catch (e: FileNotFoundException) {
           return@executeInNewTransaction ResponseEntity.internalServerError().body(e.stackTraceToString())
         }

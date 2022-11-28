@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -11,7 +11,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -63,9 +63,9 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE])
   @Test
-  fun `creates key with keys edit scope`() {
+  fun `creates key with keys create scope`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId

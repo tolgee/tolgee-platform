@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
@@ -193,7 +193,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthPut(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}/set-state/RESOLVED",
       null
-    ).andAssertThatJson {
+    ).andIsOk.andAssertThatJson {
       node("text").isEqualTo("First comment")
       node("state").isEqualTo("RESOLVED")
     }
@@ -213,7 +213,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `does not delete when not manager and not author`() {
+  fun `does not delete when doesn't have edit scope and not author`() {
     userAccount = testData.pepa
     performProjectAuthDelete(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",

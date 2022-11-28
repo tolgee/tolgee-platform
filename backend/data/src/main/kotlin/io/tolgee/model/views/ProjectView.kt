@@ -12,7 +12,7 @@ interface ProjectView {
   val slug: String?
   val avatarHash: String?
   val baseLanguage: Language?
-  val organizationOwner: Organization?
+  val organizationOwner: Organization
   val organizationRole: OrganizationRoleType?
-  val directPermissions: Permission.ProjectPermissionType?
+  val directPermission: Permission?
 }

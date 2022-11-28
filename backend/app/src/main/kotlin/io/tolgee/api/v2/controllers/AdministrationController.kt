@@ -74,7 +74,7 @@ class AdministrationController(
     search: String? = null
   ): PagedModel<UserAccountModel> {
     securityService.checkUserIsServerAdmin()
-    val users = userAccountService.findAllPaged(pageable, search)
+    val users = userAccountService.findAllWithDisabledPaged(pageable, search)
     return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
   }
 
@@ -88,6 +88,27 @@ class AdministrationController(
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
     }
     userAccountService.delete(userId)
+  }
+
+  @PutMapping(value = ["/users/{userId}/disable"])
+  @Operation(summary = "Deletes an user")
+  @NeedsSuperJwtToken
+  @DenyPatAccess
+  fun disableUser(@PathVariable userId: Long) {
+    securityService.checkUserIsServerAdmin()
+    if (userId == authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
+    }
+    userAccountService.disable(userId)
+  }
+
+  @PutMapping(value = ["/users/{userId}/enable"])
+  @Operation(summary = "Deletes an user")
+  @NeedsSuperJwtToken
+  @DenyPatAccess
+  fun enableUser(@PathVariable userId: Long) {
+    securityService.checkUserIsServerAdmin()
+    userAccountService.enable(userId)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])

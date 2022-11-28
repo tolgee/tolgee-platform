@@ -2,13 +2,16 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
@@ -16,39 +19,39 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.InvitationTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/"), JavaMailSenderMocked {
+class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"
     private const val INVITED_NAME = "Franta"
   }
 
-  @Autowired
-  @MockBean
-  override lateinit var javaMailSender: JavaMailSender
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
-
   @BeforeEach
   @AfterEach
   fun reset() {
     tolgeeProperties.frontEndUrl = null
+    emailTestUtil.initMocks()
+  }
+
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
+
+  val invitationTestUtil: InvitationTestUtil by lazy {
+    InvitationTestUtil(this, applicationContext)
   }
 
   @Test
@@ -63,39 +66,69 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         node("permittedLanguageIds").isArray.hasSize(2)
         node("invitedUserName").isEqualTo("Franta")
         node("invitedUserEmail").isEqualTo("a@a.a")
+        node("permission") {
+          node("type").isEqualTo("TRANSLATE")
+          node("stateChangeLanguageIds").isArray.hasSize(0)
+          node("translateLanguageIds").isArray.hasSize(2)
+          node("viewLanguageIds").isArray.hasSize(0)
+        }
       }
     }
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `invites user to project with languages`() {
-    val testData = prepareTestData()
-
-    val invitatationJson = performProjectAuthPut(
-      "/invite",
-      ProjectInviteUserDto(
-        Permission.ProjectPermissionType.TRANSLATE, languages = setOf(testData.englishLanguage.id)
-      )
-    ).andIsOk.andGetContentAsString
-
-    val key = parseCode(invitatationJson)
-
-    val invitation = invitationService.getInvitation(key)
-    assertThat(invitation.permission?.languages?.toList()?.first()?.tag).isEqualTo("en")
+  fun `invites user to project with languages (translate)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.TRANSLATE
+      languages = setOf(getLang("en"))
+    }.andIsOk
+    val invitation = invitationTestUtil.getInvitation(result)
+    invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `fails when provide languages for non TRANSLATE type`() {
-    val testData = prepareTestData()
+  fun `invites user to project with languages (review)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.REVIEW
+      translateLanguages = setOf(getLang("en"))
+      stateChangeLanguages = setOf(getLang("en"))
+    }.andIsOk
+    val invitation = invitationTestUtil.getInvitation(result)
+    invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+  }
 
-    performProjectAuthPut(
-      "/invite",
-      ProjectInviteUserDto(
-        Permission.ProjectPermissionType.EDIT, languages = setOf(testData.englishLanguage.id)
-      )
-    ).andIsBadRequest
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot set different languages (review)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.REVIEW
+      translateLanguages = setOf(getLang("en"))
+      stateChangeLanguages = setOf()
+    }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates languages and permission (lower)`() {
+    invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.VIEW
+      translateLanguages = setOf(getLang("en"))
+    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates languages and permission (higher)`() {
+    invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.EDIT
+      translateLanguages = setOf(getLang("en"))
+    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
@@ -118,12 +151,12 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `sends invitation e-mail`() {
     val code = inviteWithUserWithNameAndEmail()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    val messageContent = messageArgumentCaptor.value.tolgeeStandardMessageContent
+    val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
     assertThat(messageContent).contains("http://localhost/")
-    assertEmailTo().isEqualTo(INVITED_EMAIL)
+    emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
   @Test
@@ -131,9 +164,9 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   fun `uses frontEnd url when possible`() {
     tolgeeProperties.frontEndUrl = "dummy_fe_url"
     inviteWithUserWithNameAndEmail()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    val messageContent = messageArgumentCaptor.value.tolgeeStandardMessageContent
+    val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains("dummy_fe_url")
   }
 
@@ -156,7 +189,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         Permission(
           user = user2,
           project = project,
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         )
       )
       userAccount = user
@@ -166,7 +199,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     performAuthPut(
       "/v2/projects/${project.id}/invite",
       ProjectInviteUserDto(
-        type = Permission.ProjectPermissionType.VIEW,
+        type = ProjectPermissionType.VIEW,
         email = "hello@hello2.com",
         name = "Franta"
       )
@@ -174,7 +207,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   }
 
   private fun inviteWithManagePermissions(): String {
-    val invitationJson = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
+    val invitationJson = performProjectAuthPut("/invite", ProjectInviteUserDto(ProjectPermissionType.MANAGE))
       .andIsOk.andGetContentAsString
     return parseCode(invitationJson)
   }
@@ -190,7 +223,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   private fun performInviteWithNameAndEmail() = performProjectAuthPut(
     "/invite",
     ProjectInviteUserDto(
-      type = Permission.ProjectPermissionType.MANAGE,
+      type = ProjectPermissionType.MANAGE,
       email = INVITED_EMAIL,
       name = INVITED_NAME
     )
@@ -208,10 +241,11 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     return invitationService.create(
       CreateProjectInvitationParams(
         project = project,
-        type = Permission.ProjectPermissionType.TRANSLATE,
-        languages = project.languages.toList(),
+        type = ProjectPermissionType.TRANSLATE,
+        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
-        email = "a@a.a"
+        email = "a@a.a",
+        scopes = null
       )
     )
   }

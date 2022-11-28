@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -28,42 +28,42 @@ class KeyControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   @Test
   fun `denies access for user without the language permission - Token Auth`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("de").andIsForbidden
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with language permission - Token Auth`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("en").andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with all language permissions - Token Auth`() {
-    userAccount = testData.allLangUser
+    userAccount = testData.translateAllUser
     performUpdate("en").andIsOk
   }
 
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `denies access for user without the language permission - API key`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("de").andIsForbidden
   }
 
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `allows access for user with language permission - API key`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("en").andIsOk
   }
 
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `allows access for user with all language permissions - API key`() {
-    userAccount = testData.allLangUser
+    userAccount = testData.translateAllUser
     performUpdate("en").andIsOk
   }
 

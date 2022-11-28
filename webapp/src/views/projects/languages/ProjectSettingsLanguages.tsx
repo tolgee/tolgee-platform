@@ -22,12 +22,16 @@ import {
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
 } from './tableStyles';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export const ProjectSettingsLanguages = () => {
   const queryClient = useQueryClient();
   const project = useProject();
   const { t } = useTranslate();
   const config = useConfig();
+  const { satisfiesPermission } = useProjectPermissions();
+
+  const canEditLanguages = satisfiesPermission('languages.edit');
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
@@ -46,20 +50,24 @@ export const ProjectSettingsLanguages = () => {
 
   return (
     <Box mb={6}>
-      <Box mt={4}>
-        <Typography variant="h5">
-          <T keyName="create_language_title" />
-        </Typography>
-      </Box>
-      <Box mb={2}>
-        <CreateSingleLanguage
-          autoFocus={false}
-          onCancel={() => {}}
-          onCreated={() => {
-            invalidateUrlPrefix(queryClient, '/v2/project');
-          }}
-        />
-      </Box>
+      {canEditLanguages && (
+        <>
+          <Box mt={4}>
+            <Typography variant="h5">
+              <T keyName="create_language_title" />
+            </Typography>
+          </Box>
+          <Box mb={2}>
+            <CreateSingleLanguage
+              autoFocus={false}
+              onCancel={() => {}}
+              onCreated={() => {
+                invalidateUrlPrefix(queryClient, '/v2/project');
+              }}
+            />
+          </Box>
+        </>
+      )}
       <StyledLanguageTable
         style={{ gridTemplateColumns: '1fr auto auto' }}
         data-cy="project-settings-languages"
@@ -79,24 +87,27 @@ export const ProjectSettingsLanguages = () => {
               <LanguageItem language={l} />
             </div>
             <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
-            <Box
-              className={TABLE_LAST_CELL}
-              mt={1}
-              mb={1}
-              data-cy="project-settings-languages-list-edit-button"
-            >
-              <Link
-                to={LINKS.PROJECT_EDIT_LANGUAGE.build({
-                  [PARAMS.PROJECT_ID]: project.id,
-                  [PARAMS.LANGUAGE_ID]: l.id,
-                })}
+            {canEditLanguages && (
+              <Box
+                className={TABLE_LAST_CELL}
+                mt={1}
+                mb={1}
+                data-cy="project-settings-languages-list-edit-button"
               >
-                <SettingsIconButton
-                  size="small"
-                  aria-label={`Settings ${l.name}`}
-                />
-              </Link>
-            </Box>
+                <Link
+                  to={LINKS.PROJECT_EDIT_LANGUAGE.build({
+                    [PARAMS.PROJECT_ID]: project.id,
+                    [PARAMS.LANGUAGE_ID]: l.id,
+                  })}
+                >
+                  <SettingsIconButton
+                    disabled={!canEditLanguages}
+                    size="small"
+                    aria-label={`Settings ${l.name}`}
+                  />
+                </Link>
+              </Box>
+            )}
           </React.Fragment>
         ))}
       </StyledLanguageTable>

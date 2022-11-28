@@ -6,6 +6,7 @@ import {
   useTheme,
   useMediaQuery,
   styled,
+  Typography,
 } from '@mui/material';
 import { NavigateNext } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
@@ -61,7 +62,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
                 {name}
               </Box>
             );
-          } else {
+          } else if (url) {
             return (
               <StyledLink
                 data-cy="navigation-item"
@@ -74,6 +75,17 @@ export const Navigation: React.FC<Props> = ({ path }) => {
                 {icon}
                 {name}
               </StyledLink>
+            );
+          } else {
+            return (
+              <Typography
+                data-cy="navigation-item"
+                key={index}
+                color={index === path.length - 1 ? 'primary' : 'inherit'}
+              >
+                {icon}
+                {name}
+              </Typography>
             );
           }
         })}

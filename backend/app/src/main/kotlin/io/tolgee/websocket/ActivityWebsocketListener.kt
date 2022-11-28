@@ -39,7 +39,7 @@ class ActivityWebsocketListener(
 
   fun getActorInfo(userId: Long?): ActorInfo {
     return userId?.let {
-      val user = userAccountService.find(userId) ?: return@let null
+      val user = userAccountService.findActive(userId) ?: return@let null
       ActorInfo(
         type = ActorType.USER,
         data = simpleUserAccountModelAssembler.toModel(user)

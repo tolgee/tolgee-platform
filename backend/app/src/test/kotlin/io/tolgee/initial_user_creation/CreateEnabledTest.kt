@@ -62,7 +62,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
   @Test
   fun passwordStoredInDb() {
-    val johny = userAccountService.find("johny")
+    val johny = userAccountService.findActive("johny")
     assertThat(passwordEncoder.matches(passwordFile.readText(), johny!!.password)).isTrue
   }
 

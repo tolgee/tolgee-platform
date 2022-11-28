@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
@@ -7,14 +7,19 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import {
   StyledBillingSection,
-  StyledBillingSectionTitle,
   StyledBillingSectionSubtitle,
   StyledBillingSectionSubtitleSmall,
+  StyledBillingSectionTitle,
 } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
+import { EstimatedCosts } from '../common/usage/EstimatedCosts';
+import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { useOrganization } from '../../useOrganization';
+import { getProgressData } from 'tg.component/billing/utils';
 
-type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
+type CloudSubscriptionModel =
+  billingComponents['schemas']['CloudSubscriptionModel'];
 type UsageModel = components['schemas']['UsageModel'];
 type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
 
@@ -34,22 +39,35 @@ const StyledHeader = styled('div')`
 `;
 
 type Props = {
-  activePlan: ActivePlanModel;
+  activeSubscription: CloudSubscriptionModel;
   usage: UsageModel;
   balance: CreditBalanceModel;
 };
 
-export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
+export const CurrentUsage: FC<Props> = ({
+  activeSubscription,
+  usage,
+  balance,
+}) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+
+  const {
+    translationsUsed,
+    translationsMax,
+    creditMax,
+    creditUsed,
+    isPayAsYouGo,
+  } = getProgressData(usage);
+
   return (
-    <StyledBillingSection gridArea="usage">
+    <StyledBillingSection gridArea="usage" maxWidth={650}>
       <StyledHeader>
         <StyledBillingSectionTitle>
           {t('billing_actual_title')}
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>
-          {activePlan.name}
+          {activeSubscription.plan.name}
           {Boolean(usage.extraCreditBalance) && (
             <StyledBillingSectionSubtitleSmall>
               {' '}
@@ -61,24 +79,34 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
             </StyledBillingSectionSubtitleSmall>
           )}
         </StyledBillingSectionSubtitle>
+        <Box flexGrow={1}>
+          {activeSubscription.plan.type === 'PAY_AS_YOU_GO' &&
+            activeSubscription.estimatedCosts !== undefined && (
+              <CloudEstimatedCosts
+                estimatedCosts={activeSubscription.estimatedCosts}
+              />
+            )}
+        </Box>
       </StyledHeader>
       <StyledMetrics>
         <PlanMetric
-          name={t('billing_actual_available_translations')}
-          currentAmount={usage.translationLimit - usage.currentTranslations}
-          totalAmount={usage.translationLimit}
-          periodEnd={activePlan.currentPeriodEnd}
+          name={t('billing_actual_used_translations')}
+          currentQuantity={translationsUsed}
+          totalQuantity={translationsMax}
+          periodEnd={activeSubscription.currentPeriodEnd}
+          isPayAsYouGo={isPayAsYouGo}
         />
         <PlanMetric
           name={
             <T
-              keyName="billing_actual_monthly_credits"
+              keyName="billing_actual_used_monthly_credits"
               params={{ hint: <MtHint /> }}
             />
           }
-          currentAmount={Math.round(usage.creditBalance / 100)}
-          totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
-          periodEnd={activePlan.currentPeriodEnd}
+          currentQuantity={Math.round(creditUsed / 100)}
+          totalQuantity={Math.round((creditMax || 0) / 100)}
+          periodEnd={activeSubscription.currentPeriodEnd}
+          isPayAsYouGo={isPayAsYouGo}
         />
         <Box gridColumn="1">{t('billing_credits_refill')}</Box>
         <Box gridColumn="2 / -1" data-cy="billing-actual-period">
@@ -92,20 +120,20 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
               params={{ hint: <MtHint /> }}
             />
           }
-          currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
+          currentQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
-        {!activePlan.free && (
+        {!activeSubscription.plan.free && (
           <>
             <Box gridColumn="1">{t('billing_actual_period')}</Box>
             <Box gridColumn="2 / -1" data-cy="billing-actual-period">
-              {activePlan.currentBillingPeriod === 'MONTHLY'
+              {activeSubscription.currentBillingPeriod === 'MONTHLY'
                 ? t('billing_monthly')
                 : t('billing_annual')}
             </Box>
             <Box gridColumn="1">{t('billing_actual_period_end')}</Box>
             <Box gridColumn="2 / -1" data-cy="billing-actual-period-end">
-              {formatDate(activePlan.currentPeriodEnd)} (
-              {!activePlan.cancelAtPeriodEnd ? (
+              {formatDate(activeSubscription.currentPeriodEnd)} (
+              {!activeSubscription.cancelAtPeriodEnd ? (
                 <StyledPositive>
                   {t('billing_actual_period_renewal')}
                 </StyledPositive>
@@ -121,4 +149,22 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
       </StyledMetrics>
     </StyledBillingSection>
   );
+};
+
+const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
+  const organization = useOrganization();
+
+  const useUsage = (enabled: boolean) =>
+    useBillingApiQuery({
+      url: '/v2/organizations/{organizationId}/billing/expected-usage',
+      method: 'get',
+      path: {
+        organizationId: organization!.id,
+      },
+      options: {
+        enabled,
+      },
+    });
+
+  return <EstimatedCosts {...props} useUsage={useUsage} />;
 };

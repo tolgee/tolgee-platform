@@ -20,7 +20,11 @@ class FrontendUrlProvider(
       return builder.build().toUriString()
     }
 
-  fun getBillingUrl(organizationSlug: String): String {
-    return "${this.url}/organizations/$organizationSlug/billing"
+  fun getSubscriptionsUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/subscriptions"
+  }
+
+  fun getSelfHostedSubscriptionsUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/subscriptions/self-hosted-ee"
   }
 }

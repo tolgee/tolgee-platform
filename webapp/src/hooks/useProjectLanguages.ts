@@ -15,9 +15,5 @@ export const useProjectLanguages = (): LanguageModel[] => {
     );
   }
 
-  if (!data._embedded?.languages) {
-    return [];
-  }
-
-  return data._embedded.languages;
+  return data._embedded?.languages || [];
 };

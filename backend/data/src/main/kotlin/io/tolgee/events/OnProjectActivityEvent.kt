@@ -4,5 +4,5 @@ import io.tolgee.activity.ActivityHolder
 import org.springframework.context.ApplicationEvent
 
 class OnProjectActivityEvent(
-  val source: ActivityHolder,
-) : ApplicationEvent(source)
+  val activityHolder: ActivityHolder,
+) : ApplicationEvent(activityHolder)

@@ -26,6 +26,10 @@ export const StyledLanguageTable = styled('div')`
   }
 
   & .${TABLE_FIRST_CELL} {
+    display: flex;
+    align-items: center;
+    min-height: 50px;
+    grid-column-start: 1;
     padding-left: ${({ theme }) => theme.spacing(2)};
   }
 

@@ -22,7 +22,8 @@ class UserAccountModelAssembler(
       emailAwaitingVerification = entity.emailVerification?.newEmail,
       avatar = avatar,
       globalServerRole = entity.role ?: UserAccount.Role.USER,
-      deleted = entity.deletedAt != null
+      deleted = entity.deletedAt != null,
+      disabled = entity.disabledAt != null,
     )
   }
 }

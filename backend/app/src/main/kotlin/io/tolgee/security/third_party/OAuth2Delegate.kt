@@ -93,7 +93,7 @@ class OAuth2Delegate(
 
         val userAccountOptional = userAccountService.findByThirdParty("oauth2", userResponse.sub!!)
         val user = userAccountOptional.orElseGet {
-          userAccountService.find(email)?.let {
+          userAccountService.findActive(email)?.let {
             throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
           }
 

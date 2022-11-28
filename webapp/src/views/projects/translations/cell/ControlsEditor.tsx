@@ -39,6 +39,7 @@ const StyledRightestPart = styled('div')`
 type ControlsProps = {
   state?: State;
   isBaseLanguage?: boolean;
+  stateChangeEnabled?: boolean;
   onSave?: () => void;
   onCancel?: () => void;
   onInsertBase?: () => void;
@@ -51,6 +52,7 @@ type ControlsProps = {
 export const ControlsEditor: React.FC<ControlsProps> = ({
   state,
   isBaseLanguage,
+  stateChangeEnabled,
   onSave,
   onCancel,
   onInsertBase,
@@ -60,7 +62,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   screenshotsPresent,
 }) => {
   // right section
-  const displayTransitionButtons = state;
+  const displayTransitionButtons = state && stateChangeEnabled;
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
   const displayInsertBase = !isBaseLanguage;

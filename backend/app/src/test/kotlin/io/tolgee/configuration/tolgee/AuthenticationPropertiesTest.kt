@@ -28,7 +28,7 @@ class AuthenticationPropertiesTest : AbstractTransactionalTest() {
   @Test
   fun testCreateInitialUserDisabled() {
     assertThat(tolgeeProperties.authentication.createInitialUser).isEqualTo(false)
-    assertThat(userAccountService.find(tolgeeProperties.authentication.initialUsername)).isNull()
+    assertThat(userAccountService.findActive(tolgeeProperties.authentication.initialUsername)).isNull()
   }
 
   @Test

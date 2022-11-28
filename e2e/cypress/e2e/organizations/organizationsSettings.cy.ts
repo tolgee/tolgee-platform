@@ -45,37 +45,6 @@ describe('Organization Settings', () => {
     );
   });
 
-  it('changes member privileges', () => {
-    gcy('organization-side-menu').contains('Member permissions').click();
-    gcy('permissions-menu-button').click();
-    gcy('permissions-menu').within(() => {
-      cy.contains('Translate').click();
-    });
-    confirmHardMode();
-    assertMessage('Permissions set');
-    visitMemberPrivileges();
-    gcy('permissions-menu-button').contains('Translate');
-  });
-
-  it("member privileges change doesn't affect profile", () => {
-    gcy('organization-side-menu').contains('Member permissions').click();
-    gcy('permissions-menu-button').click();
-    gcy('permissions-menu').within(() => {
-      cy.contains('Translate').click();
-    });
-    confirmHardMode();
-    visitProfile();
-    gcy('organization-name-field').within(() =>
-      cy.get('input').should('have.value', 'Tolgee')
-    );
-    gcy('organization-address-part-field').within(() =>
-      cy.get('input').should('have.value', 'tolgee')
-    );
-    gcy('organization-description-field').within(() =>
-      cy.get('input').should('have.value', 'This is us')
-    );
-  });
-
   it('Gates cannot change Tolgee settings', () => {
     login('gates@microsoft.com');
     visitProfile();
@@ -110,9 +79,5 @@ describe('Organization Settings', () => {
 
   const visitProfile = () => {
     cy.visit(`${HOST}/organizations/tolgee/profile`);
-  };
-
-  const visitMemberPrivileges = () => {
-    cy.visit(`${HOST}/organizations/tolgee/member-privileges`);
   };
 });

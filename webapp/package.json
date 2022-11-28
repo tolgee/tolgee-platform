@@ -13,6 +13,7 @@
     "@mui/lab": "^5.0.0-alpha.75",
     "@mui/material": "^5.5.3",
     "@mui/x-date-pickers": "5.0.0-beta.6",
+    "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^7.49.0",
     "@stomp/stompjs": "^6.1.2",
     "@tolgee/format-icu": "^5.6.0",
@@ -24,6 +25,7 @@
     "diff": "^5.0.0",
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
+    "node-fetch": "3.3.0",
     "notistack": "^2.0.4",
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",
@@ -68,6 +70,7 @@
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc",
+    "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
     "tsc:prod": "tsc --project tsconfig.prod.json",
     "load-translations": "tolgee pull ./src/i18n -o",
     "check-translations": "tolgee extract check './src/**/*.ts?(x)'"
@@ -127,6 +130,7 @@
     "prismjs": "1.25.0",
     "react-scripts": "4.0.3",
     "redux-devtools-extension": "^2.13.9",
+    "ts-unused-exports": "^9.0.4",
     "typescript": "^4.3.2",
     "webpack": "4.44.2"
   }

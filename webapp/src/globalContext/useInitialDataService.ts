@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
 
@@ -10,14 +10,15 @@ import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { useTolgee } from '@tolgee/react';
 import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
+type PrivateOrganizationModel =
+  components['schemas']['PrivateOrganizationModel'];
 
 export const useInitialDataService = () => {
   const actions = container.resolve(GlobalActions);
   const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
-    OrganizationModel | undefined
+    PrivateOrganizationModel | undefined
   >(undefined);
   const security = useSelector((state: AppState) => state.global.security);
   const initialData = useApiQuery({
@@ -51,14 +52,9 @@ export const useInitialDataService = () => {
     }
   }, [Boolean(initialData.data)]);
 
-  const organizationLoadable = useApiMutation({
-    url: '/v2/organizations/{id}',
+  const preferredOrganizationLoadable = useApiMutation({
+    url: '/v2/preferred-organization',
     method: 'get',
-    options: {
-      onSuccess(data) {
-        setOrganization(data);
-      },
-    },
   });
 
   const setPreferredOrganization = useApiMutation({
@@ -69,33 +65,18 @@ export const useInitialDataService = () => {
   const preferredOrganization =
     organization ?? initialData.data?.preferredOrganization;
 
-  const previousPreferred = useRef<number>();
+  const updatePreferredOrganization = async (organizationId: number) => {
+    if (organizationId !== preferredOrganization?.id) {
+      // set preffered organization
+      await setPreferredOrganization.mutateAsync({
+        path: { organizationId },
+      });
 
-  const updatePreferredOrganization = useCallback(
-    (newOrg: number | OrganizationModel) => {
-      let organizationId: number | undefined;
-      if (typeof newOrg === 'number') {
-        if (organization?.id !== newOrg) {
-          organizationLoadable.mutate({ path: { id: newOrg } });
-          organizationId = newOrg;
-        }
-      } else if (newOrg) {
-        setOrganization(newOrg as OrganizationModel);
-        organizationId = newOrg.id;
-      }
-      if (
-        organizationId !== undefined &&
-        organizationId !==
-          (previousPreferred.current ?? preferredOrganization?.id)
-      ) {
-        previousPreferred.current = organizationId;
-        setPreferredOrganization.mutate({
-          path: { organizationId },
-        });
-      }
-    },
-    [organization, setOrganization, organizationLoadable]
-  );
+      // load new preferred organization
+      const data = await preferredOrganizationLoadable.mutateAsync({});
+      setOrganization(data);
+    }
+  };
 
   const refetchInitialData = () => {
     setOrganization(undefined);
@@ -106,6 +87,11 @@ export const useInitialDataService = () => {
     refetchInitialData();
   }, [security.jwtToken]);
 
+  const isFetching =
+    initialData.isFetching ||
+    setPreferredOrganization.isLoading ||
+    preferredOrganizationLoadable.isLoading;
+
   if (initialData.error) {
     throw new Error(initialData.error.message || initialData.error);
   }
@@ -115,7 +101,7 @@ export const useInitialDataService = () => {
       ...initialData.data!,
       preferredOrganization,
     },
-    isFetching: initialData.isFetching || organizationLoadable.isLoading,
+    isFetching,
     isLoading: initialData.isLoading,
 
     refetchInitialData,

@@ -15,6 +15,8 @@ export const usePermissionTranslation = () => {
           return t('permission_type_translate_hint');
         case 'VIEW':
           return t('permission_type_view_hint');
+        case 'GRANULAR':
+          return t('permission_type_granular_hint');
       }
     } else {
       switch (type) {
@@ -26,6 +28,8 @@ export const usePermissionTranslation = () => {
           return t('permission_type_translate');
         case 'VIEW':
           return t('permission_type_view');
+        case 'GRANULAR':
+          return t('permission_type_granular');
       }
     }
     return type;

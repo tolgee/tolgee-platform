@@ -35,13 +35,13 @@ class ProjectListDashboardE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanup() {
-    userAccountService.find("projectListDashboardUser")?.let {
+    userAccountService.findActive("projectListDashboardUser")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }
       userAccountService.delete(it)
     }
-    userAccountService.find(ProjectsTestData().userWithTranslatePermission.username)?.let {
+    userAccountService.findActive(ProjectsTestData().userWithTranslatePermission.username)?.let {
       userAccountService.delete(it)
     }
   }

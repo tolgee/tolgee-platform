@@ -23,8 +23,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
-            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user-2's organization 1")
+            projectsNode.node("[1].organizationOwner.slug").isEqualTo("user-2-s-organization-1")
+            projectsNode.node("[1].organizationOwner.name").isEqualTo("user-2's organization 1")
           }
         }
     }
@@ -40,8 +40,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
-            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user-2's organization 1")
+            projectsNode.node("[1].organizationOwner.slug").isEqualTo("user-2-s-organization-1")
+            projectsNode.node("[1].organizationOwner.name").isEqualTo("user-2's organization 1")
           }
         }
     }

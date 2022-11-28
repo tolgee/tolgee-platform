@@ -53,7 +53,7 @@ class CleanDbTestListener : TestExecutionListener {
         String.format(
           "SELECT table_schema, table_name" +
             " FROM information_schema.tables" +
-            " WHERE table_catalog = '%s' and (table_schema = 'public' or table_schema = 'billing')" +
+            " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
             "   and table_name not in ($ignoredTablesString)",
           databaseName
         )

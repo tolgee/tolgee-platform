@@ -10,8 +10,8 @@ import { MessageService } from 'tg.service/MessageService';
 
 import { CellKey } from '../CellKey';
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
@@ -20,7 +20,6 @@ import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
@@ -41,9 +40,11 @@ const StyledTags = styled('div')`
   flex-wrap: wrap;
   align-items: flex-start;
   overflow: hidden;
+
   & > * {
     margin: 0px 3px 3px 0px;
   }
+
   position: relative;
 `;
 
@@ -64,6 +65,7 @@ const StyledLanguageField = styled('div')`
   border-color: ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 1px 1px 0px;
   border-style: solid;
+
   & + & {
     border-top: 0px;
   }
@@ -77,7 +79,10 @@ export const KeyEditForm: React.FC = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const permissions = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
+  const canViewScreenshots = satisfiesPermission('screenshots.view');
+  const editEnabled = satisfiesPermission('keys.edit');
 
   const translation = useTranslationsSelector((c) => c.translations)?.[0];
   const languages = useTranslationsSelector((c) => c.languages);
@@ -138,12 +143,6 @@ export const KeyEditForm: React.FC = () => {
     );
   };
 
-  useGlobalLoading(updateNamespace.isLoading);
-
-  const editEnabled = permissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
-
   const handleRemoveKey = () => {
     confirmation({
       title: <T keyName="translation_single_delete_title" />,
@@ -176,6 +175,8 @@ export const KeyEditForm: React.FC = () => {
       },
     });
   };
+
+  useGlobalLoading(updateNamespace.isLoading);
 
   return translation ? (
     <StyledContainer>
@@ -244,7 +245,14 @@ export const KeyEditForm: React.FC = () => {
                 data={translation!}
                 language={language}
                 active={true}
-                editEnabled={permissions.canEditLanguage(language.id)}
+                editEnabled={satisfiesLanguageAccess(
+                  'translations.edit',
+                  language.id
+                )}
+                stateChangeEnabled={satisfiesLanguageAccess(
+                  'translations.state-edit',
+                  language.id
+                )}
                 lastFocusable={false}
               />
             </StyledLanguageField>
@@ -252,14 +260,16 @@ export const KeyEditForm: React.FC = () => {
         })}
       </div>
 
-      <div>
-        <FieldLabel>
-          <T keyName="translation_single_label_screenshots" />
-        </FieldLabel>
-        <StyledGalleryField>
-          <ScreenshotGallery keyId={translation!.keyId} />
-        </StyledGalleryField>
-      </div>
+      {canViewScreenshots && (
+        <div>
+          <FieldLabel>
+            <T keyName="translation_single_label_screenshots" />
+          </FieldLabel>
+          <StyledGalleryField>
+            <ScreenshotGallery keyId={translation!.keyId} />
+          </StyledGalleryField>
+        </div>
+      )}
 
       <StyledActions>
         {editEnabled && (

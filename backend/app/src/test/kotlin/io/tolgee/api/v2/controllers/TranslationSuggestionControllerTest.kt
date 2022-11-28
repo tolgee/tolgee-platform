@@ -4,13 +4,13 @@ import com.amazonaws.services.translate.AmazonTranslate
 import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.fixtures.andAssertThatJson
@@ -21,7 +21,7 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.apache.commons.lang3.time.DateUtils
+import io.tolgee.util.addMonths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -312,10 +312,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 1) }
+    mockCurrentDate { Date().addMonths(1) }
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 2) }
+    mockCurrentDate { Date().addMonths(2) }
     testMtCreditConsumption()
   }
 
