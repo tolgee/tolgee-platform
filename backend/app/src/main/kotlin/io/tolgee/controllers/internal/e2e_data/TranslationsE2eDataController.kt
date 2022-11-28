@@ -60,7 +60,7 @@ class TranslationsE2eDataController(
   @GetMapping(value = ["/cleanup-for-filters"])
   @Transactional
   fun cleanupForFilters() {
-    userAccountService.find("franta")?.let {
+    userAccountService.findActive("franta")?.let {
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }

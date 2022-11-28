@@ -4,6 +4,6 @@ import io.tolgee.activity.iterceptor.PreCommitEventPublisher
 import org.springframework.context.ApplicationEvent
 
 class OnEntityPreDelete(
-  val source: PreCommitEventPublisher,
-  val entity: Any?
-) : ApplicationEvent(source)
+  override val source: PreCommitEventPublisher,
+  override val entity: Any?
+) : ApplicationEvent(source), EntityPreCommitEvent

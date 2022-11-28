@@ -31,9 +31,8 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -107,7 +106,7 @@ class TranslationsController(
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey
   @Operation(
     summary = "Returns all translations for specified languages",
     responses = [
@@ -147,8 +146,11 @@ When null, resulting file will be a flat key-value object.
       return null
     }
 
+    val permittedTags = securityService
+      .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
+
     val response = translationService.getTranslations(
-      languageTags = languages,
+      languageTags = permittedTags,
       namespace = ns,
       projectId = projectHolder.project.id,
       structureDelimiter = request.getStructureDelimiter()
@@ -162,20 +164,9 @@ When null, resulting file will be a flat key-value object.
       )
   }
 
-  /**
-   * It has to be handled manually since spring returns default value even when empty value provided
-   */
-  private fun WebRequest.getStructureDelimiter(): Char? {
-    val structureDelimiterParam = this.parameterMap["structureDelimiter"]?.first() ?: return '.'
-    if (structureDelimiterParam == "") {
-      return null
-    }
-    return structureDelimiterParam.toCharArray().first()
-  }
-
   @PutMapping("")
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
@@ -196,8 +187,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PostMapping("")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
@@ -213,14 +204,14 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
-    securityService.checkLanguageTranslatePermission(translation)
+    securityService.checkStateChangePermission(translation)
     return translationModelAssembler.toModel(translationService.setState(translation, state))
   }
 
@@ -234,19 +225,21 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = [""])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   @Operation(summary = "Returns translations in project")
+  @AccessWithApiKey
   fun getTranslations(
     @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
+    this.securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_VIEW)
 
     val languages: Set<Language> = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
 
     val pageableWithSort = getSafeSortPageable(pageable)
-    val data = translationService.getViewData(projectHolder.project.id, pageableWithSort, params, languages)
+
+    val data = translationService
+      .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
 
@@ -259,14 +252,14 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["select-all"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
     @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
   ): SelectAllResponse {
     val languages: Set<Language> = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
 
     return SelectAllResponse(
       translationService.getSelectAllKeys(
@@ -278,8 +271,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   fun dismissAutoTranslatedState(
@@ -287,13 +280,14 @@ When null, resulting file will be a flat key-value object.
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkStateChangePermission(translation)
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Set's "outdated" indication""")
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
   fun setOutdated(
@@ -307,8 +301,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Returns history of specific translation. 
 
@@ -320,6 +314,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   ): PagedModel<TranslationHistoryModel> {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(translation.language.id))
     val translations = activityService.getTranslationHistory(translation.id, pageable)
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
@@ -327,7 +322,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
-      authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
+      authenticationFacade.apiKey.scopesEnum.contains(Scope.SCREENSHOTS_VIEW)
     ) {
       return screenshotService.getScreenshotsForKeys(keyIds)
     }
@@ -348,7 +343,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
 
   private fun checkKeyEditScope() {
     if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
+      securityService.checkApiKeyScopes(setOf(Scope.KEYS_EDIT), authenticationFacade.apiKey)
     }
   }
 
@@ -365,5 +360,16 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
+  }
+
+  /**
+   * It has to be handled manually since spring returns default value even when empty value provided
+   */
+  private fun WebRequest.getStructureDelimiter(): Char? {
+    val structureDelimiterParam = this.parameterMap["structureDelimiter"]?.first() ?: return '.'
+    if (structureDelimiterParam == "") {
+      return null
+    }
+    return structureDelimiterParam.toCharArray().first()
   }
 }

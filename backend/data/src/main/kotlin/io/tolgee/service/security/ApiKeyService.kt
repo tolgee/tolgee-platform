@@ -10,7 +10,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.PROJECT_API_KEY_PREFIX
@@ -33,7 +33,7 @@ class ApiKeyService(
 ) {
   fun create(
     userAccount: UserAccount,
-    scopes: Set<ApiScope>,
+    scopes: Set<Scope>,
     project: Project,
     expiresAt: Long? = null,
     description: String? = null
@@ -92,9 +92,10 @@ class ApiKeyService(
     apiKeyRepository.delete(apiKey)
   }
 
-  fun getAvailableScopes(userAccountId: Long, project: Project): Set<ApiScope> {
-    return permissionService.getProjectPermissionType(project.id, userAccountId)?.availableScopes?.toSet()
+  fun getAvailableScopes(userAccountId: Long, project: Project): Array<Scope> {
+    val permittedScopes = permissionService.getProjectPermissionScopes(project.id, userAccountId)
       ?: throw NotFoundException()
+    return Scope.expand(permittedScopes)
   }
 
   fun editApiKey(apiKey: ApiKey, dto: V2EditApiKeyDto): ApiKey {

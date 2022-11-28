@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data.dataImport
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 
 class ImportCleanTestData {
   var project: Project
@@ -19,7 +19,7 @@ class ImportCleanTestData {
       addPermission {
         project = this@project.self
         user = this@ImportCleanTestData.userAccount
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       val key = addKey {

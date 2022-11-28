@@ -17,6 +17,10 @@ describe('Organization Members', () => {
     visit();
   });
 
+  afterEach(() => {
+    organizationTestData.clean();
+  });
+
   it('contains organization users', () => {
     gcy('global-paginated-list').within(() => {
       cy.contains('Cukrberg')
@@ -120,7 +124,7 @@ describe('Organization Members', () => {
   };
 
   function leaveOrganization() {
-    gcy('global-paginated-list').within(() => {
+    cy.gcy('global-paginated-list').within(() => {
       cy.contains('admin')
         .closestDcy('organization-member-item')
         .within(() => {

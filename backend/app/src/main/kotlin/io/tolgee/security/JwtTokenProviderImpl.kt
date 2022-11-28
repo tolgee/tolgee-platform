@@ -104,7 +104,7 @@ class JwtTokenProviderImpl(
   }
 
   override fun getUser(token: JwtToken): UserAccountDto {
-    val userAccount = userAccountService.find(token.id)
+    val userAccount = userAccountService.findActive(token.id)
       ?: throw AuthenticationException(io.tolgee.constants.Message.USER_NOT_FOUND)
 
     if (userAccount.tokensValidNotBefore != null && token.issuedAt.before(userAccount.tokensValidNotBefore))

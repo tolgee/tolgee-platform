@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 
 class DockerContainerRunner(
   private val image: String,
-  private val expose: Map<String, String>,
+  private val expose: Map<String, String> = mapOf(),
   private val waitForLog: String,
 
   /**
@@ -30,7 +30,8 @@ class DockerContainerRunner(
   private val stopBeforeStart: Boolean = true,
   private val env: Map<String, String>? = null,
   private val command: String = "",
-  private val timeout: Long = 10000
+  private val timeout: Long = 10000,
+  private val debug: (String) -> Unit = {}
 ) {
   fun run() {
     if (stopBeforeStart) {
@@ -54,14 +55,18 @@ class DockerContainerRunner(
 
   private fun startNewContainer() {
     val startTime = System.currentTimeMillis()
-    "docker run $rmString -d $exposeString$envString --name $containerName $image $command".runCommand()
+    val command = "docker run $rmString -d $exposeString$envString --name $containerName $image $command"
+    debug("Running new container using command: $command")
+    command.runCommand()
     waitForContainerLoggedOutput(startTime, waitForLogTimesForNewContainer)
   }
 
   private fun startExistingContainer() {
     val startTime = System.currentTimeMillis()
     if (!isContainerRunning()) {
-      "docker start $containerName".runCommand()
+      val command = "docker start $containerName"
+      debug("Starting existing container using command: $command")
+      command.runCommand()
       waitForContainerLoggedOutput(startTime, waitForLogTimesForExistingContainer)
     }
   }
@@ -72,18 +77,35 @@ class DockerContainerRunner(
     waitFor(timeout) {
       val since = System.currentTimeMillis() - startTime
       val sinceString = String.format(Locale.US, "%.03f", since.toFloat() / 1000)
-      val output = "docker logs --since=${sinceString}s $containerName".runCommand()
-      return@waitFor output.containsTimes(waitForLog) >= times
+      val command = "docker logs --since=${sinceString}s $containerName"
+      debug("Waiting for container to log output using command: $command")
+      val output = command.runCommand()
+
+      debug("Waiting for string: $waitForLog in container output:\n $output")
+
+      val result = output.containsTimes(waitForLog) >= times
+
+      if (!result) {
+        debug("String not found in container output, waiting...")
+      } else {
+        debug("String found in container output, continuing...")
+      }
+
+      result
     }
   }
 
   fun stop() {
     if (rm) {
-      "docker rm --force $containerName".runCommand()
+      val command = "docker rm --force $containerName"
+      debug("Removing container using command: $command")
+      command.runCommand()
       return
     }
     if (isContainerRunning()) {
-      "docker stop $containerName".runCommand()
+      val command = "docker stop $containerName"
+      debug("Removing container using command: $command")
+      command.runCommand()
     }
   }
 

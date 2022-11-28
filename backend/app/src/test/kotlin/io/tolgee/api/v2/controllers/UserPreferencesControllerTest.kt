@@ -23,7 +23,7 @@ class UserPreferencesControllerTest : AuthorizedControllerTest() {
     userAccount = testData.franta
     performAuthPut("/v2/user-preferences/set-language/de", null).andIsOk
     transactionTemplate.execute {
-      assertThat(userAccountService.find(userAccount!!.username)?.preferences?.language).isEqualTo("de")
+      assertThat(userAccountService.findActive(userAccount!!.username)?.preferences?.language).isEqualTo("de")
     }
   }
 

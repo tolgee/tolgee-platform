@@ -3,14 +3,16 @@ package io.tolgee.service.machineTranslation
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.dtos.MtCreditBalanceDto
+import io.tolgee.events.OnConsumePayAsYouGoMtCredits
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.addMonths
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
-import org.apache.commons.lang3.time.DateUtils
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
@@ -21,6 +23,7 @@ class MtCreditBucketService(
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
   private val organizationService: OrganizationService,
+  private val eventPublisher: ApplicationEventPublisher
 ) {
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
@@ -32,25 +35,41 @@ class MtCreditBucketService(
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
     val balances = getCreditBalances(bucket)
-    val totalBalance = balances.creditBalance + balances.extraCreditBalance
+    val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
+    val totalBalance = balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
 
     if (totalBalance - amount < 0) {
       throw OutOfCreditsException()
     }
 
-    bucket.consumeSufficientCredits(amount)
+    bucket.consumeSufficientCredits(amount, bucket.organization!!.id)
+
     save(bucket)
   }
 
-  private fun MtCreditBucket.consumeSufficientCredits(amount: Int) {
+  private fun MtCreditBucket.consumeSufficientCredits(amount: Int, organizationId: Long) {
     if (this.credits >= amount) {
       this.credits -= amount
       return
     }
 
-    val amountToConsumeFromExtraCredits = amount - this.credits
+    if (this.extraCredits + this.credits >= amount) {
+      val amountToConsumeFromExtraCredits = amount - this.credits
+      this.credits = 0
+      this.extraCredits -= amountToConsumeFromExtraCredits
+      return
+    }
+
+    val amountToConsumeFromPayAsYouGo = amount - this.credits - this.extraCredits
     this.credits = 0
-    this.extraCredits -= amountToConsumeFromExtraCredits
+    this.extraCredits = 0
+    eventPublisher.publishEvent(
+      OnConsumePayAsYouGoMtCredits(
+        this@MtCreditBucketService,
+        organizationId,
+        amountToConsumeFromPayAsYouGo
+      )
+    )
   }
 
   @Transactional
@@ -106,7 +125,7 @@ class MtCreditBucketService(
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
-    return DateUtils.addMonths(this.refilled, 1)
+    return this.refilled.addMonths(1)
   }
 
   fun refillBucket(bucket: MtCreditBucket) {

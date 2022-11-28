@@ -156,6 +156,11 @@ dependencies {
      * MISC MODULE
      */
     implementation(project(':misc'))
+
+    /**
+     * EE MODULE
+     */
+    implementation(project(':ee-app'))
 }
 
 test {

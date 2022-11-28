@@ -2,8 +2,8 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
 
@@ -44,7 +44,7 @@ class ProjectStatsTestData : BaseTestData() {
       }
 
       addPermission {
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
         user = organizationMember
       }
     }

@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.Scope
 import io.tolgee.service.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Tag(name = "User invitations to project")
+@Tag(name = "User invitations to project or organization")
 class V2InvitationController @Autowired constructor(
   private val invitationService: InvitationService,
   private val securityService: SecurityService,
@@ -39,8 +39,8 @@ class V2InvitationController @Autowired constructor(
     }
     invitation.permission?.let {
       securityService.checkProjectPermission(
-        invitation.permission!!.project.id,
-        Permission.ProjectPermissionType.MANAGE
+        invitation.permission!!.project!!.id,
+        Scope.ADMIN
       )
     }
 

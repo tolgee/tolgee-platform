@@ -2,7 +2,8 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -12,6 +13,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.Test
@@ -165,6 +167,20 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThatJson(parsed["en.json"]!!) {
       node("key").isEqualTo("hello")
     }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports only allowed languages`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.projectBuilder.self }
+    userAccount = testData.viewEnOnlyUser
+
+    val parsed = performExport()
+    val files = parsed.keys
+    files.assert.containsExactly("en.json")
   }
 
   private fun initBaseData() {

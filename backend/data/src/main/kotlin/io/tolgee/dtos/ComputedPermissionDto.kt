@@ -1,11 +1,95 @@
 package io.tolgee.dtos
 
-import io.tolgee.model.Permission
+import io.tolgee.constants.ComputedPermissionOrigin
+import io.tolgee.dtos.cacheable.IPermission
+import io.tolgee.exceptions.LanguageNotPermittedException
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 
-data class ComputedPermissionDto(
-  val type: Permission.ProjectPermissionType?,
-  val languageIds: Set<Long>?
-) {
-  val allLanguagesPermitted: Boolean
-    get() = type != Permission.ProjectPermissionType.TRANSLATE || languageIds.isNullOrEmpty()
+class ComputedPermissionDto(
+  permission: IPermission,
+  val origin: ComputedPermissionOrigin = ComputedPermissionOrigin.NONE
+) : IPermission by permission {
+
+  val expandedScopes: Array<Scope> by lazy {
+    Scope.expand(this.scopes)
+  }
+
+  fun checkViewPermitted(vararg languageIds: Long) = checkLanguagePermitted(languageIds.toList(), viewLanguageIds)
+  fun checkTranslatePermitted(vararg languageIds: Long) = checkLanguagePermitted(
+    languageIds.toList(),
+    translateLanguageIds
+  )
+
+  fun checkStateChangePermitted(vararg languageIds: Long) = checkLanguagePermitted(
+    languageIds.toList(),
+    stateChangeLanguageIds
+  )
+
+  private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
+    if (scopes.isEmpty()) {
+      return false
+    }
+
+    if (languageIds.isNullOrEmpty()) {
+      return true
+    }
+
+    if (scopes.contains(Scope.ADMIN)) {
+      return true
+    }
+
+    return false
+  }
+
+  private fun checkLanguagePermitted(languageIds: Collection<Long>, permittedLanguageIds: Collection<Long>?) {
+    if (this.isAllLanguagesPermitted(permittedLanguageIds)) {
+      return
+    }
+    if (permittedLanguageIds?.containsAll(languageIds) != true) {
+      throw LanguageNotPermittedException(languageIds = languageIds - permittedLanguageIds.orEmpty().toSet())
+    }
+  }
+
+  constructor(permission: IPermission) : this(
+    permission,
+    origin = if (permission.organizationId != null)
+      ComputedPermissionOrigin.ORGANIZATION_BASE
+    else
+      ComputedPermissionOrigin.DIRECT
+  )
+
+  companion object {
+    private fun getEmptyPermission(scopes: Array<Scope>, type: ProjectPermissionType): IPermission {
+      return object : IPermission {
+        override val scopes: Array<Scope>
+          get() = scopes
+        override val projectId: Long?
+          get() = null
+        override val organizationId: Long?
+          get() = null
+        override val translateLanguageIds: Set<Long>?
+          get() = null
+        override val viewLanguageIds: Set<Long>?
+          get() = null
+        override val stateChangeLanguageIds: Set<Long>?
+          get() = null
+        override val type: ProjectPermissionType
+          get() = type
+        override val granular: Boolean?
+          get() = null
+      }
+    }
+
+    val NONE
+      get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
+    val ADMIN
+      get() = ComputedPermissionDto(
+        getEmptyPermission(
+          scopes = arrayOf(Scope.ADMIN),
+          type = ProjectPermissionType.MANAGE
+        ),
+        origin = ComputedPermissionOrigin.ADMIN
+      )
+  }
 }

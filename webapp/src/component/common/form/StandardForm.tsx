@@ -31,6 +31,7 @@ interface FormProps<T> {
   disabled?: boolean;
   children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
   rootSx?: SxProps;
+  hideCancel?: boolean;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
@@ -38,6 +39,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   validationSchema,
   disabled,
   rootSx = { mb: 2 },
+  hideCancel,
   ...props
 }) => {
   const history = useHistory();
@@ -76,12 +78,14 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                       <Box flexGrow={1}>{props.customActions}</Box>
                     )}
                     <Box display="flex" alignItems="flex-end">
-                      <Button
-                        data-cy="global-form-cancel-button"
-                        onClick={onCancel}
-                      >
-                        <T keyName="global_form_cancel" />
-                      </Button>
+                      {!hideCancel && (
+                        <Button
+                          data-cy="global-form-cancel-button"
+                          onClick={onCancel}
+                        >
+                          <T keyName="global_form_cancel" />
+                        </Button>
+                      )}
                       <Box ml={1}>
                         <LoadingButton
                           data-cy="global-form-save-button"

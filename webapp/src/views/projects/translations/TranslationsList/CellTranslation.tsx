@@ -1,17 +1,17 @@
 import { useRef } from 'react';
 import clsx from 'clsx';
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import {
-  StyledCell,
   CELL_CLICKABLE,
   CELL_HOVER,
   CELL_PLAIN,
   CELL_RAISED,
   CELL_SELECTED,
+  StyledCell,
 } from '../cell/styles';
 import { useEditableRow } from '../useEditableRow';
 import { useTranslationsActions } from '../context/TranslationsContext';
@@ -85,6 +85,7 @@ type Props = {
   colIndex?: number;
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
+  stateChangeEnabled: boolean;
   width?: number | string;
   active: boolean;
   lastFocusable: boolean;
@@ -97,6 +98,7 @@ export const CellTranslation: React.FC<Props> = ({
   colIndex,
   onResize,
   editEnabled,
+  stateChangeEnabled,
   width,
   active,
   lastFocusable,
@@ -164,6 +166,7 @@ export const CellTranslation: React.FC<Props> = ({
       })}
       tabIndex={0}
       ref={cellRef}
+      data-cy="translations-table-cell-translation"
     >
       <StyledContainer
         className={clsx(
@@ -207,6 +210,7 @@ export const CellTranslation: React.FC<Props> = ({
             onComments={() => handleOpen('comments')}
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
+            stateChangeEnabled={stateChangeEnabled}
             editEnabled={editEnabled}
             state={state}
             onStateChange={handleStateChange}
@@ -230,6 +234,7 @@ export const CellTranslation: React.FC<Props> = ({
           autofocus={autofocus}
           state={state}
           onStateChange={handleStateChange}
+          stateChangeEnabled={stateChangeEnabled}
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}

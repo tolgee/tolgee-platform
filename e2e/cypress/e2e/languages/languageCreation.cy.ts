@@ -3,9 +3,13 @@ import {
   selectInAutocomplete,
   setLanguageData,
   typeToAutocomplete,
-  visitProjectLanguages,
 } from '../../common/languages';
-import { assertMessage, gcy, getInputByName } from '../../common/shared';
+import {
+  assertMessage,
+  gcy,
+  getInputByName,
+  visitProjectLanguages,
+} from '../../common/shared';
 import { languagesTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 

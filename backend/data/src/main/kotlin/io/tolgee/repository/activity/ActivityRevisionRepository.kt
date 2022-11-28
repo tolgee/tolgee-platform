@@ -2,7 +2,6 @@ package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityDescribingEntity
-import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -19,19 +18,6 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   """
   )
   fun getForProject(projectId: Long, pageable: Pageable): Page<ActivityRevision>
-
-  @Query(
-    """
-      from ActivityModifiedEntity ame 
-      join ame.activityRevision ar
-      where ar.id in :ids and 
-      ar.type in :allowedActivityTypes
-    """
-  )
-  fun getModificationsByRevisionIdIn(
-    ids: Collection<Long>,
-    allowedActivityTypes: List<ActivityType>
-  ): List<ActivityModifiedEntity>
 
   @Query(
     """

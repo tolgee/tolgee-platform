@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType.TRANSLATE
 
 class MtCreditsTestData : BaseTestData() {
   lateinit var organization: Organization
@@ -13,7 +13,7 @@ class MtCreditsTestData : BaseTestData() {
     root.addOrganization {
       name = "Org"
       organization = this
-      basePermissions = Permission.ProjectPermissionType.TRANSLATE
+      basePermission.type = TRANSLATE
     }.apply {
       addRole {
         this.user = this@MtCreditsTestData.user

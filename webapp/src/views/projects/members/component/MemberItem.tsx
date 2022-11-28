@@ -1,24 +1,25 @@
-import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
+import { useTranslate } from '@tolgee/react';
 import { Chip, styled } from '@mui/material';
+import { T } from '@tolgee/react';
 
-import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
-import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
-import { confirmation } from 'tg.hooks/confirmation';
+import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useUpdatePermissions } from './useUpdatePermissions';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
-
-const messageService = container.resolve(MessageService);
 
 const StyledListItem = styled('div')`
   display: flex;
@@ -45,6 +46,13 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
+const StyledItemUser = styled('div')`
+  display: flex;
+  margin-left: 8px;
+  flex-grow: 1;
+  align-items: center;
+`;
+
 type Props = {
   user: UserAccountInProjectModel;
 };
@@ -53,87 +61,82 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
   const { t } = useTranslate();
+  const { satisfiesPermission } = useProjectPermissions();
+  const isAdmin = satisfiesPermission('admin');
+  const allLangs = useProjectLanguages();
 
-  const editPermission = useApiMutation({
-    url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
-    method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/users',
-  });
-
-  const changePermission = (permissionType, languages, showMessage) => {
-    editPermission.mutate(
-      {
-        path: {
-          userId: user?.id,
-          permissionType,
-          projectId: project.id,
-        },
-        query: {
-          languages: permissionType === 'TRANSLATE' ? languages : undefined,
-        },
-      },
-      {
-        onSuccess() {
-          if (showMessage) {
-            messageService.success(<T keyName="permissions_set_message" />);
-          }
-        },
-        onError(e) {
-          parseErrorResponse(e).forEach((err) =>
-            messageService.error(<TranslatedError code={err} />)
-          );
-        },
-      }
-    );
-  };
-
-  const changePermissionConfirm = (permissionType, languages) => {
-    confirmation({
-      message: <T keyName="change_permissions_confirmation" />,
-      onConfirm: () => changePermission(permissionType, languages, true),
-    });
-  };
-
-  const allLanguages = useProjectLanguages();
-  const allLangIds = allLanguages.map((l) => l.id);
-  const projectPermissionType = user.computedPermissions.type;
   const isCurrentUser = currentUser?.id === user.id;
   const isOwner = user.organizationRole === 'OWNER';
 
+  const messages = useMessage();
+
+  const { updatePermissions, setByOrganization } = useUpdatePermissions({
+    userId: user.id,
+    projectId: project.id,
+  });
+
+  async function handleSubmit(data: PermissionSettingsState) {
+    try {
+      await updatePermissions(data);
+      messages.success(<T>permissions_set_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
+  }
+
+  const isOrganzationMember = Boolean(user.organizationRole);
+  const hasDirectPermissions = Boolean(user.directPermission);
+
+  async function handleResetToOrganization() {
+    try {
+      await setByOrganization();
+      messages.success(<T>permissions_reset_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
+  }
+
   return (
     <StyledListItem data-cy="project-member-item">
-      <StyledItemText>
-        {user.name} ({user.username}){' '}
-        {user.organizationRole && (
-          <Chip size="small" label={project.organizationOwnerName} />
-        )}
-      </StyledItemText>
+      <StyledItemUser>
+        <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
+        <StyledItemText>
+          {user.name} ({user.username}){' '}
+          {user.organizationRole && (
+            <Chip size="small" label={project.organizationOwner?.name} />
+          )}
+        </StyledItemText>
+      </StyledItemUser>
       <StyledItemActions>
-        {projectPermissionType === 'TRANSLATE' && (
-          <LanguagePermissionsMenu
-            selected={user.computedPermissions.permittedLanguageIds || []}
-            onSelect={(langs) =>
-              changePermission(projectPermissionType, langs, false)
-            }
-          />
-        )}
+        <ScopesInfo scopes={user.computedPermission.scopes} />
+        <LanguagePermissionSummary
+          permissions={user.computedPermission}
+          allLangs={allLangs}
+        />
         <PermissionsMenu
-          title={
+          buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
               : isOwner
               ? t('cannot_change_your_own_access_tooltip')
               : undefined
           }
-          selected={user.computedPermissions.type!}
-          onSelect={(permission) =>
-            changePermissionConfirm(permission, allLangIds)
-          }
           buttonProps={{
             size: 'small',
-            disabled: isCurrentUser || isOwner,
+            disabled: !isAdmin || isCurrentUser || isOwner,
           }}
-          minPermissions={user.organizationBasePermissions}
+          modalProps={{
+            allLangs,
+            title: user.name || user.username,
+            permissions: user.computedPermission,
+            onSubmit: handleSubmit,
+            isInheritedFromOrganization:
+              !hasDirectPermissions && isOrganzationMember,
+            onResetToOrganization:
+              hasDirectPermissions && isOrganzationMember
+                ? handleResetToOrganization
+                : undefined,
+          }}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

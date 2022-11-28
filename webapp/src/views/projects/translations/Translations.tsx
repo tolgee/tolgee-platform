@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +15,6 @@ import { TranslationsList } from './TranslationsList/TranslationsList';
 import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';
@@ -50,9 +49,7 @@ export const Translations = () => {
 
   const translationsEmpty = !translations?.length;
 
-  const canAdd = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
+  const canAdd = projectPermissions.satisfiesPermission('keys.edit');
 
   const [_, setNewDialog] = useUrlSearchState('create', {
     defaultVal: 'false',

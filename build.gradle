@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2020. Tolgee
  */
-
 buildscript {
     repositories {
         mavenCentral()
@@ -100,6 +99,7 @@ project(':server-app').afterEvaluate {
     task stopDbChangelogContainer(type: Exec) {
         commandLine "docker", "rm", "--force", dbSchemaContainerName
         mustRunAfter project(':data').tasks.findByName("diffChangeLog")
+        mustRunAfter project(':ee-app').tasks.findByName("diffChangeLog")
     }
 
     task diffChangeLog {
@@ -149,3 +149,4 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 subprojects {
     task allDeps(type: DependencyReportTask) {}
 }
+

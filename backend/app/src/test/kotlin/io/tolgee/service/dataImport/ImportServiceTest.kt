@@ -3,11 +3,13 @@ package io.tolgee.service.dataImport
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.security.AuthenticationProvider
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -82,9 +84,12 @@ class ImportServiceTest : AbstractSpringTest() {
     val testData = executeInNewTransaction {
       val testData = ImportNamespacesTestData()
       testDataService.saveTestData(testData.root)
+      val provider = applicationContext.getBean(AuthenticationProvider::class.java)
+      SecurityContextHolder.getContext().authentication = provider.getAuthentication(testData.userAccount)
       testData
     }
     executeInNewTransaction {
+      permissionService.find(testData.project.id, testData.userAccount.id)
       val import = importService.get(testData.import.id)
       importService.import(import)
     }

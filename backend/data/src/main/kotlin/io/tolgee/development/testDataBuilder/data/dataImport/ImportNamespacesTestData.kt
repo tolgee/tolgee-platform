@@ -3,12 +3,12 @@ package io.tolgee.development.testDataBuilder.data.dataImport
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.KeyComment
 import io.tolgee.model.translation.Translation
 
@@ -134,7 +134,7 @@ class ImportNamespacesTestData {
       addPermission {
         project = this@project.self
         user = this@ImportNamespacesTestData.userAccount
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
       english = addEnglish().self
       german = addGerman().self

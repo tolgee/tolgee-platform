@@ -11,7 +11,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -42,7 +42,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       mapOf(
         "projectId" to testData.projectBuilder.self.id,
-        "scopes" to setOf(ApiScope.TRANSLATIONS_VIEW.value, ApiScope.SCREENSHOTS_UPLOAD.value)
+        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value)
       )
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
@@ -61,7 +61,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       mapOf(
         "projectId" to testData.projectBuilder.self.id,
-        "scopes" to setOf(ApiScope.TRANSLATIONS_VIEW.value, ApiScope.SCREENSHOTS_UPLOAD.value)
+        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value, Scope.SCREENSHOTS_UPLOAD.value)
       )
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
@@ -81,7 +81,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       CreateApiKeyDto().apply {
         projectId = testData.projectBuilder.self.id
-        scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_UPLOAD)
+        scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_UPLOAD)
       }
     ).andIsForbidden
   }
@@ -93,7 +93,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       "/v2/api-keys",
       CreateApiKeyDto().apply {
         projectId = testData.projectBuilder.self.id
-        scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_UPLOAD, ApiScope.KEYS_EDIT)
+        scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_UPLOAD, Scope.KEYS_EDIT)
       }
     ).andIsForbidden
   }
@@ -176,7 +176,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `updates existing key`() {
     userAccount = testData.frantisekDobrota
-    performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(ApiScope.TRANSLATIONS_EDIT)))
+    performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(Scope.TRANSLATIONS_EDIT)))
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("scopes").isEqualTo("""["translations.edit"]""")
       }
@@ -185,14 +185,14 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `doesn't update existing key when not satisfies permissions`() {
     userAccount = testData.frantisekDobrota
-    performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(ApiScope.KEYS_EDIT)))
+    performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(Scope.KEYS_EDIT)))
       .andIsForbidden
   }
 
   @Test
   fun `doesn't update existing key for different user`() {
     userAccount = testData.frantisekDobrota
-    performAuthPut("/v2/api-keys/${testData.usersKey.id}", V2EditApiKeyDto(setOf(ApiScope.KEYS_EDIT)))
+    performAuthPut("/v2/api-keys/${testData.usersKey.id}", V2EditApiKeyDto(setOf(Scope.KEYS_EDIT)))
       .andIsForbidden
   }
 
@@ -254,7 +254,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `returns correct permitted languages for current`() {
     val testData = LanguagePermissionsTestData()
     testDataService.saveTestData(testData.root)
-    userAccount = testData.bothLangsExplicitUser
+    userAccount = testData.translateAllExplicitUser
     performAuthGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
       .andPrettyPrint.andAssertThatJson {
         node("id").isValidId

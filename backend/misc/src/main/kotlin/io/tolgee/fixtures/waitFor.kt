@@ -21,7 +21,7 @@ class WaitNotSatisfiedException : Exception()
 class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : Exception(throwable)
 
 fun waitForNotThrowing(
-  throwableClass: KClass<out Throwable>,
+  throwableClass: KClass<out Throwable> = Throwable::class,
   timeout: Long = 10000,
   pollTime: Long = 10,
   fn: () -> Unit

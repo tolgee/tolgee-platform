@@ -5,9 +5,8 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
@@ -35,7 +34,6 @@ class KeyComplexEditHelper(
   private val translationService: TranslationService = applicationContext.getBean(TranslationService::class.java)
   private val tagService: TagService = applicationContext.getBean(TagService::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
-  private val authenticationFacade: AuthenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
 
   private lateinit var key: Key
@@ -198,24 +196,17 @@ class KeyComplexEditHelper(
   }
 
   private fun Project.checkScreenshotsDeletePermission() {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_DELETE), authenticationFacade.apiKey)
-    }
-    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
+    securityService.checkProjectPermission(this.id, Scope.SCREENSHOTS_DELETE)
+
   }
 
   private fun Project.checkKeysEditPermission() {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
-    }
-    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.EDIT)
+    securityService.checkProjectPermission(this.id, Scope.KEYS_EDIT)
+
   }
 
   private fun Project.checkTranslationsEditPermission() {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_EDIT), authenticationFacade.apiKey)
-    }
-    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
+    securityService.checkProjectPermission(this.id, Scope.TRANSLATIONS_EDIT)
   }
 
   private fun Key.checkInProject() {

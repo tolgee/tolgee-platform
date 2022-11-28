@@ -5,11 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springdoc.api.annotations.ParameterObject
@@ -37,22 +38,30 @@ import java.util.zip.ZipOutputStream
 class V2ExportController(
   private val exportService: ExportService,
   private val projectHolder: ProjectHolder,
+  private val languageService: LanguageService,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   @GetMapping(value = [""])
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data")
   fun export(
     @ParameterObject params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
+    params.languages = languageService
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
+      .toList()
+      .map { language -> language.tag }
+      .toSet()
+
     val exported = exportService.export(projectHolder.project.id, params)
     checkExportNotEmpty(exported)
     return getExportResponse(params, exported)
   }
 
   @PostMapping(value = [""])
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.
   """

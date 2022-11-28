@@ -4,12 +4,14 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 
 class ImportTestData {
@@ -23,6 +25,7 @@ class ImportTestData {
   lateinit var importFrench: ImportLanguage
   lateinit var importEnglish: ImportLanguage
   lateinit var translationWithConflict: ImportTranslation
+  lateinit var newLongKey: ImportKey
   var project: Project
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
@@ -36,7 +39,7 @@ class ImportTestData {
       addPermission {
         project = this@project.self
         user = this@ImportTestData.userAccount
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       val key = addKey {
@@ -132,6 +135,7 @@ class ImportTestData {
           }
           addImportKey {
             name = (1..2000).joinToString("") { "a" }
+            newLongKey = this
           }
           addImportKey {
             name = "extraordinary key"
@@ -159,11 +163,6 @@ class ImportTestData {
           }
           addImportTranslation {
             this.language = importEnglish
-            this.key = data.importKeys[3].self
-            this.conflict = projectBuilder.data.translations[3].self
-          }
-          addImportTranslation {
-            this.language = importEnglish
             this.key = data.importKeys[4].self
           }
           addImportTranslation {
@@ -176,6 +175,37 @@ class ImportTestData {
     }.self
   }
 
+  fun useTranslateOnlyUser(): UserAccount {
+    val user = this.root.addUserAccount {
+      name = "En only user"
+      username = "en_only_user"
+    }
+    this.import.author = user.self
+    this.projectBuilder.addPermission {
+      this.user = user.self
+      this.scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
+      this.type = null
+      viewLanguages.add(english)
+      translateLanguages.add(english)
+    }
+    return user.self
+  }
+
+  fun useViewEnOnlyUser(): UserAccount {
+    val user = this.root.addUserAccount {
+      name = "En only user"
+      username = "en_only_user"
+    }
+    this.import.author = user.self
+    this.projectBuilder.addPermission {
+      this.user = user.self
+      this.scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+      this.type = null
+      viewLanguages.add(english)
+    }
+    return user.self
+  }
+
   fun addEmptyKey() {
     this.importBuilder.data.importFiles[0].apply {
       addImportKey {
@@ -184,18 +214,26 @@ class ImportTestData {
     }
   }
 
-  fun addFrenchTranslations() {
+  fun addFrenchTranslations(): () -> List<Unit> {
+    val translations = mutableListOf<ImportTranslation>()
     this.importBuilder.data.importFiles[0].apply {
       addImportTranslation {
         this.language = importFrench
         this.key = data.importKeys[0].self
         this.text = "French text"
+        translations.add(this)
       }
       addImportTranslation {
         this.language = importFrench
         this.key = data.importKeys[2].self
         this.text = "French text"
+        translations.add(this)
       }
+    }
+
+    return {
+      this.importFrench.existingLanguage = this.french
+      translations.map { it.resolve() }
     }
   }
 
