@@ -14,7 +14,7 @@ open class ProjectWithLanguagesView(
   override val baseLanguage: Language?,
   override val organizationOwner: Organization?,
   override val organizationRole: OrganizationRoleType?,
-  override val directPermissions: Permission.ProjectPermissionType?,
+  override val directPermissions: Permission?,
   val permittedLanguageIds: List<Long>?
 ) : ProjectView {
   companion object {

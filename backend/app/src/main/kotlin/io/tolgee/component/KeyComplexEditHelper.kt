@@ -5,9 +5,8 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
@@ -189,16 +188,16 @@ class KeyComplexEditHelper(
 
   private fun Project.checkScreenshotsDeletePermission() {
     if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_DELETE), authenticationFacade.apiKey)
+      securityService.checkApiKeyScopes(setOf(Scope.SCREENSHOTS_DELETE), authenticationFacade.apiKey)
     }
-    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
+    securityService.checkProjectPermission(this.id, Scope.SCREENSHOTS_DELETE)
   }
 
   private fun Project.checkKeysEditPermission() {
     if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
+      securityService.checkApiKeyScopes(setOf(Scope.KEYS_EDIT), authenticationFacade.apiKey)
     }
-    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.EDIT)
+    securityService.checkProjectPermission(this.id, Scope.KEYS_EDIT)
   }
 
   private fun Key.checkInProject() {

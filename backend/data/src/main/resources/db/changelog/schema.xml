@@ -2379,4 +2379,17 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-1">
+        <addColumn tableName="permission">
+            <column name="organization_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-2">
+        <addColumn tableName="permission">
+            <column name="scopes" type="varchar[]"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-3">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="permission" constraintName="FKodqlqlhjgsfwnq418388o4vy7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

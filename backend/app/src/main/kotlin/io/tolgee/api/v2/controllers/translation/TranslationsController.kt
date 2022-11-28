@@ -31,9 +31,8 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -107,7 +106,7 @@ class TranslationsController(
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
   @Operation(
     summary = "Returns all translations for specified languages",
     responses = [
@@ -174,8 +173,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("")
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
@@ -196,8 +195,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PostMapping("")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey([Scope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
@@ -213,8 +212,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey([Scope.TRANSLATION_STATE_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATION_STATE_EDIT)
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
@@ -234,8 +233,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = [""])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Returns translations in project")
   fun getTranslations(
     @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
@@ -259,8 +258,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["select-all"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
     @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
@@ -278,8 +277,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   fun dismissAutoTranslatedState(
@@ -307,8 +306,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Returns history of specific translation. 
 
@@ -327,7 +326,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
-      authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
+      authenticationFacade.apiKey.scopesEnum.contains(Scope.SCREENSHOTS_VIEW)
     ) {
       return screenshotService.getScreenshotsForKeys(keyIds)
     }
@@ -348,7 +347,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
 
   private fun checkKeyEditScope() {
     if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
+      securityService.checkApiKeyScopes(setOf(Scope.KEYS_EDIT), authenticationFacade.apiKey)
     }
   }
 

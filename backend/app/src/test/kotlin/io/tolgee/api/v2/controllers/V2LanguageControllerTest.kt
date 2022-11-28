@@ -10,7 +10,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -79,7 +79,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.LANGUAGES_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.LANGUAGES_EDIT])
   fun `deletes language with API key`() {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
@@ -93,7 +93,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `does not deletes language with API key (permissions)`() {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())

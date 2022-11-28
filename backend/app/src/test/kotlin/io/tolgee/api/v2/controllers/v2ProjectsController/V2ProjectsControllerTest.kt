@@ -153,7 +153,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
         user = directPermissionUser
         project = directPermissionProject
         type = Permission.ProjectPermissionType.TRANSLATE
-        languages = project.languages.toMutableSet()
+        languages = project!!.languages.toMutableSet()
       }
     )
 
@@ -178,7 +178,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     withPermissionsTestData { project, user ->
       performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-      permissionService.getProjectPermissionType(project.id, user)
+      permissionService.getProjectPermissionScopes(project.id, user)
         .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
     }
   }
@@ -200,9 +200,11 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
       permissionService.getProjectPermissionData(project.id, user.id)
         .let {
-          assertThat(it.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
-          assertThat(it.computedPermissions.languageIds).contains(lng1.id)
-          assertThat(it.computedPermissions.languageIds).contains(lng2.id)
+          assertThat(it.computedPermissions.scopes).containsAll(
+            Permission.ProjectPermissionType.VIEW.availableScopes.toList()
+          )
+          assertThat(it.computedPermissions.translateLanguageIds).contains(lng1.id)
+          assertThat(it.computedPermissions.translateLanguageIds).contains(lng2.id)
         }
     }
   }
@@ -215,8 +217,9 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
     organizationRoleService.grantMemberRoleToUser(user, project.organizationOwner!!)
     permissionService.create(Permission(user = user, project = project, type = Permission.ProjectPermissionType.VIEW))
-    project.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
-    organizationRepository.save(project.organizationOwner!!)
+    project.organizationOwner.basePermission.scopes =
+      Permission.ProjectPermissionType.EDIT.availableScopes
+    organizationRepository.save(project.organizationOwner)
 
     loginAsUser(usersAndOrganizations[1].name)
 
@@ -278,8 +281,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     val user = dbPopulator.createUserIfNotExists("jirina")
     organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
 
-    repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
-    organizationRepository.save(repo.organizationOwner!!)
+    repo.organizationOwner.basePermission.scopes = Permission.ProjectPermissionType.EDIT.availableScopes
+    organizationRepository.save(repo.organizationOwner)
 
     loginAsUser(usersAndOrganizations[1].name)
 
@@ -317,7 +320,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-    permissionService.getProjectPermissionType(repo.id, user)
+    permissionService.getProjectPermissionScopes(repo.id, user)
       .let { assertThat(it).isNull() }
   }
 

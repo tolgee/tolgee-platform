@@ -20,6 +20,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -95,7 +96,7 @@ class ApiKeyController(
   fun get(@PathVariable keyId: Long): ApiKeyModel {
     val apiKey = apiKeyService.findOptional(keyId).orElseThrow { NotFoundException() }
     if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {
-      securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)
+      securityService.checkProjectPermission(apiKey.project.id, Scope.ADMIN)
     }
     return apiKey.let { apiKeyModelAssembler.toModel(it) }
   }
@@ -117,7 +118,7 @@ class ApiKeyController(
 
   private fun getProjectPermittedLanguages(): Set<Long>? {
     val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
-    val languageIds = data.computedPermissions.languageIds
+    val languageIds = data.computedPermissions.translateLanguageIds
     if (languageIds.isNullOrEmpty()) {
       return null
     }
@@ -126,7 +127,7 @@ class ApiKeyController(
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
   @Operation(summary = "Returns all API keys for project")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(Scope.ADMIN)
   fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
     return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
@@ -172,7 +173,7 @@ class ApiKeyController(
 
   private fun checkOwner(apiKey: ApiKey) {
     try {
-      securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)
+      securityService.checkProjectPermission(apiKey.project.id, Scope.ADMIN)
     } catch (e: PermissionException) {
       // users can delete their own api keys
       if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {

@@ -59,13 +59,15 @@ class ProjectsE2eDataController(
     userAccountRepository.saveAll(createdUsers.values)
 
     organizations.forEach {
-      val organization = organizationRepository.save(
-        Organization(
-          name = it.name,
-          slug = organizationService.generateSlug(it.name),
-          basePermissions = it.basePermission
-        )
+      val organization = Organization(
+        name = it.name,
+        slug = organizationService.generateSlug(it.name),
       )
+
+      val basePermission = Permission(organization = organization)
+      organization.basePermission = basePermission
+      permissionRepository.save(basePermission)
+      organizationRepository.save(organization)
 
       it.owners.forEach {
         createdUsers[it]!!.let { user ->

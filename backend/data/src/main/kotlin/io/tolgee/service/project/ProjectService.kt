@@ -178,17 +178,17 @@ class ProjectService constructor(
         val permission = result[1] as Permission?
         val organization = result[2] as Organization?
         val organizationRole = result[3] as OrganizationRole?
-        val permissionType = permissionService.computeProjectPermissionType(
+        val scopes = permissionService.computeProjectPermissionType(
           organizationRole?.type,
-          organization?.basePermissions,
-          permission?.type,
+          organization?.basePermission?.scopes,
+          permission?.scopes,
           permission?.languages?.map { it.id }?.toSet()
-        ).type
+        ).scopes
           ?: throw IllegalStateException(
             "Project project should not" +
               " return project with no permission for provided user"
           )
-        fromEntityAndPermission(project, permissionType)
+        fromEntityAndPermission(project, scopes)
       }.toList()
   }
 

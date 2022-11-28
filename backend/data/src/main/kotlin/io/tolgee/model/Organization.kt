@@ -44,12 +44,9 @@ class Organization(
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
 ) : ModelWithAvatar, AuditModel() {
-  constructor(
-    name: String,
-    description: String? = null,
-    slug: String = "",
-    basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-  ) : this(0, name, description, slug, basePermissions)
+
+  @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true)
+  lateinit var basePermission: Permission
 
   @JsonIgnore
   @OneToMany(mappedBy = "organization")

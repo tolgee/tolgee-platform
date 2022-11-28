@@ -27,30 +27,25 @@ class CachedPermissionService(
   @set:Autowired
   lateinit var projectService: ProjectService
 
-  fun getAllOfProject(project: Project?): Set<Permission> {
-    return permissionRepository.getAllByProjectAndUserNotNull(project)
-  }
-
   fun findById(id: Long): Permission? {
     return permissionRepository.findById(id).orElse(null)
   }
 
   fun create(permission: Permission): Permission {
-    permission.project.permissions.add(permission)
     return permissionRepository.save(permission)
   }
 
   @CacheEvict(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    key = "{#permission.user?.id, #permission.project?.id}"
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}"
   )
   fun delete(permission: Permission) {
     permissionRepository.delete(permission)
   }
 
   @CacheEvict(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id}"
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
   )
   fun createForInvitation(
     invitation: Invitation,
@@ -81,26 +76,45 @@ class CachedPermissionService(
   }
 
   @Cacheable(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    key = "{#userId, #projectId}",
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
   )
   @Transactional
   fun findOneDtoByProjectIdAndUserId(projectId: Long, userId: Long): PermissionDto? {
     return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)?.let { permission ->
       PermissionDto(
+        id = permission.id,
         userId = permission.user?.id,
         invitationId = permission.invitation?.id,
+        scopes = permission.scopes,
+        projectId = permission.project?.id,
+        organizationId = null,
+        languageIds = permission.languages.map { it.id }.toMutableSet()
+      )
+    }
+  }
+
+  @Cacheable(
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
+  )
+  fun findOneDtoByOrganizationId(organizationId: Long): PermissionDto? {
+    return permissionRepository.findOneByOrganizationId(organizationId)?.let { permission ->
+      PermissionDto(
         id = permission.id,
-        type = permission.type,
-        projectId = permission.project.id,
+        userId = permission.user?.id,
+        invitationId = permission.invitation?.id,
+        scopes = permission.scopes,
+        projectId = permission.project?.id,
+        organizationId = permission.project?.id,
         languageIds = permission.languages.map { it.id }.toMutableSet()
       )
     }
   }
 
   @CacheEvict(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    key = "{#permission.user?.id, #permission.project?.id}"
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#permission.user?.id, #permission.project?.id, #permission.organization?.id}"
   )
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
     permission.invitation = null
@@ -109,18 +123,10 @@ class CachedPermissionService(
   }
 
   @CacheEvict(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id}"
+    cacheNames = [Caches.PERMISSIONS],
+    key = "{#result.user?.id, #result.project?.id, #permission.organization?.id}"
   )
   fun save(permission: Permission): Permission {
     return permissionRepository.save(permission)
-  }
-
-  @CacheEvict(
-    cacheNames = [Caches.PROJECT_PERMISSIONS],
-    allEntries = true
-  )
-  fun saveAll(permissions: Iterable<Permission>) {
-    this.permissionRepository.saveAll(permissions)
   }
 }

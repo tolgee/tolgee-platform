@@ -45,7 +45,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       val base = dbPopulator.createBase("Hello world", generateUniqueString())
       val projects = projectService.findAllPermitted(base.userAccount)
       assertThat(projects).hasSize(1)
-      assertThat(projects[0].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+      assertThat(projects[0].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.MANAGE.availableScopes)
     }
   }
 
@@ -63,9 +63,9 @@ class ProjectServiceTest : AbstractSpringTest() {
       organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)
       val projects = projectService.findAllPermitted(base.userAccount)
       assertThat(projects).hasSize(7)
-      assertThat(projects[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
-      assertThat(projects[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
-      assertThat(projects[5].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+      assertThat(projects[6].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.MANAGE.availableScopes)
+      assertThat(projects[1].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.VIEW.availableScopes)
+      assertThat(projects[5].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.MANAGE.availableScopes)
     }
   }
 
@@ -101,10 +101,10 @@ class ProjectServiceTest : AbstractSpringTest() {
 
       val projects = projectService.findAllPermitted(base.userAccount)
       assertThat(projects).hasSize(7)
-      assertThat(projects[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
-      assertThat(projects[2].permissionType).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
-      assertThat(projects[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
-      assertThat(projects[5].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+      assertThat(projects[6].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.MANAGE.availableScopes)
+      assertThat(projects[2].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.TRANSLATE.availableScopes)
+      assertThat(projects[1].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.VIEW.availableScopes)
+      assertThat(projects[5].scopes).containsExactlyInAnyOrder(*Permission.ProjectPermissionType.MANAGE.availableScopes)
     }
   }
 

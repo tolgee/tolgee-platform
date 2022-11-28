@@ -8,7 +8,7 @@ class UserAccountInProjectWithLanguagesView(
   override val name: String?,
   override val username: String,
   override val organizationRole: OrganizationRoleType?,
-  override val organizationBasePermissions: Permission.ProjectPermissionType?,
-  override val directPermissions: Permission.ProjectPermissionType?,
+  override val organizationBasePermissions: Permission,
+  override val directPermissions: Permission?,
   val permittedLanguageIds: List<Long>?
 ) : UserAccountInProjectView

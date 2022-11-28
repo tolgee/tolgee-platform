@@ -280,15 +280,19 @@ class TestDataService(
   }
 
   private fun saveAllOrganizations(builder: TestDataBuilder) {
-    organizationService.saveAll(
-      builder.data.organizations.map {
-        it.self.apply {
-          val slug = this.slug
-          if (slug.isEmpty()) {
-            this.slug = organizationService.generateSlug(this.name!!)
-          }
+    val organizationsToSave = builder.data.organizations.map {
+      it.self.apply {
+        val slug = this.slug
+        if (slug.isEmpty()) {
+          this.slug = organizationService.generateSlug(this.name)
         }
       }
+    }
+
+    permissionService.saveAll(organizationsToSave.map { it.basePermission }.filterNotNull())
+
+    organizationService.saveAll(
+      organizationsToSave
     )
   }
 

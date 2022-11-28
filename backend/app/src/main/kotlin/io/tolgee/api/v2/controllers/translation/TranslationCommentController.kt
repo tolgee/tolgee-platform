@@ -18,8 +18,7 @@ import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyD
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
@@ -77,7 +76,7 @@ class TranslationCommentController(
 
   @GetMapping(value = ["{translationId}/comments"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
   @Operation(summary = "Returns translation comments of translation")
   fun getAll(
     @PathVariable translationId: Long,
@@ -93,7 +92,7 @@ class TranslationCommentController(
 
   @GetMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
   @Operation(summary = "Returns single translation comment")
   fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
     val comment = translationCommentService.get(commentId)
@@ -103,7 +102,7 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_EDIT])
   @Operation(summary = "Updates single translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_EDIT)
   fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
@@ -117,8 +116,8 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_EDIT)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_EDIT])
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
   fun setState(
     @PathVariable commentId: Long,
@@ -131,8 +130,7 @@ class TranslationCommentController(
   }
 
   @DeleteMapping(value = ["{translationId}/comments/{commentId}"])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  // the permissions are checked in the body! We need to enable authors to delete their comments
   @Operation(summary = "Deletes the translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_DELETE)
   fun delete(@PathVariable commentId: Long) {
@@ -140,10 +138,7 @@ class TranslationCommentController(
     comment.checkFromProject()
     if (comment.author.id != authenticationFacade.userAccount.id) {
       try {
-        securityService.checkProjectPermission(
-          projectHolder.project.id,
-          Permission.ProjectPermissionType.MANAGE
-        )
+        checkEditPermission()
       } catch (e: PermissionException) {
         throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
       }
@@ -151,9 +146,20 @@ class TranslationCommentController(
     translationCommentService.delete(comment)
   }
 
+  private fun checkEditPermission() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(Scope.TRANSLATION_COMMENTS_EDIT), authenticationFacade.apiKey)
+      return
+    }
+    securityService.checkProjectPermission(
+      projectHolder.project.id,
+      Scope.TRANSLATION_COMMENTS_EDIT
+    )
+  }
+
   @PostMapping(value = ["/create-comment"])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_ADD)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_ADD])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
@@ -187,8 +193,8 @@ class TranslationCommentController(
   }
 
   @PostMapping(value = ["{translationId}/comments"])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_ADD)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_ADD])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)

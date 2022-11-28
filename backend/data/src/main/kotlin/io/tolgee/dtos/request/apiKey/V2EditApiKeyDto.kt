@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import javax.validation.constraints.NotEmpty
 
 data class V2EditApiKeyDto(
@@ -15,19 +15,19 @@ data class V2EditApiKeyDto(
     ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
     """
   )
-  var scopes: Set<ApiScope> = setOf(),
+  var scopes: Set<Scope> = setOf(),
   var description: String? = null
 ) {
 
   @Suppress("unused")
   @JsonSetter("scopes")
   fun jsonSetScopes(scopes: Set<String>) {
-    this.scopes = scopes.map { value -> ApiScope.fromValue(value) }.toSet()
+    this.scopes = scopes.map { value -> Scope.fromValue(value) }.toSet()
   }
 
   @Suppress("unused")
   @JsonGetter("scopes")
   fun jsonGetScopes(): Set<String> {
-    return scopes.map { obj: ApiScope -> obj.value }.toSet()
+    return scopes.map { obj: Scope -> obj.value }.toSet()
   }
 }

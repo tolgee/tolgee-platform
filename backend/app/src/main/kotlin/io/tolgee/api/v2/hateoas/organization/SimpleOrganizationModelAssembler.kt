@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.organization
 
 import io.tolgee.api.v2.controllers.organization.OrganizationController
+import io.tolgee.api.v2.hateoas.permission.PermissionModel
 import io.tolgee.model.Organization
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -17,10 +18,10 @@ class SimpleOrganizationModelAssembler(
     val link = linkTo<OrganizationController> { get(entity.slug ?: "") }.withSelfRel()
     return SimpleOrganizationModel(
       entity.id,
-      entity.name!!,
-      entity.slug!!,
+      entity.name,
+      entity.slug,
       entity.description,
-      entity.basePermissions,
+      PermissionModel(entity.basePermission.scopes, entity.basePermission.languages.map { it.id }),
       avatarService.getAvatarLinks(entity.avatarHash)
     ).add(link)
   }

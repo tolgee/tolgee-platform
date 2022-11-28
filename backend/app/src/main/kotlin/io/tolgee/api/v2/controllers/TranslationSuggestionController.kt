@@ -10,8 +10,7 @@ import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -51,8 +50,8 @@ class TranslationSuggestionController(
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
     val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
@@ -89,8 +88,8 @@ class TranslationSuggestionController(
     summary = "Suggests machine translations from translation memory." +
       "\n\nThe result is always sorted by similarity, so sorting is not supported."
   )
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   fun suggestTranslationMemory(
     @RequestBody @Valid dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable

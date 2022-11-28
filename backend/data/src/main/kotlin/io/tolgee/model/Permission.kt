@@ -1,6 +1,11 @@
 package io.tolgee.model
 
-import io.tolgee.model.enums.ApiScope
+import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.tolgee.model.enums.Scope
+import org.hibernate.annotations.Parameter
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -14,6 +19,16 @@ import javax.persistence.OneToOne
 
 @Suppress("LeakingThis")
 @Entity
+@TypeDef(
+  name = "enum-array",
+  typeClass = EnumArrayType::class,
+  parameters = [
+    Parameter(
+      name = EnumArrayType.SQL_ARRAY_TYPE,
+      value = "varchar"
+    )
+  ]
+)
 class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +37,21 @@ class Permission(
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount? = null,
 
+  /**
+   * When base permission for organizatio
+   */
+  @OneToOne(fetch = FetchType.LAZY)
+  var organization: Organization? = null,
+
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
 
   @Enumerated(EnumType.STRING)
-  var type: ProjectPermissionType = ProjectPermissionType.VIEW
+  var type: ProjectPermissionType = ProjectPermissionType.VIEW,
+
+  @Type(type = "enum-array")
+  @Column(name = "scopes", columnDefinition = "varchar[]")
+  var scopes: Array<Scope> = ProjectPermissionType.VIEW.availableScopes
 ) : AuditModel() {
 
   /**
@@ -44,44 +69,44 @@ class Permission(
     invitation: Invitation? = null,
     project: Project,
     type: ProjectPermissionType = ProjectPermissionType.VIEW
-  ) : this(id, user, invitation, type) {
+  ) : this(id, user, null, invitation, type) {
     this.project = project
   }
 
   @ManyToOne
-  var project: Project = Project()
+  var project: Project? = null
 
-  enum class ProjectPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
-    VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_VIEW, ApiScope.ACTIVITY_VIEW)),
+  enum class ProjectPermissionType(val power: Int, val availableScopes: Array<Scope>) {
+    VIEW(1, arrayOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)),
     TRANSLATE(
       2,
-      arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SCREENSHOTS_VIEW, ApiScope.ACTIVITY_VIEW)
+      arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)
     ),
     EDIT(
       3,
       arrayOf(
-        ApiScope.TRANSLATIONS_VIEW,
-        ApiScope.TRANSLATIONS_EDIT,
-        ApiScope.KEYS_EDIT,
-        ApiScope.SCREENSHOTS_VIEW,
-        ApiScope.SCREENSHOTS_UPLOAD,
-        ApiScope.SCREENSHOTS_DELETE,
-        ApiScope.ACTIVITY_VIEW,
-        ApiScope.IMPORT
+        Scope.TRANSLATIONS_VIEW,
+        Scope.TRANSLATIONS_EDIT,
+        Scope.KEYS_EDIT,
+        Scope.SCREENSHOTS_VIEW,
+        Scope.SCREENSHOTS_UPLOAD,
+        Scope.SCREENSHOTS_DELETE,
+        Scope.ACTIVITY_VIEW,
+        Scope.IMPORT
       )
     ),
     MANAGE(
       4,
       arrayOf(
-        ApiScope.TRANSLATIONS_VIEW,
-        ApiScope.TRANSLATIONS_EDIT,
-        ApiScope.KEYS_EDIT,
-        ApiScope.SCREENSHOTS_VIEW,
-        ApiScope.SCREENSHOTS_UPLOAD,
-        ApiScope.SCREENSHOTS_DELETE,
-        ApiScope.ACTIVITY_VIEW,
-        ApiScope.IMPORT,
-        ApiScope.LANGUAGES_EDIT
+        Scope.TRANSLATIONS_VIEW,
+        Scope.TRANSLATIONS_EDIT,
+        Scope.KEYS_EDIT,
+        Scope.SCREENSHOTS_VIEW,
+        Scope.SCREENSHOTS_UPLOAD,
+        Scope.SCREENSHOTS_DELETE,
+        Scope.ACTIVITY_VIEW,
+        Scope.IMPORT,
+        Scope.LANGUAGES_EDIT
       )
     );
   }

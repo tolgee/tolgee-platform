@@ -14,7 +14,6 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -154,7 +153,9 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("name").isEqualTo(dummyDto.name)
         node("id").isEqualTo(organization.id)
         node("description").isEqualTo(dummyDto.description)
-        node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
+        node("basePermission") {
+          node("scopes").isArray.contains("translations.view")
+        }
         node("slug").isEqualTo(dummyDto.slug)
       }
     }
@@ -250,22 +251,22 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
-  fun `edits organization`() {
-    val organization = createOrganization(dummyDto)
-    performAuthPut(
-      "/v2/organizations/${organization.id}",
-      dummyDto.also { dto ->
-        dto.name = "Hello"
-        dto.slug = "hello-1"
-        dto.basePermissions = Permission.ProjectPermissionType.TRANSLATE
-        dto.description = "This is changed description"
+  fun testEdit() {
+    this.organizationService.create(dummyDto, userAccount!!).let {
+      performAuthPut(
+        "/v2/organizations/${it.id}",
+        dummyDto.also { organization ->
+          organization.name = "Hello"
+          organization.slug = "hello-1"
+          organization.description = "This is changed description"
+        }
+      ).andIsOk.andPrettyPrint.andAssertThatJson {
+        node("name").isEqualTo("Hello")
+        node("slug").isEqualTo("hello-1")
+        node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+        node("basePermissions").isEqualTo("TRANSLATE")
+        node("description").isEqualTo("This is changed description")
       }
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("name").isEqualTo("Hello")
-      node("slug").isEqualTo("hello-1")
-      node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-      node("basePermissions").isEqualTo("TRANSLATE")
-      node("description").isEqualTo("This is changed description")
     }
   }
 

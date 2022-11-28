@@ -3,7 +3,7 @@ package io.tolgee.controllers
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
@@ -56,7 +56,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
   fun exportZipJsonApiKeyPermissionFail() {
     performProjectAuthGet("export/jsonZip").andIsForbidden
   }

@@ -6,7 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 
 class LanguagePermissionsTestData {
@@ -70,7 +70,7 @@ class LanguagePermissionsTestData {
 
       addApiKey {
         userAccount = bothLangsExplicitUser
-        scopesEnum = mutableSetOf(ApiScope.TRANSLATIONS_EDIT)
+        scopesEnum = mutableSetOf(Scope.TRANSLATIONS_EDIT)
         bothLangsExplicitUserApiKey = this
       }
 
