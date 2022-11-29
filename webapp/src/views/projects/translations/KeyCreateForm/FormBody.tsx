@@ -27,7 +27,7 @@ const StyledContainer = styled('div')`
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0px 16px;
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
