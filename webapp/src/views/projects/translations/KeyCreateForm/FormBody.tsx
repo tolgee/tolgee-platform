@@ -25,6 +25,15 @@ const StyledContainer = styled('div')`
   margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
+const StyledKeyNsContainer = styled('div')`
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 0px 16px;
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const StyledEdtorWrapper = styled('div')`
   background: ${({ theme }) => theme.palette.background.default};
   align-self: stretch;
@@ -104,53 +113,57 @@ export const FormBody: React.FC<Props> = ({
   return (
     <>
       <StyledContainer>
-        <FastField name="name">
-          {({ field, form, meta }: FieldProps<any>) => {
-            return (
-              <div>
-                <FieldLabel>
-                  <T>translation_single_label_key</T>
-                </FieldLabel>
-                <EditorWrapper>
-                  <StyledEdtorWrapper data-cy="translation-create-key-input">
-                    <Editor
-                      plaintext
+        <StyledKeyNsContainer>
+          <FastField name="name">
+            {({ field, form, meta }: FieldProps<any>) => {
+              return (
+                <div>
+                  <FieldLabel>
+                    <T>translation_single_label_key</T>
+                  </FieldLabel>
+                  <EditorWrapper>
+                    <StyledEdtorWrapper data-cy="translation-create-key-input">
+                      <Editor
+                        plaintext
+                        value={field.value}
+                        onChange={(val) => {
+                          form.setFieldValue(field.name, val);
+                        }}
+                        onSave={() => form.handleSubmit()}
+                        onBlur={() => form.setFieldTouched(field.name, true)}
+                        minHeight="unset"
+                        autofocus={autofocus}
+                        scrollMargins={{ bottom: 150 }}
+                        autoScrollIntoView
+                      />
+                    </StyledEdtorWrapper>
+                  </EditorWrapper>
+                  <FieldError error={meta.touched && meta.error} />
+                </div>
+              );
+            }}
+          </FastField>
+
+          <FastField name="namespace">
+            {({ field, form }: FieldProps<any>) => {
+              return (
+                <div>
+                  <FieldLabel>
+                    <T>translation_single_label_namespace</T>
+                  </FieldLabel>
+                  <StyledEdtorWrapper data-cy="translation-create-namespace-input">
+                    <NamespaceSelector
                       value={field.value}
-                      onChange={(val) => {
-                        form.setFieldValue(field.name, val);
-                      }}
-                      onSave={() => form.handleSubmit()}
-                      onBlur={() => form.setFieldTouched(field.name, true)}
-                      minHeight="unset"
-                      autofocus={autofocus}
-                      scrollMargins={{ bottom: 150 }}
-                      autoScrollIntoView
+                      onChange={(value) =>
+                        form.setFieldValue(field.name, value)
+                      }
                     />
                   </StyledEdtorWrapper>
-                </EditorWrapper>
-                <FieldError error={meta.touched && meta.error} />
-              </div>
-            );
-          }}
-        </FastField>
-
-        <FastField name="namespace">
-          {({ field, form }: FieldProps<any>) => {
-            return (
-              <div>
-                <FieldLabel>
-                  <T>translation_single_label_namespace</T>
-                </FieldLabel>
-                <StyledEdtorWrapper data-cy="translation-create-namespace-input">
-                  <NamespaceSelector
-                    value={field.value}
-                    onChange={(value) => form.setFieldValue(field.name, value)}
-                  />
-                </StyledEdtorWrapper>
-              </div>
-            );
-          }}
-        </FastField>
+                </div>
+              );
+            }}
+          </FastField>
+        </StyledKeyNsContainer>
 
         <FieldArray
           name="tags"

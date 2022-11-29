@@ -50,9 +50,10 @@ export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
             >
               {namespaces?.map((ns) => (
                 <MenuItem
+                  data-cy="export-namespace-selector-item"
                   key={ns}
                   value={ns}
-                  data-cy="export-namespace-selector-item"
+                  dense
                 >
                   <Checkbox checked={field.value.includes(ns)} />
                   <ListItemText primary={ns || t('namespace_default')} />
