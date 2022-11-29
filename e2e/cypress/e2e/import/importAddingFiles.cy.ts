@@ -34,11 +34,14 @@ describe('Import Adding files', () => {
     cy.get('[data-cy=dropzone]').attachFile('import/namespaces.zip', {
       subjectType: 'drag-n-drop',
     });
+
+    cy.xpath('.//*[@data-cy="namespaces-selector"]//*[text()="movies"]').should(
+      'have.length',
+      2
+    );
+
     cy.xpath(
-      './/*[@data-cy="namespaces-select"]//input[@value="movies"]'
-    ).should('have.length', 2);
-    cy.xpath(
-      './/*[@data-cy="namespaces-select"]//input[@value="homepage"]'
+      './/*[@data-cy="namespaces-selector"]//*[text()="homepage"]'
     ).should('have.length', 2);
 
     cy.xpath(

@@ -171,8 +171,8 @@ describe('Import result & manipulation', () => {
         .should('contain', '0 / 0');
 
       const langRow = getLanguageRow('multilang.json (de)');
-      langRow.findDcy('namespaces-select').click();
-      cy.gcy('namespaces-select-option').contains('<none>').click();
+      langRow.findDcy('namespaces-selector').click();
+      cy.gcy('search-select-item').contains('<none>').click();
 
       cy.waitForDom();
       getLanguageRow('multilang.json (de)')
@@ -194,8 +194,8 @@ describe('Import result & manipulation', () => {
 
   function selectNamespaceOnRow(row: string, namespace: string) {
     const langRow = getLanguageRow(row);
-    langRow.findDcy('namespaces-select').click();
-    cy.gcy('namespaces-select-option-new').click();
+    langRow.findDcy('namespaces-selector').click();
+    cy.gcy('search-select-new').click();
     cy.gcy('namespaces-select-text-field').clear().type(namespace);
     cy.gcy('namespaces-select-confirm').click();
   }
