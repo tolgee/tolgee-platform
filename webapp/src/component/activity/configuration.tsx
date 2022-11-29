@@ -171,7 +171,7 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
   Namespace: {
     label: 'activity_entity_namespace',
     fields: {
-      name: { label: 'activity_entity_namespace.name' },
+      name: { type: 'namespace', label: 'activity_entity_namespace.name' },
     },
   },
 };

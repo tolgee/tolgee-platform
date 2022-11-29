@@ -6,12 +6,11 @@ const StyledContainer = styled('span')`
 `;
 
 const StyledNamespace = styled('span')`
-  background: ${({ theme }) => theme.palette.background.default};
-  padding: ${({ theme }) => theme.spacing(0, 1.5, 0, 1.5)};
-  padding-bottom: 1px;
-  height: 24px;
-  border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.palette.divider1.main};
+  background: ${({ theme }) => theme.palette.emphasis[200]};
+  max-height: 1.5em;
+  padding: 0px 4px;
+  border-radius: 4px;
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
   color: ${({ theme }) => theme.palette.activity.added};
 `;
 
@@ -30,8 +29,8 @@ type Props = {
 };
 
 const NamespaceComponent: React.FC<Props> = ({ input }) => {
-  const oldInput = input?.old?.data?.name;
-  const newInput = input?.new?.data?.name;
+  const oldInput = input.old?.data?.name || input.old;
+  const newInput = input.new?.data?.name || input.new;
   if (oldInput && newInput) {
     return (
       <StyledContainer>
