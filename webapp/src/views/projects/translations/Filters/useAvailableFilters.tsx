@@ -29,7 +29,7 @@ export const useAvailableFilters = (
   return [
     {
       name: null,
-      type: 'tags',
+      type: 'multi',
       options: [
         {
           label: t('translations_filters_heading_tags'),

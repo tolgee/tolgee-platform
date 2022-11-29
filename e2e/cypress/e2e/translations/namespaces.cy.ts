@@ -69,6 +69,8 @@ describe('namespaces in translations', () => {
 
     cy.gcy('translations-cell-save-button').click();
 
+    waitForGlobalLoading();
+
     cy.gcy('translations-namespace-banner')
       .contains('new-ns')
       .should('be.visible');

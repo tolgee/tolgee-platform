@@ -11,7 +11,7 @@ export type FilterType = { filter: string; value: string | boolean | string[] };
 export type GroupType = {
   name: string | null;
   options: OptionType[];
-  type?: 'states' | 'tags';
+  type?: 'states' | 'multi';
 };
 
 export type OptionType = {

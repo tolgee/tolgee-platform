@@ -5,7 +5,7 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { SubmenuStates } from './SubmenuStates';
-import { SubmenuTags } from './SubmenuTags';
+import { SubmenuMulti } from './SubmenuMulti';
 import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
 import { useAvailableFilters } from './useAvailableFilters';
 import { toggleFilter } from './tools';
@@ -28,7 +28,7 @@ export const useFiltersContent = () => {
 
   availableFilters.forEach((group, i1) => {
     if (group.options?.length) {
-      if (group.type !== 'tags') {
+      if (group.type !== 'multi') {
         options.push(
           <CompactListSubheader
             key={i1}
@@ -69,9 +69,9 @@ export const useFiltersContent = () => {
               activeFilters={activeFilters}
             />
           );
-        } else if (group.type === 'tags') {
+        } else if (group.type === 'multi') {
           options.push(
-            <SubmenuTags
+            <SubmenuMulti
               key={`${i1}.${i2}`}
               item={option}
               handleToggle={handleFilterToggle}

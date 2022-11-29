@@ -4,6 +4,7 @@ import { Checkbox, ListItemText, Menu, MenuItem } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
 import { OptionType } from './tools';
+import { CompactMenuItem } from './FiltersComponents';
 
 type Props = {
   item: OptionType;
@@ -11,8 +12,8 @@ type Props = {
   activeFilters: string[];
 };
 
-export const SubmenuTags: React.FC<Props> = React.forwardRef(
-  function SubmenuTags({ item, handleToggle, activeFilters }, ref) {
+export const SubmenuMulti: React.FC<Props> = React.forwardRef(
+  function SubmenuMulti({ item, handleToggle, activeFilters }, ref) {
     const [menuOpen, setMenuOpen] = useState<HTMLElement | null>(null);
 
     const handleMenuClick = (e) => {
@@ -29,11 +30,10 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
 
     return (
       <>
-        <MenuItem
+        <CompactMenuItem
           onClick={handleMenuClick}
           selected={Boolean(menuOpen || subFiltersNumber)}
           ref={ref as any}
-          sx={{ height: 50 }}
         >
           <ListItemText
             primary={
@@ -41,7 +41,7 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
             }
           />
           <ArrowRight />
-        </MenuItem>
+        </CompactMenuItem>
         <Menu
           anchorOrigin={{
             vertical: 'top',
