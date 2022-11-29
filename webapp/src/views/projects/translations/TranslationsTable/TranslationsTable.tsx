@@ -90,7 +90,7 @@ export const TranslationsTable = () => {
   useEffect(() => {
     resetColumns(
       columns.map(() => 1),
-      tableRef.current
+      tableRef
     );
   }, [languageCols, tableRef]);
 

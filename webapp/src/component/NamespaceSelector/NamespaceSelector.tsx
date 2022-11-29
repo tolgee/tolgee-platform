@@ -81,7 +81,7 @@ export const NamespaceSelector: React.FC<Props> = ({
         addNewTooltip={t('namespace_select_new')}
         onSelect={onChange}
         items={existingOptions}
-        value={value}
+        value={value || ''}
       />
       {Boolean(dialogOpen) && (
         <NamespaceNewDialog

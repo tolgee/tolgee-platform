@@ -2,33 +2,35 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createProviderNew } from 'tg.fixtures/createProviderNew';
 import { useResize, resizeColumn } from '../useResize';
 
+type PassedRefType = React.RefObject<HTMLElement | undefined>;
+
 export const [ColumnsContext, useColumnsActions, useColumnsContext] =
   createProviderNew(() => {
-    const [initialColSizes, setInitialColSizes] = useState<number[]>();
-
     const [columnSizes, setColumnSizes] = useState<number[]>();
 
-    const [tableEl, setTableEl] = useState<HTMLDivElement | null>();
+    const [tableRef, setTableRef] = useState<PassedRefType>({
+      current: undefined,
+    });
     const resizersCallbacksRef = useRef<(() => void)[]>([]);
 
-    const { width } = useResize(tableEl, initialColSizes);
+    const { width } = useResize(tableRef, columnSizes);
 
     const columnSizesPercent = useMemo(() => {
       const columnsSum = columnSizes?.reduce((a, b) => a + b, 0) || 0;
       return columnSizes?.map((size) => (size / columnsSum) * 100 + '%');
     }, [columnSizes]);
 
-    useEffect(() => {
-      const prevSizes =
-        columnSizes?.length === initialColSizes?.length
-          ? columnSizes
-          : initialColSizes;
+    function calcualteRealSize(prevSizes: number[] | undefined) {
       const previousWidth = prevSizes?.reduce((a, b) => a + b, 0) || 1;
       const newSizes = prevSizes?.map(
         (w) => (w / previousWidth) * (width || 1)
       );
-      setColumnSizes(newSizes);
-    }, [width, initialColSizes]);
+      return newSizes;
+    }
+
+    useEffect(() => {
+      setColumnSizes(calcualteRealSize(columnSizes));
+    }, [width]);
 
     const actions = {
       startResize(index: number) {
@@ -40,9 +42,9 @@ export const [ColumnsContext, useColumnsActions, useColumnsContext] =
         }
       },
 
-      resetColumns(initialSizes: number[], element: HTMLDivElement | null) {
-        setInitialColSizes(initialSizes);
-        setTableEl(element);
+      resetColumns(sizeRatio: number[], elementRef: PassedRefType) {
+        setColumnSizes(calcualteRealSize(sizeRatio));
+        setTableRef(elementRef);
       },
 
       addResizer(index: number, callback: () => void) {

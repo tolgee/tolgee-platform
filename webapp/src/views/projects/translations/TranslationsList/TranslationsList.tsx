@@ -53,7 +53,7 @@ export const TranslationsList = () => {
     useColumnsActions();
 
   useEffect(() => {
-    resetColumns([1, 3], tableRef.current);
+    resetColumns([1, 3], tableRef);
   }, [tableRef]);
 
   const handleFetchMore = useCallback(() => {

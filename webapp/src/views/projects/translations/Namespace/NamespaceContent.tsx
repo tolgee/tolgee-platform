@@ -57,9 +57,10 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
     const [open, setOpen] = useState<undefined | HTMLElement>(undefined);
     const [renameOpen, setRenameOpen] = useState(false);
     const permission = useProjectPermissions();
-    const canRename = permission.satisfiesPermission(
-      ProjectPermissionType.EDIT
-    );
+    const canRename =
+      permission.satisfiesPermission(ProjectPermissionType.EDIT) &&
+      namespace.name &&
+      namespace.id !== undefined;
 
     const handleClose = () => {
       setOpen(undefined);
@@ -84,14 +85,12 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
           <StyledContent role="button" data-cy="namespaces-banner-content">
             {namespace.name || t('namespace_default')}
           </StyledContent>
-          {namespace.id !== undefined && (
-            <StyledMoreArrow
-              role="button"
-              data-cy="namespaces-banner-menu-button"
-            >
-              <ArrowDropDown fontSize="small" />
-            </StyledMoreArrow>
-          )}
+          <StyledMoreArrow
+            role="button"
+            data-cy="namespaces-banner-menu-button"
+          >
+            <ArrowDropDown fontSize="small" />
+          </StyledMoreArrow>
         </StyledNamespace>
         {open && (
           <Menu
