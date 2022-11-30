@@ -25,9 +25,9 @@ class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/
     userAccount = testData.project1nonOwner
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("/leave", null).andIsOk
-    assertThat(permissionService.findOneByProjectIdAndUserId(testData.projectBuilder.self.id, userAccount!!.id))
+    assertThat(permissionService.find(projectId = testData.projectBuilder.self.id, userId = userAccount!!.id))
       .isNull()
-    assertThat(permissionService.findOneByProjectIdAndUserId(testData.projectBuilder.self.id, testData.user.id))
+    assertThat(permissionService.find(projectId = testData.projectBuilder.self.id, userId = testData.user.id))
       .isNotNull
   }
 

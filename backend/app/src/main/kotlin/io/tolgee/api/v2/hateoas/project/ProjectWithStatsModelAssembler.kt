@@ -33,8 +33,8 @@ class ProjectWithStatsModelAssembler(
     val computedPermissions = permissionService.computeProjectPermissionType(
       view.organizationRole,
       view.organizationOwner?.basePermission?.scopes,
-      view.directPermissions?.scopes,
-      view.directPermissions?.languages?.map { it.id }?.toMutableSet()
+      view.directPermission?.scopes,
+      view.directPermission?.languages?.map { it.id }?.toMutableSet()
     )
 
     return ProjectWithStatsModel(
@@ -46,8 +46,8 @@ class ProjectWithStatsModelAssembler(
       organizationRole = view.organizationRole,
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
       organizationOwner = view.organizationOwner?.let { simpleOrganizationModelAssembler.toModel(it) },
-      directPermissions = view.directPermissions?.let { permissionModelAssembler.toModel(it) },
-      computedPermissions = PermissionModel(
+      directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
+      computedPermission = PermissionModel(
         scopes = computedPermissions.scopes!!,
         permittedLanguageIds = computedPermissions.translateLanguageIds?.toList()
       ),

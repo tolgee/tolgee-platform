@@ -21,6 +21,6 @@ open class ProjectModel(
   val baseLanguage: LanguageModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
-  val directPermissions: PermissionModel?,
-  val computedPermissions: PermissionModel
+  val directPermission: PermissionModel?,
+  val computedPermission: PermissionModel
 ) : RepresentationModel<ProjectModel>()

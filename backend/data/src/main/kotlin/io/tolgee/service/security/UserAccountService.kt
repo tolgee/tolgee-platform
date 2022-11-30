@@ -16,8 +16,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
-import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
@@ -264,20 +264,22 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null
-  ): Page<UserAccountInProjectWithLanguagesView> {
+  ): Page<ExtendedUserAccountInProject> {
     val users = getAllInProject(projectId, pageable, search, exceptUserId)
+    val organizationBasePermission = organizationService.getProjectOwner(projectId = projectId).basePermission
+
     val permittedLanguageMap = permissionService.getPermittedTranslateLanguagesForUserIds(
       users.content.map { it.id },
       projectId
     )
     return users.map {
-      UserAccountInProjectWithLanguagesView(
+      ExtendedUserAccountInProject(
         id = it.id,
         name = it.name,
         username = it.username,
         organizationRole = it.organizationRole,
-        organizationBasePermissions = it.organizationBasePermissions,
-        directPermissions = it.directPermissions,
+        directPermission = it.directPermission,
+        organizationBasePermission = organizationBasePermission,
         permittedLanguageIds = permittedLanguageMap[it.id]
       )
     }

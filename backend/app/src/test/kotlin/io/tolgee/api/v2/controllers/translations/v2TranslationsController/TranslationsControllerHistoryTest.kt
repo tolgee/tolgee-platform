@@ -7,9 +7,9 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -46,7 +46,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
         }.build {
           addPermission {
             user = this@buildUser.self
-            type = Permission.ProjectPermissionType.TRANSLATE
+            type = ProjectPermissionType.TRANSLATE
             project = testProject
           }
           lang = addLanguage {

@@ -14,8 +14,9 @@ class ProjectInvitationModelAssembler() :
   override fun toModel(entity: Invitation): ProjectInvitationModel {
     return ProjectInvitationModel(
       id = entity.id!!,
-      code = entity.code!!,
+      code = entity.code,
       type = entity.permission!!.type,
+      scopes = entity.permission!!.scopes,
       permittedLanguageIds = entity.permission!!.languages.map { it.id },
       createdAt = entity.createdAt!!,
       invitedUserName = entity.name,

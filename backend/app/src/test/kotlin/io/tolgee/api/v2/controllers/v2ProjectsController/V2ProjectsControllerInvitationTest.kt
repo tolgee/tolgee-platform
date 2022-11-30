@@ -16,6 +16,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -75,7 +76,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     val invitatationJson = performProjectAuthPut(
       "/invite",
       ProjectInviteUserDto(
-        Permission.ProjectPermissionType.TRANSLATE, languages = setOf(testData.englishLanguage.id)
+        ProjectPermissionType.TRANSLATE, languages = setOf(testData.englishLanguage.id)
       )
     ).andIsOk.andGetContentAsString
 
@@ -93,7 +94,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     performProjectAuthPut(
       "/invite",
       ProjectInviteUserDto(
-        Permission.ProjectPermissionType.EDIT, languages = setOf(testData.englishLanguage.id)
+        ProjectPermissionType.EDIT, languages = setOf(testData.englishLanguage.id)
       )
     ).andIsBadRequest
   }
@@ -156,7 +157,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         Permission(
           user = user2,
           project = project,
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         )
       )
       userAccount = user
@@ -166,7 +167,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     performAuthPut(
       "/v2/projects/${project.id}/invite",
       ProjectInviteUserDto(
-        type = Permission.ProjectPermissionType.VIEW,
+        type = ProjectPermissionType.VIEW,
         email = "hello@hello2.com",
         name = "Franta"
       )
@@ -174,7 +175,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   }
 
   private fun inviteWithManagePermissions(): String {
-    val invitationJson = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
+    val invitationJson = performProjectAuthPut("/invite", ProjectInviteUserDto(ProjectPermissionType.MANAGE))
       .andIsOk.andGetContentAsString
     return parseCode(invitationJson)
   }
@@ -190,7 +191,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   private fun performInviteWithNameAndEmail() = performProjectAuthPut(
     "/invite",
     ProjectInviteUserDto(
-      type = Permission.ProjectPermissionType.MANAGE,
+      type = ProjectPermissionType.MANAGE,
       email = INVITED_EMAIL,
       name = INVITED_NAME
     )
@@ -208,7 +209,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     return invitationService.create(
       CreateProjectInvitationParams(
         project = project,
-        type = Permission.ProjectPermissionType.TRANSLATE,
+        type = ProjectPermissionType.TRANSLATE,
         languages = project.languages.toList(),
         name = "Franta",
         email = "a@a.a"

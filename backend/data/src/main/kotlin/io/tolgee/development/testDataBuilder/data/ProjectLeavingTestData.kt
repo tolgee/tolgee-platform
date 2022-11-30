@@ -1,10 +1,10 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 
 class ProjectLeavingTestData : BaseTestData() {
   lateinit var userWithOrganizationRole: UserAccount
@@ -32,12 +32,12 @@ class ProjectLeavingTestData : BaseTestData() {
         project1nonOwner = this
         projectBuilder.addPermission {
           user = this@addUserAccount
-          type = Permission.ProjectPermissionType.VIEW
+          type = ProjectPermissionType.VIEW
         }
       }
       projectBuilder.addPermission {
         user = userWithOrganizationRole
-        type = Permission.ProjectPermissionType.VIEW
+        type = ProjectPermissionType.VIEW
       }
 
       addOrganization {
@@ -61,7 +61,7 @@ class ProjectLeavingTestData : BaseTestData() {
         }.build {
           addPermission {
             user = this@ProjectLeavingTestData.userWithOrganizationRole
-            type = Permission.ProjectPermissionType.VIEW
+            type = ProjectPermissionType.VIEW
           }
         }
       }

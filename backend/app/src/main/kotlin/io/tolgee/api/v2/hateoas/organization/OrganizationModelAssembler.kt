@@ -15,15 +15,18 @@ class OrganizationModelAssembler(
   OrganizationController::class.java, OrganizationModel::class.java
 ) {
   override fun toModel(view: OrganizationView): OrganizationModel {
-    val link = linkTo<OrganizationController> { get(view.slug) }.withSelfRel()
+    val link = linkTo<OrganizationController> { get(view.organization.slug) }.withSelfRel()
     return OrganizationModel(
-      view.id,
-      view.name,
-      view.slug,
-      view.description,
-      PermissionModel(view.basePermission.scopes, view.basePermission.languages.map { it.id }),
+      view.organization.id,
+      view.organization.name,
+      view.organization.slug,
+      view.organization.description,
+      PermissionModel(
+        view.organization.basePermission.scopes,
+        view.organization.basePermission.languages.map { it.id }
+      ),
       view.currentUserRole,
-      avatarService.getAvatarLinks(view.avatarHash)
+      avatarService.getAvatarLinks(view.organization.avatarHash)
     ).add(link)
   }
 }

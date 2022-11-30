@@ -4,12 +4,12 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.translation.Translation
 
 class ImportTestData {
@@ -36,7 +36,7 @@ class ImportTestData {
       addPermission {
         project = this@project.self
         user = this@ImportTestData.userAccount
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       val key = addKey {

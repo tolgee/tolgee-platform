@@ -4,12 +4,14 @@ import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Invitation
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -61,7 +63,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT
       )
     )
 
@@ -76,7 +78,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT
       )
     ).code
 
@@ -84,7 +86,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     loginAsUser(newUser.username)
     performAuthGet("/v2/invitations/$code/accept").andIsOk
 
-    assertInvitationAccepted(project, newUser, Permission.ProjectPermissionType.EDIT)
+    assertInvitationAccepted(project, newUser, ProjectPermissionType.EDIT)
   }
 
   @Test
@@ -94,7 +96,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        Permission.ProjectPermissionType.TRANSLATE,
+        ProjectPermissionType.TRANSLATE,
         project.languages.toList()
       )
     ).code
@@ -102,25 +104,25 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     loginAsUser(newUser.username)
 
     performAuthGet("/v2/invitations/$code/accept").andIsOk
-    assertInvitationAccepted(project, newUser, Permission.ProjectPermissionType.TRANSLATE)
+    assertInvitationAccepted(project, newUser, ProjectPermissionType.TRANSLATE)
   }
 
   private fun assertInvitationAccepted(
     project: Project,
     newUser: UserAccount,
-    expectedType: Permission.ProjectPermissionType
+    expectedType: ProjectPermissionType
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
     assertThat(permissionService.getProjectPermissionScopes(project.id, newUser)).isNotNull
     val type = permissionService.getProjectPermissionScopes(project.id, newUser)!!
-    assertThat(type).isEqualTo(expectedType)
+    type.assert.equalsPermissionType(expectedType)
   }
 
   private fun createTranslateInvitation(project: Project): Invitation {
     return invitationService.create(
       CreateProjectInvitationParams(
         project = project,
-        type = Permission.ProjectPermissionType.TRANSLATE,
+        type = ProjectPermissionType.TRANSLATE,
         languages = project.languages.toList(),
         name = "Franta",
         email = "a@a.a"

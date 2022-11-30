@@ -50,14 +50,12 @@ class WebSocketConfig(
           }
 
           if (projectId != null) {
-            val user = (accessor.user as? UsernamePasswordAuthenticationToken)?.principal as? UserAccountDto
-              ?: throw MessagingException("Forbidden")
-
             try {
-              securityService.checkProjectPermission(projectId = projectId, Scope.TRANSLATIONS_VIEW)
+              val user = (accessor.user as? UsernamePasswordAuthenticationToken)?.principal as UserAccountDto
+              securityService.checkProjectPermission(projectId = projectId, Scope.TRANSLATIONS_VIEW, user)
             } catch (e: Exception) {
-              null
-            } ?: throw MessagingException("Forbidden")
+              throw MessagingException("Forbidden")
+            }
           }
         }
 

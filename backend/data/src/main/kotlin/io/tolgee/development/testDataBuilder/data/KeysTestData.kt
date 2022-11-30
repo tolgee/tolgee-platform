@@ -3,10 +3,10 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 
@@ -35,7 +35,7 @@ class KeysTestData {
     }.build {
       addPermission {
         user = this@KeysTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
     }.self
 
@@ -59,7 +59,7 @@ class KeysTestData {
       addPermission {
 
         user = this@KeysTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       firstKey = addKey {

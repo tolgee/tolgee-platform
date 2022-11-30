@@ -3,9 +3,9 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -39,12 +39,12 @@ class TranslationCommentsTestData {
     }.build {
       addPermission {
         user = this@TranslationCommentsTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       addPermission {
         user = this@TranslationCommentsTestData.pepa
-        type = Permission.ProjectPermissionType.EDIT
+        type = ProjectPermissionType.EDIT
       }
 
       englishLanguage = addLanguage {
@@ -116,14 +116,14 @@ class TranslationCommentsTestData {
         addPermission {
           project = projectBuilder.self
           user = jindra.self
-          type = Permission.ProjectPermissionType.TRANSLATE
+          type = ProjectPermissionType.TRANSLATE
           languages = mutableSetOf(englishLanguage)
         }
         addPermission {
 
           project = projectBuilder.self
           user = vojta.self
-          type = Permission.ProjectPermissionType.VIEW
+          type = ProjectPermissionType.VIEW
         }
         addKey {
           name = "C key"
