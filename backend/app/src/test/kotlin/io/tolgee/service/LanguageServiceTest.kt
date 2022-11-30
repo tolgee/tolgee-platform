@@ -9,7 +9,7 @@ import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -66,18 +66,18 @@ class LanguageServiceTest : AbstractSpringTest() {
 
     val enUserData = permissionService.getProjectPermissionData(testData.project.id, testData.enOnlyUser.id)
     assertThat(enUserData.computedPermissions.scopes)
-      .containsAll(Permission.ProjectPermissionType.VIEW.availableScopes.toList())
+      .containsAll(ProjectPermissionType.VIEW.availableScopes.toList())
 
     val allLangUserData = permissionService.getProjectPermissionData(testData.project.id, testData.allLangUser.id)
     assertThat(allLangUserData.computedPermissions.scopes)
-      .containsAll(Permission.ProjectPermissionType.TRANSLATE.availableScopes.toList())
+      .containsAll(ProjectPermissionType.TRANSLATE.availableScopes.toList())
 
     val explicitBothLangsUserData = permissionService.getProjectPermissionData(
       testData.project.id,
       testData.bothLangsExplicitUser.id
     )
     assertThat(explicitBothLangsUserData.computedPermissions.scopes)
-      .containsAll(Permission.ProjectPermissionType.TRANSLATE.availableScopes.toList())
+      .containsAll(ProjectPermissionType.TRANSLATE.availableScopes.toList())
     assertThat(explicitBothLangsUserData.computedPermissions.translateLanguageIds).hasSize(1)
   }
 }

@@ -32,16 +32,21 @@ class SecurityService @Autowired constructor(
     if (getProjectPermissionScopes(projectId) == null && !isCurrentUserServerAdmin()) throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
-    if (isCurrentUserServerAdmin()) {
+  fun checkProjectPermission(projectId: Long, requiredPermission: Scope, userAccountDto: UserAccountDto) {
+    if (isUserAdmin(userAccountDto)) {
       return
     }
 
-    val usersPermissionScopes = getProjectPermissionScopes(projectId) ?: throw PermissionException()
+    val usersPermissionScopes = getProjectPermissionScopes(projectId, userAccountDto.id)
+      ?: throw PermissionException()
 
     if (!usersPermissionScopes.contains(requiredPermission)) {
       throw PermissionException()
     }
+  }
+
+  fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
+    checkProjectPermission(projectId, requiredPermission, activeUser)
   }
 
   fun checkLanguageTranslatePermission(projectId: Long, languageIds: Collection<Long>) {
@@ -106,7 +111,11 @@ class SecurityService @Autowired constructor(
   }
 
   private fun isCurrentUserServerAdmin(): Boolean {
-    return activeUser.role == UserAccount.Role.ADMIN
+    return isUserAdmin(activeUser)
+  }
+
+  private fun isUserAdmin(user: UserAccountDto): Boolean {
+    return user.role == UserAccount.Role.ADMIN
   }
 
   private val activeUser: UserAccountDto

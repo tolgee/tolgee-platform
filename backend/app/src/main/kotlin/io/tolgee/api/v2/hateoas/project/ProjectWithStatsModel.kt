@@ -22,12 +22,12 @@ open class ProjectWithStatsModel(
   val baseLanguage: LanguageModel?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
-  val directPermissions: PermissionModel?,
+  val directPermission: PermissionModel?,
   @Schema(
     description = "Actual current user's permissions on this project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: PermissionModel,
+  val computedPermission: PermissionModel,
   val stats: ProjectStatistics,
   val languages: List<LanguageModel>
 ) : RepresentationModel<ProjectWithStatsModel>()

@@ -3,9 +3,9 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 
@@ -54,17 +54,17 @@ class LanguagePermissionsTestData {
       addPermission {
         languages = mutableSetOf(englishLanguage)
         user = enOnlyUser
-        type = Permission.ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = allLangUser
-        type = Permission.ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = bothLangsExplicitUser
-        type = Permission.ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
         languages = mutableSetOf(englishLanguage, germanLanguage)
       }
 

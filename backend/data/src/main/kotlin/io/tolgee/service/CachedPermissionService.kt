@@ -9,9 +9,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +27,7 @@ class CachedPermissionService(
   @set:Autowired
   lateinit var projectService: ProjectService
 
-  fun findById(id: Long): Permission? {
+  fun find(id: Long): Permission? {
     return permissionRepository.findById(id).orElse(null)
   }
 
@@ -70,43 +70,20 @@ class CachedPermissionService(
       throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
     }
   }
-
-  fun findOneByProjectIdAndUserId(projectId: Long, userId: Long): Permission? {
-    return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)
-  }
-
   @Cacheable(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
+    key = "{#userId, #projectId, #organizationId}"
   )
   @Transactional
-  fun findOneDtoByProjectIdAndUserId(projectId: Long, userId: Long): PermissionDto? {
-    return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)?.let { permission ->
+  fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
+    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(projectId, userId, organizationId)?.let { permission ->
       PermissionDto(
         id = permission.id,
         userId = permission.user?.id,
         invitationId = permission.invitation?.id,
         scopes = permission.scopes,
         projectId = permission.project?.id,
-        organizationId = null,
-        languageIds = permission.languages.map { it.id }.toMutableSet()
-      )
-    }
-  }
-
-  @Cacheable(
-    cacheNames = [Caches.PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
-  )
-  fun findOneDtoByOrganizationId(organizationId: Long): PermissionDto? {
-    return permissionRepository.findOneByOrganizationId(organizationId)?.let { permission ->
-      PermissionDto(
-        id = permission.id,
-        userId = permission.user?.id,
-        invitationId = permission.invitation?.id,
-        scopes = permission.scopes,
-        projectId = permission.project?.id,
-        organizationId = permission.project?.id,
+        organizationId = permission.organization?.id,
         languageIds = permission.languages.map { it.id }.toMutableSet()
       )
     }

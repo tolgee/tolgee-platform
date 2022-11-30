@@ -3,6 +3,7 @@ package io.tolgee.fixtures
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Message
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
@@ -94,6 +95,11 @@ val JsonAssert.isValidId: BigDecimalAssert
   get() {
     return this.asNumber().isGreaterThan(BigDecimal(10000000))
   }
+
+fun JsonAssert.isPermissionScopes(type: ProjectPermissionType): JsonAssert {
+  this.isArray.containsAll(type.availableScopes.toList()).hasSize(type.availableScopes.size)
+  return this
+}
 
 inline fun <T> ListAssert<T>.containsAny(crossinline fn: T.() -> Boolean) {
   this.satisfies { list ->

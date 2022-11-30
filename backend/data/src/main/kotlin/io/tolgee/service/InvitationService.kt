@@ -131,7 +131,7 @@ class InvitationService @Autowired constructor(
     permission: Permission,
     userAccount: UserAccount
   ): Permission {
-    if (permissionService.findOneByProjectIdAndUserId(permission.project!!.id, userAccount.id) != null) {
+    if (permissionService.find(projectId = permission.project!!.id, userId = userAccount.id) != null) {
       throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
     }
     return permissionService.acceptInvitation(permission, userAccount)

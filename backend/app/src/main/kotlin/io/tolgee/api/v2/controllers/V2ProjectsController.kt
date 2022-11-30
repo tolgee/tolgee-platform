@@ -28,10 +28,10 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
-import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -82,7 +82,7 @@ V2ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
   private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
-  private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectWithLanguagesView>,
+  private val userArrayResourcesAssembler: PagedResourcesAssembler<ExtendedUserAccountInProject>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
@@ -280,9 +280,9 @@ V2ProjectsController(
     )
     val options = organizations.content.map {
       ProjectTransferOptionModel(
-        name = it.name,
-        slug = it.slug,
-        id = it.id,
+        name = it.organization.name,
+        slug = it.organization.slug,
+        id = it.organization.id,
       )
     }.toMutableList()
     options.sortBy { it.name }

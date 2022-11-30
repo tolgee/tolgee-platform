@@ -14,5 +14,5 @@ interface ProjectView {
   val baseLanguage: Language?
   val organizationOwner: Organization?
   val organizationRole: OrganizationRoleType?
-  val directPermissions: Permission?
+  val directPermission: Permission?
 }

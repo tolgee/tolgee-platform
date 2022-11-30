@@ -1,9 +1,13 @@
 package io.tolgee.model.enums
 
+import com.fasterxml.jackson.annotation.JsonValue
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 
-enum class Scope(var value: String) {
+enum class Scope(
+  @get:JsonValue
+  var value: String
+) {
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
   KEYS_EDIT("keys.edit"),
@@ -59,8 +63,9 @@ enum class Scope(var value: String) {
           TRANSLATION_COMMENTS_EDIT,
           listOf(
             HierarchyItem(
-              TRANSLATION_COMMENTS_ADD, listOf()
-            )
+              TRANSLATION_COMMENTS_ADD,
+              listOf(HierarchyItem(TRANSLATIONS_VIEW))
+            ),
           )
         ),
         HierarchyItem(
@@ -69,9 +74,9 @@ enum class Scope(var value: String) {
       )
     )
 
-    private fun getSelfAndRequirementsOf(item: HierarchyItem): MutableSet<Scope> {
+    private fun getSelfAndRequirements(item: HierarchyItem): MutableSet<Scope> {
       val descendants = item.requires.flatMap {
-        getSelfAndRequirementsOf(it)
+        getSelfAndRequirements(it)
       }.toMutableSet()
 
       descendants.add(item.scope)
@@ -91,9 +96,9 @@ enum class Scope(var value: String) {
       return getScopeHierarchyItems(root = hierarchy, scope).toTypedArray()
     }
 
-    private fun getSelfAndRequirementsOf(scope: Scope): Array<Scope> {
+    fun getSelfAndRequirements(scope: Scope): Array<Scope> {
       val hierarchyItems = getScopeHierarchyItems(scope)
-      return hierarchyItems.flatMap { getSelfAndRequirementsOf(it) }.toTypedArray()
+      return hierarchyItems.flatMap { getSelfAndRequirements(it) }.toTypedArray()
     }
 
     /**
@@ -104,7 +109,7 @@ enum class Scope(var value: String) {
      *
      */
     fun getUnpackedScopes(permittedScopes: Array<Scope>): Array<Scope> {
-      return permittedScopes.flatMap { getSelfAndRequirementsOf(it).toList() }.toSet().toTypedArray()
+      return permittedScopes.flatMap { getSelfAndRequirements(it).toList() }.toSet().toTypedArray()
     }
 
     fun fromValue(value: String): Scope {

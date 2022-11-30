@@ -1,7 +1,9 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.unpack
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
@@ -38,7 +40,7 @@ class Permission(
   var user: UserAccount? = null,
 
   /**
-   * When base permission for organizatio
+   * When base permission for organization
    */
   @OneToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null,
@@ -46,13 +48,35 @@ class Permission(
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
 
-  @Enumerated(EnumType.STRING)
-  var type: ProjectPermissionType = ProjectPermissionType.VIEW,
-
   @Type(type = "enum-array")
   @Column(name = "scopes", columnDefinition = "varchar[]")
   var scopes: Array<Scope> = ProjectPermissionType.VIEW.availableScopes
 ) : AuditModel() {
+
+  var type: ProjectPermissionType?
+    set(value) {
+      value?.let {
+        scopes = it.availableScopes
+      }
+    }
+    get() {
+      return ProjectPermissionType.values().find {
+        val unpackedAvailableScopes = it.availableScopes.unpack()
+        val unpackedCurrentScopes = scopes.unpack()
+        val containsAll = unpackedAvailableScopes.toList().containsAll(
+          unpackedCurrentScopes.toList()
+        )
+        val hasSameSize = unpackedAvailableScopes.size == unpackedCurrentScopes.size
+        hasSameSize && containsAll
+      }
+    }
+
+  /**
+   * Kept only to keep data in the DB, before migrated
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "type")
+  private var deprecatedType: ProjectPermissionType = ProjectPermissionType.VIEW
 
   /**
    * Languages for translate permission.
@@ -67,47 +91,13 @@ class Permission(
     id: Long = 0L,
     user: UserAccount? = null,
     invitation: Invitation? = null,
-    project: Project,
+    project: Project? = null,
+    organization: Organization? = null,
     type: ProjectPermissionType = ProjectPermissionType.VIEW
-  ) : this(id, user, null, invitation, type) {
+  ) : this(id, user, null, invitation, scopes = type.availableScopes) {
     this.project = project
   }
 
   @ManyToOne
   var project: Project? = null
-
-  enum class ProjectPermissionType(val power: Int, val availableScopes: Array<Scope>) {
-    VIEW(1, arrayOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)),
-    TRANSLATE(
-      2,
-      arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)
-    ),
-    EDIT(
-      3,
-      arrayOf(
-        Scope.TRANSLATIONS_VIEW,
-        Scope.TRANSLATIONS_EDIT,
-        Scope.KEYS_EDIT,
-        Scope.SCREENSHOTS_VIEW,
-        Scope.SCREENSHOTS_UPLOAD,
-        Scope.SCREENSHOTS_DELETE,
-        Scope.ACTIVITY_VIEW,
-        Scope.IMPORT
-      )
-    ),
-    MANAGE(
-      4,
-      arrayOf(
-        Scope.TRANSLATIONS_VIEW,
-        Scope.TRANSLATIONS_EDIT,
-        Scope.KEYS_EDIT,
-        Scope.SCREENSHOTS_VIEW,
-        Scope.SCREENSHOTS_UPLOAD,
-        Scope.SCREENSHOTS_DELETE,
-        Scope.ACTIVITY_VIEW,
-        Scope.IMPORT,
-        Scope.LANGUAGES_EDIT
-      )
-    );
-  }
 }

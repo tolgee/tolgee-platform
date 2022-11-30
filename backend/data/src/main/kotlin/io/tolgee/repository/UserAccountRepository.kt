@@ -68,13 +68,12 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-        select ua.id as id, ua.name as name, ua.username as username, p.type as directPermissions, orl.type as organizationRole,
-        orl.organization.id as oid, o.basePermissions as organizationBasePermissions from UserAccount ua, Project r 
-        left join Permission p on ua = p.user and p.project.id = :projectId
+        select ua.id as id, ua.name as name, ua.username as username, p as directPermission, orl.type as organizationRole 
+        from UserAccount ua, Project r 
+        left join fetch Permission p on ua = p.user and p.project.id = :projectId
         left join OrganizationRole orl on orl.user = ua and r.organizationOwner = orl.organization
-        left join Organization  o on orl.organization = o
         where r.id = :projectId and (p is not null or orl is not null)
-        and ( :exceptUserId is null or ua.id <> :exceptUserId)
+        and (:exceptUserId is null or ua.id <> :exceptUserId)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)

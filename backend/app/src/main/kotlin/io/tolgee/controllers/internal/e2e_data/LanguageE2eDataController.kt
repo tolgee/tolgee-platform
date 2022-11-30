@@ -2,7 +2,7 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.model.Permission
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.security.InternalController
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -40,7 +40,7 @@ class LanguageE2eDataController(
 
         projectBuilder.build {
           addPermission {
-            type = Permission.ProjectPermissionType.MANAGE
+            type = ProjectPermissionType.MANAGE
             user = userAccount
             project = projectBuilder.self
           }

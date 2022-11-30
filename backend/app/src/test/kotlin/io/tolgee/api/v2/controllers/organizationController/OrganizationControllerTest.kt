@@ -11,9 +11,11 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isPermissionScopes
 import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -33,7 +35,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("_embedded.organizations") {
           isArray.hasSize(6)
           node("[0].name").isEqualTo("user-2's organization 1")
-          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].basePermission.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
@@ -83,7 +85,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
           it.node("[0].name").isEqualTo("user-2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
+          it.node("[0].basePermission.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
@@ -264,7 +266,9 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("name").isEqualTo("Hello")
         node("slug").isEqualTo("hello-1")
         node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-        node("basePermissions").isEqualTo("TRANSLATE")
+        node("basePermission") {
+          node("scopes").isPermissionScopes(ProjectPermissionType.VIEW)
+        }
         node("description").isEqualTo("This is changed description")
       }
     }

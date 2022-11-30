@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.tolgee.model.enums.ProjectPermissionType
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,7 +40,7 @@ class Organization(
   open var slug: String = "",
 
   @Enumerated(EnumType.STRING)
-  open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
+  open var basePermissions: ProjectPermissionType = ProjectPermissionType.VIEW,
 
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null

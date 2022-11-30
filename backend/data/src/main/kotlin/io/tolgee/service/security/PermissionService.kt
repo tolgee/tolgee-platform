@@ -12,10 +12,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class PermissionService(
   private val permissionRepository: PermissionRepository,
   private val organizationRoleService: OrganizationRoleService,
@@ -52,7 +53,7 @@ class PermissionService(
   }
 
   fun findById(id: Long): Permission? {
-    return cachedPermissionService.findById(id)
+    return cachedPermissionService.find(id)
   }
 
   fun getProjectPermissionScopes(projectId: Long, userAccount: UserAccount) =
@@ -64,12 +65,12 @@ class PermissionService(
   }
 
   fun getProjectPermissionData(project: ProjectDto, userAccountId: Long): ProjectPermissionData {
-    val projectPermission = findOneDtoByProjectIdAndUserId(project.id, userAccountId)
+    val projectPermission = find(projectId = project.id, userId = userAccountId)
 
     val organizationRole = project.organizationOwnerId
       ?.let { organizationRoleService.findType(userAccountId, it) }
 
-    val organizationBasePermission = project.organizationOwnerId?.let { findOneDtoByOrganizationId(it) }
+    val organizationBasePermission = project.organizationOwnerId?.let { find(organizationId = it) }
 
     val computed = computeProjectPermissionType(
       organizationRole = organizationRole,
@@ -126,6 +127,15 @@ class PermissionService(
     }
   }
 
+  fun delete(permissionId: Long) {
+    val permission = get(permissionId)
+    delete(permission)
+  }
+
+  fun get(permissionId: Long): Permission {
+    return this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
+  }
+
   /**
    * Deletes all permissions in project
    * No need to evict cache, since this is only used when project is deleted
@@ -151,24 +161,19 @@ class PermissionService(
     directPermissionScopes: Array<Scope>?,
     projectPermissionLanguages: Set<Long>?
   ): ComputedPermissionDto {
-    if (organizationRole == null) {
-      return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
-    }
-
     if (organizationRole == OrganizationRoleType.OWNER) {
       return ComputedPermissionDto(arrayOf(Scope.ADMIN), null)
     }
 
-    if (organizationRole == OrganizationRoleType.MEMBER) {
-      if (directPermissionScopes == null) {
-        return ComputedPermissionDto(organizationBasePermissionScopes, null)
-      }
-
-      if (organizationBasePermissionScopes.isNullOrEmpty()) {
-        return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
-      }
+    if (directPermissionScopes != null) {
+      return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
     }
-    throw IllegalStateException("Unexpected organization role")
+
+    if (organizationRole == OrganizationRoleType.MEMBER) {
+      return ComputedPermissionDto(organizationBasePermissionScopes, null)
+    }
+
+    return ComputedPermissionDto(null, null)
   }
 
   fun createForInvitation(
@@ -180,16 +185,9 @@ class PermissionService(
     return cachedPermissionService.createForInvitation(invitation, project, type, languages)
   }
 
-  fun findOneByProjectIdAndUserId(projectId: Long, userId: Long): Permission? {
-    return cachedPermissionService.findOneByProjectIdAndUserId(projectId, userId)
-  }
-
-  fun findOneDtoByProjectIdAndUserId(projectId: Long, userId: Long): PermissionDto? {
-    return cachedPermissionService.findOneDtoByProjectIdAndUserId(projectId, userId)
-  }
-
-  fun findOneDtoByOrganizationId(organizationId: Long): PermissionDto? {
-    return cachedPermissionService.findOneDtoByOrganizationId(organizationId)
+  @Transactional
+  fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
+    return cachedPermissionService.find(projectId, userId, organizationId)
   }
 
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
@@ -287,5 +285,9 @@ class PermissionService(
       ?: throw NotFoundException()
 
     this.delete(permissionEntity)
+  }
+
+  fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission> {
+    return this.permissionRepository.getOrganizationBasePermissions(ids)
   }
 }

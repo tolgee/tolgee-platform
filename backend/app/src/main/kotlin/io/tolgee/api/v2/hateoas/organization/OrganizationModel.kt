@@ -20,7 +20,7 @@ open class OrganizationModel(
   @Schema(example = "This is a beautiful organization full of beautiful and clever people")
   val description: String?,
 
-  val basePermissions: PermissionModel,
+  val basePermission: PermissionModel,
 
   @Schema(
     description = """The role of currently authorized user. 

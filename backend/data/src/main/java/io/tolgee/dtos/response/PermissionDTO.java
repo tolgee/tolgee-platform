@@ -1,11 +1,12 @@
 package io.tolgee.dtos.response;
 
 import io.tolgee.model.Permission;
+import io.tolgee.model.enums.ProjectPermissionType;
 
 public class PermissionDTO {
     private Long id;
 
-    private Permission.ProjectPermissionType type;
+    private ProjectPermissionType type;
 
     private String username;
 
@@ -13,7 +14,7 @@ public class PermissionDTO {
 
     private String userFullName;
 
-    public PermissionDTO(Long id, Permission.ProjectPermissionType type, String username, Long userId, String userFullName) {
+    public PermissionDTO(Long id, ProjectPermissionType type, String username, Long userId, String userFullName) {
         this.id = id;
         this.type = type;
         this.username = username;
@@ -36,7 +37,7 @@ public class PermissionDTO {
         return this.id;
     }
 
-    public Permission.ProjectPermissionType getType() {
+    public ProjectPermissionType getType() {
         return this.type;
     }
 
@@ -56,7 +57,7 @@ public class PermissionDTO {
         this.id = id;
     }
 
-    public void setType(Permission.ProjectPermissionType type) {
+    public void setType(ProjectPermissionType type) {
         this.type = type;
     }
 
@@ -120,7 +121,7 @@ public class PermissionDTO {
 
     public static class PermissionDTOBuilder {
         private Long id;
-        private Permission.ProjectPermissionType type;
+        private ProjectPermissionType type;
         private String username;
         private Long userId;
         private String userFullName;
@@ -133,7 +134,7 @@ public class PermissionDTO {
             return this;
         }
 
-        public PermissionDTO.PermissionDTOBuilder type(Permission.ProjectPermissionType type) {
+        public PermissionDTO.PermissionDTOBuilder type(ProjectPermissionType type) {
             this.type = type;
             return this;
         }

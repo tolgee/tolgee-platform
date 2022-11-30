@@ -1,7 +1,7 @@
 package io.tolgee.dtos.response;
 
 import io.tolgee.model.Invitation;
-import io.tolgee.model.Permission;
+import io.tolgee.model.enums.ProjectPermissionType;
 
 public class InvitationDTO {
 
@@ -9,9 +9,9 @@ public class InvitationDTO {
 
     private String code;
 
-    private Permission.ProjectPermissionType type;
+    private ProjectPermissionType type;
 
-    public InvitationDTO(Long id, String code, Permission.ProjectPermissionType type) {
+    public InvitationDTO(Long id, String code, ProjectPermissionType type) {
         this.id = id;
         this.code = code;
         this.type = type;
@@ -36,7 +36,7 @@ public class InvitationDTO {
         return this.code;
     }
 
-    public Permission.ProjectPermissionType getType() {
+    public ProjectPermissionType getType() {
         return this.type;
     }
 
@@ -48,7 +48,7 @@ public class InvitationDTO {
         this.code = code;
     }
 
-    public void setType(Permission.ProjectPermissionType type) {
+    public void setType(ProjectPermissionType type) {
         this.type = type;
     }
 
@@ -91,7 +91,7 @@ public class InvitationDTO {
     public static class InvitationDTOBuilder {
         private Long id;
         private String code;
-        private Permission.ProjectPermissionType type;
+        private ProjectPermissionType type;
 
         InvitationDTOBuilder() {
         }
@@ -106,7 +106,7 @@ public class InvitationDTO {
             return this;
         }
 
-        public InvitationDTO.InvitationDTOBuilder type(Permission.ProjectPermissionType type) {
+        public InvitationDTO.InvitationDTOBuilder type(ProjectPermissionType type) {
             this.type = type;
             return this;
         }

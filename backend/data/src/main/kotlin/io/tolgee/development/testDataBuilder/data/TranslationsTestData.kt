@@ -4,9 +4,9 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -34,7 +34,7 @@ class TranslationsTestData {
     }.build project@{
       addPermission {
         user = this@TranslationsTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
       englishLanguage = addLanguage {
         name = "English"

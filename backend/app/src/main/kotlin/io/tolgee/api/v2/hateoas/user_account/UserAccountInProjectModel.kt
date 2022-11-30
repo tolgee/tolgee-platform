@@ -12,11 +12,11 @@ data class UserAccountInProjectModel(
   val username: String,
   var name: String?,
   val organizationRole: OrganizationRoleType?,
-  val organizationBasePermissions: PermissionModel,
-  val directPermissions: PermissionModel?,
+  val organizationBasePermission: PermissionModel,
+  val directPermission: PermissionModel?,
   @Schema(
     description = "Actual user's permissions on selected project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: PermissionModel,
+  val computedPermission: PermissionModel,
 ) : RepresentationModel<UserAccountInProjectModel>()

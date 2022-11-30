@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
-  fun findOneByProjectIdAndUserId(projectId: Long?, userId: Long?): Permission?
+  fun findOneByProjectIdAndUserIdAndOrganizationId(projectId: Long?, userId: Long?, organizationId: Long? = null): Permission?
   fun findOneByOrganizationId(organizationId: Long): Permission?
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
@@ -49,4 +49,11 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     """
   )
   fun getProjectPermittedLanguageIds(projectIds: List<Long>, userId: Long): List<Array<Long>>
+
+  @Query(
+    """
+      from Permission p where p.organization.id in :ids
+    """
+  )
+  fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission>
 }

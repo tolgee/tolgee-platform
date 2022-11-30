@@ -10,6 +10,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
@@ -67,8 +68,7 @@ class OrganizationService(
       ?: generateSlug(createDto.name)
 
     val basePermission = Permission(
-      type = Permission.ProjectPermissionType.VIEW,
-      scopes = Permission.ProjectPermissionType.VIEW.availableScopes,
+      type = ProjectPermissionType.VIEW,
     )
 
     val organization = Organization(
@@ -270,5 +270,9 @@ class OrganizationService(
 
   fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
     return organizationRepository.findAllViews(pageable, search, userId)
+  }
+
+  fun getProjectOwner(projectId: Long): Organization {
+    return organizationRepository.getProjectOwner(projectId)
   }
 }

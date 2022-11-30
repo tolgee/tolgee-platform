@@ -8,6 +8,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
@@ -135,7 +136,7 @@ class ProjectsE2eDataController(
   companion object {
     data class PermittedUserData(
       val userName: String,
-      val permission: Permission.ProjectPermissionType,
+      val permission: ProjectPermissionType,
     )
 
     data class UserData(
@@ -144,7 +145,7 @@ class ProjectsE2eDataController(
     )
 
     data class OrganizationData(
-      val basePermission: Permission.ProjectPermissionType,
+      val basePermission: ProjectPermissionType,
       val name: String,
       val owners: MutableList<String> = mutableListOf(),
       val members: MutableList<String> = mutableListOf(),
@@ -168,19 +169,19 @@ class ProjectsE2eDataController(
     val organizations = mutableListOf(
       OrganizationData(
         name = "Facebook",
-        basePermission = Permission.ProjectPermissionType.MANAGE,
+        basePermission = ProjectPermissionType.MANAGE,
         owners = mutableListOf("cukrberg@facebook.com"),
         members = mutableListOf("john@doe.com")
       ),
       OrganizationData(
         name = "Microsoft",
-        basePermission = Permission.ProjectPermissionType.EDIT,
+        basePermission = ProjectPermissionType.EDIT,
         owners = mutableListOf("gates@microsoft.com"),
         members = mutableListOf("john@doe.com", "cukrberg@facebook.com")
       ),
       OrganizationData(
         name = "Vaclav organization",
-        basePermission = Permission.ProjectPermissionType.EDIT,
+        basePermission = ProjectPermissionType.EDIT,
         owners = mutableListOf("vaclav.novak@fake.com"),
       )
     )
@@ -192,7 +193,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "vaclav.novak@fake.com",
-            Permission.ProjectPermissionType.TRANSLATE
+            ProjectPermissionType.TRANSLATE
 
           )
         ),
@@ -204,7 +205,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "vaclav.novak@fake.com",
-            Permission.ProjectPermissionType.MANAGE
+            ProjectPermissionType.MANAGE
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -215,7 +216,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "vaclav.novak@fake.com",
-            Permission.ProjectPermissionType.EDIT
+            ProjectPermissionType.EDIT
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -226,7 +227,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "vaclav.novak@fake.com",
-            Permission.ProjectPermissionType.TRANSLATE
+            ProjectPermissionType.TRANSLATE
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -237,7 +238,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "vaclav.novak@fake.com",
-            Permission.ProjectPermissionType.VIEW
+            ProjectPermissionType.VIEW
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -247,7 +248,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "cukrberg@facebook.com",
-            Permission.ProjectPermissionType.VIEW
+            ProjectPermissionType.VIEW
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!")))),
@@ -259,7 +260,7 @@ class ProjectsE2eDataController(
         permittedUsers = mutableListOf(
           PermittedUserData(
             "cukrberg@facebook.com",
-            Permission.ProjectPermissionType.MANAGE
+            ProjectPermissionType.MANAGE
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -271,7 +272,7 @@ class ProjectsE2eDataController(
         val email = "owner@zzzcool$number.com"
         users.add(UserData(email))
         projects.find { item -> item.name == "Microsoft Word" }!!.permittedUsers.add(
-          PermittedUserData(email, Permission.ProjectPermissionType.EDIT)
+          PermittedUserData(email, ProjectPermissionType.EDIT)
         )
       }
     }

@@ -1,12 +1,12 @@
 package io.tolgee.dtos.misc
 
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.enums.ProjectPermissionType
 
 data class CreateProjectInvitationParams(
   var project: Project,
-  var type: Permission.ProjectPermissionType,
+  var type: ProjectPermissionType,
   var languages: List<Language>? = null,
   override val email: String? = null,
   override val name: String? = null

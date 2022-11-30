@@ -2,9 +2,9 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import java.util.*
 
@@ -44,12 +44,12 @@ class ApiKeysTestData : BaseTestData() {
 
         addPermission {
           user = frantisekDobrota
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
 
         addPermission {
           user = this@ApiKeysTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
       }
     }
@@ -61,7 +61,7 @@ class ApiKeysTestData : BaseTestData() {
       }
       addPermission {
         user = frantisekDobrota
-        type = Permission.ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
       addApiKey {
         key = "test_api_key_1"
