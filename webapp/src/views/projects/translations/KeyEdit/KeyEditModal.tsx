@@ -28,6 +28,14 @@ const StyledDialogContent = styled(DialogContent)`
   row-gap: ${({ theme }) => theme.spacing(2)};
   margin-bottom: ${({ theme }) => theme.spacing(2)};
   justify-content: stretch;
+  max-width: 100%;
+  position: relative;
+`;
+
+const StyledSection = styled('div')`
+  display: grid;
+  align-items: stretch;
+  max-width: 100%;
 `;
 
 const StyledTags = styled('div')`
@@ -115,7 +123,7 @@ export const KeyEditModal: React.FC<Props> = ({
           <Dialog open={true} onClose={onClose} fullWidth>
             <DialogTitle>{t('translations_key_edit_title')}</DialogTitle>
             <StyledDialogContent>
-              <div>
+              <StyledSection>
                 <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
                 <EditorWrapper>
                   <Editor
@@ -128,8 +136,8 @@ export const KeyEditModal: React.FC<Props> = ({
                   />
                 </EditorWrapper>
                 <FieldError error={errors.name} />
-              </div>
-              <div>
+              </StyledSection>
+              <StyledSection>
                 <FieldLabel>
                   {t('translations_key_edit_label_namespace')}
                 </FieldLabel>
@@ -138,8 +146,8 @@ export const KeyEditModal: React.FC<Props> = ({
                   onChange={(value) => setFieldValue('namespace', value)}
                 />
                 <FieldError error={errors.namespace} />
-              </div>
-              <div>
+              </StyledSection>
+              <StyledSection>
                 <FieldLabel>{t('translations_key_edit_label_tags')}</FieldLabel>
                 <StyledTags>
                   {values.tags.map((tag, index) => {
@@ -166,7 +174,7 @@ export const KeyEditModal: React.FC<Props> = ({
                   />
                 </StyledTags>
                 <FieldError error={errors.tags} />
-              </div>
+              </StyledSection>
             </StyledDialogContent>
             <DialogActions>
               <Button

@@ -277,6 +277,7 @@ declare namespace DataCy {
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "search-select" |
         "search-select-item" |
         "search-select-new" |
         "search-select-search" |

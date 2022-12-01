@@ -164,8 +164,8 @@ export const CellTranslation: React.FC<Props> = ({
           cellPosition={cellPosition}
         />
       ) : (
-        <div className={className}>
-          <StyledTranslation>
+        <>
+          <StyledTranslation className={className}>
             <div data-cy="translations-table-cell">
               <TranslationVisual
                 width={width}
@@ -198,7 +198,7 @@ export const CellTranslation: React.FC<Props> = ({
               />
             )}
           </StyledControls>
-        </div>
+        </>
       )}
 
       <CellStateBar state={state} onResize={handleResize} />

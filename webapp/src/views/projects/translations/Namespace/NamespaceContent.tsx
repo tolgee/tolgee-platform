@@ -22,7 +22,7 @@ const StyledNamespace = styled('div')`
   box-shadow: ${({ theme }) =>
     theme.palette.mode === 'dark'
       ? '0px 0px 7px -1px #000000'
-      : '0px 0px 7px -2px #000000'};
+      : '0px 0px 7px -2px #00000097'};
   z-index: 1;
   max-width: 100%;
   &:hover {

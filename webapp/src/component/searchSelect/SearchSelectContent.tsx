@@ -23,6 +23,7 @@ const StyledInputWrapper = styled(Box)`
   align-items: center;
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
   padding-right: 4px;
+  position: relative;
 `;
 
 const StyledHeading = styled(Typography)`
@@ -30,6 +31,15 @@ const StyledHeading = styled(Typography)`
   flex-grow: 1;
   padding: 4px 4px 4px 16px;
   font-weight: 500;
+`;
+
+const StyledInputContent = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  contain: size;
+  height: 23px;
+  width: 100%;
 `;
 
 const StyledWrapper = styled('div')`
@@ -82,8 +92,10 @@ export const SearchSelectContent: React.FC<Props> = ({
     onAddNew?.(inputValue);
   };
 
+  const width = anchorEl?.offsetWidth;
+
   return (
-    <StyledWrapper sx={{ minWidth: anchorEl?.offsetWidth || 200 }}>
+    <StyledWrapper sx={{ minWidth: width, maxWidth: width }}>
       <Autocomplete
         open
         filterOptions={(options, state) => {
@@ -109,7 +121,7 @@ export const SearchSelectContent: React.FC<Props> = ({
             selected={option.value === selected}
             data-cy="search-select-item"
           >
-            {option.name}
+            <StyledInputContent>{option.name}</StyledInputContent>
           </MenuItem>
         )}
         onChange={(_, newValue) => {

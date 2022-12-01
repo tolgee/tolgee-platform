@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, Select } from '@mui/material';
+import { Box, Select, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 
@@ -7,6 +7,15 @@ export type SelectItem = {
   value: string;
   name: string;
 };
+
+const StyledInputContent = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: -5px;
+  contain: size;
+  height: 23px;
+`;
 
 type Props = {
   onSelect: (value: string) => void;
@@ -54,7 +63,7 @@ export const SearchSelect: React.FC<Props> = ({
   const valueItem = items.find((i) => i.value === value);
 
   return (
-    <Box display="flex" data-cy="organization-switch" overflow="hidden">
+    <Box display="flex" data-cy="search-select" overflow="hidden">
       <Select
         ref={anchorEl}
         onOpen={handleOpen}
@@ -64,7 +73,11 @@ export const SearchSelect: React.FC<Props> = ({
         open={false}
         value=""
         displayEmpty
-        renderValue={() => (valueItem ? valueItem.name : value) || ''}
+        renderValue={() => (
+          <StyledInputContent>
+            {(valueItem ? valueItem.name : value) || ''}
+          </StyledInputContent>
+        )}
       />
 
       <SearchSelectPopover

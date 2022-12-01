@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useMemo, useState } from 'react';
+import { ComponentProps, useMemo, useState } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { NamespaceNewDialog } from './NamespaceNewDialog';
@@ -9,12 +9,14 @@ type Props = {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   namespaceData?: string[];
+  SearchSelectProps?: Partial<ComponentProps<typeof SearchSelect>>;
 };
 
 export const NamespaceSelector: React.FC<Props> = ({
   value,
   onChange,
   namespaceData,
+  SearchSelectProps,
 }) => {
   const project = useProject();
   const t = useTranslate();
@@ -73,6 +75,7 @@ export const NamespaceSelector: React.FC<Props> = ({
   return (
     <div data-cy="namespaces-selector">
       <SearchSelect
+        {...SearchSelectProps}
         onAddNew={(searchValue) => {
           setLastSearch(searchValue);
           setDialogOpen(true);
