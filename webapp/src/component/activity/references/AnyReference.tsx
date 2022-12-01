@@ -18,9 +18,20 @@ const StyledReferences = styled(Box)`
     align-items: center;
     overflow: hidden;
   }
+
   & .referenceText {
     display: block;
     flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  & .referencePrefix {
+    display: inline;
+    margin-right: 4px;
+    padding-right: 4px;
+    border-right: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

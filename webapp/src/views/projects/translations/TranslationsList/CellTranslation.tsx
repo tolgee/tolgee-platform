@@ -100,6 +100,7 @@ type Props = {
   width?: number | string;
   active: boolean;
   lastFocusable: boolean;
+  className?: string;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -111,6 +112,7 @@ export const CellTranslation: React.FC<Props> = ({
   width,
   active,
   lastFocusable,
+  className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
   const dispatch = useTranslationsDispatch();
@@ -178,11 +180,14 @@ export const CellTranslation: React.FC<Props> = ({
       ref={cellRef}
     >
       <StyledContainer
-        className={clsx({
-          [CELL_HOVER]: !isEditing,
-          [CELL_CLICKABLE]: editEnabled,
-          [CELL_SELECTED]: isEditing,
-        })}
+        className={clsx(
+          {
+            [CELL_HOVER]: !isEditing,
+            [CELL_CLICKABLE]: editEnabled,
+            [CELL_SELECTED]: isEditing,
+          },
+          className
+        )}
         style={{ width }}
         onClick={editEnabled ? () => toggleEdit() : undefined}
         data-cy="translations-table-cell"

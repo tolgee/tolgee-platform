@@ -52,6 +52,7 @@ export const ImportTranslationsDialog: FunctionComponent<{
     },
     options: {
       enabled: !!props.row,
+      keepPreviousData: true,
     },
     query: {
       onlyConflicts: false,
@@ -93,9 +94,7 @@ export const ImportTranslationsDialog: FunctionComponent<{
           <PaginatedHateoasList
             wrapperComponent={Box}
             wrapperComponentProps={{ sx: { m: 2 } }}
-            searchText={search}
             onPageChange={setPage}
-            onSearchChange={setSearch}
             loadable={loadable}
             renderItem={(i) => (
               <Box

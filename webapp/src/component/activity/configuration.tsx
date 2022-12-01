@@ -11,11 +11,14 @@ import {
 const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {
   if (relations?.key?.data?.name) {
     const language = relations.language?.data as any;
+    const key = relations.key;
+    const namespace = key.relations?.namespace?.data?.name as string;
     return {
       type: 'key',
-      keyName: relations.key.data.name as unknown as string,
-      exists: relations.key.exists,
-      id: relations.key.entityId,
+      keyName: key.data.name as unknown as string,
+      namespace,
+      exists: key.exists,
+      id: key.entityId,
       languages: language ? [language] : [],
     };
   }
@@ -75,20 +78,30 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
   Key: {
     label: 'activity_entity_key',
     fields: {
-      name: true,
+      name: { label: 'activity_entity_key.name' },
+      namespace: { type: 'namespace', label: 'activity_entity_key.namespace' },
     },
-    references: ({ modifications, entityId, exists }) => {
+    references: ({
+      modifications,
+      entityId,
+      exists,
+      description,
+      relations,
+    }) => {
       const result: Reference[] = [];
       const newData = getDiffVersion('new', modifications);
       const data = newData.name
         ? newData
         : getDiffVersion('old', modifications);
-      if (data.name) {
+      const keyName = data.name || description?.name;
+      const namespace = relations?.namespace?.data?.name;
+      if (keyName) {
         result.push({
           type: 'key',
           exists,
           id: entityId,
-          keyName: data.name,
+          keyName: keyName,
+          namespace: namespace as unknown as string,
         });
       }
       return result;
@@ -155,6 +168,12 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
       },
     },
   },
+  Namespace: {
+    label: 'activity_entity_namespace',
+    fields: {
+      name: { type: 'namespace', label: 'activity_entity_namespace.name' },
+    },
+  },
 };
 
 export const actionsConfiguration: Partial<
@@ -182,7 +201,7 @@ export const actionsConfiguration: Partial<
   },
   KEY_NAME_EDIT: {
     label: 'activity_key_name_edit',
-    entities: { Key: true },
+    entities: { Key: ['name'] },
   },
   CREATE_KEY: {
     label: 'activity_create_key',
@@ -196,7 +215,7 @@ export const actionsConfiguration: Partial<
     label: 'activity_complex_edit',
     entities: {
       Translation: true,
-      Key: true,
+      Key: ['name', 'namespace'],
       Screenshot: true,
     },
   },
@@ -249,5 +268,9 @@ export const actionsConfiguration: Partial<
   EDIT_PROJECT: {
     label: 'activity_edit_project',
     entities: { Project: true },
+  },
+  NAMESPACE_EDIT: {
+    label: 'activity_edit_namespace',
+    entities: { Namespace: true },
   },
 };

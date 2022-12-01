@@ -162,26 +162,18 @@ describe('Import result & manipulation', () => {
     });
 
     it('selects namespace', () => {
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .clear()
-        .type('hello{enter}');
+      selectNamespaceOnRow('multilang.json (de)', 'hello');
 
-      getLanguageRow('multilang.json (en)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .should('have.value', 'hello');
+      cy.waitForDom();
 
       getLanguageRow('multilang.json (de)')
         .findDcy('import-result-resolved-conflicts-cell')
         .should('contain', '0 / 0');
 
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-namespace-cell')
-        .find('input')
-        .clear()
-        .type('{downArrow}{enter}');
+      const langRow = getLanguageRow('multilang.json (de)');
+      langRow.findDcy('namespaces-selector').click();
+      cy.gcy('search-select-item').contains('<none>').click();
+
       cy.waitForDom();
       getLanguageRow('multilang.json (de)')
         .findDcy('import-result-resolve-button')
@@ -194,7 +186,17 @@ describe('Import result & manipulation', () => {
       gcy('import-result-row').should('have.length', 0);
       visitTranslations(importData.projects[0].id);
       cy.contains('what a key').should('be.visible');
-      cy.contains('homepage:what a key').should('be.visible');
+      gcy('translations-namespace-banner')
+        .contains('homepage')
+        .should('be.visible');
     });
   });
+
+  function selectNamespaceOnRow(row: string, namespace: string) {
+    const langRow = getLanguageRow(row);
+    langRow.findDcy('namespaces-selector').click();
+    cy.gcy('search-select-new').click();
+    cy.gcy('namespaces-select-text-field').clear().type(namespace);
+    cy.gcy('namespaces-select-confirm').click();
+  }
 });

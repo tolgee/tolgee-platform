@@ -16,7 +16,7 @@ import { ChipButton } from 'tg.component/common/buttons/ChipButton';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { LanguageSelector } from './LanguageSelector';
-import { NamespaceSelector } from './NamespaceSelector';
+import { ImportNamespaceSelector } from './ImportNamespaceSelector';
 import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 
 const StyledTableRow = styled(TableRow)`
@@ -80,7 +80,7 @@ export const ImportResultRow = (props: {
           />
         </TableCell>
         <TableCell scope="row" data-cy="import-result-namespace-cell">
-          <NamespaceSelector row={props.row} />
+          <ImportNamespaceSelector row={props.row} />
         </TableCell>
         <TableCell scope="row" data-cy="import-result-file-cell">
           <span>
