@@ -7,6 +7,8 @@ package io.tolgee
 import io.tolgee.commandLineRunners.StartupImportCommandLineRunner
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.development.Base
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -15,11 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.Resource
-import org.springframework.transaction.annotation.Transactional
 
 @Suppress("LateinitVarOverridesLateinitVar")
-@Transactional
+@CleanDbBeforeClass
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
+
+  private lateinit var base: Base
 
   @Value("classpath:startup-import")
   lateinit var importDir: Resource
@@ -33,26 +36,40 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
   @BeforeAll
   fun setup() {
-    whenever(tolgeeProperties.import).thenReturn(
-      ImportProperties().apply {
-        dir = importDir.file.absolutePath
-        createImplicitApiKey = true
-      }
-    )
+    executeInNewTransaction {
+      whenever(tolgeeProperties.import).thenReturn(
+        ImportProperties().apply {
+          dir = importDir.file.absolutePath
+          createImplicitApiKey = true
+        }
+      )
+      base = dbPopulator.createBase("labaala", "admin")
+      startupImportCommandLineRunner.run()
+    }
   }
 
   @Test
   fun `imports data on startup`() {
-    val base = dbPopulator.createBase("labaala", "admin")
-    startupImportCommandLineRunner.run()
-    val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
-    assertThat(projects).isNotEmpty
-    assertThat(projects[0].name).isEqualTo("examples")
-    val languages = languageService.findAll(projects[0].id)
-    assertThat(languageService.findAll(projects[0].id)).hasSize(4)
-    languages.forEach {
-      assertThat(translationService.getAllByLanguageId(it.id)).hasSize(10)
+    executeInNewTransaction {
+      val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
+      assertThat(projects).isNotEmpty
+      val project = projects.first()
+      val languages = languageService.findAll(project.id)
+      assertThat(languageService.findAll(project.id)).hasSize(4)
+      languages.forEach {
+        assertThat(translationService.getAllByLanguageId(it.id)).hasSize(10)
+      }
+      assertThat(project.apiKeys.first().keyHash).isEqualTo("Zy98PdrKTEla1Ix7I1WbZPRoIDttk+Byk77tEjgRIzs=")
     }
-    assertThat(projects[0].apiKeys.first().key).isEqualTo("examples-admin-imported-project-implicit")
+  }
+
+  @Test
+  fun `imports data with namespaces`() {
+    executeInNewTransaction {
+      val projects = projectService.findAllByNameAndOrganizationOwner("with-namespaces", base.organization)
+      assertThat(projects).isNotEmpty
+      val project = projects.first()
+      project.namespaces.assert.hasSize(7)
+    }
   }
 }
