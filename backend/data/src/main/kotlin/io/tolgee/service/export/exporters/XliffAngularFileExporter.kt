@@ -15,7 +15,7 @@ import org.dom4j.io.XMLWriter
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
-class XliffFileExporter(
+class XliffAngularFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: ExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
@@ -104,7 +104,26 @@ class XliffFileExporter(
     try {
       string.parseHtml().forEach { node ->
         node.parent = null
-        this.add(node)
+        val regex = "\\{[^\\{]+?\\}".toRegex()
+        if(regex.containsMatchIn(node.text)) {
+          var nodeTextToProcess = node.text
+          var paramSeqId = 0
+          regex.findAll(node.text).forEach { placeholder ->
+            val placeholderText = placeholder.value
+            this.addText(nodeTextToProcess.split(placeholderText).first())
+            this.addElement("x").addAttribute("id",
+              if (paramSeqId > 0)  "INTERPOLATION_$paramSeqId" else "INTERPOLATION")
+              .addAttribute("equiv-text", "{$placeholderText}")
+            nodeTextToProcess = nodeTextToProcess.split(placeholderText).last()
+            paramSeqId++
+          }
+          if(nodeTextToProcess.isNotEmpty()) {
+            this.addText(nodeTextToProcess)
+          }
+        }
+        else {
+          this.add(node)
+        }
       }
     } catch (e: DocumentException) {
       this.addText(string)
