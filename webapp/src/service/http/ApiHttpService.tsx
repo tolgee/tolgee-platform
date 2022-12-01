@@ -11,6 +11,7 @@ import { MessageService } from '../MessageService';
 import { TokenService } from '../TokenService';
 import { errorCapture } from './errorCapture';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -120,7 +121,9 @@ export class ApiHttpService {
                 this.messageService.error(<T>resource_not_found_message</T>);
               }
               if (r.status == 400 && !options.disableBadRequestHandling) {
-                this.messageService.error(<T>{resObject.code}</T>);
+                this.messageService.error(
+                  <T>{parseErrorResponse(resObject)[0]}</T>
+                );
               }
               if (r.status >= 400 && r.status <= 500) {
                 errorCapture(resObject.code);
@@ -229,18 +232,24 @@ export class ApiHttpService {
   }
 
   buildQuery(object: { [key: string]: any }): string {
-    return Object.keys(object)
+    const query = Object.keys(object)
       .filter((k) => !!object[k])
       .map((k) => {
         if (Array.isArray(object[k])) {
           return object[k]
-            .map((v) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+            .map(
+              (v) =>
+                encodeURIComponent(k) +
+                '=' +
+                (v === '' ? '%02%03' : encodeURIComponent(v))
+            )
             .join('&');
         } else {
           return encodeURIComponent(k) + '=' + encodeURIComponent(object[k]);
         }
       })
       .join('&');
+    return query;
   }
 
   static async getResObject(r: Response, o?: RequestOptions) {

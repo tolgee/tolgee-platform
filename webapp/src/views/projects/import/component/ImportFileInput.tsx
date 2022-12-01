@@ -45,7 +45,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
 
     const pasteListener = (e: ClipboardEvent) => {
       const files: File[] = [];
-      if (e.clipboardData == null) {
+      if (!e.clipboardData?.files.length) {
         return;
       }
       for (let i = 0; i < e.clipboardData.files.length; i++) {

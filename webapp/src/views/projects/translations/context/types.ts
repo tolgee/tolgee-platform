@@ -7,6 +7,9 @@ type KeyWithTranslationsModel =
 type TranslationsQueryType =
   operations['getTranslations']['parameters']['query'];
 
+export type DeletableKeyWithTranslationsModelType =
+  components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
+
 export interface CellPosition {
   keyId: number;
   language: string | undefined;
@@ -85,3 +88,8 @@ export type Edit = CellPosition & {
 };
 
 export type EditMode = 'editor' | 'comments';
+
+export type KeyUpdateData = {
+  keyId: number;
+  value: Partial<DeletableKeyWithTranslationsModelType>;
+};

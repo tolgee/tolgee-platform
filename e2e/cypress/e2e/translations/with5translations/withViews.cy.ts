@@ -5,10 +5,14 @@ import {
   create4Translations,
   editCell,
   forEachView,
+  getCell,
   getCellCancelButton,
+  getCellSaveButton,
   translationsBeforeEach,
   visitTranslations,
 } from '../../../common/translations';
+import { gcy } from '../../../common/shared';
+import { selectNamespace } from '../../../common/namespace';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -45,6 +49,22 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool translated text 2').should('be.visible');
       });
 
+      it('will edit key namespace', () => {
+        getCell('Cool key 01').click();
+
+        selectNamespace('test-ns');
+
+        getCellSaveButton().click();
+
+        gcy('translations-namespace-banner')
+          .contains('test-ns')
+          .should('be.visible');
+
+        gcy('translations-namespace-banner')
+          .contains('<none>')
+          .should('be.visible');
+      });
+
       it('will cancel key edit without confirmation', () => {
         editCell('Cool key 01', 'Cool key edited', false);
         getCellCancelButton().click();
@@ -54,13 +74,17 @@ describe('Views with 5 Translations', () => {
       });
 
       it('will ask for confirmation on changed edit', () => {
-        editCell('Cool key 01', 'Cool key edited', false);
-        cy.contains('Cool key 04').click();
+        editCell('Cool translated text 1', 'Cool translation edited', false);
+        cy.contains('Cool translated text 4').click();
         cy.contains(`Unsaved changes`).should('be.visible');
         confirmSaveChanges();
-        cy.contains('Cool key edited');
-        cy.gcy('global-editor').contains('Cool key edited').should('not.exist');
-        cy.gcy('global-editor').contains('Cool key 04').should('be.visible');
+        cy.contains('Cool translation edited');
+        cy.gcy('global-editor')
+          .contains('Cool translation edited')
+          .should('not.exist');
+        cy.gcy('global-editor')
+          .contains('Cool translated text 4')
+          .should('be.visible');
       });
     }
   );

@@ -1,5 +1,5 @@
 import { useTranslationsSelector } from '../context/TranslationsContext';
-import { NON_EXCLUSIVE_FILTERS } from './useAvailableFilters';
+import { NON_EXCLUSIVE_FILTERS } from './tools';
 
 export const useActiveFilters = () => {
   const filtersObj = useTranslationsSelector((v) => v.filters);

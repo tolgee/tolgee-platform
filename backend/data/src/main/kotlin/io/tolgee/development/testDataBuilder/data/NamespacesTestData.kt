@@ -1,7 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 
@@ -11,14 +13,27 @@ class NamespacesTestData : BaseTestData() {
   lateinit var defaultUnusedProject: Project
   var namespaces = mutableMapOf<Pair<Project, String>, Namespace>()
   lateinit var dotProject: Project
+  lateinit var translator: UserAccount
 
   init {
+    root.apply {
+      addUserAccount {
+        username = "franta"
+        translator = this
+      }
+    }
+
     projectBuilder.apply {
       addKey("key", null)
       keyInNs1 = addKey("key", "ns-1")
       singleKeyInNs2 = addKey("key", "ns-2")
       addKey("key2", null)
       addKey("key2", "ns-1")
+
+      addPermission {
+        user = translator
+        type = Permission.ProjectPermissionType.TRANSLATE
+      }
     }
     root.apply {
       addProject {
