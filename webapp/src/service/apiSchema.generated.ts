@@ -1006,7 +1006,7 @@ export interface components {
     };
     ExportParams: {
       languages?: string[];
-      format: "JSON" | "XLIFF";
+      format: "JSON" | "XLIFF" | "XLIFFANGULAR";
       splitByScope: boolean;
       splitByScopeDelimiter: string;
       splitByScopeDepth: number;
