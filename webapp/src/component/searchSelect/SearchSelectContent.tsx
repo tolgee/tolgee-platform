@@ -70,6 +70,7 @@ type Props = {
   searchPlaceholder?: string;
   title?: string;
   addNewTooltip?: string;
+  minWidth?: number | string;
 };
 
 export const SearchSelectContent: React.FC<Props> = ({
@@ -84,6 +85,7 @@ export const SearchSelectContent: React.FC<Props> = ({
   searchPlaceholder,
   title,
   addNewTooltip,
+  minWidth = 250,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const t = useTranslate();
@@ -92,7 +94,10 @@ export const SearchSelectContent: React.FC<Props> = ({
     onAddNew?.(inputValue);
   };
 
-  const width = anchorEl?.offsetWidth;
+  const width =
+    anchorEl && anchorEl.offsetWidth < minWidth
+      ? minWidth
+      : anchorEl.offsetWidth;
 
   return (
     <StyledWrapper sx={{ minWidth: width, maxWidth: width }}>

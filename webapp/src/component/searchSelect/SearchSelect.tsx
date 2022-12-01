@@ -26,7 +26,7 @@ type Props = {
   title?: string;
   addNewTooltip?: string;
   displaySearch?: boolean;
-  SelectProps?: Partial<React.ComponentProps<typeof Select>>;
+  popperMinWidth?: string | number;
 };
 
 export const SearchSelect: React.FC<Props> = ({
@@ -38,6 +38,7 @@ export const SearchSelect: React.FC<Props> = ({
   title,
   addNewTooltip,
   displaySearch = true,
+  popperMinWidth,
 }) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +64,7 @@ export const SearchSelect: React.FC<Props> = ({
   const valueItem = items.find((i) => i.value === value);
 
   return (
-    <Box display="flex" data-cy="search-select" overflow="hidden">
+    <Box display="flex" data-cy="search-select">
       <Select
         ref={anchorEl}
         onOpen={handleOpen}
@@ -92,6 +93,7 @@ export const SearchSelect: React.FC<Props> = ({
         searchPlaceholder={searchPlaceholder}
         title={title}
         addNewTooltip={addNewTooltip}
+        minWidth={popperMinWidth}
       />
     </Box>
   );
