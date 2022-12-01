@@ -15,7 +15,7 @@ import { selectNamespace } from '../../common/namespace';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
-    namespaces.clean();
+    namespaces.clean({ failOnStatusCode: false });
     namespaces
       .generateStandard()
       .then((r) => r.body)
