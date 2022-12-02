@@ -92,7 +92,12 @@ class CoreImportFilesProcessor(
       return this.name.endsWith(".zip")
     }
 
-  private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
+  private fun ImportFileDto.saveFileEntity() = importService.saveFile(
+    ImportFile(
+      name,
+      import
+    )
+  )
 
   private fun FileProcessorContext.processResult() {
     this.fileEntity.preselectNamespace()
@@ -103,7 +108,7 @@ class CoreImportFilesProcessor(
   }
 
   private fun ImportFile.preselectNamespace() {
-    val namespace = """^([^/]+)/.*""".toRegex().matchEntire(this.name!!)?.groups?.get(1)?.value
+    val namespace = """^[\/]?([^/\\]+)[/\\].*""".toRegex().matchEntire(this.name!!)?.groups?.get(1)?.value
     if (!namespace.isNullOrBlank()) {
       this.namespace = namespace
     }
