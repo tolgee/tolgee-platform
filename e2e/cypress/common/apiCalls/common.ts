@@ -270,7 +270,7 @@ export const setUserType = (username: string, type: AccountType) => {
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
-  ) as any as Promise<components['schemas']['ApiKeyDTO']>;
+  ) as any as Promise<components['schemas']['ApiKeyModel']>;
 
 export const getAllProjectApiKeys = (projectId: number) =>
   // Cypress Promise implementation is so clever

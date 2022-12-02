@@ -233,7 +233,7 @@ class OpenApiConfiguration {
         openApi.paths = newPaths
 
         val usedTags = newPaths.flatMap { it.value.readOperations() }.flatMap { it.tags }
-        openApi.tags.removeIf { !usedTags.contains(it.name) }
+        openApi?.tags?.removeIf { !usedTags.contains(it.name) }
       }
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
         operationHandlers[operation] = handlerMethod

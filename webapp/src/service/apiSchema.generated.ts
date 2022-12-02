@@ -181,14 +181,8 @@ export interface paths {
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
   };
-  "/api/address-part/generate-project": {
-    post: operations["generateProjectSlug_1"];
-  };
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
-  };
-  "/api/address-part/generate-organization": {
-    post: operations["generateOrganizationSlug_1"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -271,14 +265,8 @@ export interface paths {
   "/v2/slug/validate-project/{slug}": {
     get: operations["validateProjectSlug"];
   };
-  "/api/address-part/validate-project/{slug}": {
-    get: operations["validateProjectSlug_1"];
-  };
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
-  };
-  "/api/address-part/validate-organization/{slug}": {
-    get: operations["validateOrganizationSlug_1"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data always required by frontend */
@@ -3523,61 +3511,7 @@ export interface operations {
       };
     };
   };
-  generateProjectSlug_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
   generateOrganizationSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateOrganizationSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -4615,61 +4549,7 @@ export interface operations {
       };
     };
   };
-  validateProjectSlug_1: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   validateOrganizationSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateOrganizationSlug_1: {
     parameters: {
       path: {
         slug: string;

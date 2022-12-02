@@ -30,7 +30,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
     const globalDispatch = useGlobalDispatch();
 
     const acceptCode = useApiMutation({
-      url: '/api/invitation/accept/{code}',
+      url: '/v2/invitations/{code}/accept',
       method: 'get',
     });
 
