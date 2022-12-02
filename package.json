@@ -45,6 +45,10 @@
       {
         "name": "beta",
         "prerelease": true
+      },
+      {
+        "name": "tolgee-3",
+        "prerelease": "alpha"
       }
     ]
   }
