@@ -40,9 +40,12 @@ class StartupImportService(
 
     if (dir !== null && File(dir).exists() && File(dir).isDirectory) {
       File(dir).listFiles()?.filter { it.isDirectory }?.forEach { projectDir ->
-        val fileDtos = projectDir.listFiles()?.map { it -> ImportFileDto(it.name, it.inputStream()) }?.toList()
+        val fileDtos = projectDir.walk().filter { !it.isDirectory }.map {
+          val relativePath = it.path.replace(projectDir.path, "")
+          if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
+        }.filterNotNull().toList()
 
-        if (fileDtos != null) {
+        if (fileDtos.isNotEmpty()) {
           val userAccount = getInitialUserAccount()
           val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
           SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
@@ -83,14 +86,16 @@ class StartupImportService(
     fileDtos: List<ImportFileDto>,
     organization: Organization
   ): Project {
+    val languages = fileDtos.map { file ->
+      // remove extension
+      val name = file.name.replace(Regex("^.*[\\/]([a-zA-Z0-9_\\-]+)\\.\\w+\$"), "$1")
+      LanguageDto(name, name, name)
+    }.toSet().toList()
+
     val project = projectService.createProject(
       CreateProjectDTO(
         name = projectName,
-        languages = fileDtos.map { file ->
-          // remove extension
-          val name = file.name.replace(Regex("\\.[^.]*"), "")
-          LanguageDto(name, name, name)
-        },
+        languages = languages,
         organizationId = organization.id
       ),
     )
