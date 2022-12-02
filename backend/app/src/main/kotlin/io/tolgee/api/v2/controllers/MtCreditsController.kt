@@ -29,6 +29,7 @@ class MtCreditsController(
   private val organizationRoleService: OrganizationRoleService,
   private val organizationService: OrganizationService
 ) {
+
   @GetMapping("/projects/{projectId}/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for specified project")
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
