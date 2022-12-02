@@ -29,15 +29,17 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it enables MFA`() {
-    val requestDto = UserTotpEnableRequestDto(
-      totpKey = TOTP_KEY,
-      otp = mfaService.generateStringCode(encodedKey),
-      password = initialPassword
-    )
+    retry {
+      val requestDto = UserTotpEnableRequestDto(
+        totpKey = TOTP_KEY,
+        otp = mfaService.generateStringCode(encodedKey),
+        password = initialPassword
+      )
 
-    performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
-    val fromDb = userAccountService.find(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+      performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
+      val fromDb = userAccountService.find(initialUsername)
+      Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+    }
   }
 
   @Test
@@ -68,19 +70,21 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `it requires valid TOTP code for activation`() {
-    val requestDto = UserTotpEnableRequestDto(
-      totpKey = TOTP_KEY,
-      otp = (mfaService.generateCode(encodedKey) + 1).toString().padStart(6, '0'),
-      password = initialPassword
-    )
+    retry {
+      val requestDto = UserTotpEnableRequestDto(
+        totpKey = TOTP_KEY,
+        otp = (mfaService.generateCode(encodedKey) + 1).toString().padStart(6, '0'),
+        password = initialPassword
+      )
 
-    val res = performAuthPut("/v2/user/mfa/totp", requestDto)
-      .andIsBadRequest
-      .andReturn()
+      val res = performAuthPut("/v2/user/mfa/totp", requestDto)
+        .andIsBadRequest
+        .andReturn()
 
-    assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
-    val fromDb = userAccountService.find(initialUsername)
-    Assertions.assertThat(fromDb!!.totpKey).isNull()
+      assertThat(res).error().isCustomValidation.hasMessage("invalid_otp_code")
+      val fromDb = userAccountService.find(initialUsername)
+      Assertions.assertThat(fromDb!!.totpKey).isNull()
+    }
   }
 
   @Test

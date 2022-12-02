@@ -124,7 +124,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   fun `updates contact when user is updated`() {
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
     userAccount = user
-    performAuthPost("/api/user", updateRequestDto)
+    performAuthPut("/v2/user", updateRequestDto)
       .andIsOk
     verifyEmailSentOnUpdate()
   }
