@@ -393,6 +393,9 @@ export interface paths {
   "/v2/preferred-organization": {
     get: operations["getPreferred"];
   };
+  "/v2/pats/current": {
+    get: operations["getCurrent"];
+  };
   "/v2/organizations/{slug}/projects-with-stats": {
     get: operations["getAllWithStatistics_1"];
   };
@@ -453,7 +456,7 @@ export interface paths {
     get: operations["get_12"];
   };
   "/v2/api-keys/current": {
-    get: operations["getCurrent"];
+    get: operations["getCurrent_1"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -855,12 +858,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      createdAt: number;
-      updatedAt: number;
-      description: string;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -931,15 +934,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      id: number;
       username?: string;
-      description: string;
-      expiresAt?: number;
       projectId: number;
+      expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1325,7 +1328,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1337,6 +1339,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1554,6 +1557,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PatWithUserModel: {
+      user: components["schemas"]["SimpleUserAccountModel"];
+      expiresAt?: number;
+      lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      id: number;
+      description: string;
+    };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
@@ -1605,15 +1617,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
       username?: string;
-      description: string;
-      expiresAt?: number;
       projectId: number;
+      expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5998,6 +6010,28 @@ export interface operations {
       };
     };
   };
+  getCurrent: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PatWithUserModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllWithStatistics_1: {
     parameters: {
       query: {
@@ -6599,7 +6633,7 @@ export interface operations {
       };
     };
   };
-  getCurrent: {
+  getCurrent_1: {
     parameters: {};
     responses: {
       /** OK */
