@@ -29,7 +29,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[1].name)
 
-    performAuthGet("/api/organizations?size=100")
+    performAuthGet("/v2/organizations?size=100")
       .andPrettyPrint.andAssertThatJson {
         node("_embedded.organizations") {
           isArray.hasSize(6)
@@ -47,7 +47,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     userAccount = testData.franta
 
-    performAuthGet("/api/organizations?size=100")
+    performAuthGet("/v2/organizations?size=100")
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
@@ -79,7 +79,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     loginAsUser(users[1].name)
 
-    performAuthGet("/api/organizations?size=100&filterCurrentUserOwner=true")
+    performAuthGet("/v2/organizations?size=100&filterCurrentUserOwner=true")
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
@@ -96,7 +96,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     loginAsUser(users[1].name)
 
-    performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
+    performAuthGet("/v2/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
       .andPrettyPrint
       .andAssertThatJson
       .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")

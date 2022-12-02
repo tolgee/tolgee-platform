@@ -7,7 +7,7 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateSlugDto
-import io.tolgee.service.OrganizationService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -21,7 +21,7 @@ import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/slug", "/api/address-part"])
+@RequestMapping(value = ["/v2/slug"])
 @Tag(name = "Slug generation")
 class SlugController(
   private val organizationService: OrganizationService,

@@ -8,7 +8,7 @@ import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.security.apiKeyAuth.ApiKeyAuthenticationToken
 import io.tolgee.security.patAuth.PatAuthenticationToken
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component

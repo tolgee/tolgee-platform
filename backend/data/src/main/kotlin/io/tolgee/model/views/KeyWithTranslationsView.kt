@@ -9,6 +9,8 @@ import io.tolgee.model.key.Tag
 data class KeyWithTranslationsView(
   val keyId: Long,
   val keyName: String,
+  val keyNamespaceId: Long?,
+  val keyNamespace: String?,
   val screenshotCount: Long,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
 ) {
@@ -21,6 +23,8 @@ data class KeyWithTranslationsView(
       val result = KeyWithTranslationsView(
         keyId = data.removeFirst() as Long,
         keyName = data.removeFirst() as String,
+        keyNamespaceId = data.removeFirst() as Long?,
+        keyNamespace = data.removeFirst() as String?,
         screenshotCount = data.removeFirst() as Long
       )
 

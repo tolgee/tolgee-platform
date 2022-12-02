@@ -110,8 +110,5 @@ describe('Shortcuts', () => {
 
     move('leftarrow');
     assertAvailableCommands(['Move', 'Edit']);
-
-    editCell('Cool key 01');
-    assertAvailableCommands(['Save', 'Save & continue']);
   });
 });

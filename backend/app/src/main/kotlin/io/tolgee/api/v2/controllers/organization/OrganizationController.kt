@@ -34,11 +34,11 @@ import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.OrganizationStatsService
-import io.tolgee.service.UserAccountService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.security.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -67,7 +67,7 @@ import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/organizations", "/api/organizations"])
+@RequestMapping(value = ["/v2/organizations"])
 @Tag(name = "Organizations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(

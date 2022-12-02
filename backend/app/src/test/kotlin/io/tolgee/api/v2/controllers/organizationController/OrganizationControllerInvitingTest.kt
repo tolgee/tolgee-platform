@@ -146,7 +146,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
         type = OrganizationRoleType.MEMBER
       )
     )
-    performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
+    performAuthDelete("/v2/invitations/${invitation.id!!}", null).andIsOk
     assertThatThrownBy { invitationService.getInvitation(invitation.code) }
       .isInstanceOf(BadRequestException::class.java)
   }

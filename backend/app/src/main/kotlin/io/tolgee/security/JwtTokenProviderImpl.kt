@@ -16,7 +16,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.JwtToken.Companion.JWT_TOKEN_SUPER_EXPIRATION_CLAIM
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component

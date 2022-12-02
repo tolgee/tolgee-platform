@@ -9,9 +9,9 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

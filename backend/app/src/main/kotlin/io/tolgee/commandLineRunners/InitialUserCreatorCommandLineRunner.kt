@@ -5,8 +5,8 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.UserAccount
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.ApplicationListener

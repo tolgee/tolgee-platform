@@ -13,6 +13,9 @@ open class SetTranslationsResponseModel(
   @Schema(description = "Name of key", example = "this_is_super_key")
   val keyName: String,
 
+  @Schema(description = "The namespace of the key", example = "homepage")
+  val keyNamespace: String?,
+
   @Schema(
     description = "Translations object containing values updated in this request",
     example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}"

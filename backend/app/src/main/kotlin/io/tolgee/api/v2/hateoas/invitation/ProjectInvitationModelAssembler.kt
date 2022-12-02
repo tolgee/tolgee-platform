@@ -2,7 +2,6 @@ package io.tolgee.api.v2.hateoas.invitation
 
 import io.tolgee.api.v2.controllers.V2InvitationController
 import io.tolgee.model.Invitation
-import io.tolgee.security.controllers.InvitationController
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class ProjectInvitationModelAssembler() :
   RepresentationModelAssemblerSupport<Invitation, ProjectInvitationModel>(
-    InvitationController::class.java, ProjectInvitationModel::class.java
+    V2InvitationController::class.java, ProjectInvitationModel::class.java
   ) {
   override fun toModel(entity: Invitation): ProjectInvitationModel {
     return ProjectInvitationModel(

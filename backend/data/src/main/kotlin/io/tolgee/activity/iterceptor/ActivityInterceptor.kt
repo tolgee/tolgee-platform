@@ -1,6 +1,7 @@
 package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.util.Logging
 import org.hibernate.EmptyInterceptor
 import org.hibernate.Transaction
 import org.hibernate.type.Type
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component
 import java.io.Serializable
 
 @Component
-class ActivityInterceptor : EmptyInterceptor() {
+class ActivityInterceptor : EmptyInterceptor(), Logging {
 
   @Autowired
   lateinit var applicationContext: ApplicationContext

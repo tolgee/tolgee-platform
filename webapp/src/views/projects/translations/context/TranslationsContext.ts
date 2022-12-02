@@ -17,6 +17,7 @@ import {
   Edit,
   Filters,
   KeyElement,
+  KeyUpdateData,
   RemoveTag,
   ScrollToElement,
   SetTranslationState,
@@ -51,13 +52,15 @@ type ActionType =
   | { type: 'ADD_TAG'; payload: AddTag }
   | { type: 'REMOVE_TAG'; payload: RemoveTag }
   | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslation }
+  | { type: 'UPDATE_KEY'; payload: KeyUpdateData }
   | { type: 'INSERT_TRANSLATION'; payload: AddTranslation }
   | { type: 'REGISTER_ELEMENT'; payload: KeyElement }
   | { type: 'UNREGISTER_ELEMENT'; payload: KeyElement }
   | { type: 'SCROLL_TO_ELEMENT'; payload: ScrollToElement }
   | { type: 'FOCUS_ELEMENT'; payload: CellPosition }
   | { type: 'REGISTER_LIST'; payload: ReactList }
-  | { type: 'UNREGISTER_LIST'; payload: ReactList };
+  | { type: 'UNREGISTER_LIST'; payload: ReactList }
+  | { type: 'REFETCH_TRANSLATIONS' };
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
@@ -66,6 +69,7 @@ type Props = {
   baseLang: string | undefined;
   keyId?: number;
   keyName?: string;
+  keyNamespace?: string;
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
 };
@@ -107,6 +111,7 @@ export const [
     projectId: props.projectId,
     keyId: props.keyId,
     keyName: props.keyName,
+    keyNamespace: props.keyNamespace,
     pageSize: props.pageSize,
     updateLocalStorageLanguages: props.updateLocalStorageLanguages,
     // when initial langs are null, fetching is postponed
@@ -188,6 +193,8 @@ export const [
         return tagsService.removeTag(action.payload);
       case 'UPDATE_TRANSLATION':
         return translationService.updateTranslation(action.payload);
+      case 'UPDATE_KEY':
+        return translationService.updateTranslationKeys([action.payload]);
       case 'INSERT_TRANSLATION':
         return translationService.insertAsFirst(action.payload);
       case 'REGISTER_ELEMENT':
@@ -202,6 +209,8 @@ export const [
         return viewRefs.registerList(action.payload);
       case 'UNREGISTER_LIST':
         return viewRefs.unregisterList(action.payload);
+      case 'REFETCH_TRANSLATIONS':
+        return translationService.refetchTranslations();
     }
   };
 

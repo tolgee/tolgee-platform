@@ -42,7 +42,9 @@ export const ColumnResizer: React.FC<Props> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    onResize(originalSize + position.x);
+    if (isDragging) {
+      onResize(originalSize + position.x);
+    }
   }, [position, isDragging]);
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
@@ -37,6 +38,7 @@ class ProjectBuilder(
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
     var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
     var avatarFile: ClassPathResource? = null
+    var namespaces = mutableListOf<NamespaceBuilder>()
   }
 
   var data = DATA()
@@ -65,6 +67,8 @@ class ProjectBuilder(
   fun addAutoTranslationConfig(ft: FT<AutoTranslationConfig>) {
     data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this@ProjectBuilder).also { ft(it.self) }
   }
+
+  fun addNamespace(ft: FT<Namespace>) = addOperation(data.namespaces, ft)
 
   fun addEnglish(): LanguageBuilder {
     return addLanguage {

@@ -1,12 +1,17 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.fixtures.node
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class V2ImportControllerManipulationTest : AuthorizedControllerTest() {
+class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `it deletes import`() {
     val testData = ImportTestData()
@@ -101,6 +106,93 @@ class V2ImportControllerManipulationTest : AuthorizedControllerTest() {
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/languages/${testData.importFrench.id}/" +
+      "select-existing/${testData.french.id}"
+    performAuthPut(path, null).andIsOk
+    assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
+      .isEqualTo(testData.french)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it selects namespace, resets conflicts`() {
+    val testData = ImportNamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+    val path = "import/result/files/${testData.defaultNsFile.id}/select-namespace"
+    performProjectAuthPut(path, mapOf("namespace" to "new-ns")).andIsOk
+
+    executeInNewTransaction {
+      val file = importService.findFile(testData.defaultNsFile.id)!!
+      assertThat(file.namespace)
+        .isEqualTo("new-ns")
+      val importLanguage = file.languages
+        .find { it.name == "de" }!!
+      importLanguage.translations
+        .any { it.conflict != null }
+        .assert.isEqualTo(false)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `resets language when selecting namespace`() {
+    val testData = ImportNamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+    val path = "import/result/files/${testData.defaultNsFile.id}/select-namespace"
+    performProjectAuthPut(path, mapOf("namespace" to "homepage")).andIsOk
+    importService.findLanguage(testData.importEnglish.id)!!.existingLanguage.assert.isNull()
+    importService.findLanguage(testData.importGerman.id)!!.existingLanguage.assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns all namespaces`() {
+    val testData = ImportNamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+    performProjectAuthGet("import/all-namespaces").andIsOk.andAssertThatJson {
+      node("_embedded.namespaces") {
+        node("[0].name").isEqualTo("existing-namespace")
+        node("[1].name").isEqualTo("existing-namespace2")
+        node("[2].name").isEqualTo("homepage")
+      }
+    }
+  }
+
+  @Test
+  fun `it selects same language for different namespaces`() {
+    val testData = ImportTestData()
+    // assign the existing french to the import french
+    testData.importFrench.existingLanguage = testData.french
+    val nsData = testData.addFilesWithNamespaces()
+    testDataService.saveTestData(testData.root)
+    val user = testData.root.data.userAccounts[0].self
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+    // try to assign with another french but in different namespace
+    val path = "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
+      "select-existing/${testData.french.id}"
+    performAuthPut(path, null).andIsOk
+    assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
+      .isEqualTo(testData.french)
+  }
+
+  @Test
+  fun `conflicts are refreshed when changing namespace`() {
+    val testData = ImportTestData()
+    // assign the existing french to the import french
+    testData.importFrench.existingLanguage = testData.french
+    val nsData = testData.addFilesWithNamespaces()
+    testDataService.saveTestData(testData.root)
+    val user = testData.root.data.userAccounts[0].self
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+    // try to assign with another french but in different namespace
+    val path = "/v2/projects/$projectId/import/result/languages/${nsData.importFrenchInNs.id}/" +
       "select-existing/${testData.french.id}"
     performAuthPut(path, null).andIsOk
     assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)

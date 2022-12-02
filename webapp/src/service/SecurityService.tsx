@@ -142,7 +142,7 @@ export class SecurityService {
     if (code) {
       try {
         await this.apiSchemaService.schemaRequest(
-          '/api/invitation/accept/{code}',
+          '/v2/invitations/{code}/accept',
           'get'
         )({ path: { code } });
       } catch (e) {

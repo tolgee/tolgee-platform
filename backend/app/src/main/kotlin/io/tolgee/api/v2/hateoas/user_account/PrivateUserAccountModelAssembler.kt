@@ -1,9 +1,9 @@
 package io.tolgee.api.v2.hateoas.user_account
 
+import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.model.UserAccount
-import io.tolgee.security.controllers.UserController
 import io.tolgee.service.AvatarService
-import io.tolgee.service.MfaService
+import io.tolgee.service.security.MfaService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
@@ -12,7 +12,7 @@ class PrivateUserAccountModelAssembler(
   private val avatarService: AvatarService,
   private val mfaService: MfaService
 ) : RepresentationModelAssemblerSupport<UserAccount, PrivateUserAccountModel>(
-  UserController::class.java, PrivateUserAccountModel::class.java
+  V2UserController::class.java, PrivateUserAccountModel::class.java
 ) {
   override fun toModel(entity: UserAccount): PrivateUserAccountModel {
     val avatar = avatarService.getAvatarLinks(entity.avatarHash)

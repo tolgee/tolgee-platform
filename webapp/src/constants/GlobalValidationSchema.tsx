@@ -284,6 +284,10 @@ export class Validation {
   static readonly BILLING_RECIPIENT_EMAIL = Yup.object({
     emailRecipient: Yup.string().required().email(),
   });
+
+  static readonly NAMESPACE_FORM = Yup.object({
+    namespace: Yup.string().required().max(100),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

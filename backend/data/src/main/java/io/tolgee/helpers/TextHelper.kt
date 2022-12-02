@@ -5,7 +5,11 @@ import java.util.regex.Pattern
 
 object TextHelper {
   @JvmStatic
-  fun splitOnNonEscapedDelimiter(string: String, delimiter: Char): List<String> {
+  fun splitOnNonEscapedDelimiter(string: String, delimiter: Char?): List<String> {
+    if (delimiter == null) {
+      return listOf(string)
+    }
+
     val result = ArrayList<String>()
     var actual = StringBuilder()
     for (i in string.indices) {

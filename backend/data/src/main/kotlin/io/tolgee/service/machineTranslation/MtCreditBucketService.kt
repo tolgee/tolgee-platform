@@ -8,7 +8,7 @@ import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
-import io.tolgee.service.OrganizationService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.apache.commons.lang3.time.DateUtils
 import org.springframework.stereotype.Service

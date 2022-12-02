@@ -35,7 +35,7 @@ class Organization(
 
   @Column(name = "address_part")
   @field:NotBlank @field:Size(min = 3, max = 60)
-  @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
+  @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
   open var slug: String = "",
 
   @Enumerated(EnumType.STRING)

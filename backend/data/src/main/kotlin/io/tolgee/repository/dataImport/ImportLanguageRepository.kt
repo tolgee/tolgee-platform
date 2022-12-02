@@ -21,6 +21,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             select il.id as id, il.name as name, el.id as existingLanguageId, 
             el.tag as existingLanguageTag, el.name as existingLanguageName,
             if.name as importFileName, if.id as importFileId,
+            if.namespace as namespace,
             (select count(*) from if.issues) as importFileIssueCount,
             count(it) as totalCount, 
             sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
@@ -46,6 +47,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             $VIEW_BASE_QUERY
             where if.import.id = :importId
             $VIEW_GROUP_BY
+            order by il.id
             """
   )
   fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>

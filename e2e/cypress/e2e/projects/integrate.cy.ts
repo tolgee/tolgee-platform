@@ -1,7 +1,7 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { gcy, selectInSelect } from '../../common/shared';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
+import { ApiKeyModel } from '../../../../webapp/src/service/response.types';
 import {
   createApiKey,
   createTestProject,
@@ -120,7 +120,7 @@ describe('Integrate view', () => {
     });
 
     describe('existing API key', () => {
-      let created: ApiKeyDTO;
+      let created: ApiKeyModel;
       beforeEach(() => {
         createApiKeysAndSelectOne(projectId).then((v) => {
           created = v;
@@ -222,7 +222,7 @@ const getApiKeySelectValue = () => {
     .then((v) => parseInt(v as string));
 };
 
-const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
+const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyModel> => {
   createApiKey({ projectId: projectId, scopes: ['translations.edit'] });
   return createApiKey({
     projectId: projectId,
@@ -236,7 +236,7 @@ const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
           v.description
         ).then(() => v)
       )
-  ) as Promise<ApiKeyDTO>;
+  ) as Promise<ApiKeyModel>;
 };
 
 const createNewApiKey = () => {

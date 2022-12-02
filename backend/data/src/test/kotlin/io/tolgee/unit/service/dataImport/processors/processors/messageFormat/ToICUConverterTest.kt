@@ -28,7 +28,7 @@ class ToICUConverterTest {
       File("src/test/resources/import/po/example.po")
         .inputStream()
     )
-    context = FileProcessorContext(importFileDto, importFile, mock())
+    context = FileProcessorContext(importFileDto, importFile)
   }
 
   @Test

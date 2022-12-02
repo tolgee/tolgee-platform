@@ -67,6 +67,8 @@ declare namespace DataCy {
         "export-format-selector-item" |
         "export-language-selector" |
         "export-language-selector-item" |
+        "export-namespace-selector" |
+        "export-namespace-selector-item" |
         "export-state-selector" |
         "export-state-selector-item" |
         "export-submit-button" |
@@ -122,6 +124,7 @@ declare namespace DataCy {
         "import-result-file-cell" |
         "import-result-file-warnings" |
         "import-result-language-menu-cell" |
+        "import-result-namespace-cell" |
         "import-result-resolve-button" |
         "import-result-resolved-conflicts-cell" |
         "import-result-row" |
@@ -181,6 +184,17 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "namespaces-banner-content" |
+        "namespaces-banner-menu" |
+        "namespaces-banner-menu-button" |
+        "namespaces-banner-menu-option" |
+        "namespaces-rename-cancel" |
+        "namespaces-rename-confirm" |
+        "namespaces-rename-text-field" |
+        "namespaces-select-cancel" |
+        "namespaces-select-confirm" |
+        "namespaces-select-text-field" |
+        "namespaces-selector" |
         "navigation-item" |
         "organization-address-part-field" |
         "organization-description-field" |
@@ -263,6 +277,10 @@ declare namespace DataCy {
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
         "screenshot-box" |
+        "search-select" |
+        "search-select-item" |
+        "search-select-new" |
+        "search-select-search" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
@@ -272,6 +290,7 @@ declare namespace DataCy {
         "tag-autocomplete-option" |
         "transfer-project-apply-button" |
         "translation-create-key-input" |
+        "translation-create-namespace-input" |
         "translation-create-translation-input" |
         "translation-edit-delete-button" |
         "translation-edit-key-field" |
@@ -304,6 +323,7 @@ declare namespace DataCy {
         "translations-key-count" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
+        "translations-namespace-banner" |
         "translations-row" |
         "translations-row-checkbox" |
         "translations-select-all-button" |

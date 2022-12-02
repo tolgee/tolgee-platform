@@ -30,6 +30,9 @@ export const importTestData = {
     internalFetch('e2e-data/import/generate-with-long-text'),
 };
 
+export const importNamespacesTestData =
+  generateTestDataObject('import-namespaces');
+
 export const projectListdData = generateTestDataObject(
   'projects-list-dashboard'
 );
@@ -84,6 +87,8 @@ export const translationWebsocketsTestData = generateTestDataObject(
 export const userDeletionTestData = generateTestDataObject('user-deletion');
 
 export const formerUserTestData = generateTestDataObject('former-user');
+
+export const namespaces = generateTestDataObject('namespaces');
 
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),

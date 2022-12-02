@@ -5,10 +5,10 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.model.Permission
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat

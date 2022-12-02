@@ -12,14 +12,14 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.ProcessorFactory
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -80,19 +80,21 @@ class CoreImportFileProcessorUnitTest {
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
     whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }
     whenever(importMock.project).thenReturn(Project(1, "test repo"))
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(Optional.of(existingLanguage))
-    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(UserAccount()))
+    val userAccount = UserAccount()
+    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(userAccount))
+    whenever(authenticationFacadeMock.userAccountEntity).thenReturn(userAccount)
   }
 
   @Test
   fun `finds proper existing language for imported language`() {
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(importServiceMock).saveLanguages(
       argThat {
         this.first().run {
@@ -116,7 +118,7 @@ class CoreImportFileProcessorUnitTest {
         }
       )
     )
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(importServiceMock).saveTranslations(
       argThat {
         assertThat(this[0].conflict).isEqualTo(existingTranslation)
@@ -135,7 +137,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addKeyComment("test_key", "test comment")
     whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
-    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(
       argThat {
         this.comments.any { it.text == "test comment" }

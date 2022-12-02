@@ -12,7 +12,7 @@ import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.views.ProjectWithLanguagesView
-import io.tolgee.service.OrganizationService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/organizations", "/api/organizations"])
+@RequestMapping(value = ["/v2/organizations"])
 @Tag(name = "Organizations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationProjectController(
