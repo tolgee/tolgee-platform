@@ -150,42 +150,24 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
-  "/api/organizations/{organizationId}/users/{userId}/set-role": {
-    put: operations["setUserRole_1"];
+  "/v2/organizations/{id}": {
+    get: operations["get_9"];
+    put: operations["update_4"];
+    delete: operations["delete_8"];
   };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
   };
-  "/api/organizations/{id}/leave": {
-    put: operations["leaveOrganization_1"];
-  };
   "/v2/organizations/{id}/invite": {
     put: operations["inviteUser_1"];
-  };
-  "/api/organizations/{id}/invite": {
-    put: operations["inviteUser_2"];
   };
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
   };
-  "/api/organizations/{id}/avatar": {
-    put: operations["uploadAvatar_3"];
-    delete: operations["removeAvatar_3"];
-  };
-  "/v2/organizations/{id}": {
-    get: operations["get_10"];
-    put: operations["update_4"];
-    delete: operations["delete_8"];
-  };
-  "/api/organizations/{id}": {
-    get: operations["get_11"];
-    put: operations["update_5"];
-    delete: operations["delete_9"];
-  };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_6"];
-    delete: operations["delete_11"];
+    put: operations["update_5"];
+    delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
@@ -258,20 +240,12 @@ export interface paths {
     get: operations["getAll_8"];
     post: operations["create_9"];
   };
-  "/api/organizations": {
-    get: operations["getAll_9"];
-    post: operations["create_10"];
-  };
   "/v2/image-upload": {
     post: operations["upload"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
-    post: operations["create_11"];
-  };
-  "/api/user": {
-    get: operations["getInfo_1"];
-    post: operations["updateUser_1"];
+    post: operations["create_10"];
   };
   "/api/public/validate_email": {
     post: operations["validateEmail"];
@@ -287,13 +261,6 @@ export interface paths {
   };
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
-  };
-  "/api/apiKeys": {
-    get: operations["allByUser_1"];
-    post: operations["create_12"];
-  };
-  "/api/apiKeys/edit": {
-    post: operations["edit_2"];
   };
   "/v2/user/single-owned-organizations": {
     get: operations["getAllSingleOwnedOrganizations"];
@@ -396,23 +363,14 @@ export interface paths {
   "/v2/pats/current": {
     get: operations["getCurrent"];
   };
-  "/v2/organizations/{slug}/projects-with-stats": {
-    get: operations["getAllWithStatistics_1"];
-  };
-  "/api/organizations/{slug}/projects-with-stats": {
-    get: operations["getAllWithStatistics_2"];
+  "/v2/organizations/{slug}": {
+    get: operations["get_8"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
   };
-  "/api/organizations/{slug}/projects": {
-    get: operations["getAllProjects_1"];
-  };
-  "/v2/organizations/{slug}": {
-    get: operations["get_8"];
-  };
-  "/api/organizations/{slug}": {
-    get: operations["get_9"];
+  "/v2/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_1"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -420,40 +378,24 @@ export interface paths {
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
-  "/api/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations_1"];
-  };
   "/v2/organizations/{organizationId}/usage": {
     /** Returns current organization usage */
     get: operations["getUsage"];
   };
-  "/api/organizations/{organizationId}/usage": {
-    /** Returns current organization usage */
-    get: operations["getUsage_1"];
-  };
   "/v2/organizations/{organizationId}/projects-with-stats": {
-    get: operations["getAllWithStatistics_3"];
-  };
-  "/api/organizations/{organizationId}/projects-with-stats": {
-    get: operations["getAllWithStatistics_4"];
+    get: operations["getAllWithStatistics_2"];
   };
   "/v2/organizations/{id}/users": {
     get: operations["getAllUsers_1"];
   };
-  "/api/organizations/{id}/users": {
-    get: operations["getAllUsers_2"];
-  };
   "/v2/organizations/{id}/projects": {
-    get: operations["getAllProjects_2"];
-  };
-  "/api/organizations/{id}/projects": {
-    get: operations["getAllProjects_3"];
+    get: operations["getAllProjects_1"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_12"];
+    get: operations["get_10"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -485,21 +427,6 @@ export interface paths {
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
   };
-  "/api/invitation/list/{projectId}": {
-    get: operations["getProjectInvitations_1"];
-  };
-  "/api/invitation/accept/{code}": {
-    get: operations["acceptInvitation_1"];
-  };
-  "/api/apiKeys/scopes": {
-    get: operations["getApiKeyScopes"];
-  };
-  "/api/apiKeys/project/{projectId}": {
-    get: operations["allByProject_1"];
-  };
-  "/api/apiKeys/availableScopes": {
-    get: operations["getScopes_1"];
-  };
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
     delete: operations["removeTag"];
   };
@@ -512,23 +439,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
-  "/api/organizations/{organizationId}/users/{userId}": {
-    delete: operations["removeUser_1"];
-  };
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_10"];
+    delete: operations["delete_9"];
   };
   "/v2/administration/users/{userId}": {
     delete: operations["deleteUser"];
-  };
-  "/api/invitation/{invitationId}": {
-    delete: operations["deleteInvitation_1"];
-  };
-  "/api/apiKeys/{key}": {
-    delete: operations["delete_12"];
   };
 }
 
@@ -868,20 +786,11 @@ export interface components {
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
-    OrganizationInviteUserDto: {
-      roleType: "MEMBER" | "OWNER";
-      /** Name of invited user */
-      name?: string;
-      /** Email to send invitation to */
-      email?: string;
-    };
-    OrganizationInvitationModel: {
-      id: number;
-      code: string;
-      type: "MEMBER" | "OWNER";
-      createdAt: string;
-      invitedUserName?: string;
-      invitedUserEmail?: string;
+    OrganizationDto: {
+      name: string;
+      description?: string;
+      slug?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
@@ -897,11 +806,20 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       avatar?: components["schemas"]["Avatar"];
     };
-    OrganizationDto: {
-      name: string;
-      description?: string;
-      slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    OrganizationInviteUserDto: {
+      roleType: "MEMBER" | "OWNER";
+      /** Name of invited user */
+      name?: string;
+      /** Email to send invitation to */
+      email?: string;
+    };
+    OrganizationInvitationModel: {
+      id: number;
+      code: string;
+      type: "MEMBER" | "OWNER";
+      createdAt: string;
+      invitedUserName?: string;
+      invitedUserEmail?: string;
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -1105,21 +1023,6 @@ export interface components {
       username: string;
       password: string;
       otp?: string;
-    };
-    ApiKeyDTO: {
-      id: number;
-      /** Resulting user's api key. Is is hidden when is not response to creation or regeneration. */
-      key?: string;
-      description: string;
-      userName?: string;
-      projectId: number;
-      projectName: string;
-      scopes: string[];
-    };
-    EditApiKeyDto: {
-      id: number;
-      scopes: string[];
-      description?: string;
     };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
@@ -1566,6 +1469,16 @@ export interface components {
       id: number;
       description: string;
     };
+    OrganizationRequestParamsDto: {
+      filterCurrentUserOwner: boolean;
+      search?: string;
+    };
+    PagedModelOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["OrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
@@ -1600,16 +1513,6 @@ export interface components {
       username: string;
       organizationRole: "MEMBER" | "OWNER";
     };
-    OrganizationRequestParamsDto: {
-      filterCurrentUserOwner: boolean;
-      search?: string;
-    };
-    PagedModelOrganizationModel: {
-      _embedded?: {
-        organizations?: components["schemas"]["OrganizationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     ApiKeyWithLanguagesModel: {
       /**
        * Languages for which user has translate permission.
@@ -1632,17 +1535,6 @@ export interface components {
         users?: components["schemas"]["UserAccountModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    UserResponseDTO: {
-      id?: number;
-      name?: string;
-      username?: string;
-      emailAwaitingVerification?: string;
-    };
-    InvitationDTO: {
-      id?: number;
-      code?: string;
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UserTotpDisableRequestDto: {
       password: string;
@@ -3268,11 +3160,69 @@ export interface operations {
       };
     };
   };
-  setUserRole_1: {
+  get_9: {
     parameters: {
       path: {
-        organizationId: number;
-        userId: number;
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_4: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  delete_8: {
+    parameters: {
+      path: {
+        id: number;
       };
     };
     responses: {
@@ -3289,11 +3239,6 @@ export interface operations {
         content: {
           "*/*": string;
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetOrganizationRoleDto"];
       };
     };
   };
@@ -3320,62 +3265,7 @@ export interface operations {
       };
     };
   };
-  leaveOrganization_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   inviteUser_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationInviteUserDto"];
-      };
-    };
-  };
-  inviteUser_2: {
     parameters: {
       path: {
         id: number;
@@ -3468,232 +3358,7 @@ export interface operations {
       };
     };
   };
-  uploadAvatar_3: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          avatar: string;
-        };
-      };
-    };
-  };
-  removeAvatar_3: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_10: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  update_4: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_8: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_11: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   update_5: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_9: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  update_6: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3725,7 +3390,7 @@ export interface operations {
       };
     };
   };
-  delete_11: {
+  delete_10: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -4667,66 +4332,6 @@ export interface operations {
       };
     };
   };
-  getAll_9: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  create_10: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
   upload: {
     parameters: {};
     responses: {
@@ -4785,7 +4390,7 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create_10: {
     responses: {
       /** OK */
       200: {
@@ -4809,51 +4414,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateApiKeyDto"];
-      };
-    };
-  };
-  getInfo_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserResponseDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updateUser_1: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };
@@ -4981,78 +4541,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LoginRequest"];
-      };
-    };
-  };
-  allByUser_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  create_12: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateApiKeyDto"];
-      };
-    };
-  };
-  edit_2: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EditApiKeyDto"];
       };
     };
   };
@@ -6032,17 +5520,8 @@ export interface operations {
       };
     };
   };
-  getAllWithStatistics_1: {
+  get_8: {
     parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
       path: {
         slug: string;
       };
@@ -6051,43 +5530,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_2: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
@@ -6140,11 +5583,8 @@ export interface operations {
       };
     };
   };
-  getAllProjects_1: {
+  getAllWithStatistics_1: {
     parameters: {
-      path: {
-        slug: string;
-      };
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
@@ -6154,30 +5594,6 @@ export interface operations {
         sort?: string[];
         search?: string;
       };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_8: {
-    parameters: {
       path: {
         slug: string;
       };
@@ -6186,34 +5602,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_9: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -6284,33 +5673,6 @@ export interface operations {
       };
     };
   };
-  getInvitations_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   /** Returns current organization usage */
   getUsage: {
     parameters: {
@@ -6339,71 +5701,7 @@ export interface operations {
       };
     };
   };
-  /** Returns current organization usage */
-  getUsage_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UsageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_3: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_4: {
+  getAllWithStatistics_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -6475,79 +5773,7 @@ export interface operations {
       };
     };
   };
-  getAllUsers_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllProjects_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllProjects_3: {
+  getAllProjects_1: {
     parameters: {
       path: {
         id: number;
@@ -6606,7 +5832,7 @@ export interface operations {
       };
     };
   };
-  get_12: {
+  get_10: {
     parameters: {
       path: {
         keyId: number;
@@ -6904,128 +6130,6 @@ export interface operations {
       };
     };
   };
-  getProjectInvitations_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["InvitationDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  acceptInvitation_1: {
-    parameters: {
-      path: {
-        code: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getApiKeyScopes: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string[];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  allByProject_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getScopes_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": { [key: string]: string[] };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   removeTag: {
     parameters: {
       path: {
@@ -7123,30 +6227,6 @@ export interface operations {
       };
     };
   };
-  removeUser_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   deleteInvitation: {
     parameters: {
       path: {
@@ -7170,7 +6250,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_9: {
     parameters: {
       path: {
         ids: number[];
@@ -7197,52 +6277,6 @@ export interface operations {
     parameters: {
       path: {
         userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  deleteInvitation_1: {
-    parameters: {
-      path: {
-        invitationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  delete_12: {
-    parameters: {
-      path: {
-        key: string;
       };
     };
     responses: {

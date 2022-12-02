@@ -67,7 +67,7 @@ import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/organizations", "/api/organizations"])
+@RequestMapping(value = ["/v2/organizations"])
 @Tag(name = "Organizations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(
