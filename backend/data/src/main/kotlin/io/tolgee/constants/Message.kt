@@ -113,7 +113,8 @@ enum class Message {
   CANNOT_DELETE_YOUR_OWN_ACCOUNT,
   CANNOT_SORT_BY_THIS_COLUMN,
   NAMESPACE_NOT_FOUND,
-  NAMESPACE_EXISTS;
+  NAMESPACE_EXISTS,
+  INVALID_AUTHENTICATION_METHOD;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
