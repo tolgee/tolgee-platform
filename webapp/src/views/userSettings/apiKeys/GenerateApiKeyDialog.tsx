@@ -24,6 +24,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 interface Value {
   scopes: string[];
@@ -63,26 +64,15 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     },
   });
 
-  const scopes = useApiQuery({
-    url: '/v2/api-keys/availableScopes',
-    method: 'get',
-  });
-
   const generateMutation = useApiMutation({
     url: '/v2/api-keys',
     method: 'post',
     invalidatePrefix: '/v2/api-keys',
   });
 
-  const getAvailableScopes = (projectId?: number): Set<string> => {
-    const userPermissionType =
-      projects?.data?._embedded?.projects?.find((r) => r.id === projectId)
-        ?.computedPermissions.type || props.project?.computedPermissions.type;
-    if (!userPermissionType || !scopes?.data) {
-      return new Set();
-    }
-    return new Set(scopes.data[userPermissionType]);
-  };
+  const projectPermissions = useProjectPermissions();
+
+  const availableScopes = new Set(projectPermissions.scopes ?? []);
 
   const handleGenerate = (value) => {
     if (props.project) {
@@ -113,8 +103,6 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     const projectId =
       projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
 
-    const availableScopes = getAvailableScopes(projectId);
-
     return {
       projectId: projectId,
       //all scopes checked by default
@@ -124,7 +112,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     };
   };
 
-  if (projects.isLoading || scopes.isLoading) {
+  if (projects.isLoading) {
     return <FullPageLoading />;
   }
 
@@ -145,7 +133,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
         )) || (
           <>
             {props.loading && <BoxLoading />}
-            {(projects.data || props.project) && scopes.data && (
+            {(projects.data || props.project) && (
               <StandardForm
                 onSubmit={handleGenerate}
                 saveActionLoadable={generateMutation}
@@ -158,7 +146,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                     formikProps.setFieldValue(
                       'scopes',
                       setsIntersection(
-                        getAvailableScopes(formikProps.values.projectId),
+                        availableScopes,
                         formikProps.values.scopes as any
                       )
                     );
@@ -204,9 +192,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                         <CheckBoxGroupMultiSelect
                           label="Scopes"
                           name="scopes"
-                          options={getAvailableScopes(
-                            formikProps.values.projectId
-                          )}
+                          options={availableScopes}
                         />
                       </Box>
                     </>

@@ -22,7 +22,8 @@ enum class Scope(
   MEMBERS_EDIT("permissions.edit"),
   MEMBERS_VIEW("users.view"),
   TRANSLATION_COMMENTS_ADD("translation-comments.add"),
-  TRANSLATION_COMMENTS_EDIT("translation-comments.add"),
+  TRANSLATION_COMMENTS_EDIT("translation-comments.edit"),
+  TRANSLATION_COMMENTS_SET_STATE("translation-comments.set-state"),
   TRANSLATION_STATE_EDIT("translation-state.edit")
   ;
 

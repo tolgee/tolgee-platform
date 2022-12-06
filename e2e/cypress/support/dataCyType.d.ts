@@ -95,7 +95,6 @@ declare namespace DataCy {
         "global-paginated-list" |
         "global-plus-button" |
         "global-search-field" |
-        "global-snackbars" |
         "global-user-menu-button" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |

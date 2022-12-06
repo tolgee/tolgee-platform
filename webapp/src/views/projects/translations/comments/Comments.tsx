@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { TextField, IconButton, styled } from '@mui/material';
+import { IconButton, styled, TextField } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -8,7 +8,6 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useUser } from 'tg.globalContext/helpers';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { Comment } from './Comment';
 import { useComments } from './useComments';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
@@ -140,10 +139,10 @@ export const Comments: React.FC<Props> = ({
           {commentsList?.map((comment) => {
             const canDelete =
               user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
+              permissions.satisfiesPermission('translation-comments.edit');
             const canChangeState =
               user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
+              permissions.satisfiesPermission('translation-comments.set-state');
             const date = new Date(comment.createdAt);
             return (
               <React.Fragment key={comment.id}>

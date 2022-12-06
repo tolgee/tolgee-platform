@@ -50,9 +50,7 @@ export const Translations = () => {
 
   const translationsEmpty = !translations?.length;
 
-  const canAdd = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
+  const canAdd = projectPermissions.satisfiesPermission('keys.edit');
 
   const [_, setNewDialog] = useUrlSearchState('create', {
     defaultVal: 'false',

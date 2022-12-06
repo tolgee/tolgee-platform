@@ -110,9 +110,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </StyledToggleButton>
           </ButtonGroup>
 
-          {projectPermissions.satisfiesPermission(
-            ProjectPermissionType.EDIT
-          ) && (
+          {projectPermissions.satisfiesPermission('keys.edit') && (
             <Button
               startIcon={<Add />}
               color="primary"

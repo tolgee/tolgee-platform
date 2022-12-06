@@ -54,17 +54,17 @@ class LanguagePermissionsTestData {
       addPermission {
         languages = mutableSetOf(englishLanguage)
         user = enOnlyUser
-        type = ProjectPermissionType.TRANSLATE
+        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = allLangUser
-        type = ProjectPermissionType.TRANSLATE
+        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = bothLangsExplicitUser
-        type = ProjectPermissionType.TRANSLATE
+        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
         languages = mutableSetOf(englishLanguage, germanLanguage)
       }
 

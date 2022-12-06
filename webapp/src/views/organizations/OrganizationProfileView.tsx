@@ -61,7 +61,6 @@ export const OrganizationProfileView: FunctionComponent = () => {
     const toSave = {
       name: values.name,
       description: values.description,
-      basePermissions: values.basePermissions,
       slug: values.slug,
     } as OrganizationBody;
 

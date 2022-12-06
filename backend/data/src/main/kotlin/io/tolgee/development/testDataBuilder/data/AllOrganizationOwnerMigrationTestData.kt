@@ -16,7 +16,7 @@ class AllOrganizationOwnerMigrationTestData {
         addPermission {
           user = this@userAccount.self
           project = this@project.self
-          type = ProjectPermissionType.MANAGE
+          estimatedTypeFromScopes = ProjectPermissionType.MANAGE
         }
       }
       addProject {
@@ -26,7 +26,7 @@ class AllOrganizationOwnerMigrationTestData {
         addPermission {
           user = this@userAccount.self
           project = this@project.self
-          type = ProjectPermissionType.MANAGE
+          estimatedTypeFromScopes = ProjectPermissionType.MANAGE
         }
       }
     }

@@ -97,9 +97,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     method: 'delete',
   });
 
-  const canEdit = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
+  const canAdd = projectPermissions.satisfiesPermission('screenshots.upload');
 
   const onDelete = (id: number) => {
     deleteLoadable.mutate(
@@ -114,7 +112,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     );
   };
 
-  const addBox = canEdit && (
+  const addBox = canAdd && (
     <StyledAddBox
       key="add"
       data-cy="add-box"
@@ -297,8 +295,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               p={2}
               lang={lang()}
             >
-              {t('no_screenshots_yet')}{' '}
-              {canEdit && t('add_screenshots_message')}
+              {t('no_screenshots_yet')} {canAdd && t('add_screenshots_message')}
             </StyledHintText>
           </>
         )}

@@ -15,7 +15,7 @@ class ProjectInvitationModelAssembler() :
     return ProjectInvitationModel(
       id = entity.id!!,
       code = entity.code,
-      type = entity.permission!!.type,
+      type = entity.permission!!.estimatedTypeFromScopes,
       scopes = entity.permission!!.scopes,
       permittedLanguageIds = entity.permission!!.languages.map { it.id },
       createdAt = entity.createdAt!!,

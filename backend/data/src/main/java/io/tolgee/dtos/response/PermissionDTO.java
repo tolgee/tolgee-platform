@@ -26,7 +26,7 @@ public class PermissionDTO {
     }
 
     public static PermissionDTO fromEntity(Permission entity) {
-        return new PermissionDTO(entity.getId(), entity.getType(), entity.getUser().getUsername(), entity.getUser().getId(), entity.getUser().getName());
+        return new PermissionDTO(entity.getId(), entity.getEstimatedTypeFromScopes(), entity.getUser().getUsername(), entity.getUser().getId(), entity.getUser().getName());
     }
 
     public static PermissionDTOBuilder builder() {

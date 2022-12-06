@@ -31,7 +31,7 @@ open class BaseTestData(
       addPermission {
         project = this@buildProject.self
         user = this@BaseTestData.user
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
       }
 
       addLanguage {

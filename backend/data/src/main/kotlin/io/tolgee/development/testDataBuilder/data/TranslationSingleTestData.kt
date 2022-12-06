@@ -47,22 +47,22 @@ class TranslationSingleTestData {
     }.build {
       addPermission {
         user = this@TranslationSingleTestData.user
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
       }
 
       addPermission {
         user = this@TranslationSingleTestData.pepa
-        type = ProjectPermissionType.EDIT
+        estimatedTypeFromScopes = ProjectPermissionType.EDIT
       }
 
       addPermission {
         user = jindra.self
-        type = ProjectPermissionType.TRANSLATE
+        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = vojta.self
-        type = ProjectPermissionType.VIEW
+        estimatedTypeFromScopes = ProjectPermissionType.VIEW
       }
 
       englishLanguage = addLanguage {

@@ -98,7 +98,7 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
   };
 
   let dropZoneAllowedProps = {};
-  if (projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT)) {
+  if (projectPermissions.satisfiesPermission('screenshots.upload')) {
     dropZoneAllowedProps = { onDrop, onDragEnter, onDragLeave };
   }
 

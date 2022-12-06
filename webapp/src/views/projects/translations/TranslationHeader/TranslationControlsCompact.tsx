@@ -200,9 +200,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 </StyledToggleButton>
               </ButtonGroup>
 
-              {projectPermissions.satisfiesPermission(
-                ProjectPermissionType.EDIT
-              ) && (
+              {projectPermissions.satisfiesPermission('keys.edit') && (
                 <StyledIconButton
                   color="primary"
                   size="small"

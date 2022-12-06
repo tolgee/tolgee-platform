@@ -9,26 +9,24 @@ import {
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
-
-import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 
 type PermissionType = NonNullable<
-  components['schemas']['ProjectModel']['computedPermissions']['type']
+  components['schemas']['PermissionModel']['type']
 >;
 
 const StyledListItemText = styled(ListItemText)`
   max-width: 300px;
+
   & .textSecondary {
     white-space: normal;
   }
 `;
 
 export const PermissionsMenu: FunctionComponent<{
-  title?: string;
-  selected: PermissionType;
+  buttonTooltip?: string;
+  selected?: PermissionType;
   onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
   minPermissions?: PermissionType;
@@ -44,23 +42,22 @@ export const PermissionsMenu: FunctionComponent<{
     setAnchorEl(event.currentTarget);
   };
 
-  let types = Object.keys(ProjectPermissionType);
+  const types = Object.keys(ProjectPermissionType);
+  // //
+  // if (props.minPermissions) {
+  //   types = types.filter((k) =>
+  //     new ProjectPermissions(k as any, undefined, false).satisfiesPermission(
+  //       props.minPermissions
+  //     )
+  //   );
+  // }
 
-  if (props.minPermissions) {
-    types = types.filter((k) =>
-      new ProjectPermissions(k as any, undefined, false).satisfiesPermission(
-        props.minPermissions as any
-      )
-    );
-  }
+  const selected = props.selected?.toLowerCase() ?? 'organization_base';
 
   return (
     <>
       <Tooltip
-        title={
-          props.title ||
-          t(`permission_type_${projectPermissionTypes[props.selected]}_hint`)
-        }
+        title={props.buttonTooltip || t(`permission_type_${selected}_hint`)}
       >
         <span>
           <Button
@@ -71,7 +68,7 @@ export const PermissionsMenu: FunctionComponent<{
             aria-haspopup="true"
             onClick={handleClick}
           >
-            <T>{`permission_type_${props.selected.toLowerCase()}`}</T>{' '}
+            <T>{`permission_type_${selected}`}</T>{' '}
             <ArrowDropDown fontSize="small" />
           </Button>
         </span>

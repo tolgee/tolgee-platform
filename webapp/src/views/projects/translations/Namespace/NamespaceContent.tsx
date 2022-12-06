@@ -7,7 +7,6 @@ import { useNamespaceFilter } from './useNamespaceFilter';
 import { NamespaceRenameDialog } from './NamespaceRenameDialog';
 import { NsBannerRecord } from '../context/useNsBanners';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 const StyledNamespace = styled('div')`
   display: flex;
@@ -58,7 +57,7 @@ export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
     const [renameOpen, setRenameOpen] = useState(false);
     const permission = useProjectPermissions();
     const canRename =
-      permission.satisfiesPermission(ProjectPermissionType.EDIT) &&
+      permission.satisfiesPermission('keys.edit') &&
       namespace.name &&
       namespace.id !== undefined;
 

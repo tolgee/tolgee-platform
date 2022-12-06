@@ -190,9 +190,7 @@ export const ProjectTotals: React.FC<{
 
   const permissions = useProjectPermissions();
 
-  const canManage = permissions.satisfiesPermission(
-    ProjectPermissionType.MANAGE
-  );
+  const canManage = permissions.satisfiesPermission('admin');
 
   const tagsPresent = Boolean(stats.tagCount);
 

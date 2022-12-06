@@ -118,11 +118,11 @@ class V2ApiKeyController(
 
   private fun getProjectPermittedLanguages(): Set<Long>? {
     val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
-    val languageIds = data.computedPermissions.translateLanguageIds
+    val languageIds = data.computedPermissions.languageIds
     if (languageIds.isNullOrEmpty()) {
       return null
     }
-    return languageIds
+    return languageIds.toSet()
   }
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])

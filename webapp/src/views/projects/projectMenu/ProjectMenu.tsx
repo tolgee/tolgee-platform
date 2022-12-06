@@ -9,29 +9,24 @@ import {
   TranslationIcon,
 } from 'tg.component/CustomIcons';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
-import { useProject } from 'tg.hooks/useProject';
-import { ProjectPermissionType } from 'tg.service/response.types';
+import { useConfig } from 'tg.globalContext/helpers';
 
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export const ProjectMenu = ({ id }) => {
-  const projectDTO = useProject();
+  const projectPermissions = useProjectPermissions();
   const config = useConfig();
 
   const t = useTranslate();
 
   const topBarHidden = useTopBarHidden();
 
-  const isAdmin = useIsAdmin();
-
-  const canManage =
-    projectDTO.computedPermissions.type === ProjectPermissionType.MANAGE ||
-    isAdmin;
+  const canManage = projectPermissions.satisfiesPermission('admin');
 
   return (
     <SideMenu>

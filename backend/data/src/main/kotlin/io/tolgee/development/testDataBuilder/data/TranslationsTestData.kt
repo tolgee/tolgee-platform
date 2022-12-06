@@ -34,7 +34,7 @@ class TranslationsTestData {
     }.build project@{
       addPermission {
         user = this@TranslationsTestData.user
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
       }
       englishLanguage = addLanguage {
         name = "English"

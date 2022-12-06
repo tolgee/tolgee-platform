@@ -45,8 +45,10 @@ export const ProjectMembersView: FunctionComponent = () => {
     },
   });
 
+  // todo: Proper permission selector
+
   const basePermissionText = translatedPermissionType(
-    project.organizationOwnerBasePermissions!,
+    project?.organizationOwner?.basePermissions?.type ?? 'UNKNOWN',
     true
   );
 
@@ -69,7 +71,7 @@ export const ProjectMembersView: FunctionComponent = () => {
       loading={membersLoadable.isFetching}
       hideChildrenOnLoading={false}
     >
-      {project.organizationOwnerSlug && (
+      {project.organizationOwner?.slug && (
         <Box mb={2}>
           <Typography component={Box} alignItems={'center'} variant={'body1'}>
             <T>project_permission_information_text_base_permission_before</T>{' '}

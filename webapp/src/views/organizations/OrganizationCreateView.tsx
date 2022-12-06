@@ -9,7 +9,6 @@ import { LINKS } from 'tg.constants/links';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { OrganizationFields } from './components/OrganizationFields';
@@ -45,7 +44,6 @@ export const OrganizationCreateView: FunctionComponent = () => {
     name: '',
     slug: '',
     description: '',
-    basePermissions: ProjectPermissionType.VIEW,
   };
 
   return (

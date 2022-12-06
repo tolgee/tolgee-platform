@@ -44,7 +44,7 @@ class ProjectStatsTestData : BaseTestData() {
       }
 
       addPermission {
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
         user = organizationMember
       }
     }

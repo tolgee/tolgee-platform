@@ -116,8 +116,8 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
-  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_SET_STATE)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_SET_STATE])
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
   fun setState(
     @PathVariable commentId: Long,

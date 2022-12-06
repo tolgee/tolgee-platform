@@ -4,7 +4,7 @@ import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
-import io.tolgee.api.v2.hateoas.permission.PermissionModel
+import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.api.v2.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.service.AvatarService
@@ -21,7 +21,8 @@ class ProjectWithStatsModelAssembler(
   private val languageModelAssembler: LanguageModelAssembler,
   private val avatarService: AvatarService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
-  private val permissionModelAssembler: PermissionModelAssembler
+  private val permissionModelAssembler: PermissionModelAssembler,
+  private val computedPermissionModelAssembler: ComputedPermissionModelAssembler
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
   V2ProjectsController::class.java, ProjectWithStatsModel::class.java
 ) {
@@ -30,11 +31,10 @@ class ProjectWithStatsModelAssembler(
     val baseLanguage = view.baseLanguage ?: let {
       projectService.getOrCreateBaseLanguage(view.id)
     }
-    val computedPermissions = permissionService.computeProjectPermissionType(
+    val computedPermissions = permissionService.computeProjectPermission(
       view.organizationRole,
-      view.organizationOwner?.basePermission?.scopes,
-      view.directPermission?.scopes,
-      view.directPermission?.languages?.map { it.id }?.toMutableSet()
+      view.organizationOwner.basePermission,
+      view.directPermission,
     )
 
     return ProjectWithStatsModel(
@@ -45,16 +45,13 @@ class ProjectWithStatsModelAssembler(
       avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationRole = view.organizationRole,
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
-      organizationOwner = view.organizationOwner?.let { simpleOrganizationModelAssembler.toModel(it) },
+      organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
-      computedPermission = PermissionModel(
-        scopes = computedPermissions.scopes!!,
-        permittedLanguageIds = computedPermissions.translateLanguageIds?.toList()
-      ),
+      computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) },
     ).add(link).also { model ->
-      view.organizationOwner?.slug?.let {
+      view.organizationOwner.slug.let {
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
       }
     }

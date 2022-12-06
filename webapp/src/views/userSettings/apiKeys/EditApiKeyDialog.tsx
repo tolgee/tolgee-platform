@@ -15,6 +15,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { Scopes, useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
@@ -64,13 +65,9 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const t = useTranslate();
 
-  const getAvailableScopes = (): Set<string> => {
-    const userPermissionType = projectLoadable?.data?.computedPermissions?.type;
-    if (!userPermissionType || !availableScopesLoadable?.data) {
-      return new Set();
-    }
-    return new Set(availableScopesLoadable.data[userPermissionType]);
-  };
+  const projectPermissions = useProjectPermissions();
+
+  const availableScopes = new Set(projectPermissions.scopes ?? []);
 
   const handleEdit = (value) =>
     editMutation.mutateAsync(
@@ -94,9 +91,8 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     );
 
   const getInitialValues = () => {
-    const availableScopes = getAvailableScopes();
-
-    const currentScopes = apiKeyLoadable.data?.scopes.filter((currentScope) =>
+    const scopes = apiKeyLoadable.data?.scopes as Scopes;
+    const currentScopes = scopes?.filter((currentScope) =>
       availableScopes.has(currentScope)
     );
 
@@ -155,7 +151,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
                     <CheckBoxGroupMultiSelect
                       label="Scopes"
                       name="scopes"
-                      options={getAvailableScopes()}
+                      options={availableScopes}
                     />
                   </Box>
                 </>

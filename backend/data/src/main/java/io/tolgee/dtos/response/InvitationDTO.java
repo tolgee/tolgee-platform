@@ -21,7 +21,7 @@ public class InvitationDTO {
     }
 
     public static InvitationDTO fromEntity(Invitation invitation) {
-        return InvitationDTO.builder().id(invitation.getId()).code(invitation.getCode()).type(invitation.getPermission().getType()).build();
+        return InvitationDTO.builder().id(invitation.getId()).code(invitation.getCode()).type(invitation.getPermission().getEstimatedTypeFromScopes()).build();
     }
 
     public static InvitationDTOBuilder builder() {

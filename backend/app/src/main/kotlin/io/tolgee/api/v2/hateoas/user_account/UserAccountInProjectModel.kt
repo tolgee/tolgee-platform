@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.user_account
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModel
 import io.tolgee.api.v2.hateoas.permission.PermissionModel
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
@@ -18,5 +19,5 @@ data class UserAccountInProjectModel(
     description = "Actual user's permissions on selected project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermission: PermissionModel,
+  val computedPermission: ComputedPermissionModel,
 ) : RepresentationModel<UserAccountInProjectModel>()

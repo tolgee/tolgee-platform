@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.unpack
@@ -9,6 +10,7 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
@@ -18,6 +20,8 @@ import javax.persistence.Id
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
+import javax.persistence.PrePersist
+import javax.persistence.PreUpdate
 
 @Suppress("LeakingThis")
 @Entity
@@ -31,6 +35,7 @@ import javax.persistence.OneToOne
     )
   ]
 )
+@EntityListeners(Permission.Companion.PermissionListeners::class)
 class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,13 +52,21 @@ class Permission(
 
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
-
+) : AuditModel(), IPermission {
   @Type(type = "enum-array")
   @Column(name = "scopes", columnDefinition = "varchar[]")
-  var scopes: Array<Scope> = ProjectPermissionType.VIEW.availableScopes
-) : AuditModel() {
+  private var _scopes: Array<Scope>? = ProjectPermissionType.VIEW.availableScopes
 
-  var type: ProjectPermissionType?
+  override var scopes: Array<Scope>
+    get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
+    set(value) {
+      this._scopes = value
+    }
+
+  override val granular: Boolean
+    get() = this._scopes != null
+
+  var estimatedTypeFromScopes: ProjectPermissionType?
     set(value) {
       value?.let {
         scopes = it.availableScopes
@@ -72,11 +85,11 @@ class Permission(
     }
 
   /**
-   * Kept only to keep data in the DB, before migrated
+   * When user doesn't have granular permission set
    */
   @Enumerated(EnumType.STRING)
   @Column(name = "type")
-  private var deprecatedType: ProjectPermissionType = ProjectPermissionType.VIEW
+  override var type: ProjectPermissionType? = ProjectPermissionType.VIEW
 
   /**
    * Languages for translate permission.
@@ -94,10 +107,35 @@ class Permission(
     project: Project? = null,
     organization: Organization? = null,
     type: ProjectPermissionType = ProjectPermissionType.VIEW
-  ) : this(id, user, null, invitation, scopes = type.availableScopes) {
+  ) : this(id, user, null, invitation) {
     this.project = project
+    this.scopes = type.availableScopes
   }
 
   @ManyToOne
   var project: Project? = null
+
+  val userId: Long?
+    get() = this.user?.id
+  val invitationId: Long?
+    get() = this.invitation?.id
+  override val projectId: Long?
+    get() = this.project?.id
+  override val organizationId: Long?
+    get() = this.organization?.id
+  override val languageIds: Set<Long>?
+    get() = this.languages.map { it.id }.toSet()
+
+  companion object {
+
+    class PermissionListeners {
+      @PrePersist
+      @PreUpdate
+      fun prePersist(permission: Permission) {
+        if (permission._scopes.isNullOrEmpty() && permission.type == null) {
+          throw IllegalStateException("Cannot save permission with no scopes or type")
+        }
+      }
+    }
+  }
 }

@@ -120,7 +120,7 @@ class ImportE2eDataController(
           addGerman()
           self.baseLanguage = english.self
           addPermission {
-            type = ProjectPermissionType.MANAGE
+            estimatedTypeFromScopes = ProjectPermissionType.MANAGE
             user = this@buildUserAccount.self
             project = this@buildProject.self
           }

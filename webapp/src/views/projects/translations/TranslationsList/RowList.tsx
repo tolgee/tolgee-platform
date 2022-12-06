@@ -80,9 +80,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
+        editEnabled={permissions.satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}

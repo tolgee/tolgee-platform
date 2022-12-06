@@ -10,8 +10,8 @@ import { MessageService } from 'tg.service/MessageService';
 
 import { CellKey } from '../CellKey';
 import {
-  useTranslationsSelector,
   useTranslationsDispatch,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
@@ -20,7 +20,6 @@ import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
@@ -40,9 +39,11 @@ const StyledTags = styled('div')`
   flex-wrap: wrap;
   align-items: flex-start;
   overflow: hidden;
+
   & > * {
     margin: 0px 3px 3px 0px;
   }
+
   position: relative;
 `;
 
@@ -63,6 +64,7 @@ const StyledLanguageField = styled('div')`
   border-color: ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 1px 1px 0px;
   border-style: solid;
+
   & + & {
     border-top: 0px;
   }
@@ -148,9 +150,7 @@ export const KeyEditForm: React.FC = () => {
 
   useGlobalLoading(updateNamespace.isLoading);
 
-  const editEnabled = permissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
+  const editEnabled = permissions.satisfiesPermission('keys.edit');
 
   const handleRemoveKey = () => {
     confirmation({
