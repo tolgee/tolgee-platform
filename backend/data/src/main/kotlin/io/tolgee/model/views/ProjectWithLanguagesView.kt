@@ -12,7 +12,7 @@ open class ProjectWithLanguagesView(
   override val slug: String?,
   override val avatarHash: String?,
   override val baseLanguage: Language?,
-  override val organizationOwner: Organization?,
+  override val organizationOwner: Organization,
   override val organizationRole: OrganizationRoleType?,
   override val directPermission: Permission?,
   val permittedLanguageIds: List<Long>?

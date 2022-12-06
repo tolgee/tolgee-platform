@@ -36,7 +36,7 @@ class ImportTestData {
       addPermission {
         project = this@project.self
         user = this@ImportTestData.userAccount
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
       }
 
       val key = addKey {

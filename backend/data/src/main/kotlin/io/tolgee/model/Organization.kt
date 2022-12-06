@@ -1,12 +1,9 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.tolgee.model.enums.ProjectPermissionType
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -38,9 +35,6 @@ class Organization(
   @field:NotBlank @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
   open var slug: String = "",
-
-  @Enumerated(EnumType.STRING)
-  open var basePermissions: ProjectPermissionType = ProjectPermissionType.VIEW,
 
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null

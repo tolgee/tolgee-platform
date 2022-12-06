@@ -10,7 +10,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
-type Permission = components['schemas']['OrganizationDto']['basePermissions'];
+type Permission = components['schemas']['OrganizationModel']['basePermission'];
 type OrganizationModel = components['schemas']['OrganizationModel'];
 type OrganizationDto = components['schemas']['OrganizationDto'];
 
@@ -32,7 +32,9 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
     method: 'put',
   });
 
-  const handleSet = (type: Permission) => {
+  //todo: Proper permission select
+
+  const handleSet = () => {
     confirmation({
       message: <T>really_want_to_change_base_permission_confirmation</T>,
       hardModeText: organization.data?.name?.toUpperCase(),
@@ -40,7 +42,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
         const dto: OrganizationDto = {
           name: organization.data!.name,
           slug: organization.data?.slug,
-          basePermissions: type,
+          //basePermissions: type,
           description: organization.data?.description,
         };
         editOrganization.mutate(
@@ -62,7 +64,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
   return (
     <PermissionsMenu
       onSelect={handleSet}
-      selected={organization.data!.basePermissions}
+      selected={organization.data!.basePermission.type}
     />
   );
 };

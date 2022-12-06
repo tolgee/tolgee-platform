@@ -7,30 +7,29 @@ import { Link } from 'react-router-dom';
 import { ListItemLink } from 'tg.component/common/list/ListItemLink';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
-const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
+const ProjectListItem = (p: components['schemas']['ProjectModel']) => {
   return (
     <ListItemLink
-      key={r.id}
-      to={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: r.id })}
+      key={p.id}
+      to={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: p.id })}
     >
       <ListItemText>
-        {r.name}{' '}
+        {p.name}{' '}
         <Chip
           data-cy="project-list-owner"
           size="small"
-          label={r.organizationOwnerName}
+          label={p.organizationOwner?.name}
         />
       </ListItemText>
-      {r.computedPermissions.type === ProjectPermissionType.MANAGE && (
+      {p.computedPermission?.scopes?.includes('admin') && (
         <ListItemSecondaryAction>
           <Button
             data-cy="project-settings-button"
             component={Link}
             size="small"
             variant="outlined"
-            to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: r.id })}
+            to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: p.id })}
           >
             <T>project_settings_button</T>
           </Button>

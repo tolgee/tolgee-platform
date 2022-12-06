@@ -40,7 +40,7 @@ export class SignUpService {
         this.tokenService.setToken(response.accessToken);
         this.globalActions.setJWTToken.dispatch(response.accessToken);
       }
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'invitation_code_does_not_exist_or_expired') {
         this.invitationCodeService.disposeCode();
       }

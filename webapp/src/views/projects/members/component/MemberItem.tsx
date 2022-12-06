@@ -95,7 +95,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
 
   const allLanguages = useProjectLanguages();
   const allLangIds = allLanguages.map((l) => l.id);
-  const projectPermissionType = user.computedPermissions.type;
+  const projectPermissionType = user.directPermission?.type;
   const isCurrentUser = currentUser?.id === user.id;
   const isOwner = user.organizationRole === 'OWNER';
 
@@ -104,27 +104,27 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
       <StyledItemText>
         {user.name} ({user.username}){' '}
         {user.organizationRole && (
-          <Chip size="small" label={project.organizationOwnerName} />
+          <Chip size="small" label={project.organizationOwner?.name} />
         )}
       </StyledItemText>
       <StyledItemActions>
         {projectPermissionType === 'TRANSLATE' && (
           <LanguagePermissionsMenu
-            selected={user.computedPermissions.permittedLanguageIds || []}
+            selected={user.computedPermission.permittedLanguageIds || []}
             onSelect={(langs) =>
               changePermission(projectPermissionType, langs, false)
             }
           />
         )}
         <PermissionsMenu
-          title={
+          buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
               : isOwner
               ? t('cannot_change_your_own_access_tooltip')
               : undefined
           }
-          selected={user.computedPermissions.type!}
+          selected={user.directPermission?.type}
           onSelect={(permission) =>
             changePermissionConfirm(permission, allLangIds)
           }
@@ -132,7 +132,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             size: 'small',
             disabled: isCurrentUser || isOwner,
           }}
-          minPermissions={user.organizationBasePermissions}
+          minPermissions={user.organizationBasePermission.type}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

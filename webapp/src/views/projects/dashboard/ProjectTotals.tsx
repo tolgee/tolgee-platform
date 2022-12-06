@@ -11,7 +11,6 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
@@ -190,9 +189,7 @@ export const ProjectTotals: React.FC<{
 
   const permissions = useProjectPermissions();
 
-  const canManage = permissions.satisfiesPermission(
-    ProjectPermissionType.MANAGE
-  );
+  const canManage = permissions.satisfiesPermission('admin');
 
   const tagsPresent = Boolean(stats.tagCount);
 

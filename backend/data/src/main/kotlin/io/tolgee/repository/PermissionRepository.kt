@@ -2,19 +2,29 @@ package io.tolgee.repository
 
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.model.UserAccount
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
 interface PermissionRepository : JpaRepository<Permission, Long> {
-  fun findOneByProjectIdAndUserIdAndOrganizationId(projectId: Long?, userId: Long?, organizationId: Long? = null): Permission?
-  fun findOneByOrganizationId(organizationId: Long): Permission?
-  fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
-  @Query("from Permission p join Project r on r = p.project where p.user = ?1 order by r.name")
-  fun findAllByUser(userAccount: UserAccount?): LinkedHashSet<Permission>
+  @Query(
+    """
+    from Permission p 
+    where 
+        ((:projectId is null and p.project.id is null) or p.project.id = :projectId) and 
+        ((:userId is null and p.user.id is null) or p.user.id = :userId) and 
+        ((:organizationId is null and p.organization.id is null) or p.organization.id = :organizationId)
+  """
+  )
+  fun findOneByProjectIdAndUserIdAndOrganizationId(
+    projectId: Long?,
+    userId: Long?,
+    organizationId: Long? = null
+  ): Permission?
+
+  fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
   fun deleteByIdIn(ids: Collection<Long>)
 

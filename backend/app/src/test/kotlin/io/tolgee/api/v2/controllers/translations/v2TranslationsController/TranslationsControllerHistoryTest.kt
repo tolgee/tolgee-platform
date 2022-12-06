@@ -46,7 +46,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
         }.build {
           addPermission {
             user = this@buildUser.self
-            type = ProjectPermissionType.TRANSLATE
+            estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
             project = testProject
           }
           lang = addLanguage {

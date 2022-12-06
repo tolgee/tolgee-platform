@@ -2,11 +2,10 @@ import { useCallback } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { IconButton, styled, Tooltip } from '@mui/material';
-import { Link, Clear } from '@mui/icons-material';
+import { Clear, Link } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
-import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -22,9 +21,11 @@ type UserAccountInProjectModel =
 const StyledListItem = styled('div')`
   display: flex;
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
+
   &:last-child {
     border-bottom: 0;
   }
+
   position: relative;
   padding: ${({ theme }) => theme.spacing(1)};
   flex-wrap: wrap;
@@ -128,16 +129,10 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           </Tooltip>
         )}
         <Tooltip
-          title={t(
-            `permission_type_${projectPermissionTypes[invitation.type!]}_hint`
-          )}
+          title={t(`permission_type_${invitation.type!.toLowerCase()}_hint`)}
         >
           <StyledPermissions>
-            <T
-              keyName={`permission_type_${
-                projectPermissionTypes[invitation.type!]
-              }`}
-            />
+            <T keyName={`permission_type_${invitation.type!.toLowerCase()}`} />
           </StyledPermissions>
         </Tooltip>
 

@@ -17,7 +17,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
@@ -100,9 +99,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     method: 'delete',
   });
 
-  const canEdit = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  );
+  const canAdd = projectPermissions.satisfiesPermission('screenshots.upload');
 
   const handleDelete = (id: number) => () => {
     deleteLoadable.mutate(
@@ -117,7 +114,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     );
   };
 
-  const addBox = canEdit && (
+  const addBox = canAdd && (
     <StyledAddBox
       key="add"
       data-cy="add-box"
@@ -309,8 +306,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               p={2}
               lang={lang}
             >
-              {t('no_screenshots_yet')}{' '}
-              {canEdit && t('add_screenshots_message')}
+              {t('no_screenshots_yet')} {canAdd && t('add_screenshots_message')}
             </StyledHintText>
           </>
         )}

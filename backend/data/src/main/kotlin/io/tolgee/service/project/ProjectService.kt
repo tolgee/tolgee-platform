@@ -176,13 +176,12 @@ class ProjectService constructor(
       .map { result ->
         val project = result[0] as Project
         val permission = result[1] as Permission?
-        val organization = result[2] as Organization?
+        val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
-        val scopes = permissionService.computeProjectPermissionType(
+        val scopes = permissionService.computeProjectPermission(
           organizationRole?.type,
-          organization?.basePermission?.scopes,
-          permission?.scopes,
-          permission?.languages?.map { it.id }?.toSet()
+          organization.basePermission,
+          permission,
         ).scopes
           ?: throw IllegalStateException(
             "Project project should not" +

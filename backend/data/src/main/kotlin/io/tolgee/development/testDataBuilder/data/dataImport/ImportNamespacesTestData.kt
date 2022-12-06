@@ -134,7 +134,7 @@ class ImportNamespacesTestData {
       addPermission {
         project = this@project.self
         user = this@ImportNamespacesTestData.userAccount
-        type = ProjectPermissionType.MANAGE
+        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
       }
       english = addEnglish().self
       german = addGerman().self

@@ -1,15 +1,14 @@
-import { ViewListRounded, AppsRounded, Add } from '@mui/icons-material';
+import { Add, AppsRounded, ViewListRounded } from '@mui/icons-material';
 import { Button, ButtonGroup, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import TranslationsSearchField from './TranslationsSearchField';
 
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
 import { StickyHeader } from './StickyHeader';
@@ -94,9 +93,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </StyledToggleButton>
           </ButtonGroup>
 
-          {projectPermissions.satisfiesPermission(
-            ProjectPermissionType.EDIT
-          ) && (
+          {projectPermissions.satisfiesPermission('keys.edit') && (
             <Button
               startIcon={<Add />}
               color="primary"

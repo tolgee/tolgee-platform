@@ -4,7 +4,6 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import clsx from 'clsx';
@@ -80,9 +79,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
+        editEnabled={permissions.satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}

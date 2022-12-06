@@ -9,11 +9,10 @@ import {
   translationsNavigator,
 } from './tools';
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellPosition } from '../types';
 
 export const KEY_MAP = {
@@ -46,7 +45,7 @@ export const useTranslationsShortcuts = () => {
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);
 
-  const canEdit = permissions.satisfiesPermission(ProjectPermissionType.EDIT);
+  const canEditKey = permissions.satisfiesPermission('keys.edit');
 
   const isTranslation = (position: CellPosition | undefined) =>
     position?.language;
@@ -86,7 +85,7 @@ export const useTranslationsShortcuts = () => {
       const canTranslate = permissions.canEditLanguage(
         getLanguageId(focused.language)
       );
-      if (isTranslation(focused) ? canTranslate : canEdit)
+      if (isTranslation(focused) && canTranslate)
         return (e: KeyboardEvent) => {
           e.preventDefault();
           setEdit({

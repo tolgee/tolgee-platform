@@ -5,6 +5,7 @@ package io.tolgee.service.security
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.ProjectPermissionData
+import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.cacheable.PermissionDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.BadRequestException
@@ -70,13 +71,13 @@ class PermissionService(
     val organizationRole = project.organizationOwnerId
       ?.let { organizationRoleService.findType(userAccountId, it) }
 
-    val organizationBasePermission = project.organizationOwnerId?.let { find(organizationId = it) }
+    val organizationBasePermission = find(organizationId = project.organizationOwnerId)
+      ?: throw IllegalStateException("Organization has no base permission")
 
-    val computed = computeProjectPermissionType(
+    val computed = computeProjectPermission(
       organizationRole = organizationRole,
-      organizationBasePermissionScopes = organizationBasePermission?.scopes,
-      directPermissionScopes = projectPermission?.scopes,
-      projectPermission?.languageIds
+      organizationBasePermission = organizationBasePermission,
+      directPermission = projectPermission,
     )
 
     return ProjectPermissionData(
@@ -155,25 +156,24 @@ class PermissionService(
     create(permission)
   }
 
-  fun computeProjectPermissionType(
+  fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermissionScopes: Array<Scope>?,
-    directPermissionScopes: Array<Scope>?,
-    projectPermissionLanguages: Set<Long>?
+    organizationBasePermission: IPermission,
+    directPermission: IPermission?
   ): ComputedPermissionDto {
     if (organizationRole == OrganizationRoleType.OWNER) {
-      return ComputedPermissionDto(arrayOf(Scope.ADMIN), null)
+      return ComputedPermissionDto.ADMIN
     }
 
-    if (directPermissionScopes != null) {
-      return ComputedPermissionDto(directPermissionScopes, projectPermissionLanguages)
+    if (directPermission != null) {
+      return ComputedPermissionDto(directPermission)
     }
 
     if (organizationRole == OrganizationRoleType.MEMBER) {
-      return ComputedPermissionDto(organizationBasePermissionScopes, null)
+      return ComputedPermissionDto(organizationBasePermission)
     }
 
-    return ComputedPermissionDto(null, null)
+    return ComputedPermissionDto.NONE
   }
 
   fun createForInvitation(
@@ -187,7 +187,7 @@ class PermissionService(
 
   @Transactional
   fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
-    return cachedPermissionService.find(projectId, userId, organizationId)
+    return cachedPermissionService.find(projectId = projectId, userId = userId, organizationId = organizationId)
   }
 
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
@@ -220,7 +220,7 @@ class PermissionService(
       Permission(user = userAccount, project = project, type = newPermissionType)
     }
 
-    permission.type = newPermissionType
+    permission.estimatedTypeFromScopes = newPermissionType
     permission.languages = languages?.toMutableSet() ?: mutableSetOf()
     return cachedPermissionService.save(permission)
   }
@@ -261,7 +261,7 @@ class PermissionService(
 
       if (hasAccessOnlyToDeletedLanguage) {
         permission.languages = mutableSetOf()
-        permission.type = ProjectPermissionType.VIEW
+        permission.estimatedTypeFromScopes = ProjectPermissionType.VIEW
         cachedPermissionService.save(permission)
         return@forEach
       }
@@ -285,9 +285,5 @@ class PermissionService(
       ?: throw NotFoundException()
 
     this.delete(permissionEntity)
-  }
-
-  fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission> {
-    return this.permissionRepository.getOrganizationBasePermissions(ids)
   }
 }

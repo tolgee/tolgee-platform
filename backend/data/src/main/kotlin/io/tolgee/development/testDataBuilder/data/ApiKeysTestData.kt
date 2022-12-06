@@ -44,12 +44,12 @@ class ApiKeysTestData : BaseTestData() {
 
         addPermission {
           user = frantisekDobrota
-          type = ProjectPermissionType.MANAGE
+          estimatedTypeFromScopes = ProjectPermissionType.MANAGE
         }
 
         addPermission {
           user = this@ApiKeysTestData.user
-          type = ProjectPermissionType.MANAGE
+          estimatedTypeFromScopes = ProjectPermissionType.MANAGE
         }
       }
     }
@@ -61,7 +61,7 @@ class ApiKeysTestData : BaseTestData() {
       }
       addPermission {
         user = frantisekDobrota
-        type = ProjectPermissionType.TRANSLATE
+        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
       }
       addApiKey {
         key = "test_api_key_1"

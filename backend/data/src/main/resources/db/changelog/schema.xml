@@ -2384,6 +2384,14 @@
             <column name="organization_id" type="int8"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1669390300780-0">
+        <sql>
+            create unique index permission_null_idx on permission(organization_id);
+            insert into permission (id, type, organization_id, created_at, updated_at)
+            select nextval('permission_id_seq'), base_permissions, id, current_date, current_date
+            from organization;
+        </sql>
+    </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-2">
         <addColumn tableName="permission">
             <column name="scopes" type="varchar[]"/>
@@ -2391,5 +2399,8 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-3">
         <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="permission" constraintName="FKodqlqlhjgsfwnq418388o4vy7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1670236174754-1">
+        <dropColumn columnName="base_permissions" tableName="organization"/>
     </changeSet>
 </databaseChangeLog>

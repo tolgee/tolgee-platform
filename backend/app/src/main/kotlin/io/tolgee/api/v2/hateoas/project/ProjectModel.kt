@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.project
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.language.LanguageModel
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModel
+import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModel
 import io.tolgee.api.v2.hateoas.permission.PermissionModel
 import io.tolgee.dtos.Avatar
 import io.tolgee.model.enums.OrganizationRoleType
@@ -22,5 +23,5 @@ open class ProjectModel(
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")
   val directPermission: PermissionModel?,
-  val computedPermission: PermissionModel
+  val computedPermission: ComputedPermissionModel
 ) : RepresentationModel<ProjectModel>()

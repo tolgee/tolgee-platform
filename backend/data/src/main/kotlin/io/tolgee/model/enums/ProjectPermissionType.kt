@@ -1,9 +1,9 @@
 package io.tolgee.model.enums
 
-enum class ProjectPermissionType(val power: Int, val availableScopes: Array<Scope>) {
-  VIEW(1, arrayOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)),
+enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
+  NONE(arrayOf()),
+  VIEW(arrayOf(Scope.TRANSLATIONS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.ACTIVITY_VIEW)),
   TRANSLATE(
-    2,
     arrayOf(
       Scope.TRANSLATIONS_VIEW,
       Scope.TRANSLATIONS_EDIT,
@@ -14,7 +14,6 @@ enum class ProjectPermissionType(val power: Int, val availableScopes: Array<Scop
     )
   ),
   EDIT(
-    3,
     arrayOf(
       Scope.TRANSLATIONS_VIEW,
       Scope.TRANSLATIONS_EDIT,
@@ -29,7 +28,6 @@ enum class ProjectPermissionType(val power: Int, val availableScopes: Array<Scop
     )
   ),
   MANAGE(
-    4,
     arrayOf(Scope.ADMIN)
   );
 }

@@ -6,7 +6,6 @@ import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import {
   ScreenshotProps,
   ScreenshotWithLabels,
@@ -24,6 +23,7 @@ const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   object-fit: contain;
   z-index: 1;
   transition: transform 0.1s, filter 0.5s;
+
   &:hover {
     transform: scale(1.1);
   }
@@ -59,10 +59,12 @@ const StyledDeleteIconButton = styled(IconButton)`
   visibility: hidden;
   opacity: 0;
   transition: visibility 0.1s linear, opacity 0.1s linear;
+
   &:hover {
     background-color: rgba(62, 62, 62, 1);
     color: rgba(255, 255, 255, 0.9);
   }
+
   &.hover {
     opacity: 1;
     visibility: visible;
@@ -101,9 +103,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
           onMouseOut={onMouseOut}
           data-cy="screenshot-thumbnail"
         >
-          {projectPermissions.satisfiesPermission(
-            ProjectPermissionType.TRANSLATE
-          ) && (
+          {projectPermissions.satisfiesPermission('screenshots.delete') && (
             <Tooltip
               title={<T noWrap>translations.screenshots.delete_tooltip</T>}
             >

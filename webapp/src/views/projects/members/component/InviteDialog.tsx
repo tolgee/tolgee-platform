@@ -30,7 +30,7 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 const messaging = container.resolve(MessageService);
 
 type PermissionType = NonNullable<
-  components['schemas']['ProjectModel']['computedPermissions']['type']
+  NonNullable<components['schemas']['ProjectModel']['directPermission']>['type']
 >;
 
 const StyledContent = styled('div')`
@@ -150,6 +150,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     <Typography variant="caption">
                       {t('invite_user_permission_label')}
                     </Typography>
+                    {/*todo: Proper Permission*/}
                     <StyledPermissions>
                       <PermissionsMenu
                         selected={values.permission}

@@ -70,13 +70,18 @@ class CachedPermissionService(
       throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
     }
   }
+
   @Cacheable(
     cacheNames = [Caches.PERMISSIONS],
     key = "{#userId, #projectId, #organizationId}"
   )
   @Transactional
   fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
-    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(projectId, userId, organizationId)?.let { permission ->
+    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
+      projectId = projectId,
+      userId = userId,
+      organizationId = organizationId
+    )?.let { permission ->
       PermissionDto(
         id = permission.id,
         userId = permission.user?.id,
@@ -84,7 +89,9 @@ class CachedPermissionService(
         scopes = permission.scopes,
         projectId = permission.project?.id,
         organizationId = permission.organization?.id,
-        languageIds = permission.languages.map { it.id }.toMutableSet()
+        languageIds = permission.languages.map { it.id }.toMutableSet(),
+        type = permission.type,
+        granular = permission.granular
       )
     }
   }

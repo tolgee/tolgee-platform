@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IconButton, Menu } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
-import { MenuItem } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -51,9 +49,7 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
     );
   };
 
-  const editable = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.MANAGE
-  );
+  const editable = projectPermissions.satisfiesPermission('languages.edit');
 
   return (
     <>

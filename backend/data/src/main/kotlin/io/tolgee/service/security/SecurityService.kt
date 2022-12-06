@@ -54,7 +54,7 @@ class SecurityService @Autowired constructor(
       return
     }
     val usersPermission = permissionService.getProjectPermissionData(projectId, authenticationFacade.userAccount.id)
-    val permittedLanguages = usersPermission.computedPermissions.translateLanguageIds
+    val permittedLanguages = usersPermission.computedPermissions.languageIds
     if (usersPermission.computedPermissions.allTranslateLanguagesPermitted) {
       return
     }

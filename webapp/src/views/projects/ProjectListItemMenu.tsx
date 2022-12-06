@@ -4,8 +4,6 @@ import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { MoreVert } from '@mui/icons-material';
-
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLeaveProject } from './useLeaveProject';
@@ -13,7 +11,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const ProjectListItemMenu: FC<{
   projectId: number;
-  computedPermissions: components['schemas']['ProjectWithStatsModel']['computedPermissions'];
+  computedPermission: components['schemas']['ProjectWithStatsModel']['computedPermission'];
   projectName: string;
 }> = (props) => {
   const { t } = useTranslate();
@@ -57,7 +55,7 @@ export const ProjectListItemMenu: FC<{
         onClose={() => setAnchorEl(null)}
         onClick={stopBubble()}
       >
-        {props.computedPermissions.type === ProjectPermissionType.MANAGE && (
+        {props.computedPermission?.scopes?.includes('admin') && (
           <MenuItem
             component={Link}
             to={LINKS.PROJECT_EDIT.build({

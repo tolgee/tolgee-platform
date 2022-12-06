@@ -64,7 +64,7 @@ class ProjectTransferringTestData {
         }.build {
           addPermission {
             user = this@ProjectTransferringTestData.user2
-            type = ProjectPermissionType.VIEW
+            estimatedTypeFromScopes = ProjectPermissionType.VIEW
           }
         }
       }

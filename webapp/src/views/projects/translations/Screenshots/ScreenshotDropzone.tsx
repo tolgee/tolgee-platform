@@ -6,7 +6,6 @@ import { Backup, HighlightOff } from '@mui/icons-material';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 import { MAX_FILE_COUNT } from './ScreenshotGallery';
 
@@ -98,7 +97,7 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
   };
 
   let dropZoneAllowedProps = {};
-  if (projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT)) {
+  if (projectPermissions.satisfiesPermission('screenshots.upload')) {
     dropZoneAllowedProps = { onDrop, onDragEnter, onDragLeave };
   }
 

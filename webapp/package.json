@@ -55,7 +55,9 @@
     "use-debounce": "^7.0.1",
     "web-vitals": "^2.1.0",
     "yup": "^0.32.9",
-    "zustand": "4.1.2"
+    "zustand": "4.1.2",
+    "@react-buddy/ide-toolbox": "^2.3.1",
+    "@react-buddy/palette-mui": "^5.0.0"
   },
   "scripts": {
     "start": "craco start",

@@ -3,7 +3,6 @@ import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import { styled } from '@mui/material';
@@ -18,6 +17,7 @@ const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 0px 0px 0px;
   position: relative;
+
   &.deleted {
     text-decoration: line-through;
     pointer-events: none;
@@ -77,9 +77,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
+        editEnabled={permissions.satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
