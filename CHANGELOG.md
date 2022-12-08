@@ -1,3 +1,10 @@
+## [2.46.1](https://github.com/tolgee/tolgee-platform/compare/v2.46.0...v2.46.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* Many languages make the list row too high ([cc1a514](https://github.com/tolgee/tolgee-platform/commit/cc1a5143fb4566323ed325aa5264703f535f2798))
+
 # [2.46.0](https://github.com/tolgee/tolgee-platform/compare/v2.45.11...v2.46.0) (2022-11-25)
 
 
