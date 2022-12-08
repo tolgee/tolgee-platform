@@ -48,7 +48,7 @@ const TranslationTools = React.memo(function TranslationTools({
   data,
   languageTag,
 }: Props) {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const config = useConfig();
 
   const isVertical = width === undefined || width < HORIZONTAL_BRAKEPOINT;

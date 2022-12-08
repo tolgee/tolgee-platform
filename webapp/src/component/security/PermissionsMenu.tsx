@@ -34,7 +34,7 @@ export const PermissionsMenu: FunctionComponent<{
   minPermissions?: PermissionType;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleClose = () => {
     setAnchorEl(null);

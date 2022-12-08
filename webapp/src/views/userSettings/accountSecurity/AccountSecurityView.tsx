@@ -22,7 +22,7 @@ import { DisableMfaDialog } from './DisableMfaDialog';
 const globalActions = container.resolve(GlobalActions);
 
 export const AccountSecurityView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
   const loadable = useSelector(

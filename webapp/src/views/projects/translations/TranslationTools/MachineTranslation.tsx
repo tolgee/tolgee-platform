@@ -51,7 +51,7 @@ export const MachineTranslation: React.FC<Props> = ({
   operationsRef,
   languageTag,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const getProviderImg = useProviderImg();
   const baseIsEmpty = data?.machineTranslations === null;
   const items = data?.machineTranslations

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
-import { useCurrentLanguage, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem, styled } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useConfig } from 'tg.globalContext/helpers';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
 
 const StyledTiles = styled(Box)`
@@ -139,7 +140,7 @@ const StyledTileEdit = styled(Box)`
 export const ProjectTotals: React.FC<{
   stats: components['schemas']['ProjectStatsModel'];
 }> = ({ stats }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const history = useHistory();
   const config = useConfig();
@@ -149,8 +150,7 @@ export const ProjectTotals: React.FC<{
     path: { projectId: project.id },
     query: { size: 1000 },
   });
-  const getLang = useCurrentLanguage();
-  const locale = getLang();
+  const locale = useCurrentLanguage();
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const anchorWidth = useRef();

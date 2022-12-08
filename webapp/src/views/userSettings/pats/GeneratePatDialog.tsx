@@ -16,7 +16,7 @@ export const GeneratePatDialog: FunctionComponent<{
 }> = (props) => {
   const expirationDateOptions = useExpirationDateOptions();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const onDialogClose = () => {
     redirect(LINKS.USER_PATS);

@@ -1,7 +1,13 @@
 import React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
-import { TolgeeProvider } from '@tolgee/react';
+import {
+  LanguageDetector,
+  ReactPlugin,
+  Tolgee,
+  TolgeeProvider,
+} from '@tolgee/react';
+import { FormatIcu } from '@tolgee/format-icu';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
@@ -46,22 +52,27 @@ const queryClient = new QueryClient({
   },
 });
 
+const tolgee = Tolgee()
+  .use(ReactPlugin())
+  .use(FormatIcu())
+  .use(LanguageDetector())
+  .init({
+    defaultLanguage: 'en',
+    apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
+    apiKey: process.env.REACT_APP_TOLGEE_API_KEY,
+    staticData: {
+      en: () => import('./i18n/en.json'),
+      es: () => import('./i18n/es.json'),
+      cs: () => import('./i18n/cs.json'),
+      fr: () => import('./i18n/fr.json'),
+      de: () => import('./i18n/de.json'),
+    },
+  });
+
 const MainWrapper = () => {
   return (
     <React.Suspense fallback={<FullPageLoading />}>
-      <TolgeeProvider
-        apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
-        apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
-        staticData={{
-          en: () => import('./i18n/en.json'),
-          // @ts-ignore
-          es: () => import('./i18n/es.json'),
-          cs: () => import('./i18n/cs.json'),
-          fr: () => import('./i18n/fr.json'),
-          de: () => import('./i18n/de.json') as any,
-        }}
-        loadingFallback={<FullPageLoading />}
-      >
+      <TolgeeProvider tolgee={tolgee} fallback={<FullPageLoading />}>
         <BrowserRouter>
           <StyledEngineProvider injectFirst>
             <ThemeProvider>

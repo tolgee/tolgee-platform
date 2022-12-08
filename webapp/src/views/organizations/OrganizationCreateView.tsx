@@ -25,7 +25,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
     url: '/v2/organizations',
     method: 'post',
   });
-  const t = useTranslate();
+  const { t } = useTranslate();
   const { updatePreferredOrganization } = usePreferredOrganization();
 
   const onSubmit = (values) => {

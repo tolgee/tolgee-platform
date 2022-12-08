@@ -1,4 +1,4 @@
-import { T, useTranslate } from '@tolgee/react';
+import { T, TFnType } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
@@ -23,13 +23,11 @@ Yup.setLocale({
     email: () => <T>validation_email_is_not_valid</T>,
     // eslint-disable-next-line react/display-name
     min: ({ min }) => (
-      <T parameters={{ min: min.toString() }}>
-        Field should have at least n chars
-      </T>
+      <T params={{ min: min.toString() }}>Field should have at least n chars</T>
     ),
     // eslint-disable-next-line react/display-name
     max: ({ max }) => (
-      <T parameters={{ max: max.toString() }}>
+      <T params={{ max: max.toString() }}>
         Field should have maximum of n chars
       </T>
     ),
@@ -159,7 +157,7 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: ReturnType<typeof useTranslate>) =>
+  static readonly LANGUAGE_TAG = (t: TFnType) =>
     Yup.string()
       .required()
       .max(20)
@@ -169,7 +167,7 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: ReturnType<typeof useTranslate>) =>
+  static readonly LANGUAGE = (t: TFnType) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,

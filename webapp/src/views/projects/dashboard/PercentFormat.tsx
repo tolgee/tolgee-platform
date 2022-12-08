@@ -5,7 +5,7 @@ type Props = {
 };
 
 export const PercentFormat: React.FC<Props> = ({ number }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   return (
     <>
       {!isNaN(number)
@@ -13,10 +13,10 @@ export const PercentFormat: React.FC<Props> = ({ number }) => {
           ? t('project_dashboard_translations_less_then_1_percent')
           : t(
               'project_dashboard_percent_count',
+              '{percentage, number, :: % }',
               {
                 percentage: number / 100,
-              },
-              '{percentage, number, :: % }'
+              }
             )
         : t('project_dashboard_percent_nan', '-')}
     </>

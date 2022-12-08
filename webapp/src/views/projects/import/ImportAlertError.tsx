@@ -78,7 +78,7 @@ export const ImportAlertError: FunctionComponent<{
           <AlertTitle>{text}</AlertTitle>
           {params[0] && (
             <T
-              parameters={{
+              params={{
                 name: params[0],
               }}
             >

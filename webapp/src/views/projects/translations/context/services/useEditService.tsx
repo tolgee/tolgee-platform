@@ -36,7 +36,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
   const putTranslation = usePutTranslation();
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   useEffect(() => {
     // field is also focused, which breaks the scrolling

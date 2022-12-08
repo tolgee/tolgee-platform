@@ -34,7 +34,7 @@ export const useLeaveProject = () => {
             break;
           default:
             messaging.error(
-              <T parameters={{ code: e.code }}>unexpected_error_message</T>
+              <T params={{ code: e.code }}>unexpected_error_message</T>
             );
         }
       },

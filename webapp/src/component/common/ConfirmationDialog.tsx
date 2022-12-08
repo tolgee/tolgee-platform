@@ -63,7 +63,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                 data-cy={'global-confirmation-hard-mode-text-field'}
                 fullWidth={true}
                 label={
-                  <T parameters={{ text: props.hardModeText }}>
+                  <T params={{ text: props.hardModeText }}>
                     hard_mode_confirmation_rewrite_text
                   </T>
                 }

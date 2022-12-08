@@ -46,7 +46,7 @@ export const loadScript = (websiteToken: string, darkMode: boolean) => {
 };
 
 export const Chatwoot = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
   const token = config?.chatwootToken;

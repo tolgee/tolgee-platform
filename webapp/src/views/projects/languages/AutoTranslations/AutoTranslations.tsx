@@ -37,7 +37,7 @@ type Props = {
 };
 
 export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [formInstance, setFormInstance] = useState(0);
   const formRef = useRef<FormikProps<any>>();
 

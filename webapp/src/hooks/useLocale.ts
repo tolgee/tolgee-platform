@@ -1,9 +1,9 @@
-import { useCurrentLanguage } from '@tolgee/react';
+import { useCurrentLanguage } from './useCurrentLanguage';
 
 export const useMoneyFormatter = () => {
-  const getLang = useCurrentLanguage();
+  const language = useCurrentLanguage();
   return (number: number, options?: Intl.NumberFormatOptions) =>
-    new Intl.NumberFormat(getLang(), {
+    new Intl.NumberFormat(language, {
       style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 0,
@@ -12,15 +12,15 @@ export const useMoneyFormatter = () => {
 };
 
 export const useDateFormatter = () => {
-  const getLang = useCurrentLanguage();
+  const language = useCurrentLanguage();
   return (
     date: number | Date | undefined,
     options?: Intl.DateTimeFormatOptions
-  ) => new Intl.DateTimeFormat(getLang(), options).format(date);
+  ) => new Intl.DateTimeFormat(language, options).format(date);
 };
 
 export const useNumberFormatter = () => {
-  const getLang = useCurrentLanguage();
+  const language = useCurrentLanguage();
   return (number: number, options?: Intl.NumberFormatOptions) =>
-    new Intl.NumberFormat(getLang(), options).format(number);
+    new Intl.NumberFormat(language, options).format(number);
 };

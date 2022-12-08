@@ -28,7 +28,7 @@ export const LanguageEditView = () => {
 
   const match = useRouteMatch();
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID] as number;
@@ -148,7 +148,7 @@ export const LanguageEditView = () => {
               }
               confirmationMessage({
                 message: (
-                  <T parameters={{ name: languageLoadable.data!.name }}>
+                  <T params={{ name: languageLoadable.data!.name }}>
                     delete_language_confirmation
                   </T>
                 ),

@@ -16,7 +16,7 @@ export const ProjectListItemMenu: FC<{
   computedPermissions: components['schemas']['ProjectWithStatsModel']['computedPermissions'];
   projectName: string;
 }> = (props) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { leave, isLeaving } = useLeaveProject();
 

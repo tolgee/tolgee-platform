@@ -51,7 +51,7 @@ export const UserMenu: React.FC = () => {
   );
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const config = useConfig();
   const location = useLocation();
   const history = useHistory();

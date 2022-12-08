@@ -9,7 +9,7 @@ export const ApiKeyExpiryInfo = (props: {
     {props.apiKey.expiresAt && props.apiKey.expiresAt < new Date().getTime() ? (
       <Box sx={(theme) => ({ color: theme.palette.warning.main })}>
         <T
-          parameters={{ date: props.apiKey.expiresAt }}
+          params={{ date: props.apiKey.expiresAt }}
           keyName="api-key-list-item-expired-on"
         />
       </Box>
@@ -19,7 +19,7 @@ export const ApiKeyExpiryInfo = (props: {
           <T>api-key_never_expires</T>
         ) : (
           <T
-            parameters={{ date: props.apiKey.expiresAt }}
+            params={{ date: props.apiKey.expiresAt }}
             keyName="api-key-list-item-expires-at"
           />
         )}

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useCurrentLanguage } from '@tolgee/react';
 import { Box, styled, Tooltip } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 
@@ -15,6 +14,7 @@ import { SmallActionButton } from '../cell/SmallActionButton';
 import { LimitedHeightText } from '../LimitedHeightText';
 import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 import { UserName } from 'tg.component/common/UserName';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -144,7 +144,7 @@ export const HistoryItem: React.FC<Props> = ({
         )}
       </StyledChanges>
       <StyledTime>
-        {date.toLocaleTimeString(lang(), {
+        {date.toLocaleTimeString(lang, {
           hour: 'numeric',
           minute: 'numeric',
         })}

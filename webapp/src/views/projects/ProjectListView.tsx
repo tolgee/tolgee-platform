@@ -45,7 +45,7 @@ export const ProjectListView = () => {
     },
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const isOrganizationOwner =
     preferredOrganization?.currentUserRole === 'OWNER';

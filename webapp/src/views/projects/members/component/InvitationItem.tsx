@@ -60,7 +60,7 @@ type Props = {
 };
 
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const languages = useProjectLanguages();
 
   const findLanguage = useCallback(

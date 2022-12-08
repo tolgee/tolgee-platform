@@ -77,7 +77,7 @@ export const ImportResultRow = (props: {
         }),
       title: <T>import_delete_language_dialog_title</T>,
       message: (
-        <T parameters={{ languageName: props.row.name }}>
+        <T params={{ languageName: props.row.name }}>
           import_delete_language_dialog_message
         </T>
       ),

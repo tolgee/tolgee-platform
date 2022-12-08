@@ -40,7 +40,7 @@ type Props = {
 export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const queryClient = useQueryClient();
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const dispatch = useTranslationsDispatch();
   const history = useHistory();

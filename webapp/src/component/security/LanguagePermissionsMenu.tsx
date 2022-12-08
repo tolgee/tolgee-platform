@@ -19,7 +19,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   buttonProps?: ComponentProps<typeof Button>;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const allLanguages = useProjectLanguages();
 
