@@ -75,7 +75,7 @@ export const ExportForm = () => {
     query: { size: 1000 },
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const allLangs = useMemo(
     () => languagesLoadable.data?._embedded?.languages?.map((l) => l.tag) || [],

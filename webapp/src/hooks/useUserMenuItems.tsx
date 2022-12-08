@@ -13,7 +13,7 @@ export class UserMenuItem {
 
 export const useUserMenuItems = (): UserMenuItem[] => {
   const location = useLocation();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return [
     {

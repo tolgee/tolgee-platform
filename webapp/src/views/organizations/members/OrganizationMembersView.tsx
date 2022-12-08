@@ -15,7 +15,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 
 export const OrganizationMembersView: FunctionComponent = () => {
   const organization = useOrganization();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);

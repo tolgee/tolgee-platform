@@ -1,5 +1,6 @@
 import { Box, styled } from '@mui/material';
-import { useCurrentLanguage, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
 const StyledContainer = styled('div')`
   grid-column: 1 / span 3;
@@ -31,14 +32,14 @@ type Props = {
 export const ActivityDateSeparator: React.FC<Props> = ({ date }) => {
   const lang = useCurrentLanguage();
   const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <StyledContainer>
       <StyledLine maxWidth={10} />
       <StyledDate>
         {isToday && `${t('activity_date_today')} `}
-        {date.toLocaleDateString(lang())}
+        {date.toLocaleDateString(lang)}
       </StyledDate>
       <StyledLine />
     </StyledContainer>

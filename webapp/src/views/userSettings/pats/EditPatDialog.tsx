@@ -40,7 +40,7 @@ export const EditPatDialog: FunctionComponent = () => {
     invalidatePrefix: '/v2/pats',
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   if (!patLoadable.data) {
     return <></>;

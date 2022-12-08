@@ -167,7 +167,7 @@ export const TranslationOpened: React.FC<Props> = ({
           )}
           <StyledTab
             label={
-              <T parameters={{ count: String(translation?.commentCount || 0) }}>
+              <T params={{ count: String(translation?.commentCount || 0) }}>
                 translations_cell_tab_comments
               </T>
             }

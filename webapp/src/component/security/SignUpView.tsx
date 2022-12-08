@@ -39,7 +39,7 @@ const SignUpView: FunctionComponent = () => {
   const state = useSelector((state: AppState) => state.signUp.loadables.signUp);
   const config = useConfig();
   const remoteConfig = useConfig();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const WithRecaptcha = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
@@ -147,7 +147,7 @@ const SignUpView: FunctionComponent = () => {
               <Box mt={2} mb={3}>
                 <Typography variant="body2">
                   <T
-                    parameters={{
+                    params={{
                       Link(content) {
                         return (
                           <Link href="https://tolgee.io/docs/terms_of_use">

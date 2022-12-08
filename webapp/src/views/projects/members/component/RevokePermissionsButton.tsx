@@ -38,7 +38,7 @@ const RevokePermissionsButton = (props: {
         title: <T>revoke_access_confirmation_title</T>,
         message: (
           <T
-            parameters={{
+            params={{
               userName: props.user.name || props.user.username!,
             }}
           >

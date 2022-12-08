@@ -72,7 +72,7 @@ export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
           required={true}
           helperText={
             <T
-              parameters={{
+              params={{
                 address: LINKS.ORGANIZATION.buildWithOrigin({
                   [PARAMS.ORGANIZATION_SLUG]: slugValue,
                 }),

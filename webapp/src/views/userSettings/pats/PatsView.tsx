@@ -20,7 +20,7 @@ const StyledLink = styled(Link)`
 `;
 
 export const PatsView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [page, setPage] = useState(0);
 
   const list = useApiQuery({
@@ -50,7 +50,7 @@ export const PatsView: FunctionComponent = () => {
       >
         <Box sx={{ my: 2 }}>
           <T
-            parameters={{
+            params={{
               link: <StyledLink to={LINKS.USER_API_KEYS.build()} />,
             }}
           >

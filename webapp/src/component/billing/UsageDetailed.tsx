@@ -25,7 +25,7 @@ export const UsageDetailed: React.FC<Props> = ({
         <Typography variant="caption">
           <T
             keyName="dashboard_billing_translations"
-            parameters={{
+            params={{
               available: Math.round(translationsAvailable),
               max: Math.round(translationsMax),
             }}
@@ -37,7 +37,7 @@ export const UsageDetailed: React.FC<Props> = ({
         <Typography variant="caption">
           <T
             keyName="dashboard_billing_credit"
-            parameters={{
+            params={{
               available: Math.round(creditAvailable / 100),
               max: Math.round(creditMax / 100),
             }}

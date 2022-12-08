@@ -13,7 +13,7 @@ const StyledSearchField = styled(SearchField)`
 export const SecondaryBarSearchField: FC<ComponentProps<typeof SearchField>> = (
   props
 ) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <StyledSearchField

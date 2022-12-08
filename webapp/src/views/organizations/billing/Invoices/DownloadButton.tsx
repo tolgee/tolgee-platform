@@ -19,7 +19,7 @@ const messaging = container.resolve(MessageService);
 export const DownloadButton: FC<DownloadButtonProps> = (props) => {
   const organization = useOrganization();
   const config = useConfig();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const pdfMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf',

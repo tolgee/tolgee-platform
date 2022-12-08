@@ -11,7 +11,7 @@ export const RequirePreferredOrganization: FC = (props) => {
     (v: AppState) => v.global.security.allowPrivate
   );
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { preferredOrganization, isFetching } = usePreferredOrganization();
 

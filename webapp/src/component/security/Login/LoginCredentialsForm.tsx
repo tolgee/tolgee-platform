@@ -32,7 +32,7 @@ type LoginViewCredentialsProps = {
 };
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const remoteConfig = useConfig();
   const security = useSelector((state: AppState) => state.global.security);
   const authLoading = useSelector(

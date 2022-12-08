@@ -8,7 +8,7 @@ import { BaseProjectView } from '../BaseProjectView';
 
 export const ExportView: FunctionComponent = () => {
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <BaseProjectView

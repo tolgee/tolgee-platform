@@ -5,7 +5,7 @@ import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 
 export function FabAddButtonLink(props: { to: string }) {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Box mt={2}>

@@ -31,7 +31,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
         {row && (
           <>
             <DialogTitle id="import-file-issues-dialog">
-              <T parameters={{ fileName: row.importFileName }}>
+              <T params={{ fileName: row.importFileName }}>
                 import_file_issues_title
               </T>
             </DialogTitle>
@@ -64,7 +64,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                             param.value && (
                               <>
                                 <T
-                                  parameters={{ value: param.value! }}
+                                  params={{ value: param.value! }}
                                 >{`import_file_issue_param_type_${param.type.toLowerCase()}`}</T>
                                 {idx < i.params!.length - 1 && ', '}
                               </>

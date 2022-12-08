@@ -31,11 +31,11 @@ export const MfaSettings: FunctionComponent = () => {
         <Box>
           <Typography>
             {user.mfaEnabled ? (
-              <T parameters={{ b: <StyledEnabled /> }}>
+              <T params={{ b: <StyledEnabled /> }}>
                 account-security-mfa-status-enabled
               </T>
             ) : (
-              <T parameters={{ b: <StyledDisabled /> }}>
+              <T params={{ b: <StyledDisabled /> }}>
                 account-security-mfa-status-disabled
               </T>
             )}

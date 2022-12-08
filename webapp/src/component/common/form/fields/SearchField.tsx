@@ -14,7 +14,7 @@ const SearchField = (
   const [search, setSearch] = useState(props.initial || '');
   const [debouncedSearch] = useDebounce(search, 500);
   const theme = useTheme();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { onSearch, ...otherProps } = props;
 

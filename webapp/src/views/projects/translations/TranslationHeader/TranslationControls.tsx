@@ -73,7 +73,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const projectPermissions = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const dispatch = useTranslationsDispatch();
   const view = useTranslationsSelector((v) => v.view);

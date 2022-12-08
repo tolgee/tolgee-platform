@@ -63,7 +63,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const handleDelete = () => {
     confirm({
       message: (
-        <T parameters={{ name: project.name }}>
+        <T params={{ name: project.name }}>
           delete_project_confirmation_message
         </T>
       ),
@@ -82,7 +82,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   const { leave, isLeaving } = useLeaveProject();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const initialValues: ValueType = {
     name: project.name,

@@ -120,7 +120,7 @@ export const ApiKeyListItem = (props: {
         {props.apiKey.lastUsedAt ? (
           <T
             keyName="api-key-list-item-last-used"
-            parameters={{ date: props.apiKey.lastUsedAt }}
+            params={{ date: props.apiKey.lastUsedAt }}
           />
         ) : (
           <T keyName="api-key-list-never-used" />

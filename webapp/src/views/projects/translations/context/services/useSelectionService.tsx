@@ -19,7 +19,7 @@ const messaging = container.resolve(MessageService);
 export const useSelectionService = ({ translations }: Props) => {
   const { refetchUsage } = useOrganizationUsageMethods();
   const [selection, setSelection] = useState<number[]>([]);
-  const t = useTranslate();
+  const { t } = useTranslate();
   const deleteKeys = useDeleteKeys();
   const project = useProject();
 

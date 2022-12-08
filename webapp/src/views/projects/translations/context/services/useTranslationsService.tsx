@@ -215,7 +215,7 @@ export const useTranslationsService = (props: Props) => {
       messaging.error(
         <T
           keyName="translations_languages_limit_reached"
-          parameters={{ max: MAX_LANGUAGES }}
+          params={{ max: MAX_LANGUAGES }}
         />
       );
       return;

@@ -107,7 +107,7 @@ export const Filters = () => {
               ) : value.length === 1 && findOption(value[0])?.label ? (
                 findOption(value[0])?.label
               ) : (
-                <T parameters={{ filtersNum: String(activeFilters.length) }}>
+                <T params={{ filtersNum: String(activeFilters.length) }}>
                   translations_filters_text
                 </T>
               )}

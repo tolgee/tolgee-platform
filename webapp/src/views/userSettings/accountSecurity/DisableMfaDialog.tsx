@@ -27,7 +27,7 @@ export const DisableMfaDialog: FunctionComponent = () => {
 
   const user = useUser();
   const message = useMessage();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const globalDispatch = useGlobalDispatch();
 
   useEffect(() => {

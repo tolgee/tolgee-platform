@@ -28,7 +28,7 @@ const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
 
 export const OrganizationProfileView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const leaveOrganization = useLeaveOrganization();
   const globalDispatch = useGlobalDispatch();
   const history = useHistory();

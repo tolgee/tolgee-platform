@@ -48,7 +48,7 @@ export const ImportView: FunctionComponent = () => {
   );
   const { refetchUsage } = useOrganizationUsageMethods();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const onConflictResolutionDialogClose = () => {
     dataHelper.loadData();
@@ -122,7 +122,7 @@ export const ImportView: FunctionComponent = () => {
   useEffect(() => {
     if (addFilesLoadable.error?.code === 'cannot_add_more_then_100_languages') {
       messageService.error(
-        <T parameters={{ n: '100' }}>
+        <T params={{ n: '100' }}>
           import_error_cannot_add_more_then_n_languages
         </T>
       );

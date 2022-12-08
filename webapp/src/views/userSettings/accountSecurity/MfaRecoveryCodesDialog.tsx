@@ -35,7 +35,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
 
     const [codes, setCodes] = useState<string[] | null>(null);
     const user = useUser();
-    const t = useTranslate();
+    const { t } = useTranslate();
 
     useEffect(() => {
       if (!providedPassword && user && !user.mfaEnabled) onDialogClose();
@@ -106,9 +106,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
               validationSchema={Validation.USER_MFA_VIEW_RECOVERY}
             >
               <Typography>
-                <T parameters={{ b: <b /> }}>
-                  account-security-mfa-recovery-info
-                </T>
+                <T params={{ b: <b /> }}>account-security-mfa-recovery-info</T>
               </Typography>
               <TextField
                 inputProps={{

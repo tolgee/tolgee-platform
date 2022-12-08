@@ -115,7 +115,7 @@ const StyledProjectName = styled(Typography)`
 type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
 const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: p.id,
   });
@@ -150,7 +150,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
       </StyledTitle>
       <StyledKeyCount>
         <Typography variant="body1">
-          <T parameters={{ keysCount: p.stats.keyCount.toString() }}>
+          <T params={{ keysCount: p.stats.keyCount.toString() }}>
             project_list_keys_count
           </T>
         </Typography>

@@ -9,7 +9,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 
 export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
   const organization = useOrganization();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <BaseOrganizationSettingsView

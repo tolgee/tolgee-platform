@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Menu, MenuItem, styled, Tooltip } from '@mui/material';
 import { Check, MoreVert } from '@mui/icons-material';
 
@@ -9,6 +9,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { SmallActionButton } from '../cell/SmallActionButton';
 import { UserName } from 'tg.component/common/UserName';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 
@@ -103,7 +104,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const lang = useCurrentLanguage();
   const date = new Date(data.createdAt);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const unresolveVisible = data.state !== 'NEEDS_RESOLUTION' && onChangeState;
 
@@ -154,7 +155,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
         {data.text}
       </StyledTextPre>
       <StyledTime>
-        {date.toLocaleTimeString(lang(), {
+        {date.toLocaleTimeString(lang, {
           hour: 'numeric',
           minute: 'numeric',
         })}

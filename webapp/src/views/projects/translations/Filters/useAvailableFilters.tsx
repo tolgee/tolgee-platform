@@ -25,7 +25,7 @@ export const useAvailableFilters = (
 ): GroupType[] => {
   const languages = useTranslationsSelector((v) => v.languages);
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const tags = useApiQuery({
     url: '/v2/projects/{projectId}/tags',

@@ -8,7 +8,7 @@ import React, {
 import { Skeleton, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
-import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -24,6 +24,7 @@ import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
 export interface ScreenshotGalleryProps {
   keyId: number;
@@ -76,7 +77,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const project = useProject();
   const dispatch = useTranslationsDispatch();
   const lang = useCurrentLanguage();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const screenshotsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
@@ -140,14 +141,14 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     files.forEach((file) => {
       if (file.size > config.maxUploadFileSize * 1024) {
         result.errors.push(
-          <T parameters={{ filename: file.name }}>
+          <T params={{ filename: file.name }}>
             translations.screenshots.validation.file_too_big
           </T>
         );
       }
       if (ALLOWED_UPLOAD_TYPES.indexOf(file.type) < 0) {
         result.errors.push(
-          <T parameters={{ filename: file.name }}>
+          <T params={{ filename: file.name }}>
             translations.screenshots.validation.unsupported_format
           </T>
         );
@@ -295,7 +296,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               justifyContent="center"
               flexGrow={1}
               p={2}
-              lang={lang()}
+              lang={lang}
             >
               {t('no_screenshots_yet')}{' '}
               {canEdit && t('add_screenshots_message')}
