@@ -1,3 +1,10 @@
+## [2.46.2](https://github.com/tolgee/tolgee-platform/compare/v2.46.1...v2.46.2) (2022-12-08)
+
+
+### Bug Fixes
+
+* switch to tolgee-js-5 ([7b6ef1d](https://github.com/tolgee/tolgee-platform/commit/7b6ef1dc69b6a4f19cdabded64edc44b66476b6c))
+
 ## [2.46.1](https://github.com/tolgee/tolgee-platform/compare/v2.46.0...v2.46.1) (2022-12-08)
 
 
