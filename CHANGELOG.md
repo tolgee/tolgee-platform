@@ -1,3 +1,15 @@
+# [2.47.0](https://github.com/tolgee/tolgee-platform/compare/v2.46.2...v2.47.0) (2022-12-09)
+
+
+### Bug Fixes
+
+* editor tooltips fix ([3486653](https://github.com/tolgee/tolgee-platform/commit/3486653d0bc7c458a518f89887fa6e769bdbdf42))
+
+
+### Features
+
+* store language on backend ([b4de63e](https://github.com/tolgee/tolgee-platform/commit/b4de63effb1868a95042a578f8e369141387f7dd))
+
 ## [2.46.2](https://github.com/tolgee/tolgee-platform/compare/v2.46.1...v2.46.2) (2022-12-08)
 
 
