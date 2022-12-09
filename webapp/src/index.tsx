@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
@@ -9,7 +9,7 @@ import {
 } from '@tolgee/react';
 import { FormatIcu } from '@tolgee/format-icu';
 import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
@@ -31,6 +31,7 @@ import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
+import { languageStorage, queryClient } from './initialSetup';
 
 const store = configureStore();
 
@@ -42,20 +43,11 @@ const SnackbarProvider = React.lazy(() =>
 
 container.resolve(DispatchService).store = store;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      retry: false,
-    },
-  },
-});
-
 const tolgee = Tolgee()
   .use(ReactPlugin())
   .use(FormatIcu())
   .use(LanguageDetector())
+  .use(languageStorage)
   .init({
     defaultLanguage: 'en',
     apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
@@ -71,22 +63,26 @@ const tolgee = Tolgee()
 
 const MainWrapper = () => {
   return (
-    <React.Suspense fallback={<FullPageLoading />}>
-      <TolgeeProvider tolgee={tolgee} fallback={<FullPageLoading />}>
-        <BrowserRouter>
-          <StyledEngineProvider injectFirst>
-            <ThemeProvider>
-              <CssBaseline />
-              <Provider store={store}>
-                <QueryClientProvider client={queryClient}>
-                  {/* @ts-ignore */}
-                  <ErrorBoundary>
-                    <SnackbarProvider data-cy="global-snackbars">
-                      <LoadingProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider>
+        <CssBaseline />
+        <LoadingProvider>
+          <GlobalLoading />
+          <Suspense fallback={<FullPageLoading />}>
+            <TolgeeProvider
+              tolgee={tolgee}
+              fallback={<FullPageLoading />}
+              options={{ useSuspense: false }}
+            >
+              <BrowserRouter>
+                <Provider store={store}>
+                  <QueryClientProvider client={queryClient}>
+                    {/* @ts-ignore */}
+                    <ErrorBoundary>
+                      <SnackbarProvider data-cy="global-snackbars">
                         <GlobalProvider>
                           <BottomPanelProvider>
                             <TopBarProvider>
-                              <GlobalLoading />
                               <MuiLocalizationProvider>
                                 <App />
                               </MuiLocalizationProvider>
@@ -94,17 +90,17 @@ const MainWrapper = () => {
                             </TopBarProvider>
                           </BottomPanelProvider>
                         </GlobalProvider>
-                      </LoadingProvider>
-                    </SnackbarProvider>
-                  </ErrorBoundary>
-                  <ReactQueryDevtools />
-                </QueryClientProvider>
-              </Provider>
-            </ThemeProvider>
-          </StyledEngineProvider>{' '}
-        </BrowserRouter>
-      </TolgeeProvider>
-    </React.Suspense>
+                      </SnackbarProvider>
+                    </ErrorBoundary>
+                    <ReactQueryDevtools />
+                  </QueryClientProvider>
+                </Provider>
+              </BrowserRouter>
+            </TolgeeProvider>
+          </Suspense>
+        </LoadingProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };
 
