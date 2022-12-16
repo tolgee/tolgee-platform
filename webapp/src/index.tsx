@@ -50,6 +50,7 @@ const tolgee = Tolgee()
   .use(languageStorage)
   .init({
     defaultLanguage: 'en',
+    fallbackLanguage: 'en',
     apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
     apiKey: process.env.REACT_APP_TOLGEE_API_KEY,
     staticData: {
