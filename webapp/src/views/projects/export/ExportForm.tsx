@@ -14,6 +14,7 @@ import { StateSelector } from './StateSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { NestedSelector } from './NestedSelector';
 
 const messaging = container.resolve(MessageService);
 
@@ -39,10 +40,9 @@ const StyledForm = styled('form')`
   gap: ${({ theme }) => theme.spacing(3)};
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    'states states'
-    'langs  format'
-    '.      submit';
-
+    'states  states'
+    'langs   format'
+    'options submit';
   & .states {
     grid-area: states;
   }
@@ -56,6 +56,10 @@ const StyledForm = styled('form')`
     grid-area: submit;
     justify-self: end;
   }
+`;
+
+const StyledOptions = styled('div')`
+  display: grid;
 `;
 
 export const ExportForm = () => {
@@ -96,6 +100,9 @@ export const ExportForm = () => {
   const [format, setFormat] = useUrlSearchState('format', {
     defaultVal: EXPORT_DEFAULT_FORMAT,
   });
+  const [nested, setNested] = useUrlSearchState('nested', {
+    defaultVal: 'false',
+  });
 
   if (languagesLoadable.isFetching) {
     return (
@@ -113,6 +120,7 @@ export const ExportForm = () => {
           : EXPORT_DEFAULT_STATES) as StateType[],
         languages: (languages?.length ? languages : allLangs) as string[],
         format: (format || EXPORT_DEFAULT_FORMAT) as typeof FORMATS[number],
+        nested: nested === 'true',
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -128,6 +136,7 @@ export const ExportForm = () => {
         setStates(sortStates(values.states));
         setLanguages(sortLanguages(values.languages));
         setFormat(values.format);
+        setNested(String(values.nested));
 
         return errors;
       }}
@@ -142,8 +151,8 @@ export const ExportForm = () => {
                 format: values.format,
                 filterState: values.states,
                 languages: values.languages,
-                splitByScope: false,
-                splitByScopeDelimiter: '.',
+                splitByScope: values.nested ? true : false,
+                splitByScopeDelimiter: values.nested ? '.' : '',
                 splitByScopeDepth: 0,
                 zip: values.languages.length > 1,
               },
@@ -181,6 +190,9 @@ export const ExportForm = () => {
             languages={languagesLoadable.data?._embedded?.languages}
           />
           <FormatSelector className="format" />
+          <StyledOptions className="options">
+            <NestedSelector />
+          </StyledOptions>
           <div className="submit">
             <LoadingButton
               data-cy="export-submit-button"
