@@ -39,6 +39,7 @@ export type ErrorResponseDto = {
 };
 
 export enum ProjectPermissionType {
+  NONE = 'NONE',
   MANAGE = 'MANAGE',
   EDIT = 'EDIT',
   TRANSLATE = 'TRANSLATE',

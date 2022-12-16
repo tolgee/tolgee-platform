@@ -483,7 +483,36 @@ export interface components {
       name: string;
       slug?: string;
       baseLanguageId?: number;
-      description?: string;
+    };
+    ComputedPermissionModel: {
+      permissionModel?: components["schemas"]["PermissionModel"];
+      origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
+      /** Has user explicitly set granular permissions */
+      granular: boolean;
+      /** The permitted scopes */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -498,6 +527,35 @@ export interface components {
       /** Whether is base language of project */
       base: boolean;
     };
+    /** Current user's direct permission */
+    PermissionModel: {
+      /** The permitted scopes */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
+      /** Has user explicitly set granular permissions */
+      granular: boolean;
+    };
     ProjectModel: {
       id: number;
       name: string;
@@ -506,34 +564,17 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     SimpleOrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
-    };
-    UserPermissionModel: {
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
-      permittedLanguageIds?: number[];
-      /** The type of permission. */
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UpdateNamespaceDto: {
       name: string;
@@ -654,7 +695,7 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /**
        * IDs of languages to allow user to translate to with TRANSLATE permission.
        *
@@ -669,7 +710,26 @@ export interface components {
     ProjectInvitationModel: {
       id: number;
       code: string;
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
       permittedLanguageIds?: number[];
       createdAt: string;
       invitedUserName?: string;
@@ -765,12 +825,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -779,14 +839,13 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermission: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -841,15 +900,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      id: number;
-      projectId: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       expiresAt?: number;
-      description: string;
-      userFullName?: string;
-      projectName: string;
+      projectId: number;
+      lastUsedAt?: number;
       scopes: string[];
+      description: string;
+      id: number;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1091,9 +1150,9 @@ export interface components {
       username: string;
       name?: string;
       organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      organizationBasePermission: components["schemas"]["PermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
@@ -1421,20 +1480,9 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };
@@ -1451,12 +1499,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1509,15 +1557,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
-      projectId: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       expiresAt?: number;
-      description: string;
-      userFullName?: string;
-      projectName: string;
+      projectId: number;
+      lastUsedAt?: number;
       scopes: string[];
+      description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1922,7 +1970,7 @@ export interface operations {
       path: {
         projectId: number;
         userId: number;
-        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+        permissionType: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       };
       query: {
         languages?: number[];
@@ -5091,14 +5139,6 @@ export interface operations {
       query: {
         /** Namespace to return */
         ns?: string;
-        /**
-         * Delimiter to structure response content.
-         *
-         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
-         *
-         * When null, resulting file will be a flat key-value object.
-         */
-        structureDelimiter?: string;
       };
     };
     responses: {

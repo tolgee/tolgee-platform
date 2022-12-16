@@ -11,6 +11,7 @@ import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { AdvancedPermissionsMenuItem } from './AdvancedPermissionsMenuItem';
 
 type PermissionType = NonNullable<
   components['schemas']['PermissionModel']['type']
@@ -24,12 +25,15 @@ const StyledListItemText = styled(ListItemText)`
   }
 `;
 
+// todo: create separate advanced component
 export const PermissionsMenu: FunctionComponent<{
   buttonTooltip?: string;
   selected?: PermissionType;
   onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
   minPermissions?: PermissionType;
+  user: { name?: string; id: number };
+  enableAdvanced?: boolean;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslate();
@@ -43,14 +47,6 @@ export const PermissionsMenu: FunctionComponent<{
   };
 
   const types = Object.keys(ProjectPermissionType);
-  // //
-  // if (props.minPermissions) {
-  //   types = types.filter((k) =>
-  //     new ProjectPermissions(k as any, undefined, false).satisfiesPermission(
-  //       props.minPermissions
-  //     )
-  //   );
-  // }
 
   const selected = props.selected?.toLowerCase() ?? 'organization_base';
 
@@ -106,6 +102,9 @@ export const PermissionsMenu: FunctionComponent<{
             />
           </MenuItem>
         ))}
+        {props.enableAdvanced && (
+          <AdvancedPermissionsMenuItem user={props.user} />
+        )}
       </Menu>
     </>
   );

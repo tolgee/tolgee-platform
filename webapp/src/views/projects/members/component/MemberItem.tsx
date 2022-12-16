@@ -2,7 +2,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { Chip, styled } from '@mui/material';
 
-import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
+import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
@@ -117,6 +117,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           />
         )}
         <PermissionsMenu
+          user={user}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
@@ -133,6 +134,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             disabled: isCurrentUser || isOwner,
           }}
           minPermissions={user.organizationBasePermission.type}
+          enableAdvanced={true}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

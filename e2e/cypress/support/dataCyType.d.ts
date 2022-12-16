@@ -95,6 +95,7 @@ declare namespace DataCy {
         "global-paginated-list" |
         "global-plus-button" |
         "global-search-field" |
+        "global-snackbars" |
         "global-user-menu-button" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
@@ -223,7 +224,7 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
-        "permission-select-item" |
+        "permissions-edit-advanced-dialog" |
         "permissions-language-menu-button" |
         "permissions-languages-menu" |
         "permissions-menu" |
