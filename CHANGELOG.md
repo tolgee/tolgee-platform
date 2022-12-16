@@ -1,3 +1,10 @@
+## [2.47.1](https://github.com/tolgee/tolgee-platform/compare/v2.47.0...v2.47.1) (2022-12-16)
+
+
+### Bug Fixes
+
+* error when adding comment to empty translation ([#1457](https://github.com/tolgee/tolgee-platform/issues/1457)) ([826ff0d](https://github.com/tolgee/tolgee-platform/commit/826ff0da7f85599c9136afc57864d657ea299768))
+
 # [2.47.0](https://github.com/tolgee/tolgee-platform/compare/v2.46.2...v2.47.0) (2022-12-09)
 
 
