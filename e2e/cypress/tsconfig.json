@@ -9,7 +9,8 @@
     "types": [
       "cypress",
       "cypress-xpath/src", 
-      "cy-verify-downloads"
+      "cy-verify-downloads",
+      "node"
     ],
     "jsx": "react-jsx",
     "noEmit": true,

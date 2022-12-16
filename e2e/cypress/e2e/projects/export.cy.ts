@@ -1,6 +1,6 @@
 import 'cypress-file-upload';
+import { createKey } from '../../common/apiCalls/common';
 import {
-  create4Translations,
   createExportableProject,
   exportSelectFormat,
   exportToggleLanguage,
@@ -8,9 +8,14 @@ import {
 } from '../../common/export';
 
 describe('Projects Basics', () => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
+
   beforeEach(() => {
     createExportableProject().then((p) => {
-      create4Translations(p.id);
+      createKey(p.id, `test.test`, {
+        en: `Test english`,
+        cs: `Test czech`,
+      });
       visitExport(p.id);
       cy.gcy('export-submit-button').should('be.visible');
     });
@@ -25,7 +30,23 @@ describe('Projects Basics', () => {
     exportToggleLanguage('Česky');
 
     cy.gcy('export-submit-button').click();
-    cy.verifyDownload('en.json');
+
+    cy.readFile(downloadsFolder + '/en.json').should('deep.equal', {
+      'test.test': 'Test english',
+    });
+  });
+
+  it('exports with nested structure', () => {
+    exportToggleLanguage('English');
+
+    cy.gcy('export-nested-selector').click();
+    cy.gcy('export-submit-button').click();
+    cy.verifyDownload('cs.json');
+
+    cy.readFile(downloadsFolder + '/cs.json')
+      .its('test')
+      .its('test')
+      .should('eq', 'Test czech');
   });
 
   it('exports one language to xliff', () => {
