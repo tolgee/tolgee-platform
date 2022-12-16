@@ -240,7 +240,7 @@ export const useComments = ({
   };
 
   const commentsList: TranslationCommentModel[] = [];
-  comments.data?.pages.forEach((page) =>
+  comments.data?.pages?.forEach((page) =>
     page._embedded?.translationComments?.forEach((item) =>
       commentsList.push(item)
     )
