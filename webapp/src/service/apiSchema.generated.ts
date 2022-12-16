@@ -5,7 +5,7 @@
 
 export interface paths {
   "/v2/user": {
-    get: operations["getInfo_2"];
+    get: operations["getInfo"];
     put: operations["updateUser"];
     post: operations["updateUserOld"];
     delete: operations["delete"];
@@ -104,11 +104,8 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
-    put: operations["update_2"];
+    put: operations["update_1"];
     delete: operations["delete_5"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
-    put: operations["setOutdated"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
     put: operations["dismissAutoTranslatedState"];
@@ -144,7 +141,7 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_7"];
-    put: operations["update_4"];
+    put: operations["update_3"];
     delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
@@ -155,7 +152,7 @@ export interface paths {
   };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
-    put: operations["update_5"];
+    put: operations["update_4"];
     delete: operations["delete_8"];
   };
   "/v2/organizations/{id}/leave": {
@@ -169,7 +166,7 @@ export interface paths {
     delete: operations["removeAvatar_2"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_6"];
+    put: operations["update_5"];
     delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
@@ -191,20 +188,10 @@ export interface paths {
     get: operations["getAll"];
     post: operations["createProject"];
   };
-  "/v2/projects/{projectId}/keys/info": {
-    post: operations["getInfo"];
-  };
-  "/v2/projects/{projectId}/keys/import-resolvable": {
-    post: operations["importKeys"];
-  };
-  "/v2/projects/{projectId}/keys/import": {
-    post: operations["importKeys_2"];
-  };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create"];
   };
   "/v2/projects/{projectId}/keys": {
-    get: operations["getAll_3"];
     post: operations["create_1"];
     delete: operations["delete_3"];
   };
@@ -219,7 +206,7 @@ export interface paths {
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
-    get: operations["getAll_5"];
+    get: operations["getAll_3"];
     post: operations["create_4"];
   };
   "/v2/projects/{projectId}/translations/create-comment": {
@@ -232,7 +219,7 @@ export interface paths {
     post: operations["suggestMachineTranslations"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_7"];
+    get: operations["getAll_5"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
@@ -240,11 +227,11 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/v2/pats": {
-    get: operations["getAll_9"];
+    get: operations["getAll_7"];
     post: operations["create_8"];
   };
   "/v2/organizations": {
-    get: operations["getAll_10"];
+    get: operations["getAll_8"];
     post: operations["create_9"];
   };
   "/v2/image-upload": {
@@ -303,9 +290,6 @@ export interface paths {
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
-  "/v2/projects/{projectId}/keys/search": {
-    get: operations["searchForKey"];
-  };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
@@ -332,7 +316,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
-    get: operations["getAllNamespaces_2"];
+    get: operations["getAllNamespaces_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -499,7 +483,36 @@ export interface components {
       name: string;
       slug?: string;
       baseLanguageId?: number;
-      description?: string;
+    };
+    ComputedPermissionModel: {
+      permissionModel?: components["schemas"]["PermissionModel"];
+      origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
+      /** Has user explicitly set granular permissions */
+      granular: boolean;
+      /** The permitted scopes */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -514,6 +527,35 @@ export interface components {
       /** Whether is base language of project */
       base: boolean;
     };
+    /** Current user's direct permission */
+    PermissionModel: {
+      /** The permitted scopes */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
+      /** Has user explicitly set granular permissions */
+      granular: boolean;
+    };
     ProjectModel: {
       id: number;
       name: string;
@@ -522,34 +564,17 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     SimpleOrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
-    };
-    UserPermissionModel: {
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
-      permittedLanguageIds?: number[];
-      /** The type of permission. */
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UpdateNamespaceDto: {
       name: string;
@@ -607,32 +632,6 @@ export interface components {
       screenshotIdsToDelete?: number[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
-      screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
-    };
-    KeyInScreenshotPositionDto: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
-    KeyScreenshotDto: {
-      text?: string;
-      /** Ids of screenshot uploaded with /v2/image-upload endpoint */
-      uploadedImageId: number;
-      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
-    };
-    KeyInScreenshotModel: {
-      keyId: number;
-      position?: components["schemas"]["KeyInScreenshotPosition"];
-      keyName: string;
-      keyNamespace?: string;
-      originalText?: string;
-    };
-    KeyInScreenshotPosition: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
     };
     KeyWithDataModel: {
       /** Id of key record */
@@ -668,10 +667,6 @@ export interface components {
       fileUrl: string;
       thumbnailUrl: string;
       createdAt?: string;
-      keyReferences: components["schemas"]["KeyInScreenshotModel"][];
-      location?: string;
-      width?: number;
-      height?: number;
     };
     /** Translations object containing values updated in this request */
     TranslationModel: {
@@ -681,8 +676,6 @@ export interface components {
       text?: string;
       /** State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Whether base language translation was changed after this translation was updated */
-      outdated: boolean;
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
@@ -702,7 +695,7 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /**
        * IDs of languages to allow user to translate to with TRANSLATE permission.
        *
@@ -717,7 +710,26 @@ export interface components {
     ProjectInvitationModel: {
       id: number;
       code: string;
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "permissions.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translation-state.edit"
+      )[];
       permittedLanguageIds?: number[];
       createdAt: string;
       invitedUserName?: string;
@@ -827,14 +839,13 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermission: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -892,8 +903,8 @@ export interface components {
       projectName: string;
       userFullName?: string;
       username?: string;
-      projectId: number;
       expiresAt?: number;
+      projectId: number;
       lastUsedAt?: number;
       scopes: string[];
       description: string;
@@ -919,66 +930,6 @@ export interface components {
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
     };
-    GetKeysRequestDto: {
-      keys: components["schemas"]["KeyDefinitionDto"][];
-      /** Tags to return language translations in */
-      languageTags: string[];
-    };
-    KeyDefinitionDto: {
-      name: string;
-      namespace?: string;
-    };
-    CollectionModelKeyWithDataModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyWithDataModel"][];
-      };
-    };
-    ImportKeysResolvableDto: {
-      keys: components["schemas"]["ImportKeysResolvableItemDto"][];
-    };
-    ImportKeysResolvableItemDto: {
-      /** Key name to set translations for */
-      name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
-      namespace?: string;
-      screenshots?: components["schemas"]["KeyScreenshotDto"][];
-      /** Object mapping language tag to translation */
-      translations: {
-        [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
-      };
-    };
-    /** Object mapping language tag to translation */
-    ImportTranslationResolvableDto: {
-      /** Translation text */
-      text: string;
-      /**
-       * Determines, how conflict is resolved.
-       *
-       * - KEEP: Translation is not changed
-       * - OVERRIDE: Translation is overridden
-       * - NEW: New translation is created)
-       */
-      resolution: "KEEP" | "OVERRIDE" | "NEW";
-    };
-    KeyImportResolvableResultModel: {
-      /** List of keys */
-      keys: components["schemas"]["KeyModel"][];
-      /** Map uploadedImageId to screenshot */
-      screenshots: { [key: string]: components["schemas"]["ScreenshotModel"] };
-    };
-    ImportKeysDto: {
-      keys: components["schemas"]["ImportKeysItemDto"][];
-    };
-    ImportKeysItemDto: {
-      /** Key name to set translations for */
-      name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
-      namespace?: string;
-      /** Object mapping language tag to translation */
-      translations: { [key: string]: string };
-      /** Tags of the key */
-      tags?: string[];
-    };
     CreateKeyDto: {
       /** Name of the key */
       name: string;
@@ -988,7 +939,6 @@ export interface components {
       tags?: string[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
-      screenshots?: components["schemas"]["KeyScreenshotDto"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -1077,19 +1027,11 @@ export interface components {
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
-    ScreenshotInfoDto: {
-      text?: string;
-      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
-      location?: string;
-    };
     CreatePatDto: {
       /** Description of the PAT */
       description: string;
       /** Expiration date in epoch format (milliseconds). When null, token never expires. */
       expiresAt?: number;
-    };
-    ImageUploadInfoDto: {
-      location?: string;
     };
     UploadedImageModel: {
       id: number;
@@ -1097,7 +1039,6 @@ export interface components {
       fileUrl: string;
       requestFilename: string;
       createdAt: string;
-      location?: string;
     };
     CreateApiKeyDto: {
       projectId: number;
@@ -1191,7 +1132,6 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
-      capterraTracker?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1210,9 +1150,9 @@ export interface components {
       username: string;
       name?: string;
       organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      organizationBasePermission: components["schemas"]["PermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
@@ -1241,33 +1181,6 @@ export interface components {
       creditBalance: number;
       bucketSize: number;
       extraCreditBalance: number;
-    };
-    KeySearchResultView: {
-      baseTranslation?: string;
-      namespace?: string;
-      translation?: string;
-      name: string;
-      id: number;
-    };
-    KeySearchSearchResultModel: {
-      view?: components["schemas"]["KeySearchResultView"];
-      baseTranslation?: string;
-      namespace?: string;
-      translation?: string;
-      name: string;
-      id: number;
-    };
-    PagedModelKeySearchSearchResultModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeySearchSearchResultModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelKeyModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelKeyModel: {
       _embedded?: {
@@ -1320,7 +1233,6 @@ export interface components {
         | "SET_TRANSLATION_STATE"
         | "SET_TRANSLATIONS"
         | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
         | "TRANSLATION_COMMENT_ADD"
         | "TRANSLATION_COMMENT_DELETE"
         | "TRANSLATION_COMMENT_EDIT"
@@ -1478,8 +1390,6 @@ export interface components {
       text?: string;
       /** State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Whether base language translation was changed after this translation was updated */
-      outdated: boolean;
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
@@ -1570,20 +1480,9 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };
@@ -1661,8 +1560,8 @@ export interface components {
       projectName: string;
       userFullName?: string;
       username?: string;
-      projectId: number;
       expiresAt?: number;
+      projectId: number;
       lastUsedAt?: number;
       scopes: string[];
       description: string;
@@ -1685,7 +1584,7 @@ export interface components {
 }
 
 export interface operations {
-  getInfo_2: {
+  getInfo: {
     responses: {
       /** OK */
       200: {
@@ -2071,7 +1970,7 @@ export interface operations {
       path: {
         projectId: number;
         userId: number;
-        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+        permissionType: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       };
       query: {
         languages?: number[];
@@ -2697,7 +2596,7 @@ export interface operations {
       };
     };
   };
-  update_2: {
+  update_1: {
     parameters: {
       path: {
         commentId: number;
@@ -2740,35 +2639,6 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  setOutdated: {
-    parameters: {
-      path: {
-        translationId: number;
-        state: boolean;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["TranslationModel"];
-        };
-      };
       /** Bad Request */
       400: {
         content: {
@@ -2856,10 +2726,6 @@ export interface operations {
         filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
-        /** Selects only keys, where translation in provided langs is in outdated state */
-        filterOutdatedLanguage?: string[];
-        /** Selects only keys, where translation in provided langs is not in outdated state */
-        filterNotOutdatedLanguage?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -3215,7 +3081,7 @@ export interface operations {
       };
     };
   };
-  update_4: {
+  update_3: {
     parameters: {
       path: {
         id: number;
@@ -3358,7 +3224,7 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  update_4: {
     parameters: {
       path: {
         id: number;
@@ -3529,7 +3395,7 @@ export interface operations {
       };
     };
   };
-  update_6: {
+  update_5: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3781,98 +3647,6 @@ export interface operations {
       };
     };
   };
-  getInfo: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelKeyWithDataModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetKeysRequestDto"];
-      };
-    };
-  };
-  importKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["KeyImportResolvableResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportKeysResolvableDto"];
-      };
-    };
-  };
-  importKeys_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportKeysDto"];
-      };
-    };
-  };
   create: {
     parameters: {
       path: {
@@ -3902,41 +3676,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateKeyDto"];
-      };
-    };
-  };
-  getAll_3: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
       };
     };
   };
@@ -4003,10 +3742,6 @@ export interface operations {
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
-      query: {
-        /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
-        structureDelimiter?: string;
-      };
       path: {
         projectId: number;
       };
@@ -4158,7 +3893,7 @@ export interface operations {
       };
     };
   };
-  getAll_5: {
+  getAll_3: {
     parameters: {
       path: {
         translationId: number;
@@ -4331,7 +4066,7 @@ export interface operations {
       };
     };
   };
-  getAll_7: {
+  getAll_5: {
     parameters: {
       path: {
         projectId: number;
@@ -4457,12 +4192,11 @@ export interface operations {
       content: {
         "multipart/form-data": {
           screenshot: string;
-          info?: components["schemas"]["ScreenshotInfoDto"];
         };
       };
     };
   };
-  getAll_9: {
+  getAll_7: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4521,7 +4255,7 @@ export interface operations {
       };
     };
   };
-  getAll_10: {
+  getAll_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4607,7 +4341,6 @@ export interface operations {
       content: {
         "multipart/form-data": {
           image: string;
-          info?: components["schemas"]["ImageUploadInfoDto"];
         };
       };
     };
@@ -5104,45 +4837,6 @@ export interface operations {
       };
     };
   };
-  searchForKey: {
-    parameters: {
-      query: {
-        /** Search query */
-        search: string;
-        /** Language to search in */
-        languageTag?: string;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelKeySearchSearchResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   getAllKeys: {
     parameters: {
       path: {
@@ -5373,7 +5067,7 @@ export interface operations {
     };
   };
   /** Returns all existing and imported namespaces */
-  getAllNamespaces_2: {
+  getAllNamespaces_1: {
     parameters: {
       path: {
         projectId: number;
@@ -5439,21 +5133,12 @@ export interface operations {
   getAllTranslations: {
     parameters: {
       path: {
-        /** Comma-separated language tags to return translations in. */
         languages: string[];
         projectId: number;
       };
       query: {
         /** Namespace to return */
         ns?: string;
-        /**
-         * Delimiter to structure response content.
-         *
-         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
-         *
-         * When null, resulting file will be a flat key-value object.
-         */
-        structureDelimiter?: string;
       };
     };
     responses: {
@@ -5520,10 +5205,6 @@ export interface operations {
         filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
-        /** Selects only keys, where translation in provided langs is in outdated state */
-        filterOutdatedLanguage?: string[];
-        /** Selects only keys, where translation in provided langs is not in outdated state */
-        filterNotOutdatedLanguage?: string[];
       };
       path: {
         projectId: number;
@@ -6431,7 +6112,6 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
-        keyId: number;
         projectId: number;
       };
     };

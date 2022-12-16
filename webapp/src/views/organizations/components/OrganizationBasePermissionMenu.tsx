@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
+import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
 import { PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { MessageService } from 'tg.service/MessageService';

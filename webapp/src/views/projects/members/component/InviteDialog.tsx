@@ -18,7 +18,7 @@ import copy from 'copy-to-clipboard';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
+import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';

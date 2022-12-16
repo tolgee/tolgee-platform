@@ -182,6 +182,7 @@ class ApiKeyController(
     }
   }
 
+  // todo: rename and deprecate
   @get:GetMapping(path = ["/api-keys/availableScopes"])
   @get:Operation(
     summary = "Returns API key scopes for every permission type",
@@ -226,6 +227,7 @@ class ApiKeyController(
       )
     ]
   )
+  @Deprecated(message = "Don't use this endpoint, it's useless.")
   val scopes: Map<String, List<String>> by lazy {
     ProjectPermissionType.values()
       .associate { it -> it.name to it.availableScopes.map { it.value }.toList() }
