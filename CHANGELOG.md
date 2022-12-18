@@ -1,3 +1,10 @@
+## [2.47.2](https://github.com/tolgee/tolgee-platform/compare/v2.47.1...v2.47.2) (2022-12-18)
+
+
+### Bug Fixes
+
+* add fallback language ([#1458](https://github.com/tolgee/tolgee-platform/issues/1458)) ([3e3c031](https://github.com/tolgee/tolgee-platform/commit/3e3c03127f6ac471cf6baf691251a81fb15345c6))
+
 ## [2.47.1](https://github.com/tolgee/tolgee-platform/compare/v2.47.0...v2.47.1) (2022-12-16)
 
 
