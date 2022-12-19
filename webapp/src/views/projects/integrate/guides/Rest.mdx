@@ -5,16 +5,16 @@ import { GoToDocsButton } from '../component/GoToDocsButton';
 To read more about Tolgee REST API, please visit [API spec](https://tolgee.io/api).
 
 ## Exporting data
+To export data via REST API use `{{{apiUrl}}}/v2/projects/export` endpoint.
 
-```
-{{{apiUrl}}}/api/project/export/jsonZip?ak={{{apiKey}}}
-```
+Don't forget to set `X-API-Key` header to your API key.
 
-or with curl
+### Exporting with CURL
 
 ```shell-session
-curl "{{{apiUrl}}}/api/project/export/jsonZip?ak={{{apiKey}}}" \
---output data.zip
+curl "{{{apiUrl}}}/v2/projects/export" \
+  -H "X-API-Key: {{{apiKey}}}" \
+  --output data.zip
 unzip data.zip
 rm data.zip
 ```
