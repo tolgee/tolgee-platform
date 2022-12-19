@@ -7,7 +7,14 @@ interface Caches {
     const val PROJECT_PERMISSIONS = "projectPermissions"
     const val RATE_LIMITS = "rateLimits"
     const val MACHINE_TRANSLATIONS = "machineTranslations"
+    const val PROJECT_TRANSLATIONS_MODIFIED = "projectTranslationsModified"
 
-    val caches = listOf(USER_ACCOUNTS, PROJECTS, PROJECT_PERMISSIONS, MACHINE_TRANSLATIONS)
+    val caches = listOf(
+      USER_ACCOUNTS,
+      PROJECTS,
+      PROJECT_PERMISSIONS,
+      MACHINE_TRANSLATIONS,
+      PROJECT_TRANSLATIONS_MODIFIED
+    )
   }
 }
