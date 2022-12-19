@@ -1,3 +1,11 @@
+# [2.48.0](https://github.com/tolgee/tolgee-platform/compare/v2.47.2...v2.48.0) (2022-12-19)
+
+
+### Features
+
+* add nested export selector ([6d03217](https://github.com/tolgee/tolgee-platform/commit/6d0321717e741c1335f1a19f56a730ed0601afb0))
+* add nested export selector - e2e tests ([ed11498](https://github.com/tolgee/tolgee-platform/commit/ed11498a3bea721a581d300789df4a3d0c16afbc))
+
 ## [2.47.2](https://github.com/tolgee/tolgee-platform/compare/v2.47.1...v2.47.2) (2022-12-18)
 
 
