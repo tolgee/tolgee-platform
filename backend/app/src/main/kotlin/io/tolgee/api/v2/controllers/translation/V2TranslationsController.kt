@@ -127,9 +127,9 @@ class V2TranslationsController(
     @Parameter(
       description = """Delimiter to structure response content. 
 
-e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
 
-When null, resulting file won't be structured.
+When null, resulting file will be a flat key-value object.
     """,
     )
     structureDelimiter: Char? = '.',
