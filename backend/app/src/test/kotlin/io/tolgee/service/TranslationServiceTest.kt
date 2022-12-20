@@ -22,7 +22,10 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Test
   fun getTranslations() {
     val id = dbPopulator.populate("App").project.id
-    val data = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), id)
+    val data = translationService.getTranslations(
+      HashSet(Arrays.asList("en", "de")), id,
+      structureDelimiter = '.'
+    )
     assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
   }
 
@@ -33,7 +36,10 @@ class TranslationServiceTest : AbstractSpringTest() {
     keyService.create(project, SetTranslationsWithKeyDto("folder.folder", mapOf("en" to "Ha")))
     keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", mapOf("en" to "Ha")))
 
-    val viewData = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), project.id)
+    val viewData = translationService.getTranslations(
+      HashSet(Arrays.asList("en", "de")), project.id,
+      structureDelimiter = '.'
+    )
     @Suppress("UNCHECKED_CAST")
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
   }

@@ -14,12 +14,12 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.ProcessorFactory
+import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

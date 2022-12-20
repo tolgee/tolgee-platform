@@ -9,7 +9,7 @@ import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(

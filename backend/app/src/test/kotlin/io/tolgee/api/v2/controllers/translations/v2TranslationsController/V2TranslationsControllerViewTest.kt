@@ -311,7 +311,21 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
   fun `returns all translations map API key`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations/en,de").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations/en,de").andIsOk
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Test
+  fun `delimiter can be configured`() {
+    testData.generateScopedData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations/en,de?structureDelimiter=").andIsOk.andAssertThatJson {
+      node("en.hello\\.i\\.am\\.scoped").isEqualTo("yupee!")
+    }
+    performProjectAuthGet("/translations/en,de?structureDelimiter=+").andIsOk.andAssertThatJson {
+      node("en.hello.i.am.plus.scoped").isEqualTo("yupee!")
+    }
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
