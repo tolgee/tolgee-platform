@@ -56,14 +56,6 @@ export const guides = [
     ),
   },
   {
-    name: 'Php',
-    icon: getTechnologyImgComponent('php'),
-    guide: React.lazy(
-      // @ts-ignore
-      () => import('!babel-loader!@mdx-js/loader!./guides/Php.mdx')
-    ),
-  },
-  {
     name: 'Web',
     icon: Code,
     guide: React.lazy(

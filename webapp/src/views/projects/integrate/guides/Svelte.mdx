@@ -30,18 +30,28 @@ Wrap your main `App` component with Tolgee provider.
 
 ```svelte
 <script>
-  import { TolgeeProvider } from "@tolgee/svelte";
+  import { TolgeeProvider, Tolgee, DevTools, FormatSimple } from '@tolgee/svelte';
 
-  const tolgeeConfig = {
-    preloadFallback: true,
-    apiUrl: import.meta.env.VITE_TOLGEE_API_URL,
-    apiKey: import.meta.env.VITE_TOLGEE_API_KEY
-  };
+  const tolgee = Tolgee()
+    .use(DevTools())
+    .use(FormatSimple())
+    .init({
+      language: 'en',
+
+      // for development
+      apiUrl: import.meta.env.VITE_TOLGEE_API_URL,
+      apiKey: import.meta.env.VITE_TOLGEE_API_KEY,
+
+      // for production
+      staticData: {
+        ...
+      }
+    });
 </script>
 
-<TolgeeProvider config={tolgeeConfig}>
-  <div slot="loading-fallback">Loading...</div>
-  <your application code>
+<TolgeeProvider tolgee={tolgee}>
+  <div slot="fallback">Loading...</div>
+  <slot />
 </TolgeeProvider>
 ```
 
@@ -51,14 +61,14 @@ Wrap your main `App` component with Tolgee provider.
 <script>
   import { T, getTranslate } from "@tolgee/svelte";
 
-  const t = getTranslate();
+  const { t } = getTranslate();
 </script>
 
 <T keyName="key" defaultValue="This is default" />
 
 <!-- OR -->
 
-{$t({ key: "this_is_a_key", parameters: { key: "value", key2: "value2" } })}
+{$t("this_is_a_key")}
 ```
 
 Now you are able to translate texts with Alt + Clicking them!

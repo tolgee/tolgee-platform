@@ -12,7 +12,7 @@ To read full documentation about Tolgee for Gatsby, visit [docs](https://tolgee.
 You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook.
 
 ```
-npm install @tolgee/react --save
+npm install @tolgee/react
 ```
 
 ## Setup your environment
@@ -52,27 +52,29 @@ module.exports = {
 
 ## Use TolgeeProvider
 
-```jsx
+```tsx
+import { TolgeeProvider, DevTools, Tolgee, FormatSimple } from '@tolgee/react';
 import { useIntl } from 'gatsby-plugin-react-intl';
-import { TolgeeProvider } from '@tolgee/react';
 
-import * as translationsEn from '../i18n/en.json';
-import * as translationsCs from '../i18n/cs.json';
+const tolgee = Tolgee().use(DevTools()).use(FormatSimple()).init({
+  defaultLanguage: 'en',
+  apiKey: process.env.GATSBY_TOLGEE_API_KEY,
+  apiUrl: process.env.GATSBY_TOLGEE_API_URL,
+});
 
 export const AppWrapper: React.FC = ({ children }) => {
-  const intl = useIntl();
+  const { locale, messages } = useIntl();
+
+  useMemo(() => {
+    // change tolgee language without emitting events
+    tolgee.setEmmiterActive(false);
+    tolgee.changeLanguage(locale);
+    tolgee.addStaticData({ [locale]: messages });
+    tolgee.setEmmiterActive(true);
+  }, [locale, messages]);
 
   return (
-    <TolgeeProvider
-      forceLanguage={intl.locale}
-      apiKey={process.env.GATSBY_TOLGEE_API_KEY}
-      apiUrl={process.env.GATSBY_TOLGEE_API_URL}
-      staticData={{
-        en: translationsEn,
-        cs: translationsCs,
-      }}
-      loadingFallback={<div>Loading...</div>}
-    >
+    <TolgeeProvider tolgee={tolgee} fallback={<div>Loading...</div>}>
       {children}
     </TolgeeProvider>
   );
@@ -83,22 +85,22 @@ export const AppWrapper: React.FC = ({ children }) => {
 
 Now in `HomePageInner` component, you can use Tolgee.
 
-```typescript jsx
-import {T} from "@tolgee/react";
+```tsx
+import { T } from "@tolgee/react";
 
 ...
 
-<T>translation_key</T>
+<T keyName="translation_key" />
 ```
 
 or
 
-```typescript jsx
-import {useTranslate} from "@tolgee/react";
+```tsx
+import { useTranslate } from "@tolgee/react";
 
 ...
 
-const t = useTranslate();
+const { t } = useTranslate();
 
 ...
 
