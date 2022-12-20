@@ -142,10 +142,10 @@ When null, resulting file will be a flat key-value object.
     }
 
     val response = translationService.getTranslations(
-      languages,
-      ns,
-      projectHolder.project.id,
-      structureDelimiter
+      languageTags = languages,
+      namespace = ns,
+      projectId = projectHolder.project.id,
+      structureDelimiter = structureDelimiter
     )
 
     return ResponseEntity.ok()
