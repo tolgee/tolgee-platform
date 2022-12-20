@@ -10,8 +10,8 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.SecurityService
-import io.tolgee.service.TranslationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

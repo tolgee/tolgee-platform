@@ -371,6 +371,14 @@ class TranslationsTestData {
           language = englishLanguage
         }
       }
+      addKey {
+        name = "hello+i+am+plus+scoped"
+      }.build {
+        addTranslation {
+          text = "yupee!"
+          language = englishLanguage
+        }
+      }
     }
   }
 

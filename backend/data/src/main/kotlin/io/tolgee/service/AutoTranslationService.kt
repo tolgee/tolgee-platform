@@ -10,6 +10,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.translation.TranslationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

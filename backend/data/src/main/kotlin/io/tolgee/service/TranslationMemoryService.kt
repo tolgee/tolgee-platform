@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
+import io.tolgee.service.translation.TranslationService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

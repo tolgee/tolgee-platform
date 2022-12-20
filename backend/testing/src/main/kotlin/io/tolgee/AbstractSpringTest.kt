@@ -34,7 +34,6 @@ import io.tolgee.service.PermissionService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
-import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
@@ -43,6 +42,7 @@ import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired

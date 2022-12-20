@@ -18,7 +18,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TagService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import kotlin.properties.Delegates
 
