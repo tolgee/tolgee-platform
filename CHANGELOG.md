@@ -1,3 +1,10 @@
+# [2.49.0](https://github.com/tolgee/tolgee-platform/compare/v2.48.0...v2.49.0) (2022-12-20)
+
+
+### Features
+
+* Caching of translations endpoint & configurable structure delimiter ([#1464](https://github.com/tolgee/tolgee-platform/issues/1464)) ([eb23462](https://github.com/tolgee/tolgee-platform/commit/eb23462cf9df82126687c8a922d991aaecdb1b7d))
+
 # [2.48.0](https://github.com/tolgee/tolgee-platform/compare/v2.47.2...v2.48.0) (2022-12-19)
 
 
