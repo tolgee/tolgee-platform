@@ -29,6 +29,9 @@ val ResultActions.andIsCreated: ResultActions
 val ResultActions.andIsBadRequest: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isBadRequest) }
 
+val ResultActions.andIsNotModified: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isNotModified) }
+
 fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
   return this.tryPrettyPrinting {
     this.andAssertThatJson {

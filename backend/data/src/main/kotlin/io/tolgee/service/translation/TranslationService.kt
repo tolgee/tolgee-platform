@@ -2,12 +2,12 @@ package io.tolgee.service.translation
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
@@ -56,7 +56,12 @@ class TranslationService(
 
   @Transactional
   @Suppress("UNCHECKED_CAST")
-  fun getTranslations(languageTags: Set<String>, namespace: String?, projectId: Long): Map<String, Any> {
+  fun getTranslations(
+    languageTags: Set<String>,
+    namespace: String?,
+    projectId: Long,
+    structureDelimiter: Char?
+  ): Map<String, Any> {
     val safeNamespace = if (namespace == "") null else namespace
     val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
@@ -65,7 +70,7 @@ class TranslationService(
         .computeIfAbsent(
           translation.languageTag
         ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
-      addToMap(translation, map)
+      addToMap(translation, map, structureDelimiter)
     }
     return langTranslations
   }
@@ -178,10 +183,11 @@ class TranslationService(
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>) {
+  private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>, delimiter: Char?) {
     var currentMap = map
-    val path = PathDTO.fromFullPath(translation.key)
-    for (folderName in path.path) {
+    val path = TextHelper.splitOnNonEscapedDelimiter(translation.key, delimiter).toMutableList()
+    val name = path.removeLast()
+    for (folderName in path) {
       val childMap = currentMap.computeIfAbsent(folderName) { LinkedHashMap<Any, Any>() }
       if (childMap is Map<*, *>) {
         currentMap = childMap as MutableMap<String, Any?>
@@ -192,7 +198,7 @@ class TranslationService(
       map[translation.key] = translation.text
       return
     }
-    currentMap[path.name] = translation.text
+    currentMap[name] = translation.text
   }
 
   fun deleteByIdIn(ids: Collection<Long>) {

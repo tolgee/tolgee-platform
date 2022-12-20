@@ -57,7 +57,8 @@ class ExportController @Autowired constructor(
           val translations = translationService.getTranslations(
             languages.map { it.tag }.toSet(),
             null,
-            projectHolder.project.id
+            projectHolder.project.id,
+            '.'
           )
           for ((key, value) in translations) {
             zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))

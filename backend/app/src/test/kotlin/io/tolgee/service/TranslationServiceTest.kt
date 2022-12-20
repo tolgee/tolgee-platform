@@ -25,7 +25,8 @@ class TranslationServiceTest : AbstractSpringTest() {
     val data = translationService.getTranslations(
       languageTags = HashSet(Arrays.asList("en", "de")),
       namespace = null,
-      projectId = id
+      projectId = id,
+      structureDelimiter = '.'
     )
     assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
   }
@@ -40,7 +41,8 @@ class TranslationServiceTest : AbstractSpringTest() {
     val viewData = translationService.getTranslations(
       languageTags = HashSet(Arrays.asList("en", "de")),
       namespace = null,
-      projectId = project.id
+      projectId = project.id,
+      structureDelimiter = '.'
     )
     @Suppress("UNCHECKED_CAST")
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
