@@ -48,7 +48,6 @@ describe('Integrate view', () => {
         .should('contain', 'Angular')
         .should('contain', 'Next.js')
         .should('contain', 'Gatsby')
-        .should('contain', 'Php')
         .should('contain', 'Rest')
         .should('contain', 'Web')
         .should('contain', 'JS (NPM)');
@@ -178,23 +177,18 @@ describe('Integrate view', () => {
         textsToContain: ['@tolgee/react', 'gatsby-plugin-react-intl'],
       },
       {
-        weapon: 'Php',
-        textsToContain: ['composer require tolgee'],
-      },
-      {
         weapon: 'Web',
         textsToContain: [
-          'https://unpkg.com/@tolgee/core/dist/tolgee.umd.js',
-          'https://unpkg.com/@tolgee/ui/dist/tolgee-ui.umd.js',
+          'https://cdn.jsdelivr.net/npm/@tolgee/web/dist/tolgee-web.umd.min.js',
         ],
       },
       {
         weapon: 'JS',
-        textsToContain: ['npm install @tolgee/core @tolgee/ui'],
+        textsToContain: ['npm install @tolgee/web'],
       },
       {
         weapon: 'Rest',
-        textsToContain: ['http', '/api/project/export/jsonZip'],
+        textsToContain: ['http', '/v2/projects/export'],
       },
     ];
 
