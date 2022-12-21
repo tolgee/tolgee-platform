@@ -1,3 +1,10 @@
+# [3.0.0-alpha.3](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2022-12-21)
+
+
+### Features
+
+* update integration guides to v5 ([#1465](https://github.com/tolgee/tolgee-platform/issues/1465)) ([6786645](https://github.com/tolgee/tolgee-platform/commit/678664567c8ac6ef571a42f6389645c4866b95c7))
+
 # [3.0.0-alpha.2](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2022-12-20)
 
 
