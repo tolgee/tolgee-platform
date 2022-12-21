@@ -10,7 +10,7 @@ To read full documentation about Tolgee for Angular, visit [docs](https://tolgee
 ## Install packages
 
 ```
-npm install @tolgee/ngx @tolgee/ui
+npm install @tolgee/ngx
 ```
 
 ## Setup environment
@@ -30,28 +30,48 @@ export const environment = {
 Add NgxTolgeeModule to the imports section.
 
 ```typescript
-import { NgxTolgeeModule } from "@tolgee/ngx";
-import { NgModule } from '@angular/core';
-import { environment } from '../environments/environment';
+import {
+  DevTools,
+  NgxTolgeeModule,
+  Tolgee,
+  TOLGEE_INSTANCE,
+  FormatSimple
+} from '@tolgee/ngx';
 
-
+...
 @NgModule({
   declarations: [
     ...
   ],
   imports: [
-    ...,
-    NgxTolgeeModule.forRoot({
-      apiUrl: environment.tolgeeApiUrl,
-      apiKey: environment.tolgeeApiKey,
-      ui: environment.tolgeeApiKey ? require('@tolgee/ui') : undefined
-    }),
-...,
-],
-...,
+    NgxTolgeeModule,
+    ...
+  ],
+  providers: [
+    {
+      provide: TOLGEE_INSTANCE,
+      useFactory: () => {
+        return Tolgee()
+          .use(DevTools())
+          .use(FormatSimple())
+          .init({
+            language: 'en'
+
+            // for development
+            apiUrl: environment.tolgeeApiUrl,
+            apiKey: environment.tolgeeApiKey,
+
+            // for production
+            staticData: {
+              ...
+            }
+          });
+      },
+    },
+  ],
+  ...
 })
-export class AppModule {
-}
+export class AppModule {}
 ```
 
 Maybe you will also need to set `skipLibCheck` to `true` in your `compilerOptions` section of `tsconfig.json`.

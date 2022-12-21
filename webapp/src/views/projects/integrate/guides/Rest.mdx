@@ -7,13 +7,13 @@ To read more about Tolgee REST API, please visit [API spec](https://tolgee.io/ap
 ## Exporting data
 
 ```
-{{{apiUrl}}}/api/project/export/jsonZip?ak={{{apiKey}}}
+{{{apiUrl}}}/v2/projects/export?ak={{{apiKey}}}
 ```
 
 or with curl
 
 ```shell-session
-curl "{{{apiUrl}}}/api/project/export/jsonZip?ak={{{apiKey}}}" \
+curl "{{{apiUrl}}}/v2/projects/export?ak={{{apiKey}}}" \
 --output data.zip
 unzip data.zip
 rm data.zip

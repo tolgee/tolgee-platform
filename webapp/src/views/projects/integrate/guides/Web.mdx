@@ -10,43 +10,41 @@ please visit [docs](https://tolgee.io/docs/web/get_started/hello_world).
 
 ## Add Tolgee libraries to your Web page
 
-You need `core` library to translate your texts and `ui` library to translate texts in the App.
+You need `@tolgee/web` library to translate your texts:
 
 ```html
-<script src="https://unpkg.com/@tolgee/core/dist/tolgee.umd.js"></script>
-<script src="https://unpkg.com/@tolgee/ui/dist/tolgee-ui.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tolgee/web/dist/tolgee-web.umd.min.js"></script>
 ```
 
 ## Setup Tolgee
 
 ```javascript
 // index.js
-const { Tolgee, IcuFormatter } = window['@tolgee/core'];
-const tg = Tolgee.use(IcuFormatter).init({
-  apiUrl: '{{{apiUrl}}}',
+const { Tolgee, FormatSimple, DevTools, BackendFetch } = window['@tolgee/web'];
 
-  // ############################################################
-  // ## you should never leak your API key                     ##
-  // ## remove it in for production publicly accessible site   ##
-  // ############################################################
-  apiKey: '{{{apiKey}}}',
+const tolgee = Tolgee()
+  .use(InContextTools())
+  .use(FormatSimple())
+  .use(BackendFetch())
+  .init({
+    // ############################################################
+    // ## you should never leak your API key                     ##
+    // ## remove it in for production publicly accessible site   ##
+    // ############################################################
+    apiKey: '{{{apiKey}}}',
+    apiUrl: '{{{apiUrl}}}',
+    defaultLanguage: 'en',
+    observerType: 'text',
+    observerOptions: { inputPrefix: '{{', inputSuffix: '}}' },
+  });
 
-  // in production mode this is where your
-  // exported translations are loaded from
-  filesUrlPrefix: '/i18n/',
-  defaultLanguage: 'en',
-  inputPrefix: '{{',
-  inputSuffix: '}}',
-  watch: true,
-  ui: window['@tolgee/ui'].UI,
-});
-tg.run();
+tolgee.run();
 ```
 
 ## Do stuff when Tolgee is loaded (optional)
 
 ```javascript
-tg.run().then(() => {
+tolgee.run().then(() => {
   document.getElementById('loading').style.display = 'none';
 });
 ```
@@ -60,9 +58,9 @@ tg.run().then(() => {
 or
 
 ```javascript
-tg.onLangChange.subscribe(() => {
-  tg.translate('tolgee_example_title', undefined, true).then((t) => {
-    document.title = t; //change the document title when language changes!
+tolgee.on('update', () => {
+  tolgee.t('tolgee_example_title', { noWrap: true }).then((translation) => {
+    document.title = translation; // change the document title when language changes!
   });
 });
 ```

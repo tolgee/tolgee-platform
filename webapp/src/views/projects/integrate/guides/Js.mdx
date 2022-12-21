@@ -12,32 +12,37 @@ It works fine with Webpack or Rollup projects! ;)
 ## Install packages
 
 ```shell-session
-npm install @tolgee/core @tolgee/ui
+npm install @tolgee/web
 ```
 
 ## Create Tolgee instance
 
 ```javascript
-import { Tolgee, IcuFormatter } from '@tolgee/core';
-import { UI } from '@tolgee/ui';
+import { Tolgee, FormatSimple, DevTools, BackendFetch } from '@tolgee/web';
 
-const tg = Tolgee.use(IcuFormatter).init({
-  // ############################################################
-  // ## you should never leak your API key                     ##
-  // ## remove it in for production publicly accessible site   ##
-  // ############################################################
-  apiKey: '{{{apiKey}}}',
-  apiUrl: '{{{apiUrl}}}',
-  ui: UI,
-});
+const tolgee = Tolgee()
+  .use(DevTools())
+  .use(FormatSimple())
+  .use(BackendFetch())
+  .init({
+    // ############################################################
+    // ## you should never leak your API key                     ##
+    // ## remove it in for production publicly accessible site   ##
+    // ############################################################
+    apiKey: '{{{apiKey}}}',
+    apiUrl: '{{{apiUrl}}}',
+    defaultLanguage: 'en',
+    observerType: 'text',
+    observerOptions: { inputPrefix: '{{', inputSuffix: '}}' },
+  });
 
-tg.run();
+tolgee.run();
 ```
 
 ## Do stuff when Tolgee is loaded (optional)
 
 ```javascript
-tg.run().then(() => {
+tolgee.run().then(() => {
   document.getElementById('loading').style.display = 'none';
 });
 ```
@@ -45,9 +50,9 @@ tg.run().then(() => {
 ## Use Tolgee!
 
 ```javascript
-pg.onLangChange.subscribe(() => {
-  pg.translate('tolgee_example_title', undefined, true).then((t) => {
-    document.title = t; //change the document title when language changes!
+tolgee.on('update', () => {
+  tolgee.t('tolgee_example_title', { noWrap: true }).then((translation) => {
+    document.title = translation; // change the document title when language changes!
   });
 });
 ```
