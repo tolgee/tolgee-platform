@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
 import java.util.*
@@ -130,7 +131,8 @@ e.g. For key "home.header.title" would result in {"home": {"header": {"title": "
 When null, resulting file will be a flat key-value object.
     """,
     )
-    structureDelimiter: Char? = '.',
+    @RequestParam(value = "structureDelimiter", defaultValue = ".", required = false)
+    structureDelimiter: Char?,
     request: WebRequest
   ): ResponseEntity<Map<String, Any>>? {
     val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
@@ -142,7 +144,7 @@ When null, resulting file will be a flat key-value object.
     val response = translationService.getTranslations(
       languageTags = languages,
       projectId = projectHolder.project.id,
-      structureDelimiter = structureDelimiter
+      structureDelimiter = request.getStructureDelimiter()
     )
 
     return ResponseEntity.ok()
@@ -151,6 +153,17 @@ When null, resulting file will be a flat key-value object.
       .body(
         response
       )
+  }
+
+  /**
+   * It has to be handled manually since spring returns default value even when empty value provided
+   */
+  private fun WebRequest.getStructureDelimiter(): Char? {
+    val structureDelimiterParam = this.parameterMap["structureDelimiter"]?.first() ?: return '.'
+    if (structureDelimiterParam == "") {
+      return null
+    }
+    return structureDelimiterParam.toCharArray().first()
   }
 
   @PutMapping("")
