@@ -261,6 +261,9 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthGet("/translations/en,de?structureDelimiter=+").andIsOk.andAssertThatJson {
       node("en.hello.i.am.plus.scoped").isEqualTo("yupee!")
     }
+    performProjectAuthGet("/translations/en,de").andIsOk.andAssertThatJson {
+      node("en.hello.i.am.scoped").isEqualTo("yupee!")
+    }
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])

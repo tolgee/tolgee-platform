@@ -95,6 +95,33 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(time).isLessThan(2000)
   }
 
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `the structureDelimiter works`() {
+    testData = TranslationsTestData()
+    testData.generateScopedData()
+    testDataService.saveTestData(testData.root)
+    prepareUserAndProject(testData)
+    commitTransaction()
+
+    performExport("structureDelimiter=").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello\\.i\\.am\\.scoped").isEqualTo("yupee!")
+      }
+    }
+    performExport("structureDelimiter=+").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello.i.am.plus.scoped").isEqualTo("yupee!")
+      }
+    }
+    performExport("").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello.i.am.scoped").isEqualTo("yupee!")
+      }
+    }
+  }
+
   private fun performExport(query: String = ""): Map<String, String> {
     val mvcResult = performProjectAuthGet("export?$query")
       .andIsOk
