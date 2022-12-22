@@ -1,3 +1,10 @@
+# [3.0.0-alpha.4](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2022-12-22)
+
+
+### Bug Fixes
+
+* Default structureDemiter & test in export ([#1469](https://github.com/tolgee/tolgee-platform/issues/1469)) ([3ced45f](https://github.com/tolgee/tolgee-platform/commit/3ced45fdd95ede8d7572bebbaed2c1cf2f039d8d))
+
 # [3.0.0-alpha.3](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2022-12-21)
 
 
