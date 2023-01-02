@@ -24,7 +24,7 @@ const StyledTileEdit = styled(Box)`
   position: absolute;
   top: 0px;
   right: 0px;
-  padding: 3px;
+  padding: 5px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -46,6 +46,7 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
           <IconButton
             component={Link}
             size="small"
+            color="inherit"
             to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: project.id })}
           >
             <Edit fontSize="small" />
