@@ -1,6 +1,5 @@
 package io.tolgee.dtos.request.project
 
-import io.tolgee.activity.annotation.ActivityLoggedProp
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
