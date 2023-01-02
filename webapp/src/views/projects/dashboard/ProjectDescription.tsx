@@ -40,7 +40,7 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
   );
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="project-dashboard-description">
       {canManage && (
         <StyledTileEdit>
           <IconButton

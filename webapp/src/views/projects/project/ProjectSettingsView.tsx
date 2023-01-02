@@ -152,6 +152,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
             label={<T>project_settings_name_label</T>}
             name="name"
             required={true}
+            data-cy="project-settings-name"
           />
           <TextField
             variant="standard"
@@ -159,6 +160,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
             multiline
             label={<T>project_settings_description_label</T>}
             name="description"
+            data-cy="project-settings-description"
           />
           <ProjectLanguagesProvider>
             <LanguageSelect />
