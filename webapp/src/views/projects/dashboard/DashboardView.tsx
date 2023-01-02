@@ -12,6 +12,7 @@ import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
 import { BaseProjectView } from '../BaseProjectView';
+import { ProjectDescription } from './ProjectDescription';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -123,6 +124,11 @@ export const DashboardView = () => {
           <StyledContainer>
             <Box gridArea="totalStats">
               <ProjectTotals stats={statsLoadable.data!} />
+              {project.description && (
+                <Box marginTop={2} display="grid">
+                  <ProjectDescription description={project.description} />
+                </Box>
+              )}
             </Box>
             <Box gridArea="langStats">
               <LanguageStats

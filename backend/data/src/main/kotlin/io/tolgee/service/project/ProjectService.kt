@@ -148,6 +148,7 @@ class ProjectService constructor(
     val project = projectRepository.findById(id)
       .orElseThrow { NotFoundException() }!!
     project.name = dto.name
+    project.description = dto.description
 
     dto.baseLanguageId?.let {
       val language = project.languages.find { it.id == dto.baseLanguageId }

@@ -230,6 +230,7 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "project-dashboard-base-word-count" |
+        "project-dashboard-description" |
         "project-dashboard-key-count" |
         "project-dashboard-language-bar" |
         "project-dashboard-language-count" |
@@ -261,9 +262,11 @@ declare namespace DataCy {
         "project-settings" |
         "project-settings-button" |
         "project-settings-delete-button" |
+        "project-settings-description" |
         "project-settings-languages" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
+        "project-settings-name" |
         "project-settings-transfer-button" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |

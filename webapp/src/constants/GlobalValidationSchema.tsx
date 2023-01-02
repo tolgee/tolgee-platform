@@ -211,6 +211,7 @@ export class Validation {
 
   static readonly PROJECT_SETTINGS = Yup.object().shape({
     name: Yup.string().required().min(3).max(100),
+    description: Yup.string().nullable().min(3).max(2000),
   });
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
