@@ -1,4 +1,8 @@
-import { createTestProject, login } from '../../common/apiCalls/common';
+import {
+  createTestProject,
+  deleteProject,
+  login,
+} from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 
 describe('Projects Basics', () => {
@@ -9,6 +13,10 @@ describe('Projects Basics', () => {
         projectId = r.body.id;
       })
     );
+  });
+
+  afterEach(() => {
+    deleteProject(projectId);
   });
 
   it('updates project settings', () => {
