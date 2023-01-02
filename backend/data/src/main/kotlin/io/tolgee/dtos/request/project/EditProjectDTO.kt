@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request.project
 
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
@@ -12,5 +13,8 @@ data class EditProjectDTO(
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
 
-  var baseLanguageId: Long? = null
+  var baseLanguageId: Long? = null,
+
+  @field:Size(min = 3, max = 2000)
+  var description: String? = null,
 )

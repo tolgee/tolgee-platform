@@ -46,11 +46,15 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const confirm = (options: ConfirmationDialogProps) =>
     confirmation({ title: <T>delete_project_dialog_title</T>, ...options });
 
-  const handleEdit = (values) => {
+  const handleEdit = (values: ValueType) => {
+    const data = {
+      ...values,
+      description: values.description || undefined,
+    };
     updateLoadable.mutate(
       {
         path: { projectId: project.id },
-        content: { 'application/json': values },
+        content: { 'application/json': data },
       },
       {
         onSuccess() {
@@ -87,6 +91,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const initialValues: ValueType = {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
+    description: project.description,
   };
 
   const [cancelled, setCancelled] = useState(false);
@@ -147,6 +152,13 @@ export const ProjectSettingsView: FunctionComponent = () => {
             label={<T>project_settings_name_label</T>}
             name="name"
             required={true}
+          />
+          <TextField
+            variant="standard"
+            minRows={1}
+            multiline
+            label={<T>project_settings_description_label</T>}
+            name="description"
           />
           <ProjectLanguagesProvider>
             <LanguageSelect />
