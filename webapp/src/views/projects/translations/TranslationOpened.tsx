@@ -8,7 +8,10 @@ import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { getMeta } from 'tg.fixtures/isMac';
-import { useTranslationsDispatch } from './context/TranslationsContext';
+import {
+  useTranslationsDispatch,
+  useTranslationsSelector,
+} from './context/TranslationsContext';
 import { ToolsPopup } from './TranslationTools/ToolsPopup';
 import { useTranslationTools } from './TranslationTools/useTranslationTools';
 import { useProject } from 'tg.hooks/useProject';
@@ -19,6 +22,8 @@ import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
+type KeyWithTranslationsModel =
+  components['schemas']['KeyWithTranslationsModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -75,7 +80,7 @@ const StyledCloseButton = styled(IconButton)`
 
 type Props = {
   value: string;
-  keyId: number;
+  keyData: KeyWithTranslationsModel;
   language: LanguageModel;
   translation: TranslationViewModel | undefined;
   onChange: (val: string) => void;
@@ -95,7 +100,7 @@ type Props = {
 
 export const TranslationOpened: React.FC<Props> = ({
   value,
-  keyId,
+  keyData,
   language,
   translation,
   onChange,
@@ -124,7 +129,7 @@ export const TranslationOpened: React.FC<Props> = ({
         type: 'SET_TRANSLATION_STATE',
         payload: {
           state: nextState,
-          keyId,
+          keyId: keyData.keyId,
           translationId: translation!.id,
           language: language.tag,
         },
@@ -132,10 +137,17 @@ export const TranslationOpened: React.FC<Props> = ({
     }
   };
 
+  const baseLanguage = useTranslationsSelector((v) =>
+    v.languages?.find((l) => l.base)
+  )?.tag;
+  const baseTranslation =
+    baseLanguage && keyData.translations[baseLanguage]?.text;
+
   const data = useTranslationTools({
     projectId: project.id,
-    keyId,
+    keyId: keyData.keyId,
     targetLanguageId: language.id,
+    baseText: baseTranslation,
     enabled: !language.base,
     onValueUpdate: (value) => {
       dispatch({
@@ -224,7 +236,7 @@ export const TranslationOpened: React.FC<Props> = ({
         </>
       ) : mode === 'comments' ? (
         <Comments
-          keyId={keyId}
+          keyId={keyData.keyId}
           language={language}
           translation={translation}
           onCancel={() => onCancel(true)}
