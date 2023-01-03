@@ -1,6 +1,7 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   create4Translations,
+  editCell,
   selectLangsInLocalstorage,
   translationsBeforeEach,
   visitTranslations,
@@ -46,6 +47,24 @@ describe('Translation memory', () => {
     waitForGlobalLoading(300);
     cy.gcy('global-editor')
       .contains('Cool translated text 1 translated with GOOGLE from en to cs')
+      .should('be.visible');
+  });
+
+  it.only('will update suggestions when base is changed', () => {
+    waitForGlobalLoading();
+    openEditor('Studený přeložený text 1');
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains('Cool translated text 1 translated with GOOGLE from en to cs')
+      .should('be.visible');
+
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+    waitForGlobalLoading();
+    openEditor('Studený přeložený text 1');
+
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains(
+        'Cool translated text 1 edited translated with GOOGLE from en to cs'
+      )
       .should('be.visible');
   });
 
