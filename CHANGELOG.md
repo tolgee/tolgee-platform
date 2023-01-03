@@ -1,3 +1,10 @@
+# [3.0.0-alpha.5](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2023-01-03)
+
+
+### Features
+
+* add portuguese and improve static translations loading ([#1477](https://github.com/tolgee/tolgee-platform/issues/1477)) ([37b3574](https://github.com/tolgee/tolgee-platform/commit/37b35740534f9e8812dbd20bf289972841fdbbbe))
+
 # [3.0.0-alpha.4](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2022-12-22)
 
 
