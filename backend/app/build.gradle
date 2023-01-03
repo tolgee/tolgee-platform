@@ -169,14 +169,6 @@ test {
     maxHeapSize = "2048m"
 }
 
-task testCockroach(type: Test, group: 'verification') {
-    dependsOn "startCockroachDb"
-    useJUnitPlatform()
-    maxHeapSize = "2048m"
-    systemProperty 'SPRING_PROFILES_ACTIVE', 'cockroach'
-    finalizedBy "stopCockroachDb"
-}
-
 task runContextRecreatingTests(type: Test, group: 'verification') {
     dependsOn "startCockroachDb"
     useJUnitPlatform {
@@ -191,16 +183,6 @@ task runStandardTests(type: Test, group: 'verification') {
         excludeTags "contextRecreating"
     }
     finalizedBy "stopCockroachDb"
-}
-
-task startCockroachDb(type: Exec){
-    onlyIf { System.getenv("SPRING_PROFILES_ACTIVE") == "cockroach" }
-    commandLine "bash", "-c", "docker run --rm -d --name=roach -p 26257:26257 cockroachdb/cockroach:v22.2.0 start-single-node --insecure --store=type=mem,size=0.25"
-}
-
-task stopCockroachDb(type: Exec){
-    onlyIf { System.getenv("SPRING_PROFILES_ACTIVE") == "cockroach" }
-    commandLine "bash", "-c", "docker stop roach"
 }
 
 springBoot {
