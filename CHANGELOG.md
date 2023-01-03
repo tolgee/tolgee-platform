@@ -1,3 +1,10 @@
+## [2.49.1](https://github.com/tolgee/tolgee-platform/compare/v2.49.0...v2.49.1) (2023-01-03)
+
+
+### Bug Fixes
+
+* Default structure delimiter in translations endpoint ([#1468](https://github.com/tolgee/tolgee-platform/issues/1468)) ([83f0583](https://github.com/tolgee/tolgee-platform/commit/83f0583700536999408481265b4524a46113f72a))
+
 # [2.49.0](https://github.com/tolgee/tolgee-platform/compare/v2.48.0...v2.49.0) (2022-12-20)
 
 
