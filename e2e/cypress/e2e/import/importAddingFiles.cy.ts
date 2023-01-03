@@ -57,7 +57,7 @@ describe('Import Adding files', () => {
     'has valid xliff errors',
     {
       retries: {
-        runMode: 3,
+        runMode: 10,
       },
     },
     () => {

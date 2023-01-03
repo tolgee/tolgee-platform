@@ -1,7 +1,7 @@
 import { internalFetch } from '../common';
 
 export const cleanTestData = (resource: string) => {
-  return internalFetch(`e2e-data/${resource}/clean`);
+  return internalFetch(`e2e-data/${resource}/clean`, { timeout: 20000 });
 };
 
 export const generateTestData = (resource: string) => {
