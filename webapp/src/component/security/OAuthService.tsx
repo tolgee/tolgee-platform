@@ -11,7 +11,8 @@ export interface OAuthService {
   id: string;
   authenticationUrl: string;
   buttonIcon: React.ReactElement;
-  buttonLabelTranslationKey: string;
+  loginButtonTitle: string;
+  signUpButtonTitle: string;
 }
 
 export const gitHubService = (clientId: string): OAuthService => {
@@ -24,7 +25,8 @@ export const gitHubService = (clientId: string): OAuthService => {
       `${GITHUB_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`
     ),
     buttonIcon: <GitHubIcon />,
-    buttonLabelTranslationKey: 'login_github_login_button',
+    loginButtonTitle: 'login_github_login_button',
+    signUpButtonTitle: 'login_github_signup_button',
   };
 };
 
@@ -38,7 +40,8 @@ export const googleService = (clientId: string): OAuthService => {
       `${GOOGLE_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+email+https://www.googleapis.com/auth/userinfo.profile`
     ),
     buttonIcon: <GoogleIcon />,
-    buttonLabelTranslationKey: 'login_google_login_button',
+    loginButtonTitle: 'login_google_login_button',
+    signUpButtonTitle: 'login_google_signup_button',
   };
 };
 
@@ -58,6 +61,7 @@ export const oauth2Service = (
         .join('+')}`
     ),
     buttonIcon: <LoginIcon />,
-    buttonLabelTranslationKey: 'login_oauth2_login_button',
+    loginButtonTitle: 'login_oauth2_login_button',
+    signUpButtonTitle: 'login_oauth2_signup_button',
   };
 };
