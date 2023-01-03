@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -78,6 +79,8 @@ class LanguageService(
     return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
+  @Transactional
+  @Retryable()
   fun find(id: Long): Language? {
     return languageRepository.findById(id).orElse(null)
   }

@@ -256,6 +256,8 @@ class TestDataService(
     projectBuilders.forEach { projectBuilder ->
       executeInNewTransaction(transactionManager) {
         projectService.save(projectBuilder.self)
+      }
+      executeInNewTransaction(transactionManager) {
         saveAllProjectDependants(projectBuilder)
       }
     }
