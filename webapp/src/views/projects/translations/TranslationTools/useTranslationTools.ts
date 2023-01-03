@@ -6,7 +6,7 @@ type Props = {
   projectId: number;
   keyId: number;
   targetLanguageId: number;
-  baseText?: string;
+  baseText: string | undefined;
   enabled?: boolean;
   onValueUpdate: (value: string) => void;
 };
