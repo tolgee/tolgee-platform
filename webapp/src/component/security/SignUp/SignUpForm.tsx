@@ -46,7 +46,7 @@ export const SignUpForm = (props: Props) => {
       }
       validationSchema={Validation.SIGN_UP(t, orgRequired)}
       submitButtons={
-        <Box display="flex" flexDirection="column" alignItems="stretch" mb={1}>
+        <Box display="flex" flexDirection="column" alignItems="stretch">
           <LoadingButton
             data-cy="sign-up-submit-button"
             color="primary"

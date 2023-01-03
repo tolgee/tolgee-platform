@@ -24,12 +24,11 @@ const BREAK_POINT = '(max-width: 800px)';
 const StyledGrid = styled('div')`
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
-  gap: 48px;
+  gap: 32px 48px;
 
   @media ${BREAK_POINT} {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1px auto;
-    gap: 24px;
   }
 `;
 
@@ -44,9 +43,10 @@ const StyledProviders = styled('div')`
 
 const StyledSpacer = styled('div')`
   display: grid;
-  background: ${({ theme }) => theme.palette.divider2.main};
-  width: 100%;
-  height: 100%;
+  background: lightgrey;
+  @media ${BREAK_POINT} {
+    margin: 0px -8px;
+  }
 `;
 
 export type SignUpType = {
