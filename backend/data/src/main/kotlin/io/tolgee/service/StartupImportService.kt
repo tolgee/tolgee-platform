@@ -34,27 +34,36 @@ class StartupImportService(
 
   @Transactional
   fun importFiles() {
-    val dir = properties.import.dir
-
-    if (dir !== null && File(dir).exists() && File(dir).isDirectory) {
-      File(dir).listFiles()?.filter { it.isDirectory }?.forEach { projectDir ->
-        val fileDtos = projectDir.listFiles()?.map { it -> ImportFileDto(it.name, it.inputStream()) }?.toList()
-
-        if (fileDtos != null) {
-          val userAccount = getInitialUserAccount()
-          val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
-          SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
-          val projectName = projectDir.nameWithoutExtension
-          val existingProjects = projectService.findAllByNameAndOrganizationOwner(projectName, organization)
-          if (existingProjects.isEmpty()) {
-            val project = createProject(projectName, fileDtos, organization)
-            createImplicitApiKey(userAccount, project)
-            assignProjectHolder(project)
-            importData(fileDtos, project, userAccount)
-          }
+    getDirsToImport()?.forEach { projectDir ->
+      val fileDtos = projectDir.listFiles()?.map { ImportFileDto(it.name, it.inputStream()) }?.toList()
+      if (fileDtos != null) {
+        val userAccount = getInitialUserAccount()
+        val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
+        setAuthentication(userAccount)
+        val projectName = projectDir.nameWithoutExtension
+        if (!isProjectExisting(projectName, organization)) {
+          val project = createProject(projectName, fileDtos, organization)
+          createImplicitApiKey(userAccount, project)
+          assignProjectHolder(project)
+          importData(fileDtos, project, userAccount)
         }
       }
     }
+  }
+
+  private fun setAuthentication(userAccount: UserAccount) {
+    SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
+  }
+
+  private fun isProjectExisting(projectName: String, organization: Organization) =
+    projectService.findAllByNameAndOrganizationOwner(projectName, organization).isNotEmpty()
+
+  private fun getDirsToImport(): List<File>? {
+    val dir = properties.import.dir
+    if (dir !== null && File(dir).exists() && File(dir).isDirectory) {
+      return File(dir).listFiles()?.filter { it.isDirectory }?.sortedBy { it.name }
+    }
+    return null
   }
 
   private fun importData(
