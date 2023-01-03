@@ -1,3 +1,10 @@
+## [2.49.2](https://github.com/tolgee/tolgee-platform/compare/v2.49.1...v2.49.2) (2023-01-03)
+
+
+### Bug Fixes
+
+* update machine translations if base translation changes ([#1481](https://github.com/tolgee/tolgee-platform/issues/1481)) ([c0b87ae](https://github.com/tolgee/tolgee-platform/commit/c0b87aecccc1d2b74aa3eddc93328eb06e0d28df))
+
 ## [2.49.1](https://github.com/tolgee/tolgee-platform/compare/v2.49.0...v2.49.1) (2023-01-03)
 
 
