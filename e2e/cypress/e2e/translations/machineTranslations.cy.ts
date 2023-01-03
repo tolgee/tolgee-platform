@@ -50,7 +50,7 @@ describe('Translation memory', () => {
       .should('be.visible');
   });
 
-  it.only('will update suggestions when base is changed', () => {
+  it('will update suggestions when base is changed', () => {
     waitForGlobalLoading();
     openEditor('Studený přeložený text 1');
     cy.gcy('translation-tools-machine-translation-item')
