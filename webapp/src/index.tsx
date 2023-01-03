@@ -54,11 +54,11 @@ const MainWrapper = () => {
         apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
         staticData={{
           en: () => import('./i18n/en.json'),
-          // @ts-ignore
           es: () => import('./i18n/es.json'),
           cs: () => import('./i18n/cs.json'),
           fr: () => import('./i18n/fr.json'),
           de: () => import('./i18n/de.json') as any,
+          pt: () => import('./i18n/pt.json'),
         }}
         loadingFallback={<FullPageLoading />}
       >

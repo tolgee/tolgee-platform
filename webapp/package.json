@@ -67,7 +67,8 @@
     "billing-schema": "openapi-typescript http://localhost:8080/v3/api-docs/V2%20Billing --output ./src/service/billingApiSchema.generated.ts",
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "load-translations": "sh scripts/loadTranslations.sh"
   },
   "eslintConfig": {
     "extends": [

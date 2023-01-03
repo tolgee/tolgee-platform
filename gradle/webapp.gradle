@@ -36,27 +36,12 @@ task createBuildDir() {
     }
 }
 
-task updateStaticTranslations() {
+task updateStaticTranslations(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     def tolgeeApiKey = System.env.TOLGEE_API_KEY
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
     onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }
-    doFirst {
-        def command = "curl $tolgeeApiUrl/api/repository/export/jsonZip?ak=$tolgeeApiKey --output $buildDir/translations.zip"
-        ProcessBuilder builder = new ProcessBuilder(command.split(' '))
-        Process process = builder.start()
-        process.waitFor()
-        println process.err.text
-        println process.text
-    }
-    doLast {
-        copy {
-            def zipFile = file("$buildDir/translations.zip")
-            def outputDir = file("$webappPath/src/i18n")
-
-            from zipTree(zipFile)
-            into outputDir
-        }
-    }
+    workingDir = webappPath
+    commandLine "npm", "run", "load-translations"
     dependsOn(createBuildDir)
 }
