@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.development.testDataBuilder.data.dataImport.ImportCleanTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -52,6 +53,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Value("classpath:import/namespacesMac.zip")
   lateinit var namespacesMacZip: Resource
+
+  @Value("classpath:import/importWithConflicts.zip")
+  lateinit var importWithConflicts: Resource
 
   @AfterEach
   fun resetProps() {
@@ -234,6 +238,24 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     }
   }
 
+  @Test
+  fun `correctly computes conflicts on import`() {
+    val testData = ImportCleanTestData()
+    testDataService.saveTestData(testData.root)
+
+    loginAsUser(testData.userAccount.username)
+    executeInNewTransaction {
+      performImport(
+        projectId = testData.project.id,
+        mapOf(Pair("importWithConflicts.zip", importWithConflicts))
+      ).andIsOk.andAssertThatJson {
+        node("result.page.totalElements").isEqualTo(2)
+        node("result._embedded.languages[0].conflictCount").isEqualTo(1)
+        node("result._embedded.languages[1].conflictCount").isEqualTo(1)
+      }
+    }
+  }
+
   private fun validateSavedJsonImportData(project: Project, userAccount: UserAccount) {
     importService.find(project.id, userAccount.id)!!.let { importEntity ->
       entityManager.refresh(importEntity)
@@ -266,7 +288,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
       )
     }
 
-    loginAsUser("admin")
+    loginAsAdminIfNotLogged()
     return mvc.perform(AuthorizedRequestFactory.addToken(builder))
   }
 }
