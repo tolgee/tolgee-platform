@@ -311,6 +311,7 @@ class ProjectService constructor(
     projectRepository.saveAll(projects)
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
+  @Transactional
   fun save(project: Project): Project {
     val isCreating = project.id == 0L
     projectRepository.save(project)

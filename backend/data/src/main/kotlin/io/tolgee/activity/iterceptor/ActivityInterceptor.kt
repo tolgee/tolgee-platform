@@ -26,6 +26,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     propertyNames: Array<out String>?,
     types: Array<out Type>?
   ): Boolean {
+    preCommitEventsPublisher.onPersist(entity)
     interceptedEventsManager.onFieldModificationsActivity(
       entity, state, null, propertyNames, RevisionType.ADD
     )
@@ -39,6 +40,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     propertyNames: Array<out String>?,
     types: Array<out Type>?
   ) {
+    preCommitEventsPublisher.onDelete(entity)
     interceptedEventsManager.onFieldModificationsActivity(
       entity, null, state, propertyNames, RevisionType.DEL
     )
@@ -52,6 +54,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     propertyNames: Array<out String>?,
     types: Array<out Type>?
   ): Boolean {
+    preCommitEventsPublisher.onUpdate(entity)
     interceptedEventsManager.onFieldModificationsActivity(
       entity,
       currentState,
@@ -76,4 +79,7 @@ class ActivityInterceptor : EmptyInterceptor() {
 
   val interceptedEventsManager: InterceptedEventsManager
     get() = applicationContext.getBean(InterceptedEventsManager::class.java)
+
+  val preCommitEventsPublisher: PreCommitEventPublisher
+    get() = applicationContext.getBean(PreCommitEventPublisher::class.java)
 }

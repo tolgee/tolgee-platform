@@ -15,8 +15,11 @@ import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.core.io.InputStreamSource
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -25,13 +28,13 @@ class ScreenshotService(
   private val fileStorage: FileStorage,
   private val tolgeeProperties: TolgeeProperties,
   private val imageUploadService: ImageUploadService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val transactionManager: PlatformTransactionManager
 ) {
   companion object {
     const val SCREENSHOTS_STORAGE_FOLDER_NAME = "screenshots"
   }
 
-  @Transactional
   fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
@@ -45,16 +48,25 @@ class ScreenshotService(
     return storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
   }
 
+  @Retryable
   fun storeProcessed(image: ByteArray, thumbnail: ByteArray, key: Key): Screenshot {
     val screenshotEntity = Screenshot().also {
       it.key = key
       it.extension = "png"
     }
-    key.screenshots.add(screenshotEntity)
-    screenshotRepository.save(screenshotEntity)
-    fileStorage.storeFile(screenshotEntity.getThumbnailPath(), thumbnail)
-    fileStorage.storeFile(screenshotEntity.getFilePath(), image)
-    return screenshotEntity
+    try {
+      return executeInNewTransaction(transactionManager) {
+        key.screenshots.add(screenshotEntity)
+        screenshotRepository.save(screenshotEntity)
+        fileStorage.storeFile(screenshotEntity.getThumbnailPath(), thumbnail)
+        fileStorage.storeFile(screenshotEntity.getFilePath(), image)
+        screenshotEntity
+      }
+    } catch (e: Exception) {
+      fileStorage.deleteFile(screenshotEntity.getThumbnailPath())
+      fileStorage.deleteFile(screenshotEntity.getFilePath())
+      throw e
+    }
   }
 
   @Transactional
