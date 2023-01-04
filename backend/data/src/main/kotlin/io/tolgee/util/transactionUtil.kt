@@ -7,7 +7,6 @@ import org.springframework.transaction.support.TransactionTemplate
 fun <T> executeInNewTransaction(transactionManager: PlatformTransactionManager, fn: () -> T): T {
   val tt = TransactionTemplate(transactionManager)
   tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
-  tt.isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE
 
   return tt.execute {
     fn()
