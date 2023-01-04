@@ -119,7 +119,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         footer={
           <Box display="flex" justifyContent="space-between" flexWrap="wrap">
             <Box>
-              {security.allowRegistration && (
+              {remoteConfig.allowRegistrations && (
                 <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                   <Typography variant="caption">
                     <T>login_sign_up</T>
