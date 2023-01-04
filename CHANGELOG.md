@@ -1,3 +1,10 @@
+# [2.50.0](https://github.com/tolgee/tolgee-platform/compare/v2.49.2...v2.50.0) (2023-01-04)
+
+
+### Features
+
+* add providers to signup screen ([#1326](https://github.com/tolgee/tolgee-platform/issues/1326)) ([fa5caac](https://github.com/tolgee/tolgee-platform/commit/fa5caac078d73609b7be110f30fcb4925a6c5121))
+
 ## [2.49.2](https://github.com/tolgee/tolgee-platform/compare/v2.49.1...v2.49.2) (2023-01-03)
 
 
