@@ -61,7 +61,7 @@ class PermissionService(
     getProjectPermissionScopes(projectId, userAccount.id)
 
   fun getProjectPermissionScopes(projectId: Long, userAccountId: Long): Array<Scope>? {
-    val scopes = getProjectPermissionData(projectId, userAccountId).computedPermissions.scopes ?: return null
+    val scopes = getProjectPermissionData(projectId, userAccountId).computedPermissions.scopes
     return Scope.getUnpackedScopes(scopes)
   }
 

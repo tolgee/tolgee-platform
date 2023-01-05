@@ -78,6 +78,6 @@ class LanguageServiceTest : AbstractSpringTest() {
     )
     assertThat(explicitBothLangsUserData.computedPermissions.scopes)
       .containsAll(ProjectPermissionType.TRANSLATE.availableScopes.toList())
-    assertThat(explicitBothLangsUserData.computedPermissions.languageIds).hasSize(1)
+    assertThat(explicitBothLangsUserData.computedPermissions.translateLanguageIds).hasSize(1)
   }
 }

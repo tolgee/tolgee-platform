@@ -11,9 +11,11 @@ data class PermissionDto(
   override val scopes: Array<Scope>,
   override val projectId: Long?,
   override val organizationId: Long?,
-  override val languageIds: Set<Long>? = null,
+  override val translateLanguageIds: Set<Long>? = null,
   override val type: ProjectPermissionType?,
-  override val granular: Boolean?
+  override val granular: Boolean?,
+  override val viewLanguageIds: Set<Long>?,
+  override val stateChangeLanguageIds: Set<Long>?
 ) : Serializable, IPermission {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -27,7 +29,11 @@ data class PermissionDto(
     if (!scopes.contentEquals(other.scopes)) return false
     if (projectId != other.projectId) return false
     if (organizationId != other.organizationId) return false
-    if (languageIds != other.languageIds) return false
+    if (translateLanguageIds != other.translateLanguageIds) return false
+    if (type != other.type) return false
+    if (granular != other.granular) return false
+    if (viewLanguageIds != other.viewLanguageIds) return false
+    if (stateChangeLanguageIds != other.stateChangeLanguageIds) return false
 
     return true
   }
@@ -39,7 +45,11 @@ data class PermissionDto(
     result = 31 * result + scopes.contentHashCode()
     result = 31 * result + (projectId?.hashCode() ?: 0)
     result = 31 * result + (organizationId?.hashCode() ?: 0)
-    result = 31 * result + (languageIds?.hashCode() ?: 0)
+    result = 31 * result + (translateLanguageIds?.hashCode() ?: 0)
+    result = 31 * result + (type?.hashCode() ?: 0)
+    result = 31 * result + (granular?.hashCode() ?: 0)
+    result = 31 * result + (viewLanguageIds?.hashCode() ?: 0)
+    result = 31 * result + (stateChangeLanguageIds?.hashCode() ?: 0)
     return result
   }
 }

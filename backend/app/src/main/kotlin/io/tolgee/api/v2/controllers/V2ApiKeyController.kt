@@ -118,7 +118,7 @@ class V2ApiKeyController(
 
   private fun getProjectPermittedLanguages(): Set<Long>? {
     val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
-    val languageIds = data.computedPermissions.languageIds
+    val languageIds = data.computedPermissions.translateLanguageIds
     if (languageIds.isNullOrEmpty()) {
       return null
     }

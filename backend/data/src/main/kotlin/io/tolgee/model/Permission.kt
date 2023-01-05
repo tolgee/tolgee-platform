@@ -56,7 +56,7 @@ class Permission(
 ) : AuditModel(), IPermission {
   @Type(type = "enum-array")
   @Column(name = "scopes", columnDefinition = "varchar[]")
-  private var _scopes: Array<Scope>? = ProjectPermissionType.VIEW.availableScopes
+  private var _scopes: Array<Scope>? = null
 
   override var scopes: Array<Scope>
     get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
@@ -94,7 +94,7 @@ class Permission(
    * When specified, user is restricted to edit specific language translations.
    */
   @ManyToMany(fetch = FetchType.EAGER)
-  var reviewLanguages: MutableSet<Language> = mutableSetOf()
+  var stateChangeLanguages: MutableSet<Language> = mutableSetOf()
 
   constructor(
     id: Long = 0L,
@@ -103,9 +103,15 @@ class Permission(
     project: Project? = null,
     organization: Organization? = null,
     type: ProjectPermissionType = ProjectPermissionType.VIEW
-  ) : this(id, user, null, invitation) {
+  ) : this(
+    id = id,
+    user = user,
+    organization = null,
+    invitation = invitation
+  ) {
     this.project = project
-    this.scopes = type.availableScopes
+    this.type = type
+    this.organization = organization
   }
 
   @ManyToOne
@@ -119,8 +125,14 @@ class Permission(
     get() = this.project?.id
   override val organizationId: Long?
     get() = this.organization?.id
-  override val languageIds: Set<Long>?
+  override val translateLanguageIds: Set<Long>?
     get() = this.translateLanguages.map { it.id }.toSet()
+
+  override val viewLanguageIds: Set<Long>?
+    get() = this.viewLanguages.map { it.id }.toSet()
+
+  override val stateChangeLanguageIds: Set<Long>?
+    get() = this.stateChangeLanguages.map { it.id }.toSet()
 
   companion object {
 
@@ -128,7 +140,7 @@ class Permission(
       @PrePersist
       @PreUpdate
       fun prePersist(permission: Permission) {
-        if (permission._scopes.isNullOrEmpty() xor (permission.type == null)) {
+        if (!(permission._scopes.isNullOrEmpty() xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
       }
