@@ -13,7 +13,7 @@ class MtCreditsTestData : BaseTestData() {
     root.addOrganization {
       name = "Org"
       organization = this
-      basePermission!!.estimatedTypeFromScopes = TRANSLATE
+      basePermission!!.type = TRANSLATE
       basePermission!!.scopes = TRANSLATE.availableScopes
     }.apply {
       addRole {

@@ -48,7 +48,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   fun `get all has language permissions`() {
     val baseTestData = BaseTestData()
     baseTestData.root.apply {
-      data.projects[0].data.permissions[0].self.languages = mutableSetOf(baseTestData.englishLanguage)
+      data.projects[0].data.permissions[0].self.translateLanguages = mutableSetOf(baseTestData.englishLanguage)
     }
     testDataService.saveTestData(baseTestData.root)
 
@@ -125,7 +125,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
         project = base.project,
         user = userAccount,
         type = ProjectPermissionType.TRANSLATE,
-      ).apply { languages = mutableSetOf(base.project.languages.first()) }
+      ).apply { translateLanguages = mutableSetOf(base.project.languages.first()) }
     )
 
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
@@ -155,8 +155,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
       Permission().apply {
         user = directPermissionUser
         project = directPermissionProject
-        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
-        languages = project!!.languages.toMutableSet()
+        type = ProjectPermissionType.TRANSLATE
+        translateLanguages = project!!.languages.toMutableSet()
       }
     )
 

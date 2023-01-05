@@ -39,12 +39,12 @@ class TranslationCommentsTestData {
     }.build {
       addPermission {
         user = this@TranslationCommentsTestData.user
-        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       addPermission {
         user = this@TranslationCommentsTestData.pepa
-        estimatedTypeFromScopes = ProjectPermissionType.EDIT
+        type = ProjectPermissionType.EDIT
       }
 
       englishLanguage = addLanguage {
@@ -116,14 +116,14 @@ class TranslationCommentsTestData {
         addPermission {
           project = projectBuilder.self
           user = jindra.self
-          estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
-          languages = mutableSetOf(englishLanguage)
+          type = ProjectPermissionType.TRANSLATE
+          translateLanguages = mutableSetOf(englishLanguage)
         }
         addPermission {
 
           project = projectBuilder.self
           user = vojta.self
-          estimatedTypeFromScopes = ProjectPermissionType.VIEW
+          type = ProjectPermissionType.VIEW
         }
         addKey {
           name = "C key"

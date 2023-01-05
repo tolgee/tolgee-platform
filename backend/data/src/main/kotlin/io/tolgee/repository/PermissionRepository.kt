@@ -34,8 +34,8 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """select distinct p
     from Permission p
-    join p.languages l on l = :language
-    join fetch p.languages allLangs
+    join p.translateLanguages l on l = :language
+    join fetch p.translateLanguages allLangs
   """
   )
   fun findAllByPermittedLanguage(language: Language): List<Permission>
@@ -43,7 +43,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """
       select p.user.id, l.id from Permission p
-      join p.languages l
+      join p.translateLanguages l
       where p.user.id in :userIds
       and p.project.id = :projectId
     """
@@ -53,7 +53,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """
       select p.project.id, l.id from Permission p
-      join p.languages l
+      join p.translateLanguages l
       where p.project.id in :projectIds
       and p.user.id = :userId
     """

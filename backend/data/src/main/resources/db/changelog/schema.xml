@@ -2268,4 +2268,36 @@
     <changeSet author="jenik (generated)" id="1670236174754-1">
         <dropColumn columnName="base_permissions" tableName="organization"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-1">
+        <createTable tableName="permission_review_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="review_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-2">
+        <createTable tableName="permission_view_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="view_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-3">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_view_languages" constraintName="FK47vi2uyggca3biukk3ioigqsb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-4">
+        <addForeignKeyConstraint baseColumnNames="view_languages_id" baseTableName="permission_view_languages" constraintName="FKc75c8vhx7rx4ls4oqh373lsv7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-5">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_review_languages" constraintName="FKeaerfm7llhufdhapew0hmj6pb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1672922045865-6">
+        <addForeignKeyConstraint baseColumnNames="review_languages_id" baseTableName="permission_review_languages" constraintName="FKke8i6o7bykxemeoc29trv2y6i" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

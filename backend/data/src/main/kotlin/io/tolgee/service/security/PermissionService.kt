@@ -220,8 +220,8 @@ class PermissionService(
       Permission(user = userAccount, project = project, type = newPermissionType)
     }
 
-    permission.estimatedTypeFromScopes = newPermissionType
-    permission.languages = languages?.toMutableSet() ?: mutableSetOf()
+    permission.type = newPermissionType
+    permission.translateLanguages = languages?.toMutableSet() ?: mutableSetOf()
     return cachedPermissionService.save(permission)
   }
 
@@ -256,17 +256,17 @@ class PermissionService(
   fun onLanguageDeleted(language: Language) {
     val permissions = permissionRepository.findAllByPermittedLanguage(language)
     permissions.forEach { permission ->
-      val hasAccessOnlyToDeletedLanguage = permission.languages.size == 1 &&
-        permission.languages.first().id == language.id
+      val hasAccessOnlyToDeletedLanguage = permission.translateLanguages.size == 1 &&
+        permission.translateLanguages.first().id == language.id
 
       if (hasAccessOnlyToDeletedLanguage) {
-        permission.languages = mutableSetOf()
-        permission.estimatedTypeFromScopes = ProjectPermissionType.VIEW
+        permission.translateLanguages = mutableSetOf()
+        permission.type = ProjectPermissionType.VIEW
         cachedPermissionService.save(permission)
         return@forEach
       }
 
-      permission.languages.removeIf { it.id == language.id }
+      permission.translateLanguages.removeIf { it.id == language.id }
       cachedPermissionService.save(permission)
     }
   }

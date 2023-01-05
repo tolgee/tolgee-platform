@@ -30,7 +30,7 @@ class KeysTestData {
     }.build {
       addPermission {
         user = this@KeysTestData.user
-        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
     }.self
 
@@ -54,7 +54,7 @@ class KeysTestData {
       addPermission {
 
         user = this@KeysTestData.user
-        estimatedTypeFromScopes = ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       firstKey = addKey {

@@ -32,7 +32,7 @@ class NamespacesTestData : BaseTestData() {
 
       addPermission {
         user = translator
-        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
     }
     root.apply {

@@ -32,12 +32,12 @@ class ProjectLeavingTestData : BaseTestData() {
         project1nonOwner = this
         projectBuilder.addPermission {
           user = this@addUserAccount
-          estimatedTypeFromScopes = ProjectPermissionType.VIEW
+          type = ProjectPermissionType.VIEW
         }
       }
       projectBuilder.addPermission {
         user = userWithOrganizationRole
-        estimatedTypeFromScopes = ProjectPermissionType.VIEW
+        type = ProjectPermissionType.VIEW
       }
 
       addOrganization {
@@ -61,7 +61,7 @@ class ProjectLeavingTestData : BaseTestData() {
         }.build {
           addPermission {
             user = this@ProjectLeavingTestData.userWithOrganizationRole
-            estimatedTypeFromScopes = ProjectPermissionType.VIEW
+            type = ProjectPermissionType.VIEW
           }
         }
       }

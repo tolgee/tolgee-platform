@@ -5,7 +5,7 @@ import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -37,7 +37,7 @@ class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/proje
     this.projectSupplier = { testData.project }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns all with last modified`() {
     val now = Date()
@@ -49,7 +49,7 @@ class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/proje
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `returns 304 when not modified`() {
     val now = Date()
     whenever(currentDateProvider.date).then { now }
@@ -60,7 +60,7 @@ class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/proje
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `works when data change`() {
     val now = Date()
     whenever(currentDateProvider.date).then { now }
@@ -81,7 +81,7 @@ class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/proje
 
   fun performWithIsModifiedSince(lastModified: String?): ResultActions {
     val headers = HttpHeaders()
-    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(ApiScope.TRANSLATIONS_VIEW), project).key
+    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
     headers["If-Modified-Since"] = lastModified
     return performGet("/v2/projects/translations/en,de", headers)
   }
