@@ -35,6 +35,11 @@ class ScreenshotService(
     const val SCREENSHOTS_STORAGE_FOLDER_NAME = "screenshots"
   }
 
+  /**
+   * CockroachDB has issues with uploading multiple screenshots in the same time, so we
+   * need to make it retryable and executed in new transaction
+   */
+  @Retryable
   fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
@@ -45,28 +50,31 @@ class ScreenshotService(
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
     val thumbnail = converter.getThumbNail()
-    return storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
+    var screenshotEntity: Screenshot? = null
+    try {
+      return executeInNewTransaction(transactionManager) {
+        screenshotEntity = storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
+        screenshotEntity!!
+      }
+    } catch (e: Exception) {
+      screenshotEntity?.id?.let {
+        fileStorage.deleteFile(screenshotEntity!!.getThumbnailPath())
+        fileStorage.deleteFile(screenshotEntity!!.getFilePath())
+      }
+      throw e
+    }
   }
 
-  @Retryable
   fun storeProcessed(image: ByteArray, thumbnail: ByteArray, key: Key): Screenshot {
     val screenshotEntity = Screenshot().also {
       it.key = key
       it.extension = "png"
     }
-    try {
-      return executeInNewTransaction(transactionManager) {
-        key.screenshots.add(screenshotEntity)
-        screenshotRepository.save(screenshotEntity)
-        fileStorage.storeFile(screenshotEntity.getThumbnailPath(), thumbnail)
-        fileStorage.storeFile(screenshotEntity.getFilePath(), image)
-        screenshotEntity
-      }
-    } catch (e: Exception) {
-      fileStorage.deleteFile(screenshotEntity.getThumbnailPath())
-      fileStorage.deleteFile(screenshotEntity.getFilePath())
-      throw e
-    }
+    key.screenshots.add(screenshotEntity)
+    screenshotRepository.save(screenshotEntity)
+    fileStorage.storeFile(screenshotEntity.getThumbnailPath(), thumbnail)
+    fileStorage.storeFile(screenshotEntity.getFilePath(), image)
+    return screenshotEntity
   }
 
   @Transactional
