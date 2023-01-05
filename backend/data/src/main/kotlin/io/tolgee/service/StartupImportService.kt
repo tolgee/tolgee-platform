@@ -14,6 +14,8 @@ import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -30,26 +32,43 @@ class StartupImportService(
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
   private val authenticationProvider: AuthenticationProvider
-) {
+) : Logging {
 
   @Transactional
   fun importFiles() {
     getDirsToImport()?.forEach { projectDir ->
-      val fileDtos = projectDir.listFiles()?.map { ImportFileDto(it.name, it.inputStream()) }?.toList()
+      val fileDtos = getImportFileDtos(projectDir)
       if (fileDtos != null) {
-        val userAccount = getInitialUserAccount()
-        val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
-        setAuthentication(userAccount)
         val projectName = projectDir.nameWithoutExtension
-        if (!isProjectExisting(projectName, organization)) {
-          val project = createProject(projectName, fileDtos, organization)
-          createImplicitApiKey(userAccount, project)
-          assignProjectHolder(project)
-          importData(fileDtos, project, userAccount)
-        }
+        importAsInitialUserProject(projectName, fileDtos)
       }
     }
   }
+
+  private fun importAsInitialUserProject(
+    projectName: String,
+    fileDtos: List<ImportFileDto>
+  ) {
+    val userAccount = getInitialUserAccount() ?: return
+    val organization = getInitialUserOrganization(userAccount)
+    setAuthentication(userAccount)
+    if (!isProjectExisting(projectName, organization)) {
+      logger.info("Importing initial project $projectName [user: $userAccount, organization: $organization]")
+      val project = createProject(projectName, fileDtos, organization)
+      createImplicitApiKey(userAccount, project)
+      assignProjectHolder(project)
+      importData(fileDtos, project, userAccount)
+      return
+    }
+    logger.info("Not Importing initial project $projectName - project already exists")
+  }
+
+  private fun getInitialUserOrganization(userAccount: UserAccount?) =
+    userAccount?.organizationRoles?.singleOrNull()?.organization
+      ?: throw IllegalStateException("No initial organization")
+
+  private fun getImportFileDtos(projectDir: File) =
+    projectDir.listFiles()?.map { ImportFileDto(it.name, it.inputStream()) }?.toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
     SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
@@ -59,9 +78,11 @@ class StartupImportService(
     projectService.findAllByNameAndOrganizationOwner(projectName, organization).isNotEmpty()
 
   private fun getDirsToImport(): List<File>? {
-    val dir = properties.import.dir
-    if (dir !== null && File(dir).exists() && File(dir).isDirectory) {
-      return File(dir).listFiles()?.filter { it.isDirectory }?.sortedBy { it.name }
+    properties.import.dir?.let { dir ->
+      val file = File(dir)
+      if (file.exists() && file.isDirectory) {
+        return file.listFiles()?.filter { it.isDirectory }?.sortedBy { it.name }
+      }
     }
     return null
   }
