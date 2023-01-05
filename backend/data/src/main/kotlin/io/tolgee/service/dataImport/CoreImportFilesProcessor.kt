@@ -10,7 +10,6 @@ import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
 import io.tolgee.util.Logging
@@ -21,7 +20,6 @@ class CoreImportFilesProcessor(
   val import: Import
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
-  private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
 
@@ -45,6 +43,8 @@ class CoreImportFilesProcessor(
         errors.add(ErrorResponseBody(e.code, e.params))
       }
     }
+
+    importDataManager.handleConflicts(false)
     return errors
   }
 
@@ -160,7 +160,6 @@ class CoreImportFilesProcessor(
       }
     }
     importDataManager.saveAllStoredKeys()
-    importDataManager.handleConflicts(false)
     importDataManager.saveAllStoredTranslations()
   }
 }
