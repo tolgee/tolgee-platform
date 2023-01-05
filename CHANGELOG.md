@@ -1,3 +1,10 @@
+# [3.0.0-alpha.6](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.5...v3.0.0-alpha.6) (2023-01-05)
+
+
+### Bug Fixes
+
+* **import:** properly compute conflicts on upload ([#1486](https://github.com/tolgee/tolgee-platform/issues/1486)) ([775770e](https://github.com/tolgee/tolgee-platform/commit/775770eead278cf26254d7c901413c9a34eb488f))
+
 # [3.0.0-alpha.5](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2023-01-03)
 
 
