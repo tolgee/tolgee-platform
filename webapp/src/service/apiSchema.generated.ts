@@ -483,14 +483,15 @@ export interface components {
       name: string;
       slug?: string;
       baseLanguageId?: number;
+      description?: string;
     };
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
-      permittedLanguageIds?: number[];
       /** Has user explicitly set granular permissions */
       granular: boolean;
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
       /** The permitted scopes */
       scopes: (
         | "translations.view"
@@ -825,12 +826,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      description: string;
       id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -900,15 +901,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
       username?: string;
+      lastUsedAt?: number;
       expiresAt?: number;
       projectId: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      description: string;
       id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1279,7 +1280,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1291,6 +1291,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1499,12 +1500,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      description: string;
       id: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1557,15 +1558,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
       username?: string;
+      lastUsedAt?: number;
       expiresAt?: number;
       projectId: number;
-      lastUsedAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      description: string;
       id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5139,6 +5140,14 @@ export interface operations {
       query: {
         /** Namespace to return */
         ns?: string;
+        /**
+         * Delimiter to structure response content.
+         *
+         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
+         *
+         * When null, resulting file will be a flat key-value object.
+         */
+        structureDelimiter?: string;
       };
     };
     responses: {

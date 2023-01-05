@@ -30,7 +30,7 @@ class ProjectsTestData : BaseTestData() {
 
         addPermission {
           user = this@ProjectsTestData.user
-          estimatedTypeFromScopes = ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
 
         project2English = addLanguage {
@@ -47,8 +47,8 @@ class ProjectsTestData : BaseTestData() {
         addPermission {
           user = userWithTranslatePermission
           project = project2
-          estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
-          languages = mutableSetOf(project2Deutsch, project2English)
+          type = ProjectPermissionType.TRANSLATE
+          translateLanguages = mutableSetOf(project2Deutsch, project2English)
         }
 
         addKey {

@@ -285,7 +285,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthGet("/translations/en,de").andIsOk
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `delimiter can be configured`() {
     testData.generateScopedData()

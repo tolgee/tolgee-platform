@@ -83,7 +83,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     val key = parseCode(invitatationJson)
 
     val invitation = invitationService.getInvitation(key)
-    assertThat(invitation.permission?.languages?.toList()?.first()?.tag).isEqualTo("en")
+    assertThat(invitation.permission?.translateLanguages?.toList()?.first()?.tag).isEqualTo("en")
   }
 
   @Test

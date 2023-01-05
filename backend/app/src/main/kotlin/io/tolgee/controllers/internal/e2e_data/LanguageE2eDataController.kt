@@ -40,7 +40,7 @@ class LanguageE2eDataController(
 
         projectBuilder.build {
           addPermission {
-            estimatedTypeFromScopes = ProjectPermissionType.MANAGE
+            type = ProjectPermissionType.MANAGE
             user = userAccount
             project = projectBuilder.self
           }

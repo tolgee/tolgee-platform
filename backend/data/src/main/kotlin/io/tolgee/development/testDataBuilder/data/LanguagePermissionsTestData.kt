@@ -52,20 +52,20 @@ class LanguagePermissionsTestData {
       self.baseLanguage = englishLanguage
 
       addPermission {
-        languages = mutableSetOf(englishLanguage)
+        translateLanguages = mutableSetOf(englishLanguage)
         user = enOnlyUser
-        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = allLangUser
-        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = bothLangsExplicitUser
-        estimatedTypeFromScopes = ProjectPermissionType.TRANSLATE
-        languages = mutableSetOf(englishLanguage, germanLanguage)
+        type = ProjectPermissionType.TRANSLATE
+        translateLanguages = mutableSetOf(englishLanguage, germanLanguage)
       }
 
       addApiKey {

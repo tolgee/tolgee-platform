@@ -56,7 +56,7 @@ class CachedPermissionService(
     validateTranslatePermissionLanguages(languages, type)
     return Permission(invitation = invitation, project = project, type = type).let { permission ->
       languages?.let {
-        permission.languages = languages.toMutableSet()
+        permission.translateLanguages = languages.toMutableSet()
       }
       permissionRepository.save(permission)
     }
@@ -89,7 +89,7 @@ class CachedPermissionService(
         scopes = permission.scopes,
         projectId = permission.project?.id,
         organizationId = permission.organization?.id,
-        languageIds = permission.languages.map { it.id }.toMutableSet(),
+        languageIds = permission.translateLanguages.map { it.id }.toMutableSet(),
         type = permission.type,
         granular = permission.granular
       )
