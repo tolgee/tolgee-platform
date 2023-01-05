@@ -15,8 +15,11 @@ import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.core.io.InputStreamSource
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -25,13 +28,18 @@ class ScreenshotService(
   private val fileStorage: FileStorage,
   private val tolgeeProperties: TolgeeProperties,
   private val imageUploadService: ImageUploadService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val transactionManager: PlatformTransactionManager
 ) {
   companion object {
     const val SCREENSHOTS_STORAGE_FOLDER_NAME = "screenshots"
   }
 
-  @Transactional
+  /**
+   * CockroachDB has issues with uploading multiple screenshots in the same time, so we
+   * need to make it retryable and executed in new transaction
+   */
+  @Retryable
   fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
@@ -42,7 +50,19 @@ class ScreenshotService(
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
     val thumbnail = converter.getThumbNail()
-    return storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
+    var screenshotEntity: Screenshot? = null
+    try {
+      return executeInNewTransaction(transactionManager) {
+        screenshotEntity = storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
+        screenshotEntity!!
+      }
+    } catch (e: Exception) {
+      screenshotEntity?.id?.let {
+        fileStorage.deleteFile(screenshotEntity!!.getThumbnailPath())
+        fileStorage.deleteFile(screenshotEntity!!.getFilePath())
+      }
+      throw e
+    }
   }
 
   fun storeProcessed(image: ByteArray, thumbnail: ByteArray, key: Key): Screenshot {

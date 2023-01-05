@@ -7,7 +7,7 @@ services:
       - 8201:8201
       - 8091:8091
     environment:
-      - spring.profiles.active=docker,e2e
+      - spring.profiles.active=docker,e2e,${SPRING_PROFILES_ACTIVE:-default}
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:8201
@@ -18,5 +18,15 @@ services:
     ports:
       - "21025:1025"
       - "21080:1080"
+  cockroachdb:
+    container_name: tolgee_cockroach_e2e
+    image: cockroachdb/cockroach:v22.2.0
+    ports:
+      - 26257:26257
+      - 8088:8080
+    command:
+      - start-single-node
+      - --insecure
+      - --store=type=mem,size=0.25
 volumes:
   e2e-db-data:

@@ -83,6 +83,44 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1585252533730-6">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <changeLogPropertyDefined property="isCockroach" value="true"/>
+            </not>
+        </preConditions>
+        <createTable tableName="source">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="sourcePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="repository_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-6crdb">
+        <preConditions onFail="CONTINUE">
+            <changeLogPropertyDefined property="isCockroach" value="true"/>
+        </preConditions>
+        <createTable tableName="source">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="sourcePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(2000)"/>
+            <column name="repository_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-6">
         <createTable tableName="source">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="sourcePK"/>
@@ -443,6 +481,14 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-2">
         <createSequence incrementBy="100" sequenceName="hibernate_sequence" startValue="1000000000"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621606909199-2crdb">
+        <preConditions onFail="CONTINUE">
+            <changeLogPropertyDefined property="isCockroach" value="true"/>
+        </preConditions>
+        <sql>
+           select setval('hibernate_sequence', 1000000000)
+        </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-3">
         <createTable tableName="import">
@@ -1088,8 +1134,27 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-13">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <changeLogPropertyDefined property="isCockroach" value="true"/>
+            </not>
+        </preConditions>
         <createTable tableName="revision">
             <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="revisionPK"/>
+            </column>
+            <column name="timestamp" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624975131291-13crdb">
+        <preConditions onFail="CONTINUE">
+            <changeLogPropertyDefined property="isCockroach" value="true"/>
+        </preConditions>
+        <createTable tableName="revision">
+            <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="revisionPK"/>
             </column>
             <column name="timestamp" type="BIGINT">
@@ -1357,6 +1422,11 @@
         <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626957302295-1">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <changeLogPropertyDefined property="isCockroach" value="true"/>
+            </not>
+        </preConditions>
         <modifyDataType tableName="revision" columnName="id" newDataType="BIGINT"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1633085681853-3">
@@ -1399,6 +1469,11 @@
                              constraintName="organization_third_party_billing_id_unique" tableName="organization"/>
     </changeSet>
     <changeSet author="jenik" id="1637177424380-0">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <changeLogPropertyDefined property="isCockroach" value="true"/>
+            </not>
+        </preConditions>
         <modifyDataType
                 columnName="name"
                 newDataType="varchar(2000)"
@@ -2101,6 +2176,11 @@
         <addUniqueConstraint columnNames="key_hash" constraintName="api_key_hash_unique" tableName="api_key"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1661361670848-3">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <changeLogPropertyDefined property="isCockroach" value="true"/>
+            </not>
+        </preConditions>
         <sqlFile path="classpath:db/changelog/hideApiKeyMigration.sql" splitStatements="false"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1661420385794-1">

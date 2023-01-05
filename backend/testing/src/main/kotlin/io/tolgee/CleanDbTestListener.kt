@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.TestContext
 import org.springframework.test.context.TestExecutionListener
+import java.sql.Connection
 import java.sql.ResultSet
 import javax.sql.DataSource
 import kotlin.system.measureTimeMillis
@@ -47,7 +48,7 @@ class CleanDbTestListener : TestExecutionListener {
     val ds: DataSource = appContext.getBean(DataSource::class.java)
     ds.connection.use { conn ->
       val stmt = conn.createStatement()
-      val databaseName: Any = "postgres"
+      val databaseName: Any = getDatabaseName(conn)
       val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
       val rs: ResultSet = stmt.executeQuery(
         String.format(
@@ -69,6 +70,15 @@ class CleanDbTestListener : TestExecutionListener {
         )
       )
     }
+  }
+
+  private fun getDatabaseName(conn: Connection): String {
+    val rs = conn.getMetaData().catalogs
+    val data = mutableListOf<String>()
+    while (rs.next()) {
+      data.add(rs.getString(1))
+    }
+    return data.single()
   }
 
   @Throws(Exception::class)

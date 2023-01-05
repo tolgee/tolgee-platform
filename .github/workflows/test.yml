@@ -58,6 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test" ]
+        profile: [ "default", "cockroach" ]
     steps:
       - uses: actions/checkout@v2
 
@@ -91,7 +92,7 @@ jobs:
           tar -xzf ~/backend-testing.tgz ./backend/testing/build
 
       - name: Run backend tests
-        run: ./gradlew ${{ matrix.command }}
+        run: SPRING_PROFILES_ACTIVE=${{ matrix.profile }} ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
 
@@ -104,7 +105,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: backend_test_reports_${{ steps.version.outputs.reportName }}
+          name: backend_test_reports_${{ matrix.profile }}
           path: |
             ./**/build/reports/**/*
 
@@ -117,6 +118,7 @@ jobs:
       matrix:
         total_jobs: [ 10 ]
         job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        profile: ["cockroach", "default"]
     steps:
       - uses: actions/checkout@v2
 
@@ -187,6 +189,7 @@ jobs:
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
+          SPRING_PROFILES_ACTIVE: ${{matrix.profile}}
 
       - uses: actions/upload-artifact@v2
         if: failure()

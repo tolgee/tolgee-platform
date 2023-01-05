@@ -167,19 +167,22 @@ dependencies {
 test {
     useJUnitPlatform()
     maxHeapSize = "2048m"
-    //maxParallelForks = (int) (Runtime.runtime.availableProcessors() / 2 + 1)
 }
 
 task runContextRecreatingTests(type: Test, group: 'verification') {
+    dependsOn "startCockroachDb"
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
+    finalizedBy "stopCockroachDb"
 }
 
 task runStandardTests(type: Test, group: 'verification') {
+    dependsOn "startCockroachDb"
     useJUnitPlatform {
         excludeTags "contextRecreating"
     }
+    finalizedBy "stopCockroachDb"
 }
 
 springBoot {

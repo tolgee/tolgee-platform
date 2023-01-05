@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.retry.annotation.EnableRetry
 
 @SpringBootApplication(
   exclude = [
@@ -43,6 +44,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EntityScan("io.tolgee.model")
 @ConfigurationPropertiesScan
 @EnableJpaRepositories("io.tolgee.repository")
+@EnableRetry
 class Application {
   companion object {
     @JvmStatic

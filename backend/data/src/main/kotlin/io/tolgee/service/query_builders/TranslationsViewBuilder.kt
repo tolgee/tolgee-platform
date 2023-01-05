@@ -1,5 +1,7 @@
 package io.tolgee.service.query_builders
 
+import io.tolgee.configuration.tolgee.DatabaseProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
@@ -338,9 +340,13 @@ class TranslationsViewBuilder(
     ): Page<KeyWithTranslationsView> {
       val em = applicationContext.getBean(EntityManager::class.java)
       val tagService = applicationContext.getBean(TagService::class.java)
+      val properties = applicationContext.getBean(TolgeeProperties::class.java)
+      val isCockroachDb = properties.database.type == DatabaseProperties.DatabaseType.COCKROACH
 
-      // otherwise it takes forever for postgres to plan the execution
-      em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
+      if (!isCockroachDb) {
+        // otherwise it takes forever for postgres to plan the execution
+        em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
+      }
 
       var translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
@@ -366,8 +372,10 @@ class TranslationsViewBuilder(
       }
       val views = query.resultList.map { KeyWithTranslationsView.of(it, languages.toList()) }
 
-      // reset the value
-      em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
+      if (!isCockroachDb) {
+        // reset the value
+        em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()
+      }
 
       val keyIds = views.map { it.keyId }
       tagService.getTagsForKeyIds(keyIds).let { tagMap ->

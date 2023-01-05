@@ -1,12 +1,15 @@
 package io.tolgee.service
 
+import org.hibernate.FlushMode
+import org.hibernate.Session
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import javax.persistence.EntityManager
+import javax.persistence.FlushModeType
 
 @Service
 class OrganizationStatsService(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   fun getProjectLanguageCount(projectId: Long): Long {
     return entityManager
@@ -33,9 +36,13 @@ class OrganizationStatsService(
   }
 
   fun getCurrentTranslationCount(organizationId: Long): Long {
-    val result = entityManager.createNativeQuery(
-      """
-      select 
+    val session = entityManager.unwrap(Session::class.java)
+    return try {
+      session.hibernateFlushMode = FlushMode.MANUAL
+      session.flushMode = FlushModeType.COMMIT
+      val query = session.createNativeQuery(
+        """
+      select
          (select sum(keyCount * languageCount) as translationCount
           from (select p.id as projectId, count(l.id) as languageCount
                 from project as p
@@ -47,8 +54,13 @@ class OrganizationStatsService(
                                   join key as k on k.project_id = p.id
                          where p.organization_owner_id = :organizationId
                          group by p.id) as keyCounts on keyCounts.projectId = languageCounts.projectId)
-      """.trimIndent()
-    ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
-    return result.toLong()
+        """.trimIndent()
+      ).setParameter("organizationId", organizationId)
+      val result = query.singleResult as BigDecimal? ?: 0
+      result.toLong()
+    } finally {
+      session.hibernateFlushMode = FlushMode.AUTO
+      session.flushMode = FlushModeType.AUTO
+    }
   }
 }
