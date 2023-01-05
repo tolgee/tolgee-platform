@@ -15,7 +15,7 @@ class ComputedPermissionDto(
         return false
       }
 
-      if (languageIds.isNullOrEmpty()) {
+      if (translateLanguageIds.isNullOrEmpty()) {
         return true
       }
 
@@ -24,7 +24,7 @@ class ComputedPermissionDto(
       }
 
       if (scopes.contains(Scope.TRANSLATIONS_EDIT)) {
-        return languageIds.isEmpty()
+        return translateLanguageIds.isEmpty()
       }
 
       return false
@@ -47,7 +47,11 @@ class ComputedPermissionDto(
           get() = null
         override val organizationId: Long?
           get() = null
-        override val languageIds: Set<Long>?
+        override val translateLanguageIds: Set<Long>?
+          get() = null
+        override val viewLanguageIds: Set<Long>?
+          get() = null
+        override val stateChangeLanguageIds: Set<Long>?
           get() = null
         override val type: ProjectPermissionType
           get() = type

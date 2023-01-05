@@ -89,7 +89,9 @@ class CachedPermissionService(
         scopes = permission.scopes,
         projectId = permission.project?.id,
         organizationId = permission.organization?.id,
-        languageIds = permission.translateLanguages.map { it.id }.toMutableSet(),
+        translateLanguageIds = permission.translateLanguageIds,
+        viewLanguageIds = permission.viewLanguageIds,
+        stateChangeLanguageIds = permission.stateChangeLanguageIds,
         type = permission.type,
         granular = permission.granular
       )

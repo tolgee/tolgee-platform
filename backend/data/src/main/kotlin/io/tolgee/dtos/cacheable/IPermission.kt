@@ -7,7 +7,9 @@ interface IPermission {
   val scopes: Array<Scope>
   val projectId: Long?
   val organizationId: Long?
-  val languageIds: Set<Long>?
+  val translateLanguageIds: Set<Long>?
+  val viewLanguageIds: Set<Long>?
+  val stateChangeLanguageIds: Set<Long>?
   val type: ProjectPermissionType?
   val granular: Boolean?
 }

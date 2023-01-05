@@ -207,8 +207,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
           assertThat(it.computedPermissions.scopes).containsAll(
             ProjectPermissionType.VIEW.availableScopes.toList()
           )
-          assertThat(it.computedPermissions.languageIds).contains(lng1.id)
-          assertThat(it.computedPermissions.languageIds).contains(lng2.id)
+          assertThat(it.computedPermissions.translateLanguageIds).contains(lng1.id)
+          assertThat(it.computedPermissions.translateLanguageIds).contains(lng2.id)
         }
     }
   }

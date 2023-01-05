@@ -12,7 +12,10 @@ class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermissi
   override fun toModel(entity: IPermission): PermissionModel {
     return PermissionModel(
       scopes = entity.scopes,
-      permittedLanguageIds = entity.languageIds,
+      permittedLanguageIds = entity.translateLanguageIds,
+      translateLanguageIds = entity.translateLanguageIds,
+      stateChangeLanguageIds = entity.stateChangeLanguageIds,
+      viewLanguageIds = entity.viewLanguageIds,
       type = entity.type,
       granular = entity.granular ?: false
     )

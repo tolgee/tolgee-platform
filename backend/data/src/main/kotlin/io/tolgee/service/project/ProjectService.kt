@@ -118,7 +118,7 @@ class ProjectService constructor(
       ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
-      perms.directPermissions?.languageIds?.toList()
+      perms.directPermissions?.translateLanguageIds?.toList()
     )
   }
 
