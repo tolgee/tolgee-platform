@@ -1,3 +1,10 @@
+# [2.51.0](https://github.com/tolgee/tolgee-platform/compare/v2.50.0...v2.51.0) (2023-01-06)
+
+
+### Features
+
+* add capterra tracker to signup page ([#1487](https://github.com/tolgee/tolgee-platform/issues/1487)) ([edca848](https://github.com/tolgee/tolgee-platform/commit/edca8488a5a5e454df0391410baabf9e8373b9a6))
+
 # [2.50.0](https://github.com/tolgee/tolgee-platform/compare/v2.49.2...v2.50.0) (2023-01-04)
 
 
