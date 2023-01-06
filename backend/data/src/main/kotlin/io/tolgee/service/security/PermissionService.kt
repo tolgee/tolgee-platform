@@ -200,9 +200,11 @@ class PermissionService(
     projectId: Long,
     userId: Long,
     newPermissionType: ProjectPermissionType,
-    languages: Set<Language>? = null
+    viewLanguages: Set<Language>? = null,
+    translateLanguages: Set<Language>? = null,
+    stateChangeLanguages: Set<Language>? = null
   ): Permission? {
-    validateLanguagePermissions(languages, newPermissionType)
+    validateLanguagePermissions(translateLanguages, newPermissionType)
 
     val data = this.getProjectPermissionData(projectId, userId)
 
@@ -223,7 +225,10 @@ class PermissionService(
     }
 
     permission.type = newPermissionType
-    permission.translateLanguages = languages?.toMutableSet() ?: mutableSetOf()
+    permission.translateLanguages = translateLanguages?.toMutableSet() ?: mutableSetOf()
+    permission.viewLanguages = viewLanguages?.toMutableSet() ?: mutableSetOf()
+    permission.stateChangeLanguages = stateChangeLanguages?.toMutableSet() ?: mutableSetOf()
+
     return cachedPermissionService.save(permission)
   }
 

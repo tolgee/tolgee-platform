@@ -29,7 +29,11 @@ class SecurityService @Autowired constructor(
   lateinit var userAccountService: UserAccountService
 
   fun checkAnyProjectPermission(projectId: Long) {
-    if (getProjectPermissionScopes(projectId).isNullOrEmpty() && !isCurrentUserServerAdmin()) throw PermissionException()
+    if (
+      getProjectPermissionScopes(projectId).isNullOrEmpty() &&
+      !isCurrentUserServerAdmin()
+    )
+      throw PermissionException()
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: Scope, userAccountDto: UserAccountDto) {
