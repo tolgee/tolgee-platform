@@ -1,3 +1,10 @@
+## [2.51.1](https://github.com/tolgee/tolgee-platform/compare/v2.51.0...v2.51.1) (2023-01-06)
+
+
+### Bug Fixes
+
+* Startup import sorted & refactored ([#1480](https://github.com/tolgee/tolgee-platform/issues/1480)) ([ba2c9f9](https://github.com/tolgee/tolgee-platform/commit/ba2c9f91e6802ab797db379c6369c9904af63559))
+
 # [2.51.0](https://github.com/tolgee/tolgee-platform/compare/v2.50.0...v2.51.0) (2023-01-06)
 
 
