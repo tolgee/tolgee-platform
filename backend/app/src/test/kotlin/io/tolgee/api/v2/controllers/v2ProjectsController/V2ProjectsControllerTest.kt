@@ -8,12 +8,10 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.isPermissionScopes
 import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -21,6 +19,8 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+
+typealias LangByTag = (tag: String) -> Long
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -182,54 +182,6 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
           .hasSize(2)
           .containsAll(directPermissionProject.languages.map { it.id })
       }
-  }
-
-  @Test
-  fun setUsersPermissions() {
-    withPermissionsTestData { project, user ->
-      performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
-
-      permissionService.getProjectPermissionScopes(project.id, user)
-        .let { assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
-    }
-  }
-
-  @Test
-  fun `sets user's permissions with languages`() {
-    withPermissionsTestData { project, user ->
-      val languages = project.languages.toList()
-      val lng1 = languages[0]
-      val lng2 = languages[1]
-
-      performAuthPut(
-        "/v2/projects/${project.id}/users/${user.id}" +
-          "/set-permissions/TRANSLATE?" +
-          "languages=${lng1.id}&" +
-          "languages=${lng2.id}",
-        null
-      ).andIsOk
-
-      permissionService.getProjectPermissionData(project.id, user.id)
-        .let {
-          assertThat(it.computedPermissions.scopes).containsAll(
-            ProjectPermissionType.VIEW.availableScopes.toList()
-          )
-          assertThat(it.computedPermissions.translateLanguageIds).contains(lng1.id)
-          assertThat(it.computedPermissions.translateLanguageIds).contains(lng2.id)
-        }
-    }
-  }
-
-  fun withPermissionsTestData(fn: (project: Project, user: UserAccount) -> Unit) {
-    val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val project = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
-    val user = dbPopulator.createUserIfNotExists("jirina")
-    organizationRoleService.grantMemberRoleToUser(user, project.organizationOwner!!)
-
-    permissionService.create(Permission(user = user, project = project, type = ProjectPermissionType.VIEW))
-
-    loginAsUser(usersAndOrganizations[1].name)
-    fn(project, user)
   }
 
   @Test

@@ -5,6 +5,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -46,7 +47,6 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
-import io.tolgee.service.security.SecurityService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.AutoTranslationService
 import org.springdoc.api.annotations.ParameterObject
@@ -89,7 +89,6 @@ V2ProjectsController(
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
-  private val securityService: SecurityService,
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
@@ -176,15 +175,28 @@ V2ProjectsController(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
+    @Schema(deprecated = true, description = "Deprecated -> use translate languages")
     @RequestParam languages: MutableSet<Long>?,
+
+    @Schema(deprecated = true, description = "Languages user can translate to")
+    @RequestParam translateLanguages: MutableSet<Long>?,
+
+    @Schema(deprecated = true, description = "Languages user can view")
+    @RequestParam viewLanguages: MutableSet<Long>?,
+
+    @Schema(deprecated = true, description = "Languages user can change translation state (review)")
+    @RequestParam stateChangeLanguages: MutableSet<Long>?,
   ) {
     checkNotCurrentUser(userId)
-    val languageEntities = getLanguagesAndCheckFromProject(languages, projectId)
     permissionService.setUserDirectPermission(
       projectId = projectId,
       userId = userId,
       newPermissionType = permissionType,
-      languages = languageEntities.toSet()
+      viewLanguages = getLanguagesAndCheckFromProject(viewLanguages, projectId),
+      translateLanguages = getLanguagesAndCheckFromProject(translateLanguages ?: languages, projectId),
+      stateChangeLanguages = getLanguagesAndCheckFromProject(
+        stateChangeLanguages, projectId
+      )
     )
   }
 
@@ -197,7 +209,7 @@ V2ProjectsController(
   private fun getLanguagesAndCheckFromProject(
     languages: Set<Long>?,
     projectId: Long
-  ): List<Language> {
+  ): Set<Language> {
     languages?.let {
       val languageEntities = languageService.findByIdIn(languages)
       languageEntities.forEach {
@@ -205,9 +217,9 @@ V2ProjectsController(
           throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
         }
       }
-      return languageEntities
+      return languageEntities.toSet()
     }
-    return listOf()
+    return setOf()
   }
 
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
@@ -298,7 +310,7 @@ V2ProjectsController(
     val params = CreateProjectInvitationParams(
       project = projectHolder.projectEntity,
       type = invitation.type!!,
-      languages = languages,
+      languages = languages.toList(),
       email = invitation.email,
       name = invitation.name
     )
