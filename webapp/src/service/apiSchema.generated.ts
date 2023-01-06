@@ -345,12 +345,6 @@ export interface paths {
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
-  "/v2/projects/{projectId}/stats/daily-activity": {
-    get: operations["getProjectDailyActivity"];
-  };
-  "/v2/projects/{projectId}/stats": {
-    get: operations["getProjectStats"];
-  };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
@@ -387,6 +381,12 @@ export interface paths {
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
   };
+  "/v2/projects/{projectId}/stats/daily-activity": {
+    get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/stats": {
+    get: operations["getProjectStats"];
+  };
   "/v2/projects/{projectId}/invitations": {
     get: operations["getProjectInvitations"];
   };
@@ -398,6 +398,9 @@ export interface paths {
   };
   "/v2/preferred-organization": {
     get: operations["getPreferred"];
+  };
+  "/v2/pats/current": {
+    get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}/projects-with-stats": {
     get: operations["getAllWithStatistics_1"];
@@ -459,7 +462,7 @@ export interface paths {
     get: operations["get_12"];
   };
   "/v2/api-keys/current": {
-    get: operations["getCurrent"];
+    get: operations["getCurrent_1"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -851,12 +854,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      id: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
-      description: string;
-      id: number;
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -927,15 +930,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
+      id: number;
+      description: string;
       username?: string;
-      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
+      lastUsedAt?: number;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
-      description: string;
-      id: number;
     };
     OldEditKeyDto: {
       currentName: string;
@@ -1191,6 +1194,7 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
+      capterraTracker?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1218,33 +1222,6 @@ export interface components {
         tags?: components["schemas"]["TagModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    LanguageStatsModel: {
-      languageId?: number;
-      languageTag?: string;
-      languageName?: string;
-      languageOriginalName?: string;
-      languageFlagEmoji?: string;
-      translatedKeyCount: number;
-      translatedWordCount: number;
-      translatedPercentage: number;
-      reviewedKeyCount: number;
-      reviewedWordCount: number;
-      reviewedPercentage: number;
-      untranslatedKeyCount: number;
-      untranslatedWordCount: number;
-      untranslatedPercentage: number;
-    };
-    ProjectStatsModel: {
-      projectId: number;
-      languageCount: number;
-      keyCount: number;
-      baseWordsCount: number;
-      translatedPercentage: number;
-      reviewedPercentage: number;
-      membersCount: number;
-      tagCount: number;
-      languageStats: components["schemas"]["LanguageStatsModel"][];
     };
     CreditBalanceModel: {
       creditBalance: number;
@@ -1460,6 +1437,33 @@ export interface components {
       slug: string;
       id: number;
     };
+    LanguageStatsModel: {
+      languageId?: number;
+      languageTag?: string;
+      languageName?: string;
+      languageOriginalName?: string;
+      languageFlagEmoji?: string;
+      translatedKeyCount: number;
+      translatedWordCount: number;
+      translatedPercentage: number;
+      reviewedKeyCount: number;
+      reviewedWordCount: number;
+      reviewedPercentage: number;
+      untranslatedKeyCount: number;
+      untranslatedWordCount: number;
+      untranslatedPercentage: number;
+    };
+    ProjectStatsModel: {
+      projectId: number;
+      languageCount: number;
+      keyCount: number;
+      baseWordsCount: number;
+      translatedPercentage: number;
+      reviewedPercentage: number;
+      membersCount: number;
+      tagCount: number;
+      languageStats: components["schemas"]["LanguageStatsModel"][];
+    };
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
@@ -1530,6 +1534,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PatWithUserModel: {
+      user: components["schemas"]["SimpleUserAccountModel"];
+      id: number;
+      description: string;
+      createdAt: number;
+      updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
+    };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
@@ -1581,15 +1594,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+      id: number;
+      description: string;
       username?: string;
-      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
+      lastUsedAt?: number;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
-      description: string;
-      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5560,60 +5573,6 @@ export interface operations {
       };
     };
   };
-  getProjectDailyActivity: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": { [key: string]: number };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getProjectStats: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["ProjectStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   getProjectCredits: {
     parameters: {
       path: {
@@ -5885,6 +5844,16 @@ export interface operations {
         languages: string[];
         projectId: number;
       };
+      query: {
+        /**
+         * Delimiter to structure response content.
+         *
+         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
+         *
+         * When null, resulting file will be a flat key-value object.
+         */
+        structureDelimiter?: string;
+      };
     };
     responses: {
       /** OK */
@@ -6000,6 +5969,60 @@ export interface operations {
       };
     };
   };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getProjectInvitations: {
     parameters: {
       path: {
@@ -6096,6 +6119,28 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getCurrent: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PatWithUserModel"];
         };
       };
       /** Bad Request */
@@ -6713,7 +6758,7 @@ export interface operations {
       };
     };
   };
-  getCurrent: {
+  getCurrent_1: {
     parameters: {};
     responses: {
       /** OK */

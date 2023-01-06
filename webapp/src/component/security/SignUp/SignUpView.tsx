@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { styled, useMediaQuery } from '@mui/material';
+import { styled, useMediaQuery, Box } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -136,6 +136,7 @@ const SignUpView: FunctionComponent = () => {
           )
         }
       />
+      {config.capterraTracker && <img src={config.capterraTracker} />}
     </DashboardPage>
   );
 
