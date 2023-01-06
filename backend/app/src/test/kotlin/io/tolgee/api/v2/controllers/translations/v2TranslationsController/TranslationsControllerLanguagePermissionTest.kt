@@ -27,42 +27,42 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
   @ProjectJWTAuthTestMethod
   @Test
   fun `denies access for user without the language permission - update`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("de").andIsForbidden
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with language permission - update`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performUpdate("en").andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with all language permissions - update`() {
-    userAccount = testData.allLangUser
+    userAccount = testData.translateAllUser
     performUpdate("en").andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `denies access for user without the language permission - set state`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performSetState(testData.germanTranslation.id).andIsForbidden
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with language permission - set state`() {
-    userAccount = testData.enOnlyUser
+    userAccount = testData.translateEnOnlyUser
     performSetState(testData.englishTranslation.id).andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `allows access for user with all language permissions - set state`() {
-    userAccount = testData.allLangUser
+    userAccount = testData.translateAllUser
     performSetState(testData.englishTranslation.id).andIsOk
   }
 

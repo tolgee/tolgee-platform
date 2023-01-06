@@ -34,8 +34,10 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query(
     """select distinct p
     from Permission p
-    join p.translateLanguages l on l = :language
-    join fetch p.translateLanguages allLangs
+    left join p.translateLanguages tl on tl = :language
+    left join p.viewLanguages vl on vl = :language
+    left join p.stateChangeLanguages scl on scl = :language
+    where tl.id is not null or vl.id is not null or scl.id is not null
   """
   )
   fun findAllByPermittedLanguage(language: Language): List<Permission>
