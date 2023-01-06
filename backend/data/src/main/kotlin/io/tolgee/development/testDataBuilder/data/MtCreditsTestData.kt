@@ -13,8 +13,7 @@ class MtCreditsTestData : BaseTestData() {
     root.addOrganization {
       name = "Org"
       organization = this
-      basePermission!!.type = TRANSLATE
-      basePermission!!.scopes = TRANSLATE.availableScopes
+      basePermission.type = TRANSLATE
     }.apply {
       addRole {
         this.user = this@MtCreditsTestData.user

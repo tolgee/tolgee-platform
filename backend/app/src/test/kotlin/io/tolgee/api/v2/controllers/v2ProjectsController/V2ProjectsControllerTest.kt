@@ -48,12 +48,19 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun `get all has language permissions`() {
     val baseTestData = BaseTestData()
-    baseTestData.root.apply {
-      data.projects[0].data.permissions[0].self.translateLanguages = mutableSetOf(baseTestData.englishLanguage)
-    }
-    testDataService.saveTestData(baseTestData.root)
 
-    userAccount = baseTestData.user
+    var franta: UserAccount? = null
+    baseTestData.root.apply {
+      franta = addUserAccount { username = "franta" }.self
+      data.projects[0].addPermission {
+        user = franta
+        type = ProjectPermissionType.TRANSLATE
+        translateLanguages = mutableSetOf(baseTestData.englishLanguage)
+      }
+    }
+
+    testDataService.saveTestData(baseTestData.root)
+    userAccount = franta
 
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(1)
@@ -106,7 +113,8 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     userAccount = testData.userWithTranslatePermission
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson.node("_embedded.projects").let {
+      .andIsOk.andAssertThatJson.node("_embedded.projects")
+      .let {
         it.isArray.hasSize(1)
         it.node("[0].computedPermission.permittedLanguageIds").isArray.hasSize(2).containsAll(
           mutableListOf(
@@ -283,7 +291,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
     permissionService.getProjectPermissionScopes(repo.id, user)
-      .let { assertThat(it).isNull() }
+      .let { assertThat(it).isEmpty() }
   }
 
   @Test

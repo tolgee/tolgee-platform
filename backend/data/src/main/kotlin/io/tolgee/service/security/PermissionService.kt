@@ -206,7 +206,9 @@ class PermissionService(
 
     val data = this.getProjectPermissionData(projectId, userId)
 
-    data.computedPermissions.scopes ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    if (data.computedPermissions.scopes.isEmpty()) {
+      throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    }
 
     data.organizationRole?.let {
       if (data.organizationRole == OrganizationRoleType.OWNER) {
