@@ -193,7 +193,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthPut(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}/set-state/RESOLVED",
       null
-    ).andAssertThatJson {
+    ).andIsOk.andAssertThatJson {
       node("text").isEqualTo("First comment")
       node("state").isEqualTo("RESOLVED")
     }

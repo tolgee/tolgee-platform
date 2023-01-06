@@ -97,7 +97,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     loginAsUser(users[1].name)
 
-    performAuthGet("/v2/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
+    performAuthGet("/v2/organizations?size=100&sort=basePermission,desc&sort=name,desc")
+      .andIsOk
       .andPrettyPrint
       .andAssertThatJson
       .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")

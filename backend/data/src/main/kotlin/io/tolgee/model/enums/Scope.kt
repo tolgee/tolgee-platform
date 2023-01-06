@@ -61,13 +61,16 @@ enum class Scope(
           listOf(HierarchyItem(MEMBERS_VIEW))
         ),
         HierarchyItem(
+          TRANSLATION_COMMENTS_SET_STATE,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        ),
+        HierarchyItem(
+          TRANSLATION_COMMENTS_ADD,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        ),
+        HierarchyItem(
           TRANSLATION_COMMENTS_EDIT,
-          listOf(
-            HierarchyItem(
-              TRANSLATION_COMMENTS_ADD,
-              listOf(HierarchyItem(TRANSLATIONS_VIEW))
-            ),
-          )
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
           TRANSLATION_STATE_EDIT, listOf()
