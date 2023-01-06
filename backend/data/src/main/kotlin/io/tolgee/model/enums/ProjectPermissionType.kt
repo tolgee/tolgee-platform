@@ -11,6 +11,16 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATION_COMMENTS_ADD,
       Scope.TRANSLATION_COMMENTS_SET_STATE,
+    )
+  ),
+  REVIEW(
+    arrayOf(
+      Scope.TRANSLATIONS_VIEW,
+      Scope.TRANSLATIONS_EDIT,
+      Scope.SCREENSHOTS_VIEW,
+      Scope.ACTIVITY_VIEW,
+      Scope.TRANSLATION_COMMENTS_ADD,
+      Scope.TRANSLATION_COMMENTS_SET_STATE,
       Scope.TRANSLATION_STATE_EDIT
     )
   ),

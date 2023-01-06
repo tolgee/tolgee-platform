@@ -95,7 +95,7 @@ class ApiKeyService(
   fun getAvailableScopes(userAccountId: Long, project: Project): Array<Scope> {
     val permittedScopes = permissionService.getProjectPermissionScopes(project.id, userAccountId)
       ?: throw NotFoundException()
-    return Scope.getUnpackedScopes(permittedScopes)
+    return Scope.expand(permittedScopes)
   }
 
   fun editApiKey(apiKey: ApiKey, dto: V2EditApiKeyDto): ApiKey {

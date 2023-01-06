@@ -35,7 +35,7 @@ class LanguagePermissionsE2eDataController(
   fun cleanup() {
     val data = LanguagePermissionsTestData()
 
-    listOf(data.allLangUser.username, data.enOnlyUser.username, data.bothLangsExplicitUser.username).forEach { user ->
+    listOf(data.translateAllUser.username, data.translateEnOnlyUser.username, data.translateAllExplicitUser.username).forEach { user ->
       userAccountService.find(user)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)

@@ -49,7 +49,7 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    permissionService.onLanguageDeleted(language)
+    permissionService.removeLanguageFromPermissions(language)
     languageRepository.delete(language)
     entityManager.flush()
   }

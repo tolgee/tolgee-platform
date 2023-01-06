@@ -24,6 +24,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,6 +37,8 @@ class PermissionService(
   private val userAccountService: UserAccountService,
   @Lazy
   private val userPreferencesService: UserPreferencesService,
+  @Lazy
+  private val applicationContext: ApplicationContext
 ) {
   @set:Autowired
   @set:Lazy
@@ -62,7 +65,7 @@ class PermissionService(
 
   fun getProjectPermissionScopes(projectId: Long, userAccountId: Long): Array<Scope>? {
     val scopes = getProjectPermissionData(projectId, userAccountId).computedPermissions.scopes
-    return Scope.getUnpackedScopes(scopes)
+    return Scope.expand(scopes)
   }
 
   fun getProjectPermissionData(project: ProjectDto, userAccountId: Long): ProjectPermissionData {
@@ -242,7 +245,11 @@ class PermissionService(
   }
 
   fun saveAll(permissions: Iterable<Permission>) {
-    permissions.forEach { cachedPermissionService.save(it) }
+    permissions.forEach { this.save(it) }
+  }
+
+  fun save(permission: Permission) {
+    cachedPermissionService.save(permission)
   }
 
   fun revoke(projectId: Long, userId: Long) {
@@ -260,21 +267,10 @@ class PermissionService(
     userPreferencesService.refreshPreferredOrganization(userId)
   }
 
-  fun onLanguageDeleted(language: Language) {
+  fun removeLanguageFromPermissions(language: Language) {
     val permissions = permissionRepository.findAllByPermittedLanguage(language)
     permissions.forEach { permission ->
-      val hasAccessOnlyToDeletedLanguage = permission.translateLanguages.size == 1 &&
-        permission.translateLanguages.first().id == language.id
-
-      if (hasAccessOnlyToDeletedLanguage) {
-        permission.translateLanguages = mutableSetOf()
-        permission.type = ProjectPermissionType.VIEW
-        cachedPermissionService.save(permission)
-        return@forEach
-      }
-
-      permission.translateLanguages.removeIf { it.id == language.id }
-      cachedPermissionService.save(permission)
+      LanguageDeletedPermissionUpdater(applicationContext = applicationContext, permission, language).invoke()
     }
   }
 

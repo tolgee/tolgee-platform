@@ -254,7 +254,7 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `returns correct permitted languages for current`() {
     val testData = LanguagePermissionsTestData()
     testDataService.saveTestData(testData.root)
-    userAccount = testData.bothLangsExplicitUser
+    userAccount = testData.translateAllExplicitUser
     performAuthGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
       .andPrettyPrint.andAssertThatJson {
         node("id").isValidId

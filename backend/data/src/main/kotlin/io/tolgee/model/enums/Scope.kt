@@ -27,6 +27,8 @@ enum class Scope(
   TRANSLATION_STATE_EDIT("translation-state.edit")
   ;
 
+  fun expand() = Scope.expand(this)
+
   companion object {
     val hierarchy = HierarchyItem(
       ADMIN,
@@ -73,14 +75,14 @@ enum class Scope(
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
-          TRANSLATION_STATE_EDIT, listOf()
+          TRANSLATION_STATE_EDIT, listOf(HierarchyItem(TRANSLATIONS_VIEW))
         )
       )
     )
 
-    private fun getSelfAndRequirements(item: HierarchyItem): MutableSet<Scope> {
+    private fun expand(item: HierarchyItem): MutableSet<Scope> {
       val descendants = item.requires.flatMap {
-        getSelfAndRequirements(it)
+        expand(it)
       }.toMutableSet()
 
       descendants.add(item.scope)
@@ -100,9 +102,9 @@ enum class Scope(
       return getScopeHierarchyItems(root = hierarchy, scope).toTypedArray()
     }
 
-    fun getSelfAndRequirements(scope: Scope): Array<Scope> {
+    fun expand(scope: Scope): Array<Scope> {
       val hierarchyItems = getScopeHierarchyItems(scope)
-      return hierarchyItems.flatMap { getSelfAndRequirements(it) }.toTypedArray()
+      return hierarchyItems.flatMap { expand(it) }.toTypedArray()
     }
 
     /**
@@ -112,8 +114,8 @@ enum class Scope(
      * ADMIN scope, (TRANSLATION_VIEW, KEYS_EDIT, etc.)
      *
      */
-    fun getUnpackedScopes(permittedScopes: Array<Scope>): Array<Scope> {
-      return permittedScopes.flatMap { getSelfAndRequirements(it).toList() }.toSet().toTypedArray()
+    fun expand(permittedScopes: Array<Scope>): Array<Scope> {
+      return permittedScopes.flatMap { expand(it).toList() }.toSet().toTypedArray()
     }
 
     fun fromValue(value: String): Scope {
