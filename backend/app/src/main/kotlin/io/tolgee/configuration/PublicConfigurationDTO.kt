@@ -31,6 +31,7 @@ class PublicConfigurationDTO(
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val openReplayApiKey = properties.openReplayApiKey
   val chatwootToken = properties.chatwootToken
+  val capterraTracker = properties.capterraTracker
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
