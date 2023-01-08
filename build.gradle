@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2020. Tolgee
  */
-
 buildscript {
     repositories {
         mavenCentral()
@@ -149,3 +148,4 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 subprojects {
     task allDeps(type: DependencyReportTask) {}
 }
+
