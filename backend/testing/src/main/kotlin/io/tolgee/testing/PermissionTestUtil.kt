@@ -11,6 +11,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
+import org.springframework.test.web.servlet.ResultActions
 
 typealias LangByTag = (tag: String) -> Long
 
@@ -29,6 +30,23 @@ class PermissionTestUtil(
   private val dbPopulator: DbPopulatorReal
     get() = applicationContext.getBean(DbPopulatorReal::class.java)
 
+  fun performSetPermissions(
+    type: String,
+    getQueryFn: (langByTag: LangByTag) -> String,
+  ): ResultActions {
+    return withPermissionsTestData { project, user ->
+      val languages = project.languages.toList()
+      val langByTag = { tag: String -> languages.find { it.tag == tag }!!.id }
+      val query = getQueryFn(langByTag)
+
+      test.performAuthPut(
+        "/v2/projects/${project.id}/users/${user.id}" +
+          "/set-permissions/$type?$query",
+        null
+      )
+    }
+  }
+
   fun checkSetPermissionsWithLanguages(
     type: String,
     getQueryFn: (langByTag: LangByTag) -> String,
@@ -45,14 +63,11 @@ class PermissionTestUtil(
         null
       ).andIsOk
 
-      permissionService.getProjectPermissionData(project.id, user.id)
-        .let {
-          checkFn(it, langByTag)
-        }
+      checkFn(permissionService.getProjectPermissionData(project.id, user.id), langByTag)
     }
   }
 
-  fun withPermissionsTestData(fn: (project: Project, user: UserAccount) -> Unit) {
+  fun <T> withPermissionsTestData(fn: (project: Project, user: UserAccount) -> T): T {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
 
     val project = usersAndOrganizations[1]
@@ -66,6 +81,6 @@ class PermissionTestUtil(
     permissionService.create(Permission(user = user, project = project, type = ProjectPermissionType.VIEW))
 
     test.loginAsUser(usersAndOrganizations[1].name)
-    fn(project, user)
+    return fn(project, user)
   }
 }

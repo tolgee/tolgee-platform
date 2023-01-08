@@ -145,7 +145,10 @@ class Permission(
       @PrePersist
       @PreUpdate
       fun prePersist(permission: Permission) {
-        if (!(permission._scopes.isNullOrEmpty() xor (permission.type == null))) {
+        if (permission._scopes?.isEmpty() == true) {
+          permission._scopes = null
+        }
+        if (!((permission._scopes == null) xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
       }

@@ -27,6 +27,11 @@ class LanguagePermissionsTestData {
     addProject()
   }
 
+  val reviewEnOnlyUser = addUserAccountWithPermissions {
+    translateLanguages = mutableSetOf(englishLanguage)
+    type = ProjectPermissionType.REVIEW
+  }
+
   val translateEnOnlyUser = addUserAccountWithPermissions {
     translateLanguages = mutableSetOf(englishLanguage)
     type = ProjectPermissionType.TRANSLATE
@@ -34,6 +39,10 @@ class LanguagePermissionsTestData {
 
   val translateAllUser = addUserAccountWithPermissions {
     type = ProjectPermissionType.TRANSLATE
+  }
+
+  val reviewAllUser = addUserAccountWithPermissions {
+    type = ProjectPermissionType.REVIEW
   }
 
   val translateAllExplicitUser = addUserAccountWithPermissions {
