@@ -10,13 +10,13 @@ data class ProjectInviteUserDto(
   @field:NotNull
   var type: ProjectPermissionType? = null,
 
-  @Schema(
-    description = """IDs of languages to allow user to translate to with TRANSLATE permission.
+  override var languages: Set<Long>? = null,
 
-Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
-  """
-  )
-  var languages: Set<Long>? = null,
+  override var translateLanguages: Set<Long>? = null,
+
+  override var viewLanguages: Set<Long>? = null,
+
+  override var stateChangeLanguages: Set<Long>? = null,
 
   @Schema(
     description = """Email to send invitation to"""
@@ -30,4 +30,4 @@ Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
   )
   @field:Size(max = 250)
   val name: String? = null
-)
+) : RequestWithLanguagePermissions

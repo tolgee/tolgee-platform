@@ -40,7 +40,7 @@ class V2InvitationController @Autowired constructor(
     invitation.permission?.let {
       securityService.checkProjectPermission(
         invitation.permission!!.project!!.id,
-        Scope.MEMBERS_EDIT
+        Scope.ADMIN
       )
     }
 

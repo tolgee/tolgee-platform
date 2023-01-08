@@ -82,8 +82,8 @@ class LanguageDeletedPermissionUpdater(
   }
 
   private fun handleStateChangeLanguagesGranular() {
-    if (shouldLowerPermissions(permission.stateChangeLanguages, Scope.TRANSLATION_STATE_EDIT)) {
-      permission.scopes = scopesWithout(Scope.TRANSLATION_STATE_EDIT)
+    if (shouldLowerPermissions(permission.stateChangeLanguages, Scope.TRANSLATIONS_STATE_EDIT)) {
+      permission.scopes = scopesWithout(Scope.TRANSLATIONS_STATE_EDIT)
     }
   }
 

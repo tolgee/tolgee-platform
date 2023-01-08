@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.fixtures.andAssertThatJson
@@ -210,7 +211,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
       CreateProjectInvitationParams(
         project = project,
         type = ProjectPermissionType.TRANSLATE,
-        languages = project.languages.toList(),
+        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
         email = "a@a.a"
       )

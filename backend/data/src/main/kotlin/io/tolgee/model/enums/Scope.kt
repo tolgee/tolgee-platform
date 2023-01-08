@@ -8,6 +8,10 @@ enum class Scope(
   @get:JsonValue
   var value: String
 ) {
+  // !!!!
+  // Don't change the order of the enum, it's stored as ORDINAL is ApiKey entity
+  // !!!!
+
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
   KEYS_EDIT("keys.edit"),
@@ -19,12 +23,11 @@ enum class Scope(
   LANGUAGES_EDIT("languages.edit"),
   ADMIN("admin"),
   PROJECT_EDIT("users.view"),
-  MEMBERS_EDIT("permissions.edit"),
   MEMBERS_VIEW("users.view"),
-  TRANSLATION_COMMENTS_ADD("translation-comments.add"),
-  TRANSLATION_COMMENTS_EDIT("translation-comments.edit"),
-  TRANSLATION_COMMENTS_SET_STATE("translation-comments.set-state"),
-  TRANSLATION_STATE_EDIT("translation-state.edit")
+  TRANSLATIONS_COMMENTS_ADD("translation-comments.add"),
+  TRANSLATIONS_COMMENTS_EDIT("translation-comments.edit"),
+  TRANSLATIONS_COMMENTS_SET_STATE("translation-comments.set-state"),
+  TRANSLATIONS_STATE_EDIT("translations.state-edit")
   ;
 
   fun expand() = Scope.expand(this)
@@ -58,24 +61,21 @@ enum class Scope(
         HierarchyItem(IMPORT),
         HierarchyItem(LANGUAGES_EDIT),
         HierarchyItem(PROJECT_EDIT),
+        HierarchyItem(MEMBERS_VIEW),
         HierarchyItem(
-          MEMBERS_EDIT,
-          listOf(HierarchyItem(MEMBERS_VIEW))
-        ),
-        HierarchyItem(
-          TRANSLATION_COMMENTS_SET_STATE,
+          TRANSLATIONS_COMMENTS_SET_STATE,
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
-          TRANSLATION_COMMENTS_ADD,
+          TRANSLATIONS_COMMENTS_ADD,
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
-          TRANSLATION_COMMENTS_EDIT,
+          TRANSLATIONS_COMMENTS_EDIT,
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
-          TRANSLATION_STATE_EDIT, listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          TRANSLATIONS_STATE_EDIT, listOf(HierarchyItem(TRANSLATIONS_VIEW))
         )
       )
     )
@@ -116,6 +116,10 @@ enum class Scope(
      */
     fun expand(permittedScopes: Array<Scope>): Array<Scope> {
       return permittedScopes.flatMap { expand(it).toList() }.toSet().toTypedArray()
+    }
+
+    fun expand(permittedScopes: Collection<Scope>): Array<Scope> {
+      return expand(permittedScopes.toTypedArray())
     }
 
     fun fromValue(value: String): Scope {
