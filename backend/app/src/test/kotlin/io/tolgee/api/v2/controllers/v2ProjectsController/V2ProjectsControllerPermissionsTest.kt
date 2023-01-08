@@ -50,7 +50,7 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
         "viewLanguages=${getLang("de")}&" +
         "stateChangeLanguages=${getLang("en")}"
     }) { data, getLangId ->
-      Assertions.assertThat(it.computedPermissions.scopes).containsAll(
+      Assertions.assertThat(data.computedPermissions.scopes).containsAll(
         ProjectPermissionType.TRANSLATE.availableScopes.toList()
       )
       Assertions.assertThat(data.computedPermissions.translateLanguageIds)

@@ -2,10 +2,9 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.security.InternalController
-import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,29 +18,14 @@ import org.springframework.web.bind.annotation.RestController
 @Transactional
 @InternalController
 class LanguagePermissionsE2eDataController(
-  private val testDataService: TestDataService,
-  private val projectService: ProjectService,
-  private val userAccountService: UserAccountService,
-) {
+  private val testDataService: TestDataService
+) : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData() {
-    val data = LanguagePermissionsTestData()
-    testDataService.saveTestData(data.root)
+    testDataService.saveTestData(testData)
   }
 
-  @GetMapping(value = ["/clean"])
-  @Transactional
-  fun cleanup() {
-    val data = LanguagePermissionsTestData()
-
-    listOf(data.translateAllUser.username, data.translateEnOnlyUser.username, data.translateAllExplicitUser.username).forEach { user ->
-      userAccountService.find(user)?.let {
-        projectService.findAllPermitted(it).forEach { repo ->
-          projectService.deleteProject(repo.id!!)
-        }
-        userAccountService.delete(it)
-      }
-    }
-  }
+  override val testData: TestDataBuilder
+    get() = LanguagePermissionsTestData().root
 }
