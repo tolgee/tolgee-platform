@@ -212,8 +212,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @AccessWithApiKey([Scope.TRANSLATION_STATE_EDIT])
-  @AccessWithProjectPermission(Scope.TRANSLATION_STATE_EDIT)
+  @AccessWithApiKey([Scope.TRANSLATIONS_STATE_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {

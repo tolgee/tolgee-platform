@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -63,7 +64,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT,
+        null
       )
     )
 
@@ -78,7 +80,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        ProjectPermissionType.EDIT
+        ProjectPermissionType.EDIT, null
       )
     ).code
 
@@ -97,7 +99,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
       CreateProjectInvitationParams(
         project,
         ProjectPermissionType.TRANSLATE,
-        project.languages.toList()
+        LanguagePermissions(translate = project.languages, null, null)
       )
     ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
@@ -123,7 +125,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
       CreateProjectInvitationParams(
         project = project,
         type = ProjectPermissionType.TRANSLATE,
-        languages = project.languages.toList(),
+        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
         email = "a@a.a"
       )

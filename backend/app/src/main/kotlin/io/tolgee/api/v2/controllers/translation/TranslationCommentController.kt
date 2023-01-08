@@ -116,8 +116,8 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
-  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_SET_STATE)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_SET_STATE])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_SET_STATE)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_SET_STATE])
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
   fun setState(
     @PathVariable commentId: Long,
@@ -148,18 +148,18 @@ class TranslationCommentController(
 
   private fun checkEditPermission() {
     if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(Scope.TRANSLATION_COMMENTS_EDIT), authenticationFacade.apiKey)
+      securityService.checkApiKeyScopes(setOf(Scope.TRANSLATIONS_COMMENTS_EDIT), authenticationFacade.apiKey)
       return
     }
     securityService.checkProjectPermission(
       projectHolder.project.id,
-      Scope.TRANSLATION_COMMENTS_EDIT
+      Scope.TRANSLATIONS_COMMENTS_EDIT
     )
   }
 
   @PostMapping(value = ["/create-comment"])
-  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_ADD)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_ADD])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_ADD])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
@@ -193,8 +193,8 @@ class TranslationCommentController(
   }
 
   @PostMapping(value = ["{translationId}/comments"])
-  @AccessWithProjectPermission(Scope.TRANSLATION_COMMENTS_ADD)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATION_COMMENTS_ADD])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
+  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_ADD])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)

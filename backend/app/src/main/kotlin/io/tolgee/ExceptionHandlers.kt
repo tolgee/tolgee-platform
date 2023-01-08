@@ -57,8 +57,6 @@ class ExceptionHandlers {
   fun handleValidationExceptions(
     ex: MethodArgumentTypeMismatchException
   ): ResponseEntity<ErrorResponseBody> {
-    ex.parameter.parameterName
-
     return ResponseEntity(
       ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
       HttpStatus.BAD_REQUEST

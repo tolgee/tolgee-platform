@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.EnumArrayType
 import io.tolgee.dtos.cacheable.IPermission
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import org.hibernate.annotations.Parameter
@@ -102,7 +103,8 @@ class Permission(
     invitation: Invitation? = null,
     project: Project? = null,
     organization: Organization? = null,
-    type: ProjectPermissionType = ProjectPermissionType.VIEW
+    type: ProjectPermissionType = ProjectPermissionType.VIEW,
+    languagePermissions: LanguagePermissions? = null
   ) : this(
     id = id,
     user = user,
@@ -112,6 +114,9 @@ class Permission(
     this.project = project
     this.type = type
     this.organization = organization
+    this.viewLanguages = languagePermissions?.view?.toMutableSet() ?: mutableSetOf()
+    this.translateLanguages = languagePermissions?.translate?.toMutableSet() ?: mutableSetOf()
+    this.stateChangeLanguages = languagePermissions?.stateChange?.toMutableSet() ?: mutableSetOf()
   }
 
   @ManyToOne

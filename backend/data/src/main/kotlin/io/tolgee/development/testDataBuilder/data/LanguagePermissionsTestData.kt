@@ -77,13 +77,13 @@ class LanguagePermissionsTestData {
   }
 
   val stateChangeScopeUser = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATION_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
+    scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
     type = null
     stateChangeLanguages = mutableSetOf(englishLanguage)
   }
 
   val stateChangeScopeUserEnForAll = addUserAccountWithPermissions {
-    scopes = arrayOf(Scope.TRANSLATION_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
+    scopes = arrayOf(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATIONS_EDIT)
     type = null
     translateLanguages = mutableSetOf(englishLanguage)
     viewLanguages = mutableSetOf(englishLanguage)

@@ -9,8 +9,8 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_EDIT,
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
-      Scope.TRANSLATION_COMMENTS_ADD,
-      Scope.TRANSLATION_COMMENTS_SET_STATE,
+      Scope.TRANSLATIONS_COMMENTS_ADD,
+      Scope.TRANSLATIONS_COMMENTS_SET_STATE,
     )
   ),
   REVIEW(
@@ -19,9 +19,9 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_EDIT,
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
-      Scope.TRANSLATION_COMMENTS_ADD,
-      Scope.TRANSLATION_COMMENTS_SET_STATE,
-      Scope.TRANSLATION_STATE_EDIT
+      Scope.TRANSLATIONS_COMMENTS_ADD,
+      Scope.TRANSLATIONS_COMMENTS_SET_STATE,
+      Scope.TRANSLATIONS_STATE_EDIT
     )
   ),
   EDIT(
@@ -34,8 +34,8 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.SCREENSHOTS_DELETE,
       Scope.ACTIVITY_VIEW,
       Scope.IMPORT,
-      Scope.TRANSLATION_COMMENTS_ADD,
-      Scope.TRANSLATION_STATE_EDIT
+      Scope.TRANSLATIONS_COMMENTS_ADD,
+      Scope.TRANSLATIONS_STATE_EDIT
     )
   ),
   MANAGE(

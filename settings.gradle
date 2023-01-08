@@ -74,3 +74,6 @@ project(':testing').projectDir = new File('backend/testing')
 
 include ':misc'
 project(':misc').projectDir = new File('backend/misc')
+
+include ':ee'
+project(':ee').projectDir = new File('ee/backend')

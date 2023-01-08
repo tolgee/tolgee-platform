@@ -3,15 +3,9 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Caches
-import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.PermissionDto
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.Invitation
-import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,34 +35,6 @@ class CachedPermissionService(
   )
   fun delete(permission: Permission) {
     permissionRepository.delete(permission)
-  }
-
-  @CacheEvict(
-    cacheNames = [Caches.PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
-  )
-  fun createForInvitation(
-    invitation: Invitation,
-    project: Project,
-    type: ProjectPermissionType,
-    languages: Collection<Language>?
-  ): Permission {
-    validateTranslatePermissionLanguages(languages, type)
-    return Permission(invitation = invitation, project = project, type = type).let { permission ->
-      languages?.let {
-        permission.translateLanguages = languages.toMutableSet()
-      }
-      permissionRepository.save(permission)
-    }
-  }
-
-  private fun validateTranslatePermissionLanguages(
-    languages: Collection<Language>?,
-    type: ProjectPermissionType
-  ) {
-    if (!languages.isNullOrEmpty() && type != ProjectPermissionType.TRANSLATE) {
-      throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
-    }
   }
 
   @Cacheable(
@@ -110,7 +76,7 @@ class CachedPermissionService(
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
-    key = "{#result.user?.id, #result.project?.id, #permission.organization?.id}"
+    key = "{#result.user?.id, #result.project?.id, #result.organization?.id}"
   )
   fun save(permission: Permission): Permission {
     return permissionRepository.save(permission)

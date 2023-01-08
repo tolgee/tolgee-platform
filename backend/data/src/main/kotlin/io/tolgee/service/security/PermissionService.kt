@@ -8,6 +8,8 @@ import io.tolgee.dtos.ProjectPermissionData
 import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.cacheable.PermissionDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
@@ -181,11 +183,19 @@ class PermissionService(
 
   fun createForInvitation(
     invitation: Invitation,
-    project: Project,
-    type: ProjectPermissionType,
-    languages: Collection<Language>?
+    params: CreateProjectInvitationParams
   ): Permission {
-    return cachedPermissionService.createForInvitation(invitation, project, type, languages)
+    params.languagePermissions?.let {
+      validateLanguagePermissions(it, params.type)
+    }
+    val permission = Permission(
+      invitation = invitation,
+      project = params.project,
+      type = params.type,
+      languagePermissions = params.languagePermissions
+    )
+
+    return this.save(permission)
   }
 
   @Transactional
@@ -203,12 +213,27 @@ class PermissionService(
     projectId: Long,
     userId: Long,
     newPermissionType: ProjectPermissionType,
-    viewLanguages: Set<Language>? = null,
-    translateLanguages: Set<Language>? = null,
-    stateChangeLanguages: Set<Language>? = null
+    languages: LanguagePermissions
   ): Permission? {
-    validateLanguagePermissions(translateLanguages, newPermissionType)
+    validateLanguagePermissions(
+      languagePermissions = languages,
+      newPermissionType = newPermissionType
+    )
 
+    val permission = getOrCreateDirectPermission(projectId, userId)
+
+    permission.scopes = emptyArray()
+    permission.type = newPermissionType
+
+    setPermissionLanguages(permission, languages)
+
+    return this.save(permission)
+  }
+
+  fun getOrCreateDirectPermission(
+    projectId: Long,
+    userId: Long,
+  ): Permission {
     val data = this.getProjectPermissionData(projectId, userId)
 
     if (data.computedPermissions.scopes.isEmpty()) {
@@ -224,23 +249,46 @@ class PermissionService(
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
       val userAccount = userAccountService.get(userId)
       val project = projectService.get(projectId)
-      Permission(user = userAccount, project = project, type = newPermissionType)
+      Permission(user = userAccount, project = project)
     }
+    return permission
+  }
 
-    permission.type = newPermissionType
-    permission.translateLanguages = translateLanguages?.toMutableSet() ?: mutableSetOf()
-    permission.viewLanguages = viewLanguages?.toMutableSet() ?: mutableSetOf()
-    permission.stateChangeLanguages = stateChangeLanguages?.toMutableSet() ?: mutableSetOf()
+  fun setPermissionLanguages(
+    permission: Permission,
+    languagePermissions: LanguagePermissions
+  ) {
+    permission.translateLanguages = languagePermissions.translate?.toMutableSet() ?: mutableSetOf()
+    permission.stateChangeLanguages = languagePermissions.stateChange?.toMutableSet() ?: mutableSetOf()
 
-    return cachedPermissionService.save(permission)
+    permission.viewLanguages = (
+      (languagePermissions.view?.toMutableSet() ?: mutableSetOf()) +
+        permission.translateLanguages + permission.stateChangeLanguages
+      ).toMutableSet()
   }
 
   private fun validateLanguagePermissions(
-    languages: Set<Language>?,
+    languagePermissions: LanguagePermissions,
     newPermissionType: ProjectPermissionType
   ) {
-    if (!languages.isNullOrEmpty() && newPermissionType != ProjectPermissionType.TRANSLATE) {
-      throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
+    val isTranslate = newPermissionType == ProjectPermissionType.TRANSLATE
+    val isReview = newPermissionType == ProjectPermissionType.REVIEW
+    val isView = newPermissionType == ProjectPermissionType.VIEW
+
+    val hasTranslateLanguages = !languagePermissions.translate.isNullOrEmpty()
+    val hasViewLanguages = !languagePermissions.view.isNullOrEmpty()
+    val hasStateChangeLanguages = !languagePermissions.stateChange.isNullOrEmpty()
+
+    if (hasViewLanguages && (!isTranslate && !isReview && !isView)) {
+      throw BadRequestException(Message.ONLY_TRANSLATE_REVIEW_OR_VIEW_PERMISSION_ACCEPTS_VIEW_LANGUAGES)
+    }
+
+    if (hasTranslateLanguages && (!isTranslate && !isReview)) {
+      throw BadRequestException(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    }
+
+    if (hasStateChangeLanguages && (!isReview)) {
+      throw BadRequestException(Message.ONLY_REVIEW_PERMISSION_ACCEPTS_STATE_CHANGE_LANGUAGES)
     }
   }
 
@@ -248,8 +296,8 @@ class PermissionService(
     permissions.forEach { this.save(it) }
   }
 
-  fun save(permission: Permission) {
-    cachedPermissionService.save(permission)
+  fun save(permission: Permission): Permission {
+    return cachedPermissionService.save(permission)
   }
 
   fun revoke(projectId: Long, userId: Long) {

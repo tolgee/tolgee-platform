@@ -40,9 +40,7 @@ class InvitationService @Autowired constructor(
 
     invitation.permission = permissionService.createForInvitation(
       invitation = invitation,
-      project = params.project,
-      type = params.type,
-      languages = params.languages
+      params
     )
 
     invitationEmailSender.sendInvitation(invitation)

@@ -5,7 +5,6 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -26,9 +25,10 @@ import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
+import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
-import io.tolgee.model.Language
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -41,7 +41,6 @@ import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
-import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
@@ -96,7 +95,7 @@ V2ProjectsController(
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
-  private val languageService: LanguageService,
+  private val projectPermissionFacade: ProjectPermissionFacade,
   private val projectWithStatsFacade: ProjectWithStatsFacade
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
@@ -168,62 +167,26 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
-  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
+  @AccessWithProjectPermission(Scope.ADMIN)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
-    @Schema(deprecated = true, description = "Deprecated -> use translate languages")
-    @RequestParam languages: MutableSet<Long>?,
-
-    @Schema(deprecated = true, description = "Languages user can translate to")
-    @RequestParam translateLanguages: MutableSet<Long>?,
-
-    @Schema(deprecated = true, description = "Languages user can view")
-    @RequestParam viewLanguages: MutableSet<Long>?,
-
-    @Schema(deprecated = true, description = "Languages user can change translation state (review)")
-    @RequestParam stateChangeLanguages: MutableSet<Long>?,
+    @ParameterObject params: SetPermissionLanguageParams
   ) {
-    checkNotCurrentUser(userId)
+    projectPermissionFacade.checkNotCurrentUser(userId)
     permissionService.setUserDirectPermission(
       projectId = projectId,
       userId = userId,
       newPermissionType = permissionType,
-      viewLanguages = getLanguagesAndCheckFromProject(viewLanguages, projectId),
-      translateLanguages = getLanguagesAndCheckFromProject(translateLanguages ?: languages, projectId),
-      stateChangeLanguages = getLanguagesAndCheckFromProject(
-        stateChangeLanguages, projectId
-      )
+      languages = projectPermissionFacade.getLanguages(params, projectId)
     )
   }
 
-  private fun checkNotCurrentUser(userId: Long) {
-    if (userId == authenticationFacade.userAccount.id) {
-      throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
-    }
-  }
-
-  private fun getLanguagesAndCheckFromProject(
-    languages: Set<Long>?,
-    projectId: Long
-  ): Set<Language> {
-    languages?.let {
-      val languageEntities = languageService.findByIdIn(languages)
-      languageEntities.forEach {
-        if (it.project.id != projectId) {
-          throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
-        }
-      }
-      return languageEntities.toSet()
-    }
-    return setOf()
-  }
-
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
-  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
+  @AccessWithProjectPermission(Scope.ADMIN)
   @Operation(summary = "Revokes user's access")
   @NeedsSuperJwtToken
   fun revokePermission(
@@ -303,23 +266,26 @@ V2ProjectsController(
 
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
-  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
+  @AccessWithProjectPermission(Scope.ADMIN)
   @NeedsSuperJwtToken
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
-    val languages = getLanguagesAndCheckFromProject(invitation.languages, projectHolder.project.id)
+    val languagesPermissions = projectPermissionFacade.getLanguages(invitation, projectHolder.project.id)
+
     val params = CreateProjectInvitationParams(
       project = projectHolder.projectEntity,
       type = invitation.type!!,
-      languages = languages.toList(),
       email = invitation.email,
-      name = invitation.name
+      name = invitation.name,
+      languagePermissions = languagesPermissions
     )
-    return projectInvitationModelAssembler.toModel(invitationService.create(params))
+
+    val created = invitationService.create(params)
+    return projectInvitationModelAssembler.toModel(created)
   }
 
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
-  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
+  @AccessWithProjectPermission(Scope.ADMIN)
   @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
