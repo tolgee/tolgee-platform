@@ -147,6 +147,24 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `doesn't fail when language doesn't exist (view)`() {
+    testData.generateLotOfData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?languages=en&languages=br&languages=fr").andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't fail when language doesn't exist (all)`() {
+    testData.generateLotOfData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations/en,br,fr").andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `selects multiple languages`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
