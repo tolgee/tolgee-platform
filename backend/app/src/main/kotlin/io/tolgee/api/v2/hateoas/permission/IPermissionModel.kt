@@ -6,7 +6,8 @@ import io.tolgee.model.enums.Scope
 
 interface IPermissionModel {
   @get:Schema(
-    description = "Permitted scopes granted to user. When user has type permissions, this field contains permission scopes of the type.",
+    description = "Permitted scopes granted to user. When user has type permissions, " +
+      "this field contains permission scopes of the type.",
     example = """["KEYS_EDIT", "TRANSLATIONS_VIEW"]"""
   )
   val scopes: Array<Scope>
