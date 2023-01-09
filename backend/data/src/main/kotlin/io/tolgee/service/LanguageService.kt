@@ -66,10 +66,12 @@ class LanguageService(
       projectId,
       userId
     ).computedPermissions.viewLanguageIds
-    if (viewLanguageIds.isNullOrEmpty()) {
-      return all
-    }
-    return all.filter { viewLanguageIds.contains(it.id) }.sortedBy { it.id }.take(2).toSet()
+    val permitted = if (viewLanguageIds.isNullOrEmpty())
+      all
+    else
+      all.filter { viewLanguageIds.contains(it.id) }
+
+    return permitted.sortedBy { it.id }.take(2).toSet()
   }
 
   @Transactional
@@ -100,9 +102,6 @@ class LanguageService(
 
   fun findByTags(tags: Collection<String>, projectId: Long): Set<Language> {
     val languages = languageRepository.findAllByTagInAndProjectId(tags, projectId)
-    if (languages.size < tags.size) {
-      throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-    }
     val sortedByTagsParam = languages.sortedBy { language ->
       tags.indexOfFirst { tag -> language.tag == tag }
     }
