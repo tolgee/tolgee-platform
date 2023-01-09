@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -78,6 +79,26 @@ class V2TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest
   fun `allows access for user with all language permissions - set state`() {
     userAccount = testData.reviewAllUser
     performSetState(testData.englishTranslation.id).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns only permitted languages (all translation endpoint)`() {
+    userAccount = testData.viewUser
+    performProjectAuthGet("/translations/en,de").andAssertThatJson {
+      node("de").isAbsent()
+      node("en").isPresent
+    }.andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns only permitted languages (translation view endpoint)`() {
+    userAccount = testData.viewUser
+    performProjectAuthGet("/translations?languages=en&languages=de").andAssertThatJson {
+      node("_embedded.keys[0].translations.de").isAbsent()
+      node("_embedded.keys[0].translations.en").isPresent
+    }.andIsOk
   }
 
   private fun performUpdate(lang: String) = performProjectAuthPut(

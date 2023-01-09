@@ -14,9 +14,7 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -62,12 +60,16 @@ class LanguageService(
     return language
   }
 
-  fun getImplicitLanguages(projectId: Long): Set<Language> {
-    val data = getPaged(
-      projectId = projectId,
-      PageRequest.of(0, 2, Sort.by(Sort.Order(Sort.Direction.ASC, "id")))
-    )
-    return data.content.toSet()
+  fun getImplicitLanguages(projectId: Long, userId: Long): Set<Language> {
+    val all = languageRepository.findAllByProjectId(projectId)
+    val viewLanguageIds = permissionService.getProjectPermissionData(
+      projectId,
+      userId
+    ).computedPermissions.viewLanguageIds
+    if (viewLanguageIds.isNullOrEmpty()) {
+      return all
+    }
+    return all.filter { viewLanguageIds.contains(it.id) }.sortedBy { it.id }.take(2).toSet()
   }
 
   @Transactional
@@ -108,10 +110,28 @@ class LanguageService(
   }
 
   @Transactional
-  fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long): Set<Language> {
+  fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long, userId: Long): Set<Language> {
     return if (languages == null) {
-      getImplicitLanguages(projectId)
-    } else findByTags(languages, projectId)
+      getImplicitLanguages(projectId, userId)
+    } else {
+      findByTagsAndFilterPermitted(projectId, userId, languages)
+    }
+  }
+
+  private fun findByTagsAndFilterPermitted(
+    projectId: Long,
+    userId: Long,
+    languages: Set<String>
+  ): Set<Language> {
+    val viewLanguageIds = permissionService.getProjectPermissionData(
+      projectId,
+      userId
+    ).computedPermissions.viewLanguageIds
+    return if (viewLanguageIds.isNullOrEmpty()) {
+      findByTags(languages, projectId)
+    } else {
+      findByTags(languages, projectId).filter { viewLanguageIds.contains(it.id) }.toSet()
+    }
   }
 
   fun findByName(name: String?, project: Project): Optional<Language> {
@@ -138,5 +158,9 @@ class LanguageService(
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {
     return languageRepository.findAllById(ids)
+  }
+
+  fun getLanguageIdsByTags(projectId: Long, languageTags: Collection<String>): Map<String, Language> {
+    return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
   }
 }

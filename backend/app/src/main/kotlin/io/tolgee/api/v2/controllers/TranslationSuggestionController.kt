@@ -20,6 +20,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -47,6 +48,7 @@ class TranslationSuggestionController(
   private val translationMemoryItemModelAssembler: TranslationMemoryItemModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arraytranslationMemoryItemModelAssembler: PagedResourcesAssembler<TranslationMemoryItemView>,
+  private val securityService: SecurityService
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
@@ -55,6 +57,8 @@ class TranslationSuggestionController(
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
     val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 
     val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
     try {
