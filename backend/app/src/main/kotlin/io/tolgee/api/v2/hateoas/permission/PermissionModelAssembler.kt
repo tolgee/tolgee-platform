@@ -2,6 +2,7 @@ package io.tolgee.api.v2.hateoas.permission
 
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.cacheable.IPermission
+import io.tolgee.model.enums.Scope
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
@@ -11,7 +12,7 @@ class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermissi
 ) {
   override fun toModel(entity: IPermission): PermissionModel {
     return PermissionModel(
-      scopes = entity.scopes,
+      scopes = Scope.expand(entity.scopes),
       permittedLanguageIds = entity.translateLanguageIds,
       translateLanguageIds = entity.translateLanguageIds,
       stateChangeLanguageIds = entity.stateChangeLanguageIds,
