@@ -19,7 +19,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         from Organization o 
         join fetch o.basePermission as bp
         left join OrganizationRole r on r.user.id = :userId
-        and r.organization = o and (r.type = :roleType or :roleType is null)
+          and r.organization = o and (r.type = :roleType or :roleType is null)
         left join o.projects p
         left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
@@ -29,6 +29,10 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     countQuery =
     """select count(o)
         from Organization o 
+        left join OrganizationRole r on r.user.id = :userId
+          and r.organization = o and (r.type = :roleType or :roleType is null)
+        left join o.projects p
+        left join p.permissions perm on perm.user.id = :userId
         where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId))

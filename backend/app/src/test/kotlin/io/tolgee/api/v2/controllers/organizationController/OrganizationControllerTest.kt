@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional
 @AutoConfigureMockMvc
 class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
-  fun testGetAll() {
+  fun `returns all`() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[1].name)
 
@@ -38,6 +38,19 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
           node("[0].name").isEqualTo("user-2's organization 1")
           node("[0].basePermission.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           node("[0].currentUserRole").isEqualTo("OWNER")
+        }
+      }
+  }
+
+  @Test
+  fun `return all with pagination`() {
+    val users = dbPopulator.createUsersAndOrganizations()
+    loginAsUser(users[1].name)
+
+    performAuthGet("/v2/organizations?size=4")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(4)
         }
       }
   }
