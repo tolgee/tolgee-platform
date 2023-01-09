@@ -6,7 +6,7 @@ import io.tolgee.model.enums.Scope
 
 interface IPermissionModel {
   @get:Schema(
-    description = "The permitted scopes",
+    description = "Permitted scopes granted to user. When user has type permissions, this field contains permission scopes of the type.",
     example = """["KEYS_EDIT", "TRANSLATIONS_VIEW"]"""
   )
   val scopes: Array<Scope>
@@ -38,13 +38,13 @@ List of languages current user has TRANSLATE permission to. If null, all languag
   val viewLanguageIds: Collection<Long>?
 
   @get:Schema(
-    description = """List of languages user can review. If null, all languages edition is permitted.""",
+    description = """List of languages user can change state to. If null, all languages edition is permitted.""",
     example = "[200001, 200004]"
   )
   val stateChangeLanguageIds: Collection<Long>?
 
   @get:Schema(
-    description = "Has user explicitly set granular permissions",
+    description = "Has user explicitly set granular permissions?",
   )
   val granular: Boolean
 }
