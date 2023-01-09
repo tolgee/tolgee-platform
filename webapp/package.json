@@ -14,6 +14,8 @@
     "@mui/material": "^5.5.3",
     "@mui/x-date-pickers": "5.0.0-beta.6",
     "@openreplay/tracker": "^3.5.4",
+    "@react-buddy/ide-toolbox": "^2.3.1",
+    "@react-buddy/palette-mui": "^5.0.0",
     "@sentry/browser": "^6.10.0",
     "@stomp/stompjs": "^6.1.2",
     "@tolgee/react": "^4.8.5",
@@ -25,6 +27,7 @@
     "diff": "^5.0.0",
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
+    "node-fetch": "3.3.0",
     "notistack": "^2.0.4",
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",
@@ -55,9 +58,7 @@
     "use-debounce": "^7.0.1",
     "web-vitals": "^2.1.0",
     "yup": "^0.32.9",
-    "zustand": "4.1.2",
-    "@react-buddy/ide-toolbox": "^2.3.1",
-    "@react-buddy/palette-mui": "^5.0.0"
+    "zustand": "4.1.2"
   },
   "scripts": {
     "start": "craco start",
@@ -67,10 +68,12 @@
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.generated.ts",
     "billing-schema": "openapi-typescript http://localhost:8080/v3/api-docs/V2%20Billing --output ./src/service/billingApiSchema.generated.ts",
+    "scopes": "",
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc",
-    "load-translations": "sh scripts/loadTranslations.sh"
+    "load-translations": "sh scripts/loadTranslations.sh",
+    "generate-scopes": "node ./scripts/generateScopes.js"
   },
   "eslintConfig": {
     "extends": [

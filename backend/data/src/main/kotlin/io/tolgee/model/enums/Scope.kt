@@ -22,7 +22,7 @@ enum class Scope(
   IMPORT("import"),
   LANGUAGES_EDIT("languages.edit"),
   ADMIN("admin"),
-  PROJECT_EDIT("users.view"),
+  PROJECT_EDIT("project.edit"),
   MEMBERS_VIEW("users.view"),
   TRANSLATIONS_COMMENTS_ADD("translation-comments.add"),
   TRANSLATIONS_COMMENTS_EDIT("translation-comments.edit"),

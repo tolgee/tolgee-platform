@@ -182,7 +182,6 @@ class V2ApiKeyController(
     }
   }
 
-  // todo: rename and deprecate
   @get:GetMapping(path = ["/api-keys/availableScopes"])
   @get:Operation(
     summary = "Returns API key scopes for every permission type",

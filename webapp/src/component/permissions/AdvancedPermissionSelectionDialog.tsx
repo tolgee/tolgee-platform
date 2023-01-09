@@ -9,10 +9,12 @@ type PermissionType = NonNullable<
   components['schemas']['PermissionModel']['type']
 >;
 
+export type SimpleUser = { username: string; id: number; name: string };
+
 export const AdvancedPermissionSelectionDialog: FC<{
   onClose: () => void;
   open: boolean;
-  user: components['schemas']['UserAccountInProjectModel'];
+  user: SimpleUser;
 }> = (props) => {
   const [selectedType, setSelectedType] = useState('NONE' as PermissionType);
 

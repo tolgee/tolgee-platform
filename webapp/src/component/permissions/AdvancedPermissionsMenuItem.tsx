@@ -1,10 +1,13 @@
 import { ListItemText, MenuItem } from '@mui/material';
 import { T } from '@tolgee/react';
 import React, { FC, useState } from 'react';
-import { AdvancedPermissionSelectionDialog } from './AdvancedPermissionSelectionDialog';
+import {
+  AdvancedPermissionSelectionDialog,
+  SimpleUser,
+} from './AdvancedPermissionSelectionDialog';
 
 export const AdvancedPermissionsMenuItem: FC<{
-  user: { name?: string; id: number };
+  user: SimpleUser;
 }> = (props) => {
   const [open, setOpen] = useState(false);
 

@@ -35,8 +35,11 @@ export interface paths {
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+  "/v2/projects/{projectId}/users/{userId}/set-permissions": {
     put: operations["setUsersPermissions"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
@@ -268,6 +271,9 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
+  "/v2/public/scope-info/hierarchy": {
+    get: operations["getHierarchy"];
+  };
   "/v2/public/initial-data": {
     /** Returns initial data always required by frontend */
     get: operations["get_1"];
@@ -488,9 +494,19 @@ export interface components {
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** List of languages user can translate to. If null, all languages edition is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can review. If null, all languages edition is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages edition is permitted. */
+      viewLanguageIds?: number[];
       /** Has user explicitly set granular permissions */
       granular: boolean;
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
       permittedLanguageIds?: number[];
       /** The permitted scopes */
       scopes: (
@@ -505,15 +521,14 @@ export interface components {
         | "languages.edit"
         | "admin"
         | "users.view"
-        | "permissions.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
         | "translation-comments.set-state"
-        | "translation-state.edit"
+        | "translations.state-edit"
       )[];
       /** The user permission type. (Null if uses granular permissions) */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -543,17 +558,26 @@ export interface components {
         | "languages.edit"
         | "admin"
         | "users.view"
-        | "permissions.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
         | "translation-comments.set-state"
-        | "translation-state.edit"
+        | "translations.state-edit"
       )[];
       /** The user permission type. (Null if uses granular permissions) */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
       permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages edition is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages edition is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can review. If null, all languages edition is permitted. */
+      stateChangeLanguageIds?: number[];
       /** Has user explicitly set granular permissions */
       granular: boolean;
     };
@@ -696,13 +720,15 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /**
-       * IDs of languages to allow user to translate to with TRANSLATE permission.
-       *
-       * Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
-       */
+      type: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** Deprecated -> use translate languages */
       languages?: number[];
+      /** Languages user can translate to */
+      translateLanguages?: number[];
+      /** Languages user can view */
+      viewLanguages?: number[];
+      /** Languages user can change translation state (review) */
+      stateChangeLanguages?: number[];
       /** Email to send invitation to */
       email?: string;
       /** Name of invited user */
@@ -711,7 +737,7 @@ export interface components {
     ProjectInvitationModel: {
       id: number;
       code: string;
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -724,12 +750,11 @@ export interface components {
         | "languages.edit"
         | "admin"
         | "users.view"
-        | "permissions.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
         | "translation-comments.set-state"
-        | "translation-state.edit"
+        | "translations.state-edit"
       )[];
       permittedLanguageIds?: number[];
       createdAt: string;
@@ -826,12 +851,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -901,15 +926,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      username?: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
       projectId: number;
+      username?: string;
+      expiresAt?: number;
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1081,6 +1106,26 @@ export interface components {
     UserPreferencesModel: {
       language?: string;
       preferredOrganizationId?: number;
+    };
+    HierarchyItem: {
+      scope:
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "import"
+        | "languages.edit"
+        | "admin"
+        | "users.view"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit";
+      requires: components["schemas"]["HierarchyItem"][];
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1280,6 +1325,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1291,7 +1337,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1500,12 +1545,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
+      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1558,15 +1603,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      username?: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
       projectId: number;
+      username?: string;
+      expiresAt?: number;
+      lastUsedAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      id: number;
       description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1971,10 +2016,50 @@ export interface operations {
       path: {
         projectId: number;
         userId: number;
-        permissionType: "NONE" | "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      };
+      query: {
+        scopes: string[];
+        languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setUsersPermissions_1: {
+    parameters: {
+      path: {
+        projectId: number;
+        userId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
       };
       query: {
         languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
       };
     };
     responses: {
@@ -4610,6 +4695,39 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getHierarchy: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["HierarchyItem"];
         };
       };
       /** Bad Request */
