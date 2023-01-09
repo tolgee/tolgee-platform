@@ -77,7 +77,7 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
         <Box mt={2}>
           <T
             keyName="billing_upgrade_preview_dialog_total"
-            parameters={{ total: props.data.total }}
+            params={{ total: props.data.total }}
           />
         </Box>
 
@@ -91,7 +91,7 @@ export const PrepareUpgradeDialog: FC<PrepareUpgradeDialogProps> = (props) => {
           <b>
             <T
               keyName="billing_upgrade_preview_dialog_amount_due_text"
-              parameters={{ amountDue: props.data.amountDue }}
+              params={{ amountDue: props.data.amountDue }}
             />
           </b>
         </Box>

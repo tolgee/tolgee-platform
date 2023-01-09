@@ -3,10 +3,16 @@ import { Box, styled } from '@mui/material';
 
 import { FlagImage } from 'tg.component/languages/FlagImage';
 
-type Props = {
-  flag: string | null | undefined;
+const DEFAULT_SIZE = 18;
+
+type CircledIconProps = {
   size?: number;
+  wrapperProps?: ComponentProps<typeof Box>;
 } & ComponentProps<typeof Box>;
+
+type CircledLanguageIconProps = {
+  flag: string | null | undefined;
+} & CircledIconProps;
 
 const StyledBox = styled(Box)`
   padding: 2px;
@@ -27,34 +33,61 @@ const StyledFlag = styled(FlagImage)`
   position: absolute;
 `;
 
-const StyledFlagBlur = styled(FlagImage)`
-  z-index: 2;
-  position: absolute;
-  filter: blur(1px);
-  opacity: 0.05;
-`;
-
-export const CircledLanguageIcon: React.FC<Props> = ({
+export const CircledLanguageIcon: React.FC<CircledLanguageIconProps> = ({
   flag,
-  size,
+  size = DEFAULT_SIZE,
   ...boxProps
 }) => {
-  size = size || 18;
+  return (
+    <CircledIcon size={size} {...boxProps}>
+      <StyledFlag
+        height={Math.floor(size * 0.75) * 2}
+        width={Math.floor(size * 0.75) * 2}
+        flagEmoji={flag || ''}
+        draggable="false"
+      />
+    </CircledIcon>
+  );
+};
+
+export const CircledIcon: React.FC<CircledIconProps> = ({
+  size = DEFAULT_SIZE,
+  children,
+  wrapperProps,
+  ...boxProps
+}) => {
   return (
     <StyledBox {...boxProps} className={boxProps.className}>
-      <StyledIconWrapper width={size} height={size}>
-        <StyledFlag
-          height={Math.floor(size * 0.75) * 2}
-          width={Math.floor(size * 0.75) * 2}
-          flagEmoji={flag || ''}
-          draggable="false"
-        />
-        <StyledFlagBlur
-          height={Math.floor(size * 0.75) * 2}
-          width={Math.floor(size * 0.75) * 2}
-          flagEmoji={flag || ''}
-          draggable="false"
-        />
+      <StyledIconWrapper {...wrapperProps} width={size} height={size}>
+        {children}
+      </StyledIconWrapper>
+    </StyledBox>
+  );
+};
+
+type CircledPillProps = {
+  width?: number;
+  height?: number;
+  wrapperProps?: ComponentProps<typeof Box>;
+} & ComponentProps<typeof Box>;
+
+export const CircledPill: React.FC<CircledPillProps> = ({
+  width = DEFAULT_SIZE,
+  height = DEFAULT_SIZE,
+  children,
+  wrapperProps,
+  ...boxProps
+}) => {
+  const borderRadius = Math.min(width, height);
+  return (
+    <StyledBox {...boxProps} className={boxProps.className}>
+      <StyledIconWrapper
+        {...wrapperProps}
+        width={width}
+        height={height}
+        style={{ borderRadius }}
+      >
+        {children}
       </StyledIconWrapper>
     </StyledBox>
   );

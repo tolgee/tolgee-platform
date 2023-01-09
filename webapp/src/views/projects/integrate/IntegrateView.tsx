@@ -26,7 +26,7 @@ export const IntegrateView: FunctionComponent = () => {
   } = useIntegrateState();
 
   const activeStep = !selectedWeapon ? 0 : !selectedApiKey ? 1 : 2;
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <BaseProjectView
@@ -85,7 +85,7 @@ export const IntegrateView: FunctionComponent = () => {
                           selectedApiKey['key'] ||
                             t({
                               key: 'integrate-api-key-hidden-description',
-                              parameters: {
+                              params: {
                                 description: selectedApiKey?.description,
                               },
                             })

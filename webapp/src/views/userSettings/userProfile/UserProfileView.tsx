@@ -21,7 +21,7 @@ import { DeleteUserButton } from './DeleteUserButton';
 const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const globalDispatch = useGlobalDispatch();
   const user = useUser();
 
@@ -87,7 +87,7 @@ export const UserProfileView: FunctionComponent = () => {
               <Box>
                 <Typography variant="body1">
                   <T
-                    parameters={{
+                    params={{
                       email: user.emailAwaitingVerification!,
                     }}
                   >

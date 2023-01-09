@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, TFnType } from '@tolgee/react';
 import CodeMirror from 'codemirror';
 import { Controlled as CodeMirrorReact } from 'react-codemirror2-react-17';
 import { parse } from '@formatjs/icu-messageformat-parser';
@@ -102,7 +102,7 @@ const StyledWrapper = styled('div')<{
 
 function linter(text: string, data: any) {
   const errors = data.errors;
-  const t = data.t as ReturnType<typeof useTranslate>;
+  const t = data.t as TFnType;
   return errors?.map((error) => {
     const location = error.location;
     const start = location?.start;
@@ -112,7 +112,7 @@ function linter(text: string, data: any) {
     const endColumn =
       start?.column === start?.column ? end?.column : end?.column - 1;
     const hint = {
-      message: t(`parser_${error.message?.toLowerCase()}`, undefined, true),
+      message: t(`parser_${error.message?.toLowerCase()}`, { noWrap: true }),
       severity: 'error',
       type: 'validation',
       from: CodeMirror.Pos(start.line - 1, startColumn),
@@ -158,7 +158,7 @@ export const Editor: React.FC<Props> = ({
   direction = 'ltr',
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleChange = (val: string) => {
     onChange?.(val);

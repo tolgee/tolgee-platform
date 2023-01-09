@@ -44,7 +44,7 @@ export const AdministrationUsers = ({
     },
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <StyledWrapper>

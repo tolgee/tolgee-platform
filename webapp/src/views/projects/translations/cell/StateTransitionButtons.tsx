@@ -18,7 +18,7 @@ export const StateTransitionButtons: React.FC<Props> = ({
   onStateChange,
   className,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const nextState: StateType =
     (state && translationStates[state]?.next) || 'TRANSLATED';

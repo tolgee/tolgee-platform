@@ -51,7 +51,7 @@ type Props = {
 export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const editPermission = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',

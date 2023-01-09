@@ -62,7 +62,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     invalidatePrefix: '/v2/api-keys',
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const getAvailableScopes = (): Set<string> => {
     const userPermissionType = projectLoadable?.data?.computedPermissions?.type;

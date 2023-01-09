@@ -52,7 +52,7 @@ export const ApiKeySelector: FC<{
 
   const project = useProject();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <>

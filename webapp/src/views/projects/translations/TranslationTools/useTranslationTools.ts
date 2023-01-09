@@ -6,7 +6,7 @@ type Props = {
   projectId: number;
   keyId: number;
   targetLanguageId: number;
-  baseText?: string;
+  baseText: string | undefined;
   enabled?: boolean;
   onValueUpdate: (value: string) => void;
 };
@@ -20,17 +20,29 @@ export const useTranslationTools = ({
   enabled = true,
 }: Props) => {
   const { updateUsage } = useOrganizationUsageMethods();
+
+  const dependencies = {
+    keyId,
+    targetLanguageId,
+    baseText,
+  };
+
+  const data = {
+    keyId,
+    targetLanguageId,
+    // if there is not keyId, send base text, to be used for search
+    baseText: keyId === undefined ? baseText : undefined,
+  };
+
   const memory = useApiQuery({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
-    query: {
-      // @ts-ignore add all dependencies to properly update query
-      keyId,
-      targetLanguageId,
-      baseText,
-    },
+    // @ts-ignore add all dependencies to properly update query
+    query: dependencies,
     path: { projectId },
-    content: { 'application/json': { keyId, targetLanguageId, baseText } },
+    content: {
+      'application/json': data,
+    },
     options: {
       enabled,
     },
@@ -41,13 +53,9 @@ export const useTranslationTools = ({
     method: 'post',
     path: { projectId },
     // @ts-ignore add all dependencies to properly update query
-    query: {
-      keyId,
-      targetLanguageId,
-      baseText,
-    },
+    query: dependencies,
     content: {
-      'application/json': { keyId, targetLanguageId, baseText },
+      'application/json': data,
     },
     fetchOptions: {
       disableBadRequestHandling: true,

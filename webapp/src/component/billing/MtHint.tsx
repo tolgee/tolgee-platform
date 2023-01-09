@@ -10,7 +10,7 @@ const StyledHint = styled(Box)`
 `;
 
 export const MtHint: React.FC = ({ children }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   return (
     <Tooltip disableInteractive title={t('global_mt_credits_hint')}>
       <StyledHint>{children}</StyledHint>

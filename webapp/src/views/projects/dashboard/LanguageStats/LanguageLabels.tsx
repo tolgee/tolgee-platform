@@ -87,14 +87,14 @@ export const LanguageLabels: React.FC<Props> = ({ data }) => {
               <Box ml={2} data-cy="project-dashboard-language-label-keys">
                 <T
                   keyName="project_dashboard_language_keys"
-                  parameters={{ count: item.keyCount }}
+                  params={{ count: item.keyCount }}
                 />
               </Box>
               {item.wordCount !== null && (
                 <Box ml={2} data-cy="project-dashboard-language-label-words">
                   <T
                     keyName="project_dashboard_language_words"
-                    parameters={{ count: item.wordCount }}
+                    params={{ count: item.wordCount }}
                   />
                 </Box>
               )}
@@ -102,10 +102,7 @@ export const LanguageLabels: React.FC<Props> = ({ data }) => {
           ))}
         </StyledContainer>
       ) : (
-        <T
-          keyName="project_dashboard_language_keys"
-          parameters={{ count: 0 }}
-        />
+        <T keyName="project_dashboard_language_keys" params={{ count: 0 }} />
       )}
     </>
   );

@@ -86,7 +86,7 @@ export const OrganizationPopover: React.FC<Props> = ({
   ownedOnly,
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [search] = useDebounce(inputValue, 500);
 
   useEffect(() => {

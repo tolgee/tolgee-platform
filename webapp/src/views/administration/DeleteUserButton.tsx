@@ -34,7 +34,7 @@ export const DeleteUserButton = (props: {
       onClick={() => {
         confirmation({
           message: (
-            <T parameters={{ name: props.user.name || props.user.username }}>
+            <T params={{ name: props.user.name || props.user.username }}>
               delete-user-confirmation-message
             </T>
           ),

@@ -101,7 +101,7 @@ export function TranslationStatesBar(props: {
         <T>{translationStates[legendItemProps.state].translationKey}</T>:&nbsp;
         {percent >= 1 ? (
           <T
-            parameters={{
+            params={{
               percent: percent / 100,
             }}
           >

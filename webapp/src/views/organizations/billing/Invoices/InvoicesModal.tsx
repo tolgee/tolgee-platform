@@ -38,7 +38,7 @@ type Props = {
 
 export const InvoicesModal: FC<Props> = ({ onClose }) => {
   const organization = useOrganization();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const [page, setPage] = useState(0);
 

@@ -27,7 +27,7 @@ type Props = {
 
 export const PlanPrice: React.FC<Props> = ({ price, period }) => {
   const formatMoney = useMoneyFormatter();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <StyledWrapper>

@@ -26,7 +26,7 @@ import {
 export const ProjectSettingsLanguages = () => {
   const queryClient = useQueryClient();
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const config = useConfig();
 
   const languagesLoadable = useApiQuery({

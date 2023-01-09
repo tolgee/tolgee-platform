@@ -21,7 +21,7 @@ type Props = {
 };
 
 export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Field name="languages">

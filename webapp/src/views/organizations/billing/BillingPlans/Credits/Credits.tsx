@@ -1,6 +1,6 @@
 import { FC, useMemo, useState } from 'react';
 import { Box, Slider, styled } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 
 import {
   useBillingApiMutation,
@@ -67,7 +67,7 @@ export const Credits: FC = () => {
     },
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const buy = (priceId: number, amount: number) => {
     buyMutation.mutate({
@@ -97,7 +97,7 @@ export const Credits: FC = () => {
     t({
       key: 'billing_buy_more_mt_slider_value',
       defaultValue: '{amount} Credits',
-      parameters: { amount: value },
+      params: { amount: value },
     });
 
   const formatPrice = useMoneyFormatter();
@@ -114,7 +114,12 @@ export const Credits: FC = () => {
     <StyledPlan>
       <StyledContent>
         <PlanTitle
-          title={t('billing_extra_credits_title', { hint: <MtHint /> })}
+          title={
+            <T
+              keyName="billing_extra_credits_title"
+              params={{ hint: <MtHint /> }}
+            />
+          }
         />
         <StyledContainer>
           <StyledSliderWrapper>

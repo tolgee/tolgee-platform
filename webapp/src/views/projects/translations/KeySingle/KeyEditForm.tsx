@@ -74,7 +74,7 @@ const StyledActions = styled('div')`
 
 export const KeyEditForm: React.FC = () => {
   const dispatch = useTranslationsDispatch();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const permissions = useProjectPermissions();
 

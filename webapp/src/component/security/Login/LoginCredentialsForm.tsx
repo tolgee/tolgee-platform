@@ -16,12 +16,7 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
-import {
-  gitHubService,
-  googleService,
-  oauth2Service,
-  OAuthService,
-} from 'tg.component/security/OAuthService';
+import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -32,7 +27,7 @@ type LoginViewCredentialsProps = {
 };
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const remoteConfig = useConfig();
   const security = useSelector((state: AppState) => state.global.security);
   const authLoading = useSelector(
@@ -46,30 +41,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
     }
   }, [security.loginErrorCode]);
 
-  const oAuthServices: OAuthService[] = [];
-  const githubConfig = remoteConfig.authMethods?.github;
-  const googleConfig = remoteConfig.authMethods?.google;
-  const oauth2Config = remoteConfig.authMethods?.oauth2;
-  if (githubConfig?.enabled && githubConfig.clientId) {
-    oAuthServices.push(gitHubService(githubConfig.clientId));
-  }
-  if (googleConfig?.enabled && googleConfig.clientId) {
-    oAuthServices.push(googleService(googleConfig.clientId));
-  }
-  if (
-    oauth2Config?.enabled &&
-    oauth2Config?.clientId &&
-    oauth2Config.scopes &&
-    oauth2Config?.authorizationUrl
-  ) {
-    oAuthServices.push(
-      oauth2Service(
-        oauth2Config.clientId,
-        oauth2Config.authorizationUrl,
-        oauth2Config.scopes
-      )
-    );
-  }
+  const oAuthServices = useOAuthServices();
 
   return (
     <DashboardPage>
@@ -118,7 +90,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                         variant="outlined"
                         style={{ marginBottom: '0.5rem' }}
                       >
-                        <T>{provider.buttonLabelTranslationKey}</T>
+                        <T>{provider.loginButtonTitle}</T>
                       </Button>
                     </React.Fragment>
                   ))}
@@ -147,7 +119,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         footer={
           <Box display="flex" justifyContent="space-between" flexWrap="wrap">
             <Box>
-              {security.allowRegistration && (
+              {remoteConfig.allowRegistrations && (
                 <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                   <Typography variant="caption">
                     <T>login_sign_up</T>

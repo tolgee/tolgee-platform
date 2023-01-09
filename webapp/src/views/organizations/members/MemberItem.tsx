@@ -42,7 +42,7 @@ type Props = {
 };
 
 export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();
 

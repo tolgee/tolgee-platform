@@ -9,7 +9,7 @@ export const PatExpiryInfo = (props: {
     {props.pat.expiresAt && props.pat.expiresAt < new Date().getTime() ? (
       <Box sx={(theme) => ({ color: theme.palette.warning.main })}>
         <T
-          parameters={{ date: props.pat.expiresAt }}
+          params={{ date: props.pat.expiresAt }}
           keyName="pat-list-item-expired-on"
         />
       </Box>
@@ -19,7 +19,7 @@ export const PatExpiryInfo = (props: {
           <T>pat_never_expires</T>
         ) : (
           <T
-            parameters={{ date: props.pat.expiresAt }}
+            params={{ date: props.pat.expiresAt }}
             keyName="pat-list-item-expires-at"
           />
         )}

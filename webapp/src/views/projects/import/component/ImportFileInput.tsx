@@ -108,7 +108,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     files.forEach((file) => {
       if (file.size > config.maxUploadFileSize * 1024) {
         result.errors.push(
-          <T parameters={{ filename: file.name }}>
+          <T params={{ filename: file.name }}>
             translations.screenshots.validation.file_too_big
           </T>
         );
@@ -117,7 +117,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
         file.name.indexOf('.') > -1 ? file.name.replace(/.*\.(.+)$/, '$1') : '';
       if (ALLOWED_EXTENSIONS.indexOf(extension) < 0) {
         result.errors.push(
-          <T parameters={{ filename: file.name }}>
+          <T params={{ filename: file.name }}>
             translations.screenshots.validation.unsupported_format
           </T>
         );

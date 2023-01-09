@@ -47,7 +47,7 @@ const StyledProjectId = styled('div')`
 
 export const DashboardView = () => {
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'] };
@@ -113,7 +113,7 @@ export const DashboardView = () => {
           <StyledProjectId>
             <T
               keyName="project_dashboard_project_id"
-              parameters={{ id: project.id }}
+              params={{ id: project.id }}
             />
           </StyledProjectId>
         }

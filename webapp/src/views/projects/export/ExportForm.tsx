@@ -15,6 +15,7 @@ import { LanguageSelector } from './LanguageSelector';
 import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
+import { NestedSelector } from './NestedSelector';
 
 const messaging = container.resolve(MessageService);
 
@@ -40,11 +41,10 @@ const StyledForm = styled('form')`
   gap: ${({ theme }) => theme.spacing(3)};
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    'states states'
-    'langs  format'
-    'ns     ns    '
-    '.      submit';
-
+    'states  states'
+    'langs   format'
+    'ns      ns    '
+    'options submit';
   & .states {
     grid-area: states;
   }
@@ -61,6 +61,10 @@ const StyledForm = styled('form')`
   & .ns {
     grid-area: ns;
   }
+`;
+
+const StyledOptions = styled('div')`
+  display: grid;
 `;
 
 export const ExportForm = () => {
@@ -89,7 +93,7 @@ export const ExportForm = () => {
     },
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const allNamespaces = useMemo(
     () =>
@@ -116,6 +120,9 @@ export const ExportForm = () => {
   const [format, setFormat] = useUrlSearchState('format', {
     defaultVal: EXPORT_DEFAULT_FORMAT,
   });
+  const [nested, setNested] = useUrlSearchState('nested', {
+    defaultVal: 'false',
+  });
 
   if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
     return (
@@ -134,6 +141,7 @@ export const ExportForm = () => {
         languages: (languages?.length ? languages : allLangs) as string[],
         format: (format || EXPORT_DEFAULT_FORMAT) as typeof FORMATS[number],
         namespaces: allNamespaces || [],
+        nested: nested === 'true',
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -149,6 +157,7 @@ export const ExportForm = () => {
         setStates(sortStates(values.states));
         setLanguages(sortLanguages(values.languages));
         setFormat(values.format);
+        setNested(String(values.nested));
 
         return errors;
       }}
@@ -163,7 +172,7 @@ export const ExportForm = () => {
                 format: values.format,
                 filterState: values.states,
                 languages: values.languages,
-                structureDelimiter: '.',
+                structureDelimiter: values.nested ? '.' : '',
                 filterNamespace: values.namespaces,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
@@ -202,6 +211,9 @@ export const ExportForm = () => {
             languages={languagesLoadable.data?._embedded?.languages}
           />
           <FormatSelector className="format" />
+          <StyledOptions className="options">
+            <NestedSelector />
+          </StyledOptions>
           <NsSelector className="ns" namespaces={allNamespaces} />
           <div className="submit">
             <LoadingButton

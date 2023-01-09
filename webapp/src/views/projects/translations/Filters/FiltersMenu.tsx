@@ -15,7 +15,7 @@ export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
   const dispatch = useTranslationsDispatch();
   const filtersContent = useFiltersContent();
   const activeFilters = useActiveFilters();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleClearFilters = () => {
     dispatch({ type: 'SET_FILTERS', payload: {} });

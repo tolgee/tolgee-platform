@@ -57,7 +57,7 @@ export const PlanInfo: React.FC<Props> = ({ plan }) => {
         <StyledName>
           <T
             keyName="billing_plan_credits_included"
-            parameters={{ hint: <MtHint /> }}
+            params={{ hint: <MtHint /> }}
           />
         </StyledName>
       </StyledItem>

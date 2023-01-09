@@ -26,7 +26,7 @@ export const LanguageModifyForm: FC<{
       <>{wrapperProps.children}</>
     );
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Wrapper>

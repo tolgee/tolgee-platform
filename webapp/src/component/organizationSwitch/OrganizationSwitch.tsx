@@ -3,7 +3,6 @@ import { Box, Link, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { OrganizationItem } from './OrganizationItem';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
@@ -49,24 +48,6 @@ export const OrganizationSwitch: React.FC<Props> = ({
     handleClose();
     history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
-
-  const organizationsLoadable = useApiQuery({
-    url: '/v2/organizations',
-    method: 'get',
-    query: {
-      params: { filterCurrentUserOwner: false },
-      size: 1000,
-      sort: ['name'],
-    },
-  });
-
-  const organizations = organizationsLoadable.data?._embedded?.organizations;
-  const organizationsContainPreferred =
-    organizations?.findIndex((o) => o.id === preferredOrganization.id) !== -1;
-
-  if (!organizationsContainPreferred) {
-    organizations?.unshift(preferredOrganization);
-  }
 
   return (
     <>

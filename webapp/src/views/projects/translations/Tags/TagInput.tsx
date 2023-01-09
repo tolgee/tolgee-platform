@@ -129,7 +129,7 @@ export const TagInput: React.FC<Props> = ({
             <MenuItem {...attrs}>
               <StyledOption data-cy="tag-autocomplete-option">
                 {option.translation ? (
-                  <T parameters={{ tag: search }}>{option.translation}</T>
+                  <T params={{ tag: search }}>{option.translation}</T>
                 ) : (
                   option.label
                 )}

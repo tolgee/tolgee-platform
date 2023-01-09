@@ -7,7 +7,7 @@ import {
   useTheme,
   styled,
 } from '@mui/material';
-import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import {
   Line,
   LineChart,
@@ -16,6 +16,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
 // seconds * minutes * hours * milliseconds = 1 day
 const DAY = 60 * 60 * 24 * 1000;
@@ -49,7 +51,7 @@ type Props = {
 };
 
 export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
-  const getLang = useCurrentLanguage();
+  const language = useCurrentLanguage();
 
   const [period, setPeriod] = useState<'week' | 'month' | 'year' | 'all'>(
     'month'
@@ -57,10 +59,10 @@ export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
 
   const theme = useTheme();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const dateFormatter = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString(getLang());
+    return new Date(timestamp).toLocaleDateString(language);
   };
 
   const dailyActivityData = useMemo(() => {

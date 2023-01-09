@@ -36,7 +36,7 @@ export const ImportView: FunctionComponent = () => {
 
   const { refetchUsage } = useOrganizationUsageMethods();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const onConflictResolutionDialogClose = () => {
     dataHelper.refetchData();
