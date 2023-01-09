@@ -2,6 +2,7 @@ package io.tolgee.dtos
 
 import io.tolgee.constants.ComputedPermissionOrigin
 import io.tolgee.dtos.cacheable.IPermission
+import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 
@@ -9,26 +10,42 @@ class ComputedPermissionDto(
   permission: IPermission,
   val origin: ComputedPermissionOrigin = ComputedPermissionOrigin.NONE
 ) : IPermission by permission {
-  val allTranslateLanguagesPermitted: Boolean
-    get() {
-      if (scopes.isNullOrEmpty()) {
-        return false
-      }
 
-      if (translateLanguageIds.isNullOrEmpty()) {
-        return true
-      }
+  fun checkViewPermitted(vararg languageIds: Long) = checkLanguagePermitted(languageIds.toList(), viewLanguageIds)
+  fun checkTranslatePermitted(vararg languageIds: Long) = checkLanguagePermitted(
+    languageIds.toList(),
+    translateLanguageIds
+  )
 
-      if (scopes.contains(Scope.ADMIN)) {
-        return true
-      }
+  fun checkStateChangePermitted(vararg languageIds: Long) = checkLanguagePermitted(
+    languageIds.toList(),
+    stateChangeLanguageIds
+  )
 
-      if (scopes.contains(Scope.TRANSLATIONS_EDIT)) {
-        return translateLanguageIds.isEmpty()
-      }
-
+  private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
+    if (scopes.isEmpty()) {
       return false
     }
+
+    if (languageIds.isNullOrEmpty()) {
+      return true
+    }
+
+    if (scopes.contains(Scope.ADMIN)) {
+      return true
+    }
+
+    return false
+  }
+
+  private fun checkLanguagePermitted(languageIds: Collection<Long>, permittedLanguageIds: Collection<Long>?) {
+    if (this.isAllLanguagesPermitted(permittedLanguageIds)) {
+      return
+    }
+    if (permittedLanguageIds?.containsAll(languageIds) != true) {
+      throw LanguageNotPermittedException(languageIds = languageIds - permittedLanguageIds.orEmpty().toSet())
+    }
+  }
 
   constructor(permission: IPermission) : this(
     permission,

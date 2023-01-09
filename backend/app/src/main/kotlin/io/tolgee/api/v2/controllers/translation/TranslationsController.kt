@@ -146,8 +146,11 @@ When null, resulting file will be a flat key-value object.
       return null
     }
 
+    val permittedTags = securityService
+      .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
+
     val response = translationService.getTranslations(
-      languageTags = languages,
+      languageTags = permittedTags,
       namespace = ns,
       projectId = projectHolder.project.id,
       structureDelimiter = request.getStructureDelimiter()
@@ -159,17 +162,6 @@ When null, resulting file will be a flat key-value object.
       .body(
         response
       )
-  }
-
-  /**
-   * It has to be handled manually since spring returns default value even when empty value provided
-   */
-  private fun WebRequest.getStructureDelimiter(): Char? {
-    val structureDelimiterParam = this.parameterMap["structureDelimiter"]?.first() ?: return '.'
-    if (structureDelimiterParam == "") {
-      return null
-    }
-    return structureDelimiterParam.toCharArray().first()
   }
 
   @PutMapping("")
@@ -219,7 +211,7 @@ When null, resulting file will be a flat key-value object.
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
-    securityService.checkLanguageTranslatePermission(translation)
+    securityService.checkStateChangePermission(translation)
     return translationModelAssembler.toModel(translationService.setState(translation, state))
   }
 
@@ -242,10 +234,12 @@ When null, resulting file will be a flat key-value object.
   ): KeysWithTranslationsPageModel {
 
     val languages: Set<Language> = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
 
     val pageableWithSort = getSafeSortPageable(pageable)
-    val data = translationService.getViewData(projectHolder.project.id, pageableWithSort, params, languages)
+
+    val data = translationService
+      .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
 
@@ -265,7 +259,7 @@ When null, resulting file will be a flat key-value object.
     @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
   ): SelectAllResponse {
     val languages: Set<Language> = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
 
     return SelectAllResponse(
       translationService.getSelectAllKeys(
@@ -278,7 +272,7 @@ When null, resulting file will be a flat key-value object.
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
   @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   fun dismissAutoTranslatedState(
@@ -286,6 +280,7 @@ When null, resulting file will be a flat key-value object.
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkStateChangePermission(translation)
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
   }
@@ -319,6 +314,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   ): PagedModel<TranslationHistoryModel> {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(translation.language.id))
     val translations = activityService.getTranslationHistory(translation.id, pageable)
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
@@ -364,5 +360,16 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
+  }
+
+  /**
+   * It has to be handled manually since spring returns default value even when empty value provided
+   */
+  private fun WebRequest.getStructureDelimiter(): Char? {
+    val structureDelimiterParam = this.parameterMap["structureDelimiter"]?.first() ?: return '.'
+    if (structureDelimiterParam == "") {
+      return null
+    }
+    return structureDelimiterParam.toCharArray().first()
   }
 }

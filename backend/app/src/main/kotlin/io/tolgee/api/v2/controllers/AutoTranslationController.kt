@@ -59,7 +59,11 @@ When no languages provided, it translates only untranslated languages."""
     @RequestParam useTranslationMemory: Boolean?
   ) {
     val key = keyService.get(keyId)
-    val languagesToTranslate = languages ?: getAllLanguagesToTranslate()
+    val languagesToTranslate = securityService.filterViewPermissionByTag(
+      projectHolder.project.id,
+      languages ?: getAllLanguagesToTranslate()
+    )
+
     checkPermissions(key, languagesToTranslate)
     validateServices(useMachineTranslation, useTranslationMemory)
 
