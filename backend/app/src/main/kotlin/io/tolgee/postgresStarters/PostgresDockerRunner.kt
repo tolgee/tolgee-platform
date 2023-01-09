@@ -34,7 +34,7 @@ class PostgresDockerRunner(
       command = "postgres -c max_connections=10000",
       stopBeforeStart = false
     ).also {
-      logger.info("Running Postgres Docker container. This may take some time...")
+      logger.info("Starting Postgres Docker container")
       it.run()
     }
   }
