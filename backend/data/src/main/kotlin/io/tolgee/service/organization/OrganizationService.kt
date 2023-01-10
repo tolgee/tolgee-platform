@@ -97,7 +97,6 @@ class OrganizationService(
 
   private fun generateSlug(name: String) =
     slugGenerator.generate(name, 3, 60) {
-      @Suppress("BlockingMethodInNonBlockingContext") // this is bug in IDEA
       this.validateSlugUniqueness(it)
     }
 
@@ -200,7 +199,7 @@ class OrganizationService(
       invitationService.delete(invitation)
     }
 
-    organization.prefereredBy
+    organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
         it.preferredOrganization = findOrCreatePreferred(
@@ -274,5 +273,13 @@ class OrganizationService(
 
   fun getProjectOwner(projectId: Long): Organization {
     return organizationRepository.getProjectOwner(projectId)
+  }
+
+  fun setBasePermission(organizationId: Long, permissionType: ProjectPermissionType) {
+    val organization = get(organizationId)
+    val basePermission = organization.basePermission
+    basePermission.type = permissionType
+    basePermission.scopes = arrayOf()
+    permissionService.save(basePermission)
   }
 }

@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v2/projects/")
+@RequestMapping("/v2/")
 @Tag(name = "User invitations to project")
 class AdvancedPermissionController(
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val eePermissionService: EePermissionService,
   private val projectHolder: ProjectHolder
 ) {
-  @PutMapping("{projectId}/users/{userId}/set-permissions")
+  @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
   @AccessWithProjectPermission(Scope.ADMIN)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
@@ -33,10 +33,10 @@ class AdvancedPermissionController(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @Schema(
-      description = "Permitted scopes for specific user",
+      description = "Granted scopes",
       example = """["translations.view", "translations.edit"]"""
     )
-    @RequestParam scopes: List<String>,
+    @RequestParam scopes: List<String>?,
     @ParameterObject params: SetPermissionLanguageParams
   ) {
     val parsedScopes = Scope.parse(scopes)
@@ -47,5 +47,19 @@ class AdvancedPermissionController(
       languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id),
       scopes = parsedScopes
     )
+  }
+
+  @PutMapping("organizations/{organizationId:[0-9]+}/set-base-permissions")
+  @Operation(summary = "Sets organization base permission")
+  fun setBasePermissions(
+    @PathVariable organizationId: Long,
+    @Schema(
+      description = "Granted scopes to all projects for all organization users without direct project permissions set",
+      example = """["translations.view", "translations.edit"]"""
+    )
+    @RequestParam scopes: List<String>
+  ) {
+    val parsedScopes = Scope.parse(scopes)
+    eePermissionService.setOrganizationBasePermission(organizationId, parsedScopes)
   }
 }

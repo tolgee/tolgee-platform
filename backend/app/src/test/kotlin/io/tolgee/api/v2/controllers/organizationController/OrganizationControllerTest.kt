@@ -17,6 +17,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -337,6 +338,20 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
       ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
+    }
+  }
+
+  @Test
+  @Transactional
+  fun `sets base permissions`() {
+    withOwnerInOrganization { organization, owner, role ->
+      loginAsUser(owner)
+      performAuthPut(
+        "/v2/organizations/${organization.id}/set-base-permissions/REVIEW",
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+      ).andIsOk
+
+      organizationService.get(organization.id).basePermission.type.assert.isEqualTo(ProjectPermissionType.REVIEW)
     }
   }
 }

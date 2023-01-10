@@ -508,7 +508,7 @@ export interface components {
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
-      /** The permitted scopes */
+      /** The Granted scopes */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -545,7 +545,7 @@ export interface components {
     };
     /** Current user's direct permission */
     PermissionModel: {
-      /** The permitted scopes */
+      /** The Granted scopes */
       scopes: (
         | "translations.view"
         | "translations.edit"

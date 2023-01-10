@@ -51,7 +51,7 @@ class Organization(
   var projects: MutableList<Project> = mutableListOf()
 
   @OneToMany(mappedBy = "preferredOrganization")
-  var prefereredBy: MutableList<UserPreferences> = mutableListOf()
+  var preferredBy: MutableList<UserPreferences> = mutableListOf()
 
   override var avatarHash: String? = null
 }

@@ -9,7 +9,7 @@ data class ProjectInviteUserDto(
   var type: ProjectPermissionType? = null,
 
   @get:Schema(
-    description = "Permitted scopes for the invited user",
+    description = "Granted scopes for the invited user",
     example = """["translations.view", "translations.edit"]"""
   )
   var scopes: Set<String>? = null,
