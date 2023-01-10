@@ -27,6 +27,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
@@ -262,6 +263,16 @@ class OrganizationController(
     val roleType = organizationRoleService.getType(organization.id)
     organizationService.removeAvatar(organization)
     return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
+  }
+
+  @PutMapping("/{organizationId:[0-9]+}/set-base-permissions/{permissionType}")
+  @Operation(summary = "Sets organization base permission")
+  fun setBasePermissions(
+    @PathVariable organizationId: Long,
+    @PathVariable permissionType: ProjectPermissionType,
+  ) {
+    organizationRoleService.checkUserIsOwner(organizationId)
+    organizationService.setBasePermission(organizationId, permissionType)
   }
 
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])

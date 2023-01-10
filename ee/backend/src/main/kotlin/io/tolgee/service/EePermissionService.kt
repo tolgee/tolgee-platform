@@ -7,13 +7,15 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.Scope
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.PermissionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EePermissionService(
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
+  private val organizationService: OrganizationService
 ) {
   @Transactional
   fun setUserDirectPermission(
@@ -35,6 +37,13 @@ class EePermissionService(
     permissionService.setPermissionLanguages(permission, languages)
 
     return permissionService.save(permission)
+  }
+
+  fun setOrganizationBasePermission(organizationId: Long, scopes: Set<Scope>) {
+    val permission = organizationService.get(organizationId).basePermission
+    permission.scopes = scopes.toTypedArray()
+    permission.type = null
+    permissionService.save(permission)
   }
 
   fun createForInvitation(

@@ -153,6 +153,14 @@ class Permission(
         if (!((permission._scopes == null) xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
+        if (permission.organization != null && (
+          permission.viewLanguages.isNotEmpty() ||
+            permission.translateLanguages.isNotEmpty() ||
+            permission.stateChangeLanguages.isNotEmpty()
+          )
+        ) {
+          throw IllegalStateException("Organization base permission cannot have language permissions")
+        }
       }
     }
   }

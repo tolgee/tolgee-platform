@@ -42,7 +42,7 @@ class PublicControllerTest :
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val invitation = invitationService.create(
-      CreateProjectInvitationParams(project, ProjectPermissionType.EDIT, null)
+      CreateProjectInvitationParams(project, ProjectPermissionType.EDIT)
     )
     val dto = SignUpDto(
       name = "Pavel Novak",
