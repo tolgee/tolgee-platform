@@ -17,6 +17,11 @@ describe('Translation comments', () => {
     waitForGlobalLoading();
   });
 
+  it("won't fail when translation is empty", () => {
+    logInAs('franta');
+    createComment('Cool comment 1', 1, 'en');
+  });
+
   it('franta can add comment (manage)', () => {
     logInAs('franta');
     createComment('Cool comment 1', 0, 'en');

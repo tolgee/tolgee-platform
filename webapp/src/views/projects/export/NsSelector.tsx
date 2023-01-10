@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   if (!namespaces) {
     return null;

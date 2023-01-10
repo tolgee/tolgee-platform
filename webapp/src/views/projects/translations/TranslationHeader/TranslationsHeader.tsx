@@ -48,7 +48,7 @@ export const TranslationsHeader = () => {
             variant="body2"
             data-cy="translations-key-count"
           >
-            <T parameters={{ count: String(translationsTotal) }}>
+            <T params={{ count: String(translationsTotal) }}>
               translations_results_count
             </T>
           </Typography>

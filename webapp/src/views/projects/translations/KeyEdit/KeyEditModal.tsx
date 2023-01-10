@@ -66,7 +66,7 @@ export const KeyEditModal: React.FC<Props> = ({
   tags,
   onClose,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const dispatch = useTranslationsDispatch();
   const messaging = useMessage();

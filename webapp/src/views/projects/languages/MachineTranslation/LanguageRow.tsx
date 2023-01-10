@@ -30,7 +30,7 @@ type Props = {
 };
 
 export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const getProviderImg = useProviderImg();
 

@@ -88,7 +88,7 @@ export const SearchSelectContent: React.FC<Props> = ({
   minWidth = 250,
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleAddNew = () => {
     onAddNew?.(inputValue);

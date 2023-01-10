@@ -15,7 +15,7 @@ export const RemoveUserButton = (props: {
   userId: number;
   userName: string;
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const organization = useOrganization();
   const removeUserLoadable = useApiMutation({
     url: '/v2/organizations/{organizationId}/users/{userId}',
@@ -26,7 +26,7 @@ export const RemoveUserButton = (props: {
   const removeUser = () => {
     confirmation({
       message: (
-        <T parameters={{ userName: props.userName }}>
+        <T params={{ userName: props.userName }}>
           really_remove_user_confirmation
         </T>
       ),

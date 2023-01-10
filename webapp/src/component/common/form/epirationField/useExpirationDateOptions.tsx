@@ -18,7 +18,7 @@ export const useExpirationDateOptions = () => {
         time: time,
         value: `${time}`,
         label: (
-          <T parameters={{ days: days }} keyName="expiration-date-days-option">
+          <T params={{ days: days }} keyName="expiration-date-days-option">
             {'{days} days'}
           </T>
         ),

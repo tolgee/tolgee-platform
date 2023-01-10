@@ -27,7 +27,7 @@ type ValueType = {
 };
 
 const PasswordResetSetView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const match = useRouteMatch();
   const user = useUser();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];

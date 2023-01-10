@@ -43,7 +43,7 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     <StyledContainer>
       <StyledText>
         {activity.translationKey ? (
-          <T keyName={activity.translationKey} parameters={titleParameters}></T>
+          <T keyName={activity.translationKey} params={titleParameters}></T>
         ) : (
           activity.type
         )}

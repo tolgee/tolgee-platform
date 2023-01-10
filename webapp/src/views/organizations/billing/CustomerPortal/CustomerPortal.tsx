@@ -22,7 +22,7 @@ const StyledStripeLogo = styled(StripeLogoSvg)`
 `;
 
 export const CustomerPortal = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const organization = useOrganization();
 
   const getCustomerPortalSession = useBillingApiMutation({

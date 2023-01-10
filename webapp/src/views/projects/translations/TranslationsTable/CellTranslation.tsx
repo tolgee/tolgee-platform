@@ -146,7 +146,7 @@ export const CellTranslation: React.FC<Props> = ({
     >
       {editVal ? (
         <StyledTranslationOpened
-          keyId={data.keyId}
+          keyData={data}
           language={language}
           translation={translation}
           value={value}

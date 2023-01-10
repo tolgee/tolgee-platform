@@ -65,7 +65,7 @@ export const FormBody: React.FC<Props> = ({
   languages,
 }) => {
   const [editedLang, setEditedLang] = useState<string | null>(null);
-  const t = useTranslate();
+  const { t } = useTranslate();
   const form = useFormikContext<any>();
   const project = useProject();
 

@@ -15,7 +15,10 @@ const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
 );
 const SignUpView = React.lazy(
-  () => import(/* webpackChunkName: "sign-up-view" */ './security/SignUpView')
+  () =>
+    import(
+      /* webpackChunkName: "sign-up-view" */ './security/SignUp/SignUpView'
+    )
 );
 
 const PasswordResetSetView = React.lazy(

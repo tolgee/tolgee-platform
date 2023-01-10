@@ -48,7 +48,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
     setDiffEnabled(!diffEnabled);
   };
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Dialog {...dialogProps}>

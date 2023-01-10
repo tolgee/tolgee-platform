@@ -39,7 +39,7 @@ const ITEMS_COUNT = 3;
 
 export const Invoices: FC = () => {
   const organization = useOrganization();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const [showAll, setShowAll] = useState(false);
 

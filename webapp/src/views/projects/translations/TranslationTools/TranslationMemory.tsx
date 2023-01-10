@@ -74,7 +74,7 @@ type Props = {
 };
 
 export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const items = data?._embedded?.translationMemoryItems;
 
   if (!data) {

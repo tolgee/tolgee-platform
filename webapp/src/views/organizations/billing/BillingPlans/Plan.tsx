@@ -34,7 +34,7 @@ export const Plan: FC<Props> = ({
   isActive,
   isEnded,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const {
     onPrepareUpgrade,
     prepareUpgradeMutation,

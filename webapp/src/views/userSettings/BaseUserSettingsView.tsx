@@ -13,7 +13,7 @@ export const BaseUserSettingsView: React.FC<Props> = ({
   navigation,
   ...otherProps
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const { authentication } = useConfig();
   const menuItems: SettingsMenuItem[] = authentication
     ? [

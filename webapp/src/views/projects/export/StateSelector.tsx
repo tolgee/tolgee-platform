@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const StateSelector: React.FC<Props> = ({ className }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Field name="states">

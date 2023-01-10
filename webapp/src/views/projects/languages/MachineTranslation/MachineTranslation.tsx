@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Link as MuiLink, styled, Typography } from '@mui/material';
 import { Formik, FormikProps } from 'formik';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -50,7 +50,7 @@ const StyledLoadingWrapper = styled('div')`
 export const MachineTranslation = () => {
   const formRef = useRef<FormikProps<any>>();
   const [expanded, setExpanded] = useState(false);
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [formInstance, setFormInstance] = useState(0);
 
   const {
@@ -211,14 +211,24 @@ export const MachineTranslation = () => {
               </Typography>
               <StyledHint variant="caption">
                 {t('project_languages_credit_balance_help')}{' '}
-                {config.billing.enabled
-                  ? preferredOrganization.currentUserRole === 'OWNER'
-                    ? t('project_languages_credit_balance_help_owner', params)
-                    : t('project_languages_credit_balance_help_member', params)
-                  : t(
-                      'project_languages_credit_balance_help_no_billing',
-                      params
-                    )}
+                {config.billing.enabled ? (
+                  preferredOrganization.currentUserRole === 'OWNER' ? (
+                    <T
+                      keyName="project_languages_credit_balance_help_owner"
+                      params={params}
+                    />
+                  ) : (
+                    <T
+                      keyName="project_languages_credit_balance_help_member"
+                      params={params}
+                    />
+                  )
+                ) : (
+                  <T
+                    keyName="project_languages_credit_balance_help_no_billing"
+                    params={params}
+                  />
+                )}
               </StyledHint>
             </Box>
           )}

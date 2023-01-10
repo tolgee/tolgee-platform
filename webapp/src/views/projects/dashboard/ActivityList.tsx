@@ -61,7 +61,7 @@ export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
     return result;
   }, [activityLoadable.data]);
 
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [diffEnabled, setDiffEnabled] = useState(true);
 
   const toggleDiff = () => {

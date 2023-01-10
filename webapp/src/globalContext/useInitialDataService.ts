@@ -7,12 +7,15 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { components } from 'tg.service/apiSchema.generated';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { useTolgee } from '@tolgee/react';
+import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
 export const useInitialDataService = () => {
   const actions = container.resolve(GlobalActions);
   const invitationCodeService = container.resolve(InvitationCodeService);
+  const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
     OrganizationModel | undefined
@@ -22,24 +25,32 @@ export const useInitialDataService = () => {
     url: '/v2/public/initial-data',
     method: 'get',
     options: {
-      onSuccess(data) {
-        // set organization data only if missing
-        setOrganization((org) => (org ? org : data.preferredOrganization));
-        const invitationCode = invitationCodeService.getCode();
-        actions.updateSecurity.dispatch({
-          allowPrivate:
-            !data?.serverConfiguration?.authentication ||
-            Boolean(data.userInfo),
-          allowRegistration:
-            data.serverConfiguration.allowRegistrations ||
-            Boolean(invitationCode), // if user has invitation code, registration is allowed
-        });
-      },
       refetchOnMount: false,
       cacheTime: Infinity,
       keepPreviousData: true,
+      staleTime: Infinity,
     },
   });
+
+  useEffect(() => {
+    const data = initialData.data;
+    if (data) {
+      // set organization data only if missing
+      setOrganization((org) => (org ? org : data.preferredOrganization));
+      if (data.languageTag) {
+        // switch ui language, once user is signed in
+        tolgee.changeLanguage(data.languageTag);
+      }
+      const invitationCode = invitationCodeService.getCode();
+      actions.updateSecurity.dispatch({
+        allowPrivate:
+          !data?.serverConfiguration?.authentication || Boolean(data.userInfo),
+        allowRegistration:
+          data.serverConfiguration.allowRegistrations ||
+          Boolean(invitationCode), // if user has invitation code, registration is allowed
+      });
+    }
+  }, [Boolean(initialData.data)]);
 
   const organizationLoadable = useApiMutation({
     url: '/v2/organizations/{id}',
@@ -92,7 +103,7 @@ export const useInitialDataService = () => {
     return initialData.refetch();
   };
 
-  useEffect(() => {
+  useOnUpdate(() => {
     refetchInitialData();
   }, [security.jwtToken]);
 

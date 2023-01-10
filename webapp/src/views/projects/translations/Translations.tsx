@@ -21,7 +21,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';
 
 export const Translations = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
 

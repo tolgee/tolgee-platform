@@ -2,9 +2,10 @@ import { default as React, FunctionComponent, useState } from 'react';
 import { IconButton, styled } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { useCurrentLanguage, useSetLanguage } from '@tolgee/react';
 import { CircledLanguageIcon } from './languages/CircledLanguageIcon';
 import { locales } from '../locales';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useTolgee } from '@tolgee/react';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -23,6 +24,7 @@ const StyledIconButton = styled(IconButton)`
 export const LocaleMenu: FunctionComponent<{ className?: string }> = (
   props
 ) => {
+  const tolgee = useTolgee();
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
     setAnchorEl(event.currentTarget);
@@ -34,10 +36,7 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const setLanguage = useSetLanguage();
-  const getCurrentLanguage = useCurrentLanguage();
-
-  const language = getCurrentLanguage();
+  const language = useCurrentLanguage();
 
   return (
     <>
@@ -72,12 +71,12 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
         >
           {Object.entries(locales).map(([abbr, lang]) => (
             <MenuItem
-              selected={getCurrentLanguage() === abbr}
+              selected={language === abbr}
               value={abbr}
               key={abbr}
               onClick={() => {
                 handleClose();
-                setLanguage(abbr);
+                tolgee.changeLanguage(abbr);
               }}
             >
               {lang.name}

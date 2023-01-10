@@ -84,7 +84,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const dispatch = useTranslationsDispatch();
   const view = useTranslationsSelector((v) => v.view);

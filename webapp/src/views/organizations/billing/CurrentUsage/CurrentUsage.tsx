@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
@@ -40,7 +40,7 @@ type Props = {
 };
 
 export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const formatDate = useDateFormatter();
   return (
     <StyledBillingSection gridArea="usage">
@@ -53,7 +53,11 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           {Boolean(usage.extraCreditBalance) && (
             <StyledBillingSectionSubtitleSmall>
               {' '}
-              + {t('billing_actual_extra_credits', { hint: <MtHint /> })}
+              +{' '}
+              <T
+                keyName="billing_actual_extra_credits"
+                params={{ hint: <MtHint /> }}
+              />
             </StyledBillingSectionSubtitleSmall>
           )}
         </StyledBillingSectionSubtitle>
@@ -66,7 +70,12 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
-          name={t('billing_actual_monthly_credits', { hint: <MtHint /> })}
+          name={
+            <T
+              keyName="billing_actual_monthly_credits"
+              params={{ hint: <MtHint /> }}
+            />
+          }
           currentAmount={Math.round(usage.creditBalance / 100)}
           totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
@@ -77,7 +86,12 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
         </Box>
         <PlanMetric
           data-cy="billing-actual-extra-credits"
-          name={t('billing_actual_extra_credits', { hint: <MtHint /> })}
+          name={
+            <T
+              keyName="billing_actual_extra_credits"
+              params={{ hint: <MtHint /> }}
+            />
+          }
           currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (

@@ -1,7 +1,7 @@
 import { T } from '@tolgee/react';
 import { singleton } from 'tsyringe';
 
-import { SignUpType } from '../component/security/SignUpView';
+import { SignUpType } from '../component/security/SignUp/SignUpView';
 import { GlobalActions } from '../store/global/GlobalActions';
 import { InvitationCodeService } from './InvitationCodeService';
 import { MessageService } from './MessageService';

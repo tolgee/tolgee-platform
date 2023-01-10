@@ -5,7 +5,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 
 export const ProjectLanguagesView = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const project = useProject();
 

@@ -43,7 +43,7 @@ const StyledToggleAllButton = styled(IconButton)`
 `;
 
 export const TranslationsSelection = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const selection = useTranslationsSelector((c) => c.selection);
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
@@ -92,7 +92,7 @@ export const TranslationsSelection = () => {
         </Tooltip>
         <T
           keyName="translations_selected_count"
-          parameters={{ count: selection.length, total: totalCount }}
+          params={{ count: selection.length, total: totalCount }}
         />
         <Tooltip title={t('translations_delete_selected')}>
           <IconButton

@@ -68,7 +68,7 @@ const StyledClearButton = styled(IconButton)`
 `;
 
 export const Filters = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const dispatch = useTranslationsDispatch();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
@@ -120,7 +120,7 @@ export const Filters = () => {
                 <T>translations_filter_placeholder</T>
               ) : (
                 (value.length === 1 && getFilterName(value[0])) || (
-                  <T parameters={{ filtersNum: String(activeFilters.length) }}>
+                  <T params={{ filtersNum: String(activeFilters.length) }}>
                     translations_filters_text
                   </T>
                 )

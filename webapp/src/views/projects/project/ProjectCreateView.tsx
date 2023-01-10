@@ -28,7 +28,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     url: '/v2/projects',
     method: 'post',
   });
-  const t = useTranslate();
+  const { t } = useTranslate();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
 

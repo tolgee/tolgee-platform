@@ -24,7 +24,7 @@ const getContent = (auto: boolean | string) => {
       {provider ? (
         <T
           keyName="translations_auto_translated_provider"
-          parameters={{
+          params={{
             provider: provider,
           }}
         />

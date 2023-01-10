@@ -84,7 +84,7 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [selectionOpen, setSelectionOpen] = useState(false);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
-  const t = useTranslate();
+  const { t } = useTranslate();
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const list = useTranslationsSelector((c) => c.reactList);
   const selection = useTranslationsSelector((c) => c.selection);
