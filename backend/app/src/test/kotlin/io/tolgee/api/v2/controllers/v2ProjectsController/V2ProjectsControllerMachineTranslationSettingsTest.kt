@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto

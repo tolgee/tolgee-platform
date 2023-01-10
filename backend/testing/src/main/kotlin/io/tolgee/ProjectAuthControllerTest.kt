@@ -1,4 +1,4 @@
-package io.tolgee.controllers
+package io.tolgee
 
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.AuthRequestPerformer

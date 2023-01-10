@@ -103,14 +103,16 @@ class Permission(
     invitation: Invitation? = null,
     project: Project? = null,
     organization: Organization? = null,
-    type: ProjectPermissionType = ProjectPermissionType.VIEW,
-    languagePermissions: LanguagePermissions? = null
+    type: ProjectPermissionType? = ProjectPermissionType.VIEW,
+    languagePermissions: LanguagePermissions? = null,
+    scopes: Array<Scope>? = null
   ) : this(
     id = id,
     user = user,
     organization = null,
     invitation = invitation
   ) {
+    this._scopes = scopes
     this.project = project
     this.type = type
     this.organization = organization

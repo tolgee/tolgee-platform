@@ -2,7 +2,8 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
@@ -10,6 +11,7 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
@@ -18,7 +20,9 @@ import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.InvitationTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -53,6 +57,10 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     tolgeeProperties.frontEndUrl = null
   }
 
+  val invitationTestUtil: InvitationTestUtil by lazy {
+    InvitationTestUtil(this, applicationContext)
+  }
+
   @Test
   fun `returns project invitations`() {
     val base = dbPopulator.createBase(generateUniqueString())
@@ -71,33 +79,45 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `invites user to project with languages`() {
-    val testData = prepareTestData()
-
-    val invitatationJson = performProjectAuthPut(
-      "/invite",
-      ProjectInviteUserDto(
-        ProjectPermissionType.TRANSLATE, languages = setOf(testData.englishLanguage.id)
-      )
-    ).andIsOk.andGetContentAsString
-
-    val key = parseCode(invitatationJson)
-
-    val invitation = invitationService.getInvitation(key)
-    assertThat(invitation.permission?.translateLanguages?.toList()?.first()?.tag).isEqualTo("en")
+  fun `invites user to project with languages (translate)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.TRANSLATE
+      languages = setOf(getLang("en"))
+    }.andIsOk
+    val invitation = invitationTestUtil.getInvitation(result)
+    invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains("en") // ads also to view
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `fails when provide languages for non TRANSLATE type`() {
-    val testData = prepareTestData()
+  fun `invites user to project with languages (review)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.REVIEW
+      stateChangeLanguages = setOf(getLang("en"))
+    }.andIsOk
+    val invitation = invitationTestUtil.getInvitation(result)
+    invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains("en") // ads also to view
+  }
 
-    performProjectAuthPut(
-      "/invite",
-      ProjectInviteUserDto(
-        ProjectPermissionType.EDIT, languages = setOf(testData.englishLanguage.id)
-      )
-    ).andIsBadRequest
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates languages and permission (lower)`() {
+    invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.VIEW
+      translateLanguages = setOf(getLang("en"))
+    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `validates languages and permission (higher)`() {
+
+    invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.EDIT
+      translateLanguages = setOf(getLang("en"))
+    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
@@ -213,7 +233,8 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         type = ProjectPermissionType.TRANSLATE,
         languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
-        email = "a@a.a"
+        email = "a@a.a",
+        scopes = null
       )
     )
   }

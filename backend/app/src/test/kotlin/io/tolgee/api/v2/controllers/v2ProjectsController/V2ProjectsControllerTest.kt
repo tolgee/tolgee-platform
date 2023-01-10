@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.fixtures.andAssertThatJson

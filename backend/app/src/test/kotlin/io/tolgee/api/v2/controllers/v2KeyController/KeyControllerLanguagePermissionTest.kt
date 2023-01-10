@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk

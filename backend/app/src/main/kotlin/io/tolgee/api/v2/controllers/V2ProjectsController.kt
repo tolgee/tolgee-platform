@@ -19,12 +19,10 @@ import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.constants.Message
-import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
-import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
@@ -262,25 +260,6 @@ V2ProjectsController(
     }.toMutableList()
     options.sortBy { it.name }
     return CollectionModel.of(options)
-  }
-
-  @PutMapping("/{projectId}/invite")
-  @Operation(summary = "Generates user invitation link for project")
-  @AccessWithProjectPermission(Scope.ADMIN)
-  @NeedsSuperJwtToken
-  fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
-    val languagesPermissions = projectPermissionFacade.getLanguages(invitation, projectHolder.project.id)
-
-    val params = CreateProjectInvitationParams(
-      project = projectHolder.projectEntity,
-      type = invitation.type!!,
-      email = invitation.email,
-      name = invitation.name,
-      languagePermissions = languagesPermissions
-    )
-
-    val created = invitationService.create(params)
-    return projectInvitationModelAssembler.toModel(created)
   }
 
   @GetMapping("{projectId:[0-9]+}/invitations")

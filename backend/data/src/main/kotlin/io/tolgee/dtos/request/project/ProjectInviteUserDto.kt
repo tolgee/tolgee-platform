@@ -3,12 +3,16 @@ package io.tolgee.dtos.request.project
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.ProjectPermissionType
 import javax.validation.constraints.Email
-import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 data class ProjectInviteUserDto(
-  @field:NotNull
   var type: ProjectPermissionType? = null,
+
+  @get:Schema(
+    description = "Permitted scopes for the invited user",
+    example = """["translations.view", "translations.edit"]"""
+  )
+  var scopes: Set<String>? = null,
 
   override var languages: Set<Long>? = null,
 
