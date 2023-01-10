@@ -19,7 +19,7 @@ export const NamespaceSelector: React.FC<Props> = ({
   SearchSelectProps,
 }) => {
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [lastSearch, setLastSearch] = useState('');
 
   const namespacesLoadable = useApiQuery({

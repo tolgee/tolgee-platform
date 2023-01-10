@@ -766,11 +766,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -842,13 +842,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      projectId: number;
-      lastUsedAt?: number;
-      username?: string;
-      expiresAt?: number;
-      description: string;
       userFullName?: string;
       projectName: string;
+      username?: string;
+      description: string;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1220,7 +1220,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1232,6 +1231,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1452,11 +1452,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1510,13 +1510,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      projectId: number;
-      lastUsedAt?: number;
-      username?: string;
-      expiresAt?: number;
-      description: string;
       userFullName?: string;
       projectName: string;
+      username?: string;
+      description: string;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       scopes: string[];
     };
     PagedModelUserAccountModel: {

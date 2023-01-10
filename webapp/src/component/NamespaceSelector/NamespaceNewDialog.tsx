@@ -23,7 +23,7 @@ export const NamespaceNewDialog: React.FC<Props> = ({
   onClose,
   onChange,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">

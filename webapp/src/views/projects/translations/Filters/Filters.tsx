@@ -68,7 +68,7 @@ const StyledClearButton = styled(IconButton)`
 `;
 
 export const Filters = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const dispatch = useTranslationsDispatch();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 

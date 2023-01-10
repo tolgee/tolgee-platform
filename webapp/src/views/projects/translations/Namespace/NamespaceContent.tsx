@@ -52,7 +52,7 @@ type Props = {
 
 export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
   function NamespaceContent({ namespace, sticky, maxWidth, hideShadow }, ref) {
-    const t = useTranslate();
+    const { t } = useTranslate();
     const { toggle, isActive } = useNamespaceFilter(namespace.name);
     const [open, setOpen] = useState<undefined | HTMLElement>(undefined);
     const [renameOpen, setRenameOpen] = useState(false);

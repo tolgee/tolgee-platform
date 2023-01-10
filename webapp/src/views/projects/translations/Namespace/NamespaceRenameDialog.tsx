@@ -29,7 +29,7 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
   namespace,
   onClose,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { name, id } = namespace;
 
