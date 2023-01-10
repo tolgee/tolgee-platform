@@ -136,6 +136,7 @@ const SignUpView: FunctionComponent = () => {
           )
         }
       />
+      {config.capterraTracker && <img src={config.capterraTracker} />}
     </DashboardPage>
   );
 

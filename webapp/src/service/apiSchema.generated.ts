@@ -765,12 +765,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      createdAt: number;
-      updatedAt: number;
-      description: string;
       lastUsedAt?: number;
       expiresAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -841,15 +841,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      id: number;
-      userFullName?: string;
       projectName: string;
-      username?: string;
-      description: string;
+      userFullName?: string;
       projectId: number;
+      username?: string;
       lastUsedAt?: number;
       expiresAt?: number;
       scopes: string[];
+      id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1073,6 +1073,7 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
+      capterraTracker?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1451,12 +1452,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      createdAt: number;
-      updatedAt: number;
-      description: string;
       lastUsedAt?: number;
       expiresAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      id: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1509,15 +1510,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
-      userFullName?: string;
       projectName: string;
-      username?: string;
-      description: string;
+      userFullName?: string;
       projectId: number;
+      username?: string;
       lastUsedAt?: number;
       expiresAt?: number;
       scopes: string[];
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
