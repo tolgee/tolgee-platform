@@ -185,15 +185,19 @@ class PermissionService(
     invitation: Invitation,
     params: CreateProjectInvitationParams
   ): Permission {
-    params.languagePermissions?.let {
-      validateLanguagePermissions(it, params.type)
+    val type = params.type ?: throw IllegalStateException("Permission type cannot be null")
+
+    params.languagePermissions.let {
+      validateLanguagePermissions(it, type)
     }
+
     val permission = Permission(
       invitation = invitation,
       project = params.project,
-      type = params.type,
-      languagePermissions = params.languagePermissions
+      type = type,
     )
+
+    setPermissionLanguages(permission, params.languagePermissions)
 
     return this.save(permission)
   }

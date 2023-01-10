@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson

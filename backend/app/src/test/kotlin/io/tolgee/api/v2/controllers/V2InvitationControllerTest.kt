@@ -64,8 +64,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        ProjectPermissionType.EDIT,
-        null
+        ProjectPermissionType.EDIT
       )
     )
 
@@ -80,7 +79,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
-        ProjectPermissionType.EDIT, null
+        ProjectPermissionType.EDIT
       )
     ).code
 
@@ -99,7 +98,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
       CreateProjectInvitationParams(
         project,
         ProjectPermissionType.TRANSLATE,
-        LanguagePermissions(translate = project.languages, null, null)
+        LanguagePermissions(translate = project.languages, null, null), null
       )
     ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
@@ -127,7 +126,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
         type = ProjectPermissionType.TRANSLATE,
         languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
         name = "Franta",
-        email = "a@a.a"
+        email = "a@a.a",
+        scopes = null
       )
     )
   }

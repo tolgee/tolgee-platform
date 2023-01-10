@@ -1,6 +1,6 @@
 package io.tolgee.websocket
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId

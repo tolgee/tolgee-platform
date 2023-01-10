@@ -4,7 +4,6 @@ import com.amazonaws.services.translate.AmazonTranslate
 import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Language

@@ -2,6 +2,7 @@ package io.tolgee.model.enums
 
 import com.fasterxml.jackson.annotation.JsonValue
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 
 enum class Scope(
@@ -129,6 +130,15 @@ enum class Scope(
         }
       }
       throw NotFoundException(Message.SCOPE_NOT_FOUND)
+    }
+    fun parse(scopes: Collection<String>?): Set<Scope> {
+      scopes ?: return setOf()
+      return scopes.map { stringScope ->
+        Scope.values().find { it.value == stringScope } ?: throw BadRequestException(
+          Message.SCOPE_NOT_FOUND,
+          listOf(stringScope)
+        )
+      }.toSet()
     }
   }
 

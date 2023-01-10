@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto

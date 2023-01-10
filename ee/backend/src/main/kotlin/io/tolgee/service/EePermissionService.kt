@@ -1,8 +1,10 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.Scope
 import io.tolgee.service.security.PermissionService
@@ -35,10 +37,33 @@ class EePermissionService(
     return permissionService.save(permission)
   }
 
+  fun createForInvitation(
+    invitation: Invitation,
+    params: CreateProjectInvitationParams
+  ): Permission {
+    val scopes = Scope.parse(params.scopes)
+
+    validateLanguagePermissions(params.languagePermissions, scopes)
+
+    val permission = Permission(
+      type = null,
+      invitation = invitation,
+      project = params.project,
+      scopes = scopes.toTypedArray(),
+    )
+
+    permissionService.setPermissionLanguages(permission, params.languagePermissions)
+
+    return permissionService.save(permission)
+  }
+
   private fun validateLanguagePermissions(
     languagePermissions: LanguagePermissions,
-    scopes: Set<Scope>
+    scopes: Set<Scope>?
   ) {
+    if (scopes.isNullOrEmpty()) {
+      throw BadRequestException(Message.SCOPES_HAS_TO_BE_SET)
+    }
     val hasTranslateLanguages = !languagePermissions.translate.isNullOrEmpty()
     val hasViewLanguages = !languagePermissions.view.isNullOrEmpty()
     val hasStateChangeLanguages = !languagePermissions.stateChange.isNullOrEmpty()

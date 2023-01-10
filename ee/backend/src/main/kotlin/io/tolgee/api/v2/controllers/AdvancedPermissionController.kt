@@ -3,9 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.NeedsSuperJwtToken
@@ -41,7 +39,7 @@ class AdvancedPermissionController(
     @RequestParam scopes: List<String>,
     @ParameterObject params: SetPermissionLanguageParams
   ) {
-    val parsedScopes = parsedScopes(scopes)
+    val parsedScopes = Scope.parse(scopes)
     projectPermissionFacade.checkNotCurrentUser(userId)
     eePermissionService.setUserDirectPermission(
       projectId = projectId,
@@ -49,14 +47,5 @@ class AdvancedPermissionController(
       languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id),
       scopes = parsedScopes
     )
-  }
-
-  private fun parsedScopes(scopes: List<String>): Set<Scope> {
-    return scopes.map { stringScope ->
-      Scope.values().find { it.value == stringScope } ?: throw BadRequestException(
-        Message.SCOPE_NOT_FOUND,
-        listOf(stringScope)
-      )
-    }.toSet()
   }
 }

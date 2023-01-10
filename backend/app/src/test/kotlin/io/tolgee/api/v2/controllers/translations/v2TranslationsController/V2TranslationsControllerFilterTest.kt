@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertError

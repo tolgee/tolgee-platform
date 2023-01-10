@@ -1,5 +1,8 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.constants.Message
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.PermissionTestUtil
 import io.tolgee.testing.assertions.Assertions
@@ -25,5 +28,47 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
       Assertions.assertThat(data.computedPermissions.stateChangeLanguageIds)
         .containsExactlyInAnyOrder(getLangId("en"))
     }
+  }
+
+  @Test
+  fun `validates permissions (languages and scopes)`() {
+    permissionTestUtil.performSetPermissions(
+      ""
+    ) { getLang -> "scopes=translations.view&translateLanguages=${getLang("en")}" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_TRANSLATE_LANGUAGES_WITHOUT_TRANSLATIONS_EDIT_SCOPE)
+
+    permissionTestUtil.performSetPermissions(
+      ""
+    ) { getLang -> "scopes=translations.view&stateChangeLanguages=${getLang("en")}" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_STATE_CHANGE_LANGUAGES_WITHOUT_TRANSLATIONS_STATE_EDIT_SCOPE)
+    permissionTestUtil.performSetPermissions(
+      ""
+    ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_VIEW_LANGUAGES_WITHOUT_TRANSLATIONS_VIEW_SCOPE)
+  }
+
+  @Test
+  fun `validates permissions (empty scopes)`() {
+    permissionTestUtil.performSetPermissions(
+      ""
+    ) { "" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.SCOPES_HAS_TO_BE_SET)
+  }
+
+  @Test
+  fun `validates permissions (admin and languages)`() {
+    permissionTestUtil.performSetPermissions("") { getLang ->
+      "scopes=admin&translateLanguages=${getLang("en")}"
+    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
+    permissionTestUtil.performSetPermissions("") { getLang ->
+      "scopes=admin&viewLanguages=${getLang("en")}"
+    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
+    permissionTestUtil.performSetPermissions("") { getLang ->
+      "scopes=admin&stateChangeLanguages=${getLang("en")}"
+    }.andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_LANGUAGE_PERMISSIONS_FOR_ADMIN_SCOPE)
   }
 }

@@ -34,17 +34,29 @@ class InvitationService @Autowired constructor(
 ) {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
+    return create(params) { invitation ->
+      permissionService.createForInvitation(
+        invitation = invitation,
+        params
+      )
+    }
+  }
+
+  /**
+   * Creates invitations for project
+   *
+   * Enables to provide custom function returning permission,
+   * to be able to create special permission when user provided scopes
+   */
+  @Transactional
+  fun create(
+    params: CreateProjectInvitationParams,
+    setPermissionFn: (invitation: Invitation) -> Permission
+  ): Invitation {
     checkEmailNotAlreadyInvited(params)
-
     val invitation = getInvitationInstance(params)
-
-    invitation.permission = permissionService.createForInvitation(
-      invitation = invitation,
-      params
-    )
-
+    invitation.permission = setPermissionFn(invitation)
     invitationEmailSender.sendInvitation(invitation)
-
     return invitationRepository.save(invitation)
   }
 

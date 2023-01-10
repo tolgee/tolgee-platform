@@ -4,12 +4,12 @@ import com.amazonaws.services.translate.AmazonTranslate
 import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.fixtures.andAssertThatJson
