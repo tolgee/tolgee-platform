@@ -1,10 +1,12 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportDataProvider
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -121,5 +123,17 @@ class ExportServiceTest : AbstractSpringTest() {
 
     assertThat(result).hasSize(5)
     assertThat(result.map { it.state }).allMatch { it == TranslationState.REVIEWED }
+  }
+  @Test
+  fun `filters export data by namespace`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams = ExportParams(filterNamespace = listOf("ns-1", null))
+    val provider = ExportDataProvider(entityManager, exportParams, testData.projectBuilder.self.id)
+    val result = provider.getData()
+
+    result.assert.hasSize(4)
+    result.forEach { it.key.namespace.assert.isIn(null, "ns-1") }
   }
 }

@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.FileStoreException
+import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
@@ -133,7 +134,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName)
+    val key = keyService.get(project.id, keyName, null)
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 
@@ -214,7 +215,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName)
+    val key = keyService.get(project.id, keyName, null)
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 
@@ -256,9 +257,9 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `does not create key when key exists`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "first_key"))
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
-        node("code").isEqualTo("key_exists")
-      }
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod

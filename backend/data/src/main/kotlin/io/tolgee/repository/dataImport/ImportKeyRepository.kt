@@ -12,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional
 interface ImportKeyRepository : JpaRepository<ImportKey, Long> {
   @Query(
     """
-        select distinct ik from ImportKey ik left join fetch ik.keyMeta
-        join fetch ik.files if join fetch if.import im where im.id = :importId
+        select distinct ik from ImportKey ik 
+          left join fetch ik.keyMeta km
+          join fetch ik.file if 
+          join fetch if.import im where im.id = :importId
         """
   )
   fun findAllByImport(importId: Long): List<ImportKey>
@@ -23,6 +25,6 @@ interface ImportKeyRepository : JpaRepository<ImportKey, Long> {
   @Query("""delete from ImportKey ik where ik.id in :ids""")
   fun deleteByIdIn(ids: List<Long>)
 
-  @Query("""select iik.id from ImportKey iik join iik.files if where if.import = :import""")
+  @Query("""select iik.id from ImportKey iik join iik.file if where if.import = :import""")
   fun getAllIdsByImport(import: Import): List<Long>
 }

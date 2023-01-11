@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
@@ -27,7 +28,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to json without scoping`() {
+  fun `it exports to json`() {
     initBaseData()
     val parsed = performExport()
 
@@ -73,23 +74,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to json with scoping`() {
-    testData = TranslationsTestData()
-    testData.generateScopedData()
-    testDataService.saveTestData(testData.root)
-    prepareUserAndProject(testData)
-    commitTransaction()
-
-    val parsed = performExport("splitByScope=true&splitByScopeDepth=2")
-
-    assertThatJson(parsed["hello/i/en.json"]!!) {
-      node("am.scoped").isEqualTo("yupee!")
-    }
-  }
-
-  @Test
-  @Transactional
-  @ProjectJWTAuthTestMethod
   fun `it filters by keyId in`() {
     testData = TranslationsTestData()
     testData.generateLotOfData(1000)
@@ -109,6 +93,33 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
 
     assertThat(time).isLessThan(2000)
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `the structureDelimiter works`() {
+    testData = TranslationsTestData()
+    testData.generateScopedData()
+    testDataService.saveTestData(testData.root)
+    prepareUserAndProject(testData)
+    commitTransaction()
+
+    performExport("structureDelimiter=").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello\\.i\\.am\\.scoped").isEqualTo("yupee!")
+      }
+    }
+    performExport("structureDelimiter=+").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello.i.am.plus.scoped").isEqualTo("yupee!")
+      }
+    }
+    performExport("").let { parsed ->
+      assertThatJson(parsed["en.json"]!!) {
+        node("hello.i.am.scoped").isEqualTo("yupee!")
+      }
+    }
   }
 
   private fun performExport(query: String = ""): Map<String, String> {
@@ -134,6 +145,25 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         it.nextEntry
       }.filterNot { it.isDirectory }
         .map { it.name to zipInputStream.bufferedReader().readText() }.toMap()
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports to json with namespaces`() {
+    val namespacesTestData = NamespacesTestData()
+    testDataService.saveTestData(namespacesTestData.root)
+    projectSupplier = { namespacesTestData.projectBuilder.self }
+    userAccount = namespacesTestData.user
+
+    val parsed = performExport()
+
+    assertThatJson(parsed["ns-1/en.json"]!!) {
+      node("key").isEqualTo("hello")
+    }
+    assertThatJson(parsed["en.json"]!!) {
+      node("key").isEqualTo("hello")
     }
   }
 

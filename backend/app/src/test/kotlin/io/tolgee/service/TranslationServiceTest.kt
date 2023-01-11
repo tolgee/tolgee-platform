@@ -2,7 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -23,7 +23,9 @@ class TranslationServiceTest : AbstractSpringTest() {
   fun getTranslations() {
     val id = dbPopulator.populate("App").project.id
     val data = translationService.getTranslations(
-      HashSet(Arrays.asList("en", "de")), id,
+      languageTags = HashSet(Arrays.asList("en", "de")),
+      namespace = null,
+      projectId = id,
       structureDelimiter = '.'
     )
     assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
@@ -33,11 +35,13 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Test
   fun `returns correct map when collision`() {
     val project = dbPopulator.populate("App").project
-    keyService.create(project, SetTranslationsWithKeyDto("folder.folder", mapOf("en" to "Ha")))
-    keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", mapOf("en" to "Ha")))
+    keyService.create(project, CreateKeyDto("folder.folder", null, mapOf("en" to "Ha")))
+    keyService.create(project, CreateKeyDto("folder.folder.translation", null, mapOf("en" to "Ha")))
 
     val viewData = translationService.getTranslations(
-      HashSet(Arrays.asList("en", "de")), project.id,
+      languageTags = HashSet(Arrays.asList("en", "de")),
+      namespace = null,
+      projectId = project.id,
       structureDelimiter = '.'
     )
     @Suppress("UNCHECKED_CAST")

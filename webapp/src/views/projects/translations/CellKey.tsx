@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Checkbox, styled, useTheme } from '@mui/material';
 import clsx from 'clsx';
 
@@ -18,8 +18,8 @@ import {
   StyledCell,
 } from './cell/styles';
 import {
-  useTranslationsSelector,
   useTranslationsDispatch,
+  useTranslationsSelector,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useDebounce } from 'use-debounce/lib';
@@ -28,6 +28,7 @@ import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { getMeta } from 'tg.fixtures/isMac';
+import { KeyEditModal } from './KeyEdit/KeyEditModal';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -116,7 +117,9 @@ type Props = {
   active: boolean;
   simple?: boolean;
   position?: PositionType;
+  className?: string;
   onSaveSuccess?: (value: string) => void;
+  editInDialog?: boolean;
 };
 
 export const CellKey: React.FC<Props> = ({
@@ -127,6 +130,8 @@ export const CellKey: React.FC<Props> = ({
   simple,
   position,
   onSaveSuccess,
+  editInDialog,
+  className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
@@ -172,26 +177,31 @@ export const CellKey: React.FC<Props> = ({
     cellRef,
   });
 
+  const displayEditor = isEditing && !editInDialog;
+
   return (
     <>
       <StyledContainer
         position={position}
-        className={clsx({
-          [CELL_PLAIN]: true,
-          [CELL_HOVER]: !isEditing,
-          [CELL_CLICKABLE]: editEnabled && !isEditing,
-          [CELL_RAISED]: isEditing,
-          [CELL_SELECTED]: isEditing,
-        })}
+        className={clsx(
+          {
+            [CELL_PLAIN]: true,
+            [CELL_HOVER]: !isEditing,
+            [CELL_CLICKABLE]: editEnabled && !displayEditor,
+            [CELL_RAISED]: displayEditor,
+            [CELL_SELECTED]: isEditing,
+          },
+          className
+        )}
         style={{ width }}
         onClick={
-          !isEditing && editEnabled ? () => handleOpen('editor') : undefined
+          !displayEditor && editEnabled ? () => handleOpen('editor') : undefined
         }
         data-cy="translations-table-cell"
         tabIndex={0}
         ref={cellRef}
       >
-        {!isEditing ? (
+        {!displayEditor ? (
           <>
             {editEnabled && !simple && (
               <StyledCheckbox
@@ -249,8 +259,8 @@ export const CellKey: React.FC<Props> = ({
           </StyledEditor>
         )}
 
-        <div className={isEditing ? 'controls' : 'controlsSmall'}>
-          {isEditing ? (
+        <div className={displayEditor ? 'controls' : 'controlsSmall'}>
+          {displayEditor ? (
             <ControlsEditor
               onCancel={() => handleClose(true)}
               onSave={handleSave}
@@ -295,6 +305,15 @@ export const CellKey: React.FC<Props> = ({
           onClose={() => {
             setScreenshotsOpen(false);
           }}
+        />
+      )}
+      {isEditing && editInDialog && (
+        <KeyEditModal
+          keyId={data.keyId}
+          name={data.keyName}
+          tags={data.keyTags.map((k) => k.name)}
+          namespace={data.keyNamespace}
+          onClose={() => handleClose(true)}
         />
       )}
     </>

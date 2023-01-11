@@ -41,6 +41,9 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/namespaces/{id}": {
+    put: operations["update"];
+  };
   "/v2/projects/{projectId}/machine-translation-service-settings": {
     get: operations["getMachineTranslationSettings"];
     put: operations["setMachineTranslationSettings"];
@@ -85,6 +88,10 @@ export interface paths {
     /** Resets existing language paired with language to import. */
     put: operations["resetExistingLanguage"];
   };
+  "/v2/projects/{projectId}/import/result/files/{fileId}/select-namespace": {
+    /** Sets namespace for file to import. */
+    put: operations["selectNamespace"];
+  };
   "/v2/projects/{projectId}/import/apply": {
     /** Imports the data prepared in previous step */
     put: operations["applyImport"];
@@ -97,7 +104,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
-    put: operations["update"];
+    put: operations["update_1"];
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
@@ -134,7 +141,7 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_7"];
-    put: operations["update_2"];
+    put: operations["update_3"];
     delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
@@ -143,42 +150,24 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
-  "/api/organizations/{organizationId}/users/{userId}/set-role": {
-    put: operations["setUserRole_1"];
+  "/v2/organizations/{id}": {
+    get: operations["get_9"];
+    put: operations["update_4"];
+    delete: operations["delete_8"];
   };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
   };
-  "/api/organizations/{id}/leave": {
-    put: operations["leaveOrganization_1"];
-  };
   "/v2/organizations/{id}/invite": {
     put: operations["inviteUser_1"];
-  };
-  "/api/organizations/{id}/invite": {
-    put: operations["inviteUser_2"];
   };
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
   };
-  "/api/organizations/{id}/avatar": {
-    put: operations["uploadAvatar_3"];
-    delete: operations["removeAvatar_3"];
-  };
-  "/v2/organizations/{id}": {
-    get: operations["get_10"];
-    put: operations["update_3"];
-    delete: operations["delete_8"];
-  };
-  "/api/organizations/{id}": {
-    get: operations["get_11"];
-    put: operations["update_4"];
-    delete: operations["delete_9"];
-  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_5"];
-    delete: operations["delete_11"];
+    delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
@@ -186,29 +175,14 @@ export interface paths {
   "/v2/administration/users/{userId}/set-role/{role}": {
     put: operations["setRole"];
   };
-  "/api/project/{projectId}/keys": {
-    put: operations["edit_2"];
-    post: operations["create_13"];
-    delete: operations["delete_14"];
-  };
-  "/api/project/{projectId}/translations": {
-    put: operations["setTranslations_2"];
-    post: operations["createOrUpdateTranslations_2"];
-  };
   "/v2/user/generate-super-token": {
     post: operations["getSuperToken"];
   };
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
   };
-  "/api/address-part/generate-project": {
-    post: operations["generateProjectSlug_1"];
-  };
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
-  };
-  "/api/address-part/generate-organization": {
-    post: operations["generateOrganizationSlug_1"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -220,10 +194,6 @@ export interface paths {
   "/v2/projects/{projectId}/keys": {
     post: operations["create_1"];
     delete: operations["delete_3"];
-  };
-  "/v2/projects/{projectId}/import/with-streaming-response": {
-    /** Prepares provided files to import, streams operation progress */
-    post: operations["addFilesStreaming"];
   };
   "/v2/projects/{projectId}/import": {
     /** Prepares provided files to import. */
@@ -253,7 +223,7 @@ export interface paths {
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
-    get: operations["getKeyScreenshots_3"];
+    get: operations["getKeyScreenshots_1"];
     post: operations["uploadScreenshot_1"];
   };
   "/v2/pats": {
@@ -264,20 +234,12 @@ export interface paths {
     get: operations["getAll_8"];
     post: operations["create_9"];
   };
-  "/api/organizations": {
-    get: operations["getAll_9"];
-    post: operations["create_10"];
-  };
   "/v2/image-upload": {
     post: operations["upload"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
-    post: operations["create_11"];
-  };
-  "/api/user": {
-    get: operations["getInfo_1"];
-    post: operations["updateUser_1"];
+    post: operations["create_10"];
   };
   "/api/public/validate_email": {
     post: operations["validateEmail"];
@@ -294,29 +256,6 @@ export interface paths {
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
   };
-  "/api/project/{projectId}/keys/translations/{languages}": {
-    /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
-    post: operations["getKeyTranslationsPost"];
-  };
-  "/api/project/{projectId}/keys/edit": {
-    post: operations["editDeprecated"];
-  };
-  "/api/project/{projectId}/keys/create": {
-    post: operations["create_12"];
-  };
-  "/api/project/{projectId}/screenshots/get": {
-    post: operations["getKeyScreenshots_1"];
-  };
-  "/api/project/{projectId}/screenshots": {
-    post: operations["uploadScreenshot_3"];
-  };
-  "/api/apiKeys": {
-    get: operations["allByUser_1"];
-    post: operations["create_16"];
-  };
-  "/api/apiKeys/edit": {
-    post: operations["edit_4"];
-  };
   "/v2/user/single-owned-organizations": {
     get: operations["getAllSingleOwnedOrganizations"];
   };
@@ -326,14 +265,8 @@ export interface paths {
   "/v2/slug/validate-project/{slug}": {
     get: operations["validateProjectSlug"];
   };
-  "/api/address-part/validate-project/{slug}": {
-    get: operations["validateProjectSlug_1"];
-  };
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
-  };
-  "/api/address-part/validate-organization/{slug}": {
-    get: operations["validateOrganizationSlug_1"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data always required by frontend */
@@ -342,11 +275,23 @@ export interface paths {
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
   };
+  "/v2/projects/{projectId}/used-namespaces": {
+    get: operations["getUsedNamespaces"];
+  };
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
+  "/v2/projects/{projectId}/namespaces": {
+    get: operations["getAllNamespaces"];
+  };
+  "/v2/projects/{projectId}/namespace-by-name/{name}": {
+    get: operations["getByName"];
+  };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
+  };
+  "/v2/projects/{projectId}/all-keys": {
+    get: operations["getAllKeys"];
   };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
@@ -368,6 +313,10 @@ export interface paths {
   "/v2/projects/{projectId}/import/result": {
     /** Returns the result of preparation. */
     get: operations["getImportResult"];
+  };
+  "/v2/projects/{projectId}/import/all-namespaces": {
+    /** Returns all existing and imported namespaces */
+    get: operations["getAllNamespaces_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -402,23 +351,14 @@ export interface paths {
   "/v2/pats/current": {
     get: operations["getCurrent"];
   };
-  "/v2/organizations/{slug}/projects-with-stats": {
-    get: operations["getAllWithStatistics_1"];
-  };
-  "/api/organizations/{slug}/projects-with-stats": {
-    get: operations["getAllWithStatistics_2"];
+  "/v2/organizations/{slug}": {
+    get: operations["get_8"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
   };
-  "/api/organizations/{slug}/projects": {
-    get: operations["getAllProjects_1"];
-  };
-  "/v2/organizations/{slug}": {
-    get: operations["get_8"];
-  };
-  "/api/organizations/{slug}": {
-    get: operations["get_9"];
+  "/v2/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_1"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -426,40 +366,24 @@ export interface paths {
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
-  "/api/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations_1"];
-  };
   "/v2/organizations/{organizationId}/usage": {
     /** Returns current organization usage */
     get: operations["getUsage"];
   };
-  "/api/organizations/{organizationId}/usage": {
-    /** Returns current organization usage */
-    get: operations["getUsage_1"];
-  };
   "/v2/organizations/{organizationId}/projects-with-stats": {
-    get: operations["getAllWithStatistics_3"];
-  };
-  "/api/organizations/{organizationId}/projects-with-stats": {
-    get: operations["getAllWithStatistics_4"];
+    get: operations["getAllWithStatistics_2"];
   };
   "/v2/organizations/{id}/users": {
     get: operations["getAllUsers_1"];
   };
-  "/api/organizations/{id}/users": {
-    get: operations["getAllUsers_2"];
-  };
   "/v2/organizations/{id}/projects": {
-    get: operations["getAllProjects_2"];
-  };
-  "/api/organizations/{id}/projects": {
-    get: operations["getAllProjects_3"];
+    get: operations["getAllProjects_1"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_12"];
+    get: operations["get_10"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -488,33 +412,8 @@ export interface paths {
   "/api/public/authorize_oauth/{serviceType}": {
     get: operations["authenticateUser_1"];
   };
-  "/api/project/{projectId}/keys/{id}": {
-    get: operations["getDeprecated"];
-    delete: operations["delete_12"];
-  };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
-  };
-  "/api/project/{projectId}/translations/{languages}": {
-    get: operations["getTranslations_2"];
-  };
-  "/api/project/{projectId}/translations/view": {
-    get: operations["getViewData"];
-  };
-  "/api/invitation/list/{projectId}": {
-    get: operations["getProjectInvitations_1"];
-  };
-  "/api/invitation/accept/{code}": {
-    get: operations["acceptInvitation_1"];
-  };
-  "/api/apiKeys/scopes": {
-    get: operations["getApiKeyScopes"];
-  };
-  "/api/apiKeys/project/{projectId}": {
-    get: operations["allByProject_1"];
-  };
-  "/api/apiKeys/availableScopes": {
-    get: operations["getScopes_1"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
     delete: operations["removeTag"];
@@ -528,26 +427,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
-  "/api/organizations/{organizationId}/users/{userId}": {
-    delete: operations["removeUser_1"];
-  };
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_10"];
+    delete: operations["delete_9"];
   };
   "/v2/administration/users/{userId}": {
     delete: operations["deleteUser"];
-  };
-  "/api/project/{projectId}/screenshots/{ids}": {
-    delete: operations["deleteScreenshots_3"];
-  };
-  "/api/invitation/{invitationId}": {
-    delete: operations["deleteInvitation_1"];
-  };
-  "/api/apiKeys/{key}": {
-    delete: operations["delete_16"];
   };
 }
 
@@ -596,6 +483,7 @@ export interface components {
       name: string;
       slug?: string;
       baseLanguageId?: number;
+      description?: string;
     };
     LanguageModel: {
       id: number;
@@ -647,6 +535,14 @@ export interface components {
       /** The type of permission. */
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    UpdateNamespaceDto: {
+      name: string;
+    };
+    NamespaceModel: {
+      /** The id of namespace */
+      id: number;
+      name: string;
+    };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
@@ -685,6 +581,8 @@ export interface components {
     ComplexEditKeyDto: {
       /** Name of the key */
       name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
       /** Translations to update */
       translations?: { [key: string]: string };
       /** Tags of the key. If not provided tags won't be modified */
@@ -699,6 +597,8 @@ export interface components {
       id: number;
       /** Name of key */
       name: string;
+      /** Namespace of key */
+      namespace?: string;
       /** Translations object containing values updated in this request */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
@@ -742,12 +642,16 @@ export interface components {
     };
     EditKeyDto: {
       name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
     };
     KeyModel: {
       /** Id of key record */
       id: number;
       /** Name of key */
       name: string;
+      /** Namespace of key */
+      namespace?: string;
     };
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
@@ -776,6 +680,9 @@ export interface components {
       usingTranslationMemory: boolean;
       /** If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
       usingMachineTranslation: boolean;
+    };
+    SetFileNamespaceRequest: {
+      namespace?: string;
     };
     TranslationCommentModel: {
       /** Id of translation comment record */
@@ -807,6 +714,8 @@ export interface components {
     SetTranslationsWithKeyDto: {
       /** Key name to set translations for */
       key: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
       /** Object mapping language tag to translation */
       translations: { [key: string]: string };
       /**
@@ -821,6 +730,8 @@ export interface components {
       keyId: number;
       /** Name of key */
       keyName: string;
+      /** The namespace of the key */
+      keyNamespace?: string;
       /** Translations object containing values updated in this request */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
@@ -854,30 +765,21 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
+      id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
-    OrganizationInviteUserDto: {
-      roleType: "MEMBER" | "OWNER";
-      /** Name of invited user */
-      name?: string;
-      /** Email to send invitation to */
-      email?: string;
-    };
-    OrganizationInvitationModel: {
-      id: number;
-      code: string;
-      type: "MEMBER" | "OWNER";
-      createdAt: string;
-      invitedUserName?: string;
-      invitedUserEmail?: string;
+    OrganizationDto: {
+      name: string;
+      description?: string;
+      slug?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
@@ -893,11 +795,20 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       avatar?: components["schemas"]["Avatar"];
     };
-    OrganizationDto: {
-      name: string;
-      description?: string;
-      slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    OrganizationInviteUserDto: {
+      roleType: "MEMBER" | "OWNER";
+      /** Name of invited user */
+      name?: string;
+      /** Email to send invitation to */
+      email?: string;
+    };
+    OrganizationInvitationModel: {
+      id: number;
+      code: string;
+      type: "MEMBER" | "OWNER";
+      createdAt: string;
+      invitedUserName?: string;
+      invitedUserEmail?: string;
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -930,19 +841,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
+      projectName: string;
+      userFullName?: string;
+      projectId: number;
+      username?: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      scopes: string[];
       id: number;
       description: string;
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
-    };
-    OldEditKeyDto: {
-      currentName: string;
-      newName: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -967,12 +874,13 @@ export interface components {
     CreateKeyDto: {
       /** Name of the key */
       name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
       translations?: { [key: string]: string };
       tags?: string[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
     };
-    StreamingResponseBody: { [key: string]: unknown };
     ErrorResponseBody: {
       code: string;
       params?: { [key: string]: unknown }[];
@@ -991,6 +899,7 @@ export interface components {
       importFileName: string;
       importFileId: number;
       importFileIssueCount: number;
+      namespace?: string;
       totalCount: number;
       conflictCount: number;
       resolvedCount: number;
@@ -1010,16 +919,16 @@ export interface components {
     ExportParams: {
       languages?: string[];
       format: "JSON" | "XLIFF";
-      splitByScope: boolean;
-      splitByScopeDelimiter: string;
-      splitByScopeDepth: number;
+      structureDelimiter?: string;
       filterKeyId?: number[];
       filterKeyIdNot?: number[];
       filterTag?: string;
       filterKeyPrefix?: string;
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
+      filterNamespace?: string[];
       zip: boolean;
     };
+    StreamingResponseBody: { [key: string]: unknown };
     TranslationCommentWithLangKeyDto: {
       keyId: number;
       languageId: number;
@@ -1104,36 +1013,6 @@ export interface components {
       password: string;
       otp?: string;
     };
-    GetKeyTranslationsReqDto: {
-      key?: string;
-    };
-    DeprecatedEditKeyDTO: {
-      oldFullPathString: string;
-      newFullPathString: string;
-    };
-    GetScreenshotsByKeyDto: {
-      key: string;
-    };
-    ScreenshotDTO: {
-      id: number;
-      filename: string;
-      createdAt: string;
-    };
-    ApiKeyDTO: {
-      id: number;
-      /** Resulting user's api key. Is is hidden when is not response to creation or regeneration. */
-      key?: string;
-      description: string;
-      userName?: string;
-      projectId: number;
-      projectName: string;
-      scopes: string[];
-    };
-    EditApiKeyDto: {
-      id: number;
-      scopes: string[];
-      description?: string;
-    };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -1217,9 +1096,26 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       computedPermissions: components["schemas"]["UserPermissionModel"];
     };
+    CollectionModelUsedNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["UsedNamespaceModel"][];
+      };
+    };
+    UsedNamespaceModel: {
+      /** The id of namespace. Null for default namespace. */
+      id?: number;
+      /** Name of namespace. Null if default. */
+      name?: string;
+    };
     PagedModelTagModel: {
       _embedded?: {
         tags?: components["schemas"]["TagModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["NamespaceModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -1227,6 +1123,11 @@ export interface components {
       creditBalance: number;
       bucketSize: number;
       extraCreditBalance: number;
+    };
+    CollectionModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
     };
     EntityDescriptionWithRelations: {
       entityClass: string;
@@ -1290,7 +1191,8 @@ export interface components {
         | "EDIT_LANGUAGE"
         | "DELETE_LANGUAGE"
         | "CREATE_PROJECT"
-        | "EDIT_PROJECT";
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -1319,7 +1221,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1331,6 +1232,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1348,6 +1250,16 @@ export interface components {
         importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelImportNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["ImportNamespaceModel"][];
+      };
+    };
+    ImportNamespaceModel: {
+      /** The id of namespace. When null, namespace doesn't exist and will be created by import. */
+      id?: number;
+      name: string;
     };
     PagedModelTranslationCommentModel: {
       _embedded?: {
@@ -1387,6 +1299,10 @@ export interface components {
       keyId: number;
       /** Name of key */
       keyName: string;
+      /** The namespace id of the key */
+      keyNamespaceId?: number;
+      /** The namespace of the key */
+      keyNamespace?: string;
       /** Tags of key */
       keyTags: components["schemas"]["TagModel"][];
       /** Count of screenshots provided for the key */
@@ -1536,12 +1452,22 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
+      id: number;
+      description: string;
+    };
+    OrganizationRequestParamsDto: {
+      filterCurrentUserOwner: boolean;
+      search?: string;
+    };
+    PagedModelOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["OrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
@@ -1577,16 +1503,6 @@ export interface components {
       username: string;
       organizationRole: "MEMBER" | "OWNER";
     };
-    OrganizationRequestParamsDto: {
-      filterCurrentUserOwner: boolean;
-      search?: string;
-    };
-    PagedModelOrganizationModel: {
-      _embedded?: {
-        organizations?: components["schemas"]["OrganizationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     ApiKeyWithLanguagesModel: {
       /**
        * Languages for which user has translate permission.
@@ -1594,54 +1510,21 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+      projectName: string;
+      userFullName?: string;
+      projectId: number;
+      username?: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      scopes: string[];
       id: number;
       description: string;
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
         users?: components["schemas"]["UserAccountModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    UserResponseDTO: {
-      id?: number;
-      name?: string;
-      username?: string;
-      emailAwaitingVerification?: string;
-    };
-    DeprecatedKeyDto: {
-      /** This means name of key. Will be renamed in v2 */
-      fullPathString: string;
-    };
-    KeyWithTranslationsResponseDto: {
-      id?: number;
-      name?: string;
-      translations: { [key: string]: string };
-    };
-    PaginationMeta: {
-      offset?: number;
-      allCount?: number;
-    };
-    ResponseParams: {
-      search?: string;
-      languages?: string[];
-    };
-    ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams: {
-      paginationMeta?: components["schemas"]["PaginationMeta"];
-      params?: components["schemas"]["ResponseParams"];
-      data?: components["schemas"]["KeyWithTranslationsResponseDto"][];
-    };
-    InvitationDTO: {
-      id?: number;
-      code?: string;
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UserTotpDisableRequestDto: {
       password: string;
@@ -2087,6 +1970,39 @@ export interface operations {
       };
     };
   };
+  update: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNamespaceDto"];
+      };
+    };
+  };
   getMachineTranslationSettings: {
     parameters: {
       path: {
@@ -2489,6 +2405,36 @@ export interface operations {
       };
     };
   };
+  /** Sets namespace for file to import. */
+  selectNamespace: {
+    parameters: {
+      path: {
+        fileId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetFileNamespaceRequest"];
+      };
+    };
+  };
   /** Imports the data prepared in previous step */
   applyImport: {
     parameters: {
@@ -2603,7 +2549,7 @@ export interface operations {
       };
     };
   };
-  update: {
+  update_1: {
     parameters: {
       path: {
         commentId: number;
@@ -2725,6 +2671,12 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Zero-based page index (0..N) */
@@ -3082,7 +3034,7 @@ export interface operations {
       };
     };
   };
-  update_2: {
+  update_3: {
     parameters: {
       path: {
         id: number;
@@ -3198,11 +3150,69 @@ export interface operations {
       };
     };
   };
-  setUserRole_1: {
+  get_9: {
     parameters: {
       path: {
-        organizationId: number;
-        userId: number;
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_4: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  delete_8: {
+    parameters: {
+      path: {
+        id: number;
       };
     };
     responses: {
@@ -3219,11 +3229,6 @@ export interface operations {
         content: {
           "*/*": string;
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetOrganizationRoleDto"];
       };
     };
   };
@@ -3250,62 +3255,7 @@ export interface operations {
       };
     };
   };
-  leaveOrganization_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   inviteUser_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationInviteUserDto"];
-      };
-    };
-  };
-  inviteUser_2: {
     parameters: {
       path: {
         id: number;
@@ -3398,231 +3348,6 @@ export interface operations {
       };
     };
   };
-  uploadAvatar_3: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          avatar: string;
-        };
-      };
-    };
-  };
-  removeAvatar_3: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_10: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  update_3: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_8: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_11: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  update_4: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_9: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   update_5: {
     parameters: {
       path: {
@@ -3655,7 +3380,7 @@ export interface operations {
       };
     };
   };
-  delete_11: {
+  delete_10: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3734,146 +3459,6 @@ export interface operations {
       };
     };
   };
-  edit_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OldEditKeyDto"];
-      };
-    };
-  };
-  create_13: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
-  delete_14: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": number[];
-      };
-    };
-  };
-  setTranslations_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
-  createOrUpdateTranslations_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
   getSuperToken: {
     responses: {
       /** OK */
@@ -3928,61 +3513,7 @@ export interface operations {
       };
     };
   };
-  generateProjectSlug_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
   generateOrganizationSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateOrganizationSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -4161,41 +3692,6 @@ export interface operations {
       };
     };
   };
-  /** Prepares provided files to import, streams operation progress */
-  addFilesStreaming: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          files: string[];
-        };
-      };
-    };
-  };
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
@@ -4266,22 +3762,14 @@ export interface operations {
         languages?: string[];
         /** Format to export to */
         format?: "JSON" | "XLIFF";
-        /** When true translations are split to directories by scopes */
-        splitByScope?: boolean;
         /**
-         * Scope delimiter.
+         * Delimiter to structure file content.
          *
-         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+         * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+         *
+         * When null, resulting file won't be structured.
          */
-        splitByScopeDelimiter?: string;
-        /**
-         * Maximum depth of scoping.
-         *
-         * e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
-         *
-         * For depth 2, resulting scopes are  "home" -> "header".
-         */
-        splitByScopeDepth?: number;
+        structureDelimiter?: string;
         /** Filter key IDs to be contained in export */
         filterKeyId?: number[];
         /** Filter key IDs not to be contained in export */
@@ -4292,6 +3780,8 @@ export interface operations {
         filterKeyPrefix?: string;
         /** Filter translations with state. By default, everything except untranslated is exported. */
         filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
+        /** Select one ore multiple namespaces to export */
+        filterNamespace?: string[];
         /**
          * If false, it doesn't return zip of files, but it returns single file.
          *
@@ -4596,7 +4086,7 @@ export interface operations {
       };
     };
   };
-  getKeyScreenshots_3: {
+  getKeyScreenshots_1: {
     parameters: {
       path: {
         keyId: number;
@@ -4778,66 +4268,6 @@ export interface operations {
       };
     };
   };
-  getAll_9: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  create_10: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
   upload: {
     parameters: {};
     responses: {
@@ -4896,7 +4326,7 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create_10: {
     responses: {
       /** OK */
       200: {
@@ -4920,51 +4350,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateApiKeyDto"];
-      };
-    };
-  };
-  getInfo_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserResponseDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  updateUser_1: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };
@@ -5095,237 +4480,6 @@ export interface operations {
       };
     };
   };
-  /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
-  getKeyTranslationsPost: {
-    parameters: {
-      path: {
-        languages: string[];
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": { [key: string]: string };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
-      };
-    };
-  };
-  editDeprecated: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DeprecatedEditKeyDTO"];
-      };
-    };
-  };
-  create_12: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
-      };
-    };
-  };
-  getKeyScreenshots_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ScreenshotDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetScreenshotsByKeyDto"];
-      };
-    };
-  };
-  uploadScreenshot_3: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        key: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ScreenshotDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          screenshot: string;
-        };
-      };
-    };
-  };
-  allByUser_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  create_16: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateApiKeyDto"];
-      };
-    };
-  };
-  edit_4: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EditApiKeyDto"];
-      };
-    };
-  };
   getAllSingleOwnedOrganizations: {
     responses: {
       /** OK */
@@ -5397,61 +4551,7 @@ export interface operations {
       };
     };
   };
-  validateProjectSlug_1: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   validateOrganizationSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateOrganizationSlug_1: {
     parameters: {
       path: {
         slug: string;
@@ -5537,6 +4637,33 @@ export interface operations {
       };
     };
   };
+  getUsedNamespaces: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelUsedNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAll_1: {
     parameters: {
       query: {
@@ -5573,6 +4700,69 @@ export interface operations {
       };
     };
   };
+  getAllNamespaces: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getByName: {
+    parameters: {
+      path: {
+        name: string;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getProjectCredits: {
     parameters: {
       path: {
@@ -5584,6 +4774,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelKeyModel"];
         };
       };
       /** Bad Request */
@@ -5802,6 +5019,34 @@ export interface operations {
       };
     };
   };
+  /** Returns all existing and imported namespaces */
+  getAllNamespaces_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getTranslationHistory: {
     parameters: {
       path: {
@@ -5845,6 +5090,8 @@ export interface operations {
         projectId: number;
       };
       query: {
+        /** Namespace to return */
+        ns?: string;
         /**
          * Delimiter to structure response content.
          *
@@ -5911,6 +5158,12 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
       };
@@ -6157,17 +5410,8 @@ export interface operations {
       };
     };
   };
-  getAllWithStatistics_1: {
+  get_8: {
     parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
       path: {
         slug: string;
       };
@@ -6176,43 +5420,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_2: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
@@ -6265,11 +5473,8 @@ export interface operations {
       };
     };
   };
-  getAllProjects_1: {
+  getAllWithStatistics_1: {
     parameters: {
-      path: {
-        slug: string;
-      };
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
@@ -6279,30 +5484,6 @@ export interface operations {
         sort?: string[];
         search?: string;
       };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_8: {
-    parameters: {
       path: {
         slug: string;
       };
@@ -6311,34 +5492,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get_9: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -6409,33 +5563,6 @@ export interface operations {
       };
     };
   };
-  getInvitations_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   /** Returns current organization usage */
   getUsage: {
     parameters: {
@@ -6464,71 +5591,7 @@ export interface operations {
       };
     };
   };
-  /** Returns current organization usage */
-  getUsage_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UsageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_3: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllWithStatistics_4: {
+  getAllWithStatistics_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -6600,79 +5663,7 @@ export interface operations {
       };
     };
   };
-  getAllUsers_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllProjects_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getAllProjects_3: {
+  getAllProjects_1: {
     parameters: {
       path: {
         id: number;
@@ -6731,7 +5722,7 @@ export interface operations {
       };
     };
   };
-  get_12: {
+  get_10: {
     parameters: {
       path: {
         keyId: number;
@@ -7002,58 +5993,6 @@ export interface operations {
       };
     };
   };
-  getDeprecated: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["DeprecatedKeyDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  delete_12: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   doExportJsonZip: {
     parameters: {
       path: {
@@ -7065,189 +6004,6 @@ export interface operations {
       200: {
         content: {
           "application/zip": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getTranslations_2: {
-    parameters: {
-      path: {
-        languages: string[];
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": { [key: string]: { [key: string]: unknown } };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getViewData: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        languages?: string[];
-        limit?: number;
-        offset?: number;
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getProjectInvitations_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["InvitationDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  acceptInvitation_1: {
-    parameters: {
-      path: {
-        code: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getApiKeyScopes: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string[];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  allByProject_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getScopes_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": { [key: string]: string[] };
         };
       };
       /** Bad Request */
@@ -7361,30 +6117,6 @@ export interface operations {
       };
     };
   };
-  removeUser_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   deleteInvitation: {
     parameters: {
       path: {
@@ -7408,7 +6140,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_9: {
     parameters: {
       path: {
         ids: number[];
@@ -7435,76 +6167,6 @@ export interface operations {
     parameters: {
       path: {
         userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  deleteScreenshots_3: {
-    parameters: {
-      path: {
-        ids: number[];
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  deleteInvitation_1: {
-    parameters: {
-      path: {
-        invitationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  delete_16: {
-    parameters: {
-      path: {
-        key: string;
       };
     };
     responses: {

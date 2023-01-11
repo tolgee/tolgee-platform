@@ -1,4 +1,4 @@
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Clear } from '@mui/icons-material';
 import {
   Select,
@@ -15,6 +15,7 @@ import {
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { useAvailableFilters } from './useAvailableFilters';
+import { FilterType } from './tools';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
 
@@ -67,6 +68,7 @@ const StyledClearButton = styled(IconButton)`
 `;
 
 export const Filters = () => {
+  const { t } = useTranslate();
   const dispatch = useTranslationsDispatch();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
@@ -87,6 +89,18 @@ export const Filters = () => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 
+  function getFilterName(value) {
+    const option = findOption(value);
+    if (option?.label) {
+      return option.label;
+    }
+
+    const parsed = JSON.parse(value) as FilterType;
+    if (parsed.filter === 'filterNamespace') {
+      return (parsed.value as string) || t('namespace_default');
+    }
+  }
+
   return (
     <StyledWrapper>
       <StyledSelect
@@ -104,12 +118,12 @@ export const Filters = () => {
             >
               {value.length === 0 ? (
                 <T>translations_filter_placeholder</T>
-              ) : value.length === 1 && findOption(value[0])?.label ? (
-                findOption(value[0])?.label
               ) : (
-                <T params={{ filtersNum: String(activeFilters.length) }}>
-                  translations_filters_text
-                </T>
+                (value.length === 1 && getFilterName(value[0])) || (
+                  <T params={{ filtersNum: String(activeFilters.length) }}>
+                    translations_filters_text
+                  </T>
+                )
               )}
             </StyledInputText>
             {Boolean(activeFilters.length) && (

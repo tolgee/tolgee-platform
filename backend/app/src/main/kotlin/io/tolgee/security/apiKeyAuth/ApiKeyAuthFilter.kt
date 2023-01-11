@@ -5,7 +5,8 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.SecurityService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -19,7 +20,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class ApiKeyAuthFilter(
-  private val apiKeyService: io.tolgee.service.ApiKeyService,
+  private val apiKeyService: ApiKeyService,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,

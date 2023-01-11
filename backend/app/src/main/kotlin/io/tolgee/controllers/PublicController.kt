@@ -21,11 +21,11 @@ import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.MfaService
-import io.tolgee.service.SignUpService
-import io.tolgee.service.UserAccountService
-import io.tolgee.service.UserCredentialsService
+import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
+import io.tolgee.service.security.SignUpService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserCredentialsService
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity

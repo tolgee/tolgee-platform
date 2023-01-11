@@ -3,6 +3,7 @@ import csDateLocale from 'date-fns/locale/cs';
 import frDateLocale from 'date-fns/locale/fr';
 import esDateLocale from 'date-fns/locale/es';
 import deDateLocale from 'date-fns/locale/de';
+import ptDateLocale from 'date-fns/locale/pt';
 
 export const locales = {
   en: {
@@ -29,5 +30,10 @@ export const locales = {
     name: 'Deutsch',
     flag: '🇩🇪',
     dateFnsLocale: deDateLocale,
+  },
+  pt: {
+    name: 'Português',
+    flag: '🇵🇹',
+    dateFnsLocale: ptDateLocale,
   },
 };

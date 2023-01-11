@@ -42,20 +42,19 @@ class XliffFileExporter(
 
   private fun prepare() {
     translations.forEach { translation ->
-      val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.splitByScopeDelimiter)
-      val resultItem = getResultItem(path, translation)
-      val pathItems = path.asSequence().drop(getRealScopeDepth(path)).toMutableList()
-      addToFileElement(resultItem.fileBodyElement, pathItems, translation)
+      val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.structureDelimiter)
+      val resultItem = getResultItem(translation)
+      addToFileElement(resultItem.fileBodyElement, path, translation)
     }
   }
 
   private fun addToFileElement(
     fileBodyElement: Element,
-    pathItems: MutableList<String>,
+    pathItems: List<String>,
     translation: ExportTranslationView
   ) {
     val transUnitElement = fileBodyElement.addElement("trans-unit")
-      .addAttribute("id", pathItems.joinToString(exportParams.splitByScopeDelimiter.toString()))
+      .addAttribute("id", pathItems.joinToString(exportParams.structureDelimiter.toString()))
       .addAttribute("datatype", "html")
 
     baseTranslations[translation.key.name]?.text?.let {
@@ -66,8 +65,8 @@ class XliffFileExporter(
     }
   }
 
-  private fun getResultItem(path: List<String>, translation: ExportTranslationView): ResultItem {
-    val absolutePath = translation.getFileAbsolutePath(path)
+  private fun getResultItem(translation: ExportTranslationView): ResultItem {
+    val absolutePath = translation.getFilePath(translation.key.namespace)
     return result[absolutePath] ?: let {
       val resultItem = createBaseDocumentStructure(translation)
       result[absolutePath] = resultItem

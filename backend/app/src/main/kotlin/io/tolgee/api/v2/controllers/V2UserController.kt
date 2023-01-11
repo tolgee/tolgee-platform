@@ -17,9 +17,9 @@ import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.patAuth.DenyPatAccess
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.MfaService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.security.MfaService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

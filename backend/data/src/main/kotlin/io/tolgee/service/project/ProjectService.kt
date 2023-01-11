@@ -21,16 +21,16 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AvatarService
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.PermissionService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.SecurityService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -148,6 +148,7 @@ class ProjectService constructor(
     val project = projectRepository.findById(id)
       .orElseThrow { NotFoundException() }!!
     project.name = dto.name
+    project.description = dto.description
 
     dto.baseLanguageId?.let {
       val language = project.languages.find { it.id == dto.baseLanguageId }

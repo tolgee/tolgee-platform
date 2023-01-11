@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
-import { Box, Button, styled, Typography } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
 import { useProject } from 'tg.hooks/useProject';
-import { FieldLabel } from '../KeySingle/FieldLabel';
+import { FieldLabel } from 'tg.component/FormField';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
+import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
+import { FieldError } from 'tg.component/FormField';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -22,26 +25,12 @@ const StyledContainer = styled('div')`
   margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
-const StyledField = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[400]};
-  overflow: hidden;
-  border-radius: 4px;
-
-  &:hover {
-    border: 1px solid ${({ theme }) => theme.palette.emphasis[900]};
-  }
-
-  &:focus-within {
-    border-color: ${({ theme }) => theme.palette.primary.main};
-    border-width: 2px;
-  }
-
-  & > * {
-    padding: 10px;
-  }
-
-  &:focus-within > * {
-    padding: 9px;
+const StyledKeyNsContainer = styled('div')`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0px 16px;
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -62,11 +51,6 @@ const StyledTags = styled('div')`
   }
 
   position: relative;
-`;
-
-const StyledError = styled(Typography)`
-  display: flex;
-  min-height: 1.2rem;
 `;
 
 type Props = {
@@ -129,37 +113,57 @@ export const FormBody: React.FC<Props> = ({
   return (
     <>
       <StyledContainer>
-        <FastField name="name">
-          {({ field, form, meta }: FieldProps<any>) => {
-            return (
-              <div>
-                <FieldLabel>
-                  <T>translation_single_label_key</T>
-                </FieldLabel>
-                <StyledField>
-                  <StyledEdtorWrapper data-cy="translation-create-key-input">
-                    <Editor
-                      plaintext
+        <StyledKeyNsContainer>
+          <FastField name="name">
+            {({ field, form, meta }: FieldProps<any>) => {
+              return (
+                <div>
+                  <FieldLabel>
+                    <T>translation_single_label_key</T>
+                  </FieldLabel>
+                  <EditorWrapper>
+                    <StyledEdtorWrapper data-cy="translation-create-key-input">
+                      <Editor
+                        plaintext
+                        value={field.value}
+                        onChange={(val) => {
+                          form.setFieldValue(field.name, val);
+                        }}
+                        onSave={() => form.handleSubmit()}
+                        onBlur={() => form.setFieldTouched(field.name, true)}
+                        minHeight="unset"
+                        autofocus={autofocus}
+                        scrollMargins={{ bottom: 150 }}
+                        autoScrollIntoView
+                      />
+                    </StyledEdtorWrapper>
+                  </EditorWrapper>
+                  <FieldError error={meta.touched && meta.error} />
+                </div>
+              );
+            }}
+          </FastField>
+
+          <FastField name="namespace">
+            {({ field, form }: FieldProps<any>) => {
+              return (
+                <div>
+                  <FieldLabel>
+                    <T>translation_single_label_namespace</T>
+                  </FieldLabel>
+                  <StyledEdtorWrapper data-cy="translation-create-namespace-input">
+                    <NamespaceSelector
                       value={field.value}
-                      onChange={(val) => {
-                        form.setFieldValue(field.name, val);
-                      }}
-                      onSave={() => form.handleSubmit()}
-                      onBlur={() => form.setFieldTouched(field.name, true)}
-                      minHeight="unset"
-                      autofocus={autofocus}
-                      scrollMargins={{ bottom: 150 }}
-                      autoScrollIntoView
+                      onChange={(value) =>
+                        form.setFieldValue(field.name, value)
+                      }
                     />
                   </StyledEdtorWrapper>
-                </StyledField>
-                <StyledError color="error" variant="caption">
-                  {meta.touched && meta.error}
-                </StyledError>
-              </div>
-            );
-          }}
-        </FastField>
+                </div>
+              );
+            }}
+          </FastField>
+        </StyledKeyNsContainer>
 
         <FieldArray
           name="tags"
@@ -200,7 +204,7 @@ export const FormBody: React.FC<Props> = ({
             {({ field, form, meta }) => (
               <div key={lang.tag}>
                 <FieldLabel>{lang.name}</FieldLabel>
-                <StyledField>
+                <EditorWrapper>
                   <StyledEdtorWrapper data-cy="translation-create-translation-input">
                     <Editor
                       value={field.value || ''}
@@ -215,10 +219,8 @@ export const FormBody: React.FC<Props> = ({
                       autoScrollIntoView
                     />
                   </StyledEdtorWrapper>
-                </StyledField>
-                <StyledError color="error" variant="caption">
-                  {meta.touched && meta.error}
-                </StyledError>
+                </EditorWrapper>
+                <FieldError error={meta.touched && meta.error} />
               </div>
             )}
           </FastField>

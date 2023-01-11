@@ -13,14 +13,8 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
     put: operations["prepareUpdateSubscription"];
   };
-  "/v2/organizations/{organizationId}/billing/email-recipient": {
-    put: operations["setEmailRecipient"];
-  };
   "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     put: operations["cancelSubscription"];
-  };
-  "/v2/public/billing/webhook": {
-    post: operations["webhook"];
   };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
@@ -28,8 +22,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
-  "/v2/organizations/{organizationId}/billing/plans": {
+  "/v2/public/billing/plans": {
     get: operations["getPlans"];
+  };
+  "/v2/public/billing/mt-credit-prices": {
+    get: operations["getMtCreditPrices"];
+  };
+  "/v2/organizations/{organizationId}/billing/plans": {
+    get: operations["getPlans_1"];
   };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
@@ -47,12 +47,6 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     get: operations["getActivePlan"];
-  };
-  "/v2/public/billing/plans": {
-    get: operations["getPlans_1"];
-  };
-  "/v2/public/billing/mt-credit-prices": {
-    get: operations["getMtCreditPrices"];
   };
 }
 
@@ -91,9 +85,6 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
-    SetEmailRecipientRequest: {
-      email: string;
-    };
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
@@ -122,6 +113,16 @@ export interface components {
       monthlyPrice: number;
       yearlyPrice: number;
       free: boolean;
+    };
+    CollectionModelMtCreditsPriceModel: {
+      _embedded?: {
+        prices?: components["schemas"]["MtCreditsPriceModel"][];
+      };
+    };
+    MtCreditsPriceModel: {
+      id: number;
+      price: number;
+      amount: number;
     };
     InvoiceModel: {
       id: number;
@@ -159,17 +160,6 @@ export interface components {
       registrationNo?: string;
       vatNo?: string;
       email?: string;
-      emailRecipient?: string;
-    };
-    CollectionModelMtCreditsPriceModel: {
-      _embedded?: {
-        prices?: components["schemas"]["MtCreditsPriceModel"][];
-      };
-    };
-    MtCreditsPriceModel: {
-      id: number;
-      price: number;
-      amount: number;
     };
   };
 }
@@ -262,34 +252,6 @@ export interface operations {
       };
     };
   };
-  setEmailRecipient: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetEmailRecipientRequest"];
-      };
-    };
-  };
   cancelSubscription: {
     parameters: {
       path: {
@@ -310,38 +272,6 @@ export interface operations {
         content: {
           "*/*": string;
         };
-      };
-    };
-  };
-  webhook: {
-    parameters: {
-      header: {
-        "Stripe-Signature"?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
       };
     };
   };
@@ -410,6 +340,50 @@ export interface operations {
     };
   };
   getPlans: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getMtCreditPrices: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getPlans_1: {
     parameters: {
       path: {
         organizationId: number;
@@ -566,50 +540,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ActivePlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getPlans_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getMtCreditPrices: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
         };
       };
       /** Bad Request */

@@ -77,7 +77,7 @@ export interface UserUpdateDTO {
   password?: string;
 }
 
-export type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
+export type ApiKeyModel = components['schemas']['ApiKeyModel'];
 
 export interface PermissionEditDTO {
   permissionId: number;

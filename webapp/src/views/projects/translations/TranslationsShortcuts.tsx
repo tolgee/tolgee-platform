@@ -243,6 +243,7 @@ export const TranslationsShortcuts = () => {
 
   const editorIsActive =
     cursorMode === 'editor' &&
+    cursorLanguage &&
     document.activeElement?.className === 'CodeMirror-code';
 
   const items = (

@@ -9,7 +9,7 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
-import io.tolgee.service.SecurityService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,6 +56,7 @@ class ExportController @Autowired constructor(
           val zipOutputStream = ZipOutputStream(out)
           val translations = translationService.getTranslations(
             languages.map { it.tag }.toSet(),
+            null,
             projectHolder.project.id,
             '.'
           )

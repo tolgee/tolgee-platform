@@ -12,18 +12,19 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           token: '${{ secrets.TOLGEE_MACHINE_PAT }}'
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
           java-version: 11
+          distribution: adopt
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
+          node-version: "16.x"
 
       - name: Set git globals
         run: |

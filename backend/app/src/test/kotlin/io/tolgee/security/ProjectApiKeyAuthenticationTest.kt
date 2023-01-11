@@ -3,7 +3,6 @@ package io.tolgee.security
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -15,7 +14,6 @@ import io.tolgee.testing.assertions.UserApiAppAction
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -34,8 +32,7 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   fun `access with legacy key works`() {
     val base = dbPopulator.createBase(generateUniqueString())
     val apiKey = apiKeyService.create(base.userAccount, setOf(*ApiScope.values()), base.project)
-    mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=" + apiKey.key))
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=" + apiKey.key)).andIsOk
   }
 
   @Test
@@ -57,64 +54,6 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
     )
     mvc.perform(MockMvcRequestBuilders.get("/api/projects"))
       .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
-  }
-
-  @Test
-  fun accessWithApiKey_listPermissions() {
-    var apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW)
-    performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.OK))
-    apiKey = createBaseWithApiKey(ApiScope.KEYS_EDIT)
-    performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.FORBIDDEN))
-  }
-
-  @Test
-  fun accessWithApiKey_editPermissions() {
-    var apiKey = createBaseWithApiKey(ApiScope.KEYS_EDIT)
-    val translations = SetTranslationsWithKeyDto(key = "aaaa", translations = mapOf(Pair("aaa", "aaa")))
-
-    performAction(
-      UserApiAppAction(
-        method = HttpMethod.POST,
-        body = translations,
-        apiKey = apiKey.key,
-        url = "/uaa",
-        expectedStatus = HttpStatus.FORBIDDEN
-      )
-    )
-    apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT)
-    performAction(
-      UserApiAppAction(
-        method = HttpMethod.POST,
-        body = translations,
-        apiKey = apiKey.key,
-        url = "/uaa",
-        expectedStatus = HttpStatus.NOT_FOUND
-      )
-    )
-  }
-
-  @Test
-  fun accessWithApiKey_getLanguages() {
-    var apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW)
-    performAction(
-      UserApiAppAction(
-        method = HttpMethod.GET,
-        apiKey = apiKey.key,
-        url = "/uaa/languages",
-        expectedStatus = HttpStatus.FORBIDDEN
-      )
-    )
-
-    apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT)
-
-    performAction(
-      UserApiAppAction(
-        method = HttpMethod.GET,
-        apiKey = apiKey.key,
-        url = "/uaa/languages",
-        expectedStatus = HttpStatus.OK
-      )
-    )
   }
 
   @Test

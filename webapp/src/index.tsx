@@ -2,8 +2,8 @@ import React, { Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
+  DevTools,
   LanguageDetector,
-  ReactPlugin,
   Tolgee,
   TolgeeProvider,
 } from '@tolgee/react';
@@ -44,7 +44,7 @@ const SnackbarProvider = React.lazy(() =>
 container.resolve(DispatchService).store = store;
 
 const tolgee = Tolgee()
-  .use(ReactPlugin())
+  .use(DevTools())
   .use(FormatIcu())
   .use(LanguageDetector())
   .use(languageStorage)
@@ -59,6 +59,7 @@ const tolgee = Tolgee()
       cs: () => import('./i18n/cs.json'),
       fr: () => import('./i18n/fr.json'),
       de: () => import('./i18n/de.json'),
+      pt: () => import('./i18n/pt.json'),
     },
   });
 

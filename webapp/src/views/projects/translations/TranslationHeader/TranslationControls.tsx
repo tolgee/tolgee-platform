@@ -5,7 +5,6 @@ import { T, useTranslate } from '@tolgee/react';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import TranslationsSearchField from './TranslationsSearchField';
 
 import {
@@ -14,40 +13,15 @@ import {
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
 import { ViewMode } from '../context/types';
+import { StickyHeader } from './StickyHeader';
 
-const StyledControls = styled('div')`
+const StyledContainer = styled('div')`
   display: flex;
-  box-sizing: border-box;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  margin: -12px -5px -10px -5px;
-  margin-left: ${({ theme }) => theme.spacing(-2)};
-  margin-right: ${({ theme }) => theme.spacing(-2)};
-  padding: ${({ theme }) => theme.spacing(0, 1.5)};
-  position: sticky;
-  top: 50px;
-  height: 61px;
-  z-index: ${({ theme }) => theme.zIndex.appBar + 1};
-  background: ${({ theme }) => theme.palette.background.default};
-  transition: transform 0.2s ease-in-out;
   padding-bottom: 8px;
   padding-top: 13px;
-`;
-
-const StyledShadow = styled('div')`
-  background: ${({ theme }) => theme.palette.background.default};
-  height: 1px;
-  position: sticky;
-  z-index: ${({ theme }) => theme.zIndex.appBar};
-  margin-left: ${({ theme }) => theme.spacing(-1)};
-  margin-right: ${({ theme }) => theme.spacing(-1)};
-  box-shadow: ${({ theme }) =>
-    theme.palette.mode === 'dark'
-      ? '0px 1px 6px 0px #000000, 0px 1px 6px 0px #000000'
-      : '0px -1px 7px 0px #000000'};
-  top: 110px;
-  transition: all 0.25s;
 `;
 
 const StyledSpaced = styled('div')`
@@ -98,15 +72,9 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
     onDialogOpen();
   };
 
-  const trigger = useTopBarHidden();
-
   return (
-    <>
-      <StyledControls
-        style={{
-          transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
-        }}
-      >
+    <StickyHeader height={55}>
+      <StyledContainer>
         <StyledSpaced>
           <StyledTranslationsSearchField
             value={search || ''}
@@ -156,12 +124,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </Button>
           )}
         </StyledSpaced>
-      </StyledControls>
-      <StyledShadow
-        style={{
-          transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
-        }}
-      />
-    </>
+      </StyledContainer>
+    </StickyHeader>
   );
 };

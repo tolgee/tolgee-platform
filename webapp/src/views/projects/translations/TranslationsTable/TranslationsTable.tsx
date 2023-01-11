@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import ReactList from 'react-list';
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
@@ -7,11 +7,17 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
 import { TranslationsToolbar } from '../TranslationsToolbar';
+import { NamespaceBanner } from '../Namespace/NamespaceBanner';
+import { useNsBanners } from '../context/useNsBanners';
+import {
+  useColumnsActions,
+  useColumnsContext,
+} from '../context/ColumnsContext';
+import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -36,18 +42,16 @@ const StyledHeaderCell = styled('div')`
   box-sizing: border-box;
   display: flex;
   flex-grow: 0;
-  align-items: center;
   overflow: hidden;
-
   &.keyCell {
     padding-left: 13px;
+    padding-top: 8px;
   }
 `;
 
 export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
-  const resizersCallbacksRef = useRef<(() => void)[]>([]);
 
   const dispatch = useTranslationsDispatch();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -58,6 +62,13 @@ export const TranslationsTable = () => {
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
+
+  const columnSizes = useColumnsContext((c) => c.columnSizes);
+  const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
+  const totalWidth = useColumnsContext((c) => c.totalWidth);
+
+  const { startResize, resizeColumn, addResizer, resetColumns } =
+    useColumnsActions();
 
   const languageCols = useMemo(() => {
     if (languages && translationsLanguages) {
@@ -76,35 +87,12 @@ export const TranslationsTable = () => {
     [translationsLanguages]
   );
 
-  const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
-
-  const { width } = useResize(tableRef, translations);
-
-  const handleColumnResize = (i: number) => (size: number) => {
-    setColumnSizes(resizeColumn(columnSizes, i, size));
-  };
-
-  const columnSizesPercent = useMemo(() => {
-    const columnsSum = columnSizes.reduce((a, b) => a + b, 0);
-    return columnSizes.map((size) => (size / columnsSum) * 100 + '%');
-  }, [columnSizes]);
-
-  const handleResize = useCallback(
-    (colIndex: number) => {
-      resizersCallbacksRef.current[colIndex]?.();
-    },
-    [resizersCallbacksRef]
-  );
-
   useEffect(() => {
-    const prevSizes =
-      columnSizes.length === columns.length
-        ? columnSizes
-        : columns.map(() => 1);
-    const previousWidth = prevSizes.reduce((a, b) => a + b, 0) || 1;
-    const newSizes = prevSizes.map((w) => (w / previousWidth) * (width || 1));
-    setColumnSizes(newSizes);
-  }, [width, columns]);
+    resetColumns(
+      columns.map(() => 1),
+      tableRef
+    );
+  }, [languageCols, tableRef]);
 
   const handleFetchMore = useCallback(() => {
     dispatch({
@@ -127,6 +115,9 @@ export const TranslationsTable = () => {
     }
   }, [reactListRef.current]);
 
+  const nsBanners = useNsBanners();
+  const isBannerOnFirstRow = nsBanners[0]?.row === 0;
+
   if (!translations) {
     return null;
   }
@@ -144,14 +135,18 @@ export const TranslationsTable = () => {
             <StyledHeaderCell key={i} style={{ width: columnSizesPercent[i] }}>
               <CellLanguage
                 colIndex={i - 1}
-                onResize={handleResize}
+                onResize={startResize}
                 language={language}
               />
             </StyledHeaderCell>
           ) : (
             <StyledHeaderCell
               key={i}
-              style={{ width: columnSizesPercent[i] }}
+              style={{
+                width: columnSizesPercent[i],
+                height:
+                  39 + (isBannerOnFirstRow ? NAMESPACE_BANNER_SPACING : 0),
+              }}
               className="keyCell"
             >
               <T>translation_grid_key_text</T>
@@ -166,10 +161,8 @@ export const TranslationsTable = () => {
             key={i}
             size={w}
             left={left}
-            onResize={handleColumnResize(i)}
-            passResizeCallback={(callback) =>
-              (resizersCallbacksRef.current[i] = callback)
-            }
+            onResize={(size) => resizeColumn(i, size)}
+            passResizeCallback={(callback) => addResizer(i, callback)}
           />
         );
       })}
@@ -191,18 +184,30 @@ export const TranslationsTable = () => {
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
+
+          const nsBannerAfter = nsBanners.find((b) => b.row === index + 1);
+          const nsBanner = nsBanners.find((b) => b.row === index);
           return (
-            <RowTable
-              key={row.keyId}
-              data={row}
-              languages={languageCols}
-              columnSizes={columnSizesPercent}
-              onResize={handleResize}
-            />
+            <div key={row.keyId}>
+              {nsBanner && (
+                <NamespaceBanner
+                  namespace={nsBanner}
+                  maxWidth={columnSizes[0]}
+                />
+              )}
+              <RowTable
+                bannerBefore={Boolean(nsBanner)}
+                bannerAfter={Boolean(nsBannerAfter)}
+                data={row}
+                languages={languageCols}
+                columnSizes={columnSizesPercent}
+                onResize={startResize}
+              />
+            </div>
           );
         }}
       />
-      <TranslationsToolbar width={width} />
+      <TranslationsToolbar width={totalWidth} />
     </StyledContainer>
   );
 };

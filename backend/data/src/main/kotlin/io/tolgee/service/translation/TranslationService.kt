@@ -2,14 +2,8 @@ package io.tolgee.service.translation
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.query_results.KeyWithTranslationsDto
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
-import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
-import io.tolgee.dtos.response.ViewDataResponse
-import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -23,12 +17,11 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.query_builders.TranslationsViewBuilder
-import io.tolgee.service.query_builders.TranslationsViewBuilderOld
+import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
@@ -38,18 +31,16 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import java.util.stream.Collectors
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
 class TranslationService(
   private val translationRepository: TranslationRepository,
-  private val entityManager: EntityManager,
   private val importService: ImportService,
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val translationViewDataProvider: TranslationViewDataProvider
 ) {
   @set:Autowired
   @set:Lazy
@@ -67,10 +58,12 @@ class TranslationService(
   @Suppress("UNCHECKED_CAST")
   fun getTranslations(
     languageTags: Set<String>,
+    namespace: String?,
     projectId: Long,
-    structureDelimiter: Char? = '.'
+    structureDelimiter: Char?
   ): Map<String, Any> {
-    val allByLanguages = translationRepository.getTranslations(languageTags, projectId)
+    val safeNamespace = if (namespace == "") null else namespace
+    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
     for (translation in allByLanguages) {
       val map = langTranslations
@@ -84,25 +77,6 @@ class TranslationService(
 
   fun getAllByLanguageId(languageId: Long): List<Translation> {
     return translationRepository.getAllByLanguageId(languageId)
-  }
-
-  fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
-    val project = projectService.get(projectId)
-    val key = keyService.findOptional(projectId, path!!).orElse(null)
-    val languages: Set<Language> = if (languageTags == null) {
-      languageService.getImplicitLanguages(projectId)
-    } else {
-      languageService.findByTags(languageTags, projectId)
-    }
-    val translations = getKeyTranslations(languages, project, key)
-    val translationsMap = translations.stream()
-      .collect(Collectors.toMap({ v: Translation -> v.language.tag }, Translation::text))
-    for (language in languages) {
-      if (translationsMap.keys.stream().filter { l: String? -> l == language.tag }.findAny().isEmpty) {
-        translationsMap[language.tag] = ""
-      }
-    }
-    return translationsMap
   }
 
   fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
@@ -141,38 +115,13 @@ class TranslationService(
     return this.translationRepository.findById(id).orElse(null)
   }
 
-  @Suppress("UNCHECKED_CAST")
-  @Deprecated(
-    replaceWith = ReplaceWith("getViewData"),
-    message = "Use new getViewData. This is for old API compatibility."
-  )
-  fun getViewDataOld(
-    languageTags: Set<String>?,
-    projectId: Long?,
-    limit: Int,
-    offset: Int,
-    search: String?
-  ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-    val project = projectService.get(projectId!!)
-    val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, projectId)
-    val (count, data1) = TranslationsViewBuilderOld.getData(entityManager, project, languages, search, limit, offset)
-    return ViewDataResponse(
-      data1
-        .stream()
-        .map { queryResult: Any? -> fromQueryResult(KeyWithTranslationsDto((queryResult as Array<Any?>))) }
-        .collect(Collectors.toCollection { LinkedHashSet() }),
-      offset, count,
-      ResponseParams(search, languages.stream().map(Language::tag).collect(Collectors.toSet()))
-    )
-  }
-
   fun getViewData(
     projectId: Long,
     pageable: Pageable,
     params: GetTranslationsParams,
     languages: Set<Language>
   ): Page<KeyWithTranslationsView> {
-    return TranslationsViewBuilder.getData(applicationContext, projectId, languages, pageable, params, params.cursor)
+    return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
   }
 
   fun getSelectAllKeys(
@@ -180,7 +129,7 @@ class TranslationService(
     params: TranslationFilters,
     languages: Set<Language>
   ): List<Long> {
-    return TranslationsViewBuilder.getSelectAllKeys(applicationContext, projectId, languages, params)
+    return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
   }
 
   fun setTranslation(key: Key, languageTag: String?, text: String?): Translation? {

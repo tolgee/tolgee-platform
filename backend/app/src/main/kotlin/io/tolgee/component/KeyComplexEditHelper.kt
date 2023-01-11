@@ -13,11 +13,11 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.key.Key
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.SecurityService
-import io.tolgee.service.TagService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.key.TagService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import kotlin.properties.Delegates
@@ -72,7 +72,7 @@ class KeyComplexEditHelper(
       updateScreenshotsWithPermissionCheck(dto, key)
     }
 
-    return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name))
+    return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name, dto.namespace))
   }
 
   private fun setActivityHolder() {

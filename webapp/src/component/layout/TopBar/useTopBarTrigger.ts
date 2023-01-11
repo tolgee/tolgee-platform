@@ -12,7 +12,7 @@ export const useTopBarTrigger = () => {
   handlerRef.current = () => {
     const currentScrollPos = window.pageYOffset;
     const difference = currentScrollPos - lastPosition.current;
-    if (currentScrollPos < 100) {
+    if (currentScrollPos < 80) {
       // we are at the top
       setTriggered(false);
     } else if (difference > 0) {

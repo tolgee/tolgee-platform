@@ -30,6 +30,29 @@ describe('Import Adding files', () => {
     gcy('import-result-total-count-cell').should('contain.text', '8');
   });
 
+  it('uploads .zip with namespaces', () => {
+    cy.get('[data-cy=dropzone]').attachFile('import/namespaces.zip', {
+      subjectType: 'drag-n-drop',
+    });
+
+    cy.xpath('.//*[@data-cy="namespaces-selector"]//*[text()="movies"]').should(
+      'have.length',
+      2
+    );
+
+    cy.xpath(
+      './/*[@data-cy="namespaces-selector"]//*[text()="homepage"]'
+    ).should('have.length', 2);
+
+    cy.xpath(
+      './/*[@data-cy="import-result-language-menu-cell"]//*[text()="English"]'
+    ).should('have.length', 2);
+
+    cy.xpath(
+      './/*[@data-cy="import-result-language-menu-cell"]//*[text()="German"]'
+    ).should('have.length', 2);
+  });
+
   it(
     'uploads multiple xliffs',
     {

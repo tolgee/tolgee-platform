@@ -29,34 +29,48 @@ REACT_APP_TOLGEE_API_KEY={{{apiKey}}}
 Wrap your main `App` component with Tolgee provider.
 
 ```typescript jsx
-import {TolgeeProvider} from "@tolgee/react";
+import { Tolgee, DevTools, TolgeeProvider, FormatSimple } from "@tolgee/react";
+
+const tolgee = Tolgee()
+  .use(DevTools())
+  .use(FormatSimple())
+  .init({
+    language: 'en',
+
+    // for development
+    apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
+    apiKey: process.env.REACT_APP_TOLGEE_API_KEY,
+
+    // for production
+    staticData: {
+      ...
+    }
+  });
 
 ...
 
 <TolgeeProvider
-    filesUrlPrefix="i18n/"
-    apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
-    apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
-    loadingFallback={<>Loading...</>}
+  tolgee={tolgee}
+  fallback="Loading..." // loading fallback
 >
-    <App/>
+  <App />
 </TolgeeProvider>
 ```
 
 ## Use Tolgee!
 
 ```typescript jsx
-import {T} from "@tolgee/react";
+import { T } from "@tolgee/react";
 
 ...
 
-<T>translation_key</T>
+<T keyName="translation_key" />
 ```
 
 or
 
 ```typescript jsx
-import {useTranslate} from "@tolgee/react";
+import { useTranslate } from "@tolgee/react";
 
 ...
 

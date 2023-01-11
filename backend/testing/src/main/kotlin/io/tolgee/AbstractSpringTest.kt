@@ -20,28 +20,29 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.ApiKeyService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.MfaService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.PatService
-import io.tolgee.service.PermissionService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.TagService
-import io.tolgee.service.TranslationCommentService
-import io.tolgee.service.UserAccountService
-import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.key.TagService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.MfaService
+import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
@@ -192,6 +193,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var mfaService: MfaService
+
+  @Autowired
+  lateinit var namespaceService: NamespaceService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

@@ -4,6 +4,7 @@ import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.annotations.ApiKeyPresentMode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -24,7 +25,7 @@ class ProjectApiKeyAuthRequestPerformer(
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
 
   @field:Autowired
-  lateinit var apiKeyService: io.tolgee.service.ApiKeyService
+  lateinit var apiKeyService: ApiKeyService
 
   val apiKey: ApiKeyDTO by lazy {
     ApiKeyDTO.fromEntity(

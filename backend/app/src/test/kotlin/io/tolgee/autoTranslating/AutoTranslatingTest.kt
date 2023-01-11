@@ -105,7 +105,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     assertThat(time).isLessThan(2000)
 
     executeInNewTransaction {
-      val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations
+      val translations = keyService.get(testData.project.id, CREATE_KEY_NAME, null).translations
         .toList().sortedBy { it.text }
       assertThat(translations).hasSize(9)
       assertThat(translations[1].text).isEqualTo("Translated with Amazon")
@@ -154,7 +154,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     transactionTemplate.execute {
       assertThat(
         keyService
-          .get(testData.project.id, CREATE_KEY_NAME)
+          .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage }
       )
@@ -172,7 +172,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     transactionTemplate.execute {
       assertThat(
         keyService
-          .get(testData.project.id, CREATE_KEY_NAME)
+          .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage }
       )
@@ -200,7 +200,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     performCreateHalloKeyWithEnAndDeTranslations()
 
     transactionTemplate.execute {
-      val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
+      val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
         .translations
         .find { it.language == testData.spanishLanguage }
 
@@ -208,7 +208,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     }
   }
 
-  private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
+  private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
     .getLangTranslation(testData.spanishLanguage).text
 
   private fun performCreateHalloKeyWithEnAndDeTranslations() {
@@ -232,7 +232,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     assertThat(deTranslation).isNotEqualTo(THIS_IS_BEAUTIFUL_DE)
   }
 
-  private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
+  private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
     .getLangTranslation(testData.germanLanguage).text
 
   private fun performSetConfig(usingTm: Boolean, usingMt: Boolean) {

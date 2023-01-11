@@ -3,7 +3,7 @@ package io.tolgee.security.patAuth
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.security.PAT_PREFIX
-import io.tolgee.service.PatService
+import io.tolgee.service.security.PatService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter

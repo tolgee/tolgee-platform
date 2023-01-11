@@ -14,6 +14,8 @@ import io.tolgee.security.AuthenticationProvider
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
@@ -38,10 +40,8 @@ class StartupImportService(
   fun importFiles() {
     getDirsToImport()?.forEach { projectDir ->
       val fileDtos = getImportFileDtos(projectDir)
-      if (fileDtos != null) {
-        val projectName = projectDir.nameWithoutExtension
-        importAsInitialUserProject(projectName, fileDtos)
-      }
+      val projectName = projectDir.nameWithoutExtension
+      importAsInitialUserProject(projectName, fileDtos)
     }
   }
 
@@ -68,7 +68,10 @@ class StartupImportService(
       ?: throw IllegalStateException("No initial organization")
 
   private fun getImportFileDtos(projectDir: File) =
-    projectDir.listFiles()?.map { ImportFileDto(it.name, it.inputStream()) }?.toList()
+    projectDir.walk().filter { !it.isDirectory }.map {
+      val relativePath = it.path.replace(projectDir.path, "")
+      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
+    }.filterNotNull().toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
     SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
@@ -92,7 +95,7 @@ class StartupImportService(
     project: Project,
     userAccount: UserAccount
   ) {
-    importService.addFiles(fileDtos, null, project, userAccount)
+    importService.addFiles(fileDtos, project, userAccount)
     val imports = importService.getAllByProject(project.id)
     imports.forEach {
       importService.import(it)
@@ -111,14 +114,16 @@ class StartupImportService(
     fileDtos: List<ImportFileDto>,
     organization: Organization
   ): Project {
+    val languages = fileDtos.map { file ->
+      // remove extension
+      val name = file.name.replace(Regex("^.*[\\/]([a-zA-Z0-9_\\-]+)\\.\\w+\$"), "$1")
+      LanguageDto(name, name, name)
+    }.toSet().toList()
+
     val project = projectService.createProject(
       CreateProjectDTO(
         name = projectName,
-        languages = fileDtos.map { file ->
-          // remove extension
-          val name = file.name.replace(Regex("\\.[^.]*"), "")
-          LanguageDto(name, name, name)
-        },
+        languages = languages,
         organizationId = organization.id
       ),
     )

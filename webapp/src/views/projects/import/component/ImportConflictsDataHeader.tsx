@@ -9,13 +9,12 @@ import {
 } from '@mui/material';
 import { DoneAll } from '@mui/icons-material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
-const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{
   language: components['schemas']['ImportLanguageModel'];
 }> = (props) => {
@@ -24,8 +23,22 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   const theme = useTheme();
   const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
 
+  const setOverrideMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
+  });
+
+  const setKeepMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/import/result/languages/{languageId}',
+  });
+
   const keepAllExisting = () => {
-    actions.loadableActions.resolveAllKeepExisting.dispatch({
+    setKeepMutation.mutate({
       path: {
         projectId: project.id,
         languageId: props.language!.id,
@@ -34,13 +47,16 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   };
 
   const overrideAll = () => {
-    actions.loadableActions.resolveAllOverride.dispatch({
+    setOverrideMutation.mutate({
       path: {
         projectId: project.id,
         languageId: props.language!.id,
       },
     });
   };
+
+  useGlobalLoading(setKeepMutation.isLoading);
+  useGlobalLoading(setOverrideMutation.isLoading);
 
   const keepAllButton = (
     <Button

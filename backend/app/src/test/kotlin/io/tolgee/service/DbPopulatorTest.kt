@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach

@@ -50,14 +50,11 @@ class JsonFileExporterTest {
 
   @Suppress("UNCHECKED_CAST")
   @Test
-  fun `it scopes to files`() {
-    val data = generateTranslationsForKeys(listOf("a.a.a", "a", "a.a"))
+  fun `it scopes by namespaces`() {
+    val data = generateTranslationsForKeys(listOf("a:a.a", "a", "a:a", "a:b.a"))
     val exported = JsonFileExporter(
       data,
-      ExportParams().apply {
-        splitByScope = true
-        splitByScopeDepth = 2
-      }
+      ExportParams().apply {}
     ).produceFiles()
 
     val ajson = exported.getFileTextContent("en.json")
@@ -67,10 +64,8 @@ class JsonFileExporterTest {
     val aajson = exported.getFileTextContent("a/en.json")
     assertThatJson(aajson) {
       node("a").isEqualTo("text")
-    }
-    val aaajson = exported.getFileTextContent("a/a/en.json")
-    assertThatJson(aaajson) {
-      node("a").isEqualTo("text")
+      node("a\\.a").isEqualTo("text")
+      node("b.a").isEqualTo("text")
     }
   }
 
@@ -108,8 +103,11 @@ class JsonFileExporterTest {
   }
 
   private fun generateTranslationsForKeys(keys: List<String>): List<ExportTranslationView> {
-    return keys.sorted().map { keyName ->
-      val key = ExportKeyView(1, keyName)
+    return keys.sorted().map { keyDef ->
+      val split = keyDef.split(":").toMutableList()
+      val keyName = split.removeLast()
+      val namespace = split.removeLastOrNull()
+      val key = ExportKeyView(1, keyName, namespace)
       val trans = ExportTranslationView(1, "text", TranslationState.TRANSLATED, key, "en")
       key.translations["en"] = trans
       trans

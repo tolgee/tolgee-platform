@@ -1,23 +1,34 @@
-import React, { FunctionComponent } from 'react';
-import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import React, { FunctionComponent, useState } from 'react';
+import { Alert, Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { Warning } from '@mui/icons-material';
-import { Alert } from '@mui/material';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
-
-import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-const actions = container.resolve(ImportActions);
 export const ImportFileIssuesDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
 }> = (props) => {
   const project = useProject();
-
   const row = props.row;
+  const [page, setPage] = useState(0);
+
+  const loadable = useApiQuery({
+    url: '/v2/projects/{projectId}/import/result/files/{importFileId}/issues',
+    method: 'get',
+    path: {
+      projectId: project.id,
+      importFileId: row?.importFileId as any,
+    },
+    options: {
+      enabled: !!row,
+    },
+    query: {
+      page: page,
+    },
+  });
 
   return (
     <div>
@@ -36,17 +47,9 @@ export const ImportFileIssuesDialog: FunctionComponent<{
               </T>
             </DialogTitle>
             <DialogContent>
-              <SimplePaginatedHateoasList
-                actions={actions}
-                loadableName="getFileIssues"
-                dispatchParams={[
-                  {
-                    path: {
-                      projectId: project.id,
-                      importFileId: row.importFileId,
-                    },
-                  },
-                ]}
+              <PaginatedHateoasList
+                loadable={loadable}
+                onPageChange={setPage}
                 wrapperComponent={Box}
                 wrapperComponentProps={{ sx: { mb: 2 } }}
                 listComponent={Box}

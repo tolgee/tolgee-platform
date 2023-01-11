@@ -83,6 +83,6 @@ class PoFileProcessorTest {
       "exmample.po",
       inputStream
     )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile)
   }
 }

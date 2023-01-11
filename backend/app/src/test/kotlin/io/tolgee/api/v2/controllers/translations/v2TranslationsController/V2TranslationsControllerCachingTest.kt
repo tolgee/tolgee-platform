@@ -69,7 +69,7 @@ class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/proje
     val lastModified = performAndGetLastModified()
     performWithIsModifiedSince(lastModified).andIsNotModified
 
-    val newNow = Date(Date().time + 5000)
+    val newNow = Date(Date().time + 50000)
     whenever(currentDateProvider.date).then { newNow }
     translationService.setTranslation(testData.aKey, testData.englishLanguage, "This was changed!")
 

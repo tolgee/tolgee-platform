@@ -8,8 +8,8 @@ import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.service.AvatarService
-import io.tolgee.service.PermissionService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component

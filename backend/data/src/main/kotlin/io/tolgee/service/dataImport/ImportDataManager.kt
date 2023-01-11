@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -7,25 +8,35 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
-import io.tolgee.service.KeyMetaService
-import io.tolgee.service.KeyService
+import io.tolgee.service.LanguageService
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.Logging
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
   private val applicationContext: ApplicationContext,
-  private val import: Import
-) {
-  val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+  private val import: Import,
+) : Logging {
+  private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
-  val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+
+  private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
+
+  private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
   private val keyMetaService: KeyMetaService by lazy {
     applicationContext.getBean(KeyMetaService::class.java)
   }
 
   val storedKeys by lazy {
-    importService.findKeys(import).asSequence().map { it.name to it }.toMap(mutableMapOf())
+    importService.findKeys(import)
+      .asSequence()
+      .map { (it.file to it.name) to it }
+      .toMap(mutableMapOf())
   }
 
   val storedLanguages by lazy {
@@ -34,29 +45,46 @@ class ImportDataManager(
 
   val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
 
-  private val existingTranslations = mutableMapOf<Long, MutableMap<String, Translation>>()
+  /**
+   * LanguageId to (Map of Pair(Namespace,KeyName) to Translation)
+   */
+  private val existingTranslations: MutableMap<Long, MutableMap<Pair<String?, String>, Translation>> by lazy {
+    val result = mutableMapOf<Long, MutableMap<Pair<String?, String>, Translation>>()
+    this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
+      if (language != null && result[language.id] == null) {
+        result[language.id] = mutableMapOf<Pair<String?, String>, Translation>().apply {
+          translationService.getAllByLanguageId(language.id)
+            .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
+        }
+      }
+    }
+    result
+  }
 
-  val existingKeys: MutableMap<String, Key> by lazy {
-    keyService.getAll(import.project.id).asSequence().map { it.name to it }.toMap().toMutableMap()
+  val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
+    keyService.getAll(import.project.id)
+      .asSequence()
+      .map { (it.namespace?.name to it.name) to it }
+      .toMap(mutableMapOf())
   }
 
   private val translationService: TranslationService by lazy {
     applicationContext.getBean(TranslationService::class.java)
   }
 
-  val storedMetas: MutableMap<String, KeyMeta> by lazy {
-    keyMetaService.getWithFetchedData(this.import).asSequence().map { it.importKey!!.name to it }
+  val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
+    keyMetaService.getWithFetchedData(this.import.project).asSequence()
+      .map { (it.key!!.namespace?.name to it.key!!.name) to it }
       .toMap().toMutableMap()
   }
 
-  val existingMetas: MutableMap<String, KeyMeta> by lazy {
-    keyMetaService.getWithFetchedData(this.import.project).asSequence().map { it.key!!.name to it }
-      .toMap().toMutableMap()
+  val existingNamespaces by lazy {
+    namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
   }
 
   /**
    * Returns list of translations provided for a language and a key.
-   * It returns collection since translations could collide, when an user uploads multiple files with different values
+   * It returns collection since translations could collide, when a user uploads multiple files with different values
    * for a key
    */
   fun getStoredTranslations(key: ImportKey, language: ImportLanguage): MutableList<ImportTranslation> {
@@ -96,39 +124,27 @@ class ImportDataManager(
    * @param removeEqual Whether translations with equal texts should be removed
    */
   fun handleConflicts(removeEqual: Boolean) {
-    populateExistingTranslations()
     this.storedTranslations.asSequence().flatMap { it.value.values }.forEach { languageTranslations ->
       val toRemove = mutableListOf<ImportTranslation>()
-      languageTranslations.forEach { importedTranslaton ->
-        val existingLanguage = importedTranslaton.language.existingLanguage
+      languageTranslations.forEach { importedTranslation ->
+        val existingLanguage = importedTranslation.language.existingLanguage
         if (existingLanguage != null) {
           val existingTranslation = existingTranslations[existingLanguage.id]
-            ?.let { it[importedTranslaton.key.name] }
+            ?.let { it[importedTranslation.language.file.namespace to importedTranslation.key.name] }
           if (existingTranslation != null) {
             // remove if text is the same
-            if (existingTranslation.text == importedTranslaton.text) {
-              toRemove.add(importedTranslaton)
+            if (existingTranslation.text == importedTranslation.text) {
+              toRemove.add(importedTranslation)
             } else {
-              importedTranslaton.conflict = existingTranslation
+              importedTranslation.conflict = existingTranslation
             }
           } else {
-            importedTranslaton.conflict = null
+            importedTranslation.conflict = null
           }
         }
       }
       if (removeEqual) {
         languageTranslations.removeAll(toRemove)
-      }
-    }
-  }
-
-  private fun populateExistingTranslations() {
-    this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
-      if (language != null && existingTranslations[language.id] == null) {
-        existingTranslations[language.id] = mutableMapOf<String, Translation>().apply {
-          translationService.getAllByLanguageId(language.id)
-            .forEach { translation -> put(translation.key.name, translation) }
-        }
       }
     }
   }
@@ -141,12 +157,60 @@ class ImportDataManager(
 
   fun saveAllStoredKeys() {
     this.importService.saveAllKeys(this.storedKeys.values)
+    saveAllMetas()
   }
 
-  fun resetConflicts(importLanguage: ImportLanguage) {
+  private fun saveAllMetas() {
+    this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
+      meta.disableActivityLogging = true
+      keyMetaService.save(meta)
+      meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
+      keyMetaService.saveAllComments(meta.comments)
+      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
+      keyMetaService.saveAllCodeReferences(meta.codeReferences)
+    }
+  }
+
+  private fun resetConflicts(importLanguage: ImportLanguage) {
     this.storedTranslations[importLanguage]?.values?.asSequence()?.flatMap { it }?.forEach {
       it.conflict = null
       it.resolvedHash = null
     }
+  }
+
+  fun resetLanguage(
+    importLanguage: ImportLanguage
+  ) {
+    this.populateStoredTranslations(importLanguage)
+    this.resetConflicts(importLanguage)
+    this.handleConflicts(false)
+    if (isExistingLanguageUsed(importLanguage.existingLanguage, importLanguage)) {
+      importLanguage.existingLanguage = null
+    }
+    this.importService.saveLanguages(listOf(importLanguage))
+    this.saveAllStoredTranslations()
+  }
+
+  private fun isExistingLanguageUsed(existing: Language?, imported: ImportLanguage): Boolean {
+    existing ?: return false
+    return this.storedLanguages.any { storedLang ->
+      imported != storedLang && // ignore when is assigned to self
+        storedLang.existingLanguage?.id == existing.id &&
+        storedLang.file.namespace == imported.file.namespace
+    }
+  }
+
+  fun findMatchingExistingLanguage(importLanguage: ImportLanguage): Language? {
+    val possibleTag = """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
+      .matchEntire(importLanguage.name)?.groups?.get(1)?.value
+      ?: return null
+
+    val candidate = languageService.findByTag(possibleTag, import.project.id).orElse(null) ?: return null
+
+    if (!isExistingLanguageUsed(candidate, importLanguage)) {
+      return candidate
+    }
+
+    return null
   }
 }

@@ -3,7 +3,7 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.auth.SignUpDto
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -13,12 +13,12 @@ import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InternalController
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -105,7 +105,7 @@ class ProjectsE2eDataController(
             createdLanguages.add(it)
           }
         }
-        keyService.create(project, SetTranslationsWithKeyDto(it.key, it.value))
+        keyService.create(project, CreateKeyDto(it.key, null, it.value))
       }
     }
   }

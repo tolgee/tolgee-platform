@@ -12,7 +12,11 @@ import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
-import { ChangeScreenshotNum, UpdateTranslation } from '../types';
+import {
+  ChangeScreenshotNum,
+  KeyUpdateData,
+  UpdateTranslation,
+} from '../types';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 const MAX_LANGUAGES = 10;
@@ -34,6 +38,7 @@ type FiltersType = Pick<
   | 'filterUntranslatedAny'
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
+  | 'filterNamespace'
 >;
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
@@ -41,6 +46,7 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 type Props = {
   projectId: number;
   keyName?: string;
+  keyNamespace?: string;
   keyId?: number;
   initialLangs: string[] | null | undefined;
   pageSize?: number;
@@ -61,6 +67,7 @@ export const useTranslationsService = (props: Props) => {
     () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
     [filters]
   );
+
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
@@ -78,7 +85,7 @@ export const useTranslationsService = (props: Props) => {
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
-    sort: ['keyName'],
+    sort: ['keyNamespace', 'keyName'],
     languages: undefined,
   });
 
@@ -112,10 +119,16 @@ export const useTranslationsService = (props: Props) => {
     [props.projectId]
   );
 
+  const filterNamespace =
+    props.keyNamespace !== undefined
+      ? [props.keyNamespace]
+      : parsedFilters.filterNamespace;
+
   const requestQuery = {
     ...query,
     ...parsedFilters,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
+    filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
     search: urlSearch as string,
   };
@@ -240,12 +253,7 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateTranslationKeys = (
-    data: {
-      keyId: number;
-      value: Partial<DeletableKeyWithTranslationsModelType>;
-    }[]
-  ) => {
+  const updateTranslationKeys = (data: KeyUpdateData[]) => {
     setFixedTranslations((fixedTranslations) => {
       let result = fixedTranslations;
       data.forEach((mod) => {

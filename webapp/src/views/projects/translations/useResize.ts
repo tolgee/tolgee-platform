@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-export const useResize = (myRef, dependency) => {
-  const [width, setWidth] = useState(undefined);
+type PassedRefType = React.RefObject<HTMLElement | undefined>;
 
-  const handleResize = () => {
-    const newWidth = myRef.current?.offsetWidth;
+export const useResize = (tableRef: PassedRefType, dependency: any) => {
+  const [width, setWidth] = useState<number>();
+
+  const handleResize = useCallback(() => {
+    const newWidth = tableRef.current?.offsetWidth;
     if (newWidth && width !== newWidth) {
       setWidth(newWidth);
     }
-  };
+  }, [tableRef]);
 
   useEffect(() => {
     handleResize();
@@ -21,7 +23,7 @@ export const useResize = (myRef, dependency) => {
       clearInterval(interval);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [handleResize]);
 
   return { width: width || 0 };
 };

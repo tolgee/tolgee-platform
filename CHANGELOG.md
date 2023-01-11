@@ -1,16 +1,81 @@
-## [2.51.1](https://github.com/tolgee/tolgee-platform/compare/v2.51.0...v2.51.1) (2023-01-06)
+# [3.0.0-alpha.8](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.7...v3.0.0-alpha.8) (2023-01-11)
 
 
 ### Bug Fixes
 
+* KeyListener & Merged main > tolgee-3 ([96a1ffa](https://github.com/tolgee/tolgee-platform/commit/96a1ffa42ed8cb53de4b60905863cfa76584db5c))
+* Removed KeyListeners by accident ([0c35224](https://github.com/tolgee/tolgee-platform/commit/0c3522441a82c50f6ef87d0574c04e0169f719d8))
 * Startup import sorted & refactored ([#1480](https://github.com/tolgee/tolgee-platform/issues/1480)) ([ba2c9f9](https://github.com/tolgee/tolgee-platform/commit/ba2c9f91e6802ab797db379c6369c9904af63559))
-
-# [2.51.0](https://github.com/tolgee/tolgee-platform/compare/v2.50.0...v2.51.0) (2023-01-06)
 
 
 ### Features
 
 * add capterra tracker to signup page ([#1487](https://github.com/tolgee/tolgee-platform/issues/1487)) ([edca848](https://github.com/tolgee/tolgee-platform/commit/edca8488a5a5e454df0391410baabf9e8373b9a6))
+
+# [3.0.0-alpha.7](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.6...v3.0.0-alpha.7) (2023-01-10)
+
+
+### Bug Fixes
+
+* add fallback language ([#1458](https://github.com/tolgee/tolgee-platform/issues/1458)) ([3e3c031](https://github.com/tolgee/tolgee-platform/commit/3e3c03127f6ac471cf6baf691251a81fb15345c6))
+* Default structure delimiter in translations endpoint ([#1468](https://github.com/tolgee/tolgee-platform/issues/1468)) ([83f0583](https://github.com/tolgee/tolgee-platform/commit/83f0583700536999408481265b4524a46113f72a))
+* editor tooltips fix ([3486653](https://github.com/tolgee/tolgee-platform/commit/3486653d0bc7c458a518f89887fa6e769bdbdf42))
+* error when adding comment to empty translation ([#1457](https://github.com/tolgee/tolgee-platform/issues/1457)) ([826ff0d](https://github.com/tolgee/tolgee-platform/commit/826ff0da7f85599c9136afc57864d657ea299768))
+* fixes after merge ([31f44e8](https://github.com/tolgee/tolgee-platform/commit/31f44e8b72dba34ca5fdcbeda21fc5260c0213ef))
+* fixes after merge ([b57e059](https://github.com/tolgee/tolgee-platform/commit/b57e059ced501bb877b3eb53e3fa39c6d51563fe))
+* Many languages make the list row too high ([cc1a514](https://github.com/tolgee/tolgee-platform/commit/cc1a5143fb4566323ed325aa5264703f535f2798))
+* switch to tolgee-js-5 ([7b6ef1d](https://github.com/tolgee/tolgee-platform/commit/7b6ef1dc69b6a4f19cdabded64edc44b66476b6c))
+* update machine translations if base translation changes ([#1481](https://github.com/tolgee/tolgee-platform/issues/1481)) ([c0b87ae](https://github.com/tolgee/tolgee-platform/commit/c0b87aecccc1d2b74aa3eddc93328eb06e0d28df))
+
+
+### Features
+
+* add nested export selector ([6d03217](https://github.com/tolgee/tolgee-platform/commit/6d0321717e741c1335f1a19f56a730ed0601afb0))
+* add nested export selector - e2e tests ([ed11498](https://github.com/tolgee/tolgee-platform/commit/ed11498a3bea721a581d300789df4a3d0c16afbc))
+* add providers to signup screen ([#1326](https://github.com/tolgee/tolgee-platform/issues/1326)) ([fa5caac](https://github.com/tolgee/tolgee-platform/commit/fa5caac078d73609b7be110f30fcb4925a6c5121))
+* Caching of translations endpoint & configurable structure delimiter ([#1464](https://github.com/tolgee/tolgee-platform/issues/1464)) ([eb23462](https://github.com/tolgee/tolgee-platform/commit/eb23462cf9df82126687c8a922d991aaecdb1b7d))
+* store language on backend ([b4de63e](https://github.com/tolgee/tolgee-platform/commit/b4de63effb1868a95042a578f8e369141387f7dd))
+
+### Bug Fixes
+
+* Many languages make the list row too high ([cc1a514](https://github.com/tolgee/tolgee-platform/commit/cc1a5143fb4566323ed325aa5264703f535f2798))
+
+# [3.0.0-alpha.6](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.5...v3.0.0-alpha.6) (2023-01-05)
+
+
+### Bug Fixes
+
+* **import:** properly compute conflicts on upload ([#1486](https://github.com/tolgee/tolgee-platform/issues/1486)) ([775770e](https://github.com/tolgee/tolgee-platform/commit/775770eead278cf26254d7c901413c9a34eb488f))
+
+# [3.0.0-alpha.5](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2023-01-03)
+
+
+### Features
+
+* add portuguese and improve static translations loading ([#1477](https://github.com/tolgee/tolgee-platform/issues/1477)) ([37b3574](https://github.com/tolgee/tolgee-platform/commit/37b35740534f9e8812dbd20bf289972841fdbbbe))
+
+# [3.0.0-alpha.4](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2022-12-22)
+
+
+### Bug Fixes
+
+* Default structureDemiter & test in export ([#1469](https://github.com/tolgee/tolgee-platform/issues/1469)) ([3ced45f](https://github.com/tolgee/tolgee-platform/commit/3ced45fdd95ede8d7572bebbaed2c1cf2f039d8d))
+
+# [3.0.0-alpha.3](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2022-12-21)
+
+
+### Features
+
+* update integration guides to v5 ([#1465](https://github.com/tolgee/tolgee-platform/issues/1465)) ([6786645](https://github.com/tolgee/tolgee-platform/commit/678664567c8ac6ef571a42f6389645c4866b95c7))
+
+# [3.0.0-alpha.2](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2022-12-20)
+
+
+### Features
+
+* Caching of translations endpoint & configurable structure delimiter ([#1463](https://github.com/tolgee/tolgee-platform/issues/1463)) ([452bdbb](https://github.com/tolgee/tolgee-platform/commit/452bdbb79fc40eb98b185ea99a89097486bbaf80))
+
+# [3.0.0-alpha.1](https://github.com/tolgee/tolgee-platform/compare/v2.46.0...v3.0.0-alpha.1) (2022-12-02)
 
 # [2.50.0](https://github.com/tolgee/tolgee-platform/compare/v2.49.2...v2.50.0) (2023-01-04)
 
@@ -84,9 +149,14 @@
 ## [2.46.1](https://github.com/tolgee/tolgee-platform/compare/v2.46.0...v2.46.1) (2022-12-08)
 
 
-### Bug Fixes
+### Features
 
-* Many languages make the list row too high ([cc1a514](https://github.com/tolgee/tolgee-platform/commit/cc1a5143fb4566323ed325aa5264703f535f2798))
+* Namespaces support, removed deprecated v1 endpoints ([#1448](https://github.com/tolgee/tolgee-platform/issues/1448)) ([90b2f88](https://github.com/tolgee/tolgee-platform/commit/90b2f88f1be743c1e36f997c8ef79cd1d096c67e))
+
+
+### BREAKING CHANGES
+
+* Removed deprecated API endpoints
 
 # [2.46.0](https://github.com/tolgee/tolgee-platform/compare/v2.45.11...v2.46.0) (2022-11-25)
 

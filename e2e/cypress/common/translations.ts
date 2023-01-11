@@ -9,6 +9,7 @@ import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
 import { assertMessage } from './shared';
 import Chainable = Cypress.Chainable;
+import { selectNamespace } from './namespace';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -25,11 +26,15 @@ export const getCell = (value: string) => {
 export function createTranslation(
   testKey: string,
   translation?: string,
-  tag?: string
+  tag?: string,
+  namespace?: string
 ) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
   cy.gcy('translation-create-key-input').type(testKey);
+  if (namespace) {
+    selectNamespace(namespace);
+  }
   if (tag) {
     cy.gcy('translations-tag-input').type(tag);
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();

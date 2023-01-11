@@ -22,8 +22,8 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
-type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
-type EditApiKeyDTO = components['schemas']['EditApiKeyDto'];
+type ApiKeyModel = components['schemas']['ApiKeyModel'];
+type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
 interface Value {
   scopes: string[];
@@ -31,7 +31,7 @@ interface Value {
 }
 
 interface Props {
-  editKey?: ApiKeyDTO;
+  editKey?: ApiKeyModel;
   loading?: boolean;
   onClose?: () => void;
   onSaved?: (data: components['schemas']['ApiKeyModel']) => void;

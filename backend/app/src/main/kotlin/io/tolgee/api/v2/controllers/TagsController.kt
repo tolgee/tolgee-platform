@@ -16,8 +16,8 @@ import io.tolgee.model.key.Tag
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
-import io.tolgee.service.TagService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.TagService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

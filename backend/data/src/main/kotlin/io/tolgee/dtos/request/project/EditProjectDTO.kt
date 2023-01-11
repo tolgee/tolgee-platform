@@ -12,5 +12,8 @@ data class EditProjectDTO(
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
 
-  var baseLanguageId: Long? = null
+  var baseLanguageId: Long? = null,
+
+  @field:Size(min = 3, max = 2000)
+  var description: String? = null,
 )

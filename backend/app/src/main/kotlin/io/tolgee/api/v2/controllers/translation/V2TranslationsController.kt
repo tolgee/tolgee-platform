@@ -43,11 +43,11 @@ import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.SecurityService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.query_builders.CursorUtil
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
@@ -68,7 +68,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
-import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.validation.Valid
 
@@ -123,6 +122,8 @@ class V2TranslationsController(
   )
   fun getAllTranslations(
     @PathVariable("languages") languages: Set<String>,
+    @Parameter(description = "Namespace to return")
+    ns: String? = "",
     @Parameter(
       description = """Delimiter to structure response content. 
 
@@ -143,6 +144,7 @@ When null, resulting file will be a flat key-value object.
 
     val response = translationService.getTranslations(
       languageTags = languages,
+      namespace = ns,
       projectId = projectHolder.project.id,
       structureDelimiter = request.getStructureDelimiter()
     )
@@ -172,7 +174,7 @@ When null, resulting file will be a flat key-value object.
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.get(projectHolder.project.id, dto.key)
+    val key = keyService.get(projectHolder.project.id, dto.key, dto.namespace)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
 
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
@@ -193,12 +195,12 @@ When null, resulting file will be a flat key-value object.
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
       activityHolder.activity = ActivityType.SET_TRANSLATIONS
     } ?: let {
       checkKeyEditScope()
       activityHolder.activity = ActivityType.CREATE_KEY
-      keyService.create(projectHolder.projectEntity, dto.key)
+      keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
     }
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
@@ -307,6 +309,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return SetTranslationsResponseModel(
       keyId = key.id,
       keyName = key.name,
+      keyNamespace = key.namespace?.name,
       translations = translations.entries.associate { (languageTag, translation) ->
         languageTag to translationModelAssembler.toModel(translation)
       }

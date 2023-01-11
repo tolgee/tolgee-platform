@@ -12,9 +12,9 @@ import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.AutoTranslationService
-import io.tolgee.service.KeyService
-import io.tolgee.service.SecurityService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping

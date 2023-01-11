@@ -1,6 +1,6 @@
 import {
   addScreenshot,
-  createKey,
+  createKeyPromise,
   createProject,
   deleteProject,
   login,
@@ -9,9 +9,11 @@ import { HOST } from '../common/constants';
 import 'cypress-file-upload';
 import { getPopover } from '../common/shared';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
+import { components } from '../../../webapp/src/service/apiSchema.generated';
 
 describe('Screenshots', () => {
   let project: ProjectDTO = null;
+  let keys: components['schemas']['KeyModel'][];
 
   beforeEach(() => {
     login().then(() => {
@@ -38,12 +40,17 @@ describe('Screenshots', () => {
         const promises = [];
         for (let i = 1; i < 5; i++) {
           promises.push(
-            createKey(project.id, `Cool key ${i.toString().padStart(2, '0')}`, {
-              en: 'Cool',
-            })
+            createKeyPromise(
+              project.id,
+              `Cool key ${i.toString().padStart(2, '0')}`,
+              {
+                en: 'Cool',
+              }
+            )
           );
         }
-        return Cypress.Promise.all(promises).then(() => {
+        return Cypress.Promise.all(promises).then((keyResponse) => {
+          keys = keyResponse as any;
           visit(project.id);
         });
       });
@@ -107,22 +114,20 @@ describe('Screenshots', () => {
   );
 
   it('images and plus button is visible', () => {
-    addScreenshot(project.id, 'Cool key 04', 'screenshots/test_1.png').then(
-      () => {
-        getCameraButton(4).click();
-        cy.xpath("//img[@alt='Screenshot']")
-          .should('be.visible')
-          .and(($img) => {
-            expect($img.length).to.be.equal(1);
-            expect(
-              ($img[0] as HTMLImageElement).naturalWidth
-            ).to.be.greaterThan(0);
-          });
-        cy.xpath(
-          "//*[text() = 'Screenshots']/parent::*/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
-        ).should('be.visible');
-      }
-    );
+    addScreenshot(project.id, keys[3].id, 'screenshots/test_1.png').then(() => {
+      getCameraButton(4).click();
+      cy.xpath("//img[@alt='Screenshot']")
+        .should('be.visible')
+        .and(($img) => {
+          expect($img.length).to.be.equal(1);
+          expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(
+            0
+          );
+        });
+      cy.xpath(
+        "//*[text() = 'Screenshots']/parent::*/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
+      ).should('be.visible');
+    });
   });
 
   it('screenshots are visible only for key, where uploaded', () => {
@@ -130,7 +135,7 @@ describe('Screenshots', () => {
 
     for (let i = 0; i < 10; i++) {
       promises.push(
-        addScreenshot(project.id, 'Cool key 02', 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
       );
     }
 
@@ -152,7 +157,7 @@ describe('Screenshots', () => {
 
     for (let i = 0; i < 5; i++) {
       promises.push(
-        addScreenshot(project.id, 'Cool key 02', 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
       );
     }
 

@@ -8,25 +8,26 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
-import io.tolgee.service.ApiKeyService
-import io.tolgee.service.AutoTranslationService
-import io.tolgee.service.KeyMetaService
-import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
-import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.OrganizationService
-import io.tolgee.service.PatService
-import io.tolgee.service.PermissionService
-import io.tolgee.service.ScreenshotService
-import io.tolgee.service.TagService
-import io.tolgee.service.TranslationCommentService
-import io.tolgee.service.UserAccountService
-import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.key.TagService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PatService
+import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.translation.AutoTranslationService
+import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
@@ -63,7 +64,8 @@ class TestDataService(
   private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
   private val userPreferencesService: UserPreferencesService,
   private val languageStatsService: LanguageStatsService,
-  private val patService: PatService
+  private val patService: PatService,
+  private val namespaceService: NamespaceService
 ) : Logging {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -149,11 +151,18 @@ class TestDataService(
     saveLanguages(builder)
     savePermissions(builder)
     saveMtServiceConfigs(builder)
+    saveAllNamespaces(builder)
     saveKeyData(builder)
     saveTranslationData(builder)
     saveImportData(builder)
     saveAutoTranslationConfigs(builder)
     saveProjectAvatars(builder)
+  }
+
+  private fun saveAllNamespaces(builder: ProjectBuilder) {
+    builder.data.namespaces.forEach {
+      namespaceService.save(it.self)
+    }
   }
 
   private fun saveAutoTranslationConfigs(builder: ProjectBuilder) {

@@ -1,7 +1,7 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { gcy, selectInSelect } from '../../common/shared';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
+import { ApiKeyModel } from '../../../../webapp/src/service/response.types';
 import {
   createApiKey,
   createTestProject,
@@ -48,7 +48,6 @@ describe('Integrate view', () => {
         .should('contain', 'Angular')
         .should('contain', 'Next.js')
         .should('contain', 'Gatsby')
-        .should('contain', 'Php')
         .should('contain', 'Rest')
         .should('contain', 'Web')
         .should('contain', 'JS (NPM)');
@@ -120,7 +119,7 @@ describe('Integrate view', () => {
     });
 
     describe('existing API key', () => {
-      let created: ApiKeyDTO;
+      let created: ApiKeyModel;
       beforeEach(() => {
         createApiKeysAndSelectOne(projectId).then((v) => {
           created = v;
@@ -178,23 +177,18 @@ describe('Integrate view', () => {
         textsToContain: ['@tolgee/react', 'gatsby-plugin-react-intl'],
       },
       {
-        weapon: 'Php',
-        textsToContain: ['composer require tolgee'],
-      },
-      {
         weapon: 'Web',
         textsToContain: [
-          'https://unpkg.com/@tolgee/core/dist/tolgee.umd.js',
-          'https://unpkg.com/@tolgee/ui/dist/tolgee-ui.umd.js',
+          'https://cdn.jsdelivr.net/npm/@tolgee/web/dist/tolgee-web.umd.min.js',
         ],
       },
       {
         weapon: 'JS',
-        textsToContain: ['npm install @tolgee/core @tolgee/ui'],
+        textsToContain: ['npm install @tolgee/web'],
       },
       {
         weapon: 'Rest',
-        textsToContain: ['http', '/api/project/export/jsonZip'],
+        textsToContain: ['http', '/v2/projects/export'],
       },
     ];
 
@@ -222,7 +216,7 @@ const getApiKeySelectValue = () => {
     .then((v) => parseInt(v as string));
 };
 
-const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
+const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyModel> => {
   createApiKey({ projectId: projectId, scopes: ['translations.edit'] });
   return createApiKey({
     projectId: projectId,
@@ -236,7 +230,7 @@ const createApiKeysAndSelectOne = (projectId: number): Promise<ApiKeyDTO> => {
           v.description
         ).then(() => v)
       )
-  ) as Promise<ApiKeyDTO>;
+  ) as Promise<ApiKeyModel>;
 };
 
 const createNewApiKey = () => {
