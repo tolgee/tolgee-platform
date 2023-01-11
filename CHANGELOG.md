@@ -1,3 +1,17 @@
+# [3.0.0-alpha.8](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.7...v3.0.0-alpha.8) (2023-01-11)
+
+
+### Bug Fixes
+
+* KeyListener & Merged main > tolgee-3 ([96a1ffa](https://github.com/tolgee/tolgee-platform/commit/96a1ffa42ed8cb53de4b60905863cfa76584db5c))
+* Removed KeyListeners by accident ([0c35224](https://github.com/tolgee/tolgee-platform/commit/0c3522441a82c50f6ef87d0574c04e0169f719d8))
+* Startup import sorted & refactored ([#1480](https://github.com/tolgee/tolgee-platform/issues/1480)) ([ba2c9f9](https://github.com/tolgee/tolgee-platform/commit/ba2c9f91e6802ab797db379c6369c9904af63559))
+
+
+### Features
+
+* add capterra tracker to signup page ([#1487](https://github.com/tolgee/tolgee-platform/issues/1487)) ([edca848](https://github.com/tolgee/tolgee-platform/commit/edca8488a5a5e454df0391410baabf9e8373b9a6))
+
 # [3.0.0-alpha.7](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.6...v3.0.0-alpha.7) (2023-01-10)
 
 
