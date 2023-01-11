@@ -16,6 +16,7 @@ open class TolgeeProperties(
   var sentry: SentryProperties = SentryProperties(),
   var chatwootToken: String? = null,
   var openReplayApiKey: String? = null,
+  var capterraTracker: String? = null,
   var internal: InternalProperties = InternalProperties(),
   var fileStorageUrl: String = "",
   var maxUploadFileSize: Int = 51200,
