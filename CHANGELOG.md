@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/tolgee/tolgee-platform/compare/v2.51.1...v3.0.0) (2023-01-11)
+
+
+### Features
+
+* Namespace support, removed deprecated endpoints ([#1491](https://github.com/tolgee/tolgee-platform/issues/1491)) ([4c7af00](https://github.com/tolgee/tolgee-platform/commit/4c7af00041f256148642284b39bb521f89f2b34e))
+
+
+### BREAKING CHANGES
+
+* Removed deprecated endpoints, changed v2 export API
+
 # [3.0.0-alpha.8](https://github.com/tolgee/tolgee-platform/compare/v3.0.0-alpha.7...v3.0.0-alpha.8) (2023-01-11)
 
 
