@@ -98,7 +98,7 @@ export const SearchSelectMulti: React.FC<Props> = ({
             <CompactMenuItem
               key={option.value}
               {...props}
-              data-cy="translations-filter-option"
+              data-cy="search-select-item"
             >
               <Checkbox
                 size="small"
