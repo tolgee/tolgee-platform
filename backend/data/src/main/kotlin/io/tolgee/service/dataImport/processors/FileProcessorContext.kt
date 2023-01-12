@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport.processors
 
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -13,6 +14,7 @@ data class FileProcessorContext(
   val file: ImportFileDto,
   val fileEntity: ImportFile,
   val maxTranslationTextLength: Long = 200L,
+  val params: ImportAddFilesParams = ImportAddFilesParams(),
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()

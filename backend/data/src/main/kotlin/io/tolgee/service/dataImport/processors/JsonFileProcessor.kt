@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.exceptions.ImportCannotParseFileException
 
 class JsonFileProcessor(
-  override val context: FileProcessorContext
+  override val context: FileProcessorContext,
 ) : ImportFileProcessor() {
   override fun process() {
     try {
@@ -35,7 +35,7 @@ class JsonFileProcessor(
 
       (entry.value as? Map<*, *>)?.let { embedded ->
         embedded.parse().forEach { embeddedEntry ->
-          data["$key.${embeddedEntry.key}"] = embeddedEntry.value
+          data["$key${context.params.structureDelimiter}${embeddedEntry.key}"] = embeddedEntry.value
         }
         return@forEachIndexed
       }

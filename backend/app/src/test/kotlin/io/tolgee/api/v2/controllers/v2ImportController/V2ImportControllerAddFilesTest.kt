@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.containsAny
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -59,6 +60,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Value("classpath:import/empty-keys.json")
   lateinit var emptyKeys: Resource
+
+  @Value("classpath:import/nested.json")
+  lateinit var nested: Resource
 
   @AfterEach
   fun resetProps() {
@@ -149,6 +153,20 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
     importService.find(base.project.id, base.userAccount.id)?.let {
       assertThat(it.files[0].keys).hasSize(1)
+    }
+  }
+
+  @Test
+  fun `it imports nested keys with provided delimiter`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+
+    performImport(projectId = base.project.id, mapOf("nested.json" to nested), mapOf("structureDelimiter" to ";"))
+      .andIsOk
+
+    entityManager.clear()
+
+    importService.find(base.project.id, base.userAccount.id)?.let {
+      assertThat(it.files[0].keys).containsAny { this.name == "this;nested;a" }
     }
   }
 
@@ -292,9 +310,13 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     }
   }
 
-  private fun performImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
+  private fun performImport(
+    projectId: Long,
+    files: Map<String?, Resource>,
+    params: Map<String, Any?> = mapOf()
+  ): ResultActions {
     val builder = MockMvcRequestBuilders
-      .multipart("/v2/projects/$projectId/import")
+      .multipart("/v2/projects/$projectId/import?${mapToQueryString(params)}")
 
     files.forEach {
       builder.file(
@@ -307,5 +329,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
     loginAsAdminIfNotLogged()
     return mvc.perform(AuthorizedRequestFactory.addToken(builder))
+  }
+
+  fun mapToQueryString(map: Map<String, Any?>): String {
+    return map.entries.joinToString("&") { "${it.key}=${it.value}" }
   }
 }
