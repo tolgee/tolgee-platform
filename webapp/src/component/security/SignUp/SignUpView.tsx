@@ -103,9 +103,12 @@ const SignUpView: FunctionComponent = () => {
     );
   };
 
+  const registrationsAllowed =
+    remoteConfig.allowRegistrations || security.allowRegistration;
+
   if (
     !remoteConfig.authentication ||
-    !remoteConfig.allowRegistrations ||
+    !registrationsAllowed ||
     security.allowPrivate
   ) {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
