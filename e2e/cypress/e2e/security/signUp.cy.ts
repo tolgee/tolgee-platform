@@ -153,7 +153,7 @@ context('Sign up', () => {
     });
   });
 
-  it.only('Allows sign up when user has invitation', () => {
+  it('Allows sign up when user has invitation', () => {
     disableEmailVerification();
     disableRegistration();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
