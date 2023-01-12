@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
   ]
 )
 @Tag(name = "All localization keys", description = "All localization keys in the project")
-class V2AllKeysController(
+class AllKeysController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler,

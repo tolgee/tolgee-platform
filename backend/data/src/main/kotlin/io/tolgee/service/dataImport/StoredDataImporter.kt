@@ -31,7 +31,7 @@ class StoredDataImporter(
   /**
    * We need to persist data after everything is checked for resolved conflicts since
    * thrown ImportConflictNotResolvedException commits the transaction,
-   * looking for key in this map is also faster then querying database
+   * looking for key in this map is also faster than querying database
    */
   private val keysToSave = mutableMapOf<Pair<String?, String>, Key>()
 
@@ -65,10 +65,26 @@ class StoredDataImporter(
     importDataManager.storedLanguages.forEach {
       it.doImport()
     }
+    addAllKeys()
+    handleKeyMetas()
 
+    namespaceService.saveAll(namespacesToSave.values)
+    keyService.saveAll(keysToSave.values)
+    translationService.saveAll(translationsToSave)
+
+    keysToSave.values.flatMap {
+      it.keyMeta?.comments ?: emptyList()
+    }.also { keyMetaService.saveAllComments(it) }
+
+    keysToSave.values.flatMap {
+      it.keyMeta?.codeReferences ?: emptyList()
+    }.also { keyMetaService.saveAllCodeReferences(it) }
+  }
+
+  private fun handleKeyMetas() {
     this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
       val importedKeyMeta = storedMetas[fileNamePair.first.namespace to importKey.name]
-      // dont touch key meta when imported key has no meta
+      // don't touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
         keysToSave[fileNamePair.first.namespace to importKey.name]?.let { newKey ->
           // if key is obtained or created and meta exists, take it and import the data from the imported one
@@ -86,18 +102,12 @@ class StoredDataImporter(
         }
       }
     }
+  }
 
-    namespaceService.saveAll(namespacesToSave.values)
-    keyService.saveAll(keysToSave.values)
-    translationService.saveAll(translationsToSave)
-
-    keysToSave.values.flatMap {
-      it.keyMeta?.comments ?: emptyList()
-    }.also { keyMetaService.saveAllComments(it) }
-
-    keysToSave.values.flatMap {
-      it.keyMeta?.codeReferences ?: emptyList()
-    }.also { keyMetaService.saveAllCodeReferences(it) }
+  private fun addAllKeys() {
+    importDataManager.storedKeys.map { (fileNamePair, importKey) ->
+      addKeyToSave(importKey.file.namespace, importKey.name)
+    }
   }
 
   private fun ImportLanguage.doImport() {
@@ -134,6 +144,15 @@ class StoredDataImporter(
         newKey
       }
     }
+
+  private fun addKeyToSave(namespace: String?, keyName: String): Key {
+    return keysToSave.computeIfAbsent(namespace to keyName) {
+      importDataManager.existingKeys[namespace to keyName] ?: Key(name = keyName).apply {
+        project = import.project
+        this.namespace = getNamespace(namespace)
+      }
+    }
+  }
 
   private fun ImportTranslation.checkConflictResolved() {
     if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {

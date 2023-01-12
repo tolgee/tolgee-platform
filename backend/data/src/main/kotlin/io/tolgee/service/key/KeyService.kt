@@ -3,12 +3,14 @@ package io.tolgee.service.key
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
+import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -22,7 +24,8 @@ class KeyService(
   private val screenshotService: ScreenshotService,
   private val keyMetaService: KeyMetaService,
   private val tagService: TagService,
-  private val namespaceService: NamespaceService
+  private val namespaceService: NamespaceService,
+  private val languageService: LanguageService
 ) {
   private lateinit var translationService: TranslationService
 
@@ -172,4 +175,32 @@ class KeyService(
   }
 
   fun saveAll(entities: Collection<Key>): MutableList<Key> = entities.map { save(it) }.toMutableList()
+
+  @Transactional
+  fun importKeys(keys: List<ImportKeysItemDto>, project: Project) {
+    val existing = this.getAll(project.id).map { (it.namespace?.name to it.name) }.toSet()
+    val namespaces = namespaceService.getAllInProject(project.id).associateBy { it.name }
+    val languageTags = keys.flatMap { it.translations.keys }.toSet()
+    val languages = languageService.findByTags(languageTags, project.id).map { it.tag to it }.toMap()
+
+    keys.forEach {
+      val safeNamespace = namespaceService.getSafeName(it.namespace)
+      if (!existing.contains(safeNamespace to it.name)) {
+        val key = Key(
+          name = it.name,
+          project = project
+        ).apply {
+          if (safeNamespace != null) {
+            this.namespace = namespaces[safeNamespace] ?: namespaceService.create(safeNamespace, project.id)
+          }
+        }
+        save(key)
+        it.translations.entries.forEach { (languageTag, value) ->
+          languages[languageTag]?.let { language ->
+            translationService.setTranslation(key, language, value)
+          }
+        }
+      }
+    }
+  }
 }

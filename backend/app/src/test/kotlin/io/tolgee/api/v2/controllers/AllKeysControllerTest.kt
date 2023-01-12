@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: KeysTestData
 
   @BeforeEach

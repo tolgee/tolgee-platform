@@ -18,7 +18,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

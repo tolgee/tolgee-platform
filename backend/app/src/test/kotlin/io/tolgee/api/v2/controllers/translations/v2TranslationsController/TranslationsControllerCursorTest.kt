@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

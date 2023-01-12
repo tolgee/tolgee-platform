@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.screenshot
 
-import io.tolgee.api.v2.controllers.translation.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
@@ -16,7 +16,7 @@ class ScreenshotModelAssembler(
   private val timestampValidation: TimestampValidation,
   private val tolgeeProperties: TolgeeProperties,
 ) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
-  V2TranslationsController::class.java, ScreenshotModel::class.java
+  TranslationsController::class.java, ScreenshotModel::class.java
 ) {
   override fun toModel(entity: Screenshot): ScreenshotModel {
     val filenameWithSignature = getFilenameWithSignature(entity.filename)

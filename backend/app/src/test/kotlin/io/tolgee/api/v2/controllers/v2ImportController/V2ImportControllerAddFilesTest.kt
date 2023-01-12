@@ -57,6 +57,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   @Value("classpath:import/importWithConflicts.zip")
   lateinit var importWithConflicts: Resource
 
+  @Value("classpath:import/empty-keys.json")
+  lateinit var emptyKeys: Resource
+
   @AfterEach
   fun resetProps() {
     tolgeeProperties.maxTranslationTextLength = 10000
@@ -133,6 +136,20 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {
         node("code").isEqualTo("cannot_add_more_then_100_languages")
       }
+  }
+
+  @Test
+  fun `it imports empty keys`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+
+    performImport(projectId = base.project.id, mapOf("empty-keys.json" to emptyKeys))
+      .andIsOk.andPrettyPrint
+
+    entityManager.clear()
+
+    importService.find(base.project.id, base.userAccount.id)?.let {
+      assertThat(it.files[0].keys).hasSize(1)
+    }
   }
 
   @Test

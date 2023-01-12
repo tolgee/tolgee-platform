@@ -23,7 +23,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.translations
 
-import io.tolgee.api.v2.controllers.translation.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.api.v2.hateoas.user_account.SimpleUserAccountModel
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.service.AvatarService
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 class TranslationHistoryModelAssembler(
   private val avatarService: AvatarService,
 ) : RepresentationModelAssemblerSupport<TranslationHistoryView, TranslationHistoryModel>(
-  V2TranslationsController::class.java, TranslationHistoryModel::class.java
+  TranslationsController::class.java, TranslationHistoryModel::class.java
 ) {
   override fun toModel(view: TranslationHistoryView): TranslationHistoryModel {
     val avatar = avatarService.getAvatarLinks(view.authorAvatarHash)

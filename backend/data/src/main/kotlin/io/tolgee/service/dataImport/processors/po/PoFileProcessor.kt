@@ -26,17 +26,17 @@ class PoFileProcessor(
       languageId = parsed.meta.language ?: languageNameGuesses[0]
       context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
-      parsed.translations.forEach { poTranslation ->
+      parsed.translations.forEachIndexed { idx, poTranslation ->
         val keyName = poTranslation.msgid.toString()
 
         if (poTranslation.msgidPlural.isNotEmpty()) {
-          addPlural(poTranslation)
-          return@forEach
+          addPlural(poTranslation, idx)
+          return@forEachIndexed
         }
-        if (poTranslation.msgid.isNotBlank() && poTranslation.msgstr.isNotBlank()) {
+        if (poTranslation.msgid.isNotBlank()) {
           val icuMessage = getToIcuConverter(poTranslation)
             .convert(poTranslation.msgstr.toString())
-          context.addTranslation(keyName, languageId, icuMessage)
+          context.addTranslation(keyName, languageId, icuMessage, idx)
 
           poTranslation.meta.references.forEach { reference ->
             val split = reference.split(":")
@@ -62,12 +62,12 @@ class PoFileProcessor(
     }
   }
 
-  private fun addPlural(poTranslation: PoParsedTranslation) {
+  private fun addPlural(poTranslation: PoParsedTranslation, idx: Int) {
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
       val icuMessage = ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
         .convertPoPlural(plurals)
-      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage)
+      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage, idx)
     }
   }
 
