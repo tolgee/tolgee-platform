@@ -1,17 +1,17 @@
 import React from 'react';
 import { ProfileAvatar } from 'tg.component/common/avatar/ProfileAvatar';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 
 export const UserProfileAvatar = () => {
-  const globalDispatch = useGlobalDispatch();
+  const { refetchInitialData } = useGlobalActions();
   const uploadLoadable = useApiMutation({
     url: '/v2/user/avatar',
     method: 'put',
     options: {
       onSuccess() {
-        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        refetchInitialData();
       },
     },
   });
@@ -21,7 +21,7 @@ export const UserProfileAvatar = () => {
     method: 'delete',
     options: {
       onSuccess() {
-        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        refetchInitialData();
       },
     },
   });

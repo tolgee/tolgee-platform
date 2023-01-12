@@ -9,7 +9,7 @@ import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { getMeta } from 'tg.fixtures/isMac';
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
 import { ToolsPopup } from './TranslationTools/ToolsPopup';
@@ -118,21 +118,18 @@ export const TranslationOpened: React.FC<Props> = ({
   cellPosition,
 }) => {
   const project = useProject();
-  const dispatch = useTranslationsDispatch();
+  const { setTranslationState, updateEdit } = useTranslationsActions();
   const theme = useTheme();
 
   const nextState = translationStates[state]?.next;
 
   const handleStateChange = () => {
     if (nextState) {
-      dispatch({
-        type: 'SET_TRANSLATION_STATE',
-        payload: {
-          state: nextState,
-          keyId: keyData.keyId,
-          translationId: translation!.id,
-          language: language.tag,
-        },
+      setTranslationState({
+        state: nextState,
+        keyId: keyData.keyId,
+        translationId: translation!.id,
+        language: language.tag,
       });
     }
   };
@@ -150,11 +147,8 @@ export const TranslationOpened: React.FC<Props> = ({
     baseText: baseTranslation,
     enabled: !language.base,
     onValueUpdate: (value) => {
-      dispatch({
-        type: 'UPDATE_EDIT',
-        payload: {
-          value,
-        },
+      updateEdit({
+        value,
       });
     },
   });

@@ -16,7 +16,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Button } from '@mui/material';
@@ -68,10 +68,10 @@ export const KeyEditModal: React.FC<Props> = ({
 }) => {
   const { t } = useTranslate();
   const project = useProject();
-  const dispatch = useTranslationsDispatch();
+  const { updateKey } = useTranslationsActions();
   const messaging = useMessage();
 
-  const updateKey = useApiMutation({
+  const updateKeyLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{id}/complex-update',
     method: 'put',
     fetchOptions: {
@@ -83,7 +83,7 @@ export const KeyEditModal: React.FC<Props> = ({
     <Formik
       initialValues={{ name, namespace, tags }}
       onSubmit={(values, helpers) => {
-        updateKey.mutate(
+        updateKeyLoadable.mutate(
           {
             path: { projectId: project.id, id: keyId },
             content: {
@@ -93,15 +93,12 @@ export const KeyEditModal: React.FC<Props> = ({
           {
             onSuccess(data) {
               onClose();
-              dispatch({
-                type: 'UPDATE_KEY',
-                payload: {
-                  keyId,
-                  value: {
-                    keyName: data.name,
-                    keyNamespace: data.namespace,
-                    keyTags: data.tags,
-                  },
+              updateKey({
+                keyId,
+                value: {
+                  keyName: data.name,
+                  keyNamespace: data.namespace,
+                  keyTags: data.tags,
                 },
               });
             },
@@ -186,7 +183,7 @@ export const KeyEditModal: React.FC<Props> = ({
               <Box ml={1}>
                 <LoadingButton
                   data-cy="translations-cell-save-button"
-                  loading={updateKey.isLoading}
+                  loading={updateKeyLoadable.isLoading}
                   color="primary"
                   variant="contained"
                   type="submit"

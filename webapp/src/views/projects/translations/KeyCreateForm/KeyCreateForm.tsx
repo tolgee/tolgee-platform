@@ -15,7 +15,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -44,7 +44,7 @@ export const KeyCreateForm: React.FC<Props> = ({
 }) => {
   const project = useProject();
   const permissions = useProjectPermissions();
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
 
   const keyName = useUrlSearch().key as string;
   const namespace = useUrlSearch().ns as string;

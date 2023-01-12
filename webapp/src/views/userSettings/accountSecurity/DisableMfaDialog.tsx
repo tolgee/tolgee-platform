@@ -13,7 +13,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
-import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 type TotpDisableDto = components['schemas']['UserTotpDisableRequestDto'];
@@ -28,7 +28,7 @@ export const DisableMfaDialog: FunctionComponent = () => {
   const user = useUser();
   const message = useMessage();
   const { t } = useTranslate();
-  const globalDispatch = useGlobalDispatch();
+  const { refetchInitialData } = useGlobalActions();
 
   useEffect(() => {
     if (user && !user.mfaEnabled) onDialogClose();
@@ -41,7 +41,7 @@ export const DisableMfaDialog: FunctionComponent = () => {
       onSuccess: (r) => {
         securityService.setToken(r.accessToken!);
         message.success(<T keyName="account-security-mfa-disabled-success" />);
-        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        refetchInitialData();
         onDialogClose();
       },
     },

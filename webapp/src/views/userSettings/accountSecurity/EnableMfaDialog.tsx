@@ -20,7 +20,7 @@ import { redirect } from 'tg.hooks/redirect';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
-import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
@@ -72,7 +72,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
   const user = useUser();
   const message = useMessage();
   const { t } = useTranslate();
-  const globalDispatch = useGlobalDispatch();
+  const { refetchInitialData } = useGlobalActions();
 
   useEffect(() => {
     if (user && user.mfaEnabled) onDialogClose();
@@ -85,7 +85,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
       onSuccess: (r, v) => {
         securityService.setToken(r.accessToken!);
         message.success(<T keyName="account-security-mfa-enabled-success" />);
-        globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+        refetchInitialData();
         setRecoveryCodesPw(v.content['application/json'].password);
       },
     },

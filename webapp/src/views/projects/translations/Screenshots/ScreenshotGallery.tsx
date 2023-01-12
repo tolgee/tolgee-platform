@@ -22,7 +22,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 
@@ -75,7 +75,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const projectPermissions = useProjectPermissions();
   const config = useConfig();
   const project = useProject();
-  const dispatch = useTranslationsDispatch();
+  const { updateScreenshotCount } = useTranslationsActions();
   const lang = useCurrentLanguage();
   const { t } = useTranslate();
 
@@ -225,13 +225,10 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
 
   useEffect(() => {
     if (screenshotsLoadable.data) {
-      dispatch({
-        type: 'UPDATE_SCREENSHOT_COUNT',
-        payload: {
-          keyId: props.keyId,
-          screenshotCount:
-            screenshotsLoadable.data._embedded?.screenshots?.length,
-        },
+      updateScreenshotCount({
+        keyId: props.keyId,
+        screenshotCount:
+          screenshotsLoadable.data._embedded?.screenshots?.length,
       });
     }
   }, [screenshotsLoadable.data?._embedded?.screenshots?.length]);

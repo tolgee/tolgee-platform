@@ -1,12 +1,12 @@
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { encodeFilter, toggleFilter } from '../Filters/tools';
 
 export function useNamespaceFilter(namespace: string | undefined) {
   const filters = useTranslationsSelector((c) => c.filters);
-  const translationsDispatch = useTranslationsDispatch();
+  const { setFilters } = useTranslationsActions();
 
   if (namespace === undefined) {
     return {
@@ -22,10 +22,7 @@ export function useNamespaceFilter(namespace: string | undefined) {
   });
   const toggle = () => {
     const newFilters = toggleFilter(filters, [], rawFilter);
-    translationsDispatch({
-      type: 'SET_FILTERS',
-      payload: newFilters,
-    });
+    setFilters(newFilters);
   };
   return { isActive, toggle };
 }

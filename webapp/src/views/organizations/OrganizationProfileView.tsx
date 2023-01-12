@@ -13,7 +13,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
 import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
@@ -30,7 +30,7 @@ const messageService = container.resolve(MessageService);
 export const OrganizationProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
   const leaveOrganization = useLeaveOrganization();
-  const globalDispatch = useGlobalDispatch();
+  const { refetchInitialData } = useGlobalActions();
   const history = useHistory();
 
   const match = useRouteMatch();
@@ -100,9 +100,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
           {
             onSuccess: async () => {
               messageService.success(<T>organization_deleted_message</T>);
-              await globalDispatch({
-                type: 'REFETCH_INITIAL_DATA',
-              });
+              await refetchInitialData();
               history.push(LINKS.PROJECTS.build());
             },
             onError(e) {

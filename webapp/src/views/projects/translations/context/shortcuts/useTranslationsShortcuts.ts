@@ -10,7 +10,7 @@ import {
 } from './tools';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
@@ -32,7 +32,7 @@ export const useTranslationsShortcuts = () => {
   const root = document.getElementById('root');
   const onKeyRef = useRef<(e: KeyboardEvent) => void>();
   const availableActions = useRef<() => ShortcutsArrayType[]>();
-  const dispatch = useTranslationsDispatch();
+  const { setEdit, setTranslationState } = useTranslationsActions();
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
@@ -89,13 +89,10 @@ export const useTranslationsShortcuts = () => {
       if (isTranslation(focused) ? canTranslate : canEdit)
         return (e: KeyboardEvent) => {
           e.preventDefault();
-          dispatch({
-            type: 'SET_EDIT',
-            payload: {
-              keyId: focused.keyId,
-              language: focused.language,
-              mode: 'editor',
-            },
+          setEdit({
+            keyId: focused.keyId,
+            language: focused.language,
+            mode: 'editor',
           });
         };
     }
@@ -127,14 +124,11 @@ export const useTranslationsShortcuts = () => {
       if (translation && newState) {
         return (e: KeyboardEvent) => {
           e.preventDefault();
-          dispatch({
-            type: 'SET_TRANSLATION_STATE',
-            payload: {
-              keyId: focused.keyId,
-              language: focused.language as string,
-              translationId: translation.id,
-              state: newState,
-            },
+          setTranslationState({
+            keyId: focused.keyId,
+            language: focused.language as string,
+            translationId: translation.id,
+            state: newState,
           });
         };
       }

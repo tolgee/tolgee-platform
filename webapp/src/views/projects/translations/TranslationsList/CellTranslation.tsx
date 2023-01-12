@@ -14,7 +14,7 @@ import {
   CELL_SELECTED,
 } from '../cell/styles';
 import { useEditableRow } from '../useEditableRow';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { TranslationVisual } from '../TranslationVisual';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
@@ -115,7 +115,7 @@ export const CellTranslation: React.FC<Props> = ({
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
-  const dispatch = useTranslationsDispatch();
+  const { setTranslationState } = useTranslationsActions();
 
   const translation = data.translations[language.tag] as
     | TranslationViewModel
@@ -141,14 +141,11 @@ export const CellTranslation: React.FC<Props> = ({
   });
 
   const handleStateChange = (state: StateType) => {
-    dispatch({
-      type: 'SET_TRANSLATION_STATE',
-      payload: {
-        keyId: data.keyId,
-        language: language.tag,
-        translationId: data.translations[language.tag]?.id,
-        state,
-      },
+    setTranslationState({
+      keyId: data.keyId,
+      language: language.tag,
+      translationId: data.translations[language.tag]?.id,
+      state,
     });
   };
 
