@@ -24,7 +24,7 @@ export const FiltersMenuContent = () => {
     dispatch({ type: 'SET_FILTERS', payload: newFilters });
   };
 
-  const availableFilters = useAvailableFilters(selectedLanguages);
+  const { availableFilters } = useAvailableFilters(selectedLanguages);
 
   availableFilters.forEach((group, i1) => {
     if (!group.options?.length) {

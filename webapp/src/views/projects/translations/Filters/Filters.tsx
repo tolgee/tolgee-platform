@@ -18,6 +18,8 @@ import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -71,12 +73,19 @@ export const Filters = () => {
   const { t } = useTranslate();
   const dispatch = useTranslationsDispatch();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      filtersContent.refresh();
+    }
+  }, [isOpen]);
 
   const activeFilters = useActiveFilters();
 
   const theme = useTheme();
 
-  const availableFilters = useAvailableFilters(selectedLanguages);
+  const { availableFilters } = useAvailableFilters(selectedLanguages);
 
   const findOption = (value: string) =>
     availableFilters
@@ -104,6 +113,8 @@ export const Filters = () => {
   return (
     <StyledWrapper>
       <StyledSelect
+        onOpen={() => setIsOpen(true)}
+        onClose={() => setIsOpen(false)}
         variant="outlined"
         value={activeFilters}
         data-cy="translations-filter-select"
@@ -147,7 +158,7 @@ export const Filters = () => {
         displayEmpty
         multiple
       >
-        {filtersContent}
+        {filtersContent.options}
       </StyledSelect>
     </StyledWrapper>
   );

@@ -1,14 +1,23 @@
 import { Popover } from '@mui/material';
 
-import { SearchSelectContent } from './SearchSelectContent';
+type Props = {
+  anchorEl: HTMLElement;
+  open: boolean;
+  onClose: () => void;
+};
 
-export const SearchSelectPopover: typeof SearchSelectContent = (props) => {
-  const { anchorEl, open, onClose } = props;
+export const SearchSelectPopover: React.FC<Props> = ({
+  anchorEl,
+  open,
+  onClose,
+  children,
+}) => {
   return (
     <Popover
       anchorEl={anchorEl}
       open={open}
       onClose={onClose}
+      disablePortal={false}
       anchorOrigin={{
         vertical: 'top',
         horizontal: 'center',
@@ -18,7 +27,7 @@ export const SearchSelectPopover: typeof SearchSelectContent = (props) => {
         horizontal: 'center',
       }}
     >
-      <SearchSelectContent {...props} />
+      {children}
     </Popover>
   );
 };

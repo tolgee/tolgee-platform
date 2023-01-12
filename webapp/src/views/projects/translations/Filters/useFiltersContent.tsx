@@ -24,7 +24,7 @@ export const useFiltersContent = () => {
     dispatch({ type: 'SET_FILTERS', payload: newFilters });
   };
 
-  const availableFilters = useAvailableFilters(selectedLanguages);
+  const { availableFilters, refresh } = useAvailableFilters(selectedLanguages);
 
   availableFilters.forEach((group, i1) => {
     if (group.options?.length) {
@@ -82,5 +82,5 @@ export const useFiltersContent = () => {
       });
     }
   });
-  return options;
+  return { options, refresh };
 };

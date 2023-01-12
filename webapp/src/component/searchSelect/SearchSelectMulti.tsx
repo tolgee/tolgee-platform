@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Checkbox,
   Autocomplete,
   Box,
   IconButton,
@@ -9,14 +10,14 @@ import {
 import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
-import { SelectItem } from './SearchSelect';
+import { SelectItem } from 'tg.component/searchSelect/SearchSelect';
+import { CompactMenuItem } from '../../views/projects/translations/Filters/FiltersComponents';
 import {
   StyledWrapper,
   StyledHeading,
   StyledInput,
   StyledInputContent,
   StyledInputWrapper,
-  StyledCompactMenuItem,
 } from './SearchStyled';
 
 function PopperComponent(props) {
@@ -36,7 +37,7 @@ type Props = {
   onClose?: () => void;
   onSelect?: (value: string) => void;
   anchorEl?: HTMLElement;
-  selected: string | undefined;
+  value: string[];
   onAddNew?: (searchValue: string) => void;
   items: SelectItem[];
   displaySearch?: boolean;
@@ -46,12 +47,12 @@ type Props = {
   minWidth?: number | string;
 };
 
-export const SearchSelectContent: React.FC<Props> = ({
+export const SearchSelectMulti: React.FC<Props> = ({
   open,
   onClose,
   onSelect,
   anchorEl,
-  selected,
+  value,
   onAddNew,
   items,
   displaySearch,
@@ -87,25 +88,28 @@ export const SearchSelectContent: React.FC<Props> = ({
           noOptionsText={t('global_nothing_found')}
           loadingText={t('global_loading_text')}
           isOptionEqualToValue={(o, v) => o.value === v.value}
-          onInputChange={(_, value, reason) =>
-            reason === 'input' && setInputValue(value)
-          }
+          onInputChange={(_, value, reason) => {
+            reason === 'input' && setInputValue(value);
+          }}
           getOptionLabel={({ name }) => name}
           PopperComponent={PopperComponent}
           PaperComponent={PaperComponent}
           renderOption={(props, option) => (
-            <StyledCompactMenuItem
+            <CompactMenuItem
               key={option.value}
               {...props}
-              selected={option.value === selected}
               data-cy="search-select-item"
             >
+              <Checkbox
+                size="small"
+                edge="start"
+                checked={value.includes(option.value)}
+              />
               <StyledInputContent>{option.name}</StyledInputContent>
-            </StyledCompactMenuItem>
+            </CompactMenuItem>
           )}
           onChange={(_, newValue) => {
-            onSelect?.(newValue!.value);
-            onClose?.();
+            newValue?.value && onSelect?.(newValue.value);
           }}
           ListboxProps={{ style: { padding: 0 } }}
           renderInput={(params) => (

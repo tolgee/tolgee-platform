@@ -70,6 +70,9 @@ export const translationsTestData = {
     ),
 };
 
+export const translationsNsAndTagsTestData =
+  generateTestDataObject('ns-and-tags');
+
 export const projectLeavingTestData = generateTestDataObject('project-leaving');
 
 export const projectTransferringTestData = generateTestDataObject(

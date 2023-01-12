@@ -1,5 +1,6 @@
 import { Menu, MenuProps } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { useEffect } from 'react';
 
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { CompactMenuItem } from './FiltersComponents';
@@ -21,6 +22,12 @@ export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 
+  useEffect(() => {
+    if (anchorEl) {
+      filtersContent.refresh();
+    }
+  }, [anchorEl]);
+
   return (
     <Menu
       anchorEl={anchorEl}
@@ -31,7 +38,7 @@ export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
         horizontal: 'left',
       }}
     >
-      {filtersContent}
+      {filtersContent.options}
       {Boolean(activeFilters.length) && (
         <CompactMenuItem onClick={handleClearFilters}>
           {t('translations_filters_heading_clear')}
