@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/tolgee/tolgee-platform/compare/v3.1.0...v3.1.1) (2023-01-12)
+
+
+### Bug Fixes
+
+* allow signup with invitation ([#1497](https://github.com/tolgee/tolgee-platform/issues/1497)) ([aa03960](https://github.com/tolgee/tolgee-platform/commit/aa039605a353680cfe16a38a2a4ee93fb1a9d12b))
+
 # [3.1.0](https://github.com/tolgee/tolgee-platform/compare/v3.0.0...v3.1.0) (2023-01-12)
 
 
