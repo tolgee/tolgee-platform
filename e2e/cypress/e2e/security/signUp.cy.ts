@@ -5,7 +5,9 @@ import {
   deleteAllEmails,
   deleteUserSql,
   disableEmailVerification,
+  disableRegistration,
   enableEmailVerification,
+  enableRegistration,
   getParsedEmailVerification,
   getRecaptchaSiteKey,
   getUser,
@@ -60,12 +62,13 @@ context('Sign up', () => {
     deleteUserSql(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
+    enableRegistration();
   });
 
-  // afterEach(() => {
-  //   deleteUser(TEST_USERNAME);
-  //   setRecaptchaSiteKey(recaptchaSiteKey);
-  // });
+  afterEach(() => {
+    enableEmailVerification();
+    enableRegistration();
+  });
 
   describe('without recaptcha', () => {
     beforeEach(() => {
@@ -140,6 +143,19 @@ context('Sign up', () => {
 
   it('Remembers code after sign up', () => {
     disableEmailVerification();
+    createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
+      cy.visit(invitationLink);
+      assertMessage('Log in or sign up first please');
+      cy.visit(HOST + '/sign_up');
+      fillAndSubmitForm(false);
+      assertMessage('Thanks for your sign up!');
+      cy.contains('Crazy project').should('be.visible');
+    });
+  });
+
+  it.only('Allows sign up when user has invitation', () => {
+    disableEmailVerification();
+    disableRegistration();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
