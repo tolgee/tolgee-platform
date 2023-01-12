@@ -19,7 +19,7 @@ import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const messageService = container.resolve(MessageService);
 
@@ -34,7 +34,7 @@ export const ImportView: FunctionComponent = () => {
     undefined as components['schemas']['ImportLanguageModel'] | undefined
   );
 
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
 
   const { t } = useTranslate();
 

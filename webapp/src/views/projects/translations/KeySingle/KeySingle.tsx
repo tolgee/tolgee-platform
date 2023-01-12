@@ -13,7 +13,7 @@ import { queryEncode } from 'tg.hooks/useUrlSearchState';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 import { KeyEditForm } from './KeyEditForm';
@@ -42,7 +42,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const project = useProject();
   const { t } = useTranslate();
 
-  const dispatch = useTranslationsDispatch();
+  const { selectLanguages } = useTranslationsActions();
   const history = useHistory();
 
   const isFetching = useTranslationsSelector((c) => c.isFetching);
@@ -51,13 +51,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
     (c) => c.selectedLanguages
   )!;
   const allLanguages = useTranslationsSelector((c) => c.languages)!;
-
-  const handleLanguageChange = (languages: string[]) => {
-    dispatch({
-      type: 'SELECT_LANGUAGES',
-      payload: languages,
-    });
-  };
 
   const translation = translations?.[0];
 
@@ -98,7 +91,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
         <StyledLanguagesMenu>
           <LanguagesSelect
             languages={allLanguages}
-            onChange={handleLanguageChange}
+            onChange={selectLanguages}
             value={selectedLanguages}
             context="languages"
           />

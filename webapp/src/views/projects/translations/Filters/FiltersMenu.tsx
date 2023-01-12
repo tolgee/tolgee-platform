@@ -2,7 +2,7 @@ import { Menu, MenuProps } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useEffect } from 'react';
 
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { CompactMenuItem } from './FiltersComponents';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
@@ -13,13 +13,13 @@ type Props = {
 };
 
 export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
-  const dispatch = useTranslationsDispatch();
+  const { setFilters } = useTranslationsActions();
   const filtersContent = useFiltersContent();
   const activeFilters = useActiveFilters();
   const { t } = useTranslate();
 
   const handleClearFilters = () => {
-    dispatch({ type: 'SET_FILTERS', payload: {} });
+    setFilters({});
   };
 
   useEffect(() => {

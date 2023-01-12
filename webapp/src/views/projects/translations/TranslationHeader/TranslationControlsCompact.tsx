@@ -17,7 +17,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import TranslationsSearchField from './TranslationsSearchField';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
 import { useActiveFilters } from '../Filters/useActiveFilters';
@@ -86,7 +86,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
 
-  const dispatch = useTranslationsDispatch();
+  const { setSearch, changeView, selectLanguages } = useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const [anchorFiltersEl, setAnchorFiltersEl] =
@@ -95,20 +95,17 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     useState<HTMLButtonElement | null>(null);
 
   const handleSearchChange = (value: string) => {
-    dispatch({ type: 'SET_SEARCH', payload: value });
+    setSearch(value);
   };
 
   const activeFilters = useActiveFilters();
 
   const handleLanguageChange = (languages: string[]) => {
-    dispatch({
-      type: 'SELECT_LANGUAGES',
-      payload: languages,
-    });
+    selectLanguages(languages);
   };
 
   const handleViewChange = (val: ViewMode) => {
-    dispatch({ type: 'CHANGE_VIEW', payload: val });
+    changeView(val);
   };
 
   const handleAddTranslation = () => {

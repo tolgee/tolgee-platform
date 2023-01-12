@@ -4,7 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
 
@@ -48,21 +48,18 @@ export const TranslationsSelection = () => {
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
   const isDeleting = useTranslationsSelector((c) => c.isDeleting);
-  const dispatch = useTranslationsDispatch();
+  const { selectAll, selectionClear, deleteTranslations } =
+    useTranslationsActions();
 
   const allSelected = totalCount === selection.length;
   const somethingSelected = !allSelected && Boolean(selection.length);
 
   const handleToggleSelectAll = () => {
     if (!allSelected) {
-      dispatch({ type: 'SELECT_ALL' });
+      selectAll();
     } else {
-      dispatch({ type: 'SELECTION_CLEAR' });
+      selectionClear();
     }
-  };
-
-  const handleDelete = () => {
-    dispatch({ type: 'DELETE_TRANSLATIONS' });
   };
 
   useGlobalLoading(isLoading || isDeleting);
@@ -97,7 +94,7 @@ export const TranslationsSelection = () => {
         <Tooltip title={t('translations_delete_selected')}>
           <IconButton
             data-cy="translations-delete-button"
-            onClick={handleDelete}
+            onClick={deleteTranslations}
             disabled={isDeleting || !selection.length}
             size="small"
           >

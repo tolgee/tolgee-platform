@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
@@ -53,7 +53,7 @@ export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
 
-  const dispatch = useTranslationsDispatch();
+  const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
   const translationsLanguages =
     useTranslationsSelector((v) => v.translationsLanguages) || [];
@@ -95,22 +95,14 @@ export const TranslationsTable = () => {
   }, [languageCols, tableRef]);
 
   const handleFetchMore = useCallback(() => {
-    dispatch({
-      type: 'FETCH_MORE',
-    });
+    fetchMore();
   }, [translations]);
 
   useEffect(() => {
     if (reactListRef.current) {
-      dispatch({
-        type: 'REGISTER_LIST',
-        payload: reactListRef.current,
-      });
+      registerList(reactListRef.current);
       return () => {
-        dispatch({
-          type: 'UNREGISTER_LIST',
-          payload: reactListRef.current!,
-        });
+        unregisterList(reactListRef.current!);
       };
     }
   }, [reactListRef.current]);

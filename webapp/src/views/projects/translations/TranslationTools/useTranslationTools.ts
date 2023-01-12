@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type Props = {
@@ -19,7 +19,7 @@ export const useTranslationTools = ({
   onValueUpdate,
   enabled = true,
 }: Props) => {
-  const { updateUsage } = useOrganizationUsageMethods();
+  const { updateUsage } = useGlobalActions();
 
   const dependencies = {
     keyId,

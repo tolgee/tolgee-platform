@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import ReactList from 'react-list';
-import { createProvider } from 'tg.fixtures/createProvider';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
+import { createProviderNew } from 'tg.fixtures/createProviderNew';
 import { container } from 'tsyringe';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useTranslationsService } from './services/useTranslationsService';
@@ -31,38 +31,6 @@ import { useStateService } from './services/useStateService';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useWebsocketListener } from './services/useWebsocketListener';
 
-type ActionType =
-  | { type: 'SET_SEARCH'; payload: string }
-  | { type: 'SET_SEARCH_IMMEDIATE'; payload: string }
-  | { type: 'SET_FILTERS'; payload: Filters }
-  | { type: 'SET_EDIT'; payload: Edit | undefined }
-  | { type: 'SET_EDIT_FORCE'; payload: Edit | undefined }
-  | { type: 'UPDATE_EDIT'; payload: Partial<Edit> }
-  | { type: 'TOGGLE_SELECT'; payload: number }
-  | { type: 'SELECT_ALL' }
-  | { type: 'SELECTION_CLEAR' }
-  | { type: 'CHANGE_FIELD'; payload: ChangeValue }
-  | { type: 'FETCH_MORE' }
-  | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined }
-  | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum }
-  | { type: 'CHANGE_VIEW'; payload: ViewMode }
-  | { type: 'UPDATE_LANGUAGES' }
-  | { type: 'DELETE_TRANSLATIONS' }
-  | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationState }
-  | { type: 'ADD_TAG'; payload: AddTag }
-  | { type: 'REMOVE_TAG'; payload: RemoveTag }
-  | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslation }
-  | { type: 'UPDATE_KEY'; payload: KeyUpdateData }
-  | { type: 'INSERT_TRANSLATION'; payload: AddTranslation }
-  | { type: 'REGISTER_ELEMENT'; payload: KeyElement }
-  | { type: 'UNREGISTER_ELEMENT'; payload: KeyElement }
-  | { type: 'SCROLL_TO_ELEMENT'; payload: ScrollToElement }
-  | { type: 'FOCUS_ELEMENT'; payload: CellPosition }
-  | { type: 'REGISTER_LIST'; payload: ReactList }
-  | { type: 'UNREGISTER_LIST'; payload: ReactList }
-  | { type: 'REFETCH_TRANSLATIONS' }
-  | { type: 'REFETCH_FILTERS' };
-
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
 type Props = {
@@ -77,9 +45,9 @@ type Props = {
 
 export const [
   TranslationsContextProvider,
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
-] = createProvider((props: Props) => {
+] = createProviderNew((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [initialLangs, setInitialLangs] = useState<string[] | null | undefined>(
     null
@@ -144,77 +112,102 @@ export const [
     selectionService.clear();
   };
 
-  const dispatch = async (action: ActionType) => {
-    switch (action.type) {
-      case 'SET_SEARCH':
-        translationService.setSearch(action.payload);
-        return handleTranslationsReset();
-      case 'SET_SEARCH_IMMEDIATE':
-        translationService.setUrlSearch(action.payload);
-        return handleTranslationsReset();
-      case 'SET_FILTERS':
-        translationService.setFilters(action.payload);
-        return handleTranslationsReset();
-      case 'SET_EDIT':
-        return editService.setEdit(action.payload);
-      case 'SET_EDIT_FORCE':
-        return editService.setPositionAndFocus(action.payload);
-      case 'UPDATE_EDIT':
-        return editService.updatePosition(action.payload);
-      case 'TOGGLE_SELECT':
-        return selectionService.toggle(action.payload);
-      case 'SELECT_ALL': {
-        const allItems = await translationService.getAllIds();
-        return selectionService.select(allItems.ids);
-      }
-      case 'SELECTION_CLEAR':
-        return selectionService.clear();
-      case 'FETCH_MORE':
-        return translationService.fetchNextPage();
-      case 'CHANGE_FIELD':
-        return editService.changeField(action.payload);
-      case 'SELECT_LANGUAGES':
-        translationService.setLanguages(action.payload);
-        return handleTranslationsReset();
-      case 'UPDATE_LANGUAGES':
-        translationService.updateQuery({});
-        return handleTranslationsReset();
-      case 'UPDATE_SCREENSHOT_COUNT':
-        return translationService.updateScreenshotCount(action.payload);
-      case 'CHANGE_VIEW':
-        return setView(action.payload);
-      case 'DELETE_TRANSLATIONS':
-        await selectionService.deleteSelected();
-        return handleTranslationsReset();
-      case 'SET_TRANSLATION_STATE':
-        return stateService.changeState(action.payload);
-      case 'ADD_TAG':
-        return tagsService.addTag(action.payload);
-      case 'REMOVE_TAG':
-        return tagsService.removeTag(action.payload);
-      case 'UPDATE_TRANSLATION':
-        return translationService.updateTranslation(action.payload);
-      case 'UPDATE_KEY':
-        return translationService.updateTranslationKeys([action.payload]);
-      case 'INSERT_TRANSLATION':
-        return translationService.insertAsFirst(action.payload);
-      case 'REGISTER_ELEMENT':
-        return viewRefs.registerElement(action.payload);
-      case 'UNREGISTER_ELEMENT':
-        return viewRefs.unregisterElement(action.payload);
-      case 'SCROLL_TO_ELEMENT':
-        return viewRefs.scrollToElement(action.payload);
-      case 'FOCUS_ELEMENT':
-        return viewRefs.focusCell(action.payload);
-      case 'REGISTER_LIST':
-        return viewRefs.registerList(action.payload);
-      case 'UNREGISTER_LIST':
-        return viewRefs.unregisterList(action.payload);
-      case 'REFETCH_TRANSLATIONS':
-        return translationService.refetchTranslations();
-      case 'REFETCH_FILTERS':
-        return translationService.refetchTranslations();
-    }
+  // actions
+
+  const actions = {
+    setSearch(search: string) {
+      translationService.setSearch(search);
+      return handleTranslationsReset();
+    },
+    setSearchImmediate(search: string) {
+      translationService.setUrlSearch(search);
+      return handleTranslationsReset();
+    },
+    setFilters(filters: Filters) {
+      translationService.setFilters(filters);
+      return handleTranslationsReset();
+    },
+    setEdit(edit: Edit | undefined) {
+      return editService.setEdit(edit);
+    },
+    setEditForce(edit: Edit | undefined) {
+      return editService.setPositionAndFocus(edit);
+    },
+    updateEdit(edit: Partial<Edit>) {
+      return editService.updatePosition(edit);
+    },
+    toggleSelect(index: number) {
+      return selectionService.toggle(index);
+    },
+    async selectAll() {
+      const allItems = await translationService.getAllIds();
+      return selectionService.select(allItems.ids);
+    },
+    selectionClear() {
+      return selectionService.clear();
+    },
+    fetchMore() {
+      return translationService.fetchNextPage();
+    },
+    changeField(value: ChangeValue) {
+      return editService.changeField(value);
+    },
+    selectLanguages(languages: string[] | undefined) {
+      translationService.setLanguages(languages);
+      return handleTranslationsReset();
+    },
+    updateLanguages() {
+      translationService.updateQuery({});
+      return handleTranslationsReset();
+    },
+    updateScreenshotCount(count: ChangeScreenshotNum) {
+      return translationService.updateScreenshotCount(count);
+    },
+    changeView(view: ViewMode) {
+      return setView(view);
+    },
+    async deleteTranslations() {
+      await selectionService.deleteSelected();
+    },
+    setTranslationState(state: SetTranslationState) {
+      return stateService.changeState(state);
+    },
+    addTag(tag: AddTag) {
+      return tagsService.addTag(tag);
+    },
+    removeTag(tag: RemoveTag) {
+      return tagsService.removeTag(tag);
+    },
+    updateTranslation(translation: UpdateTranslation) {
+      return translationService.updateTranslation(translation);
+    },
+    updateKey(updateKey: KeyUpdateData) {
+      return translationService.updateTranslationKeys([updateKey]);
+    },
+    insertTranslation(translation: AddTranslation) {
+      return translationService.insertAsFirst(translation);
+    },
+    registerElement(element: KeyElement) {
+      return viewRefs.registerElement(element);
+    },
+    unregisterElement(element: KeyElement) {
+      return viewRefs.unregisterElement(element);
+    },
+    scrollToElement(element: ScrollToElement) {
+      return viewRefs.scrollToElement(element);
+    },
+    focusElement(element: CellPosition) {
+      return viewRefs.focusCell(element);
+    },
+    registerList(list: ReactList) {
+      return viewRefs.registerList(list);
+    },
+    unregisterList(list: ReactList) {
+      return viewRefs.unregisterList(list);
+    },
+    refetchTranslations() {
+      return translationService.refetchTranslations();
+    },
   };
 
   const dataReady = Boolean(
@@ -254,5 +247,5 @@ export const [
     reactList: viewRefs.reactList,
   };
 
-  return [state, dispatch];
+  return [state, actions];
 });

@@ -12,7 +12,7 @@ import {
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
@@ -71,7 +71,7 @@ const StyledClearButton = styled(IconButton)`
 
 export const Filters = () => {
   const { t } = useTranslate();
-  const dispatch = useTranslationsDispatch();
+  const { setFilters } = useTranslationsActions();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -95,7 +95,7 @@ export const Filters = () => {
   const filtersContent = useFiltersContent();
 
   const handleClearFilters = (e) => {
-    dispatch({ type: 'SET_FILTERS', payload: {} });
+    setFilters({});
   };
 
   function getFilterName(value) {

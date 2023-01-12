@@ -11,7 +11,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { CellKey } from '../CellKey';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
@@ -22,10 +22,10 @@ import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const messaging = container.resolve(MessageService);
 
@@ -73,7 +73,7 @@ const StyledActions = styled('div')`
 `;
 
 export const KeyEditForm: React.FC = () => {
-  const dispatch = useTranslationsDispatch();
+  const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
   const permissions = useProjectPermissions();
@@ -88,19 +88,13 @@ export const KeyEditForm: React.FC = () => {
   const [_urlNamespace, setUrlNamespace] = useUrlSearchState('ns');
 
   const handleAddTag = (name: string) => {
-    dispatch({
-      type: 'ADD_TAG',
-      payload: { keyId: translation!.keyId, name },
-    });
+    addTag({ keyId: translation!.keyId, name });
   };
 
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
 
   const handleRemoveTag = (tagId: number) => {
-    dispatch({
-      type: 'REMOVE_TAG',
-      payload: { keyId: translation!.keyId, tagId },
-    });
+    removeTag({ keyId: translation!.keyId, tagId });
   };
 
   const deleteKeys = useApiMutation({
@@ -114,12 +108,9 @@ export const KeyEditForm: React.FC = () => {
   });
 
   const cacheUpdateNs = (namespace: string) => {
-    dispatch({
-      type: 'UPDATE_KEY',
-      payload: {
-        keyId: translation!.keyId,
-        value: { keyNamespace: namespace },
-      },
+    updateKey({
+      keyId: translation!.keyId,
+      value: { keyNamespace: namespace },
     });
   };
 

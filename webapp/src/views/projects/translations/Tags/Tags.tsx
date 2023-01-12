@@ -2,7 +2,7 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { encodeFilter, toggleFilter } from '../Filters/tools';
 import { Tag } from './Tag';
@@ -16,14 +16,11 @@ type Props = {
 };
 
 export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
-  const dispatch = useTranslationsDispatch();
+  const { removeTag, setFilters } = useTranslationsActions();
   const filters = useTranslationsSelector((c) => c.filters);
 
   const handleTagDelete = (tagId: number) => {
-    dispatch({
-      type: 'REMOVE_TAG',
-      payload: { keyId, tagId },
-    });
+    removeTag({ keyId, tagId });
   };
 
   const handleTagClick = (tagName: string) => {
@@ -35,10 +32,7 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
         value: tagName,
       })
     );
-    dispatch({
-      type: 'SET_FILTERS',
-      payload: newFilters,
-    });
+    setFilters(newFilters);
   };
 
   return (
