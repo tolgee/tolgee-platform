@@ -85,6 +85,7 @@ export const NamespaceSelector: React.FC<Props> = ({
         onSelect={onChange}
         items={existingOptions}
         value={value || ''}
+        SelectProps={{ size: 'small' }}
       />
       {Boolean(dialogOpen) && (
         <NamespaceNewDialog

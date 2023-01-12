@@ -60,7 +60,8 @@ type ActionType =
   | { type: 'FOCUS_ELEMENT'; payload: CellPosition }
   | { type: 'REGISTER_LIST'; payload: ReactList }
   | { type: 'UNREGISTER_LIST'; payload: ReactList }
-  | { type: 'REFETCH_TRANSLATIONS' };
+  | { type: 'REFETCH_TRANSLATIONS' }
+  | { type: 'REFETCH_FILTERS' };
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
@@ -210,6 +211,8 @@ export const [
       case 'UNREGISTER_LIST':
         return viewRefs.unregisterList(action.payload);
       case 'REFETCH_TRANSLATIONS':
+        return translationService.refetchTranslations();
+      case 'REFETCH_FILTERS':
         return translationService.refetchTranslations();
     }
   };

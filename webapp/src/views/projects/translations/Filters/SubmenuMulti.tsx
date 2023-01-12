@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { T } from '@tolgee/react';
-import { Checkbox, ListItemText, Menu, MenuItem } from '@mui/material';
+import { ListItemText, Popover } from '@mui/material';
 import { ArrowRight } from '@mui/icons-material';
 
 import { OptionType } from './tools';
 import { CompactMenuItem } from './FiltersComponents';
+import { SearchSelectMulti } from '../../../../component/searchSelect/SearchSelectMulti';
 
 type Props = {
   item: OptionType;
@@ -42,46 +42,34 @@ export const SubmenuMulti: React.FC<Props> = React.forwardRef(
           />
           <ArrowRight />
         </CompactMenuItem>
-        <Menu
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
-          open={Boolean(menuOpen)}
-          anchorEl={menuOpen}
-          onClose={() => setMenuOpen(null)}
-        >
-          {item.submenu?.length ? (
-            item.submenu?.map((item) => {
-              return (
-                <MenuItem
-                  data-cy="translations-filter-option"
-                  key={item.value}
-                  value={item.value!}
-                  onClick={handleToggle(item.value)}
-                  sx={{ height: 50 }}
-                >
-                  <Checkbox
-                    size="small"
-                    edge="start"
-                    checked={activeFilters.includes(item.value!)}
-                    tabIndex={-1}
-                    disableRipple
-                  />
-                  <ListItemText primary={item.label} />
-                </MenuItem>
-              );
-            })
-          ) : (
-            <MenuItem sx={{ height: 50 }} disabled>
-              <T>translations_filters_tags_empty</T>
-            </MenuItem>
-          )}
-        </Menu>
+        {item.submenu && (
+          <Popover
+            onKeyDown={(e) => e.stopPropagation()}
+            anchorEl={menuOpen}
+            open={Boolean(menuOpen)}
+            onClose={handleMenuClick}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+          >
+            <SearchSelectMulti
+              open={Boolean(menuOpen)}
+              onClose={() => setMenuOpen(null)}
+              onSelect={(value) => handleToggle(value)()}
+              displaySearch={item.submenu.length > 10}
+              items={item.submenu.map((i) => ({
+                value: i.value!,
+                name: i.label,
+              }))}
+              value={activeFilters}
+            />
+          </Popover>
+        )}
       </>
     );
   }
