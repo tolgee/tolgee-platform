@@ -30,9 +30,13 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const { t } = useTranslate();
   const remoteConfig = useConfig();
   const security = useSelector((state: AppState) => state.global.security);
+
   const authLoading = useSelector(
     (state: AppState) => state.global.authLoading
   );
+
+  const registrationsAllowed =
+    remoteConfig.allowRegistrations || security.allowRegistration;
 
   useEffect(() => {
     if (security.loginErrorCode === 'mfa_enabled') {
@@ -119,7 +123,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         footer={
           <Box display="flex" justifyContent="space-between" flexWrap="wrap">
             <Box>
-              {remoteConfig.allowRegistrations && (
+              {registrationsAllowed && (
                 <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                   <Typography variant="caption">
                     <T>login_sign_up</T>
