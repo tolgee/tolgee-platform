@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/tolgee/tolgee-platform/compare/v3.0.0...v3.1.0) (2023-01-12)
+
+
+### Features
+
+* searchable tags ([#1485](https://github.com/tolgee/tolgee-platform/issues/1485)) ([0c39250](https://github.com/tolgee/tolgee-platform/commit/0c392503f91211a9421a64065284afbf70a828e2))
+
 # [3.0.0](https://github.com/tolgee/tolgee-platform/compare/v2.51.1...v3.0.0) (2023-01-11)
 
 
