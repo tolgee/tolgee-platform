@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/tolgee/tolgee-platform/compare/v3.1.1...v3.2.0) (2023-01-13)
+
+
+### Features
+
+* Import improvements ([#1500](https://github.com/tolgee/tolgee-platform/issues/1500)) ([9446602](https://github.com/tolgee/tolgee-platform/commit/9446602cf811ae6a8589e9f2f258f1afcc4b27fe))
+
 ## [3.1.1](https://github.com/tolgee/tolgee-platform/compare/v3.1.0...v3.1.1) (2023-01-12)
 
 
