@@ -75,6 +75,8 @@ class Translation(
 
   var characterCount: Int? = null
 
+  var outdated: Boolean = false
+
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
     this.language = language

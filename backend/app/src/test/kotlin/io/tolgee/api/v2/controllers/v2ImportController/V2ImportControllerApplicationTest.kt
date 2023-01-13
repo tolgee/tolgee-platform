@@ -64,4 +64,22 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
       projectService.get(testData.project.id).keys.find { it.name == "empty key" }.assert.isNotNull
     }
   }
+
+  @Test
+  fun `it sets outdated on update`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
+    val user = testData.root.data.userAccounts[0].self
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+    val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
+    performAuthPut(path, null).andIsOk
+
+    executeInNewTransaction {
+      val key = projectService.get(testData.project.id)
+        .keys.find { it.name == "what a nice key" }!!
+      key.translations.find { it.language == testData.french }!!.outdated.assert.isEqualTo(true)
+      key.translations.find { it.language == testData.english }!!.outdated.assert.isEqualTo(false)
+    }
+  }
 }

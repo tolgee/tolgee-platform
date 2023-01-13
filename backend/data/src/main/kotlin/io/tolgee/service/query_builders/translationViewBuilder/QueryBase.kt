@@ -62,6 +62,8 @@ class QueryBase<T>(
   }
 
   private fun addLanguageSpecificFields() {
+    val outdatedFieldMap = mutableMapOf<String, Expression<Boolean>>()
+
     for (language in languages) {
       val translation = addTranslationId(language)
       val translationTextField = addTranslationText(translation, language)
@@ -71,9 +73,20 @@ class QueryBase<T>(
       val translationStateField = addTranslationStateField(translation, language)
       queryTranslationFiltering.apply(language, translationTextField, translationStateField)
 
+      val outdatedField = addTranslationOutdatedField(translation, language)
+      outdatedFieldMap[language.tag] = outdatedField
+
       addNotFilteringTranslationFields(language, translation)
       addComments(translation, language)
     }
+
+    queryTranslationFiltering.apply(outdatedFieldMap)
+  }
+
+  private fun addTranslationOutdatedField(translation: SetJoin<Key, Translation>, language: Language): Path<Boolean> {
+    val translationOutdated = translation.get(Translation_.outdated)
+    this.querySelection[language to TranslationView::outdated] = translationOutdated
+    return translationOutdated
   }
 
   private fun addComments(

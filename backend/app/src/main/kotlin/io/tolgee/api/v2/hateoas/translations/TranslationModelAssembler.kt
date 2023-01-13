@@ -15,7 +15,8 @@ class TranslationModelAssembler : RepresentationModelAssemblerSupport<Translatio
       text = entity.text,
       state = entity.state,
       auto = entity.auto,
-      mtProvider = entity.mtProvider
+      mtProvider = entity.mtProvider,
+      outdated = entity.outdated
     )
   }
 }

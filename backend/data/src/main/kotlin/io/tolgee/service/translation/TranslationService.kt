@@ -23,7 +23,6 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -37,7 +36,6 @@ import java.util.*
 class TranslationService(
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
-  private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider
@@ -288,5 +286,25 @@ class TranslationService(
     translation.auto = false
     translation.mtProvider = null
     save(translation)
+  }
+
+  @Transactional
+  fun setOutdated(translation: Translation, value: Boolean) {
+    translation.outdated = value
+    save(translation)
+  }
+
+  fun setOutdated(key: Key) {
+    val baseLanguage = key.project.baseLanguage
+    key.translations.forEach {
+      if (it.language.id != baseLanguage?.id) {
+        it.outdated = true
+        save(it)
+      }
+    }
+  }
+
+  fun setOutdatedBatch(keyIds: List<Long>) {
+    translationRepository.setOutdated(keyIds)
   }
 }

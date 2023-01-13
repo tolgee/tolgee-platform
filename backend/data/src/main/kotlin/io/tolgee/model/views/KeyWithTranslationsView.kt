@@ -28,8 +28,8 @@ data class KeyWithTranslationsView(
         screenshotCount = data.removeFirst() as Long
       )
 
-      (0 until data.size step 7).forEach { i ->
-        val language = languages[i / 7].tag
+      (0 until data.size step 8).forEach { i ->
+        val language = languages[i / 8].tag
 
         val id = data[i] as Long?
         if (id != null) {
@@ -37,10 +37,11 @@ data class KeyWithTranslationsView(
             id = id,
             text = data[i + 1] as String?,
             state = (data[i + 2] ?: TranslationState.TRANSLATED) as TranslationState,
-            auto = data[i + 3] as Boolean,
-            mtProvider = data[i + 4] as MtServiceType?,
-            commentCount = (data[i + 5]) as Long,
-            unresolvedCommentCount = (data[i + 6]) as Long
+            outdated = data[i + 3] as Boolean,
+            auto = data[i + 4] as Boolean,
+            mtProvider = data[i + 5] as MtServiceType?,
+            commentCount = (data[i + 6]) as Long,
+            unresolvedCommentCount = (data[i + 7]) as Long
           )
         }
       }

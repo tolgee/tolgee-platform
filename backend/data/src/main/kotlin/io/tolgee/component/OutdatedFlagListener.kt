@@ -1,0 +1,24 @@
+package io.tolgee.component
+
+import io.tolgee.configuration.TransactionScopeConfig
+import io.tolgee.events.OnTranslationsSet
+import io.tolgee.service.translation.TranslationService
+import org.springframework.context.annotation.Scope
+import org.springframework.context.event.EventListener
+import org.springframework.stereotype.Component
+
+@Component
+@Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
+class OutdatedFlagListener(
+  private val translationService: TranslationService
+) {
+  @EventListener
+  fun onEvent(event: OnTranslationsSet) {
+    val baseLanguage = event.key.project.baseLanguage ?: return
+    val oldBaseValue = event.oldValues[baseLanguage.tag]
+    val newBaseValue = event.translations.find { it.language.id == baseLanguage.id }?.text
+    if (oldBaseValue != newBaseValue) {
+      translationService.setOutdated(event.key)
+    }
+  }
+}

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -128,4 +129,20 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   """
   )
   fun findAllIdsForStatsUpdate(): List<Long>
+
+  @Query(
+    """
+    update Translation t
+    set t.outdated = true
+    where t.id in (
+      select t.id
+      from Translation t
+      join t.key k on k.id in :keyIds
+      join k.project p
+      where t.language.id <> p.baseLanguage.id
+    )
+  """
+  )
+  @Modifying
+  fun setOutdated(keyIds: List<Long>)
 }

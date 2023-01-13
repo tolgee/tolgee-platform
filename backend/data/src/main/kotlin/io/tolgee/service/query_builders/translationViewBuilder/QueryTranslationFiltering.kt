@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Expression
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 
@@ -17,7 +18,7 @@ class QueryTranslationFiltering(
   fun apply(
     language: Language,
     translationTextField: Path<String>,
-    translationStateField: Path<TranslationState>
+    translationStateField: Path<TranslationState>,
   ) {
     filterByStateMap?.get(language.tag)?.let { states ->
       val languageStateConditions = mutableListOf<Predicate>()
@@ -34,8 +35,27 @@ class QueryTranslationFiltering(
     if (params.filterUntranslatedInLang == language.tag) {
       queryBase.whereConditions.add(with(queryBase) { translationTextField.isNullOrBlank })
     }
+
     if (params.filterTranslatedInLang == language.tag) {
       queryBase.whereConditions.add(with(queryBase) { translationTextField.isNotNullOrBlank })
+    }
+  }
+
+  fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
+    val conditions = (
+      params.filterOutdatedLanguage?.mapNotNull {
+        val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+        cb.isTrue(field)
+      }?.toList() ?: listOf()
+      ) + (
+      params.filterNotOutdatedLanguage?.mapNotNull {
+        val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+        cb.isFalse(field)
+      }?.toList() ?: listOf()
+      )
+
+    if (conditions.isNotEmpty()) {
+      queryBase.whereConditions.add(cb.or(*conditions.toTypedArray()))
     }
   }
 
