@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.activity
 
-import io.tolgee.api.v2.controllers.V2ApiKeyController
+import io.tolgee.api.v2.controllers.ApiKeyController
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class ProjectActivityModelAssembler(
   private val avatarService: AvatarService
 ) : RepresentationModelAssemblerSupport<ProjectActivityView, ProjectActivityModel>(
-  V2ApiKeyController::class.java, ProjectActivityModel::class.java
+  ApiKeyController::class.java, ProjectActivityModel::class.java
 ) {
   override fun toModel(view: ProjectActivityView): ProjectActivityModel {
     return ProjectActivityModel(

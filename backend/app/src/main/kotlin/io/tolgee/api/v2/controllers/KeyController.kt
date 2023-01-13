@@ -14,6 +14,7 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -49,7 +50,7 @@ import javax.validation.Valid
   ]
 )
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
-class V2KeyController(
+class KeyController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler,
@@ -111,6 +112,15 @@ class V2KeyController(
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
     delete(dto.ids.toSet())
+  }
+
+  @PostMapping("/import")
+  @AccessWithApiKey([ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Import's new keys with translations. If key already exists, it's translations are not updated.")
+  @RequestActivity(ActivityType.IMPORT)
+  fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
+    keyService.importKeys(dto.keys, projectHolder.projectEntity)
   }
 
   private fun Key.checkInProject() {

@@ -17,7 +17,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod

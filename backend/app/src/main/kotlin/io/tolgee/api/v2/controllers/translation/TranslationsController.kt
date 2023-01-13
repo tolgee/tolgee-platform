@@ -85,7 +85,7 @@ import javax.validation.Valid
     Tag(name = "Translations", description = "Operations related to translations in project"),
   ]
 )
-class V2TranslationsController(
+class TranslationsController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
   private val keyService: KeyService,
@@ -194,6 +194,7 @@ When null, resulting file will be a flat key-value object.
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
+  @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
       activityHolder.activity = ActivityType.SET_TRANSLATIONS

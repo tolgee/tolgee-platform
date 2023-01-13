@@ -23,7 +23,7 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 

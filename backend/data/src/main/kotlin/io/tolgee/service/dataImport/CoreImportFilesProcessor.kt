@@ -1,6 +1,7 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
@@ -17,7 +18,8 @@ import org.springframework.context.ApplicationContext
 
 class CoreImportFilesProcessor(
   val applicationContext: ApplicationContext,
-  val import: Import
+  val import: Import,
+  val params: ImportAddFilesParams = ImportAddFilesParams(),
 ) : Logging {
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
@@ -66,9 +68,10 @@ class CoreImportFilesProcessor(
   ): MutableList<ErrorResponseBody> {
     val savedFileEntity = file.saveFileEntity()
     val fileProcessorContext = FileProcessorContext(
-      file,
-      savedFileEntity,
-      tolgeeProperties.maxTranslationTextLength
+      file = file,
+      fileEntity = savedFileEntity,
+      maxTranslationTextLength = tolgeeProperties.maxTranslationTextLength,
+      params = params
     )
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()

@@ -4,7 +4,13 @@ import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -19,7 +25,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ApiKeyControllerTest : AuthorizedControllerTest() {
+class ApiKeyControllerTest : AuthorizedControllerTest() {
 
   lateinit var testData: ApiKeysTestData
 

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.translations
 
-import io.tolgee.api.v2.controllers.translation.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -13,7 +13,7 @@ class KeyWithTranslationsModelAssembler(
   private val tagModelAssembler: TagModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler
 ) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, KeyWithTranslationsModel>(
-  V2TranslationsController::class.java, KeyWithTranslationsModel::class.java
+  TranslationsController::class.java, KeyWithTranslationsModel::class.java
 ) {
   override fun toModel(view: KeyWithTranslationsView) = KeyWithTranslationsModel(
     keyId = view.keyId,

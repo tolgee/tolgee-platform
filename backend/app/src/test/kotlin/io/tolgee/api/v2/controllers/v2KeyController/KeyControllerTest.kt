@@ -18,6 +18,7 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,7 +31,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   companion object {
     val MAX_OK_NAME = (1..2000).joinToString("") { "a" }
     val LONGER_NAME = (1..2001).joinToString("") { "a" }
@@ -349,5 +350,38 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andIsBadRequest.andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `imports keys`() {
+    projectSupplier = { testData.project }
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "first_key",
+              "translations" to
+                mapOf("en" to "hello")
+            ),
+            mapOf(
+              "name" to "new_key",
+              "translations" to
+                mapOf("en" to "hello")
+            )
+          )
+      )
+    ).andIsOk
+
+    executeInNewTransaction {
+      keyService.get(testData.firstKey.id).translations.find { it.language.tag == "en" }.assert.isNull()
+      val key = projectService.get(testData.project.id).keys.find {
+        it.name == "new_key"
+      }
+      key.assert.isNotNull()
+      key!!.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
+    }
   }
 }
