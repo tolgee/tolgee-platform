@@ -329,15 +329,16 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
         node("[0].translations.de.outdated").isEqualTo(true)
       }
     }
-    performProjectAuthGet("/translations?filterNotOutdatedForLanguage=de").andIsOk.andAssertThatJson {
+    performProjectAuthGet("/translations?filterNotOutdatedLanguage=de").andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("B key")
         node("[0].translations.de.outdated").isEqualTo(false)
       }
     }
-    performProjectAuthGet("/translations?filterNotOutdatedForLanguage=de&filterOutdatedLanguage=de").andIsOk.andAssertThatJson {
-      node("_embedded.keys").isArray.hasSize(2)
-    }
+    performProjectAuthGet("/translations?filterNotOutdatedLanguage=de&filterOutdatedLanguage=de")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys").isArray.hasSize(2)
+      }
   }
 }
