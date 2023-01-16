@@ -121,6 +121,7 @@ class TranslationsController(
     ]
   )
   fun getAllTranslations(
+    @Parameter(description = "Comma-separated language tags to return translations in.", example = "en,de,fr")
     @PathVariable("languages") languages: Set<String>,
     @Parameter(description = "Namespace to return")
     ns: String? = "",
