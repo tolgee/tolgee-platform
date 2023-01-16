@@ -56,7 +56,7 @@ type Props = {
 };
 
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',

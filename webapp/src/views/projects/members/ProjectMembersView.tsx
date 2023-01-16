@@ -17,7 +17,7 @@ import { BaseProjectView } from '../BaseProjectView';
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [search, setSearch] = useState('');

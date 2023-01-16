@@ -25,7 +25,7 @@ type Props = {
 };
 
 export const SettingsForm = ({ providers, expanded, languages }: Props) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <>

@@ -63,7 +63,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     invalidatePrefix: '/v2/api-keys',
   });
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const projectPermissions = useProjectPermissions();
 

@@ -18,7 +18,7 @@ import {
   StyledCell,
 } from './cell/styles';
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -135,7 +135,7 @@ export const CellKey: React.FC<Props> = ({
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
-  const dispatch = useTranslationsDispatch();
+  const { toggleSelect, addTag } = useTranslationsActions();
   const theme = useTheme();
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
@@ -147,15 +147,12 @@ export const CellKey: React.FC<Props> = ({
   // prevent blinking, when closing popup
   const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
-  const toggleSelect = () => {
-    dispatch({ type: 'TOGGLE_SELECT', payload: data.keyId });
+  const handleToggleSelect = () => {
+    toggleSelect(data.keyId);
   };
 
   const handleAddTag = (name: string) => {
-    dispatch({
-      type: 'ADD_TAG',
-      payload: { keyId: data.keyId, name, onSuccess: () => setTagEdit(false) },
-    });
+    addTag({ keyId: data.keyId, name, onSuccess: () => setTagEdit(false) });
   };
 
   const [tagEdit, setTagEdit] = useState(false);
@@ -207,7 +204,7 @@ export const CellKey: React.FC<Props> = ({
               <StyledCheckbox
                 size="small"
                 checked={isSelected}
-                onChange={toggleSelect}
+                onChange={handleToggleSelect}
                 onClick={stopBubble()}
                 data-cy="translations-row-checkbox"
               />

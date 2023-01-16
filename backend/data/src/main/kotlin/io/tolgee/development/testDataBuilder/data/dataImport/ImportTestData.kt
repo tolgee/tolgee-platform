@@ -171,6 +171,14 @@ class ImportTestData {
     }.self
   }
 
+  fun addEmptyKey() {
+    this.importBuilder.data.importFiles[0].apply {
+      addImportKey {
+        name = "empty key"
+      }
+    }
+  }
+
   fun addFrenchTranslations() {
     this.importBuilder.data.importFiles[0].apply {
       addImportTranslation {

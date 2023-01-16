@@ -8,7 +8,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useDeleteKeys } from 'tg.service/TranslationHooks';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useTranslationsService } from './useTranslationsService';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
@@ -17,9 +17,9 @@ type Props = {
 const messaging = container.resolve(MessageService);
 
 export const useSelectionService = ({ translations }: Props) => {
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
   const [selection, setSelection] = useState<number[]>([]);
-  const t = useTranslate();
+  const { t } = useTranslate();
   const deleteKeys = useDeleteKeys();
   const project = useProject();
 

@@ -1,50 +1,23 @@
 import React, { useState } from 'react';
 import {
-  MenuItem,
   Autocomplete,
-  InputBase,
   Box,
   IconButton,
   Tooltip,
-  styled,
-  Typography,
+  FormControl,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
+
 import { SelectItem } from './SearchSelect';
-
-const StyledInput = styled(InputBase)`
-  padding: 5px 4px 3px 16px;
-  flex-grow: 1;
-`;
-
-const StyledInputWrapper = styled(Box)`
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
-  padding-right: 4px;
-  position: relative;
-`;
-
-const StyledHeading = styled(Typography)`
-  display: flex;
-  flex-grow: 1;
-  padding: 4px 4px 4px 16px;
-  font-weight: 500;
-`;
-
-const StyledInputContent = styled('div')`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  contain: size;
-  height: 23px;
-  width: 100%;
-`;
-
-const StyledWrapper = styled('div')`
-  display: grid;
-`;
+import {
+  StyledWrapper,
+  StyledHeading,
+  StyledInput,
+  StyledInputContent,
+  StyledInputWrapper,
+  StyledCompactMenuItem,
+} from './SearchStyled';
 
 function PopperComponent(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -62,7 +35,7 @@ type Props = {
   open: boolean;
   onClose?: () => void;
   onSelect?: (value: string) => void;
-  anchorEl: HTMLElement;
+  anchorEl?: HTMLElement;
   selected: string | undefined;
   onAddNew?: (searchValue: string) => void;
   items: SelectItem[];
@@ -88,79 +61,84 @@ export const SearchSelectContent: React.FC<Props> = ({
   minWidth = 250,
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleAddNew = () => {
     onAddNew?.(inputValue);
   };
 
   const width =
-    anchorEl && anchorEl.offsetWidth < minWidth
+    !anchorEl || anchorEl.offsetWidth < minWidth
       ? minWidth
       : anchorEl.offsetWidth;
 
   return (
     <StyledWrapper sx={{ minWidth: width, maxWidth: width }}>
-      <Autocomplete
-        open
-        filterOptions={(options, state) => {
-          return options.filter((o) => o.name.startsWith(state.inputValue));
-        }}
-        options={items || []}
-        inputValue={inputValue}
-        onClose={(_, reason) => reason === 'escape' && onClose?.()}
-        clearOnEscape={false}
-        noOptionsText={t('global_nothing_found')}
-        loadingText={t('global_loading_text')}
-        isOptionEqualToValue={(o, v) => o.value === v.value}
-        onInputChange={(_, value, reason) =>
-          reason === 'input' && setInputValue(value)
-        }
-        getOptionLabel={({ name }) => name}
-        PopperComponent={PopperComponent}
-        PaperComponent={PaperComponent}
-        renderOption={(props, option) => (
-          <MenuItem
-            key={option.value}
-            {...props}
-            selected={option.value === selected}
-            data-cy="search-select-item"
-          >
-            <StyledInputContent>{option.name}</StyledInputContent>
-          </MenuItem>
-        )}
-        onChange={(_, newValue) => {
-          onSelect?.(newValue!.value);
-          onClose?.();
-        }}
-        renderInput={(params) => (
-          <StyledInputWrapper>
-            <StyledInput
-              data-cy="search-select-search"
-              key={Number(open)}
-              sx={{ display: displaySearch ? undefined : 'none' }}
-              ref={params.InputProps.ref}
-              inputProps={params.inputProps}
-              autoFocus
-              placeholder={searchPlaceholder}
-            />
-            {!displaySearch && <StyledHeading>{title}</StyledHeading>}
+      <FormControl>
+        <Autocomplete
+          open
+          filterOptions={(options, state) => {
+            return options.filter((o) => o.name.startsWith(state.inputValue));
+          }}
+          options={items || []}
+          inputValue={inputValue}
+          onClose={(_, reason) => reason === 'escape' && onClose?.()}
+          clearOnEscape={false}
+          noOptionsText={t('global_nothing_found')}
+          loadingText={t('global_loading_text')}
+          isOptionEqualToValue={(o, v) => o.value === v.value}
+          onInputChange={(_, value, reason) =>
+            reason === 'input' && setInputValue(value)
+          }
+          getOptionLabel={({ name }) => name}
+          PopperComponent={PopperComponent}
+          PaperComponent={PaperComponent}
+          renderOption={(props, option) => (
+            <StyledCompactMenuItem
+              key={option.value}
+              {...props}
+              selected={option.value === selected}
+              data-cy="search-select-item"
+            >
+              <StyledInputContent>{option.name}</StyledInputContent>
+            </StyledCompactMenuItem>
+          )}
+          onChange={(_, newValue) => {
+            onSelect?.(newValue!.value);
+            onClose?.();
+          }}
+          ListboxProps={{ style: { padding: 0 } }}
+          renderInput={(params) => (
+            <StyledInputWrapper>
+              <StyledInput
+                data-cy="search-select-search"
+                key={Number(open)}
+                sx={{ display: displaySearch ? undefined : 'none' }}
+                ref={params.InputProps.ref}
+                inputProps={params.inputProps}
+                autoFocus
+                placeholder={searchPlaceholder}
+              />
+              {!displaySearch && title && (
+                <StyledHeading>{title}</StyledHeading>
+              )}
 
-            {onAddNew && (
-              <Tooltip title={addNewTooltip || ''}>
-                <IconButton
-                  size="small"
-                  onClick={handleAddNew}
-                  sx={{ ml: 0.5 }}
-                  data-cy="search-select-new"
-                >
-                  <Add />
-                </IconButton>
-              </Tooltip>
-            )}
-          </StyledInputWrapper>
-        )}
-      />
+              {onAddNew && (
+                <Tooltip title={addNewTooltip || ''}>
+                  <IconButton
+                    size="small"
+                    onClick={handleAddNew}
+                    sx={{ ml: 0.5 }}
+                    data-cy="search-select-new"
+                  >
+                    <Add />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </StyledInputWrapper>
+          )}
+        />
+      </FormControl>
     </StyledWrapper>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { styled, Typography, Link as MuiLink } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 
 import { TabMessage } from './TabMessage';
@@ -65,7 +65,6 @@ export const ToolsTab: React.FC<Props> = ({
   children,
   data,
 }) => {
-  const t = useTranslate();
   const { preferredOrganization } = usePreferredOrganization();
   const config = useConfig();
 
@@ -75,21 +74,31 @@ export const ToolsTab: React.FC<Props> = ({
         preferredOrganization.currentUserRole === 'OWNER' &&
         config.billing.enabled
       ) {
-        return t('translation_tools_no_credits_billing_link', {
-          link: (
-            <MuiLink
-              component={Link}
-              to={LINKS.ORGANIZATION_BILLING.build({
-                [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-              })}
-            />
-          ),
-          hint: <MtHint />,
-        });
+        return (
+          <T
+            keyName="translation_tools_no_credits_billing_link"
+            params={{
+              link: (
+                <MuiLink
+                  component={Link}
+                  to={LINKS.ORGANIZATION_BILLING.build({
+                    [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+                  })}
+                />
+              ),
+              hint: <MtHint />,
+            }}
+          />
+        );
       } else {
-        return t('translation_tools_no_credits_message', {
-          hint: <MtHint />,
-        });
+        return (
+          <T
+            keyName="translation_tools_no_credits_message"
+            params={{
+              hint: <MtHint />,
+            }}
+          />
+        );
       }
     }
   };

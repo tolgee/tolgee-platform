@@ -8,7 +8,7 @@ import { container } from 'tsyringe';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { useGlobalDispatch } from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -21,8 +21,8 @@ import { DeleteUserButton } from './DeleteUserButton';
 const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
-  const t = useTranslate();
-  const globalDispatch = useGlobalDispatch();
+  const { t } = useTranslate();
+  const { refetchInitialData } = useGlobalActions();
   const user = useUser();
 
   const updateUser = useApiMutation({
@@ -42,7 +42,7 @@ export const UserProfileView: FunctionComponent = () => {
       {
         onSuccess() {
           messagesService.success(<T>User data - Successfully updated!</T>);
-          globalDispatch({ type: 'REFETCH_INITIAL_DATA' });
+          refetchInitialData();
         },
       }
     );
@@ -87,7 +87,7 @@ export const UserProfileView: FunctionComponent = () => {
               <Box>
                 <Typography variant="body1">
                   <T
-                    parameters={{
+                    params={{
                       email: user.emailAwaitingVerification!,
                     }}
                   >

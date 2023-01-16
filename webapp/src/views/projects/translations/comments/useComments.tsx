@@ -10,7 +10,7 @@ import {
   useApiMutation,
 } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
@@ -38,7 +38,7 @@ export const useComments = ({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
-  const dispatch = useTranslationsDispatch();
+  const { updateTranslation } = useTranslationsActions();
 
   const [inputValue, setInputValue] = useState('');
 
@@ -110,9 +110,10 @@ export const useComments = ({
         const translationData =
           data._embedded?.keys?.[0].translations[language.tag];
         if (translationData) {
-          dispatch({
-            type: 'UPDATE_TRANSLATION',
-            payload: { keyId, lang: language.tag, data: translationData },
+          updateTranslation({
+            keyId,
+            lang: language.tag,
+            data: translationData,
           });
         }
       });
@@ -240,7 +241,7 @@ export const useComments = ({
   };
 
   const commentsList: TranslationCommentModel[] = [];
-  comments.data?.pages.forEach((page) =>
+  comments.data?.pages?.forEach((page) =>
     page._embedded?.translationComments?.forEach((item) =>
       commentsList.push(item)
     )

@@ -1,30 +1,27 @@
-import { container } from 'tsyringe';
-import { Button, styled } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { confirmation } from 'tg.hooks/confirmation';
-import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
+import {container} from 'tsyringe';
+import {Button, styled} from '@mui/material';
+import {T, useTranslate} from '@tolgee/react';
+import {useHistory} from 'react-router-dom';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {confirmation} from 'tg.hooks/confirmation';
+import {useProject} from 'tg.hooks/useProject';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {MessageService} from 'tg.service/MessageService';
 
-import { CellKey } from '../CellKey';
-import {
-  useTranslationsDispatch,
-  useTranslationsSelector,
-} from '../context/TranslationsContext';
-import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
-import { Tag } from '../Tags/Tag';
-import { TagInput } from '../Tags/TagInput';
-import { CellTranslation } from '../TranslationsList/CellTranslation';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { FieldLabel } from 'tg.component/FormField';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { useUrlSearch } from 'tg.hooks/useUrlSearch';
+import {CellKey} from '../CellKey';
+import {useTranslationsActions, useTranslationsSelector,} from '../context/TranslationsContext';
+import {ScreenshotGallery} from '../Screenshots/ScreenshotGallery';
+import {Tag} from '../Tags/Tag';
+import {TagInput} from '../Tags/TagInput';
+import {CellTranslation} from '../TranslationsList/CellTranslation';
+import {parseErrorResponse} from 'tg.fixtures/errorFIxtures';
+import {FieldLabel} from 'tg.component/FormField';
+import {useProjectPermissions} from 'tg.hooks/useProjectPermissions';
+import {useUrlSearchState} from 'tg.hooks/useUrlSearchState';
+import {useGlobalLoading} from 'tg.component/GlobalLoading';
+import {NamespaceSelector} from 'tg.component/NamespaceSelector/NamespaceSelector';
+import {useUrlSearch} from 'tg.hooks/useUrlSearch';
+import {useGlobalActions} from 'tg.globalContext/GlobalContext';
 
 const messaging = container.resolve(MessageService);
 
@@ -75,8 +72,8 @@ const StyledActions = styled('div')`
 `;
 
 export const KeyEditForm: React.FC = () => {
-  const dispatch = useTranslationsDispatch();
-  const t = useTranslate();
+  const { addTag, removeTag, updateKey } = useTranslationsActions();
+  const { t } = useTranslate();
   const project = useProject();
   const permissions = useProjectPermissions();
 
@@ -90,19 +87,13 @@ export const KeyEditForm: React.FC = () => {
   const [_urlNamespace, setUrlNamespace] = useUrlSearchState('ns');
 
   const handleAddTag = (name: string) => {
-    dispatch({
-      type: 'ADD_TAG',
-      payload: { keyId: translation!.keyId, name },
-    });
+    addTag({ keyId: translation!.keyId, name });
   };
 
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
 
   const handleRemoveTag = (tagId: number) => {
-    dispatch({
-      type: 'REMOVE_TAG',
-      payload: { keyId: translation!.keyId, tagId },
-    });
+    removeTag({ keyId: translation!.keyId, tagId });
   };
 
   const deleteKeys = useApiMutation({
@@ -116,12 +107,9 @@ export const KeyEditForm: React.FC = () => {
   });
 
   const cacheUpdateNs = (namespace: string) => {
-    dispatch({
-      type: 'UPDATE_KEY',
-      payload: {
-        keyId: translation!.keyId,
-        value: { keyNamespace: namespace },
-      },
+    updateKey({
+      keyId: translation!.keyId,
+      value: { keyNamespace: namespace },
     });
   };
 

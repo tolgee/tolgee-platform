@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -35,6 +36,7 @@ import javax.validation.constraints.Size
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 @ActivityEntityDescribingPaths(["namespace"])
+@EntityListeners(Key.Companion.KeyListeners::class)
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)

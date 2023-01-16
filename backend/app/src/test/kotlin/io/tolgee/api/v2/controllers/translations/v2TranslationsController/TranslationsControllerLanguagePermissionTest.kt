@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: LanguagePermissionsTestData
 

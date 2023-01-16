@@ -51,7 +51,7 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2")
 @Tag(name = "API keys")
-class V2ApiKeyController(
+class ApiKeyController(
   private val apiKeyService: ApiKeyService,
   private val projectService: ProjectService,
   private val authenticationFacade: AuthenticationFacade,

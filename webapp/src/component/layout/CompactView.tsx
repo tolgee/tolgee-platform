@@ -14,13 +14,15 @@ const StyledContainer = styled('div')`
   flex-grow: 1;
   align-items: center;
   margin: ${({ theme }) => theme.spacing(1)} auto;
-  max-width: 430px;
 `;
 
 const StyledAlerts = styled('div')`
   display: flex;
   flex-direction: column;
   min-height: 100px;
+  @media (max-width: 800px) {
+    min-height: 55px;
+  }
   justify-content: flex-end;
 `;
 
@@ -29,6 +31,8 @@ const StyledPaper = styled(Paper)`
   align-items: stretch;
   padding: ${({ theme }) => theme.spacing(4, 0)};
   margin-top: ${({ theme }) => theme.spacing(2)};
+  position: relative;
+  overflow: hidden;
 `;
 
 const StyledVerticalSpace = styled('div')`
@@ -55,6 +59,7 @@ type Props = {
   title: React.ReactNode;
   content: React.ReactNode;
   footer?: React.ReactNode;
+  maxWidth?: number;
 };
 
 export const CompactView: React.FC<Props> = ({
@@ -64,6 +69,7 @@ export const CompactView: React.FC<Props> = ({
   footer,
   alerts,
   backLink,
+  maxWidth = 430,
 }) => {
   useWindowTitle(windowTitle);
 
@@ -76,7 +82,7 @@ export const CompactView: React.FC<Props> = ({
           },
         })}
       />
-      <StyledContainer>
+      <StyledContainer style={{ maxWidth }}>
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper>
           <StyledVerticalSpace>

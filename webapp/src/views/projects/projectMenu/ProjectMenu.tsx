@@ -22,7 +22,7 @@ export const ProjectMenu = ({ id }) => {
   const projectPermissions = useProjectPermissions();
   const config = useConfig();
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const topBarHidden = useTopBarHidden();
 

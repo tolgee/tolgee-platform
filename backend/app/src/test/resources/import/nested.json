@@ -1,0 +1,12 @@
+{
+  "this": {
+    "is": "a",
+    "nested": {
+      "object": "with",
+      "a": "few",
+      "keys": "and",
+      "values": "in",
+      "it": "!"
+    }
+  }
+}

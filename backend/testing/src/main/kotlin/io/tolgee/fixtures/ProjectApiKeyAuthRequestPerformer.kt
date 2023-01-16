@@ -3,8 +3,8 @@ package io.tolgee.fixtures
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
-import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.annotations.ApiKeyPresentMode
+import io.tolgee.service.security.ApiKeyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile

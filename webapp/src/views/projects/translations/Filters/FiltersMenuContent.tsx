@@ -1,7 +1,7 @@
 import { Checkbox, ListItemText } from '@mui/material';
 
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { SubmenuStates } from './SubmenuStates';
@@ -13,7 +13,7 @@ import { useActiveFilters } from './useActiveFilters';
 
 export const FiltersMenuContent = () => {
   const options: any[] = [];
-  const dispatch = useTranslationsDispatch();
+  const { setFilters } = useTranslationsActions();
   const filtersObj = useTranslationsSelector((v) => v.filters);
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
@@ -21,10 +21,10 @@ export const FiltersMenuContent = () => {
 
   const handleFilterToggle = (rawValue: string) => () => {
     const newFilters = toggleFilter(filtersObj, availableFilters, rawValue);
-    dispatch({ type: 'SET_FILTERS', payload: newFilters });
+    setFilters(newFilters);
   };
 
-  const availableFilters = useAvailableFilters(selectedLanguages);
+  const { availableFilters } = useAvailableFilters(selectedLanguages);
 
   availableFilters.forEach((group, i1) => {
     if (!group.options?.length) {

@@ -150,7 +150,7 @@ export const ProjectTransferModal: FC<{
               }
               fullWidth
               label={
-                <T parameters={{ text: project.name.toUpperCase() }}>
+                <T params={{ text: project.name.toUpperCase() }}>
                   hard_mode_confirmation_rewrite_text
                 </T>
               }

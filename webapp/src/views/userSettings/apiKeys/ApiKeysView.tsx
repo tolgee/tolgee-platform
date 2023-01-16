@@ -20,7 +20,7 @@ const StyledLink = styled(Link)`
 `;
 
 export const ApiKeysView: FunctionComponent = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [page, setPage] = useState(0);
   const list = useApiQuery({
     url: '/v2/api-keys',
@@ -51,7 +51,7 @@ export const ApiKeysView: FunctionComponent = () => {
         addLinkTo={LINKS.USER_API_KEYS_GENERATE.build()}
       >
         <Box sx={{ my: 2 }}>
-          <T parameters={{ link: <StyledLink to={LINKS.USER_PATS.build()} /> }}>
+          <T params={{ link: <StyledLink to={LINKS.USER_PATS.build()} /> }}>
             api-keys-description
           </T>
         </Box>

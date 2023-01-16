@@ -53,7 +53,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     redirect(LINKS.USER_API_KEYS);
   };
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const projects = useApiQuery({
     url: '/v2/projects',

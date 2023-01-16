@@ -15,6 +15,7 @@ import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
 import io.tolgee.api.v2.hateoas.dataImport.ImportNamespaceModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModelAssembler
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.SetFileNamespaceRequest
 import io.tolgee.exceptions.BadRequestException
@@ -89,12 +90,14 @@ class V2ImportController(
   @AccessWithApiKey(scopes = [Scope.IMPORT])
   fun addFiles(
     @RequestPart("files") files: Array<MultipartFile>,
+    @ParameterObject params: ImportAddFilesParams
   ): ImportAddFilesResultModel {
     val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
     val errors = importService.addFiles(
       files = fileDtos,
       project = projectHolder.projectEntity,
-      userAccount = authenticationFacade.userAccountEntity
+      userAccount = authenticationFacade.userAccountEntity,
+      params = params
     )
     return getImportAddFilesResultModel(errors)
   }

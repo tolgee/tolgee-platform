@@ -17,6 +17,7 @@ class AuthenticationProperties(
   var jwtExpiration: Int = 604800000,
   var jwtSuperExpiration: Int = 60 * 60 * 1000, // one hour,
   var nativeEnabled: Boolean = true,
+  @E2eRuntimeMutable
   var registrationsAllowed: Boolean = false,
   @E2eRuntimeMutable
   var needsEmailVerification: Boolean = false,

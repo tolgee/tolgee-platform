@@ -17,7 +17,7 @@ export const BillingItem: React.FC<Props> = ({
   onClose,
   organizationSlug,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <MenuItem

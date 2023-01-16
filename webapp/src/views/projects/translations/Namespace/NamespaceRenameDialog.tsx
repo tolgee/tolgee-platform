@@ -17,7 +17,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { confirmation } from 'tg.hooks/confirmation';
 
 type Props = {
@@ -29,14 +29,14 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
   namespace,
   onClose,
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { name, id } = namespace;
 
   const project = useProject();
 
   const messaging = useMessage();
-  const dispatch = useTranslationsDispatch();
+  const { refetchTranslations } = useTranslationsActions();
 
   const namespaceUpdate = useApiMutation({
     url: '/v2/projects/{projectId}/namespaces/{id}',
@@ -47,7 +47,7 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
     invalidatePrefix: '/v2/projects/{projectId}/',
     options: {
       onSuccess() {
-        dispatch({ type: 'REFETCH_TRANSLATIONS' });
+        refetchTranslations();
       },
     },
   });

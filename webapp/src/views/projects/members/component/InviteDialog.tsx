@@ -52,7 +52,7 @@ type Props = {
 };
 
 export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const invite = useApiMutation({
     url: '/v2/projects/{projectId}/invite',

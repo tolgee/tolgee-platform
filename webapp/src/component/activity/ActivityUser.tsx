@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { useCurrentLanguage } from '@tolgee/react';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { ActivityModel } from './types';
 import { UserName } from '../common/UserName';
 
@@ -64,8 +64,8 @@ export const ActivityUser: React.FC<Props> = ({ item, onlyTime }) => {
       </StyledUser>
       <Box gridArea="time">
         <StyledTime>
-          {!onlyTime && date.toLocaleDateString(lang()) + ' '}
-          {date.toLocaleTimeString(lang(), {
+          {!onlyTime && date.toLocaleDateString(lang) + ' '}
+          {date.toLocaleTimeString(lang, {
             hour: 'numeric',
             minute: 'numeric',
           })}

@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport.processors
 
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
@@ -12,7 +13,8 @@ import io.tolgee.model.key.KeyMeta
 data class FileProcessorContext(
   val file: ImportFileDto,
   val fileEntity: ImportFile,
-  val maxTranslationTextLength: Long = 200L
+  val maxTranslationTextLength: Long = 200L,
+  val params: ImportAddFilesParams = ImportAddFilesParams(),
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
@@ -20,25 +22,39 @@ data class FileProcessorContext(
 
   lateinit var languageNameGuesses: List<String>
 
-  fun addTranslation(keyName: String, languageName: String, value: Any?) {
+  fun addTranslation(keyName: String, languageName: String, value: Any?, idx: Int? = null) {
     val stringValue = value as? String
+
+    if (value !is String?) {
+      this.fileEntity.addValueIsNotStringIssue(keyName, idx, value)
+      return
+    }
+
+    if (value.isNullOrEmpty()) {
+      this.fileEntity.addValueIsEmptyIssue(keyName)
+    }
 
     if (stringValue != null && stringValue.length > maxTranslationTextLength) {
       fileEntity.addIssue(FileIssueType.TRANSLATION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to keyName))
       return
     }
 
-    val language = languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
-      languages[languageName] = it
-    }
+    val language = getOrCreateLanguage(languageName)
 
     if (translations[keyName] == null) {
       translations[keyName] = mutableListOf()
     }
 
-    val entity = ImportTranslation(stringValue, language)
+    if (value != null) {
+      val entity = ImportTranslation(stringValue, language)
+      translations[keyName]!!.add(entity)
+    }
+  }
 
-    translations[keyName]!!.add(entity)
+  private fun getOrCreateLanguage(languageName: String): ImportLanguage {
+    return languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
+      languages[languageName] = it
+    }
   }
 
   fun addKeyComment(key: String, text: String) {

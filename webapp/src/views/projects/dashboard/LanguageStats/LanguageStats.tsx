@@ -82,7 +82,7 @@ type Props = {
 export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const languages = useProjectLanguages();
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const history = useHistory();
   const baseLanguage = languages.find((l) => l.base === true)!.tag;
   const allLangs = languages.map((l) => l.tag);

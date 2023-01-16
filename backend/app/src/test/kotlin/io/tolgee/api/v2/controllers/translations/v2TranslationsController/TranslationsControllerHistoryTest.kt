@@ -21,7 +21,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var translation: Translation
 

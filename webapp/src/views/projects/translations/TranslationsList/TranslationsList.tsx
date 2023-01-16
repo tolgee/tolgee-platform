@@ -5,7 +5,7 @@ import { styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
@@ -35,7 +35,7 @@ const StyledContainer = styled('div')`
 export const TranslationsList = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
-  const dispatch = useTranslationsDispatch();
+  const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
   const languages = useTranslationsSelector((v) => v.languages);
   const translationsLanguages = useTranslationsSelector(
@@ -57,9 +57,7 @@ export const TranslationsList = () => {
   }, [tableRef]);
 
   const handleFetchMore = useCallback(() => {
-    dispatch({
-      type: 'FETCH_MORE',
-    });
+    fetchMore();
   }, [translations]);
 
   const languagesRow = useMemo(
@@ -74,15 +72,9 @@ export const TranslationsList = () => {
 
   useEffect(() => {
     if (reactListRef.current) {
-      dispatch({
-        type: 'REGISTER_LIST',
-        payload: reactListRef.current,
-      });
+      registerList(reactListRef.current);
       return () => {
-        dispatch({
-          type: 'UNREGISTER_LIST',
-          payload: reactListRef.current!,
-        });
+        unregisterList(reactListRef.current!);
       };
     }
   }, [reactListRef.current]);

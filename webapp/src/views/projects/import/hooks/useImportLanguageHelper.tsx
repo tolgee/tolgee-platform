@@ -58,7 +58,7 @@ export const useImportLanguageHelper = (
 
       title: <T>import_delete_language_dialog_title</T>,
       message: (
-        <T parameters={{ languageName: row.name }}>
+        <T params={{ languageName: row.name }}>
           import_delete_language_dialog_message
         </T>
       ),

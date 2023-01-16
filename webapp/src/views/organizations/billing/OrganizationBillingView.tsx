@@ -62,7 +62,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const organization = useOrganization();
 
   const creditBalance = useOrganizationCreditBalance();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const url = new URL(window.location.href);
 

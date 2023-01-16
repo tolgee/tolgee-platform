@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import {
-  useTranslationsDispatch,
+  useTranslationsActions,
   useTranslationsSelector,
 } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
@@ -21,7 +21,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';
 
 export const Translations = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
 
@@ -39,7 +39,7 @@ export const Translations = () => {
     [translations]
   );
 
-  const dispatch = useTranslationsDispatch();
+  const { setSearchImmediate, setFilters } = useTranslationsActions();
 
   const { onKey } = useTranslationsShortcuts();
 
@@ -61,8 +61,8 @@ export const Translations = () => {
   };
 
   const handleClearFilters = () => {
-    dispatch({ type: 'SET_SEARCH_IMMEDIATE', payload: '' });
-    dispatch({ type: 'SET_FILTERS', payload: {} });
+    setSearchImmediate('');
+    setFilters({});
   };
 
   useGlobalLoading(isFetching || isLoading);

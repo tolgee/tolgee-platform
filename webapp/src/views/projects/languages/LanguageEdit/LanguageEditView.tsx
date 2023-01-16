@@ -15,7 +15,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
-import { useOrganizationUsageMethods } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -24,11 +24,11 @@ const messageService = container.resolve(MessageService);
 export const LanguageEditView = () => {
   const confirmationMessage = (options: ConfirmationDialogProps) =>
     confirmation({ title: 'Delete language', ...options });
-  const { refetchUsage } = useOrganizationUsageMethods();
+  const { refetchUsage } = useGlobalActions();
 
   const match = useRouteMatch();
   const project = useProject();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID] as number;
@@ -148,7 +148,7 @@ export const LanguageEditView = () => {
               }
               confirmationMessage({
                 message: (
-                  <T parameters={{ name: languageLoadable.data!.name }}>
+                  <T params={{ name: languageLoadable.data!.name }}>
                     delete_language_confirmation
                   </T>
                 ),

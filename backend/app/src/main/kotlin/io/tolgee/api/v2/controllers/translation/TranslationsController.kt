@@ -84,7 +84,7 @@ import javax.validation.Valid
     Tag(name = "Translations", description = "Operations related to translations in project"),
   ]
 )
-class V2TranslationsController(
+class TranslationsController(
   private val projectHolder: ProjectHolder,
   private val translationService: TranslationService,
   private val keyService: KeyService,
@@ -120,6 +120,7 @@ class V2TranslationsController(
     ]
   )
   fun getAllTranslations(
+    @Parameter(description = "Comma-separated language tags to return translations in.", example = "en,de,fr")
     @PathVariable("languages") languages: Set<String>,
     @Parameter(description = "Namespace to return")
     ns: String? = "",
@@ -185,6 +186,7 @@ When null, resulting file will be a flat key-value object.
   @AccessWithApiKey([Scope.KEYS_EDIT])
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
+  @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace)?.also {
       activityHolder.activity = ActivityType.SET_TRANSLATIONS

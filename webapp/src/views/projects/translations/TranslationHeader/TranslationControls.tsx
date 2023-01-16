@@ -9,10 +9,10 @@ import TranslationsSearchField from './TranslationsSearchField';
 
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
-import { ViewMode } from '../context/types';
+import { StickyHeader } from './StickyHeader';
 import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
@@ -47,26 +47,11 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const projectPermissions = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
-  const dispatch = useTranslationsDispatch();
+  const { setSearch, selectLanguages, changeView } = useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
-
-  const handleSearchChange = (value: string) => {
-    dispatch({ type: 'SET_SEARCH', payload: value });
-  };
-
-  const handleLanguageChange = (languages: string[]) => {
-    dispatch({
-      type: 'SELECT_LANGUAGES',
-      payload: languages,
-    });
-  };
-
-  const handleViewChange = (val: ViewMode) => {
-    dispatch({ type: 'CHANGE_VIEW', payload: val });
-  };
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -78,7 +63,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
         <StyledSpaced>
           <StyledTranslationsSearchField
             value={search || ''}
-            onSearchChange={handleSearchChange}
+            onSearchChange={setSearch}
             label={null}
             variant="outlined"
             placeholder={t('standard_search_label')}
@@ -88,7 +73,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
 
         <StyledSpaced>
           <LanguagesSelect
-            onChange={handleLanguageChange}
+            onChange={selectLanguages}
             value={selectedLanguages || []}
             languages={languages || []}
             context="translations"
@@ -96,14 +81,14 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           <ButtonGroup>
             <StyledToggleButton
               color={view === 'LIST' ? 'primary' : 'default'}
-              onClick={() => handleViewChange('LIST')}
+              onClick={() => changeView('LIST')}
               data-cy="translations-view-list-button"
             >
               <ViewListRounded />
             </StyledToggleButton>
             <StyledToggleButton
               color={view === 'TABLE' ? 'primary' : 'default'}
-              onClick={() => handleViewChange('TABLE')}
+              onClick={() => changeView('TABLE')}
               data-cy="translations-view-table-button"
             >
               <AppsRounded />

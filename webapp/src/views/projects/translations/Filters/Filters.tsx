@@ -12,12 +12,14 @@ import {
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -68,15 +70,22 @@ const StyledClearButton = styled(IconButton)`
 `;
 
 export const Filters = () => {
-  const t = useTranslate();
-  const dispatch = useTranslationsDispatch();
+  const { t } = useTranslate();
+  const { setFilters } = useTranslationsActions();
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      filtersContent.refresh();
+    }
+  }, [isOpen]);
 
   const activeFilters = useActiveFilters();
 
   const theme = useTheme();
 
-  const availableFilters = useAvailableFilters(selectedLanguages);
+  const { availableFilters } = useAvailableFilters(selectedLanguages);
 
   const findOption = (value: string) =>
     availableFilters
@@ -86,8 +95,20 @@ export const Filters = () => {
   const filtersContent = useFiltersContent();
 
   const handleClearFilters = (e) => {
-    dispatch({ type: 'SET_FILTERS', payload: {} });
+    setFilters({});
   };
+
+  function getFilterName(value) {
+    const option = findOption(value);
+    if (option?.label) {
+      return option.label;
+    }
+
+    const parsed = JSON.parse(value) as FilterType;
+    if (parsed.filter === 'filterNamespace') {
+      return (parsed.value as string) || t('namespace_default');
+    }
+  }
 
   function getFilterName(value) {
     const option = findOption(value);
@@ -104,6 +125,8 @@ export const Filters = () => {
   return (
     <StyledWrapper>
       <StyledSelect
+        onOpen={() => setIsOpen(true)}
+        onClose={() => setIsOpen(false)}
         variant="outlined"
         value={activeFilters}
         data-cy="translations-filter-select"
@@ -120,7 +143,7 @@ export const Filters = () => {
                 <T>translations_filter_placeholder</T>
               ) : (
                 (value.length === 1 && getFilterName(value[0])) || (
-                  <T parameters={{ filtersNum: String(activeFilters.length) }}>
+                  <T params={{ filtersNum: String(activeFilters.length) }}>
                     translations_filters_text
                   </T>
                 )
@@ -147,7 +170,7 @@ export const Filters = () => {
         displayEmpty
         multiple
       >
-        {filtersContent}
+        {filtersContent.options}
       </StyledSelect>
     </StyledWrapper>
   );

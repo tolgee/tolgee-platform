@@ -67,9 +67,9 @@ class NamespaceService(
     }
   }
 
-  private fun getSafeName(name: String?) = if (name.isNullOrBlank()) null else name
+  fun getSafeName(name: String?) = if (name.isNullOrBlank()) null else name
 
-  private fun create(name: String?, projectId: Long): Namespace? {
+  fun create(name: String?, projectId: Long): Namespace? {
     if (name.isNullOrBlank()) {
       return null
     }

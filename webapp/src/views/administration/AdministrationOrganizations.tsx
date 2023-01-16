@@ -54,7 +54,7 @@ export const AdministrationOrganizations = ({
   });
 
   const history = useHistory();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <StyledWrapper>

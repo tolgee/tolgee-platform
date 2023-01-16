@@ -19,5 +19,5 @@ open class ImportLanguageModel(
   override val namespace: String?,
   override val totalCount: Int,
   override val conflictCount: Int,
-  override val resolvedCount: Int
+  override val resolvedCount: Int,
 ) : RepresentationModel<ImportLanguageModel>(), ImportLanguageView

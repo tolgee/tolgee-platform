@@ -36,7 +36,7 @@ export const PermissionsMenu: FunctionComponent<{
   enableAdvanced?: boolean;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const handleClose = () => {
     setAnchorEl(null);

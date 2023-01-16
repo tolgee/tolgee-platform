@@ -6,7 +6,7 @@ import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/Langua
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 
@@ -32,7 +32,7 @@ type Props = {
 };
 
 export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
-  const dispatch = useTranslationsDispatch();
+  const { insertTranslation } = useTranslationsActions();
 
   const languages = useTranslationsSelector((c) => c.languages);
   const selectedLanguagesDefault = useTranslationsSelector(
@@ -76,16 +76,14 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
       };
     });
 
-    dispatch({
-      type: 'INSERT_TRANSLATION',
-      payload: {
+    insertTranslation( {
         keyId: data.id,
         keyNamespace: data.namespace,
         keyName: data.name,
         keyTags: data.tags,
         screenshotCount: 0,
         translations,
-      },
+
     });
   };
 

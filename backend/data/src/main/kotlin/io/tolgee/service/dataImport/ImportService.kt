@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
@@ -54,7 +55,8 @@ class ImportService(
   fun addFiles(
     files: List<ImportFileDto>,
     project: Project,
-    userAccount: UserAccount
+    userAccount: UserAccount,
+    params: ImportAddFilesParams = ImportAddFilesParams()
   ): List<ErrorResponseBody> {
     val import = findNotExpired(project.id, userAccount.id) ?: Import(project).also {
       it.author = userAccount
@@ -69,7 +71,8 @@ class ImportService(
     importRepository.save(import)
     val fileProcessor = CoreImportFilesProcessor(
       applicationContext = applicationContext,
-      import = import
+      import = import,
+      params = params
     )
     val errors = fileProcessor.processFiles(files)
 

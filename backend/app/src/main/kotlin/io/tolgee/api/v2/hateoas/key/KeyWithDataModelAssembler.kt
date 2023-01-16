@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.key
 
-import io.tolgee.api.v2.controllers.translation.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
@@ -14,7 +14,7 @@ class KeyWithDataModelAssembler(
   private val translationModelAssembler: TranslationModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler
 ) : RepresentationModelAssemblerSupport<Key, KeyWithDataModel>(
-  V2TranslationsController::class.java, KeyWithDataModel::class.java
+  TranslationsController::class.java, KeyWithDataModel::class.java
 ) {
   override fun toModel(entity: Key) = KeyWithDataModel(
     id = entity.id,

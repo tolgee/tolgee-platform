@@ -4,7 +4,7 @@ import { Clear } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import { AutoTranslationIcon } from '../../../../component/AutoTranslationIcon';
 
 type KeyWithTranslationsModel =
@@ -53,7 +53,7 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   const project = useProject();
   const translation = keyData.translations[lang];
 
-  const dispatch = useTranslationsDispatch();
+  const { updateTranslation } = useTranslationsActions();
 
   const clear = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state',
@@ -67,9 +67,10 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
         path: { projectId: project.id, translationId: translation!.id },
       })
       .then(() => {
-        dispatch({
-          type: 'UPDATE_TRANSLATION',
-          payload: { keyId: keyData.keyId, lang, data: { auto: false } },
+        updateTranslation({
+          keyId: keyData.keyId,
+          lang,
+          data: { auto: false },
         });
       });
   };

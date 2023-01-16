@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 import {
   useTranslationsSelector,
-  useTranslationsDispatch,
+  useTranslationsActions,
 } from './context/TranslationsContext';
 import { AfterCommand, EditMode } from './context/types';
 
@@ -22,7 +22,14 @@ export const useEditableRow = ({
   onSaveSuccess,
   cellRef,
 }: Props) => {
-  const dispatch = useTranslationsDispatch();
+  const {
+    updateEdit,
+    registerElement,
+    unregisterElement,
+    setEdit,
+    changeField,
+    setEditForce,
+  } = useTranslationsActions();
 
   const cursor = useTranslationsSelector((v) => {
     return v.cursor?.keyId === keyId ? v.cursor : undefined;
@@ -35,19 +42,12 @@ export const useEditableRow = ({
 
   const originalValue = (isEditing && defaultVal) || '';
 
-  const setValue = (val: string) =>
-    dispatch({ type: 'UPDATE_EDIT', payload: { value: val } });
+  const setValue = (val: string) => updateEdit({ value: val });
 
   useEffect(() => {
-    dispatch({
-      type: 'REGISTER_ELEMENT',
-      payload: { keyId, language, ref: cellRef.current! },
-    });
+    registerElement({ keyId, language, ref: cellRef.current! });
     return () => {
-      dispatch({
-        type: 'UNREGISTER_ELEMENT',
-        payload: { keyId, language, ref: cellRef.current! },
-      });
+      unregisterElement({ keyId, language, ref: cellRef.current! });
     };
   }, [cellRef.current, keyId, language]);
 
@@ -58,43 +58,37 @@ export const useEditableRow = ({
   }, [isEditing, originalValue]);
 
   const handleOpen = (mode: EditMode) => {
-    dispatch({
-      type: 'SET_EDIT',
-      payload: {
-        keyId,
-        language,
-        mode,
-      },
+    setEdit({
+      keyId,
+      language,
+      mode,
     });
   };
 
   const handleSave = (after?: AfterCommand) => {
-    dispatch({
-      type: 'CHANGE_FIELD',
-      payload: {
-        after,
-        onSuccess: () => onSaveSuccess?.(value),
-      },
+    changeField({
+      after,
+      onSuccess: () => onSaveSuccess?.(value),
     });
   };
 
   const handleClose = (force = false) => {
     if (force) {
-      dispatch({ type: 'SET_EDIT_FORCE', payload: undefined });
+      setEditForce(undefined);
     } else {
-      dispatch({ type: 'SET_EDIT', payload: undefined });
+      setEdit(undefined);
     }
   };
 
   const handleModeChange = (mode: EditMode) => {
-    dispatch({ type: 'UPDATE_EDIT', payload: { mode: mode } });
+    updateEdit({ mode });
   };
 
   useEffect(() => {
     const isChanged = originalValue !== value;
     // let context know, that something has changed
     if (isEditing && Boolean(cursor?.changed) !== isChanged) {
-      dispatch({ type: 'UPDATE_EDIT', payload: { changed: isChanged } });
+      updateEdit({ changed: isChanged });
     }
   }, [originalValue, cursor?.changed, value]);
 

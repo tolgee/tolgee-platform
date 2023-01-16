@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Menu, MenuItem, styled } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
-import { useTranslate } from '@tolgee/react';
+import React, {useState} from 'react';
+import {Menu, MenuItem, styled} from '@mui/material';
+import {ArrowDropDown} from '@mui/icons-material';
+import {useTranslate} from '@tolgee/react';
 
-import { useNamespaceFilter } from './useNamespaceFilter';
-import { NamespaceRenameDialog } from './NamespaceRenameDialog';
-import { NsBannerRecord } from '../context/useNsBanners';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import {useNamespaceFilter} from './useNamespaceFilter';
+import {NamespaceRenameDialog} from './NamespaceRenameDialog';
+import {NsBannerRecord} from '../context/useNsBanners';
+import {useProjectPermissions} from 'tg.hooks/useProjectPermissions';
 
 const StyledNamespace = styled('div')`
   display: flex;
@@ -51,7 +51,7 @@ type Props = {
 
 export const NamespaceContent = React.forwardRef<HTMLDivElement, Props>(
   function NamespaceContent({ namespace, sticky, maxWidth, hideShadow }, ref) {
-    const t = useTranslate();
+    const { t } = useTranslate();
     const { toggle, isActive } = useNamespaceFilter(namespace.name);
     const [open, setOpen] = useState<undefined | HTMLElement>(undefined);
     const [renameOpen, setRenameOpen] = useState(false);

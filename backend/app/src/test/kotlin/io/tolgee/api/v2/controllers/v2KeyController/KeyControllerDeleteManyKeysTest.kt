@@ -15,7 +15,7 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

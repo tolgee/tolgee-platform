@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2ImportController
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -46,5 +47,21 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=KEEP"
     performAuthPut(path, null).andIsOk
+  }
+
+  @Test
+  fun `it imports empty keys`() {
+    val testData = ImportTestData()
+    testData.addEmptyKey()
+    testDataService.saveTestData(testData.root)
+    val user = testData.root.data.userAccounts[0].self
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+    val path = "/v2/projects/$projectId/import/apply?forceMode=KEEP"
+    performAuthPut(path, null).andIsOk
+
+    executeInNewTransaction {
+      projectService.get(testData.project.id).keys.find { it.name == "empty key" }.assert.isNotNull
+    }
   }
 }

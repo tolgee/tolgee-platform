@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { components } from 'tg.service/apiSchema.generated';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useTranslationsActions } from '../context/TranslationsContext';
 import {
   StyledCell,
   CELL_PLAIN,
@@ -108,17 +108,14 @@ export const CellTranslation: React.FC<Props> = ({
     language: language.tag,
     cellRef,
   });
-  const dispatch = useTranslationsDispatch();
+  const { setTranslationState } = useTranslationsActions();
 
   const handleStateChange = (state: StateType) => {
-    dispatch({
-      type: 'SET_TRANSLATION_STATE',
-      payload: {
-        keyId: data.keyId,
-        translationId: translation?.id as number,
-        language: language.tag as string,
-        state,
-      },
+    setTranslationState({
+      keyId: data.keyId,
+      translationId: translation?.id as number,
+      language: language.tag as string,
+      state,
     });
   };
 
@@ -146,7 +143,7 @@ export const CellTranslation: React.FC<Props> = ({
     >
       {editVal ? (
         <StyledTranslationOpened
-          keyId={data.keyId}
+          keyData={data}
           language={language}
           translation={translation}
           value={value}

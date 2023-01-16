@@ -30,7 +30,7 @@ type Props = {
 };
 
 export const RoleMenu: React.FC<Props> = (props) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClose = () => {

@@ -26,7 +26,7 @@ type LoginViewTotpProps = {
 };
 
 export function LoginTotpForm(props: LoginViewTotpProps) {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const security = useSelector((state: AppState) => state.global.security);
   const authLoading = useSelector(
     (state: AppState) => state.global.authLoading

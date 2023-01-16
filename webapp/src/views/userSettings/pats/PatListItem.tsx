@@ -95,7 +95,7 @@ export function PatListItem(props: {
         {props.pat.lastUsedAt ? (
           <T
             keyName="pat-list-item-last-used"
-            parameters={{ date: props.pat.lastUsedAt }}
+            params={{ date: props.pat.lastUsedAt }}
           />
         ) : (
           <T keyName="pat-list-never-used" />

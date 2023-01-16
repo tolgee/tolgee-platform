@@ -28,7 +28,7 @@ export const CreateLanguageField: FC<{
   const [preferredEmojis, setPreferredEmojis] = useState([] as string[]);
   const [edit, setEdit] = useState(false);
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   useEffect(() => {
     props.onEditChange?.(edit);

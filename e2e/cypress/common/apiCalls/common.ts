@@ -361,6 +361,11 @@ export const enableEmailVerification = () =>
 export const disableEmailVerification = () =>
   setProperty('authentication.needsEmailVerification', false);
 
+export const enableRegistration = () =>
+  setProperty('authentication.registrationsAllowed', true);
+export const disableRegistration = () =>
+  setProperty('authentication.registrationsAllowed', false);
+
 export const enableAuthentication = () =>
   setProperty('authentication.enabled', true);
 export const disableAuthentication = () =>

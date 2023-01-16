@@ -16,6 +16,8 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -32,34 +34,60 @@ class StartupImportService(
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
   private val authenticationProvider: AuthenticationProvider
-) {
+) : Logging {
 
   @Transactional
   fun importFiles() {
-    val dir = properties.import.dir
+    getDirsToImport()?.forEach { projectDir ->
+      val fileDtos = getImportFileDtos(projectDir)
+      val projectName = projectDir.nameWithoutExtension
+      importAsInitialUserProject(projectName, fileDtos)
+    }
+  }
 
-    if (dir !== null && File(dir).exists() && File(dir).isDirectory) {
-      File(dir).listFiles()?.filter { it.isDirectory }?.forEach { projectDir ->
-        val fileDtos = projectDir.walk().filter { !it.isDirectory }.map {
-          val relativePath = it.path.replace(projectDir.path, "")
-          if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
-        }.filterNotNull().toList()
+  private fun importAsInitialUserProject(
+    projectName: String,
+    fileDtos: List<ImportFileDto>
+  ) {
+    val userAccount = getInitialUserAccount() ?: return
+    val organization = getInitialUserOrganization(userAccount)
+    setAuthentication(userAccount)
+    if (!isProjectExisting(projectName, organization)) {
+      logger.info("Importing initial project $projectName [user: $userAccount, organization: $organization]")
+      val project = createProject(projectName, fileDtos, organization)
+      createImplicitApiKey(userAccount, project)
+      assignProjectHolder(project)
+      importData(fileDtos, project, userAccount)
+      return
+    }
+    logger.info("Not Importing initial project $projectName - project already exists")
+  }
 
-        if (fileDtos.isNotEmpty()) {
-          val userAccount = getInitialUserAccount()
-          val organization = userAccount?.organizationRoles?.singleOrNull()?.organization ?: return
-          SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
-          val projectName = projectDir.nameWithoutExtension
-          val existingProjects = projectService.findAllByNameAndOrganizationOwner(projectName, organization)
-          if (existingProjects.isEmpty()) {
-            val project = createProject(projectName, fileDtos, organization)
-            createImplicitApiKey(userAccount, project)
-            assignProjectHolder(project)
-            importData(fileDtos, project, userAccount)
-          }
-        }
+  private fun getInitialUserOrganization(userAccount: UserAccount?) =
+    userAccount?.organizationRoles?.singleOrNull()?.organization
+      ?: throw IllegalStateException("No initial organization")
+
+  private fun getImportFileDtos(projectDir: File) =
+    projectDir.walk().filter { !it.isDirectory }.map {
+      val relativePath = it.path.replace(projectDir.path, "")
+      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.inputStream())
+    }.filterNotNull().toList()
+
+  private fun setAuthentication(userAccount: UserAccount) {
+    SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
+  }
+
+  private fun isProjectExisting(projectName: String, organization: Organization) =
+    projectService.findAllByNameAndOrganizationOwner(projectName, organization).isNotEmpty()
+
+  private fun getDirsToImport(): List<File>? {
+    properties.import.dir?.let { dir ->
+      val file = File(dir)
+      if (file.exists() && file.isDirectory) {
+        return file.listFiles()?.filter { it.isDirectory }?.sortedBy { it.name }
       }
     }
+    return null
   }
 
   private fun importData(

@@ -32,6 +32,7 @@ class Xliff12FileProcessor(
     var id: String? = null
     var currentTextValue: String? = null
     var targetProvided = false
+    var idx = 0
 
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
@@ -79,11 +80,13 @@ class Xliff12FileProcessor(
           if (event.isEndElement) {
             when (currentOpenElement) {
               "file" -> {
+                idx = 0
                 fileOriginal = null
                 sourceLanguage = null
                 targetLanguage = null
               }
               "trans-unit" -> {
+                idx++
                 if (id != null && !targetProvided) {
                   context.fileEntity.addIssue(
                     FileIssueType.TARGET_NOT_PROVIDED,
@@ -95,13 +98,13 @@ class Xliff12FileProcessor(
               }
               "source" -> {
                 if (sourceLanguage != null && id != null) {
-                  context.addTranslation(id!!, sourceLanguage!!, sw.toString())
+                  context.addTranslation(id!!, sourceLanguage!!, sw.toString(), idx)
                 }
               }
               "target" -> {
                 if (targetLanguage != null && id != null) {
                   targetProvided = true
-                  context.addTranslation(id!!, targetLanguage!!, sw.toString())
+                  context.addTranslation(id!!, targetLanguage!!, sw.toString(), idx)
                 }
               }
               "note" -> {

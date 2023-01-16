@@ -489,46 +489,6 @@ export interface components {
       name: string;
       slug?: string;
       baseLanguageId?: number;
-      description?: string;
-    };
-    ComputedPermissionModel: {
-      permissionModel?: components["schemas"]["PermissionModel"];
-      origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
-      /** List of languages user can translate to. If null, all languages edition is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can review. If null, all languages edition is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages edition is permitted. */
-      viewLanguageIds?: number[];
-      /** Has user explicitly set granular permissions */
-      granular: boolean;
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
-      /** The Granted scopes */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "import"
-        | "languages.edit"
-        | "admin"
-        | "users.view"
-        | "users.view"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-      )[];
-      /** The user permission type. (Null if uses granular permissions) */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -600,6 +560,14 @@ export interface components {
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
+    };
+    UpdateNamespaceDto: {
+      name: string;
+    };
+    NamespaceModel: {
+      /** The id of namespace */
+      id: number;
+      name: string;
     };
     UpdateNamespaceDto: {
       name: string;
@@ -851,34 +819,16 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       description: string;
-      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
-    };
-    OrganizationDto: {
-      name: string;
-      description?: string;
-      slug?: string;
-    };
-    OrganizationModel: {
-      id: number;
-      name: string;
-      slug: string;
-      description?: string;
-      basePermission: components["schemas"]["PermissionModel"];
-      /**
-       * The role of currently authorized user.
-       *
-       * Can be null when user has direct access to one of the projects owned by the organization.
-       */
-      currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
     };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
@@ -926,15 +876,18 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectId: number;
       username?: string;
-      expiresAt?: number;
       lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      description: string;
       id: number;
+    };
+    OldEditKeyDto: {
+      currentName: string;
+      newName: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1178,6 +1131,7 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
+      capterraTracker?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1199,6 +1153,17 @@ export interface components {
       organizationBasePermission: components["schemas"]["PermissionModel"];
       directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
+    };
+    CollectionModelUsedNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["UsedNamespaceModel"][];
+      };
+    };
+    UsedNamespaceModel: {
+      /** The id of namespace. Null for default namespace. */
+      id?: number;
+      /** Name of namespace. Null if default. */
+      name?: string;
     };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
@@ -1325,7 +1290,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1337,6 +1301,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1545,6 +1510,25 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      lastUsedAt?: number;
+      expiresAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      id: number;
+      description: string;
+    };
+    OrganizationRequestParamsDto: {
+      filterCurrentUserOwner: boolean;
+      search?: string;
+    };
+    PagedModelOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["OrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PatWithUserModel: {
+      user: components["schemas"]["SimpleUserAccountModel"];
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
@@ -1603,15 +1587,16 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectId: number;
       username?: string;
       expiresAt?: number;
       lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       projectName: string;
       userFullName?: string;
       scopes: string[];
-      description: string;
       id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2136,6 +2121,39 @@ export interface operations {
       };
     };
   };
+  update: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNamespaceDto"];
+      };
+    };
+  };
   getMachineTranslationSettings: {
     parameters: {
       path: {
@@ -2535,6 +2553,36 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  /** Sets namespace for file to import. */
+  selectNamespace: {
+    parameters: {
+      path: {
+        fileId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetFileNamespaceRequest"];
       };
     };
   };
@@ -4613,56 +4661,238 @@ export interface operations {
       };
     };
   };
-  getAllSingleOwnedOrganizations: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelSimpleOrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  get: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["UserPreferencesModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateProjectSlug: {
+  /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
+  getKeyTranslationsPost: {
     parameters: {
       path: {
-        slug: string;
+        languages: string[];
+        projectId: number;
       };
     };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: string };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
+      };
+    };
+  };
+  editDeprecated: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeprecatedEditKeyDTO"];
+      };
+    };
+  };
+  create_12: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  getKeyScreenshots_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ScreenshotDTO"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetScreenshotsByKeyDto"];
+      };
+    };
+  };
+  uploadScreenshot_3: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        key: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ScreenshotDTO"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          screenshot: string;
+        };
+      };
+    };
+  };
+  allByUser_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyDTO"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_16: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyDTO"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateApiKeyDto"];
+      };
+    };
+  };
+  edit_4: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditApiKeyDto"];
+      };
+    };
+  };
+  getAllSingleOwnedOrganizations: {
     responses: {
       /** OK */
       200: {
@@ -4711,7 +4941,7 @@ export interface operations {
       };
     };
   };
-  getHierarchy: {
+  validateProjectSlug_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -5213,6 +5443,34 @@ export interface operations {
       };
     };
   };
+  /** Returns all existing and imported namespaces */
+  getAllNamespaces_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getTranslationHistory: {
     parameters: {
       path: {
@@ -5372,6 +5630,60 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelProjectTransferOptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectStatsModel"];
         };
       };
       /** Bad Request */

@@ -49,7 +49,7 @@ class ImportFile(
     )
   }
 
-  fun addValueIsNotStringIssue(keyName: String, keyIndex: Int, value: Any?) {
+  fun addValueIsNotStringIssue(keyName: String, keyIndex: Int?, value: Any?) {
     addIssue(
       FileIssueType.VALUE_IS_NOT_STRING,
       mapOf(

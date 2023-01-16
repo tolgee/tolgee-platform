@@ -27,7 +27,7 @@ type ValueType = {
 };
 
 const PasswordResetView: FunctionComponent<LoginProps> = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const security = useSelector((state: AppState) => state.global.security);
   const remoteConfig = useConfig();
 

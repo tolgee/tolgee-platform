@@ -22,7 +22,7 @@ import org.springframework.http.HttpHeaders
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/projects/") {
+class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData
 
