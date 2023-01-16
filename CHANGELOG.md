@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/tolgee/tolgee-platform/compare/v3.2.0...v3.2.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* API Docs > document languages parameter in getAllTranslations ([#1505](https://github.com/tolgee/tolgee-platform/issues/1505)) ([881245e](https://github.com/tolgee/tolgee-platform/commit/881245ea975e19aab83d75a9a5cfde392dea3987))
+
 # [3.2.0](https://github.com/tolgee/tolgee-platform/compare/v3.1.1...v3.2.0) (2023-01-13)
 
 
