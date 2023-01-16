@@ -1,25 +1,24 @@
 import { T, useTranslate } from '@tolgee/react';
 import { Clear } from '@mui/icons-material';
 import {
-  Select,
-  Typography,
   IconButton,
-  Tooltip,
-  useTheme,
+  Select,
   styled,
+  Tooltip,
+  Typography,
+  useTheme,
 } from '@mui/material';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -97,18 +96,6 @@ export const Filters = () => {
   const handleClearFilters = (e) => {
     setFilters({});
   };
-
-  function getFilterName(value) {
-    const option = findOption(value);
-    if (option?.label) {
-      return option.label;
-    }
-
-    const parsed = JSON.parse(value) as FilterType;
-    if (parsed.filter === 'filterNamespace') {
-      return (parsed.value as string) || t('namespace_default');
-    }
-  }
 
   function getFilterName(value) {
     const option = findOption(value);

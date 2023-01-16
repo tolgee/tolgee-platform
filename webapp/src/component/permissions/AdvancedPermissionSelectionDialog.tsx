@@ -28,7 +28,7 @@ export const AdvancedPermissionSelectionDialog: FC<{
     >
       <DialogTitle>
         <T
-          parameters={{ userName: props.user.name! }}
+          params={{ userName: props.user.name! }}
           keyName="advanced_permissions_dialog_title"
         />
       </DialogTitle>

@@ -153,6 +153,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     {/*todo: Proper Permission*/}
                     <StyledPermissions>
                       <PermissionsMenu
+                        user={null}
                         selected={values.permission}
                         onSelect={(permission) =>
                           formik.setFieldValue('permission', permission)

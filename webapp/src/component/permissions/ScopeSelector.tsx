@@ -19,19 +19,23 @@ export const ScopeSelector = () => {
     }
   }
 
-  return categories.map((category) => (
+  return (
     <>
-      <Typography variant="h6">{category.name}</Typography>
-      {category.scopes.map((scope) => (
-        <div key={scope}>
-          {scope}
-          <ScopeCheckbox
-            onChange={(_, checked) => onChange(scope, checked)}
-            selectedScopes={selectedScopes}
-            scope={scope}
-          />
-        </div>
+      {categories.map((category) => (
+        <>
+          <Typography variant="h6">{category.name}</Typography>
+          {category.scopes.map((scope) => (
+            <div key={scope}>
+              {scope}
+              <ScopeCheckbox
+                onChange={(_, checked) => onChange(scope, checked)}
+                selectedScopes={selectedScopes}
+                scope={scope}
+              />
+            </div>
+          ))}
+        </>
       ))}
     </>
-  ));
+  );
 };

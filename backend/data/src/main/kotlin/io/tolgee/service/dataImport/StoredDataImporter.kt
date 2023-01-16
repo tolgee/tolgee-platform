@@ -102,10 +102,7 @@ class StoredDataImporter(
         }
       }
     }
-
-    namespaceService.saveAll(namespacesToSave.values)
-    keyService.saveAll(keysToSave.values)
-    translationService.saveAll(translationsToSave)
+  }
 
   private fun addAllKeys() {
     importDataManager.storedKeys.map { (fileNamePair, importKey) ->

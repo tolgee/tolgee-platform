@@ -5,7 +5,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 
-
 class ImportCleanTestData {
   var project: Project
   var userAccount: UserAccount
