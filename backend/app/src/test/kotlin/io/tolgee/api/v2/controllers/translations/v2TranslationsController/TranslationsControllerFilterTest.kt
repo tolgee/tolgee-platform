@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.development.testDataBuilder.data.TranslationSourceChangeStateTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -312,5 +313,32 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
     performProjectAuthGet("/translations?filterState=de,REVIIIIIIEWED")
       .andIsBadRequest.andAssertError.hasCode("filter_by_value_state_not_valid")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by outdated`() {
+    val testData = TranslationSourceChangeStateTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterOutdatedLanguage=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("A key")
+        node("[0].translations.de.outdated").isEqualTo(true)
+      }
+    }
+    performProjectAuthGet("/translations?filterNotOutdatedLanguage=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("B key")
+        node("[0].translations.de.outdated").isEqualTo(false)
+      }
+    }
+    performProjectAuthGet("/translations?filterNotOutdatedLanguage=de&filterOutdatedLanguage=de")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys").isArray.hasSize(2)
+      }
   }
 }

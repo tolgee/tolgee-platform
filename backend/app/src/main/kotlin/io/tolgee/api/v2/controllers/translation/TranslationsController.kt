@@ -277,6 +277,21 @@ When null, resulting file will be a flat key-value object.
     return translationModelAssembler.toModel(translation)
   }
 
+  @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @Operation(summary = """Set's "outdated" indication""")
+  @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
+  fun setOutdated(
+    @PathVariable translationId: Long,
+    @PathVariable state: Boolean
+  ): TranslationModel {
+    val translation = translationService.get(translationId)
+    translation.checkFromProject()
+    translationService.setOutdated(translation, state)
+    return translationModelAssembler.toModel(translation)
+  }
+
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
   @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)

@@ -2244,4 +2244,11 @@
     <changeSet author="jenik (generated)" id="1665492431777-7">
         <dropColumn columnName="archive_id" tableName="import_file"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-1">
+        <addColumn tableName="translation">
+            <column name="outdated" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
