@@ -13,14 +13,15 @@ import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 type State = components['schemas']['TranslationViewModel']['state'];
 
 const StyledControlsWrapper = styled('div')`
+  display: grid;
   box-sizing: border-box;
   grid-area: controls;
-  display: grid;
   justify-content: end;
   overflow: hidden;
   min-height: 44px;
   padding: 12px 14px 12px 12px;
   margin-top: -16px;
+  margin-right: -10px;
 `;
 
 const StyledStateButtons = styled('div')`
