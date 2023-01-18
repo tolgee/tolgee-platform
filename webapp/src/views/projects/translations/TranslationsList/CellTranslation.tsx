@@ -25,6 +25,7 @@ import { useEffect } from 'react';
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
 const StyledWrapper = styled(StyledCell)`
   &.splitContainer {
@@ -107,14 +108,16 @@ export const CellTranslation: React.FC<Props> = ({
   const { setTranslationState, setTranslationOutdated } =
     useTranslationsActions();
 
-  const translation = data.translations[language.tag];
+  const translation = data.translations[language.tag] as
+    | TranslationViewModel
+    | undefined;
 
-  const [displayOutdated, setDisplayOutdated] = useState(translation.outdated);
+  const [displayOutdated, setDisplayOutdated] = useState(translation?.outdated);
   useEffect(() => {
-    if (translation.outdated) {
+    if (translation?.outdated) {
       setDisplayOutdated(true);
     }
-  }, [translation.outdated]);
+  }, [translation?.outdated]);
 
   const {
     isEditing,

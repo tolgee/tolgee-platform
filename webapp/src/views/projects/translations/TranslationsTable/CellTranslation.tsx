@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -22,6 +22,7 @@ import { styled } from '@mui/material';
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
 const StyledContainer = styled(StyledCell)`
   display: flex;
@@ -76,7 +77,9 @@ export const CellTranslation: React.FC<Props> = ({
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
 
-  const translation = data.translations[language.tag];
+  const translation = data.translations[language.tag] as
+    | TranslationViewModel
+    | undefined;
   const state = translation?.state || 'UNTRANSLATED';
 
   const {
@@ -98,7 +101,12 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef,
   });
 
-  const [displayOutdated] = useState(data.translations[language.tag]?.outdated);
+  const [displayOutdated, setDisplayOutdated] = useState(translation?.outdated);
+  useEffect(() => {
+    if (translation?.outdated) {
+      setDisplayOutdated(true);
+    }
+  }, [translation?.outdated]);
 
   const { setTranslationState, setTranslationOutdated } =
     useTranslationsActions();
@@ -189,7 +197,7 @@ export const CellTranslation: React.FC<Props> = ({
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
             displayOutdated={displayOutdated}
-            outdated={translation.outdated}
+            outdated={translation?.outdated}
             onOutdatedChange={handleOutdatedChange}
             lastFocusable={lastFocusable}
             active={active}
