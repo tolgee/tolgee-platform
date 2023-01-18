@@ -1,3 +1,10 @@
+## [3.2.2](https://github.com/tolgee/tolgee-platform/compare/v3.2.1...v3.2.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* vanilla guide ([#1508](https://github.com/tolgee/tolgee-platform/issues/1508)) ([f511074](https://github.com/tolgee/tolgee-platform/commit/f5110743acf2c0edcb1f26e46af702e622dfe4c2))
+
 ## [3.2.1](https://github.com/tolgee/tolgee-platform/compare/v3.2.0...v3.2.1) (2023-01-16)
 
 
