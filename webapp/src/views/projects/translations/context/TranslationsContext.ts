@@ -20,6 +20,7 @@ import {
   KeyUpdateData,
   RemoveTag,
   ScrollToElement,
+  SetTranslationOutdated,
   SetTranslationState,
   UpdateTranslation,
   ViewMode,
@@ -171,6 +172,9 @@ export const [
     },
     setTranslationState(state: SetTranslationState) {
       return stateService.changeState(state);
+    },
+    setTranslationOutdated(state: SetTranslationOutdated) {
+      return stateService.changeOutdated(state);
     },
     addTag(tag: AddTag) {
       return tagsService.addTag(tag);

@@ -107,6 +107,9 @@ export interface paths {
     put: operations["update_1"];
     delete: operations["delete_5"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
+    put: operations["setOutdated"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
     put: operations["dismissAutoTranslatedState"];
   };
@@ -187,6 +190,9 @@ export interface paths {
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
+  };
+  "/v2/projects/{projectId}/keys/import": {
+    post: operations["importKeys"];
   };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create"];
@@ -635,6 +641,8 @@ export interface components {
       text?: string;
       /** State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      /** Whether base language translation was changed after this translation was updated */
+      outdated: boolean;
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
@@ -765,12 +773,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
-      createdAt: number;
-      updatedAt: number;
       id: number;
       description: string;
+      createdAt: number;
+      updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -841,15 +849,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
-      projectId: number;
-      username?: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
-      scopes: string[];
       id: number;
       description: string;
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -870,6 +878,17 @@ export interface components {
       organizationId: number;
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
+    };
+    ImportKeysDto: {
+      keys: components["schemas"]["ImportKeysItemDto"][];
+    };
+    ImportKeysItemDto: {
+      /** Key name to set translations for */
+      name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      /** Object mapping language tag to translation */
+      translations: { [key: string]: string };
     };
     CreateKeyDto: {
       /** Name of the key */
@@ -1175,6 +1194,7 @@ export interface components {
         | "SET_TRANSLATION_STATE"
         | "SET_TRANSLATIONS"
         | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
         | "TRANSLATION_COMMENT_ADD"
         | "TRANSLATION_COMMENT_DELETE"
         | "TRANSLATION_COMMENT_EDIT"
@@ -1332,6 +1352,8 @@ export interface components {
       text?: string;
       /** State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      /** Whether base language translation was changed after this translation was updated */
+      outdated: boolean;
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
@@ -1452,12 +1474,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      lastUsedAt?: number;
-      expiresAt?: number;
-      createdAt: number;
-      updatedAt: number;
       id: number;
       description: string;
+      createdAt: number;
+      updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1510,15 +1532,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
-      projectId: number;
-      username?: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
-      scopes: string[];
       id: number;
       description: string;
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2606,6 +2628,35 @@ export interface operations {
       };
     };
   };
+  setOutdated: {
+    parameters: {
+      path: {
+        translationId: number;
+        state: boolean;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   dismissAutoTranslatedState: {
     parameters: {
       path: {
@@ -2679,6 +2730,10 @@ export interface operations {
         filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -3600,6 +3655,34 @@ export interface operations {
       };
     };
   };
+  importKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysDto"];
+      };
+    };
+  };
   create: {
     parameters: {
       path: {
@@ -3695,6 +3778,10 @@ export interface operations {
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
+      query: {
+        /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
+        structureDelimiter?: string;
+      };
       path: {
         projectId: number;
       };
@@ -5166,6 +5253,10 @@ export interface operations {
         filterNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
       };
       path: {
         projectId: number;

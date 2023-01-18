@@ -1,9 +1,15 @@
 import React from 'react';
-import { Edit, CameraAlt } from '@mui/icons-material';
 import { T } from '@tolgee/react';
+import { Edit, CameraAlt } from '@mui/icons-material';
+import { styled } from '@mui/material';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
+
+const StyledControls = styled('div')`
+  display: flex;
+  gap: 8px;
+`;
 
 type ControlsProps = {
   editEnabled?: boolean;
@@ -27,7 +33,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
   const displayScreenshots = onScreenshots;
 
   return (
-    <>
+    <StyledControls>
       {displayEdit && (
         <ControlsButton
           onClick={onEdit}
@@ -56,6 +62,6 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           />
         </ControlsButton>
       )}
-    </>
+    </StyledControls>
   );
 };

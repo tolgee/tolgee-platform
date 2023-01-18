@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { styled } from '@mui/material';
 
@@ -20,11 +20,11 @@ import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
 import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { useEffect } from 'react';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
-type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
 const StyledWrapper = styled(StyledCell)`
   &.splitContainer {
@@ -80,17 +80,6 @@ const StyledTranslationOpened = styled(TranslationOpened)`
   flex-grow: 1;
 `;
 
-const StyledControlsWrapper = styled('div')`
-  box-sizing: border-box;
-  grid-area: controls;
-  display: flex;
-  justify-content: flex-end;
-  overflow: hidden;
-  min-height: 44px;
-  padding: 12px 14px 12px 12px;
-  margin-top: -16px;
-`;
-
 type Props = {
   data: KeyWithTranslationsModel;
   language: LanguageModel;
@@ -115,11 +104,17 @@ export const CellTranslation: React.FC<Props> = ({
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
-  const { setTranslationState } = useTranslationsActions();
+  const { setTranslationState, setTranslationOutdated } =
+    useTranslationsActions();
 
-  const translation = data.translations[language.tag] as
-    | TranslationViewModel
-    | undefined;
+  const translation = data.translations[language.tag];
+
+  const [displayOutdated, setDisplayOutdated] = useState(translation.outdated);
+  useEffect(() => {
+    if (translation.outdated) {
+      setDisplayOutdated(true);
+    }
+  }, [translation.outdated]);
 
   const {
     isEditing,
@@ -146,6 +141,15 @@ export const CellTranslation: React.FC<Props> = ({
       language: language.tag,
       translationId: data.translations[language.tag]?.id,
       state,
+    });
+  };
+
+  const handleOutdatedChange = (outdated: boolean) => {
+    setTranslationOutdated({
+      keyId: data.keyId,
+      translationId: translation?.id as number,
+      language: language.tag as string,
+      outdated,
     });
   };
 
@@ -209,27 +213,22 @@ export const CellTranslation: React.FC<Props> = ({
 
         <CellStateBar state={state} onResize={handleResize} />
 
-        <StyledControlsWrapper>
-          {!isEditing &&
-            (active ? (
-              <ControlsTranslation
-                onEdit={() => handleOpen('editor')}
-                onComments={() => handleOpen('comments')}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-                editEnabled={editEnabled}
-                state={state}
-                onStateChange={handleStateChange}
-              />
-            ) : (
-              // hide as many components as possible in order to be performant
-              <ControlsTranslation
-                lastFocusable={lastFocusable}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-              />
-            ))}
-        </StyledControlsWrapper>
+        {!isEditing && (
+          <ControlsTranslation
+            onEdit={() => handleOpen('editor')}
+            onComments={() => handleOpen('comments')}
+            commentsCount={translation?.commentCount}
+            unresolvedCommentCount={translation?.unresolvedCommentCount}
+            editEnabled={editEnabled}
+            state={state}
+            onStateChange={handleStateChange}
+            displayOutdated={displayOutdated}
+            outdated={translation?.outdated}
+            onOutdatedChange={handleOutdatedChange}
+            active={active}
+            lastFocusable={lastFocusable}
+          />
+        )}
       </StyledContainer>
 
       {editVal && (
@@ -249,6 +248,9 @@ export const CellTranslation: React.FC<Props> = ({
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
           cellRef={cellRef}
+          displayOutdated={displayOutdated}
+          outdated={translation?.outdated}
+          onOutdatedChange={handleOutdatedChange}
         />
       )}
     </StyledWrapper>

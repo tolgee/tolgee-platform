@@ -311,6 +311,7 @@ declare namespace DataCy {
         "translations-cell-close" |
         "translations-cell-comments-button" |
         "translations-cell-edit-button" |
+        "translations-cell-outdated-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-tab-comments" |

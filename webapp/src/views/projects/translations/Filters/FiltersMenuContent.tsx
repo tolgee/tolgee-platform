@@ -30,7 +30,7 @@ export const FiltersMenuContent = () => {
     if (!group.options?.length) {
       return;
     } else {
-      if (group.type !== 'multi') {
+      if (group.type !== 'multi' && !group.name) {
         options.push(
           <CompactListSubheader
             key={i1}

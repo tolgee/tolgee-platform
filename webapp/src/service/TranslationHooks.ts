@@ -30,6 +30,12 @@ export const usePutTranslationState = () =>
     method: 'put',
   });
 
+export const usePutTranslationOutdated = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}',
+    method: 'put',
+  });
+
 export const usePutTag = () =>
   useApiMutation({
     url: '/v2/projects/{projectId}/keys/{keyId}/tags',

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -45,17 +45,6 @@ const StyledAutoIndicator = styled(AutoTranslationIndicator)`
 const StyledTranslation = styled('div')`
   flex-grow: 1;
   margin: ${({ theme }) => theme.spacing(1.5, 1.5, 1, 1.5)};
-`;
-
-const StyledControls = styled('div')`
-  box-sizing: border-box;
-  grid-area: controls;
-  display: flex;
-  justify-content: flex-end;
-  overflow: hidden;
-  min-height: 44px;
-  padding: 12px 14px 12px 12px;
-  margin-top: -16px;
 `;
 
 type Props = {
@@ -108,7 +97,11 @@ export const CellTranslation: React.FC<Props> = ({
     language: language.tag,
     cellRef,
   });
-  const { setTranslationState } = useTranslationsActions();
+
+  const [displayOutdated] = useState(data.translations[language.tag]?.outdated);
+
+  const { setTranslationState, setTranslationOutdated } =
+    useTranslationsActions();
 
   const handleStateChange = (state: StateType) => {
     setTranslationState({
@@ -116,6 +109,15 @@ export const CellTranslation: React.FC<Props> = ({
       translationId: translation?.id as number,
       language: language.tag as string,
       state,
+    });
+  };
+
+  const handleOutdatedChange = (outdated: boolean) => {
+    setTranslationOutdated({
+      keyId: data.keyId,
+      translationId: translation?.id as number,
+      language: language.tag as string,
+      outdated,
     });
   };
 
@@ -159,6 +161,9 @@ export const CellTranslation: React.FC<Props> = ({
           editEnabled={editEnabled}
           cellRef={containerRef}
           cellPosition={cellPosition}
+          displayOutdated={displayOutdated}
+          outdated={translation?.outdated}
+          onOutdatedChange={handleOutdatedChange}
         />
       ) : (
         <>
@@ -175,26 +180,20 @@ export const CellTranslation: React.FC<Props> = ({
             <StyledAutoIndicator keyData={data} lang={language.tag} />
           </StyledTranslation>
 
-          <StyledControls>
-            {active ? (
-              <ControlsTranslation
-                onEdit={() => handleOpen('editor')}
-                editEnabled={editEnabled}
-                state={state}
-                onStateChange={handleStateChange}
-                onComments={() => handleOpen('comments')}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-              />
-            ) : (
-              // hide as many components as possible in order to be performant
-              <ControlsTranslation
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-                lastFocusable={lastFocusable}
-              />
-            )}
-          </StyledControls>
+          <ControlsTranslation
+            onEdit={() => handleOpen('editor')}
+            editEnabled={editEnabled}
+            state={state}
+            onStateChange={handleStateChange}
+            onComments={() => handleOpen('comments')}
+            commentsCount={translation?.commentCount}
+            unresolvedCommentCount={translation?.unresolvedCommentCount}
+            displayOutdated={displayOutdated}
+            outdated={translation.outdated}
+            onOutdatedChange={handleOutdatedChange}
+            lastFocusable={lastFocusable}
+            active={active}
+          />
         </>
       )}
 
