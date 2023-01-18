@@ -20,7 +20,8 @@ You need `@tolgee/web` library to translate your texts:
 
 ```javascript
 // index.js
-const { Tolgee, FormatSimple, DevTools, BackendFetch } = window['@tolgee/web'];
+const { Tolgee, InContextTools, FormatSimple, BackendFetch } =
+  window['@tolgee/web'];
 
 const tolgee = Tolgee()
   .use(InContextTools())
