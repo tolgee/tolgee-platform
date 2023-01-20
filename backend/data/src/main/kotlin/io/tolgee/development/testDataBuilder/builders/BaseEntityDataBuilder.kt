@@ -9,8 +9,8 @@ abstract class BaseEntityDataBuilder<Entity, Builder> : EntityDataBuilder<Entity
     instance: Builder,
     ft: AddedEntity.() -> Unit
   ): Builder {
-    collection.add(instance)
     ft(instance.self)
+    collection.add(instance)
     return instance
   }
 

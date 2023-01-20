@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
@@ -14,6 +15,8 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -208,5 +211,9 @@ class KeyService(
         }
       }
     }
+  }
+
+  fun findKeys(search: String, languageTag: String?, project: ProjectDto, pageable: Pageable): Page<KeySearchResultView> {
+    return keyRepository.findKeys(search, project.id, languageTag, pageable)
   }
 }

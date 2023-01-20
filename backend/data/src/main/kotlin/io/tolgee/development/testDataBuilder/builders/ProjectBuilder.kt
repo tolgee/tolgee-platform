@@ -53,7 +53,7 @@ class ProjectBuilder(
   fun addLanguage(ft: FT<Language>) =
     addOperation(data.languages, ft)
 
-  fun addKey(ft: FT<Key>) = addOperation(data.keys, ft).also { it.self { project = this@ProjectBuilder.self } }
+  fun addKey(ft: FT<Key>) = addOperation(data.keys, ft)
 
   fun addTranslation(ft: FT<Translation>) = addOperation(data.translations, ft)
 
@@ -91,6 +91,10 @@ class ProjectBuilder(
       originalName = "Čeština"
       tag = "cs"
     }
+  }
+
+  fun getLanguageByTag(tag: String): LanguageBuilder? {
+    return data.languages.find { it.self.tag == tag }
   }
 
   val onlyUser get() = this.self.organizationOwner?.memberRoles?.singleOrNull()?.user
