@@ -2251,4 +2251,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431778-0">
+        <sql dbms="postgresql">
+            CREATE INDEX key_name ON key USING GIN (name gin_trgm_ops);
+        </sql>
+    </changeSet>
 </databaseChangeLog>

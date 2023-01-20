@@ -92,4 +92,8 @@ class Key(
       }
     }
   }
+
+  override fun hashCode(): Int {
+    return id.hashCode() * name.hashCode()
+  }
 }

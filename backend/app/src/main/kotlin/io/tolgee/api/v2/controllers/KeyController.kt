@@ -1,11 +1,14 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeySearchResultModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeySearchSearchResultModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
@@ -23,6 +26,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import org.springdoc.api.annotations.ParameterObject
@@ -42,6 +46,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
@@ -63,7 +68,9 @@ class KeyController(
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
   private val applicationContext: ApplicationContext,
-  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>
+  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>,
+  private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -145,6 +152,26 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
+  }
+
+  @GetMapping("/search")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(
+    summary = "This endpoint helps you to find desired key by keyName, " +
+      "base translation or translation in specified language."
+  )
+  fun searchForKey(
+    @RequestParam
+    @Parameter(description = "Search query")
+    search: String,
+    @RequestParam
+    @Parameter(description = "Language to search in")
+    languageTag: String? = null,
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<KeySearchSearchResultModel> {
+    val result = keyService.findKeys(search, languageTag, projectHolder.project, pageable)
+    return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
   private fun Key.checkInProject() {

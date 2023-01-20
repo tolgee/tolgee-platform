@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
@@ -223,6 +224,10 @@ class KeyService(
     }
 
     tagService.tagKeys(toTag)
+  }
+
+  fun findKeys(search: String, languageTag: String?, project: ProjectDto, pageable: Pageable): Page<KeySearchResultView> {
+    return keyRepository.findKeys(search, project.id, languageTag, pageable)
   }
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
