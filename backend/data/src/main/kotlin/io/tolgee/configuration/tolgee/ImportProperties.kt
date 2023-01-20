@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class ImportProperties {
   var dir: String? = null
   var createImplicitApiKey: Boolean = false
+  var baseLanguageTag: String = "en"
 }
