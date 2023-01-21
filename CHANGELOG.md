@@ -1,3 +1,10 @@
+## [3.2.3](https://github.com/tolgee/tolgee-platform/compare/v3.2.2...v3.2.3) (2023-01-21)
+
+
+### Bug Fixes
+
+* Startup import base language ([#1512](https://github.com/tolgee/tolgee-platform/issues/1512)) ([8be6f72](https://github.com/tolgee/tolgee-platform/commit/8be6f726757c7ade39e3c9c97e47062c990a1e04))
+
 ## [3.2.2](https://github.com/tolgee/tolgee-platform/compare/v3.2.1...v3.2.2) (2023-01-18)
 
 
