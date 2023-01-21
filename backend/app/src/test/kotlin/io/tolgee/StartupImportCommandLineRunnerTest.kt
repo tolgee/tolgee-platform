@@ -41,6 +41,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
         ImportProperties().apply {
           dir = importDir.file.absolutePath
           createImplicitApiKey = true
+          baseLanguageTag = "de"
         }
       )
       base = dbPopulator.createBase("labaala", "admin")
@@ -70,6 +71,16 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
       assertThat(projects).isNotEmpty
       val project = projects.first()
       project.namespaces.assert.hasSize(7)
+    }
+  }
+
+  @Test
+  fun `sets base language`() {
+    executeInNewTransaction {
+      val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
+      assertThat(projects).isNotEmpty
+      val project = projects.first()
+      project.baseLanguage!!.tag.assert.isEqualTo("de")
     }
   }
 }
