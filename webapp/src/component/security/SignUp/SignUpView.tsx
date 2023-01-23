@@ -128,7 +128,9 @@ const SignUpView: FunctionComponent = () => {
             </Alert>
           ) : (
             <StyledGrid>
-              <SignUpForm onSubmit={props.onSubmit} />
+              <div>
+                <SignUpForm onSubmit={props.onSubmit} />
+              </div>
 
               <StyledSpacer />
 
