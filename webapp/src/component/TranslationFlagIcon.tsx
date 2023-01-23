@@ -2,7 +2,7 @@ import { Tooltip, styled } from '@mui/material';
 
 const StyledImgWrapper = styled('div')`
   display: flex;
-  & > svg {
+  & svg {
     font-size: 16px;
   }
 `;
