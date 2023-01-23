@@ -29,13 +29,9 @@ describe('Translation states', () => {
   });
 
   it('outdated indicator logic', () => {
-    getOutdatedIndicator('Studený přeložený text 1')
-      .should('be.visible')
-      .click();
+    getOutdatedIndicator('Studený přeložený text 1').should('be.visible');
+    getRemoveOutdatedIndicator('Studený přeložený text 1').click();
     waitForGlobalLoading();
-    getOutdatedIndicator('Studený přeložený text 1').should('exist');
-
-    visitTranslations(project.id);
     getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
 
     editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
@@ -44,9 +40,8 @@ describe('Translation states', () => {
   });
 
   it('shows action in activity', () => {
-    getOutdatedIndicator('Studený přeložený text 1')
-      .should('be.visible')
-      .click();
+    getOutdatedIndicator('Studený přeložený text 1').should('be.visible');
+    getRemoveOutdatedIndicator('Studený přeložený text 1').click();
     visitProjectDashboard(project.id);
 
     const lastActivity = cy.gcy('activity-compact').first();
@@ -54,9 +49,13 @@ describe('Translation states', () => {
   });
 
   const getOutdatedIndicator = (translationText: string) => {
-    return getCell(translationText).findDcy(
-      'translations-cell-outdated-button'
-    );
+    return getCell(translationText).findDcy('translations-outdated-indicator');
+  };
+
+  const getRemoveOutdatedIndicator = (translationText: string) => {
+    return getCell(translationText)
+      .findDcy('translations-outdated-clear-button')
+      .invoke('show');
   };
 
   const getCell = (translationText: string) => {
