@@ -97,5 +97,5 @@ class ProjectBuilder(
     return data.languages.find { it.self.tag == tag }
   }
 
-  val onlyUser get() = this.self.organizationOwner?.memberRoles?.singleOrNull()?.user
+  val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
 }
