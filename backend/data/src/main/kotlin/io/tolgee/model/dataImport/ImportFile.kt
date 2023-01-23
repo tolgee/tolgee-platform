@@ -32,11 +32,12 @@ class ImportFile(
   var namespace: String? = null
 
   fun addIssue(type: FileIssueType, params: Map<FileIssueParamType, String>) {
-    ImportFileIssue(file = this, type = type).apply {
+    val issue = ImportFileIssue(file = this, type = type).apply {
       this.params = params.map {
         ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
       }.toMutableList()
     }
+    this.issues.add(issue)
   }
 
   fun addKeyIsNotStringIssue(keyName: Any, keyIndex: Int) {

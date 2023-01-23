@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull
     )
   ]
 )
-data class OrganizationRole(
+class OrganizationRole(
   @OneToOne
   var invitation: Invitation? = null,
 
