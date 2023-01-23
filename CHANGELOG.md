@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/tolgee/tolgee-platform/compare/v3.2.3...v3.3.0) (2023-01-23)
+
+
+### Features
+
+* fix signup error view ([#1514](https://github.com/tolgee/tolgee-platform/issues/1514)) ([11bd00b](https://github.com/tolgee/tolgee-platform/commit/11bd00ba78b8054cdc3473fa969cc856036f621d))
+
 ## [3.2.3](https://github.com/tolgee/tolgee-platform/compare/v3.2.2...v3.2.3) (2023-01-21)
 
 
