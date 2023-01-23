@@ -96,9 +96,6 @@ type Props = {
   editEnabled: boolean;
   cellRef: React.RefObject<HTMLDivElement>;
   cellPosition?: string;
-  displayOutdated?: boolean;
-  outdated?: boolean;
-  onOutdatedChange?: (changed: boolean) => void;
 };
 
 export const TranslationOpened: React.FC<Props> = ({
@@ -119,9 +116,6 @@ export const TranslationOpened: React.FC<Props> = ({
   editEnabled,
   cellRef,
   cellPosition,
-  displayOutdated,
-  outdated,
-  onOutdatedChange,
 }) => {
   const project = useProject();
   const { setTranslationState, updateEdit } = useTranslationsActions();
@@ -223,9 +217,6 @@ export const TranslationOpened: React.FC<Props> = ({
               onSave={onSave}
               onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
-              displayOutdated={displayOutdated}
-              outdated={outdated}
-              onOutdatedChange={onOutdatedChange}
             />
           </StyledEditorControls>
           {!language.base && (

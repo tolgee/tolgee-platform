@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -15,7 +15,7 @@ import {
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
-import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { TranslationFlags } from '../cell/TranslationFlags';
 import { StateType } from 'tg.constants/translationStates';
 import { styled } from '@mui/material';
 
@@ -38,7 +38,7 @@ const StyledTranslationOpened = styled(TranslationOpened)`
   padding-left: 4px;
 `;
 
-const StyledAutoIndicator = styled(AutoTranslationIndicator)`
+const StyledAutoIndicator = styled(TranslationFlags)`
   height: 0;
   position: relative;
 `;
@@ -101,15 +101,7 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef,
   });
 
-  const [displayOutdated, setDisplayOutdated] = useState(translation?.outdated);
-  useEffect(() => {
-    if (translation?.outdated) {
-      setDisplayOutdated(true);
-    }
-  }, [translation?.outdated]);
-
-  const { setTranslationState, setTranslationOutdated } =
-    useTranslationsActions();
+  const { setTranslationState } = useTranslationsActions();
 
   const handleStateChange = (state: StateType) => {
     setTranslationState({
@@ -117,15 +109,6 @@ export const CellTranslation: React.FC<Props> = ({
       translationId: translation?.id as number,
       language: language.tag as string,
       state,
-    });
-  };
-
-  const handleOutdatedChange = (outdated: boolean) => {
-    setTranslationOutdated({
-      keyId: data.keyId,
-      translationId: translation?.id as number,
-      language: language.tag as string,
-      outdated,
     });
   };
 
@@ -169,9 +152,6 @@ export const CellTranslation: React.FC<Props> = ({
           editEnabled={editEnabled}
           cellRef={containerRef}
           cellPosition={cellPosition}
-          displayOutdated={displayOutdated}
-          outdated={translation?.outdated}
-          onOutdatedChange={handleOutdatedChange}
         />
       ) : (
         <>
@@ -196,9 +176,6 @@ export const CellTranslation: React.FC<Props> = ({
             onComments={() => handleOpen('comments')}
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
-            displayOutdated={displayOutdated}
-            outdated={translation?.outdated}
-            onOutdatedChange={handleOutdatedChange}
             lastFocusable={lastFocusable}
             active={active}
           />

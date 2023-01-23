@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { styled } from '@mui/material';
-import { Edit, Comment, Error, ErrorOutline } from '@mui/icons-material';
+import { Edit, Comment } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -30,10 +30,6 @@ const StyledStateButtons = styled('div')`
   padding-right: 8px;
 `;
 
-const ActiveError = styled(Error)`
-  color: ${({ theme }) => theme.palette.primary.main};
-`;
-
 const ActiveComment = styled(Comment)`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
@@ -48,9 +44,6 @@ type ControlsProps = {
   unresolvedCommentCount: number | undefined;
   // render last focusable button
   lastFocusable: boolean;
-  displayOutdated?: boolean;
-  outdated?: boolean;
-  onOutdatedChange?: (changed: boolean) => void;
   active?: boolean;
 };
 
@@ -63,9 +56,6 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   commentsCount,
   unresolvedCommentCount,
   lastFocusable,
-  outdated,
-  displayOutdated,
-  onOutdatedChange,
   active,
 }) => {
   const spots: string[] = [];
@@ -85,15 +75,10 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   if (displayComments) {
     spots.push('comments');
   }
-  if (displayOutdated) {
-    spots.push('outdated');
-  }
 
   const inDomTransitionButtons = displayTransitionButtons && active;
   const inDomEdit = displayEdit && active;
-  const inDomOutdated = displayOutdated;
-  const inDomComments =
-    displayComments || active || (lastFocusable && !inDomOutdated);
+  const inDomComments = displayComments || active || lastFocusable;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
   const gridTemplateColumns = `auto ${spots
@@ -143,24 +128,6 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
             <ActiveComment fontSize="small" />
           ) : (
             <Comment fontSize="small" />
-          )}
-        </ControlsButton>
-      )}
-      {inDomOutdated && (
-        <ControlsButton
-          style={{ gridArea: 'outdated' }}
-          onClick={() => onOutdatedChange?.(!outdated)}
-          data-cy="translations-cell-outdated-button"
-          className={clsx({
-            [CELL_SHOW_ON_HOVER]: !outdated,
-            [CELL_HIGHLIGHT_ON_HOVER]: !outdated,
-          })}
-          tooltip={<T>translations_cell_outdated</T>}
-        >
-          {outdated ? (
-            <ActiveError fontSize="small" />
-          ) : (
-            <ErrorOutline fontSize="small" />
           )}
         </ControlsButton>
       )}

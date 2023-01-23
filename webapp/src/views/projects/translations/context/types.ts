@@ -70,13 +70,6 @@ export type SetTranslationState = {
   state: StateType;
 };
 
-export type SetTranslationOutdated = {
-  keyId: number;
-  translationId: number;
-  language: string;
-  outdated: boolean;
-};
-
 export type ChangeScreenshotNum = {
   keyId: number;
   screenshotCount: number | undefined;

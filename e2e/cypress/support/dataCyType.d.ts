@@ -311,7 +311,6 @@ declare namespace DataCy {
         "translations-cell-close" |
         "translations-cell-comments-button" |
         "translations-cell-edit-button" |
-        "translations-cell-outdated-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-tab-comments" |
@@ -329,6 +328,8 @@ declare namespace DataCy {
         "translations-language-select-form-control" |
         "translations-language-select-item" |
         "translations-namespace-banner" |
+        "translations-outdated-clear-button" |
+        "translations-outdated-indicator" |
         "translations-row" |
         "translations-row-checkbox" |
         "translations-select-all-button" |

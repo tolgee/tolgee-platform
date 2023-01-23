@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from '@tolgee/react';
 import { Button, styled } from '@mui/material';
-import { CameraAlt, Error, ErrorOutline } from '@mui/icons-material';
+import { CameraAlt } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
@@ -27,10 +27,6 @@ const StyledRightPart = styled('div')`
   gap: 8px;
 `;
 
-const ActiveError = styled(Error)`
-  color: ${({ theme }) => theme.palette.primary.main};
-`;
-
 type ControlsProps = {
   state?: State;
   onSave?: () => void;
@@ -39,9 +35,6 @@ type ControlsProps = {
   onStateChange?: (state: StateType) => void;
   screenshotRef?: React.Ref<any>;
   screenshotsPresent?: boolean;
-  displayOutdated?: boolean;
-  outdated?: boolean;
-  onOutdatedChange?: (changed: boolean) => void;
 };
 
 export const ControlsEditor: React.FC<ControlsProps> = ({
@@ -52,9 +45,6 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   onStateChange,
   screenshotRef,
   screenshotsPresent,
-  displayOutdated,
-  outdated,
-  onOutdatedChange,
 }) => {
   // right section
   const displayTransitionButtons = state;
@@ -106,20 +96,6 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
                 fontSize="small"
                 color={screenshotsPresent ? 'primary' : undefined}
               />
-            </ControlsButton>
-          )}
-          {displayOutdated && (
-            <ControlsButton
-              style={{ gridArea: 'outdated' }}
-              onClick={() => onOutdatedChange?.(!outdated)}
-              tooltip={<T>translations_cell_outdated</T>}
-              data-cy="translations-cell-outdated-button"
-            >
-              {outdated ? (
-                <ActiveError fontSize="small" />
-              ) : (
-                <ErrorOutline fontSize="small" />
-              )}
             </ControlsButton>
           )}
         </StyledRightPart>
