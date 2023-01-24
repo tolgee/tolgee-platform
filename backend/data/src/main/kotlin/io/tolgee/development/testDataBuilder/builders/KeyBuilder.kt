@@ -44,4 +44,11 @@ class KeyBuilder(
   }
 
   fun addScreenshot(ft: FT<Screenshot>) = addOperation(data.screenshots, ft)
+
+  fun addTranslation(languageTag: String, text: String?) {
+    addTranslation {
+      this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
+      this.text = text
+    }
+  }
 }

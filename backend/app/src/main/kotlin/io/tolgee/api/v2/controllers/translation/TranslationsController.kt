@@ -311,24 +311,6 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
 
-  @GetMapping(value = [""])
-  @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @Operation(
-    summary = """
-      
-    """
-  )
-  fun importKeysWithTranslations(
-    @PathVariable translationId: Long,
-    @ParameterObject @SortDefault(sort = ["timestamp"], direction = Sort.Direction.DESC) pageable: Pageable
-  ): PagedModel<TranslationHistoryModel> {
-    val translation = translationService.get(translationId)
-    translation.checkFromProject()
-    val translations = activityService.getTranslationHistory(translation.id, pageable)
-    return historyPagedAssembler.toModel(translations, historyModelAssembler)
-  }
-
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||

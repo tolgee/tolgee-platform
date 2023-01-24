@@ -18,6 +18,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
+import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -152,6 +153,15 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
+  }
+
+  @PostMapping("/import-resolvable")
+  @AccessWithApiKey([ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
+  @RequestActivity(ActivityType.IMPORT)
+  fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto) {
+    keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
   }
 
   @GetMapping("/search")
