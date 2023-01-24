@@ -10,6 +10,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
@@ -18,7 +19,6 @@ import io.tolgee.model.views.TranslationView
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Join
 import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
@@ -144,7 +144,8 @@ class QueryBase<T>(
     val screenshotRoot = screenshotSubquery.from(Screenshot::class.java)
     val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
     screenshotSubquery.select(screenshotCount)
-    val screenshotsJoin: Join<Screenshot, Key> = screenshotRoot.join(Screenshot_.key)
+    val referencesJoin = screenshotRoot.join(Screenshot_.keyScreenshotReferences)
+    val screenshotsJoin = referencesJoin.join(KeyScreenshotReference_.screenshot)
     screenshotSubquery.where(cb.equal(this.root.get(Key_.id), screenshotsJoin.get(Key_.id)))
     screenshotCountExpression = screenshotSubquery.selection
     this.querySelection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression

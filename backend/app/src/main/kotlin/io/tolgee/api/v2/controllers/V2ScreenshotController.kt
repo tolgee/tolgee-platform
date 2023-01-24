@@ -10,8 +10,10 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.ApiScope
@@ -91,9 +93,17 @@ class V2ScreenshotController(
   fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {
-      it.key.checkInProject()
+      it.checkInProject()
     }
     screenshotService.delete(screenshots)
+  }
+
+  private fun Screenshot.checkInProject() {
+    this.keyScreenshotReferences.forEach {
+      if (it.key.project.id != projectHolder.project.id) {
+        throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+      }
+    }
   }
 
   private fun Key.checkInProject() {

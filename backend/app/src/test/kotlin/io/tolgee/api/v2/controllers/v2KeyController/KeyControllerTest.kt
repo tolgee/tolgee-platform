@@ -203,7 +203,10 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2"),
         screenshotUploadedImageIds = screenshotImageIds,
-        screenshotIdsToDelete = listOf(testData.keyWithReferences.screenshots.first().id)
+        screenshotIdsToDelete = listOf(
+          testData.keyWithReferences.keyScreenshotReferences
+            .map { it.screenshot }.first().id
+        )
       )
     ).andIsOk.andAssertThatJson {
       node("id").isValidId
