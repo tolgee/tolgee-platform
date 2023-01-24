@@ -6,22 +6,27 @@ package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
-import io.tolgee.model.key.Key
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import org.apache.commons.codec.digest.DigestUtils
 import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Entity
-import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 
 @Entity
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["key"])
 class Screenshot : StandardAuditModel() {
-  @ManyToOne(optional = false)
-  lateinit var key: Key
+  @OneToMany(mappedBy = "screenshot", orphanRemoval = true)
+  var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
+
+  /**
+   * For legacy projects the path was ${key.project.id}/${key.id}
+   */
+  var path: String = ""
 
   val filename: String
     get() {
-      return "${key.project.id}/${key.id}/$hash.$extension"
+      return "$path/$hash.$extension"
     }
 
   val thumbnailFilename: String
@@ -29,7 +34,7 @@ class Screenshot : StandardAuditModel() {
       if (!hasThumbnail) {
         return filename
       }
-      return "${key.project.id}/${key.id}/${hash}_thumbnail.$extension"
+      return "$path/${hash}_thumbnail.$extension"
     }
 
   val hash: String

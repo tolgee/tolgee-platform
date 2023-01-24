@@ -4,9 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
@@ -174,12 +172,9 @@ class KeyComplexEditHelper(
     if (screenshotIds.isNotEmpty()) {
       key.project.checkScreenshotsDeletePermission()
     }
-    val screenshots = screenshotService.findByIdIn(screenshotIds).onEach {
-      if (it.key.id != key.id) {
-        throw BadRequestException(Message.SCREENSHOT_NOT_OF_KEY)
-      }
+    screenshotService.findByIdIn(screenshotIds).forEach {
+      screenshotService.removeScreenshotReference(key, it)
     }
-    screenshotService.delete(screenshots)
   }
 
   private fun Project.checkScreenshotsDeletePermission() {

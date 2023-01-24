@@ -64,12 +64,16 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun findAll() {
-    val key = keyService.create(project, CreateKeyDto("test"))
-    val key2 = keyService.create(project, CreateKeyDto("test_2"))
+    val (key, key2) = executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
+      val key2 = keyService.create(project, CreateKeyDto("test_2"))
 
-    screenshotService.store(screenshotFile, key)
-    screenshotService.store(screenshotFile, key)
-    screenshotService.store(screenshotFile, key2)
+      screenshotService.store(screenshotFile, key)
+      screenshotService.store(screenshotFile, key)
+      screenshotService.store(screenshotFile, key2)
+
+      key to key2
+    }
 
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.screenshots").isArray.hasSize(2)
@@ -88,11 +92,14 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `returns correct fileUrl when absolute url is set`() {
     tolgeeProperties.fileStorageUrl = "http://hello.com"
-    val key = keyService.create(project, CreateKeyDto("test"))
-    screenshotService.store(screenshotFile, key)
+
+    val key = executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
+      screenshotService.store(screenshotFile, key)
+      key
+    }
 
     performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
-
       node("_embedded.screenshots[0].fileUrl").isString.startsWith("http://hello.com/screenshots")
     }
   }
@@ -100,9 +107,10 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun getScreenshotFile() {
-    val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key)
-
+    val screenshot = executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
+      screenshotService.store(screenshotFile, key)
+    }
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
     val result = performAuthGet("/screenshots/${screenshot.filename}").andIsOk
       .andExpect(
@@ -116,12 +124,14 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun delete() {
-    val key = keyService.create(project, CreateKeyDto("test"))
+    val (key, list) = executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
 
-    val list = (1..20).map {
-      screenshotService.store(screenshotFile, key)
-    }.toCollection(mutableListOf())
-
+      val list = (1..20).map {
+        screenshotService.store(screenshotFile, key)
+      }.toCollection(mutableListOf())
+      key to list
+    }
     val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
 
     performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)

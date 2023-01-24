@@ -301,7 +301,10 @@ Sorting is not supported for supported. It is automatically sorted from newest t
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      return screenshotService.getKeysWithScreenshots(keyIds).associate { it.id to it.screenshots }
+      return screenshotService.getKeysWithScreenshots(keyIds).associate {
+        it.id to it.keyScreenshotReferences
+          .map { reference -> reference.screenshot }.toMutableSet()
+      }
     }
     return null
   }
