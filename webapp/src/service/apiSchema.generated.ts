@@ -503,6 +503,8 @@ export interface components {
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /** List of languages user can translate to. If null, all languages edition is permitted. */
       translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, all languages edition is permitted. */
@@ -536,8 +538,6 @@ export interface components {
         | "translation-comments.set-state"
         | "translations.state-edit"
       )[];
-      /** The user permission type. (Null if uses granular permissions) */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -862,12 +862,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
+      id: number;
       lastUsedAt?: number;
+      expiresAt?: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      description: string;
-      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -937,15 +937,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      description: string;
       id: number;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      username?: string;
+      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1568,12 +1568,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      expiresAt?: number;
+      id: number;
       lastUsedAt?: number;
+      expiresAt?: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      description: string;
-      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1626,15 +1626,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      description: string;
       id: number;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      username?: string;
+      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {

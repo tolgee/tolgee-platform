@@ -2,7 +2,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { Chip, styled } from '@mui/material';
 
-import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
+import { PermissionsMenu } from 'tg.component/PermissionsModal/PermissionsMenu';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
@@ -117,7 +117,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           />
         )}
         <PermissionsMenu
-          user={user}
+          nameInTitle={user.name}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
@@ -125,16 +125,11 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
               ? t('cannot_change_your_own_access_tooltip')
               : undefined
           }
-          selected={user.directPermission?.type}
-          onSelect={(permission) =>
-            changePermissionConfirm(permission, allLangIds)
-          }
           buttonProps={{
             size: 'small',
             disabled: isCurrentUser || isOwner,
           }}
-          minPermissions={user.organizationBasePermission.type}
-          enableAdvanced={true}
+          permissions={user.computedPermission}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

@@ -76,14 +76,13 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
       };
     });
 
-    insertTranslation( {
-        keyId: data.id,
-        keyNamespace: data.namespace,
-        keyName: data.name,
-        keyTags: data.tags,
-        screenshotCount: 0,
-        translations,
-
+    insertTranslation({
+      keyId: data.id,
+      keyNamespace: data.namespace,
+      keyName: data.name,
+      keyTags: data.tags,
+      screenshotCount: 0,
+      translations,
     });
   };
 

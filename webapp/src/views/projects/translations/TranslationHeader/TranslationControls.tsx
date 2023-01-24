@@ -13,7 +13,6 @@ import {
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
 import { StickyHeader } from './StickyHeader';
-import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
   display: flex;
