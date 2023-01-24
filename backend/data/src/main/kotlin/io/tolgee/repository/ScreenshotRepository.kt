@@ -32,4 +32,13 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
   """
   )
   fun getKeysWithScreenshots(keyIds: Collection<Long>): List<Key>
+
+  @Query(
+    """
+    from Screenshot s 
+      join fetch s.keyScreenshotReferences ksr
+    where s.id in :ids
+  """
+  )
+  fun findAllById(ids: Collection<Long>): List<Screenshot>
 }
