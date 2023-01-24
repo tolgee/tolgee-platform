@@ -153,6 +153,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
+  "/v2/organizations/{organizationId}/set-base-permissions": {
+    put: operations["setBasePermissions"];
+  };
+  "/v2/organizations/{organizationId}/set-base-permissions/{permissionType}": {
+    put: operations["setBasePermissions_1"];
+  };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
     put: operations["update_4"];
@@ -190,6 +196,9 @@ export interface paths {
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
+  };
+  "/v2/projects/{projectId}/keys/import": {
+    post: operations["importKeys"];
   };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create"];
@@ -494,13 +503,15 @@ export interface components {
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /** List of languages user can translate to. If null, all languages edition is permitted. */
       translateLanguageIds?: number[];
-      /** List of languages user can review. If null, all languages edition is permitted. */
+      /** List of languages user can change state to. If null, all languages edition is permitted. */
       stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages edition is permitted. */
       viewLanguageIds?: number[];
-      /** Has user explicitly set granular permissions */
+      /** Has user explicitly set granular permissions? */
       granular: boolean;
       /**
        * Deprecated (use translateLanguageIds).
@@ -508,7 +519,7 @@ export interface components {
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
-      /** The Granted scopes */
+      /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -520,15 +531,13 @@ export interface components {
         | "import"
         | "languages.edit"
         | "admin"
-        | "users.view"
+        | "project.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
         | "translation-comments.set-state"
         | "translations.state-edit"
       )[];
-      /** The user permission type. (Null if uses granular permissions) */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -545,7 +554,7 @@ export interface components {
     };
     /** Current user's direct permission */
     PermissionModel: {
-      /** The Granted scopes */
+      /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -557,7 +566,7 @@ export interface components {
         | "import"
         | "languages.edit"
         | "admin"
-        | "users.view"
+        | "project.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
@@ -576,9 +585,9 @@ export interface components {
       translateLanguageIds?: number[];
       /** List of languages user can view. If null, all languages edition is permitted. */
       viewLanguageIds?: number[];
-      /** List of languages user can review. If null, all languages edition is permitted. */
+      /** List of languages user can change state to. If null, all languages edition is permitted. */
       stateChangeLanguageIds?: number[];
-      /** Has user explicitly set granular permissions */
+      /** Has user explicitly set granular permissions? */
       granular: boolean;
     };
     ProjectModel: {
@@ -720,7 +729,9 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** Granted scopes for the invited user */
+      scopes?: string[];
       /** Deprecated -> use translate languages */
       languages?: number[];
       /** Languages user can translate to */
@@ -749,7 +760,7 @@ export interface components {
         | "import"
         | "languages.edit"
         | "admin"
-        | "users.view"
+        | "project.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
@@ -851,12 +862,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      id: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      description: string;
-      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -926,15 +937,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectId: number;
-      username?: string;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      description: string;
       id: number;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      username?: string;
+      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -955,6 +966,17 @@ export interface components {
       organizationId: number;
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
+    };
+    ImportKeysDto: {
+      keys: components["schemas"]["ImportKeysItemDto"][];
+    };
+    ImportKeysItemDto: {
+      /** Key name to set translations for */
+      name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      /** Object mapping language tag to translation */
+      translations: { [key: string]: string };
     };
     CreateKeyDto: {
       /** Name of the key */
@@ -1119,7 +1141,7 @@ export interface components {
         | "import"
         | "languages.edit"
         | "admin"
-        | "users.view"
+        | "project.edit"
         | "users.view"
         | "translation-comments.add"
         | "translation-comments.edit"
@@ -1178,6 +1200,7 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
+      capterraTracker?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1545,12 +1568,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      id: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      description: string;
-      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1603,15 +1626,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectId: number;
-      username?: string;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      description: string;
       id: number;
+      projectId: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
+      username?: string;
+      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2018,7 +2041,7 @@ export interface operations {
         userId: number;
       };
       query: {
-        scopes: string[];
+        scopes?: string[];
         languages?: number[];
         translateLanguages?: number[];
         viewLanguages?: number[];
@@ -3283,6 +3306,62 @@ export interface operations {
       };
     };
   };
+  setBasePermissions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        scopes: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setBasePermissions_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get_9: {
     parameters: {
       path: {
@@ -3733,6 +3812,34 @@ export interface operations {
       };
     };
   };
+  importKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysDto"];
+      };
+    };
+  };
   create: {
     parameters: {
       path: {
@@ -3828,6 +3935,10 @@ export interface operations {
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
+      query: {
+        /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
+        structureDelimiter?: string;
+      };
       path: {
         projectId: number;
       };
@@ -5252,6 +5363,7 @@ export interface operations {
   getAllTranslations: {
     parameters: {
       path: {
+        /** Comma-separated language tags to return translations in. */
         languages: string[];
         projectId: number;
       };
