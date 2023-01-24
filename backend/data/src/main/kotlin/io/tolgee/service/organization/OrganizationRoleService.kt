@@ -114,6 +114,8 @@ class OrganizationRoleService(
   ) {
     OrganizationRole(user = user, organization = organization, type = organizationRoleType)
       .let {
+        organization.memberRoles.add(it)
+        user.organizationRoles.add(it)
         organizationRoleRepository.save(it)
       }
   }

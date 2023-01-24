@@ -291,7 +291,10 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun setUsersPermissionsOwn() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+    val repo = usersAndOrganizations[1]
+      .organizationRoles[0]
+      .organization!!
+      .projects[0]
 
     loginAsUser(usersAndOrganizations[1].name)
 

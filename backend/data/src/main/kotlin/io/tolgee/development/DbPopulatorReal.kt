@@ -109,6 +109,7 @@ class DbPopulatorReal(
     project.slug = slugGenerator.generate(projectName, 3, 60) { true }
     en = createLanguage("en", project)
     de = createLanguage("de", project)
+    organization.projects.add(project)
     projectService.save(project)
     return project
   }

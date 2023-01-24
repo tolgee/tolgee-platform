@@ -113,7 +113,7 @@ class ScreenshotService(
     }
   }
 
-  fun findByIdIn(ids: Collection<Long>): MutableList<Screenshot> {
+  fun findByIdIn(ids: Collection<Long>): List<Screenshot> {
     return screenshotRepository.findAllById(ids)
   }
 

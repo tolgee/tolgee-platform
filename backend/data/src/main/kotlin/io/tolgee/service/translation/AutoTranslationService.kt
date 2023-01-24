@@ -117,7 +117,9 @@ class AutoTranslationService(
 
   private fun createNonExistingTranslations(key: Key): List<Translation> {
     return getLanguagesWithNoTranslation(key).map { language ->
-      Translation(key = key, language = language)
+      val translation = Translation(key = key, language = language)
+      key.translations.add(translation)
+      translation
     }
   }
 
