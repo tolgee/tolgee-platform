@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -15,6 +16,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -29,7 +31,8 @@ class KeyService(
   private val keyMetaService: KeyMetaService,
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val applicationContext: ApplicationContext
 ) {
   private lateinit var translationService: TranslationService
 
@@ -213,7 +216,18 @@ class KeyService(
     }
   }
 
-  fun findKeys(search: String, languageTag: String?, project: ProjectDto, pageable: Pageable): Page<KeySearchResultView> {
+  fun findKeys(
+    search: String,
+    languageTag: String?,
+    project: ProjectDto,
+    pageable: Pageable
+  ): Page<KeySearchResultView> {
     return keyRepository.findKeys(search, project.id, languageTag, pageable)
+  }
+
+  @Transactional
+  fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project) {
+    val importer = ResolvingKeyImporter(applicationContext = applicationContext, keysToImport = keys, projectEntity = projectEntity)
+    importer()
   }
 }

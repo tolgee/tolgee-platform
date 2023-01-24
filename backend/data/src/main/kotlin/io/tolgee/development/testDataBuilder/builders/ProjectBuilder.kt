@@ -93,6 +93,16 @@ class ProjectBuilder(
     }
   }
 
+  fun addKey(namespace: String? = null, keyName: String, ft: KeyBuilder.() -> Unit): KeyBuilder {
+    return addKey(keyName, ft).build { setNamespace(namespace) }
+  }
+
+  fun addKey(keyName: String, ft: KeyBuilder.() -> Unit): KeyBuilder {
+    return addKey {
+      name = keyName
+    }.apply(ft)
+  }
+
   fun getLanguageByTag(tag: String): LanguageBuilder? {
     return data.languages.find { it.self.tag == tag }
   }
