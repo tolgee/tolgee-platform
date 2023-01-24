@@ -20,13 +20,13 @@ class ImportFile(
   @ManyToOne(optional = false)
   val import: Import,
 ) : StandardAuditModel() {
-  @OneToMany(mappedBy = "file")
+  @OneToMany(mappedBy = "file", orphanRemoval = true)
   var issues: MutableList<ImportFileIssue> = mutableListOf()
 
-  @OneToMany(mappedBy = "file")
+  @OneToMany(mappedBy = "file", orphanRemoval = true)
   var keys: MutableList<ImportKey> = mutableListOf()
 
-  @OneToMany(mappedBy = "file")
+  @OneToMany(mappedBy = "file", orphanRemoval = true)
   var languages: MutableList<ImportLanguage> = mutableListOf()
 
   var namespace: String? = null

@@ -18,6 +18,6 @@ class ImportFileIssue(
   @Enumerated
   var type: FileIssueType = FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
 
-  @OneToMany(mappedBy = "issue")
+  @OneToMany(mappedBy = "issue", orphanRemoval = true)
   var params: MutableList<ImportFileIssueParam>? = null,
 ) : StandardAuditModel()

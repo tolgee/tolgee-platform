@@ -21,7 +21,7 @@ class ImportKey(
   var file: ImportFile
 ) : StandardAuditModel(), WithKeyMeta {
 
-  @OneToMany(mappedBy = "key")
+  @OneToMany(mappedBy = "key", orphanRemoval = true)
   var translations: MutableList<ImportTranslation> = mutableListOf()
 
   @OneToOne(mappedBy = "importKey")
