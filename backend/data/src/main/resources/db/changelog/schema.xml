@@ -2251,9 +2251,27 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1665492431778-0">
+    <changeSet author="jenik (generated)" id="1665492431778-1">
         <sql dbms="postgresql">
-            CREATE INDEX key_name ON key USING GIN (name gin_trgm_ops);
+            CREATE extension unaccent;
+            CREATE TEXT SEARCH CONFIGURATION simple_unaccent ( COPY = simple );
+            ALTER TEXT SEARCH CONFIGURATION simple_unaccent
+            ALTER MAPPING FOR asciiword, asciihword, hword_asciipart, hword, hword_part, word
+                WITH unaccent, simple;
+            ALTER TABLE key
+                ADD COLUMN textsearchable_name tsvector
+                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', name)) STORED;
+            CREATE INDEX key_name_tsvector ON key USING GIN (textsearchable_name);
+
+            ALTER TABLE translation
+                ADD COLUMN textsearchable_text tsvector
+                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', text)) STORED;
+            CREATE INDEX translation_text_tsvector ON translation USING GIN (textsearchable_text);
+
+            ALTER TABLE namespace
+                ADD COLUMN textsearchable_name tsvector
+                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', name)) STORED;
+            CREATE INDEX namespace_name_tsvector ON namespace USING GIN (textsearchable_name);
         </sql>
     </changeSet>
 </databaseChangeLog>

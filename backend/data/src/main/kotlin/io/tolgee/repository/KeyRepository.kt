@@ -50,24 +50,44 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select k.id as id, ns.name as namespace, k.name as name, bt.text as baseTranslation, t.text as translation from 
        key k
-       join project p on p.id = k.project_id
+       join project p on p.id = k.project_id and p.id = :projectId
        left join namespace ns on k.namespace_id = ns.id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-    to_tsquery(:search) query   
-    where k.project_id = :projectId
-    order by (
-       3 * ts_rank_cd(to_tsvector(ns.name), query) +
-       3 * ts_rank_cd(to_tsvector(k.name), query) +
-       ts_rank_cd(to_tsvector(t.text), query) +
-       ts_rank_cd(to_tsvector(bt.text), query)
+    websearch_to_tsquery('simple_unaccent', :search) query   
+       where (
+            ns.textsearchable_name @@ query
+            or k.textsearchable_name @@ query
+            or t.textsearchable_text @@ query
+            or bt.textsearchable_text @@ query
+          )
+       order by (
+           3 * ts_rank_cd(ns.textsearchable_name, query) +
+           3 * ts_rank_cd(k.textsearchable_name, query) +
+           ts_rank_cd(t.textsearchable_text, query) +
+           ts_rank_cd(bt.textsearchable_text, query)
     ) desc, k.id
     limit :#{#pageable.pageSize}
     offset :#{#pageable.offset}
   """,
     nativeQuery = true,
-    countQuery = """select count(*) from key k where k.project_id = :projectId"""
+    countQuery = """select count(k.id) 
+      from key k
+       join project p on p.id = k.project_id and p.id = :projectId
+       left join namespace ns on k.namespace_id = ns.id
+       left join language l on p.id = l.project_id and l.tag = :languageTag
+       left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
+       left join translation t on t.key_id = k.id and (t.language_id = l.id),
+      websearch_to_tsquery('simple_unaccent', :search) query
+      where 
+        (
+          ns.textsearchable_name @@ query
+          or k.textsearchable_name @@ query
+          or t.textsearchable_text @@ query
+          or bt.textsearchable_text @@ query
+        )
+      """
   )
   fun findKeys(search: String, projectId: Long, languageTag: String?, pageable: Pageable): Page<KeySearchResultView>
 

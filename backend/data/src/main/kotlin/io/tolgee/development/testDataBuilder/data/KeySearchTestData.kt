@@ -12,6 +12,7 @@ class KeySearchTestData : BaseTestData() {
     projectBuilder.apply {
       addKeyWithTranslations("this-is-key", "Hallo!", "Hello!")
       addKeyWithTranslations("this-is-key-2", "Aj!", "Oh!")
+      addKeyWithTranslations("beauty", "Krása!", "Oh!")
     }
 
     root.apply {
