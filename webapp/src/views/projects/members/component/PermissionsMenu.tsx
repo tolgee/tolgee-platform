@@ -1,21 +1,21 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { PermissionsModal } from '../PermissionsModal/PermissionsModal';
-import { PermissionModel } from './types';
+import { PermissionsModal } from './PermissionsModal';
+import { PermissionModel } from '../../../../component/PermissionsSettings/types';
 
 type Props = {
   buttonTooltip?: string;
   // onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
-  nameInTitle?: string;
+  user: { name?: string; id: number };
   permissions: PermissionModel;
 };
 
 export const PermissionsMenu: FunctionComponent<Props> = ({
   buttonTooltip,
   buttonProps,
-  nameInTitle,
+  user,
   permissions,
 }) => {
   const [open, setOpen] = React.useState(false);
@@ -45,7 +45,7 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
       </Tooltip>
       {open && (
         <PermissionsModal
-          nameInTitle={nameInTitle}
+          user={user}
           onClose={handleClose}
           permissions={permissions}
         />
