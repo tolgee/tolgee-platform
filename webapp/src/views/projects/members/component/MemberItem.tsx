@@ -2,15 +2,13 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { Chip, styled } from '@mui/material';
 
-import { PermissionsMenu } from 'tg.component/PermissionsModal/PermissionsMenu';
+import { PermissionsMenu } from 'tg.views/projects/members/component/PermissionsMenu';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
-import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
 
@@ -86,15 +84,6 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
     );
   };
 
-  const changePermissionConfirm = (permissionType, languages) => {
-    confirmation({
-      message: <T>change_permissions_confirmation</T>,
-      onConfirm: () => changePermission(permissionType, languages, true),
-    });
-  };
-
-  const allLanguages = useProjectLanguages();
-  const allLangIds = allLanguages.map((l) => l.id);
   const projectPermissionType = user.directPermission?.type;
   const isCurrentUser = currentUser?.id === user.id;
   const isOwner = user.organizationRole === 'OWNER';
@@ -117,7 +106,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           />
         )}
         <PermissionsMenu
-          nameInTitle={user.name}
+          user={user}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
