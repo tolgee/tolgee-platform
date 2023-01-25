@@ -26,7 +26,6 @@ class ScopeInfoController : IController {
   @GetMapping(value = ["/hierarchy"])
   @Operation(summary = "Returns hierarchy of scopes")
   fun getHierarchy(
-    @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
   ): Scope.HierarchyItem {
     return Scope.hierarchy

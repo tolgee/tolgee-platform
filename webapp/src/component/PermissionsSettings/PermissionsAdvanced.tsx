@@ -1,3 +1,11 @@
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+
 export const PermissionsAdvanced = () => {
-  return <div>PermissionsAdvanced</div>;
+  const hierarchy = useApiQuery({
+    url: '/v2/public/scope-info/hierarchy',
+    method: 'get',
+    query: {},
+  });
+
+  return <pre>{JSON.stringify(hierarchy.data, null, 2)}</pre>;
 };

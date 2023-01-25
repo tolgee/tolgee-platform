@@ -505,6 +505,12 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user permission type. (Null if uses granular permissions) */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
       /** List of languages user can translate to. If null, all languages edition is permitted. */
       translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, all languages edition is permitted. */
@@ -513,12 +519,6 @@ export interface components {
       viewLanguageIds?: number[];
       /** Has user explicitly set granular permissions? */
       granular: boolean;
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
       /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -863,11 +863,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       description: string;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -938,13 +938,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      userFullName?: string;
+      projectName: string;
+      username?: string;
+      description: string;
       projectId: number;
       lastUsedAt?: number;
       expiresAt?: number;
-      username?: string;
-      description: string;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1569,11 +1569,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       description: string;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1627,13 +1627,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      userFullName?: string;
+      projectName: string;
+      username?: string;
+      description: string;
       projectId: number;
       lastUsedAt?: number;
       expiresAt?: number;
-      username?: string;
-      description: string;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -4825,12 +4825,6 @@ export interface operations {
   getHierarchy: {
     parameters: {
       query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
         search?: string;
       };
     };

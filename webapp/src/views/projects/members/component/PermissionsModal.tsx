@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { T } from '@tolgee/react';
 import {
   Button,
@@ -17,7 +18,6 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { useState } from 'react';
 
 type Props = {
   onClose: () => void;
