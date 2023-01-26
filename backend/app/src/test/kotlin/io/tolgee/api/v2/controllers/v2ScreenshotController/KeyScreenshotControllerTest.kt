@@ -23,7 +23,7 @@ import java.io.File
 import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
+class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   lateinit var initialScreenshotUrl: String
 
   @BeforeAll

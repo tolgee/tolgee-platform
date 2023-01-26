@@ -12,7 +12,6 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
-import io.tolgee.model.key.screenshotReference.KeyScreenshotReferenceId
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.security.AuthenticationFacade
@@ -105,12 +104,19 @@ class ScreenshotService(
   }
 
   fun removeScreenshotReference(key: Key, screenshot: Screenshot) {
-    val reference = keyScreenshotReferenceRepository
-      .getReferenceById(KeyScreenshotReferenceId(key.id, screenshot.id))
+    removeScreenshotReferences(key, listOf(screenshot))
+  }
+
+  fun removeScreenshotReferences(key: Key, screenshots: List<Screenshot>) {
+    val reference = keyScreenshotReferenceRepository.findAll(key, screenshots)
     keyScreenshotReferenceRepository.delete(reference)
-    val screenshotReferences = keyScreenshotReferenceRepository.getAllByScreenshot(screenshot)
-    if (screenshotReferences.isEmpty()) {
-      delete(screenshot)
+    val screenshotReferences = keyScreenshotReferenceRepository
+      .getAllByScreenshot(screenshots)
+      .groupBy { it.screenshot.id }
+    screenshots.forEach {
+      if (screenshotReferences[it.id] == null) {
+        delete(it)
+      }
     }
   }
 
@@ -127,13 +133,13 @@ class ScreenshotService(
   fun deleteAllByKeyId(keyId: Long) {
     val all = screenshotRepository.getAllByKeyId(keyId)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAllInBatch(all)
+    screenshotRepository.deleteAll(all)
   }
 
   fun deleteAllByKeyId(keyIds: Collection<Long>) {
     val all = screenshotRepository.getAllByKeyIdIn(keyIds)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAllInBatch(all)
+    screenshotRepository.deleteAll(all)
   }
 
   private fun deleteFile(screenshot: Screenshot) {

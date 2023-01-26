@@ -29,7 +29,7 @@ import java.util.*
   ]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
+class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @set:Autowired
   lateinit var timestampValidation: TimestampValidation
 

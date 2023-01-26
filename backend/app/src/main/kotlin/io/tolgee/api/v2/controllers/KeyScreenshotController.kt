@@ -49,7 +49,7 @@ import org.springframework.web.multipart.MultipartFile
   ]
 )
 @Tag(name = "Screenshots")
-class V2ScreenshotController(
+class KeyScreenshotController(
   private val screenshotService: ScreenshotService,
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
@@ -67,7 +67,7 @@ class V2ScreenshotController(
   ): ResponseEntity<ScreenshotModel> {
     val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
     if (!contentTypes.contains(screenshot.contentType!!)) {
-      throw ValidationException(io.tolgee.constants.Message.FILE_NOT_IMAGE)
+      throw ValidationException(Message.FILE_NOT_IMAGE)
     }
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
@@ -90,12 +90,14 @@ class V2ScreenshotController(
   @Operation(summary = "Deletes multiple screenshots by ids")
   @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
-  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
+  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>, @PathVariable keyId: Long) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {
       it.checkInProject()
     }
-    screenshotService.delete(screenshots)
+    val key = keyService.get(keyId)
+    key.checkInProject()
+    screenshotService.removeScreenshotReferences(key, screenshots)
   }
 
   private fun Screenshot.checkInProject() {
