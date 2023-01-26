@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
@@ -18,6 +19,7 @@ class KeysTestData {
   lateinit var secondKey: Key
   lateinit var english: Language
   lateinit var german: Language
+  lateinit var screenshot: Screenshot
 
   lateinit var projectBuilder: ProjectBuilder
 
@@ -72,7 +74,7 @@ class KeysTestData {
         name = "key_with_referecnces"
         this@KeysTestData.keyWithReferences = this
       }.build {
-        addScreenshot {}
+        screenshot = addScreenshot {}.self
         addMeta {
           tags.add(
             Tag().apply {
