@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/tolgee/tolgee-platform/compare/v3.3.0...v3.3.1) (2023-01-26)
+
+
+### Bug Fixes
+
+* Import deletion throws 500 ([#1518](https://github.com/tolgee/tolgee-platform/issues/1518)) ([a73c4dc](https://github.com/tolgee/tolgee-platform/commit/a73c4dc231adb51c6033e78dcc332fb6954237bb))
+
 # [3.3.0](https://github.com/tolgee/tolgee-platform/compare/v3.2.3...v3.3.0) (2023-01-23)
 
 
