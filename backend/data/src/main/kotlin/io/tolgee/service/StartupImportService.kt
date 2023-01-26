@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class StartupImportService(
@@ -33,7 +34,8 @@ class StartupImportService(
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
-  private val authenticationProvider: AuthenticationProvider
+  private val authenticationProvider: AuthenticationProvider,
+  private val entityManager: EntityManager
 ) : Logging {
 
   @Transactional
@@ -96,6 +98,8 @@ class StartupImportService(
     userAccount: UserAccount
   ) {
     importService.addFiles(fileDtos, project, userAccount)
+    entityManager.flush()
+    entityManager.clear()
     val imports = importService.getAllByProject(project.id)
     imports.forEach {
       importService.import(it)

@@ -22,6 +22,6 @@ class Import(
   @ManyToOne(optional = false)
   lateinit var author: UserAccount
 
-  @OneToMany(mappedBy = "import")
+  @OneToMany(mappedBy = "import", orphanRemoval = true)
   var files = mutableListOf<ImportFile>()
 }
