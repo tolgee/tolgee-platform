@@ -157,6 +157,12 @@ class TestDataService(
     saveImportData(builder)
     saveAutoTranslationConfigs(builder)
     saveProjectAvatars(builder)
+    saveScreenshotData(builder)
+  }
+
+  private fun saveScreenshotData(builder: ProjectBuilder) {
+    screenshotService.saveAll(builder.data.screenshots.map { it.self })
+    screenshotService.saveAllReferences(builder.data.keyScreenshotReferences.map { it.self })
   }
 
   private fun saveAllNamespaces(builder: ProjectBuilder) {
@@ -241,7 +247,6 @@ class TestDataService(
     val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
     tagService.saveAll(metas.flatMap { it.tags })
     keyMetaService.saveAll(metas)
-    screenshotService.saveAll(keyBuilders.flatMap { it.data.screenshots.map { it.self } }.toList())
   }
 
   private fun saveAllImportDependants(importBuilders: List<ImportBuilder>) {

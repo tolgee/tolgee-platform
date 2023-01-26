@@ -227,7 +227,11 @@ class KeyService(
 
   @Transactional
   fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project) {
-    val importer = ResolvingKeyImporter(applicationContext = applicationContext, keysToImport = keys, projectEntity = projectEntity)
+    val importer = ResolvingKeyImporter(
+      applicationContext = applicationContext,
+      keysToImport = keys,
+      projectEntity = projectEntity
+    )
     importer()
   }
 }

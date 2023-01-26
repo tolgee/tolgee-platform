@@ -8,9 +8,11 @@ import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.Screenshot
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
@@ -39,6 +41,8 @@ class ProjectBuilder(
     var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
     var avatarFile: ClassPathResource? = null
     var namespaces = mutableListOf<NamespaceBuilder>()
+    var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
+    var screenshots = mutableListOf<ScreenshotBuilder>()
   }
 
   var data = DATA()
@@ -69,6 +73,10 @@ class ProjectBuilder(
   }
 
   fun addNamespace(ft: FT<Namespace>) = addOperation(data.namespaces, ft)
+
+  fun addScreenshotReference(ft: FT<KeyScreenshotReference>) = addOperation(data.keyScreenshotReferences, ft)
+
+  fun addScreenshot(ft: FT<Screenshot>) = addOperation(data.screenshots, ft)
 
   fun addEnglish(): LanguageBuilder {
     return addLanguage {
