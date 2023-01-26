@@ -16,12 +16,11 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testLeaveOrganization() {
-    this.organizationService.create(dummyDto, userAccount!!).let { testOrg ->
-      organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
-      assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNotNull
-      performAuthPut("/v2/organizations/${testOrg.id}/leave", null).andIsOk
-      assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNull()
-    }
+    val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+    organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
+    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNotNull
+    performAuthPut("/v2/organizations/${testOrg.id}/leave", null).andIsOk
+    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNull()
   }
 
   private fun getPermittedOrgs() =
@@ -44,15 +43,13 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testLeaveOrganizationNoOtherOwner() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isNotEmpty
-      }
-
-      performAuthPut("/v2/organizations/${it.id}/leave", null)
-        .andIsBadRequest
-        .andAssertError
-        .isCustomValidation.hasMessage("organization_has_no_other_owner")
+    val organization = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+    organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
+      assertThat(it).isNotEmpty
     }
+    performAuthPut("/v2/organizations/${organization.id}/leave", null)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("organization_has_no_other_owner")
   }
 }

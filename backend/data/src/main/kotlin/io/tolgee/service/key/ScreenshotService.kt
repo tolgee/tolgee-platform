@@ -59,6 +59,7 @@ class ScreenshotService(
     reference.key = key
     reference.screenshot = screenshot
     screenshot.keyScreenshotReferences.add(reference)
+    key.keyScreenshotReferences.add(reference)
     entityManager.persist(reference)
     screenshotRepository.save(screenshot)
     fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
@@ -105,7 +106,7 @@ class ScreenshotService(
 
   fun removeScreenshotReference(key: Key, screenshot: Screenshot) {
     val reference = keyScreenshotReferenceRepository
-      .getReferenceById(KeyScreenshotReferenceId(key, screenshot))
+      .getReferenceById(KeyScreenshotReferenceId(key.id, screenshot.id))
     keyScreenshotReferenceRepository.delete(reference)
     val screenshotReferences = keyScreenshotReferenceRepository.getAllByScreenshot(screenshot)
     if (screenshotReferences.isEmpty()) {
@@ -157,5 +158,9 @@ class ScreenshotService(
 
   fun getKeysWithScreenshots(ids: Collection<Long>): List<Key> {
     return screenshotRepository.getKeysWithScreenshots(ids)
+  }
+
+  fun saveAllReferences(data: List<KeyScreenshotReference>) {
+    keyScreenshotReferenceRepository.saveAll(data)
   }
 }

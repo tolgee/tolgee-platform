@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -120,7 +121,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testGetOneWithUrl() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
+    createOrganization(dummyDto).let {
       performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson {
         node("name").isEqualTo(dummyDto.name)
         node("description").isEqualTo(dummyDto.description)
@@ -148,7 +149,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testGetOneWithId() {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
+    createOrganization(dummyDto).let { organization ->
       performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson {
         node("name").isEqualTo(dummyDto.name)
         node("id").isEqualTo(organization.id)
@@ -161,11 +162,10 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testGetOnePermissions() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      performAuthGet("/v2/organizations/${it.id}").andIsOk.andAssertThatJson {
-        node("name").isEqualTo(dummyDto.name)
-        node("description").isEqualTo(dummyDto.description)
-      }
+    val organization = createOrganization(dummyDto)
+    performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson {
+      node("name").isEqualTo(dummyDto.name)
+      node("description").isEqualTo(dummyDto.description)
     }
   }
 
@@ -193,7 +193,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testCreateSlugValidation() {
-    this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
+    createOrganization(dummyDto2.also { it.slug = "hello-1" })
 
     performAuthPost(
       "/v2/organizations",
@@ -250,53 +250,56 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
-  fun testEdit() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      performAuthPut(
-        "/v2/organizations/${it.id}",
-        dummyDto.also { organization ->
-          organization.name = "Hello"
-          organization.slug = "hello-1"
-          organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
-          organization.description = "This is changed description"
-        }
-      ).andIsOk.andPrettyPrint.andAssertThatJson {
-        node("name").isEqualTo("Hello")
-        node("slug").isEqualTo("hello-1")
-        node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-        node("basePermissions").isEqualTo("TRANSLATE")
-        node("description").isEqualTo("This is changed description")
+  fun `edits organization`() {
+    val organization = createOrganization(dummyDto)
+    performAuthPut(
+      "/v2/organizations/${organization.id}",
+      dummyDto.also { dto ->
+        dto.name = "Hello"
+        dto.slug = "hello-1"
+        dto.basePermissions = Permission.ProjectPermissionType.TRANSLATE
+        dto.description = "This is changed description"
       }
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("name").isEqualTo("Hello")
+      node("slug").isEqualTo("hello-1")
+      node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+      node("basePermissions").isEqualTo("TRANSLATE")
+      node("description").isEqualTo("This is changed description")
     }
   }
 
   @Test
-  fun testEditSlugValidation() {
-    this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
-
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      performAuthPut(
-        "/v2/organizations/${organization.id}",
-        dummyDto.also { organizationDto ->
-          organizationDto.slug = "hello-1"
-        }
-      ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
-    }
+  fun `slug validation`() {
+    createOrganization(dummyDto2.also { it.slug = "hello-1" })
+    val organization = createOrganization(dummyDto)
+    performAuthPut(
+      "/v2/organizations/${organization.id}",
+      dummyDto.also { organizationDto ->
+        organizationDto.slug = "hello-1"
+      }
+    ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
   }
 
   @Test
-  fun testDelete() {
-    val organization2 = this.organizationService.create(dummyDto2, userAccount!!)
-    this.organizationService.create(dummyDto, userAccount!!).let {
+  fun `it deletes organization`() {
+    val organization2 = createOrganization(dummyDto2)
+    createOrganization(dummyDto).let {
       performAuthDelete("/v2/organizations/${it.id}", null)
       assertThat(organizationService.find(it.id)).isNull()
       assertThat(organizationService.find(organization2.id)).isNotNull
     }
   }
 
+  private fun createOrganization(organizationDto: OrganizationDto) = executeInNewTransaction {
+    organizationService.create(
+      organizationDto, userAccount!!
+    )
+  }
+
   @Test
   @Transactional
-  fun testSetUserRole() {
+  fun `sets user role`() {
     withOwnerInOrganization { organization, owner, role ->
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",

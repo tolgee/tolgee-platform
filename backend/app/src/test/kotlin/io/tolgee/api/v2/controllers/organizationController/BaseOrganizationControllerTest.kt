@@ -37,17 +37,18 @@ class BaseOrganizationControllerTest : AuthorizedControllerTest() {
   protected fun withOwnerInOrganization(
     fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit
   ) {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
-        OrganizationRole(
-          user = createdUser,
-          organization = organization,
-          type = OrganizationRoleType.OWNER
-        ).let { createdOwnerRole ->
-          organizationRoleRepository.save(createdOwnerRole)
-          fn(organization, createdUser, createdOwnerRole)
+    executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+      .let { organization ->
+        dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
+          OrganizationRole(
+            user = createdUser,
+            organization = organization,
+            type = OrganizationRoleType.OWNER
+          ).let { createdOwnerRole ->
+            organizationRoleRepository.save(createdOwnerRole)
+            fn(organization, createdUser, createdOwnerRole)
+          }
         }
       }
-    }
   }
 }

@@ -145,8 +145,7 @@ class QueryBase<T>(
     val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
     screenshotSubquery.select(screenshotCount)
     val referencesJoin = screenshotRoot.join(Screenshot_.keyScreenshotReferences)
-    val screenshotsJoin = referencesJoin.join(KeyScreenshotReference_.screenshot)
-    screenshotSubquery.where(cb.equal(this.root.get(Key_.id), screenshotsJoin.get(Key_.id)))
+    screenshotSubquery.where(cb.equal(this.root, referencesJoin.get(KeyScreenshotReference_.key)))
     screenshotCountExpression = screenshotSubquery.selection
     this.querySelection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
   }
