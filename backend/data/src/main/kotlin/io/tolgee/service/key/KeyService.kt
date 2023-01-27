@@ -89,11 +89,28 @@ class KeyService(
       tagService.tagKey(key, it)
     }
 
-    dto.screenshotUploadedImageIds?.let {
-      screenshotService.saveUploadedImages(it, key)
-    }
+    storeScreenshots(dto, key)
 
     return key
+  }
+
+  private fun storeScreenshots(dto: CreateKeyDto, key: Key) {
+    val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
+    val screenshots = dto.screenshots
+
+    if (!screenshotUploadedImageIds.isNullOrEmpty() && !dto.screenshots.isNullOrEmpty()) {
+      throw BadRequestException(Message.PROVIDE_ONLY_ONE_OF_SCREENSHOTS_AND_SCREENSHOT_UPLOADED_IMAGE_IDS)
+    }
+
+    if(!screenshotUploadedImageIds.isNullOrEmpty()) {
+      screenshotService.saveUploadedImages(screenshotUploadedImageIds, key)
+      return
+    }
+
+    if(!screenshots.isNullOrEmpty()) {
+      screenshotService.saveUploadedImages(screenshots, key)
+      return
+    }
   }
 
   @Transactional

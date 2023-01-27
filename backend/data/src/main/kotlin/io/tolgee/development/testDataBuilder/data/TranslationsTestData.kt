@@ -6,11 +6,13 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
 
 class TranslationsTestData {
@@ -166,17 +168,24 @@ class TranslationsTestData {
   }
 
   fun addKeysWithScreenshots() {
+    var screenshot1: Screenshot? = null
+
     projectBuilder.addKey {
       name = "key with screenshot"
     }.build {
-      addScreenshot {}
+      screenshot1 = addScreenshot {}.self
       addScreenshot {}
     }
     projectBuilder.addKey {
       name = "key with screenshot 2"
     }.build {
       addScreenshot {}
-      addScreenshot {}
+      projectBuilder.addScreenshotReference {
+        screenshot = screenshot1!!
+        key = this@build.self
+        originalText = "Oh yeah"
+        positions = mutableListOf(KeyInScreenshotPosition(100, 100, 50, 50))
+      }
     }
   }
 

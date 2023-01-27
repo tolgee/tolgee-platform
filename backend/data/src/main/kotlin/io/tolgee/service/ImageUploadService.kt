@@ -40,11 +40,18 @@ class ImageUploadService(
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
 
+    val imageConverter = ImageConverter(image.inputStream)
+    val dimension = imageConverter.originalDimension;
+
     val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
-      .apply { extension = "png" }
+      .apply {
+        extension = "png"
+        originalWidth = dimension.width
+        originalHeight = dimension.height
+      }
 
     save(uploadedImageEntity)
-    val processedImage = ImageConverter(image.inputStream).getImage()
+    val processedImage = imageConverter.getImage()
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
     return uploadedImageEntity
   }

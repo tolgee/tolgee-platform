@@ -78,7 +78,7 @@ class KeyController(
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
-    if (dto.screenshotUploadedImageIds != null) {
+    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
     }
     val key = keyService.create(projectHolder.projectEntity, dto)
@@ -92,7 +92,7 @@ class KeyController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
-    return KeyComplexEditHelper(applicationContext, id, dto).doComplexEdit()
+    return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
   @PutMapping(value = ["/{id}"])

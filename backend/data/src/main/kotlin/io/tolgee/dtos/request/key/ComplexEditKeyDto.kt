@@ -26,5 +26,8 @@ data class ComplexEditKeyDto(
   val screenshotIdsToDelete: List<Long>? = null,
 
   @Schema(description = "Ids of screenshots uploaded with /v2/image-upload endpoint")
-  val screenshotUploadedImageIds: List<Long>? = null
+  @Deprecated("Use screenshotsToAdd instead")
+  val screenshotUploadedImageIds: List<Long>? = null,
+
+  val screenshotsToAdd: List<KeyScreenshotDto>? = null
 )

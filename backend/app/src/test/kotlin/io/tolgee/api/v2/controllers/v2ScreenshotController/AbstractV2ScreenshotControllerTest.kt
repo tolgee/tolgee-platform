@@ -12,6 +12,7 @@ import io.tolgee.model.key.Key
 import org.junit.jupiter.api.AfterAll
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
+import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
@@ -26,13 +27,19 @@ abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/
     File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
   }
 
-  protected fun performStoreScreenshot(project: Project, key: Key): ResultActions {
+  protected fun performStoreScreenshot(project: Project, key: Key, info: Any? = null): ResultActions {
     return performProjectAuthMultipart(
       url = "keys/${key.id}/screenshots",
       files = listOf(
         MockMultipartFile(
           "screenshot", "originalShot.png", "image/png",
           screenshotFile.file.readBytes()
+        ),
+        MockMultipartFile(
+          "info",
+          "info",
+          MediaType.APPLICATION_JSON_VALUE,
+          jacksonObjectMapper().writeValueAsBytes(info)
         )
       )
     )
