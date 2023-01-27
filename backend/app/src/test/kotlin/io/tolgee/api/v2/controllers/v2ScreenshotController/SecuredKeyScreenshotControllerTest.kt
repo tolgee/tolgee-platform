@@ -38,7 +38,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key)
+    val screenshot = screenshotService.store(screenshotFile, key, null)
 
     val result = performAuthGet("/screenshots/${screenshot.filename}")
       .andExpect(status().isBadRequest)
@@ -52,7 +52,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key)
+    val screenshot = screenshotService.store(screenshotFile, key, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
     val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
@@ -69,7 +69,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key)
+    val screenshot = screenshotService.store(screenshotFile, key, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
     val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
@@ -101,7 +101,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   @ProjectJWTAuthTestMethod
   fun findAll() {
     val key = keyService.create(project, CreateKeyDto("test"))
-    screenshotService.store(screenshotFile, key)
+    screenshotService.store(screenshotFile, key, null)
     performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
       node("_embedded.screenshots[0].filename").isString.satisfies {
         val parts = it.split("?timestamp=")

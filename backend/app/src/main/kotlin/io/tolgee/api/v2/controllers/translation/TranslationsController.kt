@@ -316,7 +316,21 @@ Sorting is not supported for supported. It is automatically sorted from newest t
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      return screenshotService.getKeysWithScreenshots(keyIds).associate {
+      val keys = screenshotService.getKeysWithScreenshots(keyIds)
+
+      val allScreenshots = keys.flatMap { it.keyScreenshotReferences.map { it.screenshot } }
+
+      val references = screenshotService.getScreenshotReferences(screenshots = allScreenshots)
+        .groupBy { it.screenshot.id }
+
+      keys.forEach {
+        it.keyScreenshotReferences.forEach { keyScreenshotReference ->
+          keyScreenshotReference.screenshot.keyScreenshotReferences =
+            references[keyScreenshotReference.screenshot.id]?.toMutableList() ?: mutableListOf()
+        }
+      }
+
+      return keys.associate {
         it.id to it.keyScreenshotReferences
           .map { reference -> reference.screenshot }.toMutableSet()
       }

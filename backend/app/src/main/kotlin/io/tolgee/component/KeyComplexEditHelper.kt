@@ -47,7 +47,7 @@ class KeyComplexEditHelper(
   private var isScreenshotDeleted by Delegates.notNull<Boolean>()
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
 
-  fun doComplexEdit(): KeyWithDataModel {
+  fun doComplexUpdate(): KeyWithDataModel {
     prepareData()
     prepareConditions()
     setActivityHolder()
@@ -127,7 +127,7 @@ class KeyComplexEditHelper(
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
     isKeyModified = key.name != dto.name
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
-    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty()
+    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() && !dto.screenshotsToAdd.isNullOrEmpty()
   }
 
   private fun areTagsModified(
@@ -159,9 +159,19 @@ class KeyComplexEditHelper(
       deleteScreenshots(screenshotIds, key)
     }
 
-    dto.screenshotUploadedImageIds?.let {
+    if (isScreenshotAdded) {
       key.project.checkScreenshotsUploadPermission()
-      screenshotService.saveUploadedImages(it, key)
+    }
+
+    val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
+    if (screenshotUploadedImageIds != null) {
+      screenshotService.saveUploadedImages(screenshotUploadedImageIds, key)
+      return
+    }
+
+    val screenshotsToAdd = dto.screenshotsToAdd
+    if (screenshotsToAdd != null) {
+      screenshotService.saveUploadedImages(screenshotsToAdd, key)
     }
   }
 

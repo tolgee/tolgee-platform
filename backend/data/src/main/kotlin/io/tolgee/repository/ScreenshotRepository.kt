@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -28,10 +29,21 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     from Key k 
       join fetch k.keyScreenshotReferences ksr
       join fetch ksr.screenshot s
+      left join fetch k.namespace n
     where k.id in :keyIds
   """
   )
   fun getKeysWithScreenshots(keyIds: Collection<Long>): List<Key>
+
+  @Query(
+    """
+    from KeyScreenshotReference ksr
+    join fetch ksr.key k
+    left join fetch k.namespace
+    where ksr.screenshot in :screenshots
+  """
+  )
+  fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference>
 
   @Query(
     """

@@ -16,7 +16,7 @@ class LanguageModelAssembler : RepresentationModelAssemblerSupport<Language, Lan
       originalName = entity.originalName,
       tag = entity.tag,
       flagEmoji = entity.flagEmoji,
-      base = entity.project?.baseLanguage?.id == entity.id
+      base = entity.project.baseLanguage?.id == entity.id
     )
   }
 }

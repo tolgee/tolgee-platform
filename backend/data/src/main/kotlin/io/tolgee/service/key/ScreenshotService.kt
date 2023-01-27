@@ -6,11 +6,14 @@ package io.tolgee.service.key
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.request.ScreenshotInfoDto
+import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.repository.ScreenshotRepository
@@ -21,7 +24,9 @@ import io.tolgee.util.ImageConverter
 import org.springframework.core.io.InputStreamSource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.awt.Dimension
 import javax.persistence.EntityManager
+import kotlin.math.roundToInt
 
 @Service
 class ScreenshotService(
@@ -38,7 +43,7 @@ class ScreenshotService(
   }
 
   @Transactional
-  fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
+  fun store(screenshotImage: InputStreamSource, key: Key, info: ScreenshotInfoDto?): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
         io.tolgee.constants.Message.MAX_SCREENSHOTS_EXCEEDED,
@@ -48,10 +53,21 @@ class ScreenshotService(
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
     val thumbnail = converter.getThumbNail()
-    return storeProcessed(image.toByteArray(), thumbnail.toByteArray(), key)
+    return storeProcessed(
+      image.toByteArray(), thumbnail.toByteArray(), key, info,
+      converter.originalDimension,
+      converter.targetDimension
+    )
   }
 
-  fun storeProcessed(image: ByteArray, thumbnail: ByteArray, key: Key): Screenshot {
+  fun storeProcessed(
+    image: ByteArray,
+    thumbnail: ByteArray,
+    key: Key,
+    info: ScreenshotInfoDto?,
+    originalDimension: Dimension,
+    targetDimension: Dimension
+  ): Screenshot {
     val screenshot = Screenshot()
     screenshot.extension = "png"
     val reference = KeyScreenshotReference()
@@ -59,6 +75,7 @@ class ScreenshotService(
     reference.screenshot = screenshot
     screenshot.keyScreenshotReferences.add(reference)
     key.keyScreenshotReferences.add(reference)
+    reference.setInfo(info, originalDimension, targetDimension)
     entityManager.persist(reference)
     screenshotRepository.save(screenshot)
     fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
@@ -66,23 +83,76 @@ class ScreenshotService(
     return screenshot
   }
 
+  private fun KeyScreenshotReference.setInfo(
+    info: ScreenshotInfoDto?,
+    originalDimension: Dimension?,
+    newDimension: Dimension?
+  ) {
+    info?.let {
+      this.originalText = info.text
+      it.positions?.forEach { positionDto ->
+        val xRatio = newDimension?.width?.toDouble()
+          ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
+        val yRatio = newDimension?.height?.toDouble()
+          ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
+
+        positions.add(
+          KeyInScreenshotPosition(
+            positionDto.x.adjustByRation(xRatio),
+            positionDto.y.adjustByRation(yRatio),
+            positionDto.width.adjustByRation(xRatio),
+            positionDto.height.adjustByRation(yRatio),
+          )
+        )
+      }
+    }
+  }
+
+  fun Int.adjustByRation(ratio: Double): Int {
+    return (this * ratio).roundToInt()
+  }
+
   @Transactional
   fun saveUploadedImages(uploadedImageIds: Collection<Long>, key: Key) {
-    val images = imageUploadService.find(uploadedImageIds)
-    if (images.size < uploadedImageIds.size) {
-      throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+    val screenshots = uploadedImageIds.map {
+      KeyScreenshotDto().apply { uploadedImageId = it }
     }
-    images.forEach { uploadedImageEntity ->
-      if (authenticationFacade.userAccount.id != uploadedImageEntity.userAccount.id) {
+    saveUploadedImages(screenshots, key)
+  }
+
+  fun saveUploadedImages(screenshots: List<KeyScreenshotDto>, key: Key) {
+    val imageIds = screenshots.map { it.uploadedImageId }
+    val images = imageUploadService.find(imageIds).associateBy { it.id }
+    screenshots.forEach { screenshotInfo ->
+      val image = images[screenshotInfo.uploadedImageId]
+        ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+
+      if (authenticationFacade.userAccount.id != image.userAccount.id) {
         throw PermissionException()
       }
+
       val data = fileStorage
         .readFile(
-          UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + uploadedImageEntity.filenameWithExtension
+          UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.filenameWithExtension
         )
-      val thumbnail = ImageConverter(data.inputStream()).getThumbNail()
-      storeProcessed(data, thumbnail.toByteArray(), key)
-      imageUploadService.delete(uploadedImageEntity)
+
+      val imageConverter = ImageConverter(data.inputStream())
+      val thumbnail = imageConverter.getThumbNail()
+
+      val info = screenshotInfo.let {
+        ScreenshotInfoDto(it.text, it.positions)
+      }
+
+      storeProcessed(
+        image = data,
+        thumbnail = thumbnail.toByteArray(),
+        key = key,
+        info = info,
+        originalDimension = Dimension(image.originalWidth, image.originalHeight),
+        targetDimension = imageConverter.originalDimension
+      )
+
+      imageUploadService.delete(image)
     }
   }
 
@@ -164,6 +234,10 @@ class ScreenshotService(
 
   fun getKeysWithScreenshots(ids: Collection<Long>): List<Key> {
     return screenshotRepository.getKeysWithScreenshots(ids)
+  }
+
+  fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference> {
+    return screenshotRepository.getScreenshotReferences(screenshots)
   }
 
   fun saveAllReferences(data: List<KeyScreenshotReference>) {

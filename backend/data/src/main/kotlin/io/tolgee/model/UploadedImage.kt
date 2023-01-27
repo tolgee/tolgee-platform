@@ -26,4 +26,8 @@ class UploadedImage(
 
   val filenameWithExtension
     get() = "$filename.$extension"
+
+  var originalWidth: Int = 0
+
+  var originalHeight: Int = 0
 }

@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -41,13 +42,46 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun `uploads single screenshot`() {
     val key = keyService.create(project, CreateKeyDto("test"))
 
-    performStoreScreenshot(project, key).andPrettyPrint.andIsCreated.andAssertThatJson {
-      val screenshots = screenshotService.findAll(key = key)
-      assertThat(screenshots).hasSize(1)
-      node("filename").isEqualTo(screenshots[0].filename)
-      val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-      assertThat(file).exists()
+    val text = "I am key"
+    performStoreScreenshot(
+      project,
+      key,
+      info = mapOf(
+        "positions" to listOf(
+          mapOf(
+            "x" to 200, "y" to 100, "width" to 40, "height" to 40
+          )
+        ),
+        "text" to text
+      )
+    ).andPrettyPrint.andIsCreated.andAssertThatJson {
+      executeInNewTransaction {
+        val screenshots = screenshotService.findAll(key = key)
+        assertThat(screenshots).hasSize(1)
+        node("filename").isEqualTo(screenshots[0].filename)
+        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
+        assertThat(file).exists()
+        val reference = screenshots[0].keyScreenshotReferences[0]
+        reference.originalText.assert.isEqualTo(text)
+        reference.positions[0].x.assert.isEqualTo(200)
+        reference.positions[0].y.assert.isEqualTo(100)
+        reference.positions[0].width.assert.isEqualTo(40)
+        reference.positions[0].height.assert.isEqualTo(40)
+      }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `uploads without metadata`() {
+    val key = keyService.create(project, CreateKeyDto("test"))
+
+    val text = "I am key"
+    performStoreScreenshot(
+      project,
+      key,
+      info = null
+    ).andIsCreated
   }
 
   @Test
@@ -68,9 +102,9 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       val key = keyService.create(project, CreateKeyDto("test"))
       val key2 = keyService.create(project, CreateKeyDto("test_2"))
 
-      screenshotService.store(screenshotFile, key)
-      screenshotService.store(screenshotFile, key)
-      screenshotService.store(screenshotFile, key2)
+      screenshotService.store(screenshotFile, key, null)
+      screenshotService.store(screenshotFile, key, null)
+      screenshotService.store(screenshotFile, key2, null)
 
       key to key2
     }
@@ -95,7 +129,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
     val key = executeInNewTransaction {
       val key = keyService.create(project, CreateKeyDto("test"))
-      screenshotService.store(screenshotFile, key)
+      screenshotService.store(screenshotFile, key, null)
       key
     }
 
@@ -109,7 +143,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun getScreenshotFile() {
     val screenshot = executeInNewTransaction {
       val key = keyService.create(project, CreateKeyDto("test"))
-      screenshotService.store(screenshotFile, key)
+      screenshotService.store(screenshotFile, key, null)
     }
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
     val result = performAuthGet("/screenshots/${screenshot.filename}").andIsOk
@@ -128,7 +162,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       val key = keyService.create(project, CreateKeyDto("test"))
 
       val list = (1..20).map {
-        screenshotService.store(screenshotFile, key)
+        screenshotService.store(screenshotFile, key, null)
       }.toCollection(mutableListOf())
       key to list
     }

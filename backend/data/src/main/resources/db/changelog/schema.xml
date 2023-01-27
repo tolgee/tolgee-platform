@@ -2285,7 +2285,7 @@
     <changeSet author="jenik (generated)" id="1674571952168-1">
         <createTable tableName="key_screenshot_reference">
             <column name="original_text" type="VARCHAR(255)"/>
-            <column name="positions" type="UUID"/>
+            <column name="positions" type="JSONB"/>
             <column name="key_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="key_screenshot_referencePK"/>
             </column>
@@ -2322,5 +2322,19 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1674574577472-2">
         <dropColumn columnName="key_id" tableName="screenshot"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674815146392-1">
+        <addColumn tableName="uploaded_image">
+            <column name="original_height" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674815146392-2">
+        <addColumn tableName="uploaded_image">
+            <column name="original_width" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
