@@ -1,19 +1,26 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.KeyImportResolvableResult
+import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolution
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolvableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.Screenshot
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.ImageUploadService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
@@ -30,16 +37,22 @@ class ResolvingKeyImporter(
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val languageService = applicationContext.getBean(LanguageService::class.java)
   private val translationService = applicationContext.getBean(TranslationService::class.java)
+  private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
+  private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
+  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
 
-  operator fun invoke() {
-    tryImport()
+
+  operator fun invoke(): KeyImportResolvableResult {
+    val keys = tryImport()
     checkErrors()
+    val screenshots = importScreenshots()
+    return KeyImportResolvableResult(keys, screenshots)
   }
 
-  private fun tryImport() {
-    keysToImport.forEach keys@{ keyToImport ->
+  private fun tryImport(): List<Key> {
+    return keysToImport.map keys@{ keyToImport ->
       val key = getOrCreateKey(keyToImport)
 
       keyToImport.mapLanguageAsKey().forEach translations@{ (language, resolvable) ->
@@ -62,6 +75,52 @@ class ResolvingKeyImporter(
           }
           translationService.save(translation)
         }
+      }
+      key
+    }
+  }
+
+  private fun importScreenshots(): Map<Long, Screenshot> {
+    val uploadedImagesIds = keysToImport.flatMap {
+      it.screenshots?.map { screenshot -> screenshot.uploadedImageId } ?: listOf()
+    }
+
+    val images = imageUploadService.find(uploadedImagesIds)
+    checkPermissions(images)
+
+    val screenshotResults = images.associate {
+      it.id to screenshotService.saveScreenshot(it)
+    }
+
+    keysToImport.forEach {
+      val key = getOrCreateKey(it)
+      it.screenshots?.forEach { screenshot ->
+        val screenshotResult = screenshotResults[screenshot.uploadedImageId]
+          ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+        val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
+
+        screenshotService.addReference(
+          key = key,
+          screenshot = screenshotResult.screenshot,
+          info = info,
+          originalDimension = screenshotResult.originalDimension,
+          targetDimension = screenshotResult.targetDimension
+        )
+      }
+      screenshotService.removeScreenshotReferencesById(key, it.removeScreenshotIds)
+    }
+
+    return screenshotResults
+      .map { (uploadedImageId, screenshotResult) ->
+        uploadedImageId to screenshotResult.screenshot
+      }
+      .toMap()
+  }
+
+  private fun checkPermissions(images: List<UploadedImage>) {
+    images.forEach { image ->
+      if (authenticationFacade.userAccount.id != image.userAccount.id) {
+        throw PermissionException()
       }
     }
   }

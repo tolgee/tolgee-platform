@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request.translation.importKeysResolvable
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.request.key.KeyScreenshotDto
 import org.hibernate.validator.constraints.Length
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -17,6 +18,11 @@ class ImportKeysResolvableItemDto(
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
   val namespace: String? = null,
+
+  val screenshots: List<KeyScreenshotDto>? = null,
+
+  @Schema(description = "Screenshots with these ids will be replaced by the ones in screenshots property")
+  val removeScreenshotIds: List<Long>? = null,
 
   /**
    * Map of language tag -> text

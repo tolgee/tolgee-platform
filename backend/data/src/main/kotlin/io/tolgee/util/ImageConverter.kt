@@ -30,7 +30,7 @@ class ImageConverter(
     return writeImage(bufferedImage, compressionQuality)
   }
 
-  fun getThumbNail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
+  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
     val side = min(sourceBufferedImage.width, sourceBufferedImage.height)
     val x = (sourceBufferedImage.width - side) / 2
     val y = (sourceBufferedImage.height - side) / 2

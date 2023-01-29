@@ -22,6 +22,7 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -42,11 +43,7 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: KeysTestData
 
   val screenshotFile: InputStreamSource by lazy {
-    val image = BufferedImage(2000, 3000, BufferedImage.TYPE_BYTE_GRAY)
-    image.createGraphics().drawString("Hello World", 10, 20)
-    val outputStream = ByteArrayOutputStream()
-    ImageIO.write(image, "jpg", outputStream)
-    InputStreamSource { outputStream.toByteArray().inputStream() }
+    generateImage(2000, 3000)
   }
 
   @BeforeEach

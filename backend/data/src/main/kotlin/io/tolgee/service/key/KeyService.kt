@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
@@ -10,6 +11,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.KeyRepository
@@ -102,12 +104,12 @@ class KeyService(
       throw BadRequestException(Message.PROVIDE_ONLY_ONE_OF_SCREENSHOTS_AND_SCREENSHOT_UPLOADED_IMAGE_IDS)
     }
 
-    if(!screenshotUploadedImageIds.isNullOrEmpty()) {
+    if (!screenshotUploadedImageIds.isNullOrEmpty()) {
       screenshotService.saveUploadedImages(screenshotUploadedImageIds, key)
       return
     }
 
-    if(!screenshots.isNullOrEmpty()) {
+    if (!screenshots.isNullOrEmpty()) {
       screenshotService.saveUploadedImages(screenshots, key)
       return
     }
@@ -243,12 +245,12 @@ class KeyService(
   }
 
   @Transactional
-  fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project) {
+  fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project): KeyImportResolvableResult {
     val importer = ResolvingKeyImporter(
       applicationContext = applicationContext,
       keysToImport = keys,
       projectEntity = projectEntity
     )
-    importer()
+    return importer()
   }
 }
