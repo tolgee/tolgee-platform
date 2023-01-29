@@ -16,16 +16,16 @@ interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReferenc
   @Query(
     """
     FROM KeyScreenshotReference ksr
-    WHERE ksr.screenshot IN :screenshots
+    WHERE ksr.screenshot.id IN :screenshotIds
   """
   )
-  fun getAllByScreenshot(screenshots: List<Screenshot>): List<KeyScreenshotReference>
+  fun findAll(screenshotIds: List<Long>): List<KeyScreenshotReference>
 
   @Query(
     """
     from KeyScreenshotReference ksr
-    where ksr.key = :key and ksr.screenshot in :screenshots
+    where ksr.key = :key and ksr.screenshot.id in :screenshotIds
   """
   )
-  fun findAll(key: Key, screenshots: List<Screenshot>): KeyScreenshotReference
+  fun findAll(key: Key, screenshotIds: List<Long>): KeyScreenshotReference
 }

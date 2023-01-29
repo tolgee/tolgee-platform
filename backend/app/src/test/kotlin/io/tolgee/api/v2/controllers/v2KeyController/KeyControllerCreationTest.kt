@@ -16,31 +16,25 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
 import java.math.BigDecimal
-import javax.imageio.ImageIO
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
 
-  val screenshotFile: InputStreamSource by lazy {
-    val image = BufferedImage(2000, 3000, BufferedImage.TYPE_BYTE_GRAY)
-    image.createGraphics().drawString("Hello World", 10, 20)
-    val outputStream = ByteArrayOutputStream()
-    ImageIO.write(image, "jpg", outputStream)
-    InputStreamSource { outputStream.toByteArray().inputStream() }
-  }
-
   lateinit var testData: KeysTestData
+
+  val screenshotFile: InputStreamSource by lazy {
+    generateImage(2000, 3000)
+  }
 
   @BeforeEach
   fun setup() {

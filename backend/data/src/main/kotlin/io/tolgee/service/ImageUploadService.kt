@@ -41,18 +41,24 @@ class ImageUploadService(
     }
 
     val imageConverter = ImageConverter(image.inputStream)
-    val dimension = imageConverter.originalDimension;
+    val dimension = imageConverter.originalDimension
 
     val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
       .apply {
         extension = "png"
         originalWidth = dimension.width
         originalHeight = dimension.height
+        width = imageConverter.targetDimension.width
+        height = imageConverter.targetDimension.height
       }
 
     save(uploadedImageEntity)
     val processedImage = imageConverter.getImage()
+    val processedThumbnail = imageConverter.getThumbnail()
+
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
+
     return uploadedImageEntity
   }
 
@@ -98,4 +104,6 @@ class ImageUploadService(
 
   val UploadedImage.filePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.filenameWithExtension
+  val UploadedImage.thumbnailFilePath
+    get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.thumbnailFilenameWithExtension
 }

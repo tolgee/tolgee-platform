@@ -5,12 +5,15 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.v2.hateoas.key.KeyImportResolvableResultModel
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeySearchResultModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeySearchSearchResultModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
+import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
@@ -71,7 +74,8 @@ class KeyController(
   private val applicationContext: ApplicationContext,
   private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>,
   private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
-  private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>
+  private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
+  private val screenshotModelAssembler: ScreenshotModelAssembler
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -160,8 +164,18 @@ class KeyController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
   @RequestActivity(ActivityType.IMPORT)
-  fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto) {
-    keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
+  fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
+    val uploadedImageToScreenshotMap =
+      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
+    val screenshots = uploadedImageToScreenshotMap.screenshots
+      .map { (uploadedImageId, screenshot) ->
+        uploadedImageId to screenshotModelAssembler.toModel(screenshot)
+      }.toMap()
+
+    val keys = uploadedImageToScreenshotMap.keys
+      .map { key -> keyModelAssembler.toModel(key) }
+
+    return KeyImportResolvableResultModel(keys, screenshots)
   }
 
   @GetMapping("/search")
