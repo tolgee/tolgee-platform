@@ -211,7 +211,7 @@ class ScreenshotService(
   fun removeScreenshotReferencesById(key: Key, screenshotIds: List<Long>?) {
     screenshotIds ?: return
     val references = keyScreenshotReferenceRepository.findAll(key, screenshotIds)
-    keyScreenshotReferenceRepository.delete(references)
+    keyScreenshotReferenceRepository.deleteAll(references)
     val screenshotReferences = keyScreenshotReferenceRepository
       .findAll(screenshotIds)
       .groupBy { it.screenshot.id }

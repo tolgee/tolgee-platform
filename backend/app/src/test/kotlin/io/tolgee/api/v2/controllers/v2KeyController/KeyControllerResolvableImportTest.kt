@@ -49,21 +49,23 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
                 "resolution" to "NEW"
               )
             ),
-            "screenshots" to mapOf(
-              "text" to "Oh oh Oh",
-              "uploadedImageId" to uploadedImageId,
-              "position" to listOf(
-                mapOf(
-                  "x" to 100,
-                  "y" to 150,
-                  "width" to 80,
-                  "height" to 100
-                ),
-                mapOf(
-                  "x" to 500,
-                  "y" to 200,
-                  "width" to 30,
-                  "height" to 20
+            "screenshots" to listOf(
+              mapOf(
+                "text" to "Oh oh Oh",
+                "uploadedImageId" to uploadedImageId,
+                "positions" to listOf(
+                  mapOf(
+                    "x" to 100,
+                    "y" to 150,
+                    "width" to 80,
+                    "height" to 100
+                  ),
+                  mapOf(
+                    "x" to 500,
+                    "y" to 200,
+                    "width" to 30,
+                    "height" to 20
+                  )
                 )
               )
             )
@@ -77,16 +79,18 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
                 "resolution" to "KEEP"
               )
             ),
-            "removeScreenshotIds" to listOf(testData.key2Screenshot.id, testData.key1and2Screenshot),
-            "screenshots" to mapOf(
-              "text" to "Oh oh Oh",
-              "uploadedImageId" to uploadedImageId,
-              "position" to listOf(
-                mapOf(
-                  "x" to 100,
-                  "y" to 150,
-                  "width" to 80,
-                  "height" to 100
+            "removeScreenshotIds" to listOf(testData.key2Screenshot.id, testData.key1and2Screenshot.id),
+            "screenshots" to listOf(
+              mapOf(
+                "text" to "Oh oh Oh",
+                "uploadedImageId" to uploadedImageId,
+                "positions" to listOf(
+                  mapOf(
+                    "x" to 100,
+                    "y" to 150,
+                    "width" to 80,
+                    "height" to 100
+                  )
                 )
               )
             )
@@ -103,11 +107,13 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       }
     }
 
+    screenshotService.findByIdIn(listOf(testData.key2Screenshot.id, testData.key1and2Screenshot.id))
+      .assert.hasSize(1) // one is deleted
+
     executeInNewTransaction {
       assertTranslationText("namespace-1", "key-1", "de", "changed")
       assertTranslationText("namespace-1", "key-1", "en", "new")
       assertTranslationText("namespace-1", "key-2", "en", "existing translation")
-
     }
   }
 

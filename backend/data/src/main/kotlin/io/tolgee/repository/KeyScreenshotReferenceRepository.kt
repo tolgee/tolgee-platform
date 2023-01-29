@@ -27,5 +27,5 @@ interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReferenc
     where ksr.key = :key and ksr.screenshot.id in :screenshotIds
   """
   )
-  fun findAll(key: Key, screenshotIds: List<Long>): KeyScreenshotReference
+  fun findAll(key: Key, screenshotIds: List<Long>): List<KeyScreenshotReference>
 }
