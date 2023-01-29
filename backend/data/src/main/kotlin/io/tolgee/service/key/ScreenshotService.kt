@@ -122,7 +122,6 @@ class ScreenshotService(
     return saveUploadedImages(screenshots, key)
   }
 
-
   /**
    * @return Map of uploaded image id and screenshot
    */
@@ -148,7 +147,6 @@ class ScreenshotService(
       screenshotInfo.uploadedImageId to screenshot
     }.toMap()
   }
-
 
   /**
    * Creates and saves screenshot entity and the corresponding file

@@ -4,14 +4,9 @@ import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
-import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
-import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -19,22 +14,15 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
-import org.springframework.core.io.Resource
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
 import java.math.BigDecimal
-import javax.imageio.ImageIO
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -159,12 +147,14 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
           KeyScreenshotDto().apply {
             text = "text"
             uploadedImageId = it.id
-            positions = listOf(KeyInScreenshotPositionDto().apply {
-              x = 100
-              y = 120
-              width = 200
-              height = 300
-            })
+            positions = listOf(
+              KeyInScreenshotPositionDto().apply {
+                x = 100
+                y = 120
+                width = 200
+                height = 300
+              }
+            )
           }
         }
       )

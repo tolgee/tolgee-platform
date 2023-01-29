@@ -4,6 +4,7 @@ import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.generateImage
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import kotlin.properties.Delegates
-import io.tolgee.fixtures.node
 
 @SpringBootTest
 @AutoConfigureMockMvc

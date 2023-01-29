@@ -33,7 +33,7 @@ class ScreenshotModelAssembler(
       thumbnailUrl = thumbnailUrl,
       createdAt = entity.createdAt,
       keyReferences = entity.keyScreenshotReferences.flatMap { reference ->
-        val positions = if(reference.positions.isEmpty()) listOf(null) else reference.positions
+        val positions = if (reference.positions.isEmpty()) listOf(null) else reference.positions
         positions.map { position ->
           KeyInScreenshotModel(
             reference.key.id,
@@ -63,7 +63,7 @@ class ScreenshotModelAssembler(
     var filenameWithSignature = filename
     if (tolgeeProperties.authentication.securedImageRetrieval) {
       filenameWithSignature = "$filenameWithSignature?timestamp=${
-        timestampValidation.encryptTimeStamp(filename, Date().time)
+      timestampValidation.encryptTimeStamp(filename, Date().time)
       }"
     }
     return filenameWithSignature

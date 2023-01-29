@@ -14,4 +14,4 @@ open class KeyImportResolvableResultModel(
 
   @Schema(description = "Map uploadedImageId to screenshot")
   val screenshots: Map<Long, ScreenshotModel>,
-  ) : RepresentationModel<KeyImportResolvableResultModel>(), Serializable
+) : RepresentationModel<KeyImportResolvableResultModel>(), Serializable
