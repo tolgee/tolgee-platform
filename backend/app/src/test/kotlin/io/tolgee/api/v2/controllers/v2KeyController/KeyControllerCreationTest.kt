@@ -25,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamSource
 import java.math.BigDecimal
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -165,12 +164,14 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
           KeyScreenshotDto().apply {
             text = "text"
             uploadedImageId = it.id
-            positions = listOf(KeyInScreenshotPositionDto().apply {
-              x = 100
-              y = 120
-              width = 200
-              height = 300
-            })
+            positions = listOf(
+              KeyInScreenshotPositionDto().apply {
+                x = 100
+                y = 120
+                width = 200
+                height = 300
+              }
+            )
           }
         }
       )

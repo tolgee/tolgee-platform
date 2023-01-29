@@ -12,7 +12,6 @@ import io.tolgee.api.v2.hateoas.key.KeySearchResultModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeySearchSearchResultModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
-import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController

@@ -43,7 +43,6 @@ class ResolvingKeyImporter(
 
   private val errors = mutableListOf<List<Serializable?>>()
 
-
   operator fun invoke(): KeyImportResolvableResult {
     val keys = tryImport()
     checkErrors()

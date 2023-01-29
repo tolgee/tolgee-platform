@@ -70,7 +70,7 @@ class KeyScreenshotController(
     @PathVariable keyId: Long,
     @RequestPart("screenshot") screenshot: MultipartFile,
     @RequestPart("info", required = false) info: ScreenshotInfoDto?
-    ): ResponseEntity<ScreenshotModel> {
+  ): ResponseEntity<ScreenshotModel> {
     val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
     if (!contentTypes.contains(screenshot.contentType!!)) {
       throw ValidationException(Message.FILE_NOT_IMAGE)

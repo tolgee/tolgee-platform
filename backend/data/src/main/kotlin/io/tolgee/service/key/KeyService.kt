@@ -11,7 +11,6 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.KeyRepository
