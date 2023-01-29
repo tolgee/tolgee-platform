@@ -115,14 +115,6 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
           isArray.hasSize(2)
           node("[0]"){
             node("keyReferences"){
-              isArray.hasSize(1)
-              node("[0].keyId").isValidId
-              node("[0].keyName").isEqualTo("key with screenshot")
-              node("[0].keyNamespace").isEqualTo(null)
-            }
-          }
-          node("[1]"){
-            node("keyReferences"){
               isArray.hasSize(2)
               node("[1].keyId").isValidId
               node("[1].keyName").isEqualTo("key with screenshot 2")
@@ -131,6 +123,14 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
               node("[1].position"){
                 node("x").isEqualTo(100)
               }
+            }
+          }
+          node("[1]"){
+            node("keyReferences"){
+              isArray.hasSize(1)
+              node("[0].keyId").isValidId
+              node("[0].keyName").isEqualTo("key with screenshot")
+              node("[0].keyNamespace").isEqualTo(null)
             }
           }
         }
