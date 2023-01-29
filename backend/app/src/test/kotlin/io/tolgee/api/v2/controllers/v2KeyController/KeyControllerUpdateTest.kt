@@ -174,17 +174,20 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
         node("[1]") {
           node("id").isNumber.isGreaterThan(BigDecimal(0))
           node("filename").isString.endsWith(".png").hasSizeGreaterThan(20)
-          node("keyReferences"){
-            node("keyId").isValidId
-            node("position"){
-              node("x").isEqualTo(71)
-              node("y").isEqualTo(85)
-              node("width").isEqualTo(141)
-              node("height").isEqualTo(212)
+          node("keyReferences") {
+            isArray
+            node("[0]") {
+              node("keyId").isValidId
+              node("position") {
+                node("x").isEqualTo(71)
+                node("y").isEqualTo(85)
+                node("width").isEqualTo(141)
+                node("height").isEqualTo(212)
+              }
+              node("keyName").isEqualTo("super_key")
+              node("keyNamespace").isEqualTo(null)
+              node("originalText").isEqualTo("text")
             }
-            node("keyName").isEqualTo("super_key")
-            node("keyNamespace").isEqualTo(null)
-            node("originalText").isEqualTo("text")
           }
         }
       }

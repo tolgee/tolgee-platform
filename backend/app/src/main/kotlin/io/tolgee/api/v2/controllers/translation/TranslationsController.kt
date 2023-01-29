@@ -318,7 +318,10 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     ) {
       val keys = screenshotService.getKeysWithScreenshots(keyIds)
 
-      val allScreenshots = keys.flatMap { it.keyScreenshotReferences.map { it.screenshot } }
+      val allScreenshots = keys
+        .flatMap { key ->
+          key.keyScreenshotReferences.map { scr -> scr.screenshot }
+        }
 
       val references = screenshotService.getScreenshotReferences(screenshots = allScreenshots)
         .groupBy { it.screenshot.id }

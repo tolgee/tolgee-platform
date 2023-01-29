@@ -31,6 +31,7 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
       join fetch ksr.screenshot s
       left join fetch k.namespace n
     where k.id in :keyIds
+    order by k.id, ksr.screenshot.id
   """
   )
   fun getKeysWithScreenshots(keyIds: Collection<Long>): List<Key>
@@ -41,6 +42,7 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     join fetch ksr.key k
     left join fetch k.namespace
     where ksr.screenshot in :screenshots
+    order by k.id, ksr.screenshot.id
   """
   )
   fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference>
