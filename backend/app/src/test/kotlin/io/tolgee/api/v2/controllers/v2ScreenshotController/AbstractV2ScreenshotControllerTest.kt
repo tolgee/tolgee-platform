@@ -9,9 +9,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.util.generateImage
 import org.junit.jupiter.api.AfterAll
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.Resource
+import org.springframework.core.io.InputStreamSource
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
@@ -19,8 +19,9 @@ import org.springframework.test.web.servlet.ResultActions
 import java.io.File
 
 abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-  @Value("classpath:screenshot.png")
-  lateinit var screenshotFile: Resource
+  val screenshotFile: InputStreamSource by lazy {
+    generateImage(100, 100)
+  }
 
   @AfterAll
   fun cleanUp() {
@@ -33,7 +34,7 @@ abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/
       files = listOf(
         MockMultipartFile(
           "screenshot", "originalShot.png", "image/png",
-          screenshotFile.file.readBytes()
+          screenshotFile.inputStream.readAllBytes()
         ),
         MockMultipartFile(
           "info",

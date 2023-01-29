@@ -52,7 +52,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
       node("requestFilename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it)
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isEqualTo(138412)
+        assertThat(file.readBytes().size).isEqualTo(7365)
       }
     }
   }

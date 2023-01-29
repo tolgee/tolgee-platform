@@ -77,7 +77,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       node("filename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it + ".png")
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isEqualTo(8123)
+        assertThat(file.readBytes().size).isEqualTo(7365)
       }
       node("requestFilename").isString.satisfies {
         val parts = it.split("?timestamp=")
