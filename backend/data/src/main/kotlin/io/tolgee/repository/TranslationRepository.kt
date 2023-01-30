@@ -26,6 +26,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         where t.key.project.id = :projectId 
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
+        order by k.name
    """
   )
   fun getTranslations(languages: Set<String>, namespace: String?, projectId: Long): List<SimpleTranslationView>

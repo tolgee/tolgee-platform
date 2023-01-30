@@ -198,6 +198,11 @@ class TranslationService(
       map[translation.key] = translation.text
       return
     }
+    // The result already contains the key, so we have to add it to root without nesting
+    if (currentMap.containsKey(name)) {
+      map[translation.key] = translation.text
+      return
+    }
     currentMap[name] = translation.text
   }
 
