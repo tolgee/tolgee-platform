@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/tolgee/tolgee-platform/compare/v3.3.1...v3.3.2) (2023-01-30)
+
+
+### Bug Fixes
+
+* Dev Tools endpoint nesting issues ([#1523](https://github.com/tolgee/tolgee-platform/issues/1523)) ([74a102c](https://github.com/tolgee/tolgee-platform/commit/74a102c51ef432a957e04daaaef097342ace9533))
+
 ## [3.3.1](https://github.com/tolgee/tolgee-platform/compare/v3.3.0...v3.3.1) (2023-01-26)
 
 
