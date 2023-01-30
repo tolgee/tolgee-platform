@@ -2,9 +2,10 @@ import { Box, Tab, Tabs } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 
-import { PermissionsAdvanced } from './PermissionsAdvanced';
+import { PermissionsAdvanced } from './PermissionsAdvanced/PermissionsAdvanced';
 import { PermissionsBasic } from './PermissionsBasic';
 import {
+  PermissionAdvanced,
   PermissionBasic,
   PermissionModel,
   PermissionSettingsState,
@@ -27,6 +28,10 @@ export const PermissionsSettings: React.FC<Props> = ({
     viewLanguages: permissions.viewLanguageIds,
     languages: permissions.permittedLanguageIds,
     stateChangeLanguages: permissions.stateChangeLanguageIds,
+  });
+
+  const [advanced, setAdvanced] = useState<PermissionAdvanced>({
+    scopes: permissions.scopes,
   });
 
   useEffect(() => {
@@ -57,12 +62,11 @@ export const PermissionsSettings: React.FC<Props> = ({
       </Box>
       <Box sx={{ mt: 1 }}>
         {tab === 'basic' && (
-          <PermissionsBasic
-            value={basic}
-            onChange={(value) => setBasic(value)}
-          />
+          <PermissionsBasic state={basic} onChange={setBasic} />
         )}
-        {tab === 'advanced' && <PermissionsAdvanced />}
+        {tab === 'advanced' && (
+          <PermissionsAdvanced state={advanced} onChange={setAdvanced} />
+        )}
       </Box>
     </div>
   );
