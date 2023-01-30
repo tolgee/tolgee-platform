@@ -49,7 +49,7 @@ describe('Translation states', () => {
   });
 
   it("won't mark empty translation", () => {
-    editCell('Studený přeložený text 1', '{backspace}', true);
+    editCell('Studený přeložený text 1', '', true);
     waitForGlobalLoading();
 
     editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
