@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { Clear, Error } from '@mui/icons-material';
+import { Clear, FlagCircle } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -24,7 +24,7 @@ const StyledClearButton = styled(Clear)`
   display: none;
 `;
 
-const ActiveError = styled(Error)`
+const ActiveFlagCircle = styled(FlagCircle)`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
@@ -129,7 +129,7 @@ export const TranslationFlags: React.FC<Props> = ({
           <StyledContainer data-cy="translations-outdated-indicator">
             <TranslationFlagIcon
               tooltip={t('translations_cell_outdated')}
-              icon={<ActiveError />}
+              icon={<ActiveFlagCircle />}
             />
             <StyledClearButton
               role="button"
