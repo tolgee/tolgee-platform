@@ -3,11 +3,11 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { PermissionBasic, PermissionModel } from './types';
 
 type Props = {
-  value: PermissionBasic;
+  state: PermissionBasic;
   onChange: (value: PermissionBasic) => void;
 };
 
-export const PermissionsBasic: React.FC<Props> = ({ value, onChange }) => {
+export const PermissionsBasic: React.FC<Props> = ({ state, onChange }) => {
   const rolesList = Object.keys(ProjectPermissionType);
 
   return (
@@ -16,7 +16,7 @@ export const PermissionsBasic: React.FC<Props> = ({ value, onChange }) => {
         return (
           <ListItemButton
             key={item}
-            selected={item === value.role}
+            selected={item === state.role}
             onClick={() => onChange({ role: item as PermissionModel['type'] })}
           >
             <ListItemText
