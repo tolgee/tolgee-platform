@@ -48,6 +48,39 @@ describe('Translation states', () => {
     lastActivity.contains('Updated state').should('be.visible');
   });
 
+  it("won't mark empty translation", () => {
+    editCell('Studený přeložený text 1', '{backspace}', true);
+    waitForGlobalLoading();
+
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+    waitForGlobalLoading();
+    cy.gcy('translations-table-cell')
+      .eq(2)
+      .findDcy('translations-outdated-indicator')
+      .should('not.exist');
+  });
+
+  it('gets resolved on edit', () => {
+    editCell(
+      'Studený přeložený text 1',
+      'Studený přeložený text 1 edited',
+      true
+    );
+    waitForGlobalLoading();
+
+    getOutdatedIndicator('Studený přeložený text 1 edited').should('not.exist');
+  });
+
+  it('gets resolved on state change', () => {
+    getCell('Studený přeložený text 1')
+      .trigger('mouseover')
+      .findDcy('translation-state-button')
+      .click();
+    waitForGlobalLoading();
+
+    getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+  });
+
   const getOutdatedIndicator = (translationText: string) => {
     return getCell(translationText).findDcy('translations-outdated-indicator');
   };
