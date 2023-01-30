@@ -92,7 +92,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.focused().type('{meta}a').type('{backspace}').type(newValue);
+    cy.focused().type('{meta}a{backspace}{ctrl}a{backspace}').type(newValue);
 
     if (save) {
       getCellSaveButton().click();
