@@ -15,28 +15,34 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
     query: {},
   });
 
-  const setScope = (scope: PermissionModelScope, value: boolean) => {
-    const exists = state.scopes.includes(scope);
-    if (exists && value === false) {
-      onChange({
-        ...state,
-        scopes: state.scopes.filter((s) => s !== scope),
-      });
-    } else if (!exists && value === true) {
-      onChange({
-        ...state,
-        scopes: [...state.scopes, scope],
-      });
-    }
+  const setScopes = (scopes: PermissionModelScope[], value: boolean) => {
+    let newScopes = [...state.scopes];
+    scopes.forEach((scope) => {
+      const exists = newScopes.includes(scope);
+      if (exists && value === false) {
+        newScopes = newScopes.filter((s) => s !== scope);
+      } else if (!exists && value === true) {
+        newScopes = [...newScopes, scope];
+      }
+    });
+    onChange({
+      ...state,
+      scopes: newScopes,
+    });
   };
 
   if (dependenciesLoadable.isLoading) {
     return <FullPageLoading />;
   }
 
+  if (!dependenciesLoadable.data) {
+    return null;
+  }
+
   return (
     <Hierarchy
-      setScope={setScope}
+      dependencies={dependenciesLoadable.data}
+      setScopes={setScopes}
       scopes={state.scopes}
       structure={{
         label: 'admin',

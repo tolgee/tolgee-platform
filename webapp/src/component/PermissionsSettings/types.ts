@@ -27,3 +27,5 @@ export type HierarchyType = {
   value?: PermissionModelScope;
   children?: HierarchyType[];
 };
+
+export type HierarchyItem = components['schemas']['HierarchyItem'];
