@@ -277,4 +277,23 @@ class ScreenshotService(
   fun saveAllReferences(data: List<KeyScreenshotReference>) {
     keyScreenshotReferenceRepository.saveAll(data)
   }
+
+  fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
+    val keys = this.getKeysWithScreenshots(keyIds)
+
+    var allScreenshots = keys
+      .flatMap { key ->
+        key.keyScreenshotReferences.map { scr -> scr.screenshot }
+      }
+
+    allScreenshots = screenshotRepository.getScreenshotsWithReferences(allScreenshots)
+
+    val keyIdScreenshotsMap = allScreenshots
+      .flatMap { it.keyScreenshotReferences }
+      .groupBy { it.key.id }
+
+    return keys.associate {
+      it.id to (keyIdScreenshotsMap[it.id]?.map { it.screenshot } ?: emptyList())
+    }
+  }
 }

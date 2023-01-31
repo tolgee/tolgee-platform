@@ -89,7 +89,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
         )
       """
   )
-  fun findKeys(search: String, projectId: Long, languageTag: String?, pageable: Pageable): Page<KeySearchResultView>
+  fun searchKeys(search: String, projectId: Long, languageTag: String?, pageable: Pageable): Page<KeySearchResultView>
 
   @Query(
     """

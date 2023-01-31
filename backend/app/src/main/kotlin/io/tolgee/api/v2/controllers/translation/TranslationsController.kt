@@ -235,7 +235,7 @@ When null, resulting file will be a flat key-value object.
     val pageableWithSort = getSafeSortPageable(pageable)
     val data = translationService.getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
-    val keysWithScreenshots = getKeysWithScreenshots(data.map { it.keyId }.toList())
+    val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
 
     if (keysWithScreenshots != null) {
       data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
@@ -311,32 +311,12 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
 
-  private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
+  private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      val keys = screenshotService.getKeysWithScreenshots(keyIds)
-
-      val allScreenshots = keys
-        .flatMap { key ->
-          key.keyScreenshotReferences.map { scr -> scr.screenshot }
-        }
-
-      val references = screenshotService.getScreenshotReferences(screenshots = allScreenshots)
-        .groupBy { it.screenshot.id }
-
-      keys.forEach {
-        it.keyScreenshotReferences.forEach { keyScreenshotReference ->
-          keyScreenshotReference.screenshot.keyScreenshotReferences =
-            references[keyScreenshotReference.screenshot.id]?.toMutableList() ?: mutableListOf()
-        }
-      }
-
-      return keys.associate {
-        it.id to it.keyScreenshotReferences
-          .map { reference -> reference.screenshot }.toMutableSet()
-      }
+      return screenshotService.getScreenshotsForKeys(keyIds)
     }
     return null
   }

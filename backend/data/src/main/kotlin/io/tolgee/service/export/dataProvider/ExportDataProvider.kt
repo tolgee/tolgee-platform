@@ -21,6 +21,7 @@ import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Join
 import javax.persistence.criteria.JoinType
+import javax.persistence.criteria.ListJoin
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.SetJoin
@@ -36,7 +37,7 @@ class ExportDataProvider(
   private var key: Root<Key> = query.from(Key::class.java)
   private lateinit var tagJoin: SetJoin<KeyMeta, Tag>
   private lateinit var keyMetaJoin: Join<Key, KeyMeta>
-  private lateinit var translationJoin: SetJoin<Key, Translation>
+  private lateinit var translationJoin: ListJoin<Key, Translation>
   private lateinit var languageJoin: SetJoin<Project, Language>
   private lateinit var projectJoin: Join<Key, Project>
   private lateinit var namespaceJoin: Join<Key, Namespace>
@@ -146,7 +147,7 @@ class ExportDataProvider(
   private fun joinTranslation(
     key: Root<Key>,
     language: SetJoin<Project, Language>
-  ): SetJoin<Key, Translation> {
+  ): ListJoin<Key, Translation> {
     val translation = key.join(Key_.translations, JoinType.LEFT)
     translation.on(
       cb.and(

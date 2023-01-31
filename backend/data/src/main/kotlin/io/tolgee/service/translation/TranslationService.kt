@@ -348,4 +348,8 @@ class TranslationService(
 
     return entityManager.createQuery(query).resultList
   }
+
+  fun getForKeys(keyIds: List<Long>, languageTags: List<String>): List<Translation> {
+    return translationRepository.getForKeys(keyIds, languageTags)
+  }
 }

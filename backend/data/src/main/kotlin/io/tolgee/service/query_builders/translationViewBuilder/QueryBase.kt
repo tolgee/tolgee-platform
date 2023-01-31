@@ -20,10 +20,10 @@ import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Expression
 import javax.persistence.criteria.JoinType
+import javax.persistence.criteria.ListJoin
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
-import javax.persistence.criteria.SetJoin
 
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
@@ -90,7 +90,7 @@ class QueryBase<T>(
   }
 
   private fun addComments(
-    translation: SetJoin<Key, Translation>,
+    translation: ListJoin<Key, Translation>,
     language: Language
   ) {
     val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
@@ -113,7 +113,7 @@ class QueryBase<T>(
   }
 
   private fun addTranslationStateField(
-    translation: SetJoin<Key, Translation>,
+    translation: ListJoin<Key, Translation>,
     language: Language
   ): Path<TranslationState> {
     val translationStateField = translation.get(Translation_.state)
@@ -122,7 +122,7 @@ class QueryBase<T>(
   }
 
   private fun addTranslationText(
-    translation: SetJoin<Key, Translation>,
+    translation: ListJoin<Key, Translation>,
     language: Language
   ): Path<String> {
     val translationTextField = translation.get(Translation_.text)
@@ -130,7 +130,7 @@ class QueryBase<T>(
     return translationTextField
   }
 
-  private fun addTranslationId(language: Language): SetJoin<Key, Translation> {
+  private fun addTranslationId(language: Language): ListJoin<Key, Translation> {
     val translation = this.root.join(Key_.translations, JoinType.LEFT)
     translation.on(cb.equal(translation.get(Translation_.language), language))
     val translationId = translation.get(Translation_.id)
@@ -152,7 +152,7 @@ class QueryBase<T>(
 
   private fun addNotFilteringTranslationFields(
     language: Language,
-    translation: SetJoin<Key, Translation>
+    translation: ListJoin<Key, Translation>
   ) {
     if (!isKeyIdsQuery) {
       this.querySelection[language to TranslationView::auto] = translation.get(Translation_.auto)

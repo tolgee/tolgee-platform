@@ -146,4 +146,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   @Modifying
   fun setOutdated(keyIds: List<Long>)
+
+  @Query(
+    """
+    from Translation t
+    join t.language l on l.tag in :languageTags
+    where t.key.id in :keys
+  """
+  )
+  fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
 }

@@ -17,7 +17,6 @@ import javax.persistence.criteria.JoinType
 import javax.persistence.criteria.ListJoin
 import javax.persistence.criteria.Root
 import javax.persistence.criteria.Selection
-import javax.persistence.criteria.SetJoin
 
 open class LanguageStatsProvider(
   val entityManager: EntityManager,
@@ -100,7 +99,7 @@ open class LanguageStatsProvider(
   private fun joinTargetTranslations(
     keyJoin: ListJoin<Project, Key>,
     state: TranslationState
-  ): SetJoin<Key, Translation> {
+  ): ListJoin<Key, Translation> {
     return keyJoin.join(Key_.translations).also { translation ->
       translation.on(
         cb.and(
