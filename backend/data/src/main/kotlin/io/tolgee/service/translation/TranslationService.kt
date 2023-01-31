@@ -309,6 +309,7 @@ class TranslationService(
       if (it.language.id != baseLanguage?.id) {
         if (!it.text.isNullOrEmpty()) {
           it.outdated = true
+          it.state = TranslationState.TRANSLATED
         }
         save(it)
       }
