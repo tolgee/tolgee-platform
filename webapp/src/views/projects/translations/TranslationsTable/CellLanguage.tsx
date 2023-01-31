@@ -1,9 +1,9 @@
 import React from 'react';
+import { styled, Box } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { CellStateBar } from '../cell/CellStateBar';
-import { styled } from '@mui/material';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -33,7 +33,9 @@ export const CellLanguage: React.FC<Props> = ({
     <>
       <StyledContent>
         <CircledLanguageIcon flag={language.flagEmoji} />
-        <div>{language.name}</div>
+        <Box sx={{ fontWeight: language.base ? 'bold' : 'normal' }}>
+          {language.name}
+        </Box>
       </StyledContent>
       <CellStateBar onResize={handleResize} />
     </>

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import clsx from 'clsx';
-import { styled } from '@mui/material';
+import { styled, Box } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
@@ -62,7 +62,7 @@ const StyledTranslationContent = styled('div')`
   position: relative;
 `;
 
-const StyledLanguage = styled('div')`
+const StyledLanguage = styled(Box)`
   margin: 12px 8px 8px 0px;
 `;
 
@@ -180,7 +180,10 @@ export const CellTranslation: React.FC<Props> = ({
       >
         <StyledCircledLanguageIcon flag={language.flagEmoji} />
 
-        <StyledLanguage data-cy="translations-table-cell-language">
+        <StyledLanguage
+          data-cy="translations-table-cell-language"
+          sx={{ fontWeight: language.base ? 'bold' : 'normal' }}
+        >
           {language.tag}
         </StyledLanguage>
 
