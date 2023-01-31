@@ -22,6 +22,7 @@ const StyledControlsWrapper = styled('div')`
   padding: 12px 14px 12px 12px;
   margin-top: -16px;
   margin-right: -10px;
+  gap: 4px;
 `;
 
 const StyledStateButtons = styled('div')`

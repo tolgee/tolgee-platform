@@ -8,7 +8,7 @@ import { ControlsButton } from './ControlsButton';
 
 const StyledControls = styled('div')`
   display: flex;
-  gap: 8px;
+  gap: 12px;
 `;
 
 type ControlsProps = {
