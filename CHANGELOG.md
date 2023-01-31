@@ -1,3 +1,10 @@
+## [3.3.3](https://github.com/tolgee/tolgee-platform/compare/v3.3.2...v3.3.3) (2023-01-31)
+
+
+### Bug Fixes
+
+* Import failure when multiple keys are present for a new namespace ([#1525](https://github.com/tolgee/tolgee-platform/issues/1525)) ([4c49a82](https://github.com/tolgee/tolgee-platform/commit/4c49a823a14289a23445aeccfed906788b175774))
+
 ## [3.3.2](https://github.com/tolgee/tolgee-platform/compare/v3.3.1...v3.3.2) (2023-01-30)
 
 
