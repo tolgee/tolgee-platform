@@ -138,18 +138,6 @@ describe('Translation memory', () => {
     getAutoTranslatedIndicator('Translation edited').should('not.exist');
   });
 
-  // const enableSettings = ({ translationMemory, machineTranslation }) => {
-  //   cy.visit(`${HOST}/projects/${project.id}/languages`);
-  //   waitForGlobalLoading();
-  //   if (translationMemory) {
-  //     cy.gcy('languages-auto-translation-memory').click();
-  //   }
-  //   if (machineTranslation) {
-  //     cy.gcy('languages-auto-machine-translation').click();
-  //   }
-  //   waitForGlobalLoading();
-  // };
-
   const getAutoTranslatedIndicator = (translationText: string) => {
     return getCell(translationText).findDcy(
       'translations-auto-translated-indicator'
