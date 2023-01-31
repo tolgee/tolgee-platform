@@ -1,4 +1,8 @@
-import { HierarchyItem, HierarchyType, PermissionModelScope } from '../types';
+import {
+  HierarchyItem,
+  HierarchyType,
+  PermissionModelScope,
+} from 'tg.component/PermissionsSettings/types';
 
 export const getChildScopes = (structure: HierarchyType) => {
   let result: PermissionModelScope[] = [];
