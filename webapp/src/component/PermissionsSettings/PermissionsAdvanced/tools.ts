@@ -1,4 +1,4 @@
-import { HierarchyType, PermissionModelScope } from '../types';
+import { HierarchyItem, HierarchyType, PermissionModelScope } from '../types';
 
 export const getChildScopes = (structure: HierarchyType) => {
   let result: PermissionModelScope[] = [];
@@ -26,4 +26,54 @@ export const checkChildren = (
     }
   });
   return { childrenCheckedAll, childrenCheckedSome };
+};
+
+export const findRequired = (
+  scope: PermissionModelScope,
+  dependencies: HierarchyItem
+) => {
+  let result: PermissionModelScope[] = [];
+  if (dependencies.scope === scope) {
+    dependencies.requires.forEach((required) => {
+      result = [
+        ...result,
+        required.scope,
+        ...findRequired(required.scope, required),
+      ];
+    });
+  } else {
+    dependencies.requires.forEach((required) => {
+      result = [...result, ...findRequired(scope, required)];
+    });
+  }
+  return result;
+};
+
+export const getDependent = (
+  myScopes: PermissionModelScope[],
+  dependencies: HierarchyItem
+) => {
+  const result = new Set<PermissionModelScope>();
+
+  dependencies.requires.forEach((item) => {
+    const childItems = getDependent(myScopes, item);
+    if (myScopes.includes(item.scope) || childItems.length) {
+      result.add(dependencies.scope);
+      childItems.forEach((s) => result.add(s));
+    }
+  });
+
+  return Array.from(result);
+};
+
+export const getRequiredScopes = (
+  scopes: PermissionModelScope[],
+  dependencies: HierarchyItem
+) => {
+  const result = new Set<PermissionModelScope>();
+  scopes.forEach((scope) => {
+    result.add(scope);
+    findRequired(scope, dependencies).forEach((scope) => result.add(scope));
+  });
+  return Array.from(result);
 };
