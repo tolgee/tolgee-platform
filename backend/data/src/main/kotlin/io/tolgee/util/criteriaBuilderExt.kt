@@ -47,3 +47,14 @@ fun CriteriaBuilder.lessThanOrEqualToNullable(
   }
   return this.or(expression.isNull, this.lessThanOrEqualTo(expression, value as String?))
 }
+
+@Suppress("TYPE_MISMATCH_WARNING")
+fun CriteriaBuilder.equalNullable(
+  expression: Expression<String>,
+  value: Any?
+): Predicate {
+  if (value == null) {
+    return this.isNull(expression)
+  }
+  return this.equal(expression, value)
+}

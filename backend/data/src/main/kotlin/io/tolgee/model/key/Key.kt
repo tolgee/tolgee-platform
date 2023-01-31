@@ -53,7 +53,7 @@ class Key(
   var namespace: Namespace? = null
 
   @OneToMany(mappedBy = "key")
-  var translations: MutableSet<Translation> = mutableSetOf()
+  var translations: MutableList<Translation> = mutableListOf()
 
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null
@@ -64,7 +64,7 @@ class Key(
   constructor(
     name: String,
     project: Project,
-    translations: MutableSet<Translation> = HashSet()
+    translations: MutableList<Translation> = mutableListOf()
   ) : this(name) {
     this.project = project
     this.translations = translations

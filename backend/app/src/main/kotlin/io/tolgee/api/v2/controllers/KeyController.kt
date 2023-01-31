@@ -12,9 +12,11 @@ import io.tolgee.api.v2.hateoas.key.KeySearchResultModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeySearchSearchResultModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeyWithScreenshotsModelAssembler
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
+import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeleteKeysDto
@@ -36,6 +38,7 @@ import org.springdoc.api.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -72,7 +75,8 @@ class KeyController(
   private val applicationContext: ApplicationContext,
   private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
-  private val screenshotModelAssembler: ScreenshotModelAssembler
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -174,8 +178,24 @@ class KeyController(
     languageTag: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
-    val result = keyService.findKeys(search, languageTag, projectHolder.project, pageable)
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
+  }
+
+  @PostMapping("/info")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.VIEW)
+  @Operation(
+    summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
+      "If key is not found, it's not included in the response."
+  )
+  fun getInfo(
+    @RequestBody
+    @Valid
+    dto: GetKeysRequestDto,
+  ): CollectionModel<KeyWithDataModel> {
+    val result = keyService.getKeysInfo(dto, projectHolder.project.id)
+    return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }
 
   private fun Key.checkInProject() {
