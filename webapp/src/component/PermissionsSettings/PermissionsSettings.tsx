@@ -1,9 +1,8 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import { T } from '@tolgee/react';
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
 
-import { PermissionsAdvanced } from './PermissionsAdvanced/PermissionsAdvanced';
 import { PermissionsBasic } from './PermissionsBasic';
 import {
   PermissionAdvanced,

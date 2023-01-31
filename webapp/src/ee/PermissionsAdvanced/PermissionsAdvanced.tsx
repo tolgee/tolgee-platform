@@ -1,7 +1,11 @@
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { PermissionAdvanced, PermissionModelScope } from '../types';
+import {
+  PermissionAdvanced,
+  PermissionModelScope,
+} from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
+import { useTranslate } from '@tolgee/react';
 
 type Props = {
   state: PermissionAdvanced;
@@ -9,6 +13,8 @@ type Props = {
 };
 
 export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
+  const { t } = useTranslate();
+
   const dependenciesLoadable = useApiQuery({
     url: '/v2/public/scope-info/hierarchy',
     method: 'get',
@@ -45,66 +51,68 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
       setScopes={setScopes}
       scopes={state.scopes}
       structure={{
-        label: 'admin',
+        label: t('permissions_item_admin'),
         value: 'admin',
         children: [
           {
-            label: 'translations',
+            label: t('permissions_item_translations'),
             children: [
               {
-                label: 'view',
+                label: t('permissions_item_translations_view'),
                 value: 'translations.view',
               },
               {
-                label: 'edit',
+                label: t('permissions_item_translations_edit'),
                 value: 'translations.edit',
               },
               {
-                label: 'comments',
+                label: t('permissions_item_translations_comments'),
                 children: [
                   {
-                    label: 'add',
+                    label: t('permissions_item_translations_comments_add'),
                     value: 'translation-comments.add',
                   },
                   {
-                    label: 'edit',
+                    label: t('permissions_item_translations_comments_edit'),
                     value: 'translation-comments.edit',
                   },
                   {
-                    label: 'set state',
+                    label: t(
+                      'permissions_item_translations_comments_set_state'
+                    ),
                     value: 'translation-comments.set-state',
                   },
                 ],
               },
               {
-                label: 'state',
+                label: t('permissions_item_translations_state'),
                 value: 'translations.state-edit',
               },
             ],
           },
           {
-            label: 'screenshots',
+            label: t('permissions_item_screenshots'),
             children: [
               {
-                label: 'view',
+                label: t('permissions_item_screenshots_view'),
                 value: 'screenshots.view',
               },
               {
-                label: 'upload',
+                label: t('permissions_item_screenshots_upload'),
                 value: 'screenshots.upload',
               },
               {
-                label: 'delete',
+                label: t('permissions_item_screenshots_delete'),
                 value: 'screenshots.delete',
               },
             ],
           },
           {
-            label: 'keys',
+            label: t('permissions_item_keys_edit'),
             value: 'keys.edit',
           },
           {
-            label: 'import',
+            label: t('permissions_item_import'),
             value: 'import',
           },
         ],

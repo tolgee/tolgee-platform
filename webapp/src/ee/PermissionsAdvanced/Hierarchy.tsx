@@ -1,5 +1,9 @@
 import { styled, Checkbox, FormControlLabel } from '@mui/material';
-import { HierarchyItem, HierarchyType, PermissionModelScope } from '../types';
+import {
+  HierarchyItem,
+  HierarchyType,
+  PermissionModelScope,
+} from 'tg.component/PermissionsSettings/types';
 import {
   checkChildren,
   getChildScopes,
