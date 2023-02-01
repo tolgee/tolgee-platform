@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
+import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
@@ -61,8 +63,8 @@ class ProjectStatsController(
 
   @Operation(summary = "Returns project daily amount of events")
   @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.ACTIVITY_VIEW)
+  @AccessWithApiKey([Scope.ACTIVITY_VIEW])
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
   }

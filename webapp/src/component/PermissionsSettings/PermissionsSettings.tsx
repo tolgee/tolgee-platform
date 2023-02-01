@@ -21,7 +21,9 @@ export const PermissionsSettings: React.FC<Props> = ({
   permissions,
   onChange,
 }) => {
-  const [tab, setTab] = useState<TabsType>('basic');
+  const [tab, setTab] = useState<TabsType>(
+    permissions.type ? 'basic' : 'advanced'
+  );
 
   const [basic, setBasic] = useState<PermissionBasic>({
     role: permissions.type,
@@ -38,8 +40,9 @@ export const PermissionsSettings: React.FC<Props> = ({
     onChange({
       tab,
       basic,
+      advanced,
     });
-  }, [tab, basic]);
+  }, [tab, basic, advanced]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: TabsType) => {
     setTab(newValue);

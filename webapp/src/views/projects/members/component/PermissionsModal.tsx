@@ -33,8 +33,14 @@ export const PermissionsModal: React.FC<Props> = ({
   const messages = useMessage();
   const project = useProject();
 
-  const editPermission = useApiMutation({
+  const editRole = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/users',
+  });
+
+  const editScopes = useApiMutation({
+    url: '/v2/projects/{projectId}/users/{userId}/set-permissions',
     method: 'put',
     invalidatePrefix: '/v2/projects/{projectId}/users',
   });
@@ -43,12 +49,12 @@ export const PermissionsModal: React.FC<Props> = ({
     PermissionSettingsState | undefined
   >(undefined);
 
-  const changePermission = () => {
+  const changeRole = () => {
     if (!settingsState?.basic?.role) {
       return;
     }
     const permissionType = settingsState.basic.role;
-    editPermission.mutate(
+    editRole.mutate(
       {
         path: {
           userId: user?.id,
@@ -56,6 +62,29 @@ export const PermissionsModal: React.FC<Props> = ({
           projectId: project.id,
         },
         query: {},
+      },
+      {
+        onSuccess() {
+          messages.success(<T>permissions_set_message</T>);
+          onClose();
+        },
+        onError(e) {
+          parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+        },
+      }
+    );
+  };
+
+  const changeScopes = () => {
+    if (!settingsState?.advanced.scopes) {
+      return;
+    }
+    editScopes.mutate(
+      {
+        path: { userId: user.id, projectId: project.id },
+        query: {
+          scopes: settingsState?.advanced.scopes,
+        },
       },
       {
         onSuccess() {
@@ -85,10 +114,8 @@ export const PermissionsModal: React.FC<Props> = ({
           <T keyName="permission_dialog_close" />
         </Button>
         <LoadingButton
-          loading={editPermission.isLoading}
-          onClick={
-            settingsState?.tab === 'basic' ? changePermission : undefined
-          }
+          loading={editRole.isLoading}
+          onClick={settingsState?.tab === 'basic' ? changeRole : changeScopes}
           color="primary"
           variant="contained"
         >
