@@ -4,7 +4,6 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import clsx from 'clsx';
@@ -47,7 +46,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   bannerBefore,
   bannerAfter,
 }) {
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission, canEditLanguage } = useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -80,7 +79,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission('keys.edit')}
+        editEnabled={satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
@@ -95,7 +94,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
             language={language}
             colIndex={0}
             onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
+            editEnabled={canEditLanguage(language.id)}
             width={columnSizes[1]}
             active={relaxedActive}
             className={clsx({

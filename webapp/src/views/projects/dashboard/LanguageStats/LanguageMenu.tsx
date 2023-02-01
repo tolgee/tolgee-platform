@@ -19,7 +19,7 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
   const history = useHistory();
   const project = useProject();
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
 
   const closeWith = (action?: () => void) => (e) => {
     e?.stopPropagation();
@@ -49,7 +49,7 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
     );
   };
 
-  const editable = projectPermissions.satisfiesPermission('languages.edit');
+  const editable = satisfiesPermission('languages.edit');
 
   return (
     <>

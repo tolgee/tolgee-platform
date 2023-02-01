@@ -12,6 +12,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useLeaveProject } from 'tg.views/projects/useLeaveProject';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const messageService = container.resolve(MessageService);
 
@@ -21,6 +22,8 @@ const RevokePermissionsButton = (props: {
   const hasOrganizationRole = !!props.user.organizationRole;
   const project = useProject();
   const currentUser = useUser();
+  const { satisfiesPermission } = useProjectPermissions();
+  const isAdmin = satisfiesPermission('admin');
 
   const { leave, isLeaving } = useLeaveProject();
 
@@ -70,10 +73,13 @@ const RevokePermissionsButton = (props: {
   let tooltip = undefined as ReactElement | undefined;
 
   if (hasOrganizationRole) {
-    tooltip = <T>user_is_part_of_organization_tooltip</T>;
+    tooltip = <T keyName="user_is_part_of_organization_tooltip" />;
     isDisabled = true;
   } else if (currentUser!.id === props.user.id) {
-    tooltip = <T>project_leave_button</T>;
+    tooltip = <T keyName="project_leave_button" />;
+  } else if (!isAdmin) {
+    tooltip = <T keyName="operation_not_permitted_error" />;
+    isDisabled = true;
   }
 
   const Wrapper: FunctionComponent = (props) =>

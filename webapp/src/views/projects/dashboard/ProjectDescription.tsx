@@ -35,9 +35,7 @@ type Props = {
 export const ProjectDescription: React.FC<Props> = ({ description }) => {
   const project = useProject();
   const permissions = useProjectPermissions();
-  const canManage = permissions.satisfiesPermission(
-    ProjectPermissionType.MANAGE
-  );
+  const canManage = permissions.satisfiesPermission('project.edit');
 
   return (
     <StyledContainer data-cy="project-dashboard-description">

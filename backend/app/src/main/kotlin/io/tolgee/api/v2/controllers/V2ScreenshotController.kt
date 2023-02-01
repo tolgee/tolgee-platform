@@ -74,7 +74,7 @@ class V2ScreenshotController(
 
   @GetMapping("")
   @Operation(summary = "Returns all screenshots for specified key")
-  @AccessWithAnyProjectPermission
+  @AccessWithProjectPermission(Scope.SCREENSHOTS_VIEW)
   @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }

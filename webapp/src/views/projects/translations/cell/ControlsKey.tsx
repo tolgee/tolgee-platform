@@ -4,6 +4,7 @@ import { T } from '@tolgee/react';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type ControlsProps = {
   editEnabled?: boolean;
@@ -22,9 +23,12 @@ export const ControlsKey: React.FC<ControlsProps> = ({
   screenshotsPresent,
   screenshotsOpen,
 }) => {
+  const { satisfiesPermission } = useProjectPermissions();
+  const canViewScreenshots = satisfiesPermission('screenshots.view');
+
   // right section
   const displayEdit = editEnabled && onEdit;
-  const displayScreenshots = onScreenshots;
+  const displayScreenshots = onScreenshots && canViewScreenshots;
 
   return (
     <>
