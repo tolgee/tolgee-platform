@@ -72,7 +72,8 @@ const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
+  const canUploadScreenshots = satisfiesPermission('screenshots.upload');
   const config = useConfig();
   const project = useProject();
   const { updateScreenshotCount } = useTranslationsActions();
@@ -99,8 +100,6 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     method: 'delete',
   });
 
-  const canAdd = projectPermissions.satisfiesPermission('screenshots.upload');
-
   const handleDelete = (id: number) => () => {
     deleteLoadable.mutate(
       {
@@ -114,7 +113,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     );
   };
 
-  const addBox = canAdd && (
+  const addBox = canUploadScreenshots && (
     <StyledAddBox
       key="add"
       data-cy="add-box"
@@ -306,7 +305,8 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               p={2}
               lang={lang}
             >
-              {t('no_screenshots_yet')} {canAdd && t('add_screenshots_message')}
+              {t('no_screenshots_yet')}{' '}
+              {canUploadScreenshots && t('add_screenshots_message')}
             </StyledHintText>
           </>
         )}

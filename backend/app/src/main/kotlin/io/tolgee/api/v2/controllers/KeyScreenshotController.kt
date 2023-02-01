@@ -21,7 +21,6 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.KeyService
@@ -81,7 +80,7 @@ class KeyScreenshotController(
 
   @GetMapping("")
   @Operation(summary = "Returns all screenshots for specified key")
-  @AccessWithAnyProjectPermission
+  @AccessWithProjectPermission(Scope.SCREENSHOTS_VIEW)
   @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }

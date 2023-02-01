@@ -22,12 +22,14 @@ export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
 
+  const canEditProject = satisfiesPermission('project.edit');
+  const canEditLanguages = satisfiesPermission('languages.edit');
+  const canViewUsers = satisfiesPermission('users.view');
+  const canImport = satisfiesPermission('import');
+
   const { t } = useTranslate();
 
   const topBarHidden = useTopBarHidden();
-
-  const canViewUsers = satisfiesPermission('users.view');
-  const canManage = satisfiesPermission('admin');
 
   return (
     <SideMenu>
@@ -51,7 +53,7 @@ export const ProjectMenu = ({ id }) => {
         matchAsPrefix
       />
       <>
-        {satisfiesPermission('project.edit') && (
+        {canEditProject && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_EDIT.build({
               [PARAMS.PROJECT_ID]: id,
@@ -61,7 +63,7 @@ export const ProjectMenu = ({ id }) => {
             text={t('project_menu_project_settings')}
           />
         )}
-        {satisfiesPermission('languages.edit') && (
+        {(canEditLanguages || canEditProject) && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_LANGUAGES.build({
               [PARAMS.PROJECT_ID]: id,
@@ -71,7 +73,7 @@ export const ProjectMenu = ({ id }) => {
             text={t('project_menu_languages')}
           />
         )}
-        {config.authentication && satisfiesPermission('users.view') && (
+        {config.authentication && canViewUsers && (
           <>
             <SideMenuItem
               linkTo={LINKS.PROJECT_PERMISSIONS.build({
@@ -82,7 +84,7 @@ export const ProjectMenu = ({ id }) => {
             />
           </>
         )}
-        {satisfiesPermission('import') && (
+        {canImport && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_IMPORT.build({
               [PARAMS.PROJECT_ID]: id,

@@ -78,7 +78,8 @@ const StyledDeleteIcon = styled(ClearIcon)`
 export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
   (props) => {
     const [hover, setHover] = useState(false);
-    const projectPermissions = useProjectPermissions();
+    const { satisfiesPermission } = useProjectPermissions();
+    const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
 
     const onMouseOver = () => {
       setHover(true);
@@ -103,7 +104,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
           onMouseOut={onMouseOut}
           data-cy="screenshot-thumbnail"
         >
-          {projectPermissions.satisfiesPermission('screenshots.delete') && (
+          {canDeleteScreenshots && (
             <Tooltip
               title={<T noWrap>translations.screenshots.delete_tooltip</T>}
             >

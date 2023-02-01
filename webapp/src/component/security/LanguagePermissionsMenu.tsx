@@ -1,10 +1,10 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
 import {
-  Menu,
-  MenuItem,
+  Button,
   Checkbox,
   ListItemText,
-  Button,
+  Menu,
+  MenuItem,
   Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
@@ -17,6 +17,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   selected: number[];
   onSelect: (value: number[]) => void;
   buttonProps?: ComponentProps<typeof Button>;
+  disabled?: boolean;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { t } = useTranslate();

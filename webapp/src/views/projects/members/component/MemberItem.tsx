@@ -11,6 +11,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -50,6 +51,8 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
   const { t } = useTranslate();
+  const { satisfiesPermission } = useProjectPermissions();
+  const isAdmin = satisfiesPermission('admin');
 
   const editPermission = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
@@ -99,6 +102,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
       <StyledItemActions>
         {projectPermissionType === 'TRANSLATE' && (
           <LanguagePermissionsMenu
+            buttonProps={{ disabled: !isAdmin }}
             selected={user.computedPermission.permittedLanguageIds || []}
             onSelect={(langs) =>
               changePermission(projectPermissionType, langs, false)
@@ -116,7 +120,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           }
           buttonProps={{
             size: 'small',
-            disabled: isCurrentUser || isOwner,
+            disabled: !isAdmin || isCurrentUser || isOwner,
           }}
           permissions={user.computedPermission}
         />

@@ -48,7 +48,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   bannerBefore,
   bannerAfter,
 }) {
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission, canEditLanguage } = useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -77,7 +77,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission('keys.edit')}
+        editEnabled={satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
@@ -105,7 +105,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
+            editEnabled={canEditLanguage(language.id)}
             width={columnSizes[index + 1]}
             cellPosition={cellPosition}
             active={relaxedActive}
