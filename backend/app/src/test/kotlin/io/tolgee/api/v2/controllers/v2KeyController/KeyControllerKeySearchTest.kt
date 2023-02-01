@@ -51,6 +51,19 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it searches for prefix`() {
+    saveAndPrepare()
+    performProjectAuthGet("keys/search?search=thi&languageTag=de").andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+        node("[0].name").isEqualTo("this-is-key")
+        node("[1].name").isEqualTo("this-is-key-2")
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `search is not slow`() {
     executeInNewTransaction {
       (1..5000).forEach {
@@ -72,7 +85,7 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
 
     executeInNewTransaction {
       val time = measureTimeMillis {
-        performProjectAuthGet("keys/search?search=et&languageTag=de").andAssertThatJson {
+        performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
           node("page.totalElements").isNumber.isGreaterThan(2000.toBigDecimal())
           node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
         }.andPrettyPrint

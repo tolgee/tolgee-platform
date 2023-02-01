@@ -55,38 +55,39 @@ interface KeyRepository : JpaRepository<Key, Long> {
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-    websearch_to_tsquery('simple_unaccent', :search) query   
-       where (
-            ns.textsearchable_name @@ query
-            or k.textsearchable_name @@ query
-            or t.textsearchable_text @@ query
-            or bt.textsearchable_text @@ query
+    lower(unaccent(:search)) as searchUnaccent
+    where (
+          lower(unaccent(ns.name)) %> searchUnaccent
+          or lower(unaccent(k.name)) %> searchUnaccent
+          or lower(unaccent(t.text)) %> searchUnaccent
+          or lower(unaccent(bt.text)) %> searchUnaccent
           )
-       order by (
-           3 * ts_rank_cd(ns.textsearchable_name, query) +
-           3 * ts_rank_cd(k.textsearchable_name, query) +
-           ts_rank_cd(t.textsearchable_text, query) +
-           ts_rank_cd(bt.textsearchable_text, query)
-    ) desc, k.id
+       order by 
+       (
+       3 * (ns.name <-> searchUnaccent) + 
+       3 * (k.name <-> searchUnaccent) + 
+       (t.text <-> searchUnaccent) +
+       (bt.text <-> searchUnaccent)
+       ) desc, k.id
     limit :#{#pageable.pageSize}
     offset :#{#pageable.offset}
   """,
     nativeQuery = true,
-    countQuery = """select count(k.id) 
+    countQuery = """
+      select count(k.id) 
       from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join namespace ns on k.namespace_id = ns.id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-      websearch_to_tsquery('simple_unaccent', :search) query
-      where 
-        (
-          ns.textsearchable_name @@ query
-          or k.textsearchable_name @@ query
-          or t.textsearchable_text @@ query
-          or bt.textsearchable_text @@ query
-        )
+      lower(unaccent(:search)) as searchUnaccent  
+      where (
+          lower(unaccent(ns.name)) %> searchUnaccent
+          or lower(unaccent(k.name)) %> searchUnaccent
+          or lower(unaccent(t.text)) %> searchUnaccent
+          or lower(unaccent(bt.text)) %> searchUnaccent
+          )
       """
   )
   fun searchKeys(search: String, projectId: Long, languageTag: String?, pageable: Pageable): Page<KeySearchResultView>

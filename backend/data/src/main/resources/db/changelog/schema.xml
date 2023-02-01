@@ -2260,26 +2260,19 @@
             CREATE
             extension unaccent;
             CREATE
-            TEXT SEARCH CONFIGURATION simple_unaccent ( COPY = simple );
-            ALTER
-            TEXT SEARCH CONFIGURATION simple_unaccent
-            ALTER
-            MAPPING FOR asciiword, asciihword, hword_asciipart, hword, hword_part, word
-                WITH unaccent, simple;
-            ALTER TABLE key
-                ADD COLUMN textsearchable_name tsvector
-                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', name)) STORED;
-            CREATE INDEX key_name_tsvector ON key USING GIN (textsearchable_name);
+            EXTENSION IF NOT EXISTS pg_trgm;
 
-            ALTER TABLE translation
-                ADD COLUMN textsearchable_text tsvector
-                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', text)) STORED;
-            CREATE INDEX translation_text_tsvector ON translation USING GIN (textsearchable_text);
+            CREATE
+            OR REPLACE FUNCTION public.f_unaccent(text)
+            RETURNS text
+            LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS
+            $func$
+            SELECT public.unaccent('public.unaccent', $1)
+            $func$;
 
-            ALTER TABLE namespace
-                ADD COLUMN textsearchable_name tsvector
-                    GENERATED ALWAYS AS (to_tsvector('simple_unaccent', name)) STORED;
-            CREATE INDEX namespace_name_tsvector ON namespace USING GIN (textsearchable_name);
+            CREATE INDEX translation_text_unaccent_gin_trgm_index ON translation USING GIN ( lower(f_unaccent(text)) gin_trgm_ops);
+            CREATE INDEX key_name_unaccent_gin_trgm_index ON key USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
+            CREATE INDEX namespace_name_unaccent_gin_trgm_index ON namespace USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1674571952168-1">
@@ -2300,21 +2293,27 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1674571952168-3">
-        <addForeignKeyConstraint baseColumnNames="screenshot_id" baseTableName="key_screenshot_reference" constraintName="FKh8sadml9k6rn9ji3q6u4em6ow" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="screenshot" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="screenshot_id" baseTableName="key_screenshot_reference"
+                                 constraintName="FKh8sadml9k6rn9ji3q6u4em6ow" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="screenshot"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1674571952168-4">
-        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_screenshot_reference" constraintName="FKp6wnbfbgoxnqv6wihs7m63v5t" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_screenshot_reference"
+                                 constraintName="FKp6wnbfbgoxnqv6wihs7m63v5t" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431778-2">
         <sql dbms="postgresql">
-            update screenshot set path = k.project_id || '/' || k.id
-            from key k
+            update screenshot
+            set path = k.project_id || '/' || k.id from key k
             where k.id = screenshot.key_id;
 
             insert into key_screenshot_reference(key_id, screenshot_id)
             select s.key_id, s.id
             from screenshot s
-            join key k on k.id = s.key_id;
+                     join key k on k.id = s.key_id;
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1674574577472-1">

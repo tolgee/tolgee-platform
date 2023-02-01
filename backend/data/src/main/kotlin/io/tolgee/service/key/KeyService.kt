@@ -23,6 +23,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
+import io.tolgee.util.setSimilarityLimit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -259,12 +260,14 @@ class KeyService(
     tagService.tagKeys(toTag)
   }
 
+  @Transactional
   fun searchKeys(
     search: String,
     languageTag: String?,
     project: ProjectDto,
     pageable: Pageable
   ): Page<KeySearchResultView> {
+    entityManager.setSimilarityLimit(0.00001)
     return keyRepository.searchKeys(search, project.id, languageTag, pageable)
   }
 
