@@ -51,41 +51,32 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
       setScopes={setScopes}
       scopes={state.scopes}
       structure={{
-        label: t('permissions_item_admin'),
         value: 'admin',
         children: [
           {
             label: t('permissions_item_translations'),
             children: [
               {
-                label: t('permissions_item_translations_view'),
                 value: 'translations.view',
               },
               {
-                label: t('permissions_item_translations_edit'),
                 value: 'translations.edit',
               },
               {
                 label: t('permissions_item_translations_comments'),
                 children: [
                   {
-                    label: t('permissions_item_translations_comments_add'),
                     value: 'translation-comments.add',
                   },
                   {
-                    label: t('permissions_item_translations_comments_edit'),
                     value: 'translation-comments.edit',
                   },
                   {
-                    label: t(
-                      'permissions_item_translations_comments_set_state'
-                    ),
                     value: 'translation-comments.set-state',
                   },
                 ],
               },
               {
-                label: t('permissions_item_translations_state'),
                 value: 'translations.state-edit',
               },
             ],
@@ -94,25 +85,32 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
             label: t('permissions_item_screenshots'),
             children: [
               {
-                label: t('permissions_item_screenshots_view'),
                 value: 'screenshots.view',
               },
               {
-                label: t('permissions_item_screenshots_upload'),
                 value: 'screenshots.upload',
               },
               {
-                label: t('permissions_item_screenshots_delete'),
                 value: 'screenshots.delete',
               },
             ],
           },
           {
-            label: t('permissions_item_keys_edit'),
             value: 'keys.edit',
           },
           {
-            label: t('permissions_item_import'),
+            value: 'users.view',
+          },
+          {
+            value: 'project.edit',
+          },
+          {
+            value: 'activity.view',
+          },
+          {
+            value: 'languages.edit',
+          },
+          {
             value: 'import',
           },
         ],

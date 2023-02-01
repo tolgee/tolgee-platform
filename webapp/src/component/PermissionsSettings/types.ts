@@ -20,10 +20,11 @@ export type PermissionAdvanced = {
 export type PermissionSettingsState = {
   tab: TabsType;
   basic: PermissionBasic;
+  advanced: PermissionAdvanced;
 };
 
 export type HierarchyType = {
-  label: string;
+  label?: string;
   value?: PermissionModelScope;
   children?: HierarchyType[];
 };

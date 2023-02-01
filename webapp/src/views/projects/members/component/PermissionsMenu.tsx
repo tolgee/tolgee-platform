@@ -3,6 +3,7 @@ import { Button, Tooltip } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { PermissionsModal } from './PermissionsModal';
 import { PermissionModel } from '../../../../component/PermissionsSettings/types';
+import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTranslations';
 
 type Props = {
   buttonTooltip?: string;
@@ -28,6 +29,8 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
     setOpen(true);
   };
 
+  const { getRoleTranslation } = useRoleTranslations();
+
   return (
     <>
       <Tooltip title={buttonTooltip || ''} disableInteractive>
@@ -39,7 +42,8 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
             aria-haspopup="true"
             onClick={handleClick}
           >
-            {permissions.type} <ArrowDropDown fontSize="small" />
+            {getRoleTranslation(permissions.type || 'ADVANCED')}
+            <ArrowDropDown fontSize="small" />
           </Button>
         </span>
       </Tooltip>

@@ -264,7 +264,7 @@ V2ProjectsController(
 
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_VIEW)
   @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)

@@ -7,38 +7,30 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type Scope = ArrayElement<NonNullable<Scopes>>;
 
-export class ProjectPermissions {
-  constructor(
-    public scopes: Scopes,
-    public permittedLanguages: number[] | undefined
-  ) {}
+export const useProjectPermissions = () => {
+  const project = useProject();
+  const scopes = project.computedPermission.scopes;
+  const permittedLanguages = project.computedPermission.permittedLanguageIds;
 
-  canEditLanguage(language: number | undefined): boolean {
-    if (!this.satisfiesPermission('translations.edit')) {
+  function satisfiesPermission(scope: Scope): boolean {
+    return !!scopes?.includes(scope);
+  }
+
+  function canEditLanguage(language: number | undefined): boolean {
+    if (satisfiesPermission('translations.edit')) {
       return false;
     }
-
-    if (!this.permittedLanguages?.length) {
+    if (!permittedLanguages?.length) {
       return true;
     }
-
     if (language !== undefined) {
-      return !!this.permittedLanguages?.includes(language);
+      return !!permittedLanguages?.includes(language);
     }
-
     return false;
   }
 
-  satisfiesPermission(scope: Scope): boolean {
-    return !!this.scopes?.includes(scope);
-  }
-}
-
-export const useProjectPermissions = (): ProjectPermissions => {
-  const project = useProject();
-  const scopes = project.computedPermission.scopes;
-  return new ProjectPermissions(
-    scopes,
-    project.computedPermission.permittedLanguageIds
-  );
+  return {
+    satisfiesPermission,
+    canEditLanguage,
+  };
 };

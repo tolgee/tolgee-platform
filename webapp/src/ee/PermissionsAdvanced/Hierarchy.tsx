@@ -10,6 +10,7 @@ import {
   getDependent,
   getRequiredScopes,
 } from './tools';
+import { useScopeTranslations } from './useScopeTranslations';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -70,6 +71,12 @@ export const Hierarchy: React.FC<Props> = ({
     }
   };
 
+  const { getScopeTranslation } = useScopeTranslations();
+
+  const label =
+    structure.label ||
+    (structure.value ? getScopeTranslation(structure.value) : undefined);
+
   return (
     <StyledContainer>
       <FormControlLabel
@@ -81,7 +88,7 @@ export const Hierarchy: React.FC<Props> = ({
             disabled={disabled}
           />
         }
-        label={structure.label}
+        label={label}
       />
       <StyledChildren>
         {structure.children?.map((child) => {
