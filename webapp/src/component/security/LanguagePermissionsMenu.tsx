@@ -17,7 +17,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   selected: number[];
   onSelect: (value: number[]) => void;
   buttonProps?: ComponentProps<typeof Button>;
-  disabled?: boolean;
+  disabled?: boolean | number[];
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { t } = useTranslate();
@@ -47,14 +47,15 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   return (
     <>
       <Tooltip
-        title={t('permission_languages_hint', {
-          subject: selectedLanguages?.length
+        title={
+          selectedLanguages?.length
             ? selectedLanguages.map((l) => l.name || l.tag).join(', ')
-            : t('languages_permitted_list_all'),
-        })}
+            : t('languages_permitted_list_all')
+        }
       >
         <Button
           data-cy="permissions-language-menu-button"
+          disabled={props.disabled === true}
           {...props.buttonProps}
           size="small"
           variant="outlined"
@@ -62,7 +63,10 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           aria-haspopup="true"
           onClick={handleClick}
         >
-          <LanguagesPermittedList languages={selectedLanguages} />
+          <LanguagesPermittedList
+            languages={selectedLanguages}
+            disabled={props.disabled}
+          />
           <ArrowDropDown fontSize="small" />
         </Button>
       </Tooltip>
@@ -88,6 +92,12 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             value={lang.tag}
             data-cy="translations-language-select-item"
             onClick={handleToggle(lang.id)}
+            disabled={
+              Array.isArray(props.disabled)
+                ? props.disabled.length === 0 ||
+                  props.disabled.includes(lang.id)
+                : props.disabled
+            }
           >
             <Checkbox checked={props.selected.includes(lang.id)} size="small" />
             <ListItemText primary={lang.name} />
