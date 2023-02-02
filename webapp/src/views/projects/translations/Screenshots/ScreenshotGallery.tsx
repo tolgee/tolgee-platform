@@ -105,7 +105,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const onDelete = (id: number) => {
     deleteLoadable.mutate(
       {
-        path: { projectId: project.id, ids: [id] },
+        path: { projectId: project.id, ids: [id], keyId: props.keyId },
       },
       {
         onSuccess() {
