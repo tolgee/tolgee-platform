@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.fixtures.andAssertError
@@ -104,6 +105,35 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
         node("namespace").isNull()
       }
     namespaceService.find("", project.id).assert.isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `throws error when moving key to default ns where a key with same name already exists`() {
+    val keyName = "super_ultra_cool_key"
+    val namespace = "super_ultra_cool_namespace"
+
+    performProjectAuthPost("keys", CreateKeyDto(name = keyName))
+      .andIsCreated
+    performProjectAuthPost("keys", CreateKeyDto(name = keyName, namespace = namespace))
+      .andIsCreated
+
+    val keyId = keyService.get(project.id, keyName, namespace).id
+
+    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName, namespace = ""))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
+
+    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName, namespace = null))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
+
+    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
