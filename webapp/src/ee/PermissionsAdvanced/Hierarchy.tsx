@@ -7,12 +7,15 @@ import {
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import {
   checkChildren,
   getChildScopes,
-  getDependent,
+  getMinimalLanguages,
+  getDependentScopes,
   getRequiredScopes,
   getScopeLanguagePermission,
+  updateByDependencies,
 } from './tools';
 import { useScopeTranslations } from './useScopeTranslations';
 
@@ -46,6 +49,8 @@ export const Hierarchy: React.FC<Props> = ({
   state,
   onChange,
 }) => {
+  const languages = useProjectLanguages();
+  const allLangs = languages.map((l) => l.id);
   const { scopes } = state;
   const scopeIncluded = structure.value && scopes.includes(structure.value);
   const { childrenCheckedSome, childrenCheckedAll } = checkChildren(
@@ -63,20 +68,24 @@ export const Hierarchy: React.FC<Props> = ({
         newScopes = [...newScopes, scope];
       }
     });
-    onChange({
-      ...state,
-      scopes: newScopes,
-    });
+    return newScopes;
   };
 
   const updateLanguagePermissions = (
     languagePermission: keyof LanguagePermissions,
     value: number[]
   ) => {
-    onChange({
-      ...state,
-      [languagePermission]: value,
-    });
+    onChange(
+      updateByDependencies(
+        myScopes,
+        {
+          ...state,
+          [languagePermission]: value,
+        },
+        dependencies,
+        allLangs
+      )
+    );
   };
 
   // scopes the item is responsible for
@@ -85,7 +94,7 @@ export const Hierarchy: React.FC<Props> = ({
     : getChildScopes(structure);
 
   // scopes which are dependent on myScopes
-  const dependentScopes = getDependent(myScopes, dependencies);
+  const dependentScopes = getDependentScopes(myScopes, dependencies);
 
   // check if all dependant scopes are in responsible nodes
   // meaning if we toggle this, nothing outside gets broken
@@ -93,6 +102,8 @@ export const Hierarchy: React.FC<Props> = ({
     (dependentScope) =>
       scopes.includes(dependentScope) && !myScopes.includes(dependentScope)
   );
+
+  const blockedLanguages = getMinimalLanguages(blockingScopes, state);
 
   const disabled = Boolean(blockingScopes.length);
 
@@ -102,11 +113,13 @@ export const Hierarchy: React.FC<Props> = ({
 
   const handleClick = () => {
     if (fullyChecked) {
-      updateScopes(myScopes, false);
+      onChange({
+        ...state,
+        scopes: updateScopes(myScopes, false),
+      });
     } else {
       // get myScopes and also their required scopes
-      const influencedScopes = getRequiredScopes(myScopes, dependencies);
-      updateScopes(influencedScopes, true);
+      onChange(updateByDependencies(myScopes, state, dependencies, allLangs));
     }
   };
 
@@ -135,7 +148,8 @@ export const Hierarchy: React.FC<Props> = ({
 
         {languagePermission && (
           <LanguagePermissionsMenu
-            buttonProps={{ size: 'small', disabled: !fullyChecked }}
+            buttonProps={{ size: 'small' }}
+            disabled={!fullyChecked || blockedLanguages}
             selected={state[languagePermission] || []}
             onSelect={(value) =>
               updateLanguagePermissions(languagePermission, value)

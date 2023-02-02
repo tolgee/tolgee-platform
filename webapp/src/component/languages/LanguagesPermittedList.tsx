@@ -3,6 +3,7 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from './CircledLanguageIcon';
+import clsx from 'clsx';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -10,6 +11,9 @@ const StyledContainer = styled('div')`
   display: flex;
   align-items: center;
   justify-content: center;
+  & .disabled {
+    opacity: 0.2;
+  }
 `;
 
 const StyledExtraCircle = styled('div')`
@@ -28,10 +32,12 @@ const StyledExtraCircle = styled('div')`
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
+  disabled?: boolean | number[];
 };
 
 export const LanguagesPermittedList: React.FC<Props> = ({
   languages,
+  disabled,
   ...props
 }) => {
   const selectedLanguages = languages?.slice(0, 3) || [];
@@ -44,7 +50,16 @@ export const LanguagesPermittedList: React.FC<Props> = ({
         <T keyName="languages_permitted_list_all" />
       ) : (
         selectedLanguages.map((l) => (
-          <CircledLanguageIcon key={l.id} size={20} flag={l.flagEmoji} />
+          <CircledLanguageIcon
+            key={l.id}
+            size={20}
+            flag={l.flagEmoji}
+            className={clsx({
+              disabled: Array.isArray(disabled)
+                ? disabled.includes(l.id) || disabled.length === 0
+                : disabled,
+            })}
+          />
         ))
       )}
       {numOfExtra > 0 && <StyledExtraCircle>+{numOfExtra}</StyledExtraCircle>}
