@@ -24,9 +24,12 @@ class Screenshot : StandardAuditModel() {
    */
   var path: String = ""
 
+  val pathWithSlash: String
+    get() = if (path.isEmpty()) "" else "$path/"
+
   val filename: String
     get() {
-      return "$path/$hash.$extension"
+      return "$pathWithSlash$hash.$extension"
     }
 
   val thumbnailFilename: String
@@ -34,7 +37,7 @@ class Screenshot : StandardAuditModel() {
       if (!hasThumbnail) {
         return filename
       }
-      return "$path/${hash}_thumbnail.$extension"
+      return "$pathWithSlash${hash}_thumbnail.$extension"
     }
 
   val hash: String

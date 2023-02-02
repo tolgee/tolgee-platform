@@ -279,14 +279,16 @@ class ScreenshotService(
   }
 
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
-    val keys = this.getKeysWithScreenshots(keyIds)
+    val keys = this.getKeysWithScreenshots(keyIds).toSet()
 
-    var allScreenshots = keys
+    val allScreenshots = keys
       .flatMap { key ->
         key.keyScreenshotReferences.map { scr -> scr.screenshot }
       }
-
-    allScreenshots = screenshotRepository.getScreenshotsWithReferences(allScreenshots)
+      .toSet() // remove dupes
+      .let {
+        screenshotRepository.getScreenshotsWithReferences(it)
+      }.toSet()
 
     val keyIdScreenshotsMap = allScreenshots
       .flatMap { it.keyScreenshotReferences }

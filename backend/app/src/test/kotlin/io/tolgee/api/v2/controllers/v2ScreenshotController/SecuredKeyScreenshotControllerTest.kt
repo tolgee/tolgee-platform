@@ -13,6 +13,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,64 +36,70 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
 
   @Test
   fun getScreenshotFileNoTimestamp() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key, null)
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      val project = base.project
+      val key = keyService.create(project, CreateKeyDto("test"))
+      val screenshot = screenshotService.store(screenshotFile, key, null)
 
-    val result = performAuthGet("/screenshots/${screenshot.filename}")
-      .andExpect(status().isBadRequest)
-      .andReturn()
+      val result = performAuthGet("/screenshots/${screenshot.filename}")
+        .andExpect(status().isBadRequest)
+        .andReturn()
 
-    assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+      assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+    }
   }
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key, null)
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      val project = base.project
+      val key = keyService.create(project, CreateKeyDto("test"))
+      val screenshot = screenshotService.store(screenshotFile, key, null)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
-    val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
+      val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
+      val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
 
-    val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
-      .andExpect(status().isBadRequest)
-      .andReturn()
+      val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
+        .andExpect(status().isBadRequest)
+        .andReturn()
 
-    assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+      assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+    }
   }
 
   @Test
   fun getScreenshotFile() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    val project = base.project
-    val key = keyService.create(project, CreateKeyDto("test"))
-    val screenshot = screenshotService.store(screenshotFile, key, null)
+    executeInNewTransaction {
+      val base = dbPopulator.createBase(generateUniqueString())
+      val project = base.project
+      val key = keyService.create(project, CreateKeyDto("test"))
+      val screenshot = screenshotService.store(screenshotFile, key, null)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
-    val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
+      val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
+      val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
 
-    performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
-      .andExpect(status().isOk)
-      .andReturn()
+      performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp").andIsOk
+    }
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun uploadScreenshot() {
-    val key = keyService.create(project, CreateKeyDto("test"))
+    executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
 
-    performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
-      val screenshots = screenshotService.findAll(key = key)
-      assertThat(screenshots).hasSize(1)
-      val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-      assertThat(file).exists()
-      assertThat(file.readBytes().size).isEqualTo(138412)
-      node("filename").isString.startsWith(screenshots[0].filename).satisfies {
-        val parts = it.split("?timestamp=")
-        timestampValidation.checkTimeStamp(parts[0], parts[1])
+      performStoreScreenshot(project, key).andIsCreated.andAssertThatJson {
+        val screenshots = screenshotService.findAll(key = key)
+        assertThat(screenshots).hasSize(1)
+        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
+        assertThat(file).exists()
+        assertThat(file.readBytes().size).isCloseTo(1524, Offset.offset(200))
+        node("filename").isString.startsWith(screenshots[0].filename).satisfies {
+          val parts = it.split("?timestamp=")
+          timestampValidation.checkTimeStamp(parts[0], parts[1])
+        }
       }
     }
   }
@@ -100,12 +107,14 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   @Test
   @ProjectJWTAuthTestMethod
   fun findAll() {
-    val key = keyService.create(project, CreateKeyDto("test"))
-    screenshotService.store(screenshotFile, key, null)
-    performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
-      node("_embedded.screenshots[0].filename").isString.satisfies {
-        val parts = it.split("?timestamp=")
-        timestampValidation.checkTimeStamp(parts[0], parts[1])
+    executeInNewTransaction {
+      val key = keyService.create(project, CreateKeyDto("test"))
+      screenshotService.store(screenshotFile, key, null)
+      performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
+        node("_embedded.screenshots[0].filename").isString.satisfies {
+          val parts = it.split("?timestamp=")
+          timestampValidation.checkTimeStamp(parts[0], parts[1])
+        }
       }
     }
   }

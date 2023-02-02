@@ -19,11 +19,12 @@ import kotlin.properties.Delegates
 @AutoConfigureMockMvc
 class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/projects/") {
 
-  val testData = ResolvableImportTestData()
+  lateinit var testData: ResolvableImportTestData
   var uploadedImageId by Delegates.notNull<Long>()
 
   @BeforeEach
   fun setup() {
+    testData = ResolvableImportTestData()
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
