@@ -2,18 +2,23 @@ import { styled, Checkbox, FormControlLabel } from '@mui/material';
 import {
   HierarchyItem,
   HierarchyType,
+  LanguagePermissions,
+  PermissionAdvanced,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
+import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import {
   checkChildren,
   getChildScopes,
   getDependent,
   getRequiredScopes,
+  getScopeLanguagePermission,
 } from './tools';
 import { useScopeTranslations } from './useScopeTranslations';
 
 const StyledContainer = styled('div')`
   display: grid;
+  justify-content: start;
 `;
 
 const StyledChildren = styled('div')`
@@ -21,24 +26,58 @@ const StyledChildren = styled('div')`
   margin-left: 32px;
 `;
 
+const StyledRow = styled('div')`
+  display: grid;
+  grid-template-columns: minmax(150px, auto) auto;
+  gap: 16px;
+  align-items: center;
+`;
+
 type Props = {
   dependencies: HierarchyItem;
   structure: HierarchyType;
-  scopes: PermissionModelScope[];
-  setScopes: (scopes: PermissionModelScope[], value: boolean) => void;
+  state: PermissionAdvanced;
+  onChange: (value: PermissionAdvanced) => void;
 };
 
 export const Hierarchy: React.FC<Props> = ({
   dependencies,
   structure,
-  scopes,
-  setScopes,
+  state,
+  onChange,
 }) => {
+  const { scopes } = state;
   const scopeIncluded = structure.value && scopes.includes(structure.value);
   const { childrenCheckedSome, childrenCheckedAll } = checkChildren(
     structure,
     scopes
   );
+
+  const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
+    let newScopes = [...state.scopes];
+    scopes.forEach((scope) => {
+      const exists = newScopes.includes(scope);
+      if (exists && value === false) {
+        newScopes = newScopes.filter((s) => s !== scope);
+      } else if (!exists && value === true) {
+        newScopes = [...newScopes, scope];
+      }
+    });
+    onChange({
+      ...state,
+      scopes: newScopes,
+    });
+  };
+
+  const updateLanguagePermissions = (
+    languagePermission: keyof LanguagePermissions,
+    value: number[]
+  ) => {
+    onChange({
+      ...state,
+      [languagePermission]: value,
+    });
+  };
 
   // scopes the item is responsible for
   const myScopes = structure.value
@@ -63,11 +102,11 @@ export const Hierarchy: React.FC<Props> = ({
 
   const handleClick = () => {
     if (fullyChecked) {
-      setScopes(myScopes, false);
+      updateScopes(myScopes, false);
     } else {
       // get myScopes and also their required scopes
       const influencedScopes = getRequiredScopes(myScopes, dependencies);
-      setScopes(influencedScopes, true);
+      updateScopes(influencedScopes, true);
     }
   };
 
@@ -77,19 +116,33 @@ export const Hierarchy: React.FC<Props> = ({
     structure.label ||
     (structure.value ? getScopeTranslation(structure.value) : undefined);
 
+  const languagePermission = getScopeLanguagePermission(structure.value);
+
   return (
     <StyledContainer>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={fullyChecked}
-            indeterminate={halfChecked}
-            onClick={handleClick}
-            disabled={disabled}
+      <StyledRow>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={fullyChecked}
+              indeterminate={halfChecked}
+              onClick={handleClick}
+              disabled={disabled}
+            />
+          }
+          label={label}
+        />
+
+        {languagePermission && (
+          <LanguagePermissionsMenu
+            buttonProps={{ size: 'small', disabled: !fullyChecked }}
+            selected={state[languagePermission] || []}
+            onSelect={(value) =>
+              updateLanguagePermissions(languagePermission, value)
+            }
           />
-        }
-        label={label}
-      />
+        )}
+      </StyledRow>
       <StyledChildren>
         {structure.children?.map((child) => {
           return (
@@ -97,8 +150,8 @@ export const Hierarchy: React.FC<Props> = ({
               key={child.value}
               dependencies={dependencies}
               structure={child}
-              scopes={scopes}
-              setScopes={setScopes}
+              state={state}
+              onChange={onChange}
             />
           );
         })}

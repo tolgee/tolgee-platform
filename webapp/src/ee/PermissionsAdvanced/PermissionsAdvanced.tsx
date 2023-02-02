@@ -1,9 +1,6 @@
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  PermissionAdvanced,
-  PermissionModelScope,
-} from 'tg.component/PermissionsSettings/types';
+import { PermissionAdvanced } from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
 import { useTranslate } from '@tolgee/react';
 
@@ -21,22 +18,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
     query: {},
   });
 
-  const setScopes = (scopes: PermissionModelScope[], value: boolean) => {
-    let newScopes = [...state.scopes];
-    scopes.forEach((scope) => {
-      const exists = newScopes.includes(scope);
-      if (exists && value === false) {
-        newScopes = newScopes.filter((s) => s !== scope);
-      } else if (!exists && value === true) {
-        newScopes = [...newScopes, scope];
-      }
-    });
-    onChange({
-      ...state,
-      scopes: newScopes,
-    });
-  };
-
   if (dependenciesLoadable.isLoading) {
     return <FullPageLoading />;
   }
@@ -48,8 +29,8 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
   return (
     <Hierarchy
       dependencies={dependenciesLoadable.data}
-      setScopes={setScopes}
-      scopes={state.scopes}
+      state={state}
+      onChange={onChange}
       structure={{
         value: 'admin',
         children: [

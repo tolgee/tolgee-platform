@@ -145,7 +145,7 @@ export const TranslationOpened: React.FC<Props> = ({
     keyId: keyData.keyId,
     targetLanguageId: language.id,
     baseText: baseTranslation,
-    enabled: !language.base,
+    enabled: !language.base && mode === 'editor',
     onValueUpdate: (value) => {
       updateEdit({
         value,

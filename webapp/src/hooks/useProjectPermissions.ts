@@ -7,30 +7,42 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type Scope = ArrayElement<NonNullable<Scopes>>;
 
+const SCOPE_TO_LANG_PROPERTY_MAP = {
+  'translations.view': 'viewLanguageIds',
+  'translations.edit': 'translateLanguageIds',
+  'translations.state-edit': 'stateChangeLanguageIds',
+};
+
 export const useProjectPermissions = () => {
   const project = useProject();
   const scopes = project.computedPermission.scopes;
-  const permittedLanguages = project.computedPermission.permittedLanguageIds;
 
   function satisfiesPermission(scope: Scope): boolean {
     return !!scopes?.includes(scope);
   }
 
-  function canEditLanguage(language: number | undefined): boolean {
-    if (satisfiesPermission('translations.edit')) {
+  function satisfiesLanguageAccess(
+    scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP,
+    languageId: number | undefined
+  ): boolean {
+    if (!satisfiesPermission(scope)) {
       return false;
     }
-    if (!permittedLanguages?.length) {
+
+    const allowedLanguages =
+      project.computedPermission[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
+
+    if (!allowedLanguages?.length) {
       return true;
     }
-    if (language !== undefined) {
-      return !!permittedLanguages?.includes(language);
+    if (languageId !== undefined) {
+      return Boolean(allowedLanguages?.includes(languageId));
     }
     return false;
   }
 
   return {
     satisfiesPermission,
-    canEditLanguage,
+    satisfiesLanguageAccess,
   };
 };

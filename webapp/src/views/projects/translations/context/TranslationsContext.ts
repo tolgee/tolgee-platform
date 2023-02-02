@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ReactList from 'react-list';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -30,6 +30,7 @@ import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useWebsocketListener } from './services/useWebsocketListener';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
@@ -49,32 +50,34 @@ export const [
   useTranslationsSelector,
 ] = createProviderNew((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
-  const [initialLangs, setInitialLangs] = useState<string[] | null | undefined>(
-    null
-  );
-
   const urlLanguages = useUrlSearchArray().languages;
-
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
     : projectPreferences.getForProject(props.projectId);
 
-  const languages = useApiQuery({
+  const [initialLangs] = useState<string[] | null | undefined>(
+    requiredLanguages
+  );
+
+  const { satisfiesLanguageAccess } = useProjectPermissions();
+
+  const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
     path: { projectId: props.projectId },
     query: { size: 1000, sort: ['tag'] },
     options: {
-      onSuccess(data) {
-        const languages = requiredLanguages?.filter((l) =>
-          data._embedded?.languages?.find((lang) => lang.tag === l)
-        );
-        // manually set initial langs
-        setInitialLangs(languages.length ? languages : undefined);
-      },
       cacheTime: 0,
     },
   });
+
+  const allowedLanguages = useMemo(
+    () =>
+      languagesLoadable.data?._embedded?.languages?.filter((l) =>
+        satisfiesLanguageAccess('translations.view', l.id)
+      ),
+    [languagesLoadable.data]
+  );
 
   const translationService = useTranslationsService({
     projectId: props.projectId,
@@ -211,7 +214,7 @@ export const [
   };
 
   const dataReady = Boolean(
-    languages.data && translationService.fixedTranslations
+    languagesLoadable.data && translationService.fixedTranslations
   );
 
   const state = {
@@ -225,11 +228,11 @@ export const [
       translationService.totalCount !== undefined
         ? translationService.totalCount
         : undefined,
-    languages: dataReady ? languages.data?._embedded?.languages : undefined,
-    isLoading: translationService.isLoading || languages.isLoading,
+    languages: dataReady ? allowedLanguages : undefined,
+    isLoading: translationService.isLoading || languagesLoadable.isLoading,
     isFetching:
       translationService.isFetching ||
-      languages.isFetching ||
+      languagesLoadable.isFetching ||
       stateService.isLoading ||
       tagsService.isLoading,
     isEditLoading: editService.isLoading,
