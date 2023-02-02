@@ -23,6 +23,7 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.equalNullable
 import org.springframework.context.ApplicationContext
 import java.io.Serializable
 import javax.persistence.EntityManager
@@ -184,7 +185,7 @@ class ResolvingKeyImporter(
     val predicates = keys.map { (namespace, name) ->
       cb.and(
         cb.equal(root.get(Key_.name), name),
-        cb.equal(namespaceJoin.get(Namespace_.name), namespace)
+        cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace)
       )
     }.toTypedArray()
 
