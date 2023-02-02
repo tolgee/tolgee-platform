@@ -5,7 +5,7 @@
 
 export interface paths {
   "/v2/user": {
-    get: operations["getInfo"];
+    get: operations["getInfo_2"];
     put: operations["updateUser"];
     post: operations["updateUserOld"];
     delete: operations["delete"];
@@ -188,6 +188,15 @@ export interface paths {
     get: operations["getAll"];
     post: operations["createProject"];
   };
+  "/v2/projects/{projectId}/keys/info": {
+    post: operations["getInfo"];
+  };
+  "/v2/projects/{projectId}/keys/import-resolvable": {
+    post: operations["importKeys"];
+  };
+  "/v2/projects/{projectId}/keys/import": {
+    post: operations["importKeys_2"];
+  };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create"];
   };
@@ -289,6 +298,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
+  };
+  "/v2/projects/{projectId}/keys/search": {
+    get: operations["searchForKey"];
   };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
@@ -591,6 +603,32 @@ export interface components {
       screenshotIdsToDelete?: number[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
+      screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
+    };
+    KeyInScreenshotPositionDto: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    KeyScreenshotDto: {
+      text?: string;
+      /** Ids of screenshot uploaded with /v2/image-upload endpoint */
+      uploadedImageId: number;
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+    };
+    KeyInScreenshotModel: {
+      keyId: number;
+      position?: components["schemas"]["KeyInScreenshotPosition"];
+      keyName: string;
+      keyNamespace?: string;
+      originalText?: string;
+    };
+    KeyInScreenshotPosition: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
     };
     KeyWithDataModel: {
       /** Id of key record */
@@ -626,6 +664,7 @@ export interface components {
       fileUrl: string;
       thumbnailUrl: string;
       createdAt?: string;
+      keyReferences: components["schemas"]["KeyInScreenshotModel"][];
     };
     /** Translations object containing values updated in this request */
     TranslationModel: {
@@ -765,10 +804,10 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       id: number;
       description: string;
     };
@@ -841,12 +880,12 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
-      projectId: number;
       username?: string;
       lastUsedAt?: number;
+      projectId: number;
       expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
       id: number;
       description: string;
@@ -871,6 +910,66 @@ export interface components {
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
     };
+    GetKeysRequestDto: {
+      keys: components["schemas"]["KeyDefinitionDto"][];
+      /** Tags to return language translations in */
+      languageTags: string[];
+    };
+    KeyDefinitionDto: {
+      name: string;
+      namespace?: string;
+    };
+    CollectionModelKeyWithDataModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithDataModel"][];
+      };
+    };
+    ImportKeysResolvableDto: {
+      keys: components["schemas"]["ImportKeysResolvableItemDto"][];
+    };
+    ImportKeysResolvableItemDto: {
+      /** Key name to set translations for */
+      name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
+      /** Screenshots with these ids will be replaced by the ones in screenshots property */
+      removeScreenshotIds?: number[];
+      /** Object mapping language tag to translation */
+      translations: {
+        [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
+      };
+    };
+    /** Object mapping language tag to translation */
+    ImportTranslationResolvableDto: {
+      /** Translation text */
+      text: string;
+      /**
+       * Determines, how conflict is resolved.
+       *
+       * - KEEP: Translation is not changed
+       * - OVERRIDE: Translation is overridden
+       * - NEW: New translation is created)
+       */
+      resolution: "KEEP" | "OVERRIDE" | "NEW";
+    };
+    KeyImportResolvableResultModel: {
+      /** List of keys */
+      keys: components["schemas"]["KeyModel"][];
+      /** Map uploadedImageId to screenshot */
+      screenshots: { [key: string]: components["schemas"]["ScreenshotModel"] };
+    };
+    ImportKeysDto: {
+      keys: components["schemas"]["ImportKeysItemDto"][];
+    };
+    ImportKeysItemDto: {
+      /** Key name to set translations for */
+      name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      /** Object mapping language tag to translation */
+      translations: { [key: string]: string };
+    };
     CreateKeyDto: {
       /** Name of the key */
       name: string;
@@ -880,6 +979,7 @@ export interface components {
       tags?: string[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -967,6 +1067,10 @@ export interface components {
       translationExtraCreditsBalanceBefore: number;
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
+    };
+    ScreenshotInfoDto: {
+      text?: string;
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
     };
     CreatePatDto: {
       /** Description of the PAT */
@@ -1124,6 +1228,27 @@ export interface components {
       bucketSize: number;
       extraCreditBalance: number;
     };
+    KeySearchResultView: {
+      namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
+      name: string;
+      id: number;
+    };
+    KeySearchSearchResultModel: {
+      view?: components["schemas"]["KeySearchResultView"];
+      namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
+      name: string;
+      id: number;
+    };
+    PagedModelKeySearchSearchResultModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeySearchSearchResultModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     CollectionModelKeyModel: {
       _embedded?: {
         keys?: components["schemas"]["KeyModel"][];
@@ -1221,6 +1346,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1232,7 +1358,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1452,10 +1577,10 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      lastUsedAt?: number;
-      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       id: number;
       description: string;
     };
@@ -1510,12 +1635,12 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
-      projectId: number;
       username?: string;
       lastUsedAt?: number;
+      projectId: number;
       expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
       id: number;
       description: string;
@@ -1537,7 +1662,7 @@ export interface components {
 }
 
 export interface operations {
-  getInfo: {
+  getInfo_2: {
     responses: {
       /** OK */
       200: {
@@ -3600,6 +3725,98 @@ export interface operations {
       };
     };
   };
+  getInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelKeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeysRequestDto"];
+      };
+    };
+  };
+  importKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyImportResolvableResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysResolvableDto"];
+      };
+    };
+  };
+  importKeys_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysDto"];
+      };
+    };
+  };
   create: {
     parameters: {
       path: {
@@ -3695,6 +3912,10 @@ export interface operations {
   /** Prepares provided files to import. */
   addFiles: {
     parameters: {
+      query: {
+        /** When importing structured JSONs, you can set the delimiter which will be used in names of improted keys. */
+        structureDelimiter?: string;
+      };
       path: {
         projectId: number;
       };
@@ -4145,6 +4366,7 @@ export interface operations {
       content: {
         "multipart/form-data": {
           screenshot: string;
+          info?: components["schemas"]["ScreenshotInfoDto"];
         };
       };
     };
@@ -4790,6 +5012,45 @@ export interface operations {
       };
     };
   };
+  searchForKey: {
+    parameters: {
+      query: {
+        /** Search query */
+        search: string;
+        /** Language to search in */
+        languageTag?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelKeySearchSearchResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllKeys: {
     parameters: {
       path: {
@@ -5086,6 +5347,7 @@ export interface operations {
   getAllTranslations: {
     parameters: {
       path: {
+        /** Comma-separated language tags to return translations in. */
         languages: string[];
         projectId: number;
       };
@@ -6073,6 +6335,7 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
+        keyId: number;
         projectId: number;
       };
     };
