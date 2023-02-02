@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -114,6 +115,48 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       assertTranslationText("namespace-1", "key-1", "de", "changed")
       assertTranslationText("namespace-1", "key-1", "en", "new")
       assertTranslationText("namespace-1", "key-2", "en", "existing translation")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it returns errors correctly`() {
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-1",
+            "translations" to mapOf(
+              "de" to mapOf(
+                "text" to "changed",
+              ),
+              "en" to mapOf(
+                "text" to "new",
+                "resolution" to "KEEP"
+              )
+            ),
+          ),
+        )
+      )
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("import_keys_error")
+      node("params") {
+        isArray.hasSize(2)
+        node("[0]") {
+          node("[0]").isEqualTo("translation_exists")
+          node("[1]").isEqualTo("namespace-1")
+          node("[2]").isEqualTo("key-1")
+          node("[3]").isEqualTo("de")
+        }
+        node("[1]") {
+          node("[0]").isEqualTo("translation_not_found")
+          node("[1]").isEqualTo("namespace-1")
+          node("[2]").isEqualTo("key-1")
+          node("[3]").isEqualTo("en")
+        }
+      }
     }
   }
 
