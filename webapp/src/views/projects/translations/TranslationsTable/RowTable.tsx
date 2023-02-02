@@ -48,7 +48,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   bannerBefore,
   bannerAfter,
 }) {
-  const { satisfiesPermission, canEditLanguage } = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -105,7 +106,10 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={canEditLanguage(language.id)}
+            editEnabled={satisfiesLanguageAccess(
+              'translations.edit',
+              language.id
+            )}
             width={columnSizes[index + 1]}
             cellPosition={cellPosition}
             active={relaxedActive}

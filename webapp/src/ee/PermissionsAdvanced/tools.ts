@@ -81,3 +81,15 @@ export const getRequiredScopes = (
   });
   return Array.from(result);
 };
+
+const SCOPE_TO_LANG_PROPERTY_MAP = {
+  'translations.view': 'viewLanguages',
+  'translations.edit': 'translateLanguages',
+  'translations.state-edit': 'stateChangeLanguages',
+};
+
+export const getScopeLanguagePermission = (
+  scope: PermissionModelScope | undefined
+) => {
+  return scope && SCOPE_TO_LANG_PROPERTY_MAP[scope];
+};

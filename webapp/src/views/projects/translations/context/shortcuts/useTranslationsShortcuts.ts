@@ -35,17 +35,18 @@ export const useTranslationsShortcuts = () => {
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
   const fixedTranslations = useTranslationsSelector((c) => c.translations);
   const allLanguages = useTranslationsSelector((c) => c.languages);
-  const languages = useTranslationsSelector((c) => c.selectedLanguages);
+  const languages = useTranslationsSelector((c) => c.translationsLanguages);
   const list = useTranslationsSelector((c) => c.reactList);
 
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);
 
-  const canEditKey = permissions.satisfiesPermission('keys.edit');
+  const canEditKey = satisfiesPermission('keys.edit');
 
   const isTranslation = (position: CellPosition | undefined) =>
     position?.language;
@@ -82,10 +83,14 @@ export const useTranslationsShortcuts = () => {
   const getEnterHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
-      const canTranslate = permissions.canEditLanguage(
+      const canTranslate = satisfiesLanguageAccess(
+        'translations.edit',
         getLanguageId(focused.language)
       );
-      if (isTranslation(focused) && canTranslate)
+      if (
+        (isTranslation(focused) && canTranslate) ||
+        (!isTranslation(focused) && canEditKey)
+      ) {
         return (e: KeyboardEvent) => {
           e.preventDefault();
           setEdit({
@@ -94,6 +99,7 @@ export const useTranslationsShortcuts = () => {
             mode: 'editor',
           });
         };
+      }
     }
   };
 
@@ -107,7 +113,8 @@ export const useTranslationsShortcuts = () => {
 
   const getChangeStateHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
-    const canTranslate = permissions.canEditLanguage(
+    const canTranslate = satisfiesLanguageAccess(
+      'translations.state-edit',
       getLanguageId(focused?.language)
     );
 

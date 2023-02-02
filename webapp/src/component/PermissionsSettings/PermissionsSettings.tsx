@@ -28,12 +28,15 @@ export const PermissionsSettings: React.FC<Props> = ({
   const [basic, setBasic] = useState<PermissionBasic>({
     role: permissions.type,
     viewLanguages: permissions.viewLanguageIds,
-    languages: permissions.permittedLanguageIds,
+    translateLanguages: permissions.permittedLanguageIds,
     stateChangeLanguages: permissions.stateChangeLanguageIds,
   });
 
   const [advanced, setAdvanced] = useState<PermissionAdvanced>({
     scopes: permissions.scopes,
+    viewLanguages: permissions.viewLanguageIds,
+    translateLanguages: permissions.translateLanguageIds,
+    stateChangeLanguages: permissions.stateChangeLanguageIds,
   });
 
   useEffect(() => {

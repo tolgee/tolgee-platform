@@ -46,7 +46,8 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   bannerBefore,
   bannerAfter,
 }) {
-  const { satisfiesPermission, canEditLanguage } = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -94,7 +95,10 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
             language={language}
             colIndex={0}
             onResize={onResize}
-            editEnabled={canEditLanguage(language.id)}
+            editEnabled={satisfiesLanguageAccess(
+              'translations.edit',
+              language.id
+            )}
             width={columnSizes[1]}
             active={relaxedActive}
             className={clsx({

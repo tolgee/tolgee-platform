@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 
 import {
+  LanguagePermissions,
   PermissionModel,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
@@ -18,6 +19,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/tools';
 
 type Props = {
   onClose: () => void;
@@ -79,11 +81,23 @@ export const PermissionsModal: React.FC<Props> = ({
     if (!settingsState?.advanced.scopes) {
       return;
     }
+
+    const languagePermissions: LanguagePermissions = {};
+
+    settingsState.advanced.scopes
+      .map(getScopeLanguagePermission)
+      .forEach((property) => {
+        if (property) {
+          languagePermissions[property] = settingsState.advanced[property];
+        }
+      });
+
     editScopes.mutate(
       {
         path: { userId: user.id, projectId: project.id },
         query: {
-          scopes: settingsState?.advanced.scopes,
+          scopes: settingsState.advanced.scopes,
+          ...languagePermissions,
         },
       },
       {
