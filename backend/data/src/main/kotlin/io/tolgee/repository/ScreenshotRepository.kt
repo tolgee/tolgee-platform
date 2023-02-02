@@ -12,10 +12,10 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
   @Query("FROM Screenshot s join s.keyScreenshotReferences ksr where ksr.key = :key")
   fun findAllByKey(key: Key): List<Screenshot>
 
-  @Query("FROM Screenshot s join s.keyScreenshotReferences ksr join ksr.key k where k.project.id = :projectId")
+  @Query("FROM Screenshot s join fetch s.keyScreenshotReferences ksr join ksr.key k where k.project.id = :projectId")
   fun getAllByKeyProjectId(projectId: Long): List<Screenshot>
 
-  @Query("FROM Screenshot s join s.keyScreenshotReferences ksr where ksr.key.id = :id")
+  @Query("FROM Screenshot s join fetch s.keyScreenshotReferences ksr where ksr.key.id = :id")
   fun getAllByKeyId(id: Long): List<Screenshot>
 
   @Query("FROM Screenshot s join s.keyScreenshotReferences ksr where ksr.key.id in :keyIds")
