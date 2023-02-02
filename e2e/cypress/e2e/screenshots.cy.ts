@@ -152,7 +152,7 @@ describe('Screenshots', () => {
     });
   });
 
-  it.only('deletes screenshot', () => {
+  it('deletes screenshot', () => {
     const promises = [];
 
     for (let i = 0; i < 5; i++) {
