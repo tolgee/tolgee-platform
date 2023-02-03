@@ -64,6 +64,7 @@ type Props = {
   colIndex?: number;
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
+  stateChangeEnabled: boolean;
   width?: number | string;
   cellPosition: string;
   active: boolean;
@@ -78,6 +79,7 @@ export const CellTranslation: React.FC<Props> = ({
   colIndex,
   onResize,
   editEnabled,
+  stateChangeEnabled,
   width,
   cellPosition,
   active,
@@ -181,6 +183,7 @@ export const CellTranslation: React.FC<Props> = ({
                 onEdit={() => handleOpen('editor')}
                 editEnabled={editEnabled}
                 state={state}
+                stateChangeEnabled={stateChangeEnabled}
                 onStateChange={handleStateChange}
                 onComments={() => handleOpen('comments')}
                 commentsCount={translation?.commentCount}

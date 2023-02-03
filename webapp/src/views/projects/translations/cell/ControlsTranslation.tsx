@@ -40,6 +40,7 @@ const StyledCheckIcon = styled(Check)`
 type ControlsProps = {
   state?: State;
   editEnabled?: boolean;
+  stateChangeEnabled?: boolean;
   onEdit?: () => void;
   onStateChange?: (state: StateType) => void;
   onComments?: () => void;
@@ -52,6 +53,7 @@ type ControlsProps = {
 export const ControlsTranslation: React.FC<ControlsProps> = ({
   state,
   editEnabled,
+  stateChangeEnabled,
   onEdit,
   onStateChange,
   onComments,
@@ -59,7 +61,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   unresolvedCommentCount,
   lastFocusable,
 }) => {
-  const displayTransitionButtons = editEnabled && state;
+  const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || lastFocusable || commentsPresent;

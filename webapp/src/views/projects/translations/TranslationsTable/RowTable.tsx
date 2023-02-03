@@ -99,6 +99,16 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
           ((prevWidth + cellWidth / 2) / allWidth) * 100
         }%`;
 
+        const canChangeState = satisfiesLanguageAccess(
+          'translations.state-edit',
+          language.id
+        );
+
+        const canEdit = satisfiesLanguageAccess(
+          'translations.edit',
+          language.id
+        );
+
         return (
           <CellTranslation
             key={language.tag}
@@ -106,10 +116,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={satisfiesLanguageAccess(
-              'translations.edit',
-              language.id
-            )}
+            stateChangeEnabled={canChangeState}
+            editEnabled={canEdit}
             width={columnSizes[index + 1]}
             cellPosition={cellPosition}
             active={relaxedActive}

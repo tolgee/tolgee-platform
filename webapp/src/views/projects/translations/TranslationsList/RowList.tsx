@@ -88,27 +88,36 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         className={keyClassName}
       />
       <StyledLanguages style={{ width: columnSizes[1] }}>
-        {languages.map((language, index) => (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={0}
-            onResize={onResize}
-            editEnabled={satisfiesLanguageAccess(
-              'translations.edit',
-              language.id
-            )}
-            width={columnSizes[1]}
-            active={relaxedActive}
-            className={clsx({
-              [firstTranslationClassName]: index === 0,
-              [lastTranslationClassName]: index === languages.length - 1,
-            })}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-          />
-        ))}
+        {languages.map((language, index) => {
+          const canChangeState = satisfiesLanguageAccess(
+            'translations.state-edit',
+            language.id
+          );
+
+          const canEdit = satisfiesLanguageAccess(
+            'translations.edit',
+            language.id
+          );
+          return (
+            <CellTranslation
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={0}
+              onResize={onResize}
+              editEnabled={canEdit}
+              stateChangeEnabled={canChangeState}
+              width={columnSizes[1]}
+              active={relaxedActive}
+              className={clsx({
+                [firstTranslationClassName]: index === 0,
+                [lastTranslationClassName]: index === languages.length - 1,
+              })}
+              // render last focusable button on last item, so it's focusable
+              lastFocusable={index === languages.length - 1}
+            />
+          );
+        })}
       </StyledLanguages>
     </StyledContainer>
   );
