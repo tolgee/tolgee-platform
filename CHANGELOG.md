@@ -1,3 +1,10 @@
+# [3.4.0](https://github.com/tolgee/tolgee-platform/compare/v3.3.4...v3.4.0) (2023-02-03)
+
+
+### Features
+
+* Add all keys endpoint ([c186d40](https://github.com/tolgee/tolgee-platform/commit/c186d40f346b00f4301bb9c07fa7528c18e34735))
+
 ## [3.3.4](https://github.com/tolgee/tolgee-platform/compare/v3.3.3...v3.3.4) (2023-01-31)
 
 
