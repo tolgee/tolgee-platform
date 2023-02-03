@@ -1,14 +1,15 @@
-import { Tooltip, styled } from '@mui/material';
+import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import {
   MachineTranslationIcon,
   TranslationMemoryIcon,
 } from 'tg.component/CustomIcons';
 import { useProviderImg } from 'tg.views/projects/translations/TranslationTools/useProviderImg';
+import { TranslationFlagIcon } from './TranslationFlagIcon';
 
 const StyledImgWrapper = styled('div')`
   display: flex;
-  & .icon {
+  & * {
     font-size: 16px;
     color: #249bad;
   }
@@ -24,23 +25,6 @@ type Props = {
   noTooltip?: boolean;
 };
 
-const getContent = (
-  provider: string | undefined,
-  providerImg: string | null
-) => {
-  return (
-    <StyledImgWrapper>
-      {provider && providerImg ? (
-        <StyledProviderImg src={providerImg} />
-      ) : provider ? (
-        <MachineTranslationIcon className="icon" />
-      ) : (
-        <TranslationMemoryIcon className="icon" />
-      )}{' '}
-    </StyledImgWrapper>
-  );
-};
-
 export const AutoTranslationIcon: React.FC<Props> = ({
   provider,
   noTooltip,
@@ -49,19 +33,27 @@ export const AutoTranslationIcon: React.FC<Props> = ({
   const providerImg = getProviderImg(provider);
   const { t } = useTranslate();
 
-  return noTooltip ? (
-    getContent(provider, providerImg)
-  ) : (
-    <Tooltip
-      title={
-        provider
+  return (
+    <TranslationFlagIcon
+      tooltip={
+        !noTooltip &&
+        (provider
           ? t('translations_auto_translated_provider', {
               provider: provider,
             })
-          : t('translations_auto_translated_tm')
+          : t('translations_auto_translated_tm'))
       }
-    >
-      {getContent(provider, providerImg)}
-    </Tooltip>
+      icon={
+        <StyledImgWrapper>
+          {provider && providerImg ? (
+            <StyledProviderImg src={providerImg} />
+          ) : provider ? (
+            <MachineTranslationIcon />
+          ) : (
+            <TranslationMemoryIcon />
+          )}
+        </StyledImgWrapper>
+      }
+    />
   );
 };

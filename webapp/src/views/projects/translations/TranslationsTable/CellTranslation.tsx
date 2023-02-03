@@ -15,13 +15,14 @@ import {
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
-import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { TranslationFlags } from '../cell/TranslationFlags';
 import { StateType } from 'tg.constants/translationStates';
 import { styled } from '@mui/material';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
 const StyledContainer = styled(StyledCell)`
   display: flex;
@@ -37,7 +38,7 @@ const StyledTranslationOpened = styled(TranslationOpened)`
   padding-left: 4px;
 `;
 
-const StyledAutoIndicator = styled(AutoTranslationIndicator)`
+const StyledAutoIndicator = styled(TranslationFlags)`
   height: 0;
   position: relative;
 `;
@@ -45,17 +46,6 @@ const StyledAutoIndicator = styled(AutoTranslationIndicator)`
 const StyledTranslation = styled('div')`
   flex-grow: 1;
   margin: ${({ theme }) => theme.spacing(1.5, 1.5, 1, 1.5)};
-`;
-
-const StyledControls = styled('div')`
-  box-sizing: border-box;
-  grid-area: controls;
-  display: flex;
-  justify-content: flex-end;
-  overflow: hidden;
-  min-height: 44px;
-  padding: 12px 14px 12px 12px;
-  margin-top: -16px;
 `;
 
 type Props = {
@@ -87,7 +77,9 @@ export const CellTranslation: React.FC<Props> = ({
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
 
-  const translation = data.translations[language.tag];
+  const translation = data.translations[language.tag] as
+    | TranslationViewModel
+    | undefined;
   const state = translation?.state || 'UNTRANSLATED';
 
   const {
@@ -108,6 +100,7 @@ export const CellTranslation: React.FC<Props> = ({
     language: language.tag,
     cellRef,
   });
+
   const { setTranslationState } = useTranslationsActions();
 
   const handleStateChange = (state: StateType) => {
@@ -175,26 +168,17 @@ export const CellTranslation: React.FC<Props> = ({
             <StyledAutoIndicator keyData={data} lang={language.tag} />
           </StyledTranslation>
 
-          <StyledControls>
-            {active ? (
-              <ControlsTranslation
-                onEdit={() => handleOpen('editor')}
-                editEnabled={editEnabled}
-                state={state}
-                onStateChange={handleStateChange}
-                onComments={() => handleOpen('comments')}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-              />
-            ) : (
-              // hide as many components as possible in order to be performant
-              <ControlsTranslation
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-                lastFocusable={lastFocusable}
-              />
-            )}
-          </StyledControls>
+          <ControlsTranslation
+            onEdit={() => handleOpen('editor')}
+            editEnabled={editEnabled}
+            state={state}
+            onStateChange={handleStateChange}
+            onComments={() => handleOpen('comments')}
+            commentsCount={translation?.commentCount}
+            unresolvedCommentCount={translation?.unresolvedCommentCount}
+            lastFocusable={lastFocusable}
+            active={active}
+          />
         </>
       )}
 

@@ -328,6 +328,8 @@ declare namespace DataCy {
         "translations-language-select-form-control" |
         "translations-language-select-item" |
         "translations-namespace-banner" |
+        "translations-outdated-clear-button" |
+        "translations-outdated-indicator" |
         "translations-row" |
         "translations-row-checkbox" |
         "translations-select-all-button" |

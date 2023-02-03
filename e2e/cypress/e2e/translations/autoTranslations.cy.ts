@@ -2,14 +2,14 @@ import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   create4Translations,
   createTranslation,
+  editCell,
   selectLangsInLocalstorage,
   translationsBeforeEach,
-  visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { HOST } from '../../common/constants';
 import { getCell } from '../../common/state';
 import { deleteProject } from '../../common/apiCalls/common';
+import { putAutoTranslationsSettings } from '../../common/apiCalls/autoTranslationsSettings';
 
 describe('Translation memory', () => {
   let project: ProjectDTO = null;
@@ -28,7 +28,6 @@ describe('Translation memory', () => {
   });
 
   it("doesn't trigger auto translation when not enabled", () => {
-    visit();
     waitForGlobalLoading();
     createTranslation('mykey', 'Cool translated text 1');
     waitForGlobalLoading();
@@ -42,8 +41,10 @@ describe('Translation memory', () => {
   });
 
   it('translate with machine translations', () => {
-    enableSettings({ translationMemory: true, machineTranslation: true });
-    visit();
+    putAutoTranslationsSettings(project.id, {
+      usingTranslationMemory: true,
+      usingMachineTranslation: true,
+    });
     waitForGlobalLoading();
     createTranslation('mykey', 'mytranslation');
     waitForGlobalLoading();
@@ -60,8 +61,10 @@ describe('Translation memory', () => {
   });
 
   it('translate with translation memory', () => {
-    enableSettings({ translationMemory: true, machineTranslation: true });
-    visit();
+    putAutoTranslationsSettings(project.id, {
+      usingTranslationMemory: true,
+      usingMachineTranslation: true,
+    });
     waitForGlobalLoading();
     createTranslation('mykey', 'Cool translated text 1');
     waitForGlobalLoading();
@@ -82,25 +85,62 @@ describe('Translation memory', () => {
     getAutoTranslatedIndicator('Studený přeložený text 1').should('not.exist');
   });
 
-  const enableSettings = ({ translationMemory, machineTranslation }) => {
-    cy.visit(`${HOST}/projects/${project.id}/languages`);
+  it('auto translate status gets resolved with state change', () => {
+    putAutoTranslationsSettings(project.id, {
+      usingTranslationMemory: true,
+      usingMachineTranslation: true,
+    });
+
     waitForGlobalLoading();
-    if (translationMemory) {
-      cy.gcy('languages-auto-translation-memory').click();
-    }
-    if (machineTranslation) {
-      cy.gcy('languages-auto-machine-translation').click();
-    }
+    createTranslation('mykey', 'New translation');
     waitForGlobalLoading();
-  };
+    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    getAutoTranslatedIndicator(
+      'New translation translated with GOOGLE from en to cs'
+    ).should('be.visible');
+
+    cy.gcy('translations-table-cell')
+      .filter(
+        ':contains("New translation translated with GOOGLE from en to cs")'
+      )
+      .first()
+      .trigger('mouseover')
+      .findDcy('translation-state-button')
+      .click();
+
+    waitForGlobalLoading();
+    getAutoTranslatedIndicator(
+      'New translation translated with GOOGLE from en to cs'
+    ).should('not.exist');
+  });
+
+  it('auto translate status gets resolved translation change', () => {
+    putAutoTranslationsSettings(project.id, {
+      usingTranslationMemory: true,
+      usingMachineTranslation: true,
+    });
+
+    waitForGlobalLoading();
+    createTranslation('mykey', 'New translation');
+    waitForGlobalLoading();
+    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    getAutoTranslatedIndicator(
+      'New translation translated with GOOGLE from en to cs'
+    ).should('be.visible');
+
+    editCell(
+      'New translation translated with GOOGLE from en to cs',
+      'Translation edited',
+      true
+    );
+
+    waitForGlobalLoading();
+    getAutoTranslatedIndicator('Translation edited').should('not.exist');
+  });
 
   const getAutoTranslatedIndicator = (translationText: string) => {
     return getCell(translationText).findDcy(
       'translations-auto-translated-indicator'
     );
-  };
-
-  const visit = () => {
-    visitTranslations(project.id);
   };
 });

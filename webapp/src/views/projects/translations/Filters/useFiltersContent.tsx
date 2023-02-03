@@ -28,7 +28,7 @@ export const useFiltersContent = () => {
 
   availableFilters.forEach((group, i1) => {
     if (group.options?.length) {
-      if (group.type !== 'multi') {
+      if (group.type !== 'multi' && group.name) {
         options.push(
           <CompactListSubheader
             key={i1}
