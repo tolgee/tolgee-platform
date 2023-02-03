@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
-import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.fixtures.andAssertError
@@ -120,17 +119,17 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
     val keyId = keyService.get(project.id, keyName, namespace).id
 
-    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName, namespace = ""))
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to ""))
       .andIsBadRequest
       .andAssertError
       .isCustomValidation.hasMessage("key_exists")
 
-    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName, namespace = null))
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to null))
       .andIsBadRequest
       .andAssertError
       .isCustomValidation.hasMessage("key_exists")
 
-    performProjectAuthPut("keys/${keyId}/complex-update", ComplexEditKeyDto(name = keyName))
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName))
       .andIsBadRequest
       .andAssertError
       .isCustomValidation.hasMessage("key_exists")
