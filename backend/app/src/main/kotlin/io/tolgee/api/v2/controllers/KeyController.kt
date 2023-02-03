@@ -25,12 +25,18 @@ import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
+import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -57,6 +63,7 @@ class KeyController(
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
   private val applicationContext: ApplicationContext,
+  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -102,6 +109,20 @@ class KeyController(
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
+  }
+
+  @GetMapping(value = [""])
+  @Transactional
+  @Operation(summary = "Returns all keys in the project")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  fun getAll(
+    @ParameterObject
+    @SortDefault("id")
+    pageable: Pageable
+  ): PagedModel<KeyModel> {
+    val data = keyService.getPaged(projectHolder.project.id, pageable)
+    return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
   @DeleteMapping(value = [""])

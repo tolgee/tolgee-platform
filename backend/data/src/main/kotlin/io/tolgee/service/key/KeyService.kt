@@ -14,6 +14,8 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -209,4 +211,6 @@ class KeyService(
       }
     }
   }
+
+  fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
 }
