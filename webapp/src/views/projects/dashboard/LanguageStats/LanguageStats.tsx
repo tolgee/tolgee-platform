@@ -11,6 +11,8 @@ import { LanguageLabels } from './LanguageLabels';
 import { TranslationStatesBar } from '../../TranslationStatesBar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import clsx from 'clsx';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -21,9 +23,13 @@ const StyledContainer = styled('div')`
 const StyledRow = styled('div')`
   display: contents;
   & > * {
-    cursor: pointer;
     padding-bottom: ${({ theme }) => theme.spacing(2)};
     padding-top: ${({ theme }) => theme.spacing(2)};
+    cursor: pointer;
+  }
+  &.disabled > * {
+    cursor: default;
+    opacity: 0.6;
   }
   &:hover > * {
     background: ${({ theme }) => theme.palette.emphasis[100]};
@@ -81,6 +87,7 @@ type Props = {
 
 export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const languages = useProjectLanguages();
+  const { satisfiesLanguageAccess } = useProjectPermissions();
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
@@ -104,10 +111,19 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
     <StyledContainer>
       {languageStats.map((item, i) => {
         const language = languages.find((l) => l.id === item.languageId)!;
+        const canViewLanguage = satisfiesLanguageAccess(
+          'translations.view',
+          language.id
+        );
 
         return (
           <React.Fragment key={item.languageId}>
-            <StyledRow onClick={() => redirectToLanguage(language.tag)}>
+            <StyledRow
+              className={clsx({ disabled: !canViewLanguage })}
+              onClick={() =>
+                canViewLanguage && redirectToLanguage(language.tag)
+              }
+            >
               <StyledInfo>
                 <Box gridArea="name">
                   {item.languageName +
