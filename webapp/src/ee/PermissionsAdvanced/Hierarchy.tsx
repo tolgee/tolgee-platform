@@ -85,7 +85,13 @@ export const Hierarchy: React.FC<Props> = ({
     structure.label ||
     (structure.value ? getScopeTranslation(structure.value) : undefined);
 
-  const minimalLanguages = getMinimalLanguages(myScopes, state, []);
+  const minimalLanguages = getMinimalLanguages(
+    structure.value
+      ? [structure.value]
+      : myScopes.filter((sc) => scopes.includes(sc)),
+    state,
+    []
+  );
 
   const displayLanguages =
     minimalLanguages && !ALL_LANGUAGES_SCOPES.includes(structure.value!);
