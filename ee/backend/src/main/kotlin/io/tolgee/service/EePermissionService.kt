@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class EePermissionService(
   private val permissionService: PermissionService,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   @Transactional
   fun setUserDirectPermission(
@@ -34,7 +34,7 @@ class EePermissionService(
     permission.type = null
     permission.scopes = scopes.toTypedArray()
 
-    permissionService.setPermissionLanguages(permission, languages)
+    permissionService.setPermissionLanguages(permission, languages, projectId)
 
     return permissionService.save(permission)
   }
@@ -61,7 +61,7 @@ class EePermissionService(
       scopes = scopes.toTypedArray(),
     )
 
-    permissionService.setPermissionLanguages(permission, params.languagePermissions)
+    permissionService.setPermissionLanguages(permission, params.languagePermissions, params.project.id)
 
     return permissionService.save(permission)
   }

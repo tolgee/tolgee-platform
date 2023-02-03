@@ -32,6 +32,7 @@ export const ProjectSettingsLanguages = () => {
   const { satisfiesPermission } = useProjectPermissions();
 
   const canEditLanguages = satisfiesPermission('languages.edit');
+  const canEditProject = satisfiesPermission('project.edit');
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',

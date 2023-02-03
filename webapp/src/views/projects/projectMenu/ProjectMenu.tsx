@@ -22,6 +22,7 @@ export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
 
+  const canViewTranslations = satisfiesPermission('translations.view');
   const canEditProject = satisfiesPermission('project.edit');
   const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewUsers = satisfiesPermission('users.view');
@@ -44,14 +45,16 @@ export const ProjectMenu = ({ id }) => {
         icon={<DashboardIcon />}
         text={t('project_menu_dashboard', 'Project Dashboard')}
       />
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_TRANSLATIONS.build({
-          [PARAMS.PROJECT_ID]: id,
-        })}
-        icon={<TranslationIcon />}
-        text={t('project_menu_translations')}
-        matchAsPrefix
-      />
+      {canViewTranslations && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<TranslationIcon />}
+          text={t('project_menu_translations')}
+          matchAsPrefix
+        />
+      )}
       <>
         {canEditProject && (
           <SideMenuItem
@@ -63,7 +66,7 @@ export const ProjectMenu = ({ id }) => {
             text={t('project_menu_project_settings')}
           />
         )}
-        {(canEditLanguages || canEditProject) && (
+        {canEditLanguages && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_LANGUAGES.build({
               [PARAMS.PROJECT_ID]: id,
@@ -95,13 +98,15 @@ export const ProjectMenu = ({ id }) => {
         )}
       </>
 
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_EXPORT.build({
-          [PARAMS.PROJECT_ID]: id,
-        })}
-        icon={<ExportIcon />}
-        text={t('project_menu_export')}
-      />
+      {canViewTranslations && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_EXPORT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<ExportIcon />}
+          text={t('project_menu_export')}
+        />
+      )}
       <SideMenuItem
         linkTo={LINKS.PROJECT_INTEGRATE.build({
           [PARAMS.PROJECT_ID]: id,
