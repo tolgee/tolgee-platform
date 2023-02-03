@@ -72,15 +72,26 @@ export const getDependentScopes = (
   return Array.from(result);
 };
 
+export const getBlockingScopes = (
+  myScopes: PermissionModelScope[],
+  selectedScopes: PermissionModelScope[],
+  dependencies: HierarchyItem
+) => {
+  const dependentScopes = getDependentScopes(myScopes, dependencies);
+  return dependentScopes.filter(
+    (dependentScope) =>
+      selectedScopes.includes(dependentScope) &&
+      !myScopes.includes(dependentScope)
+  );
+};
+
 export const getRequiredScopes = (
-  scopes: PermissionModelScope[],
+  scope: PermissionModelScope,
   dependencies: HierarchyItem
 ) => {
   const result = new Set<PermissionModelScope>();
-  scopes.forEach((scope) => {
-    result.add(scope);
-    findRequired(scope, dependencies).forEach((scope) => result.add(scope));
-  });
+  result.add(scope);
+  findRequired(scope, dependencies).forEach((scope) => result.add(scope));
   return Array.from(result);
 };
 
@@ -125,8 +136,9 @@ export const updateByDependencies = (
   };
   myScopes.forEach((myScope) => {
     const minimalLanguages = getMinimalLanguages([myScope], newState);
-    getRequiredScopes([myScope], dependencies).forEach((requiredScope) => {
+    getRequiredScopes(myScope, dependencies).forEach((requiredScope) => {
       if (!newState.scopes.includes(requiredScope)) {
+        // add required scope to selected scopes
         newState.scopes = [...newState.scopes, requiredScope];
       }
       const languageProp = getScopeLanguagePermission(requiredScope);
@@ -135,8 +147,10 @@ export const updateByDependencies = (
           newState[languageProp].length === 0 ||
           minimalLanguages.length === 0
         ) {
+          // add all languages, so they can be deselected
           newState[languageProp] = allLangs;
         } else {
+          // add language to the list
           minimalLanguages.forEach((l) => {
             if (!newState[languageProp]?.includes(l)) {
               newState[languageProp] = [...(newState[languageProp] || []), l];

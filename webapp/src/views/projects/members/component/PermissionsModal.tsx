@@ -19,7 +19,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/tools';
+import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 
 type Props = {
   onClose: () => void;

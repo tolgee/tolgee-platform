@@ -12,11 +12,10 @@ import {
   checkChildren,
   getChildScopes,
   getMinimalLanguages,
-  getDependentScopes,
-  getRequiredScopes,
   getScopeLanguagePermission,
   updateByDependencies,
-} from './tools';
+  getBlockingScopes,
+} from './hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
 
 const StyledContainer = styled('div')`
@@ -93,15 +92,9 @@ export const Hierarchy: React.FC<Props> = ({
     ? [structure.value]
     : getChildScopes(structure);
 
-  // scopes which are dependent on myScopes
-  const dependentScopes = getDependentScopes(myScopes, dependencies);
-
   // check if all dependant scopes are in responsible nodes
   // meaning if we toggle this, nothing outside gets broken
-  const blockingScopes = dependentScopes.filter(
-    (dependentScope) =>
-      scopes.includes(dependentScope) && !myScopes.includes(dependentScope)
-  );
+  const blockingScopes = getBlockingScopes(myScopes, scopes, dependencies);
 
   const blockedLanguages = getMinimalLanguages(blockingScopes, state);
 

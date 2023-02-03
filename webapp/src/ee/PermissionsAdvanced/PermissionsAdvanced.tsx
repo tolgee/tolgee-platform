@@ -44,6 +44,9 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
                 value: 'translations.edit',
               },
               {
+                value: 'translations.state-edit',
+              },
+              {
                 label: t('permissions_item_translations_comments'),
                 children: [
                   {
@@ -56,9 +59,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
                     value: 'translation-comments.set-state',
                   },
                 ],
-              },
-              {
-                value: 'translations.state-edit',
               },
             ],
           },
