@@ -231,6 +231,7 @@ export const CellTranslation: React.FC<Props> = ({
           autofocus={autofocus}
           state={state}
           onStateChange={handleStateChange}
+          stateChangeEnabled={stateChangeEnabled}
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}

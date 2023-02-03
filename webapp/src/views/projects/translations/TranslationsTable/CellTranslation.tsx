@@ -152,6 +152,7 @@ export const CellTranslation: React.FC<Props> = ({
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
+          stateChangeEnabled={stateChangeEnabled}
           cellRef={containerRef}
           cellPosition={cellPosition}
         />
