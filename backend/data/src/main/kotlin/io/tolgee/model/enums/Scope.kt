@@ -44,7 +44,8 @@ enum class Scope(
           )
         ),
         HierarchyItem(
-          KEYS_EDIT, listOf()
+          KEYS_EDIT,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
           SCREENSHOTS_UPLOAD,
@@ -76,7 +77,8 @@ enum class Scope(
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
         HierarchyItem(
-          TRANSLATIONS_STATE_EDIT, listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          TRANSLATIONS_STATE_EDIT,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
         )
       )
     )

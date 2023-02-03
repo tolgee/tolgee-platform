@@ -87,12 +87,14 @@ type Props = {
 
 export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const languages = useProjectLanguages();
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
   const baseLanguage = languages.find((l) => l.base === true)!.tag;
   const allLangs = languages.map((l) => l.tag);
+  const canViewLanguages = satisfiesPermission('translations.view');
 
   const redirectToLanguage = (lang?: string) => {
     const langs = !lang
@@ -179,7 +181,7 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
           </React.Fragment>
         );
       })}
-      {languageStats.length > 1 && (
+      {languageStats.length > 1 && canViewLanguages && (
         <>
           <StyledSeparator />
           <StyledBottomButton>

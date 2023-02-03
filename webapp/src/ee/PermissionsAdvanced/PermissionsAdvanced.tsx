@@ -47,6 +47,9 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
                 value: 'translations.state-edit',
               },
               {
+                value: 'keys.edit',
+              },
+              {
                 label: t('permissions_item_translations_comments'),
                 children: [
                   {
@@ -75,9 +78,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
                 value: 'screenshots.delete',
               },
             ],
-          },
-          {
-            value: 'keys.edit',
           },
           {
             value: 'users.view',
