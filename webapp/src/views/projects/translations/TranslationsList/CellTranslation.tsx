@@ -208,7 +208,8 @@ export const CellTranslation: React.FC<Props> = ({
             onComments={() => handleOpen('comments')}
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
-            stateChangeEnabled={stateChangeEnabled}editEnabled={editEnabled}
+            stateChangeEnabled={stateChangeEnabled}
+            editEnabled={editEnabled}
             state={state}
             onStateChange={handleStateChange}
             active={active}

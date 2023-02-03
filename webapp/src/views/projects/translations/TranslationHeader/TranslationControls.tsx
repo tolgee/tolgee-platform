@@ -42,8 +42,7 @@ type Props = {
 };
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
-  const { satisfiesPermission, satisfiesLanguageAccess } =
-    useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
