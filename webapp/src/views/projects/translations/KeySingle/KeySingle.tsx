@@ -54,10 +54,12 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
 
   const translation = translations?.[0];
 
-  const selectedLanguagesMapped = selectedLanguages?.map((l) => {
-    const language = allLanguages?.find(({ tag }) => tag === l);
-    return language!;
-  });
+  const selectedLanguagesMapped = selectedLanguages
+    ?.map((l) => {
+      const language = allLanguages?.find(({ tag }) => tag === l);
+      return language!;
+    })
+    .filter(Boolean);
 
   const { height: bottomPanelHeight } = useBottomPanel();
 

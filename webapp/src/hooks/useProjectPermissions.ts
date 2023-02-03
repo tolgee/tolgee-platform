@@ -21,6 +21,19 @@ export const useProjectPermissions = () => {
     return !!scopes?.includes(scope);
   }
 
+  function allowedLanguages(
+    scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP
+  ): boolean {
+    if (!satisfiesPermission(scope)) {
+      return false;
+    }
+
+    const allowedLanguages =
+      project.computedPermission[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
+
+    return allowedLanguages || [];
+  }
+
   function satisfiesLanguageAccess(
     scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP,
     languageId: number | undefined
@@ -44,5 +57,6 @@ export const useProjectPermissions = () => {
   return {
     satisfiesPermission,
     satisfiesLanguageAccess,
+    allowedLanguages,
   };
 };

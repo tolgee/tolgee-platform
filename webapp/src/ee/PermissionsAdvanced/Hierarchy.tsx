@@ -2,7 +2,6 @@ import { Checkbox, FormControlLabel, styled } from '@mui/material';
 import {
   HierarchyItem,
   HierarchyType,
-  LanguagePermissions,
   PermissionAdvanced,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
@@ -15,6 +14,8 @@ import {
   getScopeLanguagePermission,
   updateByDependencies,
   getBlockingScopes,
+  ALL_LANGUAGES_SCOPES,
+  isAllLanguages,
 } from './hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
 
@@ -57,6 +58,38 @@ export const Hierarchy: React.FC<Props> = ({
     scopes
   );
 
+  // scopes the item is responsible for
+  const myScopes = structure.value
+    ? [structure.value]
+    : getChildScopes(structure);
+
+  const myLanguageProps = myScopes
+    .map(getScopeLanguagePermission)
+    .filter(Boolean);
+
+  // check if all dependant scopes are in responsible nodes
+  // meaning if we toggle this, nothing outside gets broken
+  const blockingScopes = getBlockingScopes(myScopes, scopes, dependencies);
+
+  const blockedLanguages = getMinimalLanguages(blockingScopes, state, allLangs);
+
+  const disabled = Boolean(blockingScopes.length);
+
+  const fullyChecked =
+    scopeIncluded || (!structure.value && childrenCheckedAll);
+  const halfChecked = !structure.value && !fullyChecked && childrenCheckedSome;
+
+  const { getScopeTranslation } = useScopeTranslations();
+
+  const label =
+    structure.label ||
+    (structure.value ? getScopeTranslation(structure.value) : undefined);
+
+  const minimalLanguages = getMinimalLanguages(myScopes, state, []);
+
+  const displayLanguages =
+    minimalLanguages && !ALL_LANGUAGES_SCOPES.includes(structure.value!);
+
   const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
     let newScopes = [...state.scopes];
     scopes.forEach((scope) => {
@@ -70,41 +103,20 @@ export const Hierarchy: React.FC<Props> = ({
     return newScopes;
   };
 
-  const updateLanguagePermissions = (
-    languagePermission: keyof LanguagePermissions,
-    value: number[]
-  ) => {
+  const updateLanguagePermissions = (value: number[]) => {
+    const affectedScopes = myScopes.filter((sc) => scopes.includes(sc));
+    const newState = {
+      ...state,
+    };
+    myLanguageProps.forEach((langProp) => {
+      newState[langProp!] = value;
+    });
     onChange(
-      updateByDependencies(
-        myScopes,
-        {
-          ...state,
-          [languagePermission]: value,
-        },
-        dependencies,
-        allLangs
-      )
+      updateByDependencies(affectedScopes, newState, dependencies, allLangs)
     );
   };
 
-  // scopes the item is responsible for
-  const myScopes = structure.value
-    ? [structure.value]
-    : getChildScopes(structure);
-
-  // check if all dependant scopes are in responsible nodes
-  // meaning if we toggle this, nothing outside gets broken
-  const blockingScopes = getBlockingScopes(myScopes, scopes, dependencies);
-
-  const blockedLanguages = getMinimalLanguages(blockingScopes, state);
-
-  const disabled = Boolean(blockingScopes.length);
-
-  const fullyChecked =
-    scopeIncluded || (!structure.value && childrenCheckedAll);
-  const halfChecked = !structure.value && !fullyChecked && childrenCheckedSome;
-
-  const handleClick = () => {
+  const handleToggle = () => {
     if (fullyChecked) {
       onChange({
         ...state,
@@ -116,14 +128,6 @@ export const Hierarchy: React.FC<Props> = ({
     }
   };
 
-  const { getScopeTranslation } = useScopeTranslations();
-
-  const label =
-    structure.label ||
-    (structure.value ? getScopeTranslation(structure.value) : undefined);
-
-  const languagePermission = getScopeLanguagePermission(structure.value);
-
   return (
     <StyledContainer>
       <StyledRow>
@@ -132,21 +136,26 @@ export const Hierarchy: React.FC<Props> = ({
             <Checkbox
               checked={fullyChecked}
               indeterminate={halfChecked}
-              onClick={handleClick}
+              onClick={handleToggle}
               disabled={disabled}
             />
           }
           label={label}
         />
 
-        {languagePermission && (
+        {minimalLanguages && displayLanguages && (
           <LanguagePermissionsMenu
             buttonProps={{ size: 'small' }}
-            disabled={!fullyChecked || blockedLanguages}
-            selected={state[languagePermission] || []}
-            onSelect={(value) =>
-              updateLanguagePermissions(languagePermission, value)
+            disabled={(!halfChecked && !fullyChecked) || blockedLanguages}
+            selected={
+              !blockedLanguages
+                ? minimalLanguages
+                : isAllLanguages(blockedLanguages, allLangs) &&
+                  isAllLanguages(minimalLanguages, allLangs)
+                ? []
+                : minimalLanguages
             }
+            onSelect={(value) => updateLanguagePermissions(value)}
           />
         )}
       </StyledRow>

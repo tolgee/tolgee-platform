@@ -56,10 +56,12 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
     selectedLanguagesDefault ||
     [];
 
-  const selectedLanguagesMapped = selectedLanguages!.map((l) => {
-    const language = languages?.find(({ tag }) => tag === l);
-    return language!;
-  });
+  const selectedLanguagesMapped = selectedLanguages!
+    .map((l) => {
+      const language = languages?.find(({ tag }) => tag === l);
+      return language!;
+    })
+    .filter(Boolean);
 
   const handleOnSuccess = (data: KeyWithDataModel) => {
     onClose();

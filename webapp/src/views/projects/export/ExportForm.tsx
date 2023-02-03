@@ -16,6 +16,7 @@ import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
 import { NestedSelector } from './NestedSelector';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const messaging = container.resolve(MessageService);
 
@@ -69,6 +70,7 @@ const StyledOptions = styled('div')`
 
 export const ExportForm = () => {
   const project = useProject();
+  const { satisfiesLanguageAccess } = useProjectPermissions();
   const exportLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/export',
     method: 'post',
@@ -101,25 +103,40 @@ export const ExportForm = () => {
     [namespacesLoadable.data]
   );
 
-  const allLangs = useMemo(
-    () => languagesLoadable.data?._embedded?.languages?.map((l) => l.tag) || [],
+  const allowedLanguages = useMemo(
+    () =>
+      languagesLoadable.data?._embedded?.languages?.filter((l) =>
+        satisfiesLanguageAccess('translations.view', l.id)
+      ) || [],
     [languagesLoadable.data]
   );
 
+  const allowedTags = useMemo(
+    () => allowedLanguages?.map((l) => l.tag) || [],
+    [allowedLanguages]
+  );
+
   const sortLanguages = (arr: string[]) =>
-    [...arr].sort((a, b) => allLangs.indexOf(a) - allLangs.indexOf(b));
+    [...arr].sort((a, b) => allowedTags.indexOf(a) - allowedTags.indexOf(b));
 
   const [states, setStates] = useUrlSearchState('states', {
     array: true,
     defaultVal: EXPORT_DEFAULT_STATES,
   });
+
   const [languages, setLanguages] = useUrlSearchState('languages', {
     array: true,
-    defaultVal: allLangs,
+    defaultVal: allowedTags,
   });
+
+  const selectedTags = (languages as string[])?.filter((l) =>
+    allowedTags.includes(l)
+  );
+
   const [format, setFormat] = useUrlSearchState('format', {
     defaultVal: EXPORT_DEFAULT_FORMAT,
   });
+
   const [nested, setNested] = useUrlSearchState('nested', {
     defaultVal: 'false',
   });
@@ -138,7 +155,7 @@ export const ExportForm = () => {
         states: (states?.length
           ? states
           : EXPORT_DEFAULT_STATES) as StateType[],
-        languages: (languages?.length ? languages : allLangs) as string[],
+        languages: (languages?.length ? selectedTags : allowedTags) as string[],
         format: (format || EXPORT_DEFAULT_FORMAT) as typeof FORMATS[number],
         namespaces: allNamespaces || [],
         nested: nested === 'true',
@@ -206,10 +223,7 @@ export const ExportForm = () => {
       {({ isSubmitting, handleSubmit, isValid, values }) => (
         <StyledForm onSubmit={handleSubmit}>
           <StateSelector className="states" />
-          <LanguageSelector
-            className="langs"
-            languages={languagesLoadable.data?._embedded?.languages}
-          />
+          <LanguageSelector className="langs" languages={allowedLanguages} />
           <FormatSelector className="format" />
           {values.format === 'JSON' && (
             <StyledOptions className="options">

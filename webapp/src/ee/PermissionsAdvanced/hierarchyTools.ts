@@ -6,6 +6,8 @@ import {
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 
+export const ALL_LANGUAGES_SCOPES = ['admin'];
+
 export const getChildScopes = (structure: HierarchyType) => {
   let result: PermissionModelScope[] = [];
   structure.children?.forEach((child) => {
@@ -99,29 +101,42 @@ const SCOPE_TO_LANG_PROPERTY_MAP = {
   'translations.view': 'viewLanguages',
   'translations.edit': 'translateLanguages',
   'translations.state-edit': 'stateChangeLanguages',
-};
+} as const;
+
+type ValueOf<T> = T[keyof T];
 
 export const getScopeLanguagePermission = (
   scope: PermissionModelScope | undefined
-) => {
-  return scope && SCOPE_TO_LANG_PROPERTY_MAP[scope];
+): ValueOf<typeof SCOPE_TO_LANG_PROPERTY_MAP> | undefined => {
+  if (!scope) {
+    return undefined;
+  }
+  return SCOPE_TO_LANG_PROPERTY_MAP[scope];
 };
 
 export const getMinimalLanguages = (
   scopes: PermissionModelScope[],
-  permittedLanguages: LanguagePermissions
+  permittedLanguages: LanguagePermissions,
+  allLangs: number[]
 ) => {
   const result = new Set<number>();
   let all = false;
   scopes.forEach((scope) => {
     const languageProp = getScopeLanguagePermission(scope);
-    const dependantLanguages = permittedLanguages[languageProp];
+    const dependantLanguages = languageProp && permittedLanguages[languageProp];
     dependantLanguages?.forEach((langId) => result.add(langId));
-    if (dependantLanguages?.length === 0) {
+    if (
+      dependantLanguages?.length === 0 ||
+      ALL_LANGUAGES_SCOPES.includes(scope)
+    ) {
       all = true;
     }
   });
-  return all ? [] : result.size ? Array.from(result) : false;
+  return all ? allLangs : result.size ? Array.from(result) : false;
+};
+
+export const isAllLanguages = (langs: number[], allLangs: number[]) => {
+  return langs.length === 0 || allLangs.every((lid) => langs.includes(lid));
 };
 
 export const updateByDependencies = (
@@ -135,7 +150,9 @@ export const updateByDependencies = (
     scopes: Array.from(new Set([...currentState.scopes, ...myScopes])),
   };
   myScopes.forEach((myScope) => {
-    const minimalLanguages = getMinimalLanguages([myScope], newState);
+    const minimalLanguages = getMinimalLanguages([myScope], newState, allLangs);
+    const minimalIsAll =
+      minimalLanguages !== false && isAllLanguages(minimalLanguages, allLangs);
     getRequiredScopes(myScope, dependencies).forEach((requiredScope) => {
       if (!newState.scopes.includes(requiredScope)) {
         // add required scope to selected scopes
@@ -143,13 +160,16 @@ export const updateByDependencies = (
       }
       const languageProp = getScopeLanguagePermission(requiredScope);
       if (minimalLanguages && languageProp && requiredScope !== myScope) {
-        if (
-          newState[languageProp].length === 0 ||
-          minimalLanguages.length === 0
-        ) {
-          // add all languages, so they can be deselected
+        const requiredIsAll = isAllLanguages(
+          newState[languageProp] || [],
+          allLangs
+        );
+        if (!minimalIsAll && requiredIsAll) {
           newState[languageProp] = allLangs;
-        } else {
+        } else if (minimalIsAll) {
+          // add all languages, so they can be deselected
+          newState[languageProp] = [];
+        } else if (!requiredIsAll) {
           // add language to the list
           minimalLanguages.forEach((l) => {
             if (!newState[languageProp]?.includes(l)) {

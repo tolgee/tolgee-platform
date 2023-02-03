@@ -42,7 +42,8 @@ type Props = {
 };
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
@@ -50,6 +51,9 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setSearch, selectLanguages, changeView } = useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
+  const disabledLanguages = languages
+    ?.map((l) => l.id)
+    ?.filter((lid) => !satisfiesLanguageAccess('translations.view', lid));
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -75,6 +79,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             value={selectedLanguages || []}
             languages={languages || []}
             context="translations"
+            disabledLanguages={disabledLanguages}
           />
           <ButtonGroup>
             <StyledToggleButton
@@ -93,7 +98,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </StyledToggleButton>
           </ButtonGroup>
 
-          {projectPermissions.satisfiesPermission('keys.edit') && (
+          {satisfiesPermission('keys.edit') && (
             <Button
               startIcon={<Add />}
               color="primary"
