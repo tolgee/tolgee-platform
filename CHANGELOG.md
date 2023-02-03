@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/tolgee/tolgee-platform/compare/v3.4.0...v3.4.1) (2023-02-03)
+
+
+### Bug Fixes
+
+* Check for empty namespace in complex-update endpoint ([#1531](https://github.com/tolgee/tolgee-platform/issues/1531)) ([010184a](https://github.com/tolgee/tolgee-platform/commit/010184a59be8cb8ea80e138b8bb39a3afb201ef0)), closes [#1520](https://github.com/tolgee/tolgee-platform/issues/1520)
+
 # [3.4.0](https://github.com/tolgee/tolgee-platform/compare/v3.3.4...v3.4.0) (2023-02-03)
 
 
