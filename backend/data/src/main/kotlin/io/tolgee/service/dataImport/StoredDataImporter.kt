@@ -75,6 +75,7 @@ class StoredDataImporter(
 
     namespaceService.saveAll(namespacesToSave.values)
     keyService.saveAll(keysToSave.values)
+
     translationService.saveAll(translationsToSave)
 
     keysToSave.values.flatMap {
@@ -136,6 +137,7 @@ class StoredDataImporter(
         outdatedFlagKeys.add(translation.key.id)
       }
       translation.text = this@doImport.text
+      translation.resetFlags()
       translationsToSave.add(translation)
     }
   }

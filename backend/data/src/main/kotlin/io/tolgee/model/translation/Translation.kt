@@ -83,6 +83,12 @@ class Translation(
     this.language = language
   }
 
+  fun resetFlags() {
+    this.outdated = false
+    this.mtProvider = null
+    this.auto = false
+  }
+
   companion object {
     class UpdateStatsListener {
       @PrePersist

@@ -139,7 +139,7 @@ class TranslationService(
   fun setTranslation(key: Key, language: Language, text: String?): Translation? {
     val translation = getOrCreate(key, language)
     if (translation.text !== text) {
-      this.resetFlags(translation)
+      translation.resetFlags()
     }
     translation.text = text
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
@@ -160,12 +160,6 @@ class TranslationService(
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
     }
     return translationRepository.save(translation)
-  }
-
-  fun resetFlags(translation: Translation) {
-    translation.outdated = false
-    translation.mtProvider = null
-    translation.auto = false
   }
 
   @Transactional
@@ -228,7 +222,7 @@ class TranslationService(
 
   fun setState(translation: Translation, state: TranslationState): Translation {
     translation.state = state
-    this.resetFlags(translation)
+    translation.resetFlags()
     return this.save(translation)
   }
 

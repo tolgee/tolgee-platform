@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
@@ -78,8 +79,16 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       val key = projectService.get(testData.project.id)
         .keys.find { it.name == "what a nice key" }!!
-      key.translations.find { it.language == testData.french }!!.outdated.assert.isEqualTo(true)
-      key.translations.find { it.language == testData.english }!!.outdated.assert.isEqualTo(false)
+
+      val untouched = key.translations.find { it.language == testData.french }!!
+      untouched.outdated.assert.isEqualTo(true)
+      untouched.mtProvider.assert.isEqualTo(MtServiceType.GOOGLE)
+      untouched.auto.assert.isEqualTo(true)
+
+      val touched = key.translations.find { it.language == testData.english }!!
+      touched.outdated.assert.isEqualTo(false)
+      touched.mtProvider.assert.isEqualTo(null)
+      touched.auto.assert.isEqualTo(false)
     }
   }
 }
