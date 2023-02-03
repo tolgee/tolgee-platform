@@ -164,7 +164,7 @@ export const useTranslationsService = (props: Props) => {
         const selectedLanguages = data.pages[0].selectedLanguages.map(
           (l) => l.tag
         );
-        if (languages?.toString() !== selectedLanguages?.toString()) {
+        if (query.languages?.toString() !== selectedLanguages?.toString()) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
           _setLanguages(selectedLanguages);

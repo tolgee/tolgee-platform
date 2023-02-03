@@ -78,7 +78,8 @@ export const KeyEditForm: React.FC = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const permissions = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
 
   const translation = useTranslationsSelector((c) => c.translations)?.[0];
   const languages = useTranslationsSelector((c) => c.languages);
@@ -141,7 +142,7 @@ export const KeyEditForm: React.FC = () => {
 
   useGlobalLoading(updateNamespace.isLoading);
 
-  const editEnabled = permissions.satisfiesPermission('keys.edit');
+  const editEnabled = satisfiesPermission('keys.edit');
 
   const handleRemoveKey = () => {
     confirmation({
@@ -239,7 +240,14 @@ export const KeyEditForm: React.FC = () => {
                 data={translation!}
                 language={language}
                 active={true}
-                editEnabled={permissions.canEditLanguage(language.id)}
+                editEnabled={satisfiesLanguageAccess(
+                  'translations.edit',
+                  language.id
+                )}
+                stateChangeEnabled={satisfiesLanguageAccess(
+                  'translations.state-edit',
+                  language.id
+                )}
                 lastFocusable={false}
               />
             </StyledLanguageField>

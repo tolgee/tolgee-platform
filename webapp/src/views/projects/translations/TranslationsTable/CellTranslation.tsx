@@ -6,11 +6,11 @@ import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import {
-  StyledCell,
-  CELL_PLAIN,
-  CELL_HOVER,
   CELL_CLICKABLE,
+  CELL_HOVER,
+  CELL_PLAIN,
   CELL_RAISED,
+  StyledCell,
 } from '../cell/styles';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
@@ -54,6 +54,7 @@ type Props = {
   colIndex?: number;
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
+  stateChangeEnabled: boolean;
   width?: number | string;
   cellPosition: string;
   active: boolean;
@@ -68,6 +69,7 @@ export const CellTranslation: React.FC<Props> = ({
   colIndex,
   onResize,
   editEnabled,
+  stateChangeEnabled,
   width,
   cellPosition,
   active,
@@ -172,7 +174,7 @@ export const CellTranslation: React.FC<Props> = ({
             onEdit={() => handleOpen('editor')}
             editEnabled={editEnabled}
             state={state}
-            onStateChange={handleStateChange}
+            stateChangeEnabled={stateChangeEnabled}onStateChange={handleStateChange}
             onComments={() => handleOpen('comments')}
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
