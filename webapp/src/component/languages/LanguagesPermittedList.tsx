@@ -62,7 +62,15 @@ export const LanguagesPermittedList: React.FC<Props> = ({
           />
         ))
       )}
-      {numOfExtra > 0 && <StyledExtraCircle>+{numOfExtra}</StyledExtraCircle>}
+      {numOfExtra > 0 && (
+        <StyledExtraCircle
+          className={clsx({
+            disabled: disabled === true,
+          })}
+        >
+          +{numOfExtra}
+        </StyledExtraCircle>
+      )}
     </StyledContainer>
   );
 };

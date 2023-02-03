@@ -52,6 +52,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             ? selectedLanguages.map((l) => l.name || l.tag).join(', ')
             : t('languages_permitted_list_all')
         }
+        disableInteractive
       >
         <Button
           data-cy="permissions-language-menu-button"
