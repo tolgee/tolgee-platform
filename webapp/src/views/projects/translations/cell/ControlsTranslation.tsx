@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
-import { styled } from '@mui/material';
-import { Edit, Comment } from '@mui/icons-material';
+import { Badge, styled } from '@mui/material';
+import { Edit, Comment, Check } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -21,7 +21,7 @@ const StyledControlsWrapper = styled('div')`
   min-height: 44px;
   padding: 12px 14px 12px 12px;
   margin-top: -16px;
-  margin-right: -10px;
+  margin-right: -8px;
   gap: 4px;
 `;
 
@@ -31,8 +31,29 @@ const StyledStateButtons = styled('div')`
   padding-right: 8px;
 `;
 
-const ActiveComment = styled(Comment)`
-  color: ${({ theme }) => theme.palette.primary.main};
+const StyledBadge = styled(Badge)`
+  & .unresolved {
+    font-size: 10px;
+    height: unset;
+    padding: 3px 3px;
+    display: flex;
+  }
+  & .resolved {
+    background: ${({ theme }) => theme.palette.emphasis[600]};
+    padding: 0px;
+    height: 16px;
+    width: 18px;
+    display: flex;
+    min-width: unset;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
+const StyledCheckIcon = styled(Check)`
+  color: ${({ theme }) => theme.palette.emphasis[100]};
+  font-size: 14px;
+  margin: -5px;
 `;
 
 type ControlsProps = {
@@ -125,10 +146,23 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           })}
           tooltip={<T>translation_cell_comments</T>}
         >
-          {unresolvedCommentCount ? (
-            <ActiveComment fontSize="small" />
+          {onlyResolved ? (
+            <StyledBadge
+              badgeContent={<StyledCheckIcon fontSize="small" />}
+              classes={{
+                badge: 'resolved',
+              }}
+            >
+              <Comment fontSize="small" />
+            </StyledBadge>
           ) : (
-            <Comment fontSize="small" />
+            <StyledBadge
+              badgeContent={unresolvedCommentCount}
+              color="primary"
+              classes={{ badge: 'unresolved' }}
+            >
+              <Comment fontSize="small" />
+            </StyledBadge>
           )}
         </ControlsButton>
       )}
