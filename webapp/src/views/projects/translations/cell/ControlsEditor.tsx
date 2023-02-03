@@ -28,6 +28,7 @@ const StyledRightPart = styled('div')`
 
 type ControlsProps = {
   state?: State;
+  stateChangeEnabled: boolean;
   onSave?: () => void;
   onCancel?: () => void;
   onScreenshots?: () => void;
@@ -38,6 +39,7 @@ type ControlsProps = {
 
 export const ControlsEditor: React.FC<ControlsProps> = ({
   state,
+  stateChangeEnabled,
   onSave,
   onCancel,
   onScreenshots,
@@ -46,7 +48,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   screenshotsPresent,
 }) => {
   // right section
-  const displayTransitionButtons = state;
+  const displayTransitionButtons = state && stateChangeEnabled;
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
 
