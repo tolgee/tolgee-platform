@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/tolgee/tolgee-platform/compare/v3.4.1...v3.5.0) (2023-02-06)
+
+
+### Features
+
+* Oudated translation indication ([#1533](https://github.com/tolgee/tolgee-platform/issues/1533)) ([c8df0b4](https://github.com/tolgee/tolgee-platform/commit/c8df0b4b25bfbbae986cff31a4967bd7f93fd6ea))
+
 ## [3.4.1](https://github.com/tolgee/tolgee-platform/compare/v3.4.0...v3.4.1) (2023-02-03)
 
 
