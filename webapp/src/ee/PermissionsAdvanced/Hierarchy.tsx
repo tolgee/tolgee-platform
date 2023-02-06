@@ -154,7 +154,13 @@ export const Hierarchy: React.FC<Props> = ({
         {minimalLanguages && displayLanguages && (
           <LanguagePermissionsMenu
             buttonProps={{ size: 'small' }}
-            disabled={(!halfChecked && !fullyChecked) || blockedLanguages}
+            disabled={
+              (!halfChecked && !fullyChecked) ||
+              Boolean(
+                scopes.find((scope) => ALL_LANGUAGES_SCOPES.includes(scope))
+              ) ||
+              blockedLanguages
+            }
             selected={
               !blockedLanguages
                 ? minimalLanguages

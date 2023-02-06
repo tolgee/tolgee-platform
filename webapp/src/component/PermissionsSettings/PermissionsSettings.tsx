@@ -2,7 +2,9 @@ import { Box, Tab, Tabs } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { updateByDependencies } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { PermissionsBasic } from './PermissionsBasic';
@@ -23,6 +25,7 @@ export const PermissionsSettings: React.FC<Props> = ({
   permissions,
   onChange,
 }) => {
+  const allLangs = useProjectLanguages().map((l) => l.id);
   const [tab, setTab] = useState<TabsType>(
     permissions.type ? 'basic' : 'advanced'
   );
@@ -38,19 +41,34 @@ export const PermissionsSettings: React.FC<Props> = ({
     query: {},
   });
 
-  const [state, setState] = useState<PermissionState>({
-    role: permissions.type,
-    scopes: permissions.scopes,
-    viewLanguages: permissions.viewLanguageIds || [],
-    translateLanguages: permissions.translateLanguageIds || [],
-    stateChangeLanguages: permissions.stateChangeLanguageIds || [],
-  });
+  const [state, setState] = useState<PermissionState | undefined>(undefined);
 
   useEffect(() => {
-    onChange({
-      tab,
-      state,
-    });
+    if (dependenciesLoadable.data && !state) {
+      setState(
+        updateByDependencies(
+          permissions.scopes,
+          {
+            role: permissions.type,
+            scopes: permissions.scopes,
+            viewLanguages: permissions.viewLanguageIds || [],
+            translateLanguages: permissions.translateLanguageIds || [],
+            stateChangeLanguages: permissions.stateChangeLanguageIds || [],
+          },
+          dependenciesLoadable.data,
+          allLangs
+        )
+      );
+    }
+  }, [dependenciesLoadable.data]);
+
+  useEffect(() => {
+    if (state) {
+      onChange({
+        tab,
+        state,
+      });
+    }
   }, [tab, state]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: TabsType) => {
@@ -61,7 +79,7 @@ export const PermissionsSettings: React.FC<Props> = ({
     return <FullPageLoading />;
   }
 
-  if (!dependenciesLoadable.data || !rolesLoadable.data) {
+  if (!dependenciesLoadable.data || !rolesLoadable.data || !state) {
     return null;
   }
 
