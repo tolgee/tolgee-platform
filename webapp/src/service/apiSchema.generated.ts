@@ -280,6 +280,9 @@ export interface paths {
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
   };
+  "/v2/public/scope-info/roles": {
+    get: operations["getRoles"];
+  };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
   };
@@ -511,14 +514,14 @@ export interface components {
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages edition is permitted. */
-      translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, all languages edition is permitted. */
       stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages edition is permitted. */
       viewLanguageIds?: number[];
       /** Has user explicitly set granular permissions? */
       granular: boolean;
+      /** List of languages user can translate to. If null, all languages edition is permitted. */
+      translateLanguageIds?: number[];
       /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -863,9 +866,9 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      description: string;
       createdAt: number;
       updatedAt: number;
+      description: string;
       lastUsedAt?: number;
       expiresAt?: number;
     };
@@ -1569,9 +1572,9 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      description: string;
       createdAt: number;
       updatedAt: number;
+      description: string;
       lastUsedAt?: number;
       expiresAt?: number;
     };
@@ -4806,6 +4809,28 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getRoles: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: string[] };
         };
       };
       /** Bad Request */

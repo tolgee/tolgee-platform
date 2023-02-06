@@ -52,10 +52,10 @@ export const PermissionsModal: React.FC<Props> = ({
   >(undefined);
 
   const changeRole = () => {
-    if (!settingsState?.basic?.role) {
+    if (!settingsState?.state.role) {
       return;
     }
-    const permissionType = settingsState.basic.role;
+    const permissionType = settingsState.state.role;
     editRole.mutate(
       {
         path: {
@@ -78,17 +78,17 @@ export const PermissionsModal: React.FC<Props> = ({
   };
 
   const changeScopes = () => {
-    if (!settingsState?.advanced.scopes) {
+    if (!settingsState?.state.scopes) {
       return;
     }
 
     const languagePermissions: LanguagePermissions = {};
 
-    settingsState.advanced.scopes
+    settingsState.state.scopes
       .map(getScopeLanguagePermission)
       .forEach((property) => {
         if (property) {
-          languagePermissions[property] = settingsState.advanced[property];
+          languagePermissions[property] = settingsState.state[property];
         }
       });
 
@@ -96,7 +96,7 @@ export const PermissionsModal: React.FC<Props> = ({
       {
         path: { userId: user.id, projectId: project.id },
         query: {
-          scopes: settingsState.advanced.scopes,
+          scopes: settingsState.state.scopes,
           ...languagePermissions,
         },
       },

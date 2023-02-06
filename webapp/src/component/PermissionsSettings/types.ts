@@ -11,18 +11,14 @@ export type PermissionModelScope = PermissionModel['scopes'][0];
 export type LanguagePermissions =
   operations['setUsersPermissions_1']['parameters']['query'];
 
-export type PermissionBasic = {
-  role: PermissionModelRole;
-} & LanguagePermissions;
-
-export type PermissionAdvanced = {
+export type PermissionState = {
+  role?: PermissionModelRole;
   scopes: PermissionModelScope[];
 } & LanguagePermissions;
 
 export type PermissionSettingsState = {
   tab: TabsType;
-  basic: PermissionBasic;
-  advanced: PermissionAdvanced;
+  state: PermissionState;
 };
 
 export type HierarchyType = {
@@ -30,5 +26,10 @@ export type HierarchyType = {
   value?: PermissionModelScope;
   children?: HierarchyType[];
 };
+
+export type RolesMap = Record<
+  NonNullable<PermissionModelRole>,
+  PermissionModelScope[]
+>;
 
 export type HierarchyItem = components['schemas']['HierarchyItem'];
