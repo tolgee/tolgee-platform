@@ -1,14 +1,16 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { PermissionsBasic } from './PermissionsBasic';
 import {
-  PermissionAdvanced,
-  PermissionBasic,
+  PermissionState,
   PermissionModel,
   PermissionSettingsState,
+  RolesMap,
   TabsType,
 } from './types';
 
@@ -25,31 +27,43 @@ export const PermissionsSettings: React.FC<Props> = ({
     permissions.type ? 'basic' : 'advanced'
   );
 
-  const [basic, setBasic] = useState<PermissionBasic>({
-    role: permissions.type,
-    viewLanguages: permissions.viewLanguageIds,
-    translateLanguages: permissions.permittedLanguageIds,
-    stateChangeLanguages: permissions.stateChangeLanguageIds,
+  const rolesLoadable = useApiQuery({
+    url: '/v2/public/scope-info/roles',
+    method: 'get',
   });
 
-  const [advanced, setAdvanced] = useState<PermissionAdvanced>({
+  const dependenciesLoadable = useApiQuery({
+    url: '/v2/public/scope-info/hierarchy',
+    method: 'get',
+    query: {},
+  });
+
+  const [state, setState] = useState<PermissionState>({
+    role: permissions.type,
     scopes: permissions.scopes,
-    viewLanguages: permissions.viewLanguageIds,
-    translateLanguages: permissions.translateLanguageIds,
-    stateChangeLanguages: permissions.stateChangeLanguageIds,
+    viewLanguages: permissions.viewLanguageIds || [],
+    translateLanguages: permissions.translateLanguageIds || [],
+    stateChangeLanguages: permissions.stateChangeLanguageIds || [],
   });
 
   useEffect(() => {
     onChange({
       tab,
-      basic,
-      advanced,
+      state,
     });
-  }, [tab, basic, advanced]);
+  }, [tab, state]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: TabsType) => {
     setTab(newValue);
   };
+
+  if (dependenciesLoadable.isLoading || rolesLoadable.isLoading) {
+    return <FullPageLoading />;
+  }
+
+  if (!dependenciesLoadable.data || !rolesLoadable.data) {
+    return null;
+  }
 
   return (
     <div>
@@ -68,10 +82,19 @@ export const PermissionsSettings: React.FC<Props> = ({
       </Box>
       <Box sx={{ mt: 1 }}>
         {tab === 'basic' && (
-          <PermissionsBasic state={basic} onChange={setBasic} />
+          <PermissionsBasic
+            state={state}
+            onChange={setState}
+            roles={rolesLoadable.data as RolesMap}
+            dependencies={dependenciesLoadable.data}
+          />
         )}
         {tab === 'advanced' && (
-          <PermissionsAdvanced state={advanced} onChange={setAdvanced} />
+          <PermissionsAdvanced
+            state={state}
+            onChange={setState}
+            dependencies={dependenciesLoadable.data}
+          />
         )}
       </Box>
     </div>

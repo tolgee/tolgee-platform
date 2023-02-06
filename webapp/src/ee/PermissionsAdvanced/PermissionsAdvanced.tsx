@@ -1,34 +1,26 @@
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { PermissionAdvanced } from 'tg.component/PermissionsSettings/types';
+import {
+  HierarchyItem,
+  PermissionState,
+} from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
 import { useTranslate } from '@tolgee/react';
 
 type Props = {
-  state: PermissionAdvanced;
-  onChange: (value: PermissionAdvanced) => void;
+  dependencies: HierarchyItem;
+  state: PermissionState;
+  onChange: (value: PermissionState) => void;
 };
 
-export const PermissionsAdvanced: React.FC<Props> = ({ state, onChange }) => {
+export const PermissionsAdvanced: React.FC<Props> = ({
+  dependencies,
+  state,
+  onChange,
+}) => {
   const { t } = useTranslate();
-
-  const dependenciesLoadable = useApiQuery({
-    url: '/v2/public/scope-info/hierarchy',
-    method: 'get',
-    query: {},
-  });
-
-  if (dependenciesLoadable.isLoading) {
-    return <FullPageLoading />;
-  }
-
-  if (!dependenciesLoadable.data) {
-    return null;
-  }
 
   return (
     <Hierarchy
-      dependencies={dependenciesLoadable.data}
+      dependencies={dependencies}
       state={state}
       onChange={onChange}
       structure={{

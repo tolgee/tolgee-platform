@@ -41,4 +41,12 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   MANAGE(
     arrayOf(Scope.ADMIN)
   );
+
+  companion object {
+    fun getRoles(): Map<String, Array<Scope>> {
+      val result = mutableMapOf<String, Array<Scope>>()
+      ProjectPermissionType.values().forEach { value -> result[value.name] = value.availableScopes }
+      return result.toMap()
+    }
+  }
 }

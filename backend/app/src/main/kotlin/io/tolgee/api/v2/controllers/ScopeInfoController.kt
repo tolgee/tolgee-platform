@@ -1,8 +1,10 @@
 package io.tolgee.api.v2.controllers
 
+import com.fasterxml.jackson.annotation.JsonValue
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.controllers.IController
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.ProjectPermissionType
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.SortDefault
@@ -29,5 +31,11 @@ class ScopeInfoController : IController {
     search: String? = null
   ): Scope.HierarchyItem {
     return Scope.hierarchy
+  }
+
+  @GetMapping(value = ["/roles"])
+  @Operation(summary = "Returns user roles and their scopes")
+  fun getRoles(): Map<String, Array<Scope>> {
+    return ProjectPermissionType.getRoles()
   }
 }

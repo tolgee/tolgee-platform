@@ -2,7 +2,7 @@ import {
   HierarchyItem,
   HierarchyType,
   LanguagePermissions,
-  PermissionAdvanced,
+  PermissionState,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 
@@ -141,7 +141,7 @@ export const isAllLanguages = (langs: number[], allLangs: number[]) => {
 
 export const updateByDependencies = (
   myScopes: PermissionModelScope[],
-  currentState: PermissionAdvanced,
+  currentState: PermissionState,
   dependencies: HierarchyItem,
   allLangs: number[]
 ) => {

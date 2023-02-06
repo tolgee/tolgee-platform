@@ -1,31 +1,40 @@
-import { List, ListItemButton, ListItemText } from '@mui/material';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { PermissionBasic, PermissionModel } from './types';
-import { useRoleTranslations } from './useRoleTranslations';
+import { List } from '@mui/material';
+import { PermissionsRole } from './PermissionsRole';
+
+import {
+  HierarchyItem,
+  PermissionState,
+  PermissionModelRole,
+  RolesMap,
+} from './types';
 
 type Props = {
-  state: PermissionBasic;
-  onChange: (value: PermissionBasic) => void;
+  dependencies: HierarchyItem;
+  state: PermissionState;
+  onChange: (value: PermissionState) => void;
+  roles: RolesMap;
 };
 
-export const PermissionsBasic: React.FC<Props> = ({ state, onChange }) => {
-  const rolesList = Object.keys(ProjectPermissionType);
-  const { getRoleTranslation } = useRoleTranslations();
+export const PermissionsBasic: React.FC<Props> = ({
+  dependencies,
+  state,
+  onChange,
+  roles,
+}) => {
+  const rolesList = Object.keys(roles);
 
   return (
     <List>
-      {rolesList.map((item) => {
+      {rolesList.map((role) => {
         return (
-          <ListItemButton
-            key={item}
-            selected={item === state.role}
-            onClick={() => onChange({ role: item as PermissionModel['type'] })}
-          >
-            <ListItemText
-              primary={getRoleTranslation(item as any)}
-              secondary={item.toLocaleUpperCase()}
-            />
-          </ListItemButton>
+          <PermissionsRole
+            key={role}
+            role={role as NonNullable<PermissionModelRole>}
+            state={state}
+            scopes={roles[role]}
+            onChange={onChange}
+            dependencies={dependencies}
+          />
         );
       })}
     </List>

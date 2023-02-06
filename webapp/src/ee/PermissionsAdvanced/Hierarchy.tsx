@@ -2,7 +2,7 @@ import { styled, Checkbox, FormControlLabel } from '@mui/material';
 import {
   HierarchyItem,
   HierarchyType,
-  PermissionAdvanced,
+  PermissionState,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
@@ -39,8 +39,8 @@ const StyledRow = styled('div')`
 type Props = {
   dependencies: HierarchyItem;
   structure: HierarchyType;
-  state: PermissionAdvanced;
-  onChange: (value: PermissionAdvanced) => void;
+  state: PermissionState;
+  onChange: (value: PermissionState) => void;
 };
 
 export const Hierarchy: React.FC<Props> = ({
@@ -94,7 +94,9 @@ export const Hierarchy: React.FC<Props> = ({
   );
 
   const displayLanguages =
-    minimalLanguages && !ALL_LANGUAGES_SCOPES.includes(structure.value!);
+    allLangs.length > 1 &&
+    minimalLanguages &&
+    !ALL_LANGUAGES_SCOPES.includes(structure.value!);
 
   const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
     let newScopes = [...state.scopes];
@@ -166,10 +168,10 @@ export const Hierarchy: React.FC<Props> = ({
         )}
       </StyledRow>
       <StyledChildren>
-        {structure.children?.map((child) => {
+        {structure.children?.map((child, i) => {
           return (
             <Hierarchy
-              key={child.value}
+              key={`${child.value}.${i}`}
               dependencies={dependencies}
               structure={child}
               state={state}
