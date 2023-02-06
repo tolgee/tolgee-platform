@@ -105,7 +105,7 @@ export const PermissionsModal: React.FC<Props> = ({
   };
 
   return (
-    <Dialog open={true} onClose={onClose} fullWidth>
+    <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
         <T keyName="permission_dialog_title" params={{ name: user.name }} />
       </DialogTitle>

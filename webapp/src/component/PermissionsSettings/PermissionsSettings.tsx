@@ -43,6 +43,10 @@ export const PermissionsSettings: React.FC<Props> = ({
 
   const [state, setState] = useState<PermissionState | undefined>(undefined);
 
+  const setAdvanced = (data: PermissionState) => {
+    setState({ ...data, role: undefined });
+  };
+
   useEffect(() => {
     if (dependenciesLoadable.data && !state) {
       setState(
@@ -86,15 +90,11 @@ export const PermissionsSettings: React.FC<Props> = ({
   return (
     <div>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tab}
-          onChange={handleChange}
-          aria-label="basic tabs example"
-        >
-          <Tab label={<T keyName="permission_basic_title" />} value={'basic'} />
+        <Tabs value={tab} onChange={handleChange}>
+          <Tab label={<T keyName="permission_basic_title" />} value="basic" />
           <Tab
             label={<T keyName="permission_advanced_title" />}
-            value={'advanced'}
+            value="advanced"
           />
         </Tabs>
       </Box>
@@ -110,7 +110,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         {tab === 'advanced' && (
           <PermissionsAdvanced
             state={state}
-            onChange={setState}
+            onChange={setAdvanced}
             dependencies={dependenciesLoadable.data}
           />
         )}

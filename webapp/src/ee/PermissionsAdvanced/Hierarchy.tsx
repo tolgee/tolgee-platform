@@ -96,6 +96,7 @@ export const Hierarchy: React.FC<Props> = ({
   const displayLanguages =
     allLangs.length > 1 &&
     minimalLanguages &&
+    structure.value &&
     !ALL_LANGUAGES_SCOPES.includes(structure.value!);
 
   const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
@@ -157,7 +158,9 @@ export const Hierarchy: React.FC<Props> = ({
             disabled={
               (!halfChecked && !fullyChecked) ||
               Boolean(
-                scopes.find((scope) => ALL_LANGUAGES_SCOPES.includes(scope))
+                blockingScopes.find((scope) =>
+                  ALL_LANGUAGES_SCOPES.includes(scope)
+                )
               ) ||
               blockedLanguages
             }

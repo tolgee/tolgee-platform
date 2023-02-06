@@ -1,3 +1,4 @@
+import { Box, Typography } from '@mui/material';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import {
   getBlockingScopes,
@@ -6,6 +7,7 @@ import {
   isAllLanguages,
   updateByDependencies,
 } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
+import { useScopeTranslations } from 'tg.ee/PermissionsAdvanced/useScopeTranslations';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { HierarchyItem, PermissionState, PermissionModelScope } from './types';
 
@@ -32,6 +34,8 @@ export const RoleLanguage: React.FC<Props> = ({
   const blockingScopes = getBlockingScopes([scope], scopes, dependencies);
   const blockedLanguages = getMinimalLanguages(blockingScopes, state, allLangs);
 
+  const { getScopeTranslation } = useScopeTranslations();
+
   const handleSelect = (values: number[]) => {
     const { scopes: _, ...other } = updateByDependencies(
       [scope],
@@ -52,17 +56,20 @@ export const RoleLanguage: React.FC<Props> = ({
   };
 
   return (
-    <LanguagePermissionsMenu
-      selected={
-        !blockedLanguages
-          ? languages
-          : isAllLanguages(blockedLanguages, allLangs) &&
-            isAllLanguages(languages, allLangs)
-          ? []
-          : languages
-      }
-      onSelect={handleSelect}
-      disabled={blockedLanguages}
-    />
+    <Box display="grid" gridAutoFlow="row" minWidth="200px">
+      <Typography variant="caption">{getScopeTranslation(scope)}</Typography>
+      <LanguagePermissionsMenu
+        selected={
+          !blockedLanguages
+            ? languages
+            : isAllLanguages(blockedLanguages, allLangs) &&
+              isAllLanguages(languages, allLangs)
+            ? []
+            : languages
+        }
+        onSelect={handleSelect}
+        disabled={blockedLanguages}
+      />
+    </Box>
   );
 };

@@ -1,7 +1,14 @@
-import { Box } from '@mui/material';
+import { styled, Box } from '@mui/material';
 
 import { RoleLanguage } from './RoleLanguage';
 import { HierarchyItem, PermissionState } from './types';
+
+const StyledContainer = styled(Box)`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+`;
 
 type Props = {
   state: PermissionState;
@@ -16,7 +23,7 @@ export const RoleLanguages: React.FC<Props> = ({
 }) => {
   const scopes = state.scopes;
   return (
-    <Box display="flex" gap={1}>
+    <StyledContainer>
       {scopes.includes('translations.view') && (
         <RoleLanguage
           scope="translations.view"
@@ -43,6 +50,6 @@ export const RoleLanguages: React.FC<Props> = ({
           dependencies={dependencies}
         />
       )}
-    </Box>
+    </StyledContainer>
   );
 };
