@@ -10,10 +10,17 @@ type LanguageModel = components['schemas']['LanguageModel'];
 const StyledContainer = styled('div')`
   display: flex;
   align-items: center;
-  justify-content: center;
   & .disabled {
     opacity: 0.2;
   }
+`;
+
+const StyledLabel = styled('div')`
+  display: block;
+  flex-shrink: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const StyledExtraCircle = styled('div')`
@@ -44,24 +51,24 @@ export const LanguagesPermittedList: React.FC<Props> = ({
 
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
 
-  return (
+  return !selectedLanguages.length ? (
+    <StyledLabel>
+      <T keyName="languages_permitted_list_all" />
+    </StyledLabel>
+  ) : (
     <StyledContainer {...props}>
-      {!selectedLanguages.length ? (
-        <T keyName="languages_permitted_list_all" />
-      ) : (
-        selectedLanguages.map((l) => (
-          <CircledLanguageIcon
-            key={l.id}
-            size={20}
-            flag={l.flagEmoji}
-            className={clsx({
-              disabled: Array.isArray(disabled)
-                ? disabled.includes(l.id) || disabled.length === 0
-                : disabled,
-            })}
-          />
-        ))
-      )}
+      {selectedLanguages.map((l) => (
+        <CircledLanguageIcon
+          key={l.id}
+          size={20}
+          flag={l.flagEmoji}
+          className={clsx({
+            disabled: Array.isArray(disabled)
+              ? disabled.includes(l.id) || disabled.length === 0
+              : disabled,
+          })}
+        />
+      ))}
       {numOfExtra > 0 && (
         <StyledExtraCircle
           className={clsx({

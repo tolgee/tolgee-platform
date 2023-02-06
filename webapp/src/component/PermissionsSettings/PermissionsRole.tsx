@@ -1,4 +1,4 @@
-import { ListItemButton, Box } from '@mui/material';
+import { ListItemButton, Box, useTheme, styled, alpha } from '@mui/material';
 import {
   ALL_LANGUAGES_SCOPES,
   updateByDependencies,
@@ -15,6 +15,22 @@ import {
 } from './types';
 import { useRoleTranslations } from './useRoleTranslations';
 
+const StyledListItem = styled(ListItemButton)`
+  position: relative;
+  background-color: unset;
+  &:active {
+    background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.16)};
+  }
+`;
+
+const StyledShield = styled('div')`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+`;
+
 type Props = {
   dependencies: HierarchyItem;
   role: NonNullable<PermissionModelRole>;
@@ -30,6 +46,7 @@ export const PermissionsRole: React.FC<Props> = ({
   onChange,
   scopes,
 }) => {
+  const theme = useTheme();
   const allLangs = useProjectLanguages().map((l) => l.id);
   const handleSelect = () => {
     if (role !== state.role) {
@@ -50,7 +67,23 @@ export const PermissionsRole: React.FC<Props> = ({
   );
 
   return (
-    <ListItemButton selected={selected} onClick={handleSelect}>
+    <StyledListItem
+      selected={selected}
+      onClick={handleSelect}
+      style={{
+        cursor: selected ? 'default' : 'pointer',
+        backgroundColor: selected
+          ? alpha(theme.palette.primary.main, 0.16)
+          : undefined,
+      }}
+    >
+      {selected && (
+        <StyledShield
+          onMouseEnter={stopAndPrevent()}
+          onClick={stopAndPrevent()}
+          onMouseDown={stopAndPrevent()}
+        />
+      )}
       <Box>
         <Box>{getRoleTranslation(role)}</Box>
         <Box>{getRoleHint(role)}</Box>
@@ -64,6 +97,6 @@ export const PermissionsRole: React.FC<Props> = ({
           </Box>
         )}
       </Box>
-    </ListItemButton>
+    </StyledListItem>
   );
 };
