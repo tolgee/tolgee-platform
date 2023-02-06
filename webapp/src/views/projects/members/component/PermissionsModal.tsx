@@ -51,34 +51,8 @@ export const PermissionsModal: React.FC<Props> = ({
     PermissionSettingsState | undefined
   >(undefined);
 
-  const changeRole = () => {
-    if (!settingsState?.state.role) {
-      return;
-    }
-    const permissionType = settingsState.state.role;
-    editRole.mutate(
-      {
-        path: {
-          userId: user?.id,
-          permissionType,
-          projectId: project.id,
-        },
-        query: {},
-      },
-      {
-        onSuccess() {
-          messages.success(<T>permissions_set_message</T>);
-          onClose();
-        },
-        onError(e) {
-          parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
-        },
-      }
-    );
-  };
-
-  const changeScopes = () => {
-    if (!settingsState?.state.scopes) {
+  const updatePermissions = () => {
+    if (!settingsState) {
       return;
     }
 
@@ -92,24 +66,42 @@ export const PermissionsModal: React.FC<Props> = ({
         }
       });
 
-    editScopes.mutate(
-      {
-        path: { userId: user.id, projectId: project.id },
-        query: {
-          scopes: settingsState.state.scopes,
-          ...languagePermissions,
-        },
+    const afterActions = {
+      onSuccess() {
+        messages.success(<T>permissions_set_message</T>);
+        onClose();
       },
-      {
-        onSuccess() {
-          messages.success(<T>permissions_set_message</T>);
-          onClose();
+      onError(e) {
+        parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+      },
+    };
+
+    if (settingsState.tab === 'advanced' && settingsState.state.scopes) {
+      editScopes.mutate(
+        {
+          path: { userId: user.id, projectId: project.id },
+          query: {
+            scopes: settingsState.state.scopes,
+            ...languagePermissions,
+          },
         },
-        onError(e) {
-          parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+        afterActions
+      );
+    } else if (settingsState.tab === 'basic' && settingsState.state.role) {
+      editRole.mutate(
+        {
+          path: {
+            userId: user.id,
+            projectId: project.id,
+            permissionType: settingsState.state.role,
+          },
+          query: {
+            ...languagePermissions,
+          },
         },
-      }
-    );
+        afterActions
+      );
+    }
   };
 
   return (
@@ -129,7 +121,7 @@ export const PermissionsModal: React.FC<Props> = ({
         </Button>
         <LoadingButton
           loading={editRole.isLoading}
-          onClick={settingsState?.tab === 'basic' ? changeRole : changeScopes}
+          onClick={updatePermissions}
           color="primary"
           variant="contained"
         >
