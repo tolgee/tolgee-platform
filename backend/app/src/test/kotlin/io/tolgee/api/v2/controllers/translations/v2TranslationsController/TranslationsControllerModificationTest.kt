@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -197,6 +198,44 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `updates outdated flag when base updated`() {
+    testData.addTranslationsWithStates()
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        key = "state test key",
+        namespace = null,
+        translations = mutableMapOf("en" to "b"),
+        languagesToReturn = setOf("en", "de")
+      )
+    ).andAssertThatJson {
+      node("translations.en.outdated").isEqualTo(false)
+      node("translations.de.outdated").isEqualTo(true)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't update outdated flag when base updated`() {
+    testData.addTranslationsWithStates()
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        key = "state test key",
+        namespace = null,
+        translations = mutableMapOf("de" to "new"),
+        languagesToReturn = setOf("en", "de")
+      )
+    ).andAssertThatJson {
+      node("translations.en.outdated").isEqualTo(false)
+      node("translations.de.outdated").isEqualTo(false)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `removes the auto translated state`() {
     saveTestData()
     val translation = testData.aKeyGermanTranslation
@@ -207,6 +246,24 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     val updatedTranslation = translationService.get(translation.id)
     assertThat(updatedTranslation.auto).isEqualTo(false)
     assertThat(updatedTranslation.mtProvider).isEqualTo(null)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `sets outdated flag`() {
+    saveTestData()
+    val translation = testData.aKeyGermanTranslation
+    testOutdated(translation, false)
+    testOutdated(translation, true)
+  }
+
+  private fun testOutdated(translation: Translation, state: Boolean) {
+    performProjectAuthPut(
+      "/translations/${translation.id}/set-outdated-flag/$state",
+      null
+    ).andIsOk
+    val updatedTranslation = translationService.get(translation.id)
+    assertThat(updatedTranslation.outdated).isEqualTo(state)
   }
 
   private fun saveTestData() {

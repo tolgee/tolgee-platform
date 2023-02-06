@@ -37,10 +37,10 @@ describe('Translations Base', () => {
   it(`filters work correctly`, () => {
     [
       {
-        filterOption: 'At least one translated',
-        toMissAfter: ['key with screenshot'],
+        filterOption: 'Outdated translation',
+        toMissAfter: [],
         toSeeAfter: ['A key'],
-        only: false,
+        only: true,
       },
       {
         filterOption: 'Missing translation',
@@ -67,10 +67,7 @@ describe('Translations Base', () => {
 
   it('filter exclusiveness', () => {
     gcy('translations-filter-select').click();
-    [
-      ['No screenshots', 'With screenshots'],
-      ['At least one translated', 'Missing translation'],
-    ].forEach((pair) => {
+    [['No screenshots', 'With screenshots']].forEach((pair) => {
       cy.contains(pair[0]).click();
       cy.contains(pair[1]).click();
 

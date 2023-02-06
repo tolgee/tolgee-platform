@@ -1,10 +1,14 @@
 import { Filters } from '../context/types';
 
+// Filters that can have multiple values
 export const NON_EXCLUSIVE_FILTERS = [
   'filterState',
   'filterTag',
   'filterNamespace',
 ];
+
+// filters that are taken as one value
+export const UNIT_FILTERS = ['filterOutdatedLanguage'];
 
 export type FilterType = { filter: string; value: string | boolean | string[] };
 
@@ -62,7 +66,10 @@ export const toggleFilter = (
       newValue = [...(filtersObj[filterName] || []), filterValue];
     }
   } else {
-    newValue = filtersObj[filterName] !== filterValue ? filterValue : undefined;
+    newValue =
+      JSON.stringify(filtersObj[filterName]) !== JSON.stringify(filterValue)
+        ? filterValue
+        : undefined;
   }
   newFilters = {
     ...newFilters,

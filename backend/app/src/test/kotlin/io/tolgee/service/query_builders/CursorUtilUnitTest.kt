@@ -28,6 +28,7 @@ class CursorUtilUnitTest {
           id = 1,
           text = "Super key translated \uD83C\uDF8C",
           state = TranslationState.TRANSLATED,
+          outdated = false,
           auto = false,
           mtProvider = null,
           commentCount = 0,

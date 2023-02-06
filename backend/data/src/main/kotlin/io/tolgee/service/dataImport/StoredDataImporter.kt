@@ -44,6 +44,11 @@ class StoredDataImporter(
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
 
   /**
+   * Keys where base translation was changed, so we need to set outdated flag on all translations
+   */
+  val outdatedFlagKeys: MutableList<Long> = mutableListOf()
+
+  /**
    * This metas are merged, so there is only one meta for one key!!!
    *
    * It can be used only when we are finally importing the data, before that we cannot merge it,
@@ -70,6 +75,7 @@ class StoredDataImporter(
 
     namespaceService.saveAll(namespacesToSave.values)
     keyService.saveAll(keysToSave.values)
+
     translationService.saveAll(translationsToSave)
 
     keysToSave.values.flatMap {
@@ -79,6 +85,8 @@ class StoredDataImporter(
     keysToSave.values.flatMap {
       it.keyMeta?.codeReferences ?: emptyList()
     }.also { keyMetaService.saveAllCodeReferences(it) }
+
+    translationService.setOutdatedBatch(outdatedFlagKeys)
   }
 
   private fun handleKeyMetas() {
@@ -125,7 +133,11 @@ class StoredDataImporter(
         this.language = language
       }
       translation.key = existingKey
+      if (language == language.project.baseLanguage && translation.text != this.text) {
+        outdatedFlagKeys.add(translation.key.id)
+      }
       translation.text = this@doImport.text
+      translation.resetFlags()
       translationsToSave.add(translation)
     }
   }

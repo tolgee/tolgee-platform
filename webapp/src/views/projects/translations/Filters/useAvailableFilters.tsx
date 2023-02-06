@@ -68,17 +68,21 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
         name: t('translations_filters_heading_translations'),
         options: [
           {
-            label: t('translations_filters_something_translated'),
-            value: encodeFilter({
-              filter: 'filterTranslatedAny',
-              value: true,
-            }),
-          },
-          {
             label: t('translations_filters_missing_translation'),
             value: encodeFilter({
               filter: 'filterUntranslatedAny',
               value: true,
+            }),
+          },
+        ],
+      },
+      {
+        options: [
+          {
+            label: t('translations_filters_something_outdated'),
+            value: encodeFilter({
+              filter: 'filterOutdatedLanguage',
+              value: selectedLanguages || [],
             }),
           },
         ],
