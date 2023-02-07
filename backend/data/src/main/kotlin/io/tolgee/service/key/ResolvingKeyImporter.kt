@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext
 import java.io.Serializable
 import javax.persistence.EntityManager
 import javax.persistence.criteria.Join
+import javax.persistence.criteria.JoinType
 
 class ResolvingKeyImporter(
   val applicationContext: ApplicationContext,
@@ -166,8 +167,8 @@ class ResolvingKeyImporter(
     }
 
   private fun getOrCreateKey(keyToImport: ImportKeysResolvableItemDto) =
-    existingKeys[keyToImport.namespace to keyToImport.name] ?: let {
-      keyService.create(
+    existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
+      keyService.createWithoutExistenceCheck(
         name = keyToImport.name,
         namespace = keyToImport.namespace,
         project = projectEntity
@@ -180,7 +181,7 @@ class ResolvingKeyImporter(
     val root = query.from(Key::class.java)
 
     @Suppress("UNCHECKED_CAST")
-    val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace) as Join<Key, Namespace>
+    val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
 
     val predicates = keys.map { (namespace, name) ->
       cb.and(
@@ -200,7 +201,7 @@ class ResolvingKeyImporter(
     this.getAllByNamespaceAndName(
       projectId = projectEntity.id,
       keys = keysToImport.map { it.namespace to it.name }
-    ).associateBy { (it.namespace?.name to it.name) }
+    ).associateBy { (it.namespace?.name to it.name) }.toMutableMap()
   }
 
   private val languages by lazy {

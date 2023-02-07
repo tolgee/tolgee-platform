@@ -130,7 +130,11 @@ class KeyService(
   @Transactional
   fun create(project: Project, name: String, namespace: String?): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
+    return createWithoutExistenceCheck(project, name, namespace)
+  }
 
+  @Transactional
+  fun createWithoutExistenceCheck(project: Project, name: String, namespace: String?): Key {
     val key = Key(name = name, project = project)
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)

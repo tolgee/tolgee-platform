@@ -24,6 +24,9 @@ class ResolvableImportTestData : BaseTestData() {
           screenshot = key1and2Screenshot
         }
       }
+      addKey("test") {
+        addTranslation("en", "existing translation")
+      }
     }
   }
 }
