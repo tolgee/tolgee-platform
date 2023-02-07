@@ -1,4 +1,4 @@
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box, ButtonGroup, Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
@@ -75,7 +75,7 @@ export const PermissionsSettings: React.FC<Props> = ({
     }
   }, [tab, state]);
 
-  const handleChange = (_: React.SyntheticEvent, newValue: TabsType) => {
+  const handleChange = (newValue: TabsType) => () => {
     setTab(newValue);
   };
 
@@ -88,15 +88,22 @@ export const PermissionsSettings: React.FC<Props> = ({
   }
 
   return (
-    <div>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tab} onChange={handleChange}>
-          <Tab label={<T keyName="permission_basic_title" />} value="basic" />
-          <Tab
-            label={<T keyName="permission_advanced_title" />}
-            value="advanced"
-          />
-        </Tabs>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+        <ButtonGroup size="small">
+          <Button
+            color={tab === 'basic' ? 'primary' : 'default'}
+            onClick={handleChange('basic')}
+          >
+            <T keyName="permission_basic_title" />
+          </Button>
+          <Button
+            color={tab === 'advanced' ? 'primary' : 'default'}
+            onClick={handleChange('advanced')}
+          >
+            <T keyName="permission_advanced_title" />
+          </Button>
+        </ButtonGroup>
       </Box>
       <Box sx={{ mt: 1 }}>
         {tab === 'basic' && (
@@ -115,6 +122,6 @@ export const PermissionsSettings: React.FC<Props> = ({
           />
         )}
       </Box>
-    </div>
+    </Box>
   );
 };
