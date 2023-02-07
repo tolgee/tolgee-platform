@@ -29,7 +29,7 @@ const StyledRightPart = styled('div')`
 
 type ControlsProps = {
   state?: State;
-  stateChangeEnabled: boolean;
+  stateChangeEnabled?: boolean;
   onSave?: () => void;
   onCancel?: () => void;
   onScreenshots?: () => void;

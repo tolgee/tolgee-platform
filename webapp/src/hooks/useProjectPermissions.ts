@@ -55,6 +55,7 @@ export const useProjectPermissions = () => {
   }
 
   return {
+    scopes,
     satisfiesPermission,
     satisfiesLanguageAccess,
     allowedLanguages,
