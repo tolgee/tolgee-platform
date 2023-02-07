@@ -38,32 +38,12 @@ enum class Scope(
       ADMIN,
       listOf(
         HierarchyItem(
-          KEYS_EDIT,
+          TRANSLATIONS_EDIT,
           listOf(
-            HierarchyItem(
-              TRANSLATIONS_EDIT,
-              listOf(
-                HierarchyItem(TRANSLATIONS_VIEW)
-              )
-            ),
-            HierarchyItem(
-              TRANSLATIONS_STATE_EDIT,
-              listOf(HierarchyItem(TRANSLATIONS_VIEW))
-            )
+            HierarchyItem(TRANSLATIONS_VIEW)
           )
         ),
-        HierarchyItem(
-          TRANSLATIONS_COMMENTS_SET_STATE,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
-        ),
-        HierarchyItem(
-          TRANSLATIONS_COMMENTS_ADD,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
-        ),
-        HierarchyItem(
-          TRANSLATIONS_COMMENTS_EDIT,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
-        ),
+        HierarchyItem(KEYS_EDIT),
         HierarchyItem(
           SCREENSHOTS_UPLOAD,
           listOf(
@@ -80,7 +60,23 @@ enum class Scope(
         HierarchyItem(IMPORT),
         HierarchyItem(LANGUAGES_EDIT),
         HierarchyItem(PROJECT_EDIT),
-        HierarchyItem(MEMBERS_VIEW)
+        HierarchyItem(MEMBERS_VIEW),
+        HierarchyItem(
+          TRANSLATIONS_COMMENTS_SET_STATE,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        ),
+        HierarchyItem(
+          TRANSLATIONS_COMMENTS_ADD,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        ),
+        HierarchyItem(
+          TRANSLATIONS_COMMENTS_EDIT,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        ),
+        HierarchyItem(
+          TRANSLATIONS_STATE_EDIT,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+        )
       )
     )
 

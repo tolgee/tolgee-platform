@@ -6,7 +6,7 @@ import {
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 
-export const ALL_LANGUAGES_SCOPES = ['admin', 'keys.edit'];
+export const ALL_LANGUAGES_SCOPES = ['admin'];
 
 export const getChildScopes = (structure: HierarchyType) => {
   let result: PermissionModelScope[] = [];
