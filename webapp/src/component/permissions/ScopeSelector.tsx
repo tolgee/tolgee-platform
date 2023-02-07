@@ -8,7 +8,7 @@ import { Typography } from '@mui/material';
 export const ScopeSelector = () => {
   const [selectedScopes, setSelectedScopes] = useState([] as Scope[]);
 
-  const t = useTranslate();
+  const { t } = useTranslate();
   const categories = getScopeCategories(t);
 
   function onChange(scope: Scope, checked: boolean) {

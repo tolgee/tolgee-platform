@@ -13,6 +13,7 @@ import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
@@ -45,7 +46,9 @@ export const ProjectMembersView: FunctionComponent = () => {
     },
   });
 
-  // todo: Proper permission selector
+  const { satisfiesPermission } = useProjectPermissions();
+
+  const isAdmin = satisfiesPermission('admin');
 
   const basePermissionText = translatedPermissionType(
     project?.organizationOwner?.basePermissions?.type ?? 'UNKNOWN',
@@ -89,14 +92,16 @@ export const ProjectMembersView: FunctionComponent = () => {
           alignItems="center"
         >
           <Typography variant="h6">{t('invitations_title')}</Typography>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={() => setInviteOpen(true)}
-            data-cy="invite-generate-button"
-          >
-            {t('invitations_invite_button')}
-          </Button>
+          {isAdmin && (
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => setInviteOpen(true)}
+              data-cy="invite-generate-button"
+            >
+              {t('invitations_invite_button')}
+            </Button>
+          )}
         </Box>
 
         <PaginatedHateoasList

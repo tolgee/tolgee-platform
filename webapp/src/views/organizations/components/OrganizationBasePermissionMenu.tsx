@@ -10,7 +10,6 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
-type Permission = components['schemas']['OrganizationModel']['basePermission'];
 type OrganizationModel = components['schemas']['OrganizationModel'];
 type OrganizationDto = components['schemas']['OrganizationDto'];
 

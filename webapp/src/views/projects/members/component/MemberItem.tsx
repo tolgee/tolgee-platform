@@ -1,23 +1,15 @@
-import { T, useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
+import { useTranslate } from '@tolgee/react';
 import { Chip, styled } from '@mui/material';
 
-import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
-import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
-import { confirmation } from 'tg.hooks/confirmation';
+import { PermissionsMenu } from 'tg.views/projects/members/component/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
-import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
-
-const messageService = container.resolve(MessageService);
 
 const StyledListItem = styled('div')`
   display: flex;
@@ -52,50 +44,9 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
   const { t } = useTranslate();
+  const { satisfiesPermission } = useProjectPermissions();
+  const isAdmin = satisfiesPermission('admin');
 
-  const editPermission = useApiMutation({
-    url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
-    method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/users',
-  });
-
-  const changePermission = (permissionType, languages, showMessage) => {
-    editPermission.mutate(
-      {
-        path: {
-          userId: user?.id,
-          permissionType,
-          projectId: project.id,
-        },
-        query: {
-          languages: permissionType === 'TRANSLATE' ? languages : undefined,
-        },
-      },
-      {
-        onSuccess() {
-          if (showMessage) {
-            messageService.success(<T>permissions_set_message</T>);
-          }
-        },
-        onError(e) {
-          parseErrorResponse(e).forEach((err) =>
-            messageService.error(<T>{err}</T>)
-          );
-        },
-      }
-    );
-  };
-
-  const changePermissionConfirm = (permissionType, languages) => {
-    confirmation({
-      message: <T>change_permissions_confirmation</T>,
-      onConfirm: () => changePermission(permissionType, languages, true),
-    });
-  };
-
-  const allLanguages = useProjectLanguages();
-  const allLangIds = allLanguages.map((l) => l.id);
-  const projectPermissionType = user.directPermission?.type;
   const isCurrentUser = currentUser?.id === user.id;
   const isOwner = user.organizationRole === 'OWNER';
 
@@ -108,14 +59,6 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         )}
       </StyledItemText>
       <StyledItemActions>
-        {projectPermissionType === 'TRANSLATE' && (
-          <LanguagePermissionsMenu
-            selected={user.computedPermission.permittedLanguageIds || []}
-            onSelect={(langs) =>
-              changePermission(projectPermissionType, langs, false)
-            }
-          />
-        )}
         <PermissionsMenu
           user={user}
           buttonTooltip={
@@ -125,16 +68,11 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
               ? t('cannot_change_your_own_access_tooltip')
               : undefined
           }
-          selected={user.directPermission?.type}
-          onSelect={(permission) =>
-            changePermissionConfirm(permission, allLangIds)
-          }
           buttonProps={{
             size: 'small',
-            disabled: isCurrentUser || isOwner,
+            disabled: !isAdmin || isCurrentUser || isOwner,
           }}
-          minPermissions={user.organizationBasePermission.type}
-          enableAdvanced={true}
+          permissions={user.computedPermission}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

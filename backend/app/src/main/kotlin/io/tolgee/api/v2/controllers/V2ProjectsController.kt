@@ -264,7 +264,7 @@ V2ProjectsController(
 
   @GetMapping("{projectId:[0-9]+}/invitations")
   @Operation(summary = "Returns all invitations to project")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_VIEW)
   @NeedsSuperJwtToken
   fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
     val project = projectService.get(id)
@@ -274,14 +274,14 @@ V2ProjectsController(
 
   @GetMapping("/{projectId}/machine-translation-service-settings")
   @Operation(summary = "Returns machine translation settings for project")
-  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
+  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
     val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
   @PutMapping("/{projectId}/machine-translation-service-settings")
-  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
+  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   @Operation(summary = "Sets machine translation settings for project")
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto
@@ -291,7 +291,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/auto-translation-settings")
-  @AccessWithProjectPermission(Scope.PROJECT_EDIT)
+  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   @Operation(summary = "Sets auto translation settings for project")
   fun setAutoTranslationSettings(
     @RequestBody dto: AutoTranslationSettingsDto

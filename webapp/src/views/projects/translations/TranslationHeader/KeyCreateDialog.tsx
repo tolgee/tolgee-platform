@@ -56,10 +56,12 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
     selectedLanguagesDefault ||
     [];
 
-  const selectedLanguagesMapped = selectedLanguages!.map((l) => {
-    const language = languages?.find(({ tag }) => tag === l);
-    return language!;
-  });
+  const selectedLanguagesMapped = selectedLanguages!
+    .map((l) => {
+      const language = languages?.find(({ tag }) => tag === l);
+      return language!;
+    })
+    .filter(Boolean);
 
   const handleOnSuccess = (data: KeyWithDataModel) => {
     onClose();
@@ -76,14 +78,13 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
       };
     });
 
-    insertTranslation( {
-        keyId: data.id,
-        keyNamespace: data.namespace,
-        keyName: data.name,
-        keyTags: data.tags,
-        screenshotCount: 0,
-        translations,
-
+    insertTranslation({
+      keyId: data.id,
+      keyNamespace: data.namespace,
+      keyName: data.name,
+      keyTags: data.tags,
+      screenshotCount: 0,
+      translations,
     });
   };
 

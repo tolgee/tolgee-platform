@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { MoreVert } from '@mui/icons-material';
 
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLeaveProject } from './useLeaveProject';

@@ -3,13 +3,24 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from './CircledLanguageIcon';
+import clsx from 'clsx';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
   align-items: center;
-  justify-content: center;
+  & .disabled {
+    opacity: 0.2;
+  }
+`;
+
+const StyledLabel = styled('div')`
+  display: block;
+  flex-shrink: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const StyledExtraCircle = styled('div')`
@@ -28,26 +39,45 @@ const StyledExtraCircle = styled('div')`
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
+  disabled?: boolean | number[];
 };
 
 export const LanguagesPermittedList: React.FC<Props> = ({
   languages,
+  disabled,
   ...props
 }) => {
   const selectedLanguages = languages?.slice(0, 3) || [];
 
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
 
-  return (
+  return !selectedLanguages.length ? (
+    <StyledLabel>
+      <T keyName="languages_permitted_list_all" />
+    </StyledLabel>
+  ) : (
     <StyledContainer {...props}>
-      {!selectedLanguages.length ? (
-        <T keyName="languages_permitted_list_all" />
-      ) : (
-        selectedLanguages.map((l) => (
-          <CircledLanguageIcon key={l.id} size={20} flag={l.flagEmoji} />
-        ))
+      {selectedLanguages.map((l) => (
+        <CircledLanguageIcon
+          key={l.id}
+          size={20}
+          flag={l.flagEmoji}
+          className={clsx({
+            disabled: Array.isArray(disabled)
+              ? disabled.includes(l.id) || disabled.length === 0
+              : disabled,
+          })}
+        />
+      ))}
+      {numOfExtra > 0 && (
+        <StyledExtraCircle
+          className={clsx({
+            disabled: disabled === true,
+          })}
+        >
+          +{numOfExtra}
+        </StyledExtraCircle>
       )}
-      {numOfExtra > 0 && <StyledExtraCircle>+{numOfExtra}</StyledExtraCircle>}
     </StyledContainer>
   );
 };

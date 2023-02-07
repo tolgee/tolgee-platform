@@ -12,6 +12,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const messaging = container.resolve(MessageService);
 
@@ -63,6 +64,8 @@ type Props = {
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
+  const { satisfiesPermission } = useProjectPermissions();
+  const isAdmin = satisfiesPermission('admin');
 
   const findLanguage = useCallback(
     (languageId: number) => {
@@ -135,15 +138,13 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             <T keyName={`permission_type_${invitation.type!.toLowerCase()}`} />
           </StyledPermissions>
         </Tooltip>
-
         <Tooltip title={t('invite_user_invitation_copy_button')}>
           <IconButton size="small" onClick={handleGetLink}>
             <Link />
           </IconButton>
         </Tooltip>
-
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
-          <IconButton size="small" onClick={handleCancel}>
+          <IconButton size="small" onClick={handleCancel} disabled={!isAdmin}>
             <Clear />
           </IconButton>
         </Tooltip>

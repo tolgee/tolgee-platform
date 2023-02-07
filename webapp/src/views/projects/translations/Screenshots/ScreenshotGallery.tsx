@@ -17,7 +17,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
@@ -72,7 +71,8 @@ const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
+  const canUploadScreenshots = satisfiesPermission('screenshots.upload');
   const config = useConfig();
   const project = useProject();
   const { updateScreenshotCount } = useTranslationsActions();
@@ -98,8 +98,6 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     method: 'delete',
   });
 
-  const canAdd = projectPermissions.satisfiesPermission('screenshots.upload');
-
   const onDelete = (id: number) => {
     deleteLoadable.mutate(
       {
@@ -113,7 +111,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     );
   };
 
-  const addBox = canAdd && (
+  const addBox = canUploadScreenshots && (
     <StyledAddBox
       key="add"
       data-cy="add-box"
@@ -293,7 +291,8 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               p={2}
               lang={lang}
             >
-              {t('no_screenshots_yet')} {canAdd && t('add_screenshots_message')}
+              {t('no_screenshots_yet')}{' '}
+              {canUploadScreenshots && t('add_screenshots_message')}
             </StyledHintText>
           </>
         )}

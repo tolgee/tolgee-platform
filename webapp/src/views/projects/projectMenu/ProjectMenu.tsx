@@ -19,14 +19,18 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export const ProjectMenu = ({ id }) => {
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
+
+  const canViewTranslations = satisfiesPermission('translations.view');
+  const canEditProject = satisfiesPermission('project.edit');
+  const canEditLanguages = satisfiesPermission('languages.edit');
+  const canViewUsers = satisfiesPermission('users.view');
+  const canImport = satisfiesPermission('import');
 
   const { t } = useTranslate();
 
   const topBarHidden = useTopBarHidden();
-
-  const canManage = projectPermissions.satisfiesPermission('admin');
 
   return (
     <SideMenu>
@@ -41,16 +45,18 @@ export const ProjectMenu = ({ id }) => {
         icon={<DashboardIcon />}
         text={t('project_menu_dashboard', 'Project Dashboard')}
       />
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_TRANSLATIONS.build({
-          [PARAMS.PROJECT_ID]: id,
-        })}
-        icon={<TranslationIcon />}
-        text={t('project_menu_translations')}
-        matchAsPrefix
-      />
-      {canManage && (
-        <>
+      {canViewTranslations && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<TranslationIcon />}
+          text={t('project_menu_translations')}
+          matchAsPrefix
+        />
+      )}
+      <>
+        {canEditProject && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_EDIT.build({
               [PARAMS.PROJECT_ID]: id,
@@ -59,6 +65,8 @@ export const ProjectMenu = ({ id }) => {
             icon={<SettingsIcon />}
             text={t('project_menu_project_settings')}
           />
+        )}
+        {canEditLanguages && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_LANGUAGES.build({
               [PARAMS.PROJECT_ID]: id,
@@ -67,18 +75,19 @@ export const ProjectMenu = ({ id }) => {
             icon={<LanguageIcon />}
             text={t('project_menu_languages')}
           />
-          {config.authentication && (
-            <>
-              <SideMenuItem
-                linkTo={LINKS.PROJECT_PERMISSIONS.build({
-                  [PARAMS.PROJECT_ID]: id,
-                })}
-                icon={<PersonOutline />}
-                text={t('project_menu_members')}
-              />
-            </>
-          )}
-
+        )}
+        {config.authentication && canViewUsers && (
+          <>
+            <SideMenuItem
+              linkTo={LINKS.PROJECT_PERMISSIONS.build({
+                [PARAMS.PROJECT_ID]: id,
+              })}
+              icon={<PersonOutline />}
+              text={t('project_menu_members')}
+            />
+          </>
+        )}
+        {canImport && (
           <SideMenuItem
             linkTo={LINKS.PROJECT_IMPORT.build({
               [PARAMS.PROJECT_ID]: id,
@@ -86,15 +95,18 @@ export const ProjectMenu = ({ id }) => {
             icon={<ImportIcon />}
             text={t('project_menu_import')}
           />
-        </>
+        )}
+      </>
+
+      {canViewTranslations && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_EXPORT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<ExportIcon />}
+          text={t('project_menu_export')}
+        />
       )}
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_EXPORT.build({
-          [PARAMS.PROJECT_ID]: id,
-        })}
-        icon={<ExportIcon />}
-        text={t('project_menu_export')}
-      />
       <SideMenuItem
         linkTo={LINKS.PROJECT_INTEGRATE.build({
           [PARAMS.PROJECT_ID]: id,

@@ -12,7 +12,6 @@ import { useTranslate } from '@tolgee/react';
 import LanguageIcon from '@mui/icons-material/Language';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 import TranslationsSearchField from './TranslationsSearchField';
 import {
