@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,8 +12,10 @@ import io.tolgee.testing.assert
 import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.io.Resource
 import kotlin.properties.Delegates
 
 @SpringBootTest
@@ -21,6 +24,9 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
 
   lateinit var testData: ResolvableImportTestData
   var uploadedImageId by Delegates.notNull<Long>()
+
+  @Value("classpath:keyImportRequest.json")
+  lateinit var realData: Resource
 
   @BeforeEach
   fun setup() {
@@ -159,6 +165,16 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
         }
       }
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `works with real data`() {
+    val data: Map<*, *> = jacksonObjectMapper().readValue(realData.inputStream, Map::class.java)
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      data
+    ).andIsOk
   }
 
   fun assertTranslationText(namespace: String?, keyName: String, languageTag: String, expectedText: String) {
