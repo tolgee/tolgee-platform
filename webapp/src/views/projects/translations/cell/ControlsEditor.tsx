@@ -24,6 +24,7 @@ const StyledRightPart = styled('div')`
   display: flex;
   align-items: center;
   padding: ${({ theme }) => theme.spacing(1, 1.5, 1.5, 0)};
+  gap: 8px;
 `;
 
 type ControlsProps = {

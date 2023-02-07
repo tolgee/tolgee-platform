@@ -107,6 +107,7 @@ export const useImportDataHelper = () => {
       path: {
         projectId: project.id,
       },
+      query: {},
       content: {
         'multipart/form-data': {
           files: files as any,

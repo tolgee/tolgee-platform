@@ -154,6 +154,10 @@ class ImportService(
     return this.find(projectId, authorId) ?: throw NotFoundException()
   }
 
+  fun get(id: Long): Import {
+    return importRepository.findById(id).orElse(null) ?: throw NotFoundException()
+  }
+
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
   @Suppress("UNCHECKED_CAST")
@@ -241,14 +245,8 @@ class ImportService(
   }
 
   fun deleteImport(import: Import) {
-    this.importTranslationRepository.deleteAllByImport(import)
-    this.importLanguageRepository.deleteAllByImport(import)
     val keyIds = this.importKeyRepository.getAllIdsByImport(import)
     this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
-    this.importKeyRepository.deleteByIdIn(keyIds)
-    this.importFileIssueParamRepository.deleteAllByImport(import)
-    this.importFileIssueRepository.deleteAllByImport(import)
-    this.importFileRepository.deleteAllByImport(import)
     this.importRepository.delete(import)
   }
 

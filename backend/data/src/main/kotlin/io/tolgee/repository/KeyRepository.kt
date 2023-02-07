@@ -1,6 +1,8 @@
 package io.tolgee.repository
 
 import io.tolgee.model.key.Key
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -42,4 +44,16 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query("from Key k join fetch k.project left join fetch k.keyMeta where k.id in :ids")
   fun findWithProjectsAndMetas(ids: Set<Long>): List<Key>
+
+  @Query(
+    """
+      select k from Key k 
+      left join fetch k.namespace where k.project.id = :projectId
+    """,
+    countQuery = """
+      select count(k) from Key k 
+      where k.project.id = :projectId
+    """
+  )
+  fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<Key>
 }

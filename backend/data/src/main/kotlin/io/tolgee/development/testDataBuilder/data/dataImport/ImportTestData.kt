@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data.dataImport
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
@@ -89,11 +90,15 @@ class ImportTestData {
         this.key = this@project.data.keys[3].self
       }.self
       addTranslation {
+        this.auto = true
+        this.mtProvider = MtServiceType.GOOGLE
         this.language = french
         this.key = this@project.data.keys[0].self
         this.text = "What a french text"
       }.self
       addTranslation {
+        this.auto = true
+        this.mtProvider = MtServiceType.GOOGLE
         this.language = french
         this.key = this@project.data.keys[1].self
         this.text = "What a french text 2"

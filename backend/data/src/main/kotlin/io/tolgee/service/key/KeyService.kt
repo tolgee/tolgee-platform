@@ -9,10 +9,13 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Namespace
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -179,7 +182,8 @@ class KeyService(
   @Transactional
   fun importKeys(keys: List<ImportKeysItemDto>, project: Project) {
     val existing = this.getAll(project.id).map { (it.namespace?.name to it.name) }.toSet()
-    val namespaces = namespaceService.getAllInProject(project.id).associateBy { it.name }
+    val namespaces = mutableMapOf<String, Namespace>()
+    namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
     val languages = languageService.findByTags(languageTags, project.id).map { it.tag to it }.toMap()
 
@@ -190,9 +194,13 @@ class KeyService(
           name = it.name,
           project = project
         ).apply {
-          if (safeNamespace != null) {
-            this.namespace = namespaces[safeNamespace] ?: namespaceService.create(safeNamespace, project.id)
+          if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
+            val ns = namespaceService.create(safeNamespace, project.id)
+            if (ns != null) {
+              namespaces.put(safeNamespace, ns)
+            }
           }
+          this.namespace = namespaces[safeNamespace]
         }
         save(key)
         it.translations.entries.forEach { (languageTag, value) ->
@@ -203,4 +211,6 @@ class KeyService(
       }
     }
   }
+
+  fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
 }

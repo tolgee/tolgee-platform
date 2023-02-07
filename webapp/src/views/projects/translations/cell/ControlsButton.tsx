@@ -8,9 +8,6 @@ const StyledIconButton = styled(IconButton)`
   width: 36px;
   height: 36px;
   margin: -8px;
-  & + & {
-    margin-left: 4px;
-  }
 `;
 
 type Props = React.ComponentProps<typeof IconButton> & {
@@ -34,6 +31,12 @@ export const ControlsButton: React.FC<Props> = React.forwardRef(
       </StyledIconButton>
     );
 
-    return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
+    return tooltip ? (
+      <Tooltip disableInteractive title={tooltip}>
+        {content}
+      </Tooltip>
+    ) : (
+      content
+    );
   }
 );

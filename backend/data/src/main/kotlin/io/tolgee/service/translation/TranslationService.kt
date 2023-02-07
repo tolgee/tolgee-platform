@@ -23,7 +23,6 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -37,7 +36,6 @@ import java.util.*
 class TranslationService(
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
-  private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider
@@ -140,6 +138,9 @@ class TranslationService(
 
   fun setTranslation(key: Key, language: Language, text: String?): Translation? {
     val translation = getOrCreate(key, language)
+    if (translation.text !== text) {
+      translation.resetFlags()
+    }
     translation.text = text
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
       translation.state = TranslationState.TRANSLATED
@@ -148,7 +149,6 @@ class TranslationService(
       translation.state = TranslationState.UNTRANSLATED
       translation.text = null
     }
-    dismissAutoTranslated(translation)
     val t = save(translation)
     key.translations.add(t)
     return t
@@ -198,6 +198,11 @@ class TranslationService(
       map[translation.key] = translation.text
       return
     }
+    // The result already contains the key, so we have to add it to root without nesting
+    if (currentMap.containsKey(name)) {
+      map[translation.key] = translation.text
+      return
+    }
     currentMap[name] = translation.text
   }
 
@@ -222,6 +227,7 @@ class TranslationService(
 
   fun setState(translation: Translation, state: TranslationState): Translation {
     translation.state = state
+    translation.resetFlags()
     return this.save(translation)
   }
 
@@ -288,5 +294,28 @@ class TranslationService(
     translation.auto = false
     translation.mtProvider = null
     save(translation)
+  }
+
+  @Transactional
+  fun setOutdated(translation: Translation, value: Boolean) {
+    translation.outdated = value
+    save(translation)
+  }
+
+  fun setOutdated(key: Key) {
+    val baseLanguage = key.project.baseLanguage
+    key.translations.forEach {
+      if (it.language.id != baseLanguage?.id) {
+        if (!it.text.isNullOrEmpty()) {
+          it.outdated = true
+          it.state = TranslationState.TRANSLATED
+        }
+        save(it)
+      }
+    }
+  }
+
+  fun setOutdatedBatch(keyIds: List<Long>) {
+    translationRepository.setOutdated(keyIds)
   }
 }

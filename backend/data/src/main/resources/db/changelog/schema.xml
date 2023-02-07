@@ -2300,4 +2300,11 @@
     <changeSet author="jenik (generated)" id="1672937726613-6">
         <addForeignKeyConstraint baseColumnNames="state_change_languages_id" baseTableName="permission_state_change_languages" constraintName="FKpxsgkx94rrmdmqocvliirtevo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-1">
+        <addColumn tableName="translation">
+            <column name="outdated" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class StartupImportService(
@@ -33,7 +34,8 @@ class StartupImportService(
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
-  private val authenticationProvider: AuthenticationProvider
+  private val authenticationProvider: AuthenticationProvider,
+  private val entityManager: EntityManager
 ) : Logging {
 
   @Transactional
@@ -96,6 +98,8 @@ class StartupImportService(
     userAccount: UserAccount
   ) {
     importService.addFiles(fileDtos, project, userAccount)
+    entityManager.flush()
+    entityManager.clear()
     val imports = importService.getAllByProject(project.id)
     imports.forEach {
       importService.import(it)
@@ -116,7 +120,7 @@ class StartupImportService(
   ): Project {
     val languages = fileDtos.map { file ->
       // remove extension
-      val name = file.name.replace(Regex("^.*[\\/]([a-zA-Z0-9_\\-]+)\\.\\w+\$"), "$1")
+      val name = getLanguageName(file)
       LanguageDto(name, name, name)
     }.toSet().toList()
 
@@ -127,8 +131,27 @@ class StartupImportService(
         organizationId = organization.id
       ),
     )
+
+    setBaseLanguage(project)
+
     projectService.save(project)
     return project
+  }
+
+  private fun setBaseLanguage(project: Project) {
+    project.languages.find { it.tag == properties.import.baseLanguageTag }?.let {
+      project.baseLanguage = it
+    } ?: let {
+      logger.warn("Base language ${properties.import.baseLanguageTag} not found for project ${project.name}")
+    }
+  }
+
+  private fun getLanguageName(file: ImportFileDto): String {
+    val name = file.name.replace(Regex("^.*/([a-zA-Z0-9_\\-]+)\\.\\w+\$"), "$1")
+    if (name.isBlank()) {
+      throw IllegalStateException("File name is blank")
+    }
+    return name
   }
 
   private fun createImplicitApiKey(

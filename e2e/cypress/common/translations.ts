@@ -87,12 +87,17 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   // wait for editor to appear
   cy.gcy('global-editor').should('be.visible');
-  cy.contains(oldValue).should('be.visible');
+  cy.contains(oldValue).first().should('be.visible');
   cy.wait(10);
 
-  if (newValue) {
+  if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.focused().type('{meta}a').type('{backspace}').type(newValue);
+    cy.get('.CodeMirror')
+      .first()
+      .then((editor) => {
+        // @ts-ignore
+        editor[0].CodeMirror.setValue(newValue);
+      });
 
     if (save) {
       getCellSaveButton().click();

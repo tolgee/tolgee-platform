@@ -18,6 +18,9 @@ open class TranslationViewModel(
   @Schema(description = "State of translation")
   val state: TranslationState,
 
+  @Schema(description = "Whether base language translation was changed after this translation was updated")
+  val outdated: Boolean,
+
   @Schema(description = "Was translated using Translation Memory or Machine translation service?")
   val auto: Boolean,
 
