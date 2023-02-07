@@ -186,7 +186,7 @@ class PermissionService(
 
   fun createForInvitation(
     invitation: Invitation,
-    params: CreateProjectInvitationParams,
+    params: CreateProjectInvitationParams
   ): Permission {
     val type = params.type ?: throw IllegalStateException("Permission type cannot be null")
 
@@ -282,7 +282,12 @@ class PermissionService(
     permission.stateChangeLanguages = standardizeLanguagePermissions(languagePermissions.stateChange, allLanguages)
 
     permission.viewLanguages = standardizeLanguagePermissions(
-      ((languagePermissions.view?.toMutableSet() ?: mutableSetOf()) + permission.translateLanguages + permission.stateChangeLanguages),
+      (
+        (
+          languagePermissions.view?.toMutableSet()
+            ?: mutableSetOf()
+          ) + permission.translateLanguages + permission.stateChangeLanguages
+        ),
       allLanguages
     )
   }
