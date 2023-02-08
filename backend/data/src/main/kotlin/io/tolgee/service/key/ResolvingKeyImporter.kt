@@ -60,11 +60,15 @@ class ResolvingKeyImporter(
         language ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         val existingTranslation = getExistingTranslation(key, language)
 
+        val isEmpty = existingTranslation !== null && existingTranslation.text.isNullOrEmpty()
+
         val isNew = existingTranslation == null
 
-        if (validate(isNew, resolvable, key, language)) return@translations
+        val translationExists = !isEmpty && !isNew
 
-        if (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE) {
+        if (validate(translationExists, resolvable, key, language)) return@translations
+
+        if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
           translationService.setTranslation(existingTranslation!!, resolvable.text)
           return@translations
         }
@@ -134,19 +138,19 @@ class ResolvingKeyImporter(
   }
 
   private fun validate(
-    isNew: Boolean,
+    translationExists: Boolean,
     resolvable: ImportTranslationResolvableDto,
     key: Key,
     language: Language
   ): Boolean {
-    if (!isNew && resolvable.resolution == ImportTranslationResolution.NEW) {
+    if (translationExists && resolvable.resolution == ImportTranslationResolution.NEW) {
       errors.add(
         listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, language.tag)
       )
       return true
     }
 
-    if (isNew && resolvable.resolution != ImportTranslationResolution.NEW) {
+    if (!translationExists && resolvable.resolution != ImportTranslationResolution.NEW) {
       errors.add(
         listOf(Message.TRANSLATION_NOT_FOUND.code, key.namespace?.name, key.name, language.tag)
       )
