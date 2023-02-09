@@ -261,14 +261,11 @@ class PermissionService(
     return permission
   }
 
-  fun standardizeLanguagePermissions(languages: Set<Language>?, allLanguages: Set<Language>): MutableSet<Language> {
-    if (languages === null) {
-      return mutableSetOf<Language>()
+  private fun Set<Language>?.standardize(): MutableSet<Language> {
+    if (this === null) {
+      return mutableSetOf()
     }
-    if (allLanguages.all { lid -> languages.contains(lid) }) {
-      return mutableSetOf<Language>()
-    }
-    return languages.toMutableSet()
+    return toMutableSet()
   }
 
   @Transactional
@@ -278,18 +275,15 @@ class PermissionService(
     projectId: Long
   ) {
     val allLanguages = languageService.findAll(projectId)
-    permission.translateLanguages = standardizeLanguagePermissions(languagePermissions.translate, allLanguages)
-    permission.stateChangeLanguages = standardizeLanguagePermissions(languagePermissions.stateChange, allLanguages)
+    permission.translateLanguages = languagePermissions.translate.standardize()
+    permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
 
-    permission.viewLanguages = standardizeLanguagePermissions(
+    permission.viewLanguages = (
       (
-        (
-          languagePermissions.view?.toMutableSet()
-            ?: mutableSetOf()
-          ) + permission.translateLanguages + permission.stateChangeLanguages
-        ),
-      allLanguages
-    )
+        languagePermissions.view?.toMutableSet()
+          ?: mutableSetOf()
+        ) + permission.translateLanguages + permission.stateChangeLanguages
+      ).standardize()
   }
 
   private fun validateLanguagePermissions(
@@ -361,5 +355,23 @@ class PermissionService(
       ?: throw NotFoundException()
 
     this.delete(permissionEntity)
+  }
+
+  fun getPermittedViewLanguages(projectId: Long, userId: Long): Collection<Language> {
+    val permissionData = this.getProjectPermissionData(projectId, userId)
+
+    val allLanguages = languageService.findAll(projectId)
+    val viewLanguageIds = permissionData.computedPermissions.viewLanguageIds
+
+    val permittedLanguages = if (viewLanguageIds.isNullOrEmpty())
+      allLanguages
+    else
+      allLanguages.filter {
+        viewLanguageIds.contains(
+          it.id
+        )
+      }
+
+    return permittedLanguages
   }
 }

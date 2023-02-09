@@ -72,7 +72,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   @Test
   @Transactional
   fun `lowers permissions for view`() {
-    checkUser(testData.viewUser) {
+    checkUser(testData.viewEnOnlyUser) {
       assertThat(computedPermissions.type).isEqualTo(ProjectPermissionType.NONE)
     }
   }

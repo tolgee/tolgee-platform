@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
@@ -10,6 +11,7 @@ import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -436,6 +438,29 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key.assert.isNotNull()
       key!!.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `import keys checks permissions`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+
+    projectSupplier = { testData.project }
+    userAccount = testData.viewEnOnlyUser
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "first_key",
+              "translations" to
+                mapOf("de" to "hello")
+            ),
+          )
+      )
+    ).andIsForbidden
   }
 
   private fun saveTestDataAndPrepare() {
