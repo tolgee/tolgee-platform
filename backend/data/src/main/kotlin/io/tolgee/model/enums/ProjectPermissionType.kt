@@ -33,7 +33,6 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.SCREENSHOTS_UPLOAD,
       Scope.SCREENSHOTS_DELETE,
       Scope.ACTIVITY_VIEW,
-      Scope.IMPORT,
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_STATE_EDIT
     )

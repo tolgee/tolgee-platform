@@ -89,6 +89,11 @@ class KeyController(
     if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
     }
+
+    dto.translations?.keys?.let { languageTags ->
+      securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+    }
+
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
@@ -117,8 +122,8 @@ class KeyController(
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs")
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_DELETE)
+  @AccessWithApiKey(scopes = [Scope.KEYS_DELETE])
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
@@ -128,8 +133,8 @@ class KeyController(
   @GetMapping(value = [""])
   @Transactional
   @Operation(summary = "Returns all keys in the project")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Scope.KEYS_VIEW)
+  @AccessWithApiKey(scopes = [Scope.KEYS_VIEW])
   fun getAll(
     @ParameterObject
     @SortDefault("id")
@@ -142,8 +147,8 @@ class KeyController(
   @DeleteMapping(value = [""])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_DELETE)
+  @AccessWithApiKey(scopes = [Scope.KEYS_DELETE])
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
     delete(dto.ids.toSet())
@@ -158,6 +163,11 @@ class KeyController(
   )
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
+    securityService.checkLanguageTranslatePermissionByTag(
+      projectHolder.project.id,
+      dto.keys.flatMap { it.translations.keys }.toSet()
+    )
+
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
   }
 

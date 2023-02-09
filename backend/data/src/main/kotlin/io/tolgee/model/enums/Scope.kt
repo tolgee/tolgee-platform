@@ -20,7 +20,6 @@ enum class Scope(
   SCREENSHOTS_DELETE("screenshots.delete"),
   SCREENSHOTS_VIEW("screenshots.view"),
   ACTIVITY_VIEW("activity.view"),
-  IMPORT("import"),
   LANGUAGES_EDIT("languages.edit"),
   ADMIN("admin"),
   PROJECT_EDIT("project.edit"),
@@ -28,7 +27,9 @@ enum class Scope(
   TRANSLATIONS_COMMENTS_ADD("translation-comments.add"),
   TRANSLATIONS_COMMENTS_EDIT("translation-comments.edit"),
   TRANSLATIONS_COMMENTS_SET_STATE("translation-comments.set-state"),
-  TRANSLATIONS_STATE_EDIT("translations.state-edit")
+  TRANSLATIONS_STATE_EDIT("translations.state-edit"),
+  KEYS_VIEW("keys.view"),
+  KEYS_DELETE("keys.delete")
   ;
 
   fun expand() = Scope.expand(this)
@@ -43,7 +44,18 @@ enum class Scope(
             HierarchyItem(TRANSLATIONS_VIEW)
           )
         ),
-        HierarchyItem(KEYS_EDIT),
+        HierarchyItem(
+          KEYS_EDIT,
+          listOf(
+            HierarchyItem(KEYS_VIEW)
+          )
+        ),
+        HierarchyItem(
+          KEYS_DELETE,
+          listOf(
+            HierarchyItem(KEYS_VIEW)
+          )
+        ),
         HierarchyItem(
           SCREENSHOTS_UPLOAD,
           listOf(
@@ -57,7 +69,6 @@ enum class Scope(
           )
         ),
         HierarchyItem(ACTIVITY_VIEW),
-        HierarchyItem(IMPORT),
         HierarchyItem(LANGUAGES_EDIT),
         HierarchyItem(PROJECT_EDIT),
         HierarchyItem(MEMBERS_VIEW),
@@ -130,6 +141,7 @@ enum class Scope(
       }
       throw NotFoundException(Message.SCOPE_NOT_FOUND)
     }
+
     fun parse(scopes: Collection<String>?): Set<Scope> {
       scopes ?: return setOf()
       return scopes.map { stringScope ->

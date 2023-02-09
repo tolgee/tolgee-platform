@@ -286,8 +286,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey([Scope.TRANSLATIONS_STATE_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Set's "outdated" indication""")
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
   fun setOutdated(

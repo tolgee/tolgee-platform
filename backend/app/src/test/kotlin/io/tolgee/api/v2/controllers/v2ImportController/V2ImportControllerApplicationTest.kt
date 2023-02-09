@@ -2,7 +2,11 @@ package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -64,6 +68,64 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       projectService.get(testData.project.id).keys.find { it.name == "empty key" }.assert.isNotNull
     }
+  }
+
+  @Test
+  fun `it checks permissions`() {
+    val testData = ImportTestData()
+
+    val user = testData.useTranslateOnlyUser()
+
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+
+    val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
+    performAuthPut(path, null).andIsForbidden.andAssertThatJson {
+      node("params") {
+        node("[0]").isEqualTo("keys.edit")
+      }
+    }
+  }
+
+  @Test
+  fun `it checks language permissions`() {
+    val testData = ImportTestData()
+    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    val resolveFrench = testData.addFrenchTranslations()
+    resolveFrench()
+
+    val user = testData.useTranslateOnlyUser()
+
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+
+    val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
+    performAuthPut(path, null).andIsForbidden.andAssertThatJson {
+      node("code").isEqualTo("language_not_permitted")
+      node("params[0]") {
+        isArray
+        node("[0]").isValidId
+      }
+    }
+  }
+
+  @Test
+  fun `it checks permissions (view only)`() {
+    val testData = ImportTestData()
+    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    val resolveFrench = testData.addFrenchTranslations()
+    resolveFrench()
+
+    val user = testData.useViewEnOnlyUser()
+
+    testDataService.saveTestData(testData.root)
+    val projectId = testData.project.id
+    loginAsUser(user.username)
+
+    val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
+    performAuthPut(path, null).andIsForbidden
   }
 
   @Test

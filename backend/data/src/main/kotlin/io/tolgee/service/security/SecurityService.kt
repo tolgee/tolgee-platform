@@ -1,5 +1,6 @@
 package io.tolgee.service.security
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.LanguageNotPermittedException
@@ -44,10 +45,10 @@ class SecurityService @Autowired constructor(
     }
 
     val usersPermissionScopes = getProjectPermissionScopes(projectId, userAccountDto.id)
-      ?: throw PermissionException()
+      ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     if (!usersPermissionScopes.contains(requiredPermission)) {
-      throw PermissionException()
+      throw PermissionException(Message.OPERATION_NOT_PERMITTED, listOf(requiredPermission.value))
     }
   }
 
@@ -55,20 +56,49 @@ class SecurityService @Autowired constructor(
     checkProjectPermission(projectId, requiredPermission, activeUser)
   }
 
-  fun checkLanguageViewPermission(projectId: Long, languageIds: Collection<Long>) = checkLanguagePermission(
-    projectId,
-  ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
-
   fun checkLanguageViewPermissionByTag(projectId: Long, languageTags: Collection<String>) {
-    val languageIds = languageService.getLanguageIdsByTags(projectId, languageTags)
-    try {
-      checkLanguageViewPermission(projectId, languageIds.values.map { it.id })
-    } catch (e: LanguageNotPermittedException) {
-      throw LanguageNotPermittedException(
-        e.languageIds,
-        e.languageIds.mapNotNull { languageId -> languageIds.entries.find { it.value.id == languageId }?.key }
-      )
-    }
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
+    checkLanguagePermissionByTag(
+      projectId,
+      languageTags
+    ) { data, languageIds -> data.checkViewPermitted(*languageIds.toLongArray()) }
+  }
+
+  fun checkLanguageTranslatePermissionByTag(projectId: Long, languageTags: Collection<String>) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+    checkLanguagePermissionByTag(
+      projectId,
+      languageTags
+    ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+  }
+
+  fun checkStateEditPermissionByTag(projectId: Long, languageTags: Collection<String>) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
+    checkLanguagePermissionByTag(
+      projectId,
+      languageTags
+    ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+  }
+
+  fun checkLanguageViewPermission(projectId: Long, languageIds: Collection<Long>) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+  }
+
+  fun checkLanguageTranslatePermission(projectId: Long, languageIds: Collection<Long>) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+  }
+
+  fun checkLanguageStateChangePermission(projectId: Long, languageIds: Collection<Long>) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
   }
 
   fun filterViewPermissionByTag(projectId: Long, languageTags: Collection<String>): Set<String> {
@@ -79,14 +109,6 @@ class SecurityService @Autowired constructor(
     }
     return languageTags.toSet()
   }
-
-  fun checkLanguageTranslatePermission(projectId: Long, languageIds: Collection<Long>) = checkLanguagePermission(
-    projectId,
-  ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-
-  fun checkLanguageStateChangePermission(projectId: Long, languageIds: Collection<Long>) = checkLanguagePermission(
-    projectId,
-  ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
 
   private fun checkLanguagePermission(
     projectId: Long,
@@ -100,6 +122,26 @@ class SecurityService @Autowired constructor(
       authenticationFacade.userAccount.id
     )
     permissionCheckFn(usersPermission.computedPermissions)
+  }
+
+  private fun checkLanguagePermissionByTag(
+    projectId: Long,
+    languageTags: Collection<String>,
+    fn: (data: ComputedPermissionDto, languageIds: Collection<Long>) -> Unit
+  ) {
+    val languageIds = languageService.getLanguageIdsByTags(projectId, languageTags)
+    try {
+      val usersPermission = permissionService.getProjectPermissionData(
+        projectId,
+        authenticationFacade.userAccount.id
+      )
+      fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
+    } catch (e: LanguageNotPermittedException) {
+      throw LanguageNotPermittedException(
+        e.languageIds,
+        e.languageIds.mapNotNull { languageId -> languageIds.entries.find { it.value.id == languageId }?.key }
+      )
+    }
   }
 
   fun checkLanguageTranslatePermission(translation: Translation) {

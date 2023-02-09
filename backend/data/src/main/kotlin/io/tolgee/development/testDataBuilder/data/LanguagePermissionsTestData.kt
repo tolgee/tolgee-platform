@@ -64,7 +64,7 @@ class LanguagePermissionsTestData {
     stateChangeLanguages = mutableSetOf()
   }
 
-  val viewUser = addUserAccountWithPermissions {
+  val viewEnOnlyUser = addUserAccountWithPermissions {
     type = ProjectPermissionType.VIEW
     translateLanguages = mutableSetOf()
     viewLanguages = mutableSetOf(englishLanguage)
