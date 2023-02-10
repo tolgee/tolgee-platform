@@ -20,11 +20,12 @@ export const useScopeTranslations = () => {
     'screenshots.upload': t('permissions_item_screenshots_upload'),
     'screenshots.delete': t('permissions_item_screenshots_delete'),
     'keys.edit': t('permissions_item_keys_edit'),
+    'keys.view': t('permissions_item_keys_view'),
+    'keys.delete': t('permissions_item_keys_delete'),
     'project.edit': t('permissions_item_project_edit'),
     'users.view': t('permission_item_users_view'),
     'languages.edit': t('permissions_item_languages_edit'),
     'activity.view': t('permissions_item_activity_view'),
-    import: t('permissions_item_import'),
   };
 
   return {

@@ -35,8 +35,11 @@ export interface paths {
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+  "/v2/projects/{projectId}/users/{userId}/set-permissions": {
     put: operations["setUsersPermissions"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
@@ -153,6 +156,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
+  "/v2/organizations/{organizationId}/set-base-permissions": {
+    put: operations["setBasePermissions"];
+  };
+  "/v2/organizations/{organizationId}/set-base-permissions/{permissionType}": {
+    put: operations["setBasePermissions_1"];
+  };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
     put: operations["update_4"];
@@ -198,6 +207,7 @@ export interface paths {
     post: operations["create"];
   };
   "/v2/projects/{projectId}/keys": {
+    get: operations["getAll_3"];
     post: operations["create_1"];
     delete: operations["delete_3"];
   };
@@ -212,7 +222,7 @@ export interface paths {
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
-    get: operations["getAll_3"];
+    get: operations["getAll_5"];
     post: operations["create_4"];
   };
   "/v2/projects/{projectId}/translations/create-comment": {
@@ -225,7 +235,7 @@ export interface paths {
     post: operations["suggestMachineTranslations"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_5"];
+    get: operations["getAll_7"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
@@ -233,11 +243,11 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/v2/pats": {
-    get: operations["getAll_7"];
+    get: operations["getAll_9"];
     post: operations["create_8"];
   };
   "/v2/organizations": {
-    get: operations["getAll_8"];
+    get: operations["getAll_10"];
     post: operations["create_9"];
   };
   "/v2/image-upload": {
@@ -273,6 +283,12 @@ export interface paths {
   };
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
+  };
+  "/v2/public/scope-info/roles": {
+    get: operations["getRoles"];
+  };
+  "/v2/public/scope-info/hierarchy": {
+    get: operations["getHierarchy"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data always required by frontend */
@@ -491,6 +507,46 @@ export interface components {
       baseLanguageId?: number;
       description?: string;
     };
+    ComputedPermissionModel: {
+      permissionModel?: components["schemas"]["PermissionModel"];
+      origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** List of languages user can change state to. If null, all languages edition is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages edition is permitted. */
+      viewLanguageIds?: number[];
+      /** Has user explicitly set granular permissions? */
+      granular: boolean;
+      /** List of languages user can translate to. If null, all languages edition is permitted. */
+      translateLanguageIds?: number[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+      /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+    };
     LanguageModel: {
       id: number;
       /** Language name in english */
@@ -504,6 +560,45 @@ export interface components {
       /** Whether is base language of project */
       base: boolean;
     };
+    /** Current user's direct permission */
+    PermissionModel: {
+      /** Granted scopes granted to user. When user has type permissions, this field contains permission scopes of the type. */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+      )[];
+      /** The user permission type. (Null if uses granular permissions) */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages edition is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages edition is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can change state to. If null, all languages edition is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** Has user explicitly set granular permissions? */
+      granular: boolean;
+    };
     ProjectModel: {
       id: number;
       name: string;
@@ -512,34 +607,17 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     SimpleOrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
-    };
-    UserPermissionModel: {
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
-      permittedLanguageIds?: number[];
-      /** The type of permission. */
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UpdateNamespaceDto: {
       name: string;
@@ -662,13 +740,17 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /**
-       * IDs of languages to allow user to translate to with TRANSLATE permission.
-       *
-       * Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
-       */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** Granted scopes for the invited user */
+      scopes?: string[];
+      /** Deprecated -> use translate languages */
       languages?: number[];
+      /** Languages user can translate to */
+      translateLanguages?: number[];
+      /** Languages user can view */
+      viewLanguages?: number[];
+      /** Languages user can change translation state (review) */
+      stateChangeLanguages?: number[];
       /** Email to send invitation to */
       email?: string;
       /** Name of invited user */
@@ -677,7 +759,26 @@ export interface components {
     ProjectInvitationModel: {
       id: number;
       code: string;
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+      )[];
       permittedLanguageIds?: number[];
       createdAt: string;
       invitedUserName?: string;
@@ -773,12 +874,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      description: string;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -787,14 +888,13 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermission: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -849,15 +949,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      id: number;
-      description: string;
-      username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
+      username?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1041,6 +1141,27 @@ export interface components {
       language?: string;
       preferredOrganizationId?: number;
     };
+    HierarchyItem: {
+      scope:
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "users.view"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete";
+      requires: components["schemas"]["HierarchyItem"][];
+    };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1111,9 +1232,9 @@ export interface components {
       username: string;
       name?: string;
       organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      organizationBasePermission: components["schemas"]["PermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
@@ -1142,6 +1263,12 @@ export interface components {
       creditBalance: number;
       bucketSize: number;
       extraCreditBalance: number;
+    };
+    PagedModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelKeyModel: {
       _embedded?: {
@@ -1444,20 +1571,9 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };
@@ -1474,12 +1590,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      description: string;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      id: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1532,15 +1648,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
-      description: string;
-      username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
+      username?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1945,10 +2061,50 @@ export interface operations {
       path: {
         projectId: number;
         userId: number;
-        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      };
+      query: {
+        scopes?: string[];
+        languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setUsersPermissions_1: {
+    parameters: {
+      path: {
+        projectId: number;
+        userId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
       };
       query: {
         languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
       };
     };
     responses: {
@@ -3205,6 +3361,62 @@ export interface operations {
       };
     };
   };
+  setBasePermissions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        scopes: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setBasePermissions_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get_9: {
     parameters: {
       path: {
@@ -3715,6 +3927,41 @@ export interface operations {
       };
     };
   };
+  getAll_3: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   create_1: {
     parameters: {
       path: {
@@ -3933,7 +4180,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_5: {
     parameters: {
       path: {
         translationId: number;
@@ -4106,7 +4353,7 @@ export interface operations {
       };
     };
   };
-  getAll_5: {
+  getAll_7: {
     parameters: {
       path: {
         projectId: number;
@@ -4236,7 +4483,7 @@ export interface operations {
       };
     };
   };
-  getAll_7: {
+  getAll_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4295,7 +4542,7 @@ export interface operations {
       };
     };
   };
-  getAll_8: {
+  getAll_10: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4649,6 +4896,75 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getRoles: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": {
+            [key: string]: (
+              | "translations.view"
+              | "translations.edit"
+              | "keys.edit"
+              | "screenshots.upload"
+              | "screenshots.delete"
+              | "screenshots.view"
+              | "activity.view"
+              | "languages.edit"
+              | "admin"
+              | "project.edit"
+              | "users.view"
+              | "translation-comments.add"
+              | "translation-comments.edit"
+              | "translation-comments.set-state"
+              | "translations.state-edit"
+              | "keys.view"
+              | "keys.delete"
+            )[];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getHierarchy: {
+    parameters: {
+      query: {
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["HierarchyItem"];
         };
       };
       /** Bad Request */
@@ -5173,6 +5489,7 @@ export interface operations {
   getAllTranslations: {
     parameters: {
       path: {
+        /** Comma-separated language tags to return translations in. */
         languages: string[];
         projectId: number;
       };

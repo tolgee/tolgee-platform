@@ -4,3 +4,4 @@ public
 ./*.json
 
 **/*.generated.*
+src/i18n/*.json

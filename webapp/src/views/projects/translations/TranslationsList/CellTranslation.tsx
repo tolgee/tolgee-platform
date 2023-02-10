@@ -210,10 +210,10 @@ export const CellTranslation: React.FC<Props> = ({
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
             stateChangeEnabled={stateChangeEnabled}
-                editEnabled={editEnabled}
-                state={state}
-                onStateChange={handleStateChange}
-              active={active}
+            editEnabled={editEnabled}
+            state={state}
+            onStateChange={handleStateChange}
+            active={active}
             lastFocusable={lastFocusable}
           />
         )}
