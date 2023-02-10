@@ -41,12 +41,14 @@ class ImportServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes import language`() {
     val testData = ImportTestData()
-    testDataService.saveTestData(testData.root)
-    assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
-    importService.deleteLanguage(testData.importEnglish)
-    entityManager.flush()
-    entityManager.clear()
-    assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
+    executeInNewTransaction {
+      testDataService.saveTestData(testData.root)
+      val importEnglish = importService.findLanguage(testData.importEnglish.id)
+      importService.deleteLanguage(importEnglish!!)
+    }
+    executeInNewTransaction {
+      assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
+    }
   }
 
   @Test
@@ -56,15 +58,14 @@ class ImportServiceTest : AbstractSpringTest() {
       testData.addFileIssues()
       testData.addKeyMetadata()
       testDataService.saveTestData(testData.root)
-      entityManager.flush()
-      entityManager.clear()
     }
 
-    val import = importService.get(testData.import.id)
     executeInNewTransaction {
+      val import = importService.get(testData.import.id)
       importService.deleteImport(import)
-      entityManager.flush()
-      entityManager.clear()
+    }
+
+    executeInNewTransaction {
       assertThat(importService.find(testData.import.project.id, testData.import.author.id)).isNull()
     }
   }

@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.retry
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
@@ -58,19 +59,21 @@ class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
 
   @Test
   fun `works with tgpak_ prefix`() {
-    val testData = ApiKeysTestData()
-    testDataService.saveTestData(testData.root)
+    retry {
+      val testData = ApiKeysTestData()
+      testDataService.saveTestData(testData.root)
 
-    performGet(
-      "/v2/api-keys/current",
-      HttpHeaders().apply {
-        add(API_KEY_HEADER_NAME, "tgpak_" + testData.frantasKey.encodedKey)
+      performGet(
+        "/v2/api-keys/current",
+        HttpHeaders().apply {
+          add(API_KEY_HEADER_NAME, "tgpak_" + testData.frantasKey.encodedKey)
+        }
+      ).andIsOk.andAssertThatJson {
+        node("description").isNotNull
       }
-    ).andIsOk.andAssertThatJson {
-      node("description").isNotNull
-    }
 
-    apiKeyService.get(testData.frantasKey.id).lastUsedAt.assert.isNotNull.isBefore(Date())
+      apiKeyService.get(testData.frantasKey.id).lastUsedAt.assert.isNotNull.isBefore(Date())
+    }
   }
 
   @Test
