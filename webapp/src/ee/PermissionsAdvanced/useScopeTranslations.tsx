@@ -19,6 +19,7 @@ export const useScopeTranslations = () => {
     'screenshots.view': t('permissions_item_screenshots_view'),
     'screenshots.upload': t('permissions_item_screenshots_upload'),
     'screenshots.delete': t('permissions_item_screenshots_delete'),
+    'keys.create': t('permissions_item_keys_create'),
     'keys.edit': t('permissions_item_keys_edit'),
     'keys.view': t('permissions_item_keys_view'),
     'keys.delete': t('permissions_item_keys_delete'),

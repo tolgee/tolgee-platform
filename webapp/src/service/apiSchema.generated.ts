@@ -543,6 +543,7 @@ export interface components {
         | "translations.state-edit"
         | "keys.view"
         | "keys.delete"
+        | "keys.create"
       )[];
       /** The user permission type. (Null if uses granular permissions) */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -581,6 +582,7 @@ export interface components {
         | "translations.state-edit"
         | "keys.view"
         | "keys.delete"
+        | "keys.create"
       )[];
       /** The user permission type. (Null if uses granular permissions) */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -778,6 +780,7 @@ export interface components {
         | "translations.state-edit"
         | "keys.view"
         | "keys.delete"
+        | "keys.create"
       )[];
       permittedLanguageIds?: number[];
       createdAt: string;
@@ -876,8 +879,8 @@ export interface components {
       token: string;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       id: number;
       description: string;
     };
@@ -949,10 +952,10 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
+      username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      username?: string;
       projectName: string;
       userFullName?: string;
       scopes: string[];
@@ -1159,7 +1162,8 @@ export interface components {
         | "translation-comments.set-state"
         | "translations.state-edit"
         | "keys.view"
-        | "keys.delete";
+        | "keys.delete"
+        | "keys.create";
       requires: components["schemas"]["HierarchyItem"][];
     };
     AuthMethodsDTO: {
@@ -1592,8 +1596,8 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       id: number;
       description: string;
     };
@@ -1648,10 +1652,10 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
+      username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      username?: string;
       projectName: string;
       userFullName?: string;
       scopes: string[];
@@ -4936,6 +4940,7 @@ export interface operations {
               | "translations.state-edit"
               | "keys.view"
               | "keys.delete"
+              | "keys.create"
             )[];
           };
         };

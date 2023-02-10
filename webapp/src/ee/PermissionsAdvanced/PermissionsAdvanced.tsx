@@ -33,6 +33,9 @@ export const PermissionsAdvanced: React.FC<Props> = ({
                 value: 'keys.view',
               },
               {
+                value: 'keys.create',
+              },
+              {
                 value: 'keys.edit',
               },
               {
@@ -81,9 +84,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({
                 value: 'screenshots.delete',
               },
             ],
-          },
-          {
-            value: 'keys.edit',
           },
           {
             value: 'users.view',
