@@ -1,3 +1,17 @@
+## [3.5.1](https://github.com/tolgee/tolgee-platform/compare/v3.5.0...v3.5.1) (2023-02-10)
+
+
+### Bug Fixes
+
+* Fix the test ([28e199d](https://github.com/tolgee/tolgee-platform/commit/28e199da56b20f7b09f5cdf3f19527522bd55de4))
+* Fix the test ([16f8cc5](https://github.com/tolgee/tolgee-platform/commit/16f8cc5f859a5a7c62162ce86c30f94ac1bbdaa5))
+* Tgpak test retry ([824db20](https://github.com/tolgee/tolgee-platform/commit/824db20c5558b00950e858933953ed260a2b52a3))
+
+
+### Performance Improvements
+
+* Import deletion performance ([929f978](https://github.com/tolgee/tolgee-platform/commit/929f9785ca4f10737ba6d8c97aacd2d27de6827e))
+
 # [3.5.0](https://github.com/tolgee/tolgee-platform/compare/v3.4.1...v3.5.0) (2023-02-06)
 
 
