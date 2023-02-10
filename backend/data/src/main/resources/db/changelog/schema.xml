@@ -2450,4 +2450,12 @@
                 end;
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-3">
+        <sql>
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_CREATE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_DELETE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+        </sql>
+    </changeSet>
 </databaseChangeLog>
