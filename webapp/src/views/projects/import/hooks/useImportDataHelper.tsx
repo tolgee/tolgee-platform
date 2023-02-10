@@ -113,7 +113,6 @@ export const useImportDataHelper = () => {
           files: files as any,
         },
       },
-      query: {},
     });
   };
 

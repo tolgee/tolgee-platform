@@ -27,6 +27,20 @@ export const PermissionsAdvanced: React.FC<Props> = ({
         value: 'admin',
         children: [
           {
+            label: t('permissions_item_keys'),
+            children: [
+              {
+                value: 'keys.view',
+              },
+              {
+                value: 'keys.edit',
+              },
+              {
+                value: 'keys.delete',
+              },
+            ],
+          },
+          {
             label: t('permissions_item_translations'),
             children: [
               {
@@ -82,9 +96,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({
           },
           {
             value: 'languages.edit',
-          },
-          {
-            value: 'import',
           },
         ],
       }}

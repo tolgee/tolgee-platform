@@ -26,7 +26,10 @@ export const ProjectMenu = ({ id }) => {
   const canEditProject = satisfiesPermission('project.edit');
   const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewUsers = satisfiesPermission('users.view');
-  const canImport = satisfiesPermission('import');
+  const canImport =
+    (satisfiesPermission('translations.edit') ||
+      satisfiesPermission('keys.edit')) &&
+    satisfiesPermission('keys.view');
 
   const { t } = useTranslate();
 
