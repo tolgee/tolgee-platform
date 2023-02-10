@@ -30,7 +30,7 @@ class ApiKey(
 
   @NotNull
   @NotEmpty
-  @Enumerated(EnumType.ORDINAL)
+  @Enumerated(EnumType.STRING)
   @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   var scopesEnum: MutableSet<Scope>
 ) : StandardAuditModel() {
