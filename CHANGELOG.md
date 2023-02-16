@@ -1,3 +1,15 @@
+# [3.6.0](https://github.com/tolgee/tolgee-platform/compare/v3.5.1...v3.6.0) (2023-02-16)
+
+
+### Bug Fixes
+
+* New translations are outdated ([#1555](https://github.com/tolgee/tolgee-platform/issues/1555)) ([4b06a17](https://github.com/tolgee/tolgee-platform/commit/4b06a17aa2193f225386e06975c91584198137dd))
+
+
+### Features
+
+* ignore ICU tags in translations editor ([#1562](https://github.com/tolgee/tolgee-platform/issues/1562)) ([f2d5b42](https://github.com/tolgee/tolgee-platform/commit/f2d5b427abe0933fd8e5ceaab5db573cc85ae87c))
+
 ## [3.5.1](https://github.com/tolgee/tolgee-platform/compare/v3.5.0...v3.5.1) (2023-02-10)
 
 
