@@ -96,9 +96,9 @@ export const icuVariants = (
     );
 
     if (functions.length === 0 && parameters.length) {
-      const formattedValue = new IntlMessageFormat(text, locale).format(
-        staticVariables
-      );
+      const formattedValue = new IntlMessageFormat(text, locale, undefined, {
+        ignoreTag: true,
+      }).format(staticVariables);
       variants = [
         {
           value: formattedValue as string,
@@ -110,7 +110,12 @@ export const icuVariants = (
       if (func.function === 'select') {
         variants = func.options
           .map((option) => {
-            const formattedValue = new IntlMessageFormat(text, locale).format({
+            const formattedValue = new IntlMessageFormat(
+              text,
+              locale,
+              undefined,
+              { ignoreTag: true }
+            ).format({
               ...staticVariables,
               [func.name]: option,
             });
@@ -137,7 +142,12 @@ export const icuVariants = (
                 option,
               };
             }
-            const formattedValue = new IntlMessageFormat(text, locale).format({
+            const formattedValue = new IntlMessageFormat(
+              text,
+              locale,
+              undefined,
+              { ignoreTag: true }
+            ).format({
               ...staticVariables,
               [func.name]: example,
             });
