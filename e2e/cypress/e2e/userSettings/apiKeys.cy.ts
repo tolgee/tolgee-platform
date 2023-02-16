@@ -135,5 +135,5 @@ const deleteKey = (description: string) => {
     .click();
   confirmStandard();
   cy.contains(description).should('not.exist');
-  assertMessage('API Key deleted');
+  assertMessage('API key deleted');
 };
