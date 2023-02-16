@@ -2,6 +2,7 @@ import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { deleteProject } from '../../common/apiCalls/common';
 import { visitProjectDashboard } from '../../common/languages';
 import { waitForGlobalLoading } from '../../common/loading';
+import { assertMessage } from '../../common/shared';
 
 import {
   create4Translations,
@@ -29,17 +30,19 @@ describe('Translation states', () => {
   });
 
   it('outdated indicator logic', () => {
+    getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+
     getOutdatedIndicator('Studený přeložený text 1').should('be.visible');
     getRemoveOutdatedIndicator('Studený přeložený text 1').click();
     waitForGlobalLoading();
     getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
-
-    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
-    waitForGlobalLoading();
-    getOutdatedIndicator('Studený přeložený text 1').should('be.visible');
   });
 
   it('shows action in activity', () => {
+    getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+
     getOutdatedIndicator('Studený přeložený text 1').should('be.visible');
     getRemoveOutdatedIndicator('Studený přeložený text 1').click();
     visitProjectDashboard(project.id);
@@ -61,6 +64,9 @@ describe('Translation states', () => {
   });
 
   it('gets resolved on edit', () => {
+    getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+
     editCell(
       'Studený přeložený text 1',
       'Studený přeložený text 1 edited',
@@ -72,6 +78,9 @@ describe('Translation states', () => {
   });
 
   it('gets resolved on state change', () => {
+    getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+    editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
+
     getCell('Studený přeložený text 1')
       .trigger('mouseover')
       .findDcy('translation-state-button')
@@ -79,6 +88,23 @@ describe('Translation states', () => {
     waitForGlobalLoading();
 
     getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
+  });
+
+  it('wont appear when adding new key', () => {
+    cy.gcy('translations-add-button').click();
+    cy.gcy('translation-create-key-input').type('test_key');
+    cy.gcy('translation-create-translation-input')
+      .first()
+      .type('Test translation');
+
+    cy.gcy('translation-create-translation-input')
+      .eq(1)
+      .type('Testovací překlad');
+
+    cy.gcy('global-form-save-button').click();
+    assertMessage('Key created');
+
+    getOutdatedIndicator('Testovací překlad').should('not.exist');
   });
 
   const getOutdatedIndicator = (translationText: string) => {
