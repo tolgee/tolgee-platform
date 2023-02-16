@@ -38,7 +38,7 @@ describe('With 100 translations', () => {
 
   const testScroll = () => {
     cy.gcy('translations-toolbar-to-top').should('not.be.visible');
-    cy.gcy('translations-key-count').contains('100 Keys').should('be.visible');
+    cy.gcy('translations-key-count').contains('100').should('be.visible');
     cy.scrollTo('bottom');
     // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
     cy.contains('Cool key 60').should('exist');

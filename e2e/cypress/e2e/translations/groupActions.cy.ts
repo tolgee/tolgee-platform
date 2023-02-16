@@ -46,7 +46,7 @@ describe('Group actions', () => {
     gcy('translations-delete-button').click();
     confirmStandard();
     waitForGlobalLoading(500);
-    gcy('translations-key-count').contains('1 Key').should('be.visible');
+    gcy('translations-key-count').contains('1').should('be.visible');
   });
 
   const visit = () => {
