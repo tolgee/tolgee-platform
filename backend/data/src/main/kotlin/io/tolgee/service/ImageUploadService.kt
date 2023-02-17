@@ -4,6 +4,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.MaxUploadedFilesByUserProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UploadedImage
@@ -35,7 +36,7 @@ class ImageUploadService(
   }
 
   @Transactional
-  fun store(image: InputStreamSource, userAccount: UserAccount): UploadedImage {
+  fun store(image: InputStreamSource, userAccount: UserAccount, info: ImageUploadInfoDto?): UploadedImage {
     if (uploadedImageRepository.countAllByUserAccount(userAccount) > maxUploadedFilesByUserProvider()) {
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
@@ -50,6 +51,7 @@ class ImageUploadService(
         originalHeight = dimension.height
         width = imageConverter.targetDimension.width
         height = imageConverter.targetDimension.height
+        location = info?.location
       }
 
     save(uploadedImageEntity)

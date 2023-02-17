@@ -18,6 +18,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -44,12 +45,13 @@ class ResolvingKeyImporter(
   private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
+  private var importedKeys: List<Key> = emptyList()
 
   operator fun invoke(): KeyImportResolvableResult {
-    val keys = tryImport()
+    importedKeys = tryImport()
     checkErrors()
     val screenshots = importScreenshots()
-    return KeyImportResolvableResult(keys, screenshots)
+    return KeyImportResolvableResult(importedKeys, screenshots)
   }
 
   private fun tryImport(): List<Key> {
@@ -93,14 +95,23 @@ class ResolvingKeyImporter(
     val images = imageUploadService.find(uploadedImagesIds)
     checkPermissions(images)
 
-    val screenshotResults = images.associate {
+    val createdScreenshots = images.associate {
       it.id to screenshotService.saveScreenshot(it)
     }
+
+    val locations = images.map { it.location }
+
+    val allReferences = screenshotService.getKeyScreenshotReferences(
+      importedKeys,
+      locations
+    ).toMutableList()
+
+    val referencesToDelete = mutableListOf<KeyScreenshotReference>()
 
     keysToImport.forEach {
       val key = getOrCreateKey(it)
       it.screenshots?.forEach { screenshot ->
-        val screenshotResult = screenshotResults[screenshot.uploadedImageId]
+        val screenshotResult = createdScreenshots[screenshot.uploadedImageId]
           ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
         val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
@@ -111,15 +122,22 @@ class ResolvingKeyImporter(
           originalDimension = screenshotResult.originalDimension,
           targetDimension = screenshotResult.targetDimension
         )
+
+        val toDelete = allReferences.filter { reference ->
+          reference.key.id == key.id &&
+            reference.screenshot.location == screenshotResult.screenshot.location
+        }
+
+        referencesToDelete.addAll(toDelete)
       }
-      screenshotService.removeScreenshotReferencesById(key, it.removeScreenshotIds)
     }
 
-    return screenshotResults
+    screenshotService.removeScreenshotReferences(referencesToDelete)
+
+    return createdScreenshots
       .map { (uploadedImageId, screenshotResult) ->
         uploadedImageId to screenshotResult.screenshot
-      }
-      .toMap()
+      }.toMap()
   }
 
   private fun checkPermissions(images: List<UploadedImage>) {

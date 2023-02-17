@@ -35,7 +35,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getScreenshotFileNoTimestamp() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val result = performAuthGet("/uploaded-images/${image.filename}.jpg")
       .andExpect(status().isBadRequest)
@@ -46,7 +46,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
     val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
@@ -60,7 +60,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getFile() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
     val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)

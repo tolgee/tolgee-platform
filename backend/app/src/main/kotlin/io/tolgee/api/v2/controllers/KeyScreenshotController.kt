@@ -65,7 +65,7 @@ class KeyScreenshotController(
   @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
-  @RequestBody(content = [Content(encoding = [Encoding(name = "personDTO", contentType = "application/json")])])
+  @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
   fun uploadScreenshot(
     @PathVariable keyId: Long,
     @RequestPart("screenshot") screenshot: MultipartFile,

@@ -10,11 +10,14 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import org.apache.commons.codec.digest.DigestUtils
 import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Entity
+import javax.persistence.Index
 import javax.persistence.OneToMany
+import javax.persistence.Table
 
 @Entity
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["key"])
+@Table(indexes = [Index(name = "screenshot_location_idx", columnList = "location")])
 class Screenshot : StandardAuditModel() {
   @OneToMany(mappedBy = "screenshot", orphanRemoval = true)
   var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
@@ -52,6 +55,8 @@ class Screenshot : StandardAuditModel() {
 
   @ColumnDefault("false")
   var hasThumbnail: Boolean = true
+
+  var location: String? = null
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

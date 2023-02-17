@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
+import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -34,7 +35,11 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
-    uploadedImageId = imageUploadService.store(generateImage(), userAccount!!).id
+    uploadedImageId = imageUploadService.store(
+      generateImage(),
+      userAccount!!,
+      ImageUploadInfoDto(location = "My cool frame")
+    ).id
   }
 
   @Test
@@ -87,7 +92,6 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
                 "resolution" to "KEEP"
               )
             ),
-            "removeScreenshotIds" to listOf(testData.key2Screenshot.id, testData.key1and2Screenshot.id),
             "screenshots" to listOf(
               mapOf(
                 "text" to "Oh oh Oh",
@@ -115,8 +119,8 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       }
     }
 
-    screenshotService.findByIdIn(listOf(testData.key2Screenshot.id, testData.key1and2Screenshot.id))
-      .assert.hasSize(1) // one is deleted
+    screenshotService.findByIdIn(listOf(testData.key2Screenshot.id)).assert.isNotEmpty
+    screenshotService.findByIdIn(listOf(testData.key1and2Screenshot.id)).assert.isEmpty()
 
     executeInNewTransaction {
       assertTranslationText("namespace-1", "key-1", "de", "changed")

@@ -28,7 +28,7 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
       testDataService.saveTestData(testData.root)
       projectSupplier = { testData.projectBuilder.self }
       userAccount = testData.user
-      uploadedImageId = imageUploadService.store(generateImage(), userAccount!!).id
+      uploadedImageId = imageUploadService.store(generateImage(), userAccount!!, null).id
     }
   }
 

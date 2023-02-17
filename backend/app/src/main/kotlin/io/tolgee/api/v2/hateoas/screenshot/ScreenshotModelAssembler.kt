@@ -43,7 +43,8 @@ class ScreenshotModelAssembler(
             reference.originalText
           )
         }
-      }
+      },
+      location = entity.location
     )
       .add(Link.of(fileUrl, "file"))
       .add(Link.of(thumbnailUrl, "thumbnail"))

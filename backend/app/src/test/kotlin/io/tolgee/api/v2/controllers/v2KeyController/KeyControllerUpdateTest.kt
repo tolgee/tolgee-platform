@@ -54,7 +54,7 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `updates key with translations and tags and screenshots`() {
     val keyName = "super_key"
 
-    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
+    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!, null) }
     val screenshotImageIds = screenshotImages.map { it.id }
     performProjectAuthPut(
       "keys/${testData.keyWithReferences.id}/complex-update",
@@ -135,7 +135,7 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `updates key screenshots with meta`() {
     val keyName = "super_key"
 
-    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
+    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!, null) }
     performProjectAuthPut(
       "keys/${testData.keyWithReferences.id}/complex-update",
       ComplexEditKeyDto(

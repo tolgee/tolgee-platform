@@ -19,7 +19,7 @@ interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReferenc
     WHERE ksr.screenshot.id IN :screenshotIds
   """
   )
-  fun findAll(screenshotIds: List<Long>): List<KeyScreenshotReference>
+  fun findAll(screenshotIds: Collection<Long>): List<KeyScreenshotReference>
 
   @Query(
     """

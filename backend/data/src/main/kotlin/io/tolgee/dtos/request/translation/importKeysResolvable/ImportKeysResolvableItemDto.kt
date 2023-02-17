@@ -21,9 +21,6 @@ class ImportKeysResolvableItemDto(
 
   val screenshots: List<KeyScreenshotDto>? = null,
 
-  @Schema(description = "Screenshots with these ids will be replaced by the ones in screenshots property")
-  val removeScreenshotIds: List<Long>? = null,
-
   /**
    * Map of language tag -> text
    */

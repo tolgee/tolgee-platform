@@ -2350,4 +2350,19 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-1">
+        <addColumn tableName="screenshot">
+            <column name="location" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-2">
+        <addColumn tableName="uploaded_image">
+            <column name="location" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-3">
+        <createIndex indexName="screenshot_location_idx" tableName="screenshot">
+            <column name="location"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

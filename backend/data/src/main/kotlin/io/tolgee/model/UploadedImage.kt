@@ -31,6 +31,8 @@ class UploadedImage(
   val thumbnailFilenameWithExtension
     get() = "${filename}_thumbnail.$extension"
 
+  var location: String? = null
+
   var originalWidth: Int = 0
 
   var originalHeight: Int = 0

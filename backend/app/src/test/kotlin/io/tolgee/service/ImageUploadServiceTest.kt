@@ -32,9 +32,9 @@ class ImageUploadServiceTest : AbstractSpringTest() {
   @Test
   fun testCleanOldImages() {
     val user = dbPopulator.createUserIfNotExists("user")
-    val storedOlder = imageUploadService.store(screenshotFile, user)
+    val storedOlder = imageUploadService.store(screenshotFile, user, null)
     Thread.sleep(1000)
-    val storedNewer = imageUploadService.store(screenshotFile, user)
+    val storedNewer = imageUploadService.store(screenshotFile, user, null)
 
     whenever(dateProvider.date)
       .thenReturn(

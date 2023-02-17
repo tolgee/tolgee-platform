@@ -78,7 +78,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates key with translations and tags and screenshots`() {
     val keyName = "super_key"
 
-    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
+    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!, null) }
     val screenshotImageIds = screenshotImages.map { it.id }
     performProjectAuthPost(
       "keys",
@@ -153,7 +153,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates key with screenshot meta`() {
     val keyName = "super_key"
 
-    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
+    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!, null) }
     performProjectAuthPost(
       "keys",
       CreateKeyDto(

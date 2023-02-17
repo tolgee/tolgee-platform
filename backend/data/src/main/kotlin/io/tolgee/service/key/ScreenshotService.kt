@@ -56,7 +56,7 @@ class ScreenshotService(
     val image = converter.getImage()
     val thumbnail = converter.getThumbnail()
 
-    val screenshot = saveScreenshot(image.toByteArray(), thumbnail.toByteArray())
+    val screenshot = saveScreenshot(image.toByteArray(), thumbnail.toByteArray(), info?.location)
 
     return addReference(
       key = key,
@@ -160,7 +160,7 @@ class ScreenshotService(
       .readFile(
         UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.thumbnailFilenameWithExtension
       )
-    val screenshot = saveScreenshot(img, thumbnail)
+    val screenshot = saveScreenshot(img, thumbnail, image.location)
     imageUploadService.delete(image)
     return ScreateScreenshotResult(
       screenshot = screenshot,
@@ -172,9 +172,10 @@ class ScreenshotService(
   /**
    * Creates and saves screenshot entity and the corresponding file
    */
-  fun saveScreenshot(image: ByteArray, thumbnail: ByteArray): Screenshot {
+  fun saveScreenshot(image: ByteArray, thumbnail: ByteArray, location: String?): Screenshot {
     val screenshot = Screenshot()
     screenshot.extension = "png"
+    screenshot.location = location
     screenshotRepository.save(screenshot)
     fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
     fileStorage.storeFile(screenshot.getFilePath(), image)
@@ -215,6 +216,19 @@ class ScreenshotService(
       .groupBy { it.screenshot.id }
     screenshotIds.forEach {
       if (screenshotReferences[it] == null) {
+        delete(it)
+      }
+    }
+  }
+
+  fun removeScreenshotReferences(references: List<KeyScreenshotReference>) {
+    val screenshotIds = references.map { it.screenshot.id }.toSet()
+    keyScreenshotReferenceRepository.deleteAll(references)
+    val screenshotReferences = keyScreenshotReferenceRepository
+      .findAll(screenshotIds)
+      .groupBy { it.screenshot.id }
+    screenshotIds.forEach {
+      if (screenshotReferences[it].isNullOrEmpty()) {
         delete(it)
       }
     }
@@ -297,5 +311,9 @@ class ScreenshotService(
     return keys.associate {
       it.id to (keyIdScreenshotsMap[it.id]?.map { it.screenshot } ?: emptyList())
     }
+  }
+
+  fun getKeyScreenshotReferences(importedKeys: List<Key>, locations: List<String?>): List<KeyScreenshotReference> {
+    return screenshotRepository.getKeyScreenshotReferences(importedKeys, locations)
   }
 }

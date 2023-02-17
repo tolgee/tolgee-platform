@@ -13,7 +13,9 @@ class ResolvableImportTestData : BaseTestData() {
 
       addKey("namespace-1", "key-1") {
         addTranslation("de", "existing translation")
-        key1and2Screenshot = addScreenshot {}.self
+        key1and2Screenshot = addScreenshot {
+          location = "My cool frame"
+        }.self
       }
 
       addKey("namespace-1", "key-2") {
