@@ -57,11 +57,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
   )
   fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<Key>
 
-  @Query("""
+  @Query(
+    """
     select k from Key k
     left join fetch k.keyMeta km
     left join fetch km.tags
-    where k in keys
-  """)
+    where k in :keys
+  """
+  )
   fun getWithTags(keys: Set<Key>): List<Key>
 }
