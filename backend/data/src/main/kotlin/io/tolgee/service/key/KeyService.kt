@@ -181,17 +181,21 @@ class KeyService(
 
   @Transactional
   fun importKeys(keys: List<ImportKeysItemDto>, project: Project) {
-    val existing = this.getAll(project.id).map { (it.namespace?.name to it.name) }.toSet()
+    val existing = this.getAll(project.id)
+      .associateBy { ((it.namespace?.name to it.name)) }
+      .toMutableMap()
     val namespaces = mutableMapOf<String, Namespace>()
     namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
     val languages = languageService.findByTags(languageTags, project.id).map { it.tag to it }.toMap()
 
-    keys.forEach {
-      val safeNamespace = namespaceService.getSafeName(it.namespace)
-      if (!existing.contains(safeNamespace to it.name)) {
+    val toTag = mutableMapOf<Key, List<String>>()
+
+    keys.forEach { keyDto ->
+      val safeNamespace = namespaceService.getSafeName(keyDto.namespace)
+      if (!existing.containsKey(safeNamespace to keyDto.name)) {
         val key = Key(
-          name = it.name,
+          name = keyDto.name,
           project = project
         ).apply {
           if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
@@ -203,14 +207,24 @@ class KeyService(
           this.namespace = namespaces[safeNamespace]
         }
         save(key)
-        it.translations.entries.forEach { (languageTag, value) ->
+        keyDto.translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->
             translationService.setTranslation(key, language, value)
           }
         }
+        existing[safeNamespace to keyDto.name] = key
+
+        if (!keyDto.tags.isNullOrEmpty()) {
+          existing[safeNamespace to keyDto.name]?.let { key ->
+            toTag[key] = keyDto.tags
+          }
+        }
       }
     }
+
+    tagService.tagKeys(toTag)
   }
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
+  fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 }

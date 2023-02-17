@@ -20,6 +20,16 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun findAllByProject(projectId: Long, search: String? = null, pageable: Pageable): Page<Tag>
 
+
+
+  @Query(
+    """
+    from Tag t where t.project.id = :projectId and t.name in :tags
+  """
+  )
+  fun findAllByProject(projectId: Long, tags: Collection<String>): List<Tag>
+
+
   @Query(
     """
     from Key k
@@ -48,4 +58,5 @@ interface TagRepository : JpaRepository<Tag, Long> {
     """
   )
   fun getTagsWithKeyMetas(tagIds: Iterable<Long>): List<Tag>
+  fun findAllByProjectId(projectId: Long): List<Tag>
 }

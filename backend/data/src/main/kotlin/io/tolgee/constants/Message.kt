@@ -114,8 +114,9 @@ enum class Message {
   CANNOT_SORT_BY_THIS_COLUMN,
   NAMESPACE_NOT_FOUND,
   NAMESPACE_EXISTS,
-  INVALID_AUTHENTICATION_METHOD;
+  INVALID_AUTHENTICATION_METHOD,
+  MULTIPLE_PROJECTS_NOT_SUPPORTED;
 
-  val code: String
+    val code: String
     get() = name.lowercase(Locale.getDefault())
 }
