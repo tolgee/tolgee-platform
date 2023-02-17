@@ -1,3 +1,10 @@
+## [3.6.1](https://github.com/tolgee/tolgee-platform/compare/v3.6.0...v3.6.1) (2023-02-17)
+
+
+### Bug Fixes
+
+* some typos in swagger documentation. ([6fe145b](https://github.com/tolgee/tolgee-platform/commit/6fe145bb554f8244a3abaad93ad7ba2946cb1a42))
+
 # [3.6.0](https://github.com/tolgee/tolgee-platform/compare/v3.5.1...v3.6.0) (2023-02-16)
 
 
