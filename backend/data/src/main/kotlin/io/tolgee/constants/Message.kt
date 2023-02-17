@@ -117,6 +117,6 @@ enum class Message {
   INVALID_AUTHENTICATION_METHOD,
   MULTIPLE_PROJECTS_NOT_SUPPORTED;
 
-    val code: String
+  val code: String
     get() = name.lowercase(Locale.getDefault())
 }

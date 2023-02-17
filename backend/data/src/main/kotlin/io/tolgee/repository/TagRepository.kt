@@ -20,15 +20,12 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun findAllByProject(projectId: Long, search: String? = null, pageable: Pageable): Page<Tag>
 
-
-
   @Query(
     """
     from Tag t where t.project.id = :projectId and t.name in :tags
   """
   )
   fun findAllByProject(projectId: Long, tags: Collection<String>): List<Tag>
-
 
   @Query(
     """
