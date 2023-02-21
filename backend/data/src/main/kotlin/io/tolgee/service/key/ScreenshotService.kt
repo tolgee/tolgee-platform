@@ -187,7 +187,7 @@ class ScreenshotService(
     screenshot.extension = "png"
     screenshot.location = location
     screenshot.width = dimension.width
-    screenshot.height = screenshot.height
+    screenshot.height = dimension.height
     screenshotRepository.save(screenshot)
     fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
     fileStorage.storeFile(screenshot.getFilePath(), image)
