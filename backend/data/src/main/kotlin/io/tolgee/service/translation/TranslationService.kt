@@ -302,14 +302,16 @@ class TranslationService(
     save(translation)
   }
 
-  fun setOutdated(key: Key) {
+  fun setOutdated(key: Key, excludeTranslationIds: Set<Long> = emptySet()) {
     val baseLanguage = key.project.baseLanguage
     key.translations.forEach {
-      if (it.language.id != baseLanguage?.id) {
-        if (!it.text.isNullOrEmpty()) {
-          it.outdated = true
-          it.state = TranslationState.TRANSLATED
-        }
+      val isBase = it.language.id == baseLanguage?.id
+      val isEmpty = it.text.isNullOrEmpty()
+      val isExcluded = excludeTranslationIds.contains(it.id)
+
+      if (!isBase && !isEmpty && !isExcluded) {
+        it.outdated = true
+        it.state = TranslationState.TRANSLATED
         save(it)
       }
     }

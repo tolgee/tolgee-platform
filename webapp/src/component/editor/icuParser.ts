@@ -68,7 +68,7 @@ const flatTree = (root: MessageFormatElement): ParameterType[] => {
 
 export const getParameters = (text: string) => {
   let final: ParameterType[] = [];
-  const elements = parse(text);
+  const elements = parse(text, { ignoreTag: true });
   for (const element of elements) {
     final = [...final, ...flatTree(element)];
   }

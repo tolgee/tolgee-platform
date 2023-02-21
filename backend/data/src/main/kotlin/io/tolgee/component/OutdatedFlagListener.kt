@@ -20,7 +20,8 @@ class OutdatedFlagListener(
     val oldBaseValue = event.oldValues[baseLanguage.tag]
     val newBaseValue = event.translations.find { it.language.id == baseLanguage.id }?.text
     if (oldBaseValue != newBaseValue) {
-      translationService.setOutdated(event.key)
+      val excluded = event.translations.map { it.id }.toSet()
+      translationService.setOutdated(event.key, excluded)
     }
   }
 }

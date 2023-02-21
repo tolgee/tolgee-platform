@@ -441,6 +441,22 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `new translations are not outdated`() {
+    saveTestDataAndPrepare()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(name = "super_key", translations = mapOf("en" to "Hello", "de" to "Hallo"))
+    ).andIsCreated
+
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "super_key", null)!!.translations.forEach {
+        it.outdated.assert.isFalse()
+      }
+    }
+  }
+
   private fun saveTestDataAndPrepare() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

@@ -166,7 +166,7 @@ export const Editor: React.FC<Props> = ({
 
   const error = useMemo(() => {
     try {
-      parse(value, { captureLocation: true });
+      parse(value, { captureLocation: true, ignoreTag: true });
     } catch (e) {
       return e;
     }

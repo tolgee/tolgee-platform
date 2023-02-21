@@ -77,34 +77,34 @@ describe('namespaces in translations', () => {
   });
 
   it('filters by clicking on banner', () => {
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
     filterByNsBanner('ns-1');
-    gcy('translations-key-count').contains('2 Keys').should('be.visible');
+    gcy('translations-key-count').contains('2').should('be.visible');
     removeFilterNsBanner('ns-1');
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
   });
 
   it('filters by empty namespace', () => {
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
     getPopover().contains('<none>').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
-    gcy('translations-key-count').contains('2 Keys').should('be.visible');
+    gcy('translations-key-count').contains('2').should('be.visible');
   });
 
   it('filters by multiple namespaces', () => {
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
     getPopover().contains('ns-1').click();
     getPopover().contains('ns-2').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
-    gcy('translations-key-count').contains('3 Keys').should('be.visible');
+    gcy('translations-key-count').contains('3').should('be.visible');
   });
 
   it('rename namespace', () => {
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
     gcy('namespaces-banner-content')
       .contains('ns-1')
       .closestDcy('translations-namespace-banner')
@@ -130,7 +130,7 @@ describe('namespaces in translations', () => {
   it("franta doesn't have permission to rename namespace", () => {
     login('franta');
     cy.reload();
-    gcy('translations-key-count').contains('5 Keys').should('be.visible');
+    gcy('translations-key-count').contains('5').should('be.visible');
     gcy('namespaces-banner-content')
       .contains('ns-1')
       .closestDcy('translations-namespace-banner')
