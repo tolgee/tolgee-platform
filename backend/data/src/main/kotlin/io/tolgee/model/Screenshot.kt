@@ -58,6 +58,10 @@ class Screenshot : StandardAuditModel() {
 
   var location: String? = null
 
+  var width: Int = 0
+
+  var height: Int = 0
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false

@@ -44,7 +44,9 @@ class ScreenshotModelAssembler(
           )
         }
       },
-      location = entity.location
+      location = entity.location,
+      width = entity.width,
+      height = entity.height,
     )
       .add(Link.of(fileUrl, "file"))
       .add(Link.of(thumbnailUrl, "thumbnail"))

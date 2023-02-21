@@ -10,7 +10,6 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import kotlin.math.floor
-import kotlin.math.min
 import kotlin.math.sqrt
 
 class ImageConverter(
@@ -31,11 +30,20 @@ class ImageConverter(
   }
 
   fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
-    val side = min(sourceBufferedImage.width, sourceBufferedImage.height)
-    val x = (sourceBufferedImage.width - side) / 2
-    val y = (sourceBufferedImage.height - side) / 2
-    val cropped = sourceBufferedImage.getSubimage(x, y, side, side)
-    val resizedImage = cropped.getScaledInstance(size, size, Image.SCALE_SMOOTH)
+    val originalWidth = sourceBufferedImage.width
+    val originalHeight = sourceBufferedImage.height
+    val newWidth: Int
+    val newHeight: Int
+
+    if (originalWidth > originalHeight) {
+      newWidth = size
+      newHeight = (originalHeight * size) / originalWidth
+    } else {
+      newHeight = size
+      newWidth = (originalWidth * size) / originalHeight
+    }
+
+    val resizedImage = sourceBufferedImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH)
     val bufferedImage = convertToBufferedImage(resizedImage)
     return writeImage(bufferedImage, compressionQuality)
   }

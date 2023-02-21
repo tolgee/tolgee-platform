@@ -56,7 +56,12 @@ class ScreenshotService(
     val image = converter.getImage()
     val thumbnail = converter.getThumbnail()
 
-    val screenshot = saveScreenshot(image.toByteArray(), thumbnail.toByteArray(), info?.location)
+    val screenshot = saveScreenshot(
+      image.toByteArray(),
+      thumbnail.toByteArray(),
+      info?.location,
+      converter.targetDimension
+    )
 
     return addReference(
       key = key,
@@ -160,7 +165,7 @@ class ScreenshotService(
       .readFile(
         UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.thumbnailFilenameWithExtension
       )
-    val screenshot = saveScreenshot(img, thumbnail, image.location)
+    val screenshot = saveScreenshot(img, thumbnail, image.location, Dimension(image.width, image.height))
     imageUploadService.delete(image)
     return ScreateScreenshotResult(
       screenshot = screenshot,
@@ -172,10 +177,17 @@ class ScreenshotService(
   /**
    * Creates and saves screenshot entity and the corresponding file
    */
-  fun saveScreenshot(image: ByteArray, thumbnail: ByteArray, location: String?): Screenshot {
+  fun saveScreenshot(
+    image: ByteArray,
+    thumbnail: ByteArray,
+    location: String?,
+    dimension: Dimension
+  ): Screenshot {
     val screenshot = Screenshot()
     screenshot.extension = "png"
     screenshot.location = location
+    screenshot.width = dimension.width
+    screenshot.height = screenshot.height
     screenshotRepository.save(screenshot)
     fileStorage.storeFile(screenshot.getThumbnailPath(), thumbnail)
     fileStorage.storeFile(screenshot.getFilePath(), image)
