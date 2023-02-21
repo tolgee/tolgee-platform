@@ -104,7 +104,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
-    put: operations["update_1"];
+    put: operations["update_2"];
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
@@ -141,7 +141,7 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_7"];
-    put: operations["update_3"];
+    put: operations["update_4"];
     delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
@@ -152,7 +152,7 @@ export interface paths {
   };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
-    put: operations["update_4"];
+    put: operations["update_5"];
     delete: operations["delete_8"];
   };
   "/v2/organizations/{id}/leave": {
@@ -166,7 +166,7 @@ export interface paths {
     delete: operations["removeAvatar_2"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_5"];
+    put: operations["update_6"];
     delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
@@ -328,7 +328,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
-    get: operations["getAllNamespaces_1"];
+    get: operations["getAllNamespaces_2"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -665,6 +665,9 @@ export interface components {
       thumbnailUrl: string;
       createdAt?: string;
       keyReferences: components["schemas"]["KeyInScreenshotModel"][];
+      location?: string;
+      width?: number;
+      height?: number;
     };
     /** Translations object containing values updated in this request */
     TranslationModel: {
@@ -804,11 +807,11 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      createdAt: number;
-      updatedAt: number;
+      id: number;
       lastUsedAt?: number;
       expiresAt?: number;
-      id: number;
+      createdAt: number;
+      updatedAt: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -880,15 +883,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      username?: string;
+      id: number;
       lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      id: number;
+      username?: string;
       description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -933,8 +936,6 @@ export interface components {
       /** The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
-      /** Screenshots with these ids will be replaced by the ones in screenshots property */
-      removeScreenshotIds?: number[];
       /** Object mapping language tag to translation */
       translations: {
         [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
@@ -1071,6 +1072,7 @@ export interface components {
     ScreenshotInfoDto: {
       text?: string;
       positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+      location?: string;
     };
     CreatePatDto: {
       /** Description of the PAT */
@@ -1078,12 +1080,16 @@ export interface components {
       /** Expiration date in epoch format (milliseconds). When null, token never expires. */
       expiresAt?: number;
     };
+    ImageUploadInfoDto: {
+      location?: string;
+    };
     UploadedImageModel: {
       id: number;
       filename: string;
       fileUrl: string;
       requestFilename: string;
       createdAt: string;
+      location?: string;
     };
     CreateApiKeyDto: {
       projectId: number;
@@ -1229,19 +1235,19 @@ export interface components {
       extraCreditBalance: number;
     };
     KeySearchResultView: {
-      namespace?: string;
-      translation?: string;
-      baseTranslation?: string;
       name: string;
       id: number;
+      translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      namespace?: string;
-      translation?: string;
-      baseTranslation?: string;
       name: string;
       id: number;
+      translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1346,7 +1352,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1358,6 +1363,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1577,11 +1583,11 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      createdAt: number;
-      updatedAt: number;
+      id: number;
       lastUsedAt?: number;
       expiresAt?: number;
-      id: number;
+      createdAt: number;
+      updatedAt: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1635,15 +1641,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      username?: string;
+      id: number;
       lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
-      scopes: string[];
-      id: number;
+      username?: string;
       description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2674,7 +2680,7 @@ export interface operations {
       };
     };
   };
-  update_1: {
+  update_2: {
     parameters: {
       path: {
         commentId: number;
@@ -3159,7 +3165,7 @@ export interface operations {
       };
     };
   };
-  update_3: {
+  update_4: {
     parameters: {
       path: {
         id: number;
@@ -3302,7 +3308,7 @@ export interface operations {
       };
     };
   };
-  update_4: {
+  update_5: {
     parameters: {
       path: {
         id: number;
@@ -3473,7 +3479,7 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  update_6: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -4516,6 +4522,7 @@ export interface operations {
       content: {
         "multipart/form-data": {
           image: string;
+          info?: components["schemas"]["ImageUploadInfoDto"];
         };
       };
     };
@@ -5281,7 +5288,7 @@ export interface operations {
     };
   };
   /** Returns all existing and imported namespaces */
-  getAllNamespaces_1: {
+  getAllNamespaces_2: {
     parameters: {
       path: {
         projectId: number;

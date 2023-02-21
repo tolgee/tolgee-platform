@@ -35,6 +35,11 @@ export type BillingProgress = {
   sufficient: string;
 };
 
+export type Marker = {
+  primary: string;
+  secondary: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -68,6 +73,10 @@ export const colors = {
     } as BillingProgress,
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
+    marker: {
+      primary: '#ff0000',
+      secondary: '#ffc0cb',
+    },
   },
   dark: {
     white: '#dddddd',
@@ -116,5 +125,9 @@ export const colors = {
     } as BillingProgress,
     billingPlan: '#233043',
     globalLoading: '#ff6995',
+    marker: {
+      primary: '#ff0000',
+      secondary: '#ffc0cb',
+    } as Marker,
   },
 } as const;

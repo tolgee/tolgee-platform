@@ -146,6 +146,7 @@ const getTheme = (mode: PaletteMode) => {
       billingProgress: c.billingProgress,
       billingPlan: createColor(c.billingPlan),
       globalLoading: createColor(c.globalLoading),
+      marker: c.marker,
     },
     mixins: {
       toolbar: {
