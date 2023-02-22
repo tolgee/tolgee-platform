@@ -139,7 +139,7 @@ class KeyController(
   @AccessWithApiKey([ApiScope.KEYS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(
-    summary = "Imports new keys with translations. If key already exists, it's translations and tags" +
+    summary = "Imports new keys with translations. If key already exists, its translations and tags" +
       " are not updated."
   )
   @RequestActivity(ActivityType.IMPORT)
