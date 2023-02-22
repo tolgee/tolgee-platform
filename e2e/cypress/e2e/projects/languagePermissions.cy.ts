@@ -18,7 +18,7 @@ describe('Langauge Permissions', () => {
 
   afterEach(() => {
     waitForGlobalLoading();
-    // languagePermissionsData.clean();
+    languagePermissionsData.clean();
   });
 
   it('English can be edited', () => {
