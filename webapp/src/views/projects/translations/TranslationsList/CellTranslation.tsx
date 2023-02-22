@@ -58,7 +58,6 @@ const StyledTranslation = styled('div')`
 `;
 
 const StyledTranslationContent = styled('div')`
-  overflow: hidden;
   position: relative;
 `;
 
