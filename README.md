@@ -12,13 +12,13 @@
 
 An open-source alternative to Crowdin, Phrase or Lokalise
 
-![example workflow](https://github.com/tolgee/server/actions/workflows/test.yml/badge.svg)
-![kotlin](https://img.shields.io/github/languages/top/tolgee/server)
+![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
+![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
 [![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
-[![github release](https://img.shields.io/github/v/release/tolgee/server?label=GitHub%20Release)](https://github.com/tolgee/server/releases/tag/v1.2.1)
-![licence](https://img.shields.io/github/license/tolgee/server)
+[![github release](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform/releases/latest)
+![licence](https://img.shields.io/github/license/tolgee/tolgee-platform)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
-[![github stars](https://img.shields.io/github/stars/tolgee/server?style=social&label=Tolgee%20Server)](https://github.com/tolgee/server)
+[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-platform?style=social&label=Tolgee%20Platform)](https://github.com/tolgee/tolgee-platform)
 [![Github discussions](https://img.shields.io/github/discussions/tolgee/tolgee-platform)](https://github.com/tolgee/tolgee-platform/discussions)
 </div>
 
