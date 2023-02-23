@@ -86,15 +86,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.VERSION }}
 
-      - name: Deploy testing
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          mkdir -p ~/.kube
-          echo $KUBERNETES_DO_SERVICE_CONFIG | base64 -d > ~/.kube/config
-          kubectl exec $(kubectl get pods -l app=testing-migrator -o jsonpath={.items\[0\].metadata.name}) -- /bin/bash -c "MIGRATE_TARGET_IMAGE=tolgee/tolgee:latest /migrate.sh"
-        env:
-          KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
-
       - uses: actions/upload-artifact@v2
         if: always()
         with:
@@ -104,7 +95,7 @@ jobs:
             ./e2e/cypress/screenshots/**/*
             ./build/reports/**/*
 
-      - name: Trigger EE test & deploy
+      - name: Trigger Billing repo tests & testing deploy
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           curl \
