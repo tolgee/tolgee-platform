@@ -1,3 +1,16 @@
+# [3.7.0](https://github.com/tolgee/tolgee-platform/compare/v3.6.1...v3.7.0) (2023-02-23)
+
+
+### Bug Fixes
+
+* cropped khmer when editting ([#1575](https://github.com/tolgee/tolgee-platform/issues/1575)) ([7321897](https://github.com/tolgee/tolgee-platform/commit/73218978d88a815670cd83f78cb101c1a1a7f4af))
+* Links to the GitHub repo in README.md ([#1580](https://github.com/tolgee/tolgee-platform/issues/1580)) ([241f83e](https://github.com/tolgee/tolgee-platform/commit/241f83e58d4c5e1d711e10581ec3e7754c390f26))
+
+
+### Features
+
+* Keys import > import tags ([#1576](https://github.com/tolgee/tolgee-platform/issues/1576)) ([7993c20](https://github.com/tolgee/tolgee-platform/commit/7993c20a344b100ceebb0a7192a1aa73aaa62793))
+
 ## [3.6.1](https://github.com/tolgee/tolgee-platform/compare/v3.6.0...v3.6.1) (2023-02-17)
 
 
