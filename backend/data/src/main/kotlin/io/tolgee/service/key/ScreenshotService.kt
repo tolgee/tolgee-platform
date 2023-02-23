@@ -254,6 +254,10 @@ class ScreenshotService(
     return screenshotRepository.findAllById(ids)
   }
 
+  fun find(id: Long): Screenshot? {
+    return screenshotRepository.findById(id).orElse(null)
+  }
+
   fun deleteAllByProject(projectId: Long) {
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
@@ -261,15 +265,12 @@ class ScreenshotService(
   }
 
   fun deleteAllByKeyId(keyId: Long) {
-    val all = screenshotRepository.getAllByKeyId(keyId)
-    all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAll(all)
+    deleteAllByKeyId(listOf(keyId))
   }
 
   fun deleteAllByKeyId(keyIds: Collection<Long>) {
-    val all = screenshotRepository.getAllByKeyIdIn(keyIds)
-    all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAll(all)
+    val all = keyScreenshotReferenceRepository.getAllByKeyIdIn(keyIds)
+    removeScreenshotReferences(all)
   }
 
   private fun deleteFile(screenshot: Screenshot) {

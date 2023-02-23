@@ -68,13 +68,17 @@ class KeysTestData {
 
       secondKey = addKey {
         name = "second_key"
+        screenshot = addScreenshot {}.self
       }.self
 
       addKey {
         name = "key_with_referecnces"
         this@KeysTestData.keyWithReferences = this
       }.build {
-        screenshot = addScreenshot {}.self
+        addScreenshotReference {
+          screenshot = this@KeysTestData.screenshot
+          key = this@build.self
+        }
         addMeta {
           tags.add(
             Tag().apply {
