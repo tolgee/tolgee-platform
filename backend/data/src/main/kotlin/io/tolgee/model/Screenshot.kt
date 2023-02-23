@@ -58,8 +58,10 @@ class Screenshot : StandardAuditModel() {
 
   var location: String? = null
 
+  @ColumnDefault("0")
   var width: Int = 0
 
+  @ColumnDefault("0")
   var height: Int = 0
 
   override fun equals(other: Any?): Boolean {

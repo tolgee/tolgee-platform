@@ -68,7 +68,8 @@ class KeysTestData {
 
       secondKey = addKey {
         name = "second_key"
-        screenshot = addScreenshot {}.self
+      }.build {
+        screenshot = addScreenshot { }.self
       }.self
 
       addKey {

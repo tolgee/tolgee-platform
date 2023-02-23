@@ -2365,16 +2365,16 @@
             <column name="location"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1676985522837-1">
+    <changeSet author="jenik (generated)" id="1676985522838-1">
         <addColumn tableName="screenshot">
-            <column name="height" type="int4">
+            <column name="height" type="int4" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1676985522837-2">
+    <changeSet author="jenik (generated)" id="1676985522838-2">
         <addColumn tableName="screenshot">
-            <column name="width" type="int4">
+            <column name="width" type="int4" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
