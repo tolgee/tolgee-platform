@@ -1,5 +1,6 @@
 package io.tolgee.service.key
 
+import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -7,6 +8,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -15,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TagService(
   private val tagRepository: TagRepository,
-  private val keyMetaService: KeyMetaService
+  private val keyMetaService: KeyMetaService,
+  @Lazy
+  private val keyService: KeyService
 ) {
   fun tagKey(key: Key, tagName: String): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
@@ -41,6 +45,41 @@ class TagService(
     tagRepository.save(tag)
     keyMetaService.save(keyMeta)
     return tag
+  }
+
+  fun tagKeys(map: Map<Key, List<String>>) {
+    val keysWithTags = keyService.getKeysWithTags(map.keys).associateBy { it.id }
+    val projectId = keysWithTags.map { it.value.project.id }.toSet().singleOrNull()
+      ?: throw BadRequestException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+
+    val existingTags = this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }
+
+    map.forEach { (key, tagsToAdd) ->
+      tagsToAdd.forEach { tagToAdd ->
+        val keyWithData = keysWithTags[key.id] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+        val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
+        val tag = existingTags[tagToAdd]?.let {
+          if (!keyMeta.tags.contains(it)) {
+            it.keyMetas.add(keyMeta)
+            keyMeta.tags.add(it)
+          }
+          it
+        } ?: let {
+          Tag().apply {
+            project = key.project!!
+            keyMetas.add(keyMeta)
+            name = tagToAdd
+            keyMeta.tags.add(this)
+          }
+        }
+        tagRepository.save(tag)
+        keyMetaService.save(keyMeta)
+      }
+    }
+  }
+
+  private fun getFromProject(projectId: Long, tags: Collection<String>): List<Tag> {
+    return tagRepository.findAllByProject(projectId, tags)
   }
 
   fun remove(key: Key, tag: Tag) {
@@ -86,6 +125,10 @@ class TagService(
 
   fun get(id: Long): Tag {
     return find(id) ?: throw NotFoundException()
+  }
+
+  fun getAllFromProject(projectId: Long): List<Tag> {
+    return tagRepository.findAllByProjectId(projectId)
   }
 
   fun find(project: Project, tagName: String): Tag? {

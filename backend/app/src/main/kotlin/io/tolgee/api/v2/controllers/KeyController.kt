@@ -138,7 +138,10 @@ class KeyController(
   @PostMapping("/import")
   @AccessWithApiKey([ApiScope.KEYS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
-  @Operation(summary = "Imports new keys with translations. If key already exists, its translations are not updated.")
+  @Operation(
+    summary = "Imports new keys with translations. If key already exists, its translations and tags" +
+      " are not updated."
+  )
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
     keyService.importKeys(dto.keys, projectHolder.projectEntity)

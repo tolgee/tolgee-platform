@@ -27,4 +27,10 @@ class ImportKeysItemDto(
     example = "{\"en\": \"What a translated value!\", \"cs\": \"Jaká to přeložená hodnota!\"}"
   )
   val translations: Map<String, String?> = mapOf(),
+
+  @Schema(
+    description = "Tags of the key",
+    example = "[\"homepage\", \"user-profile\"]"
+  )
+  val tags: List<String>? = null
 )

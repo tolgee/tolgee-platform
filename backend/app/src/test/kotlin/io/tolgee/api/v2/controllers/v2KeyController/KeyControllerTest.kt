@@ -417,13 +417,15 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
             mapOf(
               "name" to "first_key",
               "translations" to
-                mapOf("en" to "hello")
+                mapOf("en" to "hello"),
+              "tags" to listOf("tag1", "tag2")
             ),
             mapOf(
               "name" to "new_key",
               "translations" to
-                mapOf("en" to "hello")
-            )
+                mapOf("en" to "hello"),
+              "tags" to listOf("tag1", "tag2", "test")
+            ),
           )
       )
     ).andIsOk
@@ -434,7 +436,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         it.name == "new_key"
       }
       key.assert.isNotNull()
-      key!!.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
+      key!!.keyMeta!!.tags.assert.hasSize(3)
+      key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
     }
   }
 

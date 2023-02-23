@@ -25,7 +25,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      from Key k left join fetch k.namespace where k.project.id = :projectId
+      from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId
     """
   )
   fun getAllByProjectId(projectId: Long): Set<Key>
@@ -56,4 +56,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
   )
   fun getAllByProjectId(projectId: Long, pageable: Pageable): Page<Key>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.keyMeta km
+    left join fetch km.tags
+    where k in :keys
+  """
+  )
+  fun getWithTags(keys: Set<Key>): List<Key>
 }
