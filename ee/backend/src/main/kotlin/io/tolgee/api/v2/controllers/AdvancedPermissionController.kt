@@ -3,6 +3,8 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.model.enums.Scope
@@ -23,14 +25,14 @@ import org.springframework.web.bind.annotation.RestController
 class AdvancedPermissionController(
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val eePermissionService: EePermissionService,
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {
   @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
   @AccessWithProjectPermission(Scope.ADMIN)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
-    @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @Schema(
       description = "Granted scopes",
@@ -39,10 +41,14 @@ class AdvancedPermissionController(
     @RequestParam scopes: List<String>?,
     @ParameterObject params: SetPermissionLanguageParams
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId!!,
+      Feature.GRANULAR_PERMISSIONS
+    )
     val parsedScopes = Scope.parse(scopes)
     projectPermissionFacade.checkNotCurrentUser(userId)
     eePermissionService.setUserDirectPermission(
-      projectId = projectId,
+      projectId = projectHolder.project.id,
       userId = userId,
       languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id),
       scopes = parsedScopes
@@ -59,6 +65,7 @@ class AdvancedPermissionController(
     )
     @RequestParam scopes: List<String>
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(organizationId, Feature.GRANULAR_PERMISSIONS)
     val parsedScopes = Scope.parse(scopes)
     eePermissionService.setOrganizationBasePermission(organizationId, parsedScopes)
   }

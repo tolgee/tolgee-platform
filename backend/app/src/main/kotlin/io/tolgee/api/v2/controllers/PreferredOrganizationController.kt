@@ -6,7 +6,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.v2.hateoas.organization.OrganizationModel
+import io.tolgee.api.v2.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
@@ -29,7 +29,7 @@ class PreferredOrganizationController(
       "If server allows users to create organization, preferred organization is automatically created " +
       "if user doesn't have access to any organization."
   )
-  fun getPreferred(): OrganizationModel {
+  fun getPreferred(): PrivateOrganizationModel {
     return preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
   }
 }

@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.component.enabledFeaturesProvider.PublicEnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
@@ -8,14 +10,25 @@ import io.tolgee.model.Organization
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.PermissionTestUtil
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
 class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
 
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
+
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @BeforeEach
+  fun setup() {
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.GRANULAR_PERMISSIONS)
+  }
 
   @Test
   fun `sets user's permissions with translateLanguages and view `() {
@@ -33,6 +46,17 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
       Assertions.assertThat(data.computedPermissions.stateChangeLanguageIds)
         .containsExactlyInAnyOrder(getLangId("en"))
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `fails to set user's permission when feature disabled`() {
+    enabledFeaturesProvider.forceEnabled = listOf()
+    permissionTestUtil.performSetPermissions(
+      ""
+    ) { getLang -> "scopes=screenshots.upload&viewLanguages=${getLang("en")}" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
   }
 
   @Test
@@ -100,6 +124,17 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
 
       organizationService.get(org.id).basePermission.scopes.assert.containsExactlyInAnyOrder(
         Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT
+      )
+    }
+  }
+
+  @Test
+  fun `cannot set organization base permission with scopes when disabled`() {
+    enabledFeaturesProvider.forceEnabled = listOf()
+    permissionTestUtil.withPermissionsTestData { project, user ->
+      val org = project.organizationOwner
+      performSetScopesBaseOrganization(org).andIsBadRequest.andHasErrorMessage(
+        Message.FEATURE_NOT_ENABLED
       )
     }
   }

@@ -1,6 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.enabledFeaturesProvider.PublicEnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
@@ -10,12 +12,22 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.InvitationTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/projects/") {
 
   val invitationTestUtil: InvitationTestUtil by lazy {
     InvitationTestUtil(this, applicationContext)
+  }
+
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @BeforeEach
+  fun setup() {
+    enabledFeaturesProvider.forceEnabled = listOf(Feature.GRANULAR_PERMISSIONS)
   }
 
   @Test
@@ -27,6 +39,15 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
 
     val invitation = invitationTestUtil.getInvitation(result)
     invitation.permission!!.scopes.assert.containsExactlyInAnyOrder(Scope.TRANSLATIONS_EDIT)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `fails when feature disabled`() {
+    enabledFeaturesProvider.forceEnabled = listOf()
+    invitationTestUtil.perform {
+      scopes = setOf("translations.edit")
+    }.andIsBadRequest
   }
 
   @Test
