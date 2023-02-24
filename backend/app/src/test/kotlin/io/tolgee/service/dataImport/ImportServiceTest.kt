@@ -52,15 +52,21 @@ class ImportServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes import`() {
     val testData = ImportTestData()
-    testData.addFileIssues()
-    testData.addKeyMetadata()
-    testDataService.saveTestData(testData.root)
-    entityManager.flush()
-    entityManager.clear()
-    importService.deleteImport(testData.import)
-    entityManager.flush()
-    entityManager.clear()
-    assertThat(importService.find(testData.import.project.id, testData.import.author.id)).isNull()
+    executeInNewTransaction {
+      testData.addFileIssues()
+      testData.addKeyMetadata()
+      testDataService.saveTestData(testData.root)
+      entityManager.flush()
+      entityManager.clear()
+    }
+
+    val import = importService.get(testData.import.id)
+    executeInNewTransaction {
+      importService.deleteImport(import)
+      entityManager.flush()
+      entityManager.clear()
+      assertThat(importService.find(testData.import.project.id, testData.import.author.id)).isNull()
+    }
   }
 
   @Test
@@ -71,7 +77,8 @@ class ImportServiceTest : AbstractSpringTest() {
       testData
     }
     executeInNewTransaction {
-      importService.import(testData.import)
+      val import = importService.get(testData.import.id)
+      importService.import(import)
     }
     executeInNewTransaction {
       keyService.find(testData.project.id, "what a key", "homepage").assert.isNotNull

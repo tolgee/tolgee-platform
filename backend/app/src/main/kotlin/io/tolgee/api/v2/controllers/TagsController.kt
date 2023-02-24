@@ -13,6 +13,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.KeyService
@@ -78,8 +79,8 @@ class TagsController(
 
   @GetMapping(value = ["tags"])
   @Operation(summary = "Returns project tags")
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey
   fun getAll(
     @RequestParam search: String? = null,
     @SortDefault("name") @ParameterObject pageable: Pageable

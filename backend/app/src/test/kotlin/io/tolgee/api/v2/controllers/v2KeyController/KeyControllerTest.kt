@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
@@ -10,6 +11,7 @@ import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -45,14 +47,12 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = KeysTestData()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    this.projectSupplier = { testData.project }
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `creates key`() {
+    saveTestDataAndPrepare()
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key"))
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
@@ -62,7 +62,33 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns all keys`() {
+    testData.addNKeys(120)
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("second_key")
+          node("[2].namespace").isEqualTo("null")
+        }
+      }
+    performProjectAuthGet("keys?page=1")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("key_19")
+          node("[2].namespace").isEqualTo("null")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `creates key with size 2000`() {
+    saveTestDataAndPrepare()
     performProjectAuthPost("keys", CreateKeyDto(name = MAX_OK_NAME))
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
@@ -73,6 +99,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
   @Test
   fun `creates key with keys edit scope`() {
+    saveTestDataAndPrepare()
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
@@ -83,8 +110,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `creates key with translations and tags and screenshots`() {
+    saveTestDataAndPrepare()
     val keyName = "super_key"
-
     val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
     val screenshotImageIds = screenshotImages.map { it.id }
     performProjectAuthPost(
@@ -165,6 +192,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   )
   @Test
   fun `updates key with translations and tags and screenshots`() {
+    saveTestDataAndPrepare()
+
     val keyName = "super_key"
 
     val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
@@ -239,6 +268,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not create key when not valid`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthPost("keys", CreateKeyDto(name = ""))
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {
         node("STANDARD_VALIDATION") {
@@ -257,6 +288,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not create key when key exists`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthPost("keys", CreateKeyDto(name = "first_key"))
       .andIsBadRequest
       .andAssertError
@@ -266,6 +299,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `updates key name`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "test"))
       .andIsOk.andPrettyPrint.andAssertThatJson {
         node("name").isEqualTo("test")
@@ -275,6 +310,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not update if invalid`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = ""))
       .andIsBadRequest
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = LONGER_NAME))
@@ -284,6 +321,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not update if from other project`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project2 }
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "aasda"))
       .andIsBadRequest.andAssertThatJson {
@@ -294,6 +333,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes single key`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthDelete("keys/${testData.firstKey.id}", null).andIsOk
     assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
   }
@@ -301,6 +342,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes single key with references`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthDelete("keys/${testData.keyWithReferences.id}", null).andIsOk
     assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
   }
@@ -308,6 +351,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes multiple keys with references`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthDelete("keys/${testData.keyWithReferences.id},${testData.keyWithReferences.id}", null).andIsOk
     assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
   }
@@ -315,6 +360,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not delete if not in project`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.firstKey.id}", null)
       .andIsBadRequest.andAssertThatJson {
@@ -325,6 +372,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes multiple keys`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project }
     performProjectAuthDelete("keys/${testData.firstKey.id},${testData.secondKey.id}", null).andIsOk
     assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
@@ -334,6 +383,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes multiple keys via post`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project }
     performProjectAuthDelete(
       "keys", mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id))
@@ -345,6 +396,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not delete multiple if not in project`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.secondKey.id},${testData.firstKey.id}", null)
       .andIsBadRequest.andAssertThatJson {
@@ -355,6 +408,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `imports keys`() {
+    saveTestDataAndPrepare()
+
     projectSupplier = { testData.project }
     performProjectAuthPost(
       "keys/import",
@@ -383,5 +438,34 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key.assert.isNotNull()
       key!!.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `import keys checks permissions`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+
+    projectSupplier = { testData.project }
+    userAccount = testData.viewEnOnlyUser
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "first_key",
+              "translations" to
+                mapOf("de" to "hello")
+            ),
+          )
+      )
+    ).andIsForbidden
+  }
+
+  private fun saveTestDataAndPrepare() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    this.projectSupplier = { testData.project }
   }
 }

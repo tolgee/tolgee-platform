@@ -4,7 +4,6 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import TranslationsSearchField from './TranslationsSearchField';
 
 import {
@@ -12,7 +11,6 @@ import {
   useTranslationsActions,
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
-import { StickyHeader } from './StickyHeader';
 import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
@@ -44,7 +42,7 @@ type Props = {
 };
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
@@ -95,7 +93,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </StyledToggleButton>
           </ButtonGroup>
 
-          {projectPermissions.satisfiesPermission('keys.edit') && (
+          {satisfiesPermission('keys.edit') && (
             <Button
               startIcon={<Add />}
               color="primary"

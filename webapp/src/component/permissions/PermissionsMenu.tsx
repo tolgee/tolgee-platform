@@ -11,7 +11,6 @@ import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { AdvancedPermissionsMenuItem } from './AdvancedPermissionsMenuItem';
 
 type PermissionType = NonNullable<
   components['schemas']['PermissionModel']['type']
@@ -102,9 +101,6 @@ export const PermissionsMenu: FunctionComponent<{
             />
           </MenuItem>
         ))}
-        {props.enableAdvanced && (
-          <AdvancedPermissionsMenuItem user={props.user} />
-        )}
       </Menu>
     </>
   );

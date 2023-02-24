@@ -57,6 +57,7 @@ class TranslationsTestData {
           text = "Z translation"
           state = TranslationState.REVIEWED
           auto = true
+          outdated = true
           mtProvider = MtServiceType.GOOGLE
           aKeyGermanTranslation = this
         }.build {

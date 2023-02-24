@@ -41,5 +41,8 @@ export const useStateService = ({ translations }: Props) => {
       }
     );
 
-  return { changeState, isLoading: putTranslationState.isLoading };
+  return {
+    changeState,
+    isLoading: putTranslationState.isLoading,
+  };
 };

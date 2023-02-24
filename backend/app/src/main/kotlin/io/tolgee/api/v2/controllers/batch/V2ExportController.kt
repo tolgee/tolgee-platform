@@ -6,9 +6,11 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springdoc.api.annotations.ParameterObject
@@ -36,6 +38,8 @@ import java.util.zip.ZipOutputStream
 class V2ExportController(
   private val exportService: ExportService,
   private val projectHolder: ProjectHolder,
+  private val languageService: LanguageService,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   @GetMapping(value = [""])
   @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
@@ -44,6 +48,12 @@ class V2ExportController(
   fun export(
     @ParameterObject params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
+    params.languages = languageService
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
+      .toList()
+      .map { language -> language.tag }
+      .toSet()
+
     val exported = exportService.export(projectHolder.project.id, params)
     checkExportNotEmpty(exported)
     return getExportResponse(params, exported)

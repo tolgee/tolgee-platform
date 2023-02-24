@@ -9,10 +9,6 @@ enum class Scope(
   @get:JsonValue
   var value: String
 ) {
-  // !!!!
-  // Don't change the order of the enum, it's stored as ORDINAL is ApiKey entity
-  // !!!!
-
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
   KEYS_EDIT("keys.edit"),
@@ -20,7 +16,6 @@ enum class Scope(
   SCREENSHOTS_DELETE("screenshots.delete"),
   SCREENSHOTS_VIEW("screenshots.view"),
   ACTIVITY_VIEW("activity.view"),
-  IMPORT("import"),
   LANGUAGES_EDIT("languages.edit"),
   ADMIN("admin"),
   PROJECT_EDIT("project.edit"),
@@ -28,55 +23,72 @@ enum class Scope(
   TRANSLATIONS_COMMENTS_ADD("translation-comments.add"),
   TRANSLATIONS_COMMENTS_EDIT("translation-comments.edit"),
   TRANSLATIONS_COMMENTS_SET_STATE("translation-comments.set-state"),
-  TRANSLATIONS_STATE_EDIT("translations.state-edit")
+  TRANSLATIONS_STATE_EDIT("translations.state-edit"),
+  KEYS_VIEW("keys.view"),
+  KEYS_DELETE("keys.delete"),
+  KEYS_CREATE("keys.create"),
   ;
 
   fun expand() = Scope.expand(this)
 
   companion object {
+    private val keysView = HierarchyItem(KEYS_VIEW)
+    private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))
+    private val screenshotsView = HierarchyItem(SCREENSHOTS_VIEW, listOf(keysView))
+
     val hierarchy = HierarchyItem(
       ADMIN,
       listOf(
         HierarchyItem(
           TRANSLATIONS_EDIT,
+          listOf(translationsView)
+        ),
+        HierarchyItem(
+          KEYS_EDIT,
           listOf(
-            HierarchyItem(TRANSLATIONS_VIEW)
+            keysView
           )
         ),
         HierarchyItem(
-          KEYS_EDIT, listOf()
+          KEYS_DELETE,
+          listOf(
+            keysView
+          )
+        ),
+        HierarchyItem(
+          KEYS_CREATE
         ),
         HierarchyItem(
           SCREENSHOTS_UPLOAD,
           listOf(
-            HierarchyItem(SCREENSHOTS_VIEW)
+            screenshotsView
           )
         ),
         HierarchyItem(
           SCREENSHOTS_DELETE,
           listOf(
-            HierarchyItem(SCREENSHOTS_VIEW)
+            screenshotsView
           )
         ),
         HierarchyItem(ACTIVITY_VIEW),
-        HierarchyItem(IMPORT),
         HierarchyItem(LANGUAGES_EDIT),
         HierarchyItem(PROJECT_EDIT),
         HierarchyItem(MEMBERS_VIEW),
         HierarchyItem(
           TRANSLATIONS_COMMENTS_SET_STATE,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          listOf(translationsView)
         ),
         HierarchyItem(
           TRANSLATIONS_COMMENTS_ADD,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          listOf(translationsView)
         ),
         HierarchyItem(
           TRANSLATIONS_COMMENTS_EDIT,
-          listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          listOf(translationsView)
         ),
         HierarchyItem(
-          TRANSLATIONS_STATE_EDIT, listOf(HierarchyItem(TRANSLATIONS_VIEW))
+          TRANSLATIONS_STATE_EDIT,
+          listOf(HierarchyItem(TRANSLATIONS_VIEW))
         )
       )
     )
@@ -131,6 +143,7 @@ enum class Scope(
       }
       throw NotFoundException(Message.SCOPE_NOT_FOUND)
     }
+
     fun parse(scopes: Collection<String>?): Set<Scope> {
       scopes ?: return setOf()
       return scopes.map { stringScope ->

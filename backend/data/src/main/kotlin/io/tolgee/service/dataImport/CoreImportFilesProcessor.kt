@@ -95,12 +95,14 @@ class CoreImportFilesProcessor(
       return this.name.endsWith(".zip")
     }
 
-  private fun ImportFileDto.saveFileEntity() = importService.saveFile(
-    ImportFile(
+  private fun ImportFileDto.saveFileEntity(): ImportFile {
+    val entity = ImportFile(
       name,
       import
     )
-  )
+    import.files.add(entity)
+    return importService.saveFile(entity)
+  }
 
   private fun FileProcessorContext.processResult() {
     this.fileEntity.preselectNamespace()

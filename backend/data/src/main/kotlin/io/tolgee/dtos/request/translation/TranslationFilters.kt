@@ -70,4 +70,16 @@ To filter default namespace, set to empty string.
 
   @field:Parameter(description = "Selects only keys with provided tag")
   var filterTag: List<String>? = null
+
+  @field:Parameter(
+    description = "Selects only keys, where translation in provided langs is in outdated state",
+    example = "en-US"
+  )
+  var filterOutdatedLanguage: List<String>? = null
+
+  @field:Parameter(
+    description = "Selects only keys, where translation in provided langs is not in outdated state",
+    example = "en-US"
+  )
+  var filterNotOutdatedLanguage: List<String>? = null
 }

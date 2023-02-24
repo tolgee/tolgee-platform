@@ -15,7 +15,6 @@ import { TranslationsList } from './TranslationsList/TranslationsList';
 import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';

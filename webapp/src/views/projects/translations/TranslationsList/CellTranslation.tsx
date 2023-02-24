@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import clsx from 'clsx';
-import { styled } from '@mui/material';
+import { styled, Box } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
@@ -19,7 +19,7 @@ import { TranslationVisual } from '../TranslationVisual';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
-import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { TranslationFlags } from '../cell/TranslationFlags';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -46,7 +46,7 @@ const StyledContainer = styled('div')`
     'controls controls controls     ';
 `;
 
-const StyledAutoTranslationIndicator = styled(AutoTranslationIndicator)`
+const StyledAutoTranslationIndicator = styled(TranslationFlags)`
   position: relative;
   height: 0px;
   justify-self: start;
@@ -62,7 +62,7 @@ const StyledTranslationContent = styled('div')`
   position: relative;
 `;
 
-const StyledLanguage = styled('div')`
+const StyledLanguage = styled(Box)`
   margin: 12px 8px 8px 0px;
 `;
 
@@ -80,23 +80,13 @@ const StyledTranslationOpened = styled(TranslationOpened)`
   flex-grow: 1;
 `;
 
-const StyledControlsWrapper = styled('div')`
-  box-sizing: border-box;
-  grid-area: controls;
-  display: flex;
-  justify-content: flex-end;
-  overflow: hidden;
-  min-height: 44px;
-  padding: 12px 14px 12px 12px;
-  margin-top: -16px;
-`;
-
 type Props = {
   data: KeyWithTranslationsModel;
   language: LanguageModel;
   colIndex?: number;
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
+  stateChangeEnabled: boolean;
   width?: number | string;
   active: boolean;
   lastFocusable: boolean;
@@ -109,6 +99,7 @@ export const CellTranslation: React.FC<Props> = ({
   colIndex,
   onResize,
   editEnabled,
+  stateChangeEnabled,
   width,
   active,
   lastFocusable,
@@ -191,7 +182,10 @@ export const CellTranslation: React.FC<Props> = ({
       >
         <StyledCircledLanguageIcon flag={language.flagEmoji} />
 
-        <StyledLanguage data-cy="translations-table-cell-language">
+        <StyledLanguage
+          data-cy="translations-table-cell-language"
+          sx={{ fontWeight: language.base ? 'bold' : 'normal' }}
+        >
           {language.tag}
         </StyledLanguage>
 
@@ -209,27 +203,20 @@ export const CellTranslation: React.FC<Props> = ({
 
         <CellStateBar state={state} onResize={handleResize} />
 
-        <StyledControlsWrapper>
-          {!isEditing &&
-            (active ? (
-              <ControlsTranslation
-                onEdit={() => handleOpen('editor')}
-                onComments={() => handleOpen('comments')}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-                editEnabled={editEnabled}
-                state={state}
-                onStateChange={handleStateChange}
-              />
-            ) : (
-              // hide as many components as possible in order to be performant
-              <ControlsTranslation
-                lastFocusable={lastFocusable}
-                commentsCount={translation?.commentCount}
-                unresolvedCommentCount={translation?.unresolvedCommentCount}
-              />
-            ))}
-        </StyledControlsWrapper>
+        {!isEditing && (
+          <ControlsTranslation
+            onEdit={() => handleOpen('editor')}
+            onComments={() => handleOpen('comments')}
+            commentsCount={translation?.commentCount}
+            unresolvedCommentCount={translation?.unresolvedCommentCount}
+            stateChangeEnabled={stateChangeEnabled}
+            editEnabled={editEnabled}
+            state={state}
+            onStateChange={handleStateChange}
+            active={active}
+            lastFocusable={lastFocusable}
+          />
+        )}
       </StyledContainer>
 
       {editVal && (
@@ -245,6 +232,7 @@ export const CellTranslation: React.FC<Props> = ({
           autofocus={autofocus}
           state={state}
           onStateChange={handleStateChange}
+          stateChangeEnabled={stateChangeEnabled}
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}

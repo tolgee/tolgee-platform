@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -18,6 +19,8 @@ class KeysTestData {
   lateinit var english: Language
   lateinit var german: Language
 
+  lateinit var projectBuilder: ProjectBuilder
+
   val root: TestDataBuilder = TestDataBuilder().apply {
     val userAccountBuilder = addUserAccount {
       username = "Peter"
@@ -34,7 +37,7 @@ class KeysTestData {
       }
     }.self
 
-    addProject {
+    projectBuilder = addProject {
       name = "Peter's project"
       organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
       project = this
@@ -84,6 +87,16 @@ class KeysTestData {
             line = 20
             path = "./code/exist.extension"
           }
+        }
+      }
+    }
+  }
+
+  fun addNKeys(n: Int) {
+    (1..n).forEach {
+      projectBuilder.apply {
+        addKey {
+          name = "key_$it"
         }
       }
     }

@@ -9,6 +9,7 @@ type Props = {
   anchorEl: MenuProps['anchorEl'];
   onClose: () => void;
   languages?: LanguageModel[];
+  disabledLanguages?: number[] | undefined;
   value?: string[];
   onChange: (languages: string[]) => void;
 };
@@ -19,6 +20,7 @@ export const LanguagesMenu: React.FC<Props> = ({
   languages,
   value,
   onChange,
+  disabledLanguages,
 }) => {
   return (
     <Menu
@@ -34,6 +36,7 @@ export const LanguagesMenu: React.FC<Props> = ({
         languages: languages || [],
         value: value || [],
         onChange,
+        disabledLanguages,
       })}
     </Menu>
   );

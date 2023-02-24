@@ -61,6 +61,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
       assertThat(esTranslation.auto).isEqualTo(false)
 
       assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+      assertThat(deTranslation.outdated).isFalse
       assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
       assertThat(deTranslation.auto).isEqualTo(true)
       assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)

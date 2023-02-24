@@ -1,27 +1,30 @@
-import {container} from 'tsyringe';
-import {Button, styled} from '@mui/material';
-import {T, useTranslate} from '@tolgee/react';
-import {useHistory} from 'react-router-dom';
-import {LINKS, PARAMS} from 'tg.constants/links';
-import {confirmation} from 'tg.hooks/confirmation';
-import {useProject} from 'tg.hooks/useProject';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {MessageService} from 'tg.service/MessageService';
+import { container } from 'tsyringe';
+import { Button, styled } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { useHistory } from 'react-router-dom';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useProject } from 'tg.hooks/useProject';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 
-import {CellKey} from '../CellKey';
-import {useTranslationsActions, useTranslationsSelector,} from '../context/TranslationsContext';
-import {ScreenshotGallery} from '../Screenshots/ScreenshotGallery';
-import {Tag} from '../Tags/Tag';
-import {TagInput} from '../Tags/TagInput';
-import {CellTranslation} from '../TranslationsList/CellTranslation';
-import {parseErrorResponse} from 'tg.fixtures/errorFIxtures';
-import {FieldLabel} from 'tg.component/FormField';
-import {useProjectPermissions} from 'tg.hooks/useProjectPermissions';
-import {useUrlSearchState} from 'tg.hooks/useUrlSearchState';
-import {useGlobalLoading} from 'tg.component/GlobalLoading';
-import {NamespaceSelector} from 'tg.component/NamespaceSelector/NamespaceSelector';
-import {useUrlSearch} from 'tg.hooks/useUrlSearch';
-import {useGlobalActions} from 'tg.globalContext/GlobalContext';
+import { CellKey } from '../CellKey';
+import {
+  useTranslationsActions,
+  useTranslationsSelector,
+} from '../context/TranslationsContext';
+import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
+import { Tag } from '../Tags/Tag';
+import { TagInput } from '../Tags/TagInput';
+import { CellTranslation } from '../TranslationsList/CellTranslation';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { FieldLabel } from 'tg.component/FormField';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const messaging = container.resolve(MessageService);
 
@@ -75,7 +78,8 @@ export const KeyEditForm: React.FC = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const permissions = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
 
   const translation = useTranslationsSelector((c) => c.translations)?.[0];
   const languages = useTranslationsSelector((c) => c.languages);
@@ -138,7 +142,7 @@ export const KeyEditForm: React.FC = () => {
 
   useGlobalLoading(updateNamespace.isLoading);
 
-  const editEnabled = permissions.satisfiesPermission('keys.edit');
+  const editEnabled = satisfiesPermission('keys.edit');
 
   const handleRemoveKey = () => {
     confirmation({
@@ -236,7 +240,14 @@ export const KeyEditForm: React.FC = () => {
                 data={translation!}
                 language={language}
                 active={true}
-                editEnabled={permissions.canEditLanguage(language.id)}
+                editEnabled={satisfiesLanguageAccess(
+                  'translations.edit',
+                  language.id
+                )}
+                stateChangeEnabled={satisfiesLanguageAccess(
+                  'translations.state-edit',
+                  language.id
+                )}
                 lastFocusable={false}
               />
             </StyledLanguageField>

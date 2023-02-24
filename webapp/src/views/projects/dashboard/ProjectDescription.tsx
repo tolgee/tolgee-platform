@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -35,9 +34,7 @@ type Props = {
 export const ProjectDescription: React.FC<Props> = ({ description }) => {
   const project = useProject();
   const permissions = useProjectPermissions();
-  const canManage = permissions.satisfiesPermission(
-    ProjectPermissionType.MANAGE
-  );
+  const canManage = permissions.satisfiesPermission('project.edit');
 
   return (
     <StyledContainer data-cy="project-dashboard-description">

@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
-import {Menu, MenuItem, styled} from '@mui/material';
-import {ArrowDropDown} from '@mui/icons-material';
-import {useTranslate} from '@tolgee/react';
+import React, { useState } from 'react';
+import { Menu, MenuItem, styled } from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
+import { useTranslate } from '@tolgee/react';
 
-import {useNamespaceFilter} from './useNamespaceFilter';
-import {NamespaceRenameDialog} from './NamespaceRenameDialog';
-import {NsBannerRecord} from '../context/useNsBanners';
-import {useProjectPermissions} from 'tg.hooks/useProjectPermissions';
+import { useNamespaceFilter } from './useNamespaceFilter';
+import { NamespaceRenameDialog } from './NamespaceRenameDialog';
+import { NsBannerRecord } from '../context/useNsBanners';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const StyledNamespace = styled('div')`
   display: flex;

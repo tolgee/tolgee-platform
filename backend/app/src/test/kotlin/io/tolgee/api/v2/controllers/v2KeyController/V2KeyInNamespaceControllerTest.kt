@@ -108,6 +108,35 @@ class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `throws error when moving key to default ns where a key with same name already exists`() {
+    val keyName = "super_ultra_cool_key"
+    val namespace = "super_ultra_cool_namespace"
+
+    performProjectAuthPost("keys", CreateKeyDto(name = keyName))
+      .andIsCreated
+    performProjectAuthPost("keys", CreateKeyDto(name = keyName, namespace = namespace))
+      .andIsCreated
+
+    val keyId = keyService.get(project.id, keyName, namespace).id
+
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to ""))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
+
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to null))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
+
+    performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("key_exists")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `does not create key when exists empty ns`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "key2", namespace = ""))
       .andIsBadRequest

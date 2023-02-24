@@ -36,6 +36,7 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
         type: 'translation_auto',
         compute: ({ auto, mtProvider }) => mtProvider || auto || undefined,
       },
+      outdated: { type: 'outdated' },
     },
     references: ({ relations }) => {
       const result: Reference[] = [];
@@ -192,6 +193,10 @@ export const actionsConfiguration: Partial<
   },
   SET_TRANSLATION_STATE: {
     label: 'activity_set_translation_state',
+    entities: { Translation: true },
+  },
+  SET_OUTDATED_FLAG: {
+    label: 'activity_set_outdated_flag',
     entities: { Translation: true },
   },
   KEY_DELETE: {

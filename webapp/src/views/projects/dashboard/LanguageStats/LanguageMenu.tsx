@@ -19,7 +19,8 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
   const history = useHistory();
   const project = useProject();
-  const projectPermissions = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
 
   const closeWith = (action?: () => void) => (e) => {
     e?.stopPropagation();
@@ -49,18 +50,24 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
     );
   };
 
-  const editable = projectPermissions.satisfiesPermission('languages.edit');
+  const canViewLanguage = satisfiesLanguageAccess(
+    'translations.view',
+    language.id
+  );
+  const canEditLanguages = satisfiesPermission('languages.edit');
 
   return (
     <>
-      <IconButton
-        onClick={handleOpen}
-        data-cy="project-dashboard-language-menu"
-      >
-        <MoreVert />
-      </IconButton>
+      {(canViewLanguage || canEditLanguages) && (
+        <IconButton
+          onClick={handleOpen}
+          data-cy="project-dashboard-language-menu"
+        >
+          <MoreVert />
+        </IconButton>
+      )}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeWith()}>
-        {editable && (
+        {canEditLanguages && (
           <MenuItem
             onClick={closeWith(redirectToSettings)}
             data-cy="project-dashboard-language-menu-settings"
@@ -68,12 +75,14 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
             <T keyName="language_settings_title" />
           </MenuItem>
         )}
-        <MenuItem
-          onClick={closeWith(redirectToExport)}
-          data-cy="project-dashboard-language-menu-export"
-        >
-          <T keyName="export_translations_title" />
-        </MenuItem>
+        {canViewLanguage && (
+          <MenuItem
+            onClick={closeWith(redirectToExport)}
+            data-cy="project-dashboard-language-menu-export"
+          >
+            <T keyName="export_translations_title" />
+          </MenuItem>
+        )}
       </Menu>
     </>
   );

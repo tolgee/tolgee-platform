@@ -96,6 +96,7 @@ class AutoTranslationService(
   }
 
   private fun Translation.setValueAndState(text: String, usedService: MtServiceType?) {
+    this.resetFlags()
     this.state = TranslationState.TRANSLATED
     this.auto = true
     this.text = text

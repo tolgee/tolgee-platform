@@ -11,7 +11,6 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
@@ -188,21 +187,26 @@ export const ProjectTotals: React.FC<{
     );
   };
 
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
 
-  const canManage = permissions.satisfiesPermission('admin');
+  const isAdmin = satisfiesPermission('admin');
+  const canViewMembers = satisfiesPermission('users.view');
+  const canEditLanguages = satisfiesPermission('languages.edit');
+  const canViewTranslations = satisfiesPermission('translations.view');
 
   const tagsPresent = Boolean(stats.tagCount);
+  const tagsClickable = tagsPresent && canViewTranslations;
 
-  const membersEditable = config.authentication && canManage;
+  const membersAccessable = config.authentication && canViewMembers;
+  const membersEditable = membersAccessable && isAdmin;
 
   return (
     <>
       <StyledTiles>
         <StyledTile
           gridArea="languages"
-          onClick={canManage ? redirectToLanguages : undefined}
-          className={clsx({ clickable: canManage })}
+          onClick={canEditLanguages ? redirectToLanguages : undefined}
+          className={clsx({ clickable: canEditLanguages })}
           data-cy="project-dashboard-language-count"
         >
           <StyledTileDataItem>
@@ -215,7 +219,7 @@ export const ProjectTotals: React.FC<{
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {canManage && (
+          {canEditLanguages && (
             <StyledTileEdit>
               <Edit fontSize="small" />
             </StyledTileEdit>
@@ -224,8 +228,8 @@ export const ProjectTotals: React.FC<{
 
         <StyledTile
           gridArea="text"
-          onClick={redirectToTranslations}
-          className="clickable"
+          onClick={canViewTranslations ? redirectToTranslations : undefined}
+          className={clsx({ clickable: canViewTranslations })}
         >
           <StyledTileDataItem data-cy="project-dashboard-key-count">
             <StyledTileValue>
@@ -251,8 +255,8 @@ export const ProjectTotals: React.FC<{
 
         <StyledTile
           gridArea="progress"
-          onClick={redirectToTranslations}
-          className="clickable"
+          onClick={canViewTranslations ? redirectToTranslations : undefined}
+          className={clsx({ clickable: canViewTranslations })}
         >
           <StyledTileDataItem data-cy="project-dashboard-translated-percentage">
             <StyledTileValue>
@@ -275,8 +279,8 @@ export const ProjectTotals: React.FC<{
         <StyledTile
           gridArea="users"
           data-cy="project-dashboard-members"
-          onClick={membersEditable ? redirectToPermissions : undefined}
-          className={clsx({ clickable: membersEditable })}
+          onClick={membersAccessable ? redirectToPermissions : undefined}
+          className={clsx({ clickable: membersAccessable })}
         >
           <StyledTileDataItem>
             <StyledTileValue>
@@ -306,8 +310,8 @@ export const ProjectTotals: React.FC<{
 
         <StyledTile
           gridArea="tags"
-          className={clsx({ clickable: tagsPresent })}
-          onClick={tagsPresent ? handleMenuOpen : undefined}
+          className={clsx({ clickable: tagsClickable })}
+          onClick={tagsClickable ? handleMenuOpen : undefined}
           aria-controls={open ? 'basic-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}

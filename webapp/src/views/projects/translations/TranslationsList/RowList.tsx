@@ -4,7 +4,6 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import clsx from 'clsx';
@@ -47,7 +46,8 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   bannerBefore,
   bannerAfter,
 }) {
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission, satisfiesLanguageAccess } =
+    useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -80,7 +80,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
     >
       <CellKey
         editInDialog
-        editEnabled={permissions.satisfiesPermission('keys.edit')}
+        editEnabled={satisfiesPermission('keys.edit')}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
@@ -88,24 +88,36 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         className={keyClassName}
       />
       <StyledLanguages style={{ width: columnSizes[1] }}>
-        {languages.map((language, index) => (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={0}
-            onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
-            width={columnSizes[1]}
-            active={relaxedActive}
-            className={clsx({
-              [firstTranslationClassName]: index === 0,
-              [lastTranslationClassName]: index === languages.length - 1,
-            })}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-          />
-        ))}
+        {languages.map((language, index) => {
+          const canChangeState = satisfiesLanguageAccess(
+            'translations.state-edit',
+            language.id
+          );
+
+          const canEdit = satisfiesLanguageAccess(
+            'translations.edit',
+            language.id
+          );
+          return (
+            <CellTranslation
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={0}
+              onResize={onResize}
+              editEnabled={canEdit}
+              stateChangeEnabled={canChangeState}
+              width={columnSizes[1]}
+              active={relaxedActive}
+              className={clsx({
+                [firstTranslationClassName]: index === 0,
+                [lastTranslationClassName]: index === languages.length - 1,
+              })}
+              // render last focusable button on last item, so it's focusable
+              lastFocusable={index === languages.length - 1}
+            />
+          );
+        })}
       </StyledLanguages>
     </StyledContainer>
   );

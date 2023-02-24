@@ -5,6 +5,7 @@ import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
@@ -12,6 +13,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 
@@ -26,6 +28,9 @@ class StoredDataImporter(
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
 
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
+
+  private val securityService = applicationContext.getBean(SecurityService::class.java)
+
   private val translationsToSave = mutableListOf<Translation>()
 
   /**
@@ -42,6 +47,11 @@ class StoredDataImporter(
   private val translationService = applicationContext.getBean(TranslationService::class.java)
 
   private val namespacesToSave = mutableMapOf<String?, Namespace>()
+
+  /**
+   * Keys where base translation was changed, so we need to set outdated flag on all translations
+   */
+  val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
   /**
    * This metas are merged, so there is only one meta for one key!!!
@@ -68,17 +78,42 @@ class StoredDataImporter(
     addAllKeys()
     handleKeyMetas()
 
+    checkPermissionsAndSaveAll()
+
+    translationService.setOutdatedBatch(outdatedFlagKeys)
+  }
+
+  private fun checkPermissionsAndSaveAll() {
     namespaceService.saveAll(namespacesToSave.values)
-    keyService.saveAll(keysToSave.values)
+    val keyEntitiesToSave = keysToSave.values
+
+    checkKeyPermissions()
+
+    keyService.saveAll(keyEntitiesToSave)
+
+    checkTranslationPermissions()
+
     translationService.saveAll(translationsToSave)
 
-    keysToSave.values.flatMap {
+    keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
 
-    keysToSave.values.flatMap {
+    keyEntitiesToSave.flatMap {
       it.keyMeta?.codeReferences ?: emptyList()
     }.also { keyMetaService.saveAllCodeReferences(it) }
+  }
+
+  private fun checkTranslationPermissions() {
+    val langs = translationsToSave.map { it.language }.toSet().map { it.id }
+    securityService.checkLanguageTranslatePermission(import.project.id, langs)
+  }
+
+  private fun checkKeyPermissions() {
+    val isCreatingKey = keysToSave.values.any { it.id == 0L }
+    if (isCreatingKey) {
+      securityService.checkProjectPermission(import.project.id, Scope.KEYS_EDIT)
+    }
   }
 
   private fun handleKeyMetas() {
@@ -125,7 +160,11 @@ class StoredDataImporter(
         this.language = language
       }
       translation.key = existingKey
+      if (language == language.project.baseLanguage && translation.text != this.text) {
+        outdatedFlagKeys.add(translation.key.id)
+      }
       translation.text = this@doImport.text
+      translation.resetFlags()
       translationsToSave.add(translation)
     }
   }

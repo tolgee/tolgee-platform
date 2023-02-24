@@ -50,7 +50,8 @@ export type FieldTypeEnum =
   | 'key_tags'
   | 'language_flag'
   | 'project_language'
-  | 'namespace';
+  | 'namespace'
+  | 'outdated';
 
 export type FieldOptionsObj = {
   label?: string;

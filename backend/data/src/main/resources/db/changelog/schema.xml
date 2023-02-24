@@ -2300,4 +2300,34 @@
     <changeSet author="jenik (generated)" id="1672937726613-6">
         <addForeignKeyConstraint baseColumnNames="state_change_languages_id" baseTableName="permission_state_change_languages" constraintName="FKpxsgkx94rrmdmqocvliirtevo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-1">
+        <addColumn tableName="translation">
+            <column name="outdated" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-2">
+        <sql>
+            alter table api_key_scopes_enum alter column scopes_enum type varchar(255)
+                using case
+                    when scopes_enum = 0 then 'TRANSLATIONS_VIEW'
+                    when scopes_enum = 1 then 'TRANSLATIONS_EDIT'
+                    when scopes_enum = 2 then 'KEYS_EDIT'
+                    when scopes_enum = 3 then 'SCREENSHOTS_UPLOAD'
+                    when scopes_enum = 4 then 'SCREENSHOTS_DELETE'
+                    when scopes_enum = 5 then 'SCREENSHOTS_VIEW'
+                    when scopes_enum = 6 then 'ACTIVITY_VIEW'
+                    when scopes_enum = 7 then 'LANGUAGES_EDIT'
+                end;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1673863874294-3">
+        <sql>
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_CREATE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select api_key_id, 'KEYS_DELETE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

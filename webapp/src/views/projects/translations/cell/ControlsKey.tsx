@@ -1,9 +1,16 @@
 import React from 'react';
-import { Edit, CameraAlt } from '@mui/icons-material';
 import { T } from '@tolgee/react';
+import { Edit, CameraAlt } from '@mui/icons-material';
+import { styled } from '@mui/material';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+
+const StyledControls = styled('div')`
+  display: flex;
+  gap: 12px;
+`;
 
 type ControlsProps = {
   editEnabled?: boolean;
@@ -22,12 +29,15 @@ export const ControlsKey: React.FC<ControlsProps> = ({
   screenshotsPresent,
   screenshotsOpen,
 }) => {
+  const { satisfiesPermission } = useProjectPermissions();
+  const canViewScreenshots = satisfiesPermission('screenshots.view');
+
   // right section
   const displayEdit = editEnabled && onEdit;
-  const displayScreenshots = onScreenshots;
+  const displayScreenshots = onScreenshots && canViewScreenshots;
 
   return (
-    <>
+    <StyledControls>
       {displayEdit && (
         <ControlsButton
           onClick={onEdit}
@@ -56,6 +66,6 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           />
         </ControlsButton>
       )}
-    </>
+    </StyledControls>
   );
 };

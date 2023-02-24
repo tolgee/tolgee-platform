@@ -1,3 +1,73 @@
+# [3.5.0](https://github.com/tolgee/tolgee-platform/compare/v3.4.1...v3.5.0) (2023-02-06)
+
+
+### Features
+
+* Oudated translation indication ([#1533](https://github.com/tolgee/tolgee-platform/issues/1533)) ([c8df0b4](https://github.com/tolgee/tolgee-platform/commit/c8df0b4b25bfbbae986cff31a4967bd7f93fd6ea))
+
+## [3.4.1](https://github.com/tolgee/tolgee-platform/compare/v3.4.0...v3.4.1) (2023-02-03)
+
+
+### Bug Fixes
+
+* Check for empty namespace in complex-update endpoint ([#1531](https://github.com/tolgee/tolgee-platform/issues/1531)) ([010184a](https://github.com/tolgee/tolgee-platform/commit/010184a59be8cb8ea80e138b8bb39a3afb201ef0)), closes [#1520](https://github.com/tolgee/tolgee-platform/issues/1520)
+
+# [3.4.0](https://github.com/tolgee/tolgee-platform/compare/v3.3.4...v3.4.0) (2023-02-03)
+
+
+### Features
+
+* Add all keys endpoint ([c186d40](https://github.com/tolgee/tolgee-platform/commit/c186d40f346b00f4301bb9c07fa7528c18e34735))
+
+## [3.3.4](https://github.com/tolgee/tolgee-platform/compare/v3.3.3...v3.3.4) (2023-01-31)
+
+
+### Bug Fixes
+
+* update tolgee sdk ([#1527](https://github.com/tolgee/tolgee-platform/issues/1527)) ([9d7a956](https://github.com/tolgee/tolgee-platform/commit/9d7a95633f3072a76e2bd72a74645b7b4ddf50fb))
+
+## [3.3.3](https://github.com/tolgee/tolgee-platform/compare/v3.3.2...v3.3.3) (2023-01-31)
+
+
+### Bug Fixes
+
+* Import failure when multiple keys are present for a new namespace ([#1525](https://github.com/tolgee/tolgee-platform/issues/1525)) ([4c49a82](https://github.com/tolgee/tolgee-platform/commit/4c49a823a14289a23445aeccfed906788b175774))
+
+## [3.3.2](https://github.com/tolgee/tolgee-platform/compare/v3.3.1...v3.3.2) (2023-01-30)
+
+
+### Bug Fixes
+
+* Dev Tools endpoint nesting issues ([#1523](https://github.com/tolgee/tolgee-platform/issues/1523)) ([74a102c](https://github.com/tolgee/tolgee-platform/commit/74a102c51ef432a957e04daaaef097342ace9533))
+
+## [3.3.1](https://github.com/tolgee/tolgee-platform/compare/v3.3.0...v3.3.1) (2023-01-26)
+
+
+### Bug Fixes
+
+* Import deletion throws 500 ([#1518](https://github.com/tolgee/tolgee-platform/issues/1518)) ([a73c4dc](https://github.com/tolgee/tolgee-platform/commit/a73c4dc231adb51c6033e78dcc332fb6954237bb))
+
+# [3.3.0](https://github.com/tolgee/tolgee-platform/compare/v3.2.3...v3.3.0) (2023-01-23)
+
+
+### Features
+
+* fix signup error view ([#1514](https://github.com/tolgee/tolgee-platform/issues/1514)) ([11bd00b](https://github.com/tolgee/tolgee-platform/commit/11bd00ba78b8054cdc3473fa969cc856036f621d))
+
+## [3.2.3](https://github.com/tolgee/tolgee-platform/compare/v3.2.2...v3.2.3) (2023-01-21)
+
+
+### Bug Fixes
+
+* Startup import base language ([#1512](https://github.com/tolgee/tolgee-platform/issues/1512)) ([8be6f72](https://github.com/tolgee/tolgee-platform/commit/8be6f726757c7ade39e3c9c97e47062c990a1e04))
+
+## [3.2.2](https://github.com/tolgee/tolgee-platform/compare/v3.2.1...v3.2.2) (2023-01-18)
+
+
+### Bug Fixes
+
+* vanilla guide ([#1508](https://github.com/tolgee/tolgee-platform/issues/1508)) ([f511074](https://github.com/tolgee/tolgee-platform/commit/f5110743acf2c0edcb1f26e46af702e622dfe4c2))
+
 ## [3.2.1](https://github.com/tolgee/tolgee-platform/compare/v3.2.0...v3.2.1) (2023-01-16)
 
 

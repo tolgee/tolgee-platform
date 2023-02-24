@@ -22,6 +22,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
+import io.tolgee.service.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -37,6 +38,8 @@ class PermissionService(
   private val permissionRepository: PermissionRepository,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  @Lazy
+  private val languageService: LanguageService,
   @Lazy
   private val userPreferencesService: UserPreferencesService,
   @Lazy
@@ -82,7 +85,7 @@ class PermissionService(
     val computed = computeProjectPermission(
       organizationRole = organizationRole,
       organizationBasePermission = organizationBasePermission,
-      directPermission = projectPermission,
+      directPermission = projectPermission
     )
 
     return ProjectPermissionData(
@@ -194,10 +197,10 @@ class PermissionService(
     val permission = Permission(
       invitation = invitation,
       project = params.project,
-      type = type,
+      type = type
     )
 
-    setPermissionLanguages(permission, params.languagePermissions)
+    setPermissionLanguages(permission, params.languagePermissions, params.project.id)
 
     return this.save(permission)
   }
@@ -229,14 +232,14 @@ class PermissionService(
     permission.scopes = emptyArray()
     permission.type = newPermissionType
 
-    setPermissionLanguages(permission, languages)
+    setPermissionLanguages(permission, languages, projectId)
 
     return this.save(permission)
   }
 
   fun getOrCreateDirectPermission(
     projectId: Long,
-    userId: Long,
+    userId: Long
   ): Permission {
     val data = this.getProjectPermissionData(projectId, userId)
 
@@ -258,17 +261,29 @@ class PermissionService(
     return permission
   }
 
+  private fun Set<Language>?.standardize(): MutableSet<Language> {
+    if (this === null) {
+      return mutableSetOf()
+    }
+    return toMutableSet()
+  }
+
+  @Transactional
   fun setPermissionLanguages(
     permission: Permission,
-    languagePermissions: LanguagePermissions
+    languagePermissions: LanguagePermissions,
+    projectId: Long
   ) {
-    permission.translateLanguages = languagePermissions.translate?.toMutableSet() ?: mutableSetOf()
-    permission.stateChangeLanguages = languagePermissions.stateChange?.toMutableSet() ?: mutableSetOf()
+    val allLanguages = languageService.findAll(projectId)
+    permission.translateLanguages = languagePermissions.translate.standardize()
+    permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
 
     permission.viewLanguages = (
-      (languagePermissions.view?.toMutableSet() ?: mutableSetOf()) +
-        permission.translateLanguages + permission.stateChangeLanguages
-      ).toMutableSet()
+      (
+        languagePermissions.view?.toMutableSet()
+          ?: mutableSetOf()
+        ) + permission.translateLanguages + permission.stateChangeLanguages
+      ).standardize()
   }
 
   private fun validateLanguagePermissions(
@@ -340,5 +355,23 @@ class PermissionService(
       ?: throw NotFoundException()
 
     this.delete(permissionEntity)
+  }
+
+  fun getPermittedViewLanguages(projectId: Long, userId: Long): Collection<Language> {
+    val permissionData = this.getProjectPermissionData(projectId, userId)
+
+    val allLanguages = languageService.findAll(projectId)
+    val viewLanguageIds = permissionData.computedPermissions.viewLanguageIds
+
+    val permittedLanguages = if (viewLanguageIds.isNullOrEmpty())
+      allLanguages
+    else
+      allLanguages.filter {
+        viewLanguageIds.contains(
+          it.id
+        )
+      }
+
+    return permittedLanguages
   }
 }

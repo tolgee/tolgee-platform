@@ -160,6 +160,17 @@ export const useTranslationsService = (props: Props) => {
       },
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
+
+        const selectedLanguages = data.pages[0].selectedLanguages.map(
+          (l) => l.tag
+        );
+        if (query.languages?.toString() !== selectedLanguages?.toString()) {
+          // update language selection to the fetched one
+          // if there are some languages which are not permitted or were deleted
+          _setLanguages(selectedLanguages);
+          projectPreferences.setForProject(props.projectId, selectedLanguages);
+        }
+
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
           setFixedTranslations(flatKeys);

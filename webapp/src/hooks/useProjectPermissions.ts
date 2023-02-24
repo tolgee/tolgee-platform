@@ -7,38 +7,57 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type Scope = ArrayElement<NonNullable<Scopes>>;
 
-export class ProjectPermissions {
-  constructor(
-    public scopes: Scopes,
-    public permittedLanguages: number[] | undefined
-  ) {}
+const SCOPE_TO_LANG_PROPERTY_MAP = {
+  'translations.view': 'viewLanguageIds',
+  'translations.edit': 'translateLanguageIds',
+  'translations.state-edit': 'stateChangeLanguageIds',
+};
 
-  canEditLanguage(language: number | undefined): boolean {
-    if (!this.satisfiesPermission('translations.edit')) {
+export const useProjectPermissions = () => {
+  const project = useProject();
+  const scopes = project.computedPermission.scopes;
+
+  function satisfiesPermission(scope: Scope): boolean {
+    return !!scopes?.includes(scope);
+  }
+
+  function allowedLanguages(
+    scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP
+  ): boolean {
+    if (!satisfiesPermission(scope)) {
       return false;
     }
 
-    if (!this.permittedLanguages?.length) {
+    const allowedLanguages =
+      project.computedPermission[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
+
+    return allowedLanguages || [];
+  }
+
+  function satisfiesLanguageAccess(
+    scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP,
+    languageId: number | undefined
+  ): boolean {
+    if (!satisfiesPermission(scope)) {
+      return false;
+    }
+
+    const allowedLanguages =
+      project.computedPermission[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
+
+    if (!allowedLanguages?.length) {
       return true;
     }
-
-    if (language !== undefined) {
-      return !!this.permittedLanguages?.includes(language);
+    if (languageId !== undefined) {
+      return Boolean(allowedLanguages?.includes(languageId));
     }
-
     return false;
   }
 
-  satisfiesPermission(scope: Scope): boolean {
-    return !!this.scopes?.includes(scope);
-  }
-}
-
-export const useProjectPermissions = (): ProjectPermissions => {
-  const project = useProject();
-  const scopes = project.computedPermission.scopes;
-  return new ProjectPermissions(
+  return {
     scopes,
-    project.computedPermission.permittedLanguageIds
-  );
+    satisfiesPermission,
+    satisfiesLanguageAccess,
+    allowedLanguages,
+  };
 };

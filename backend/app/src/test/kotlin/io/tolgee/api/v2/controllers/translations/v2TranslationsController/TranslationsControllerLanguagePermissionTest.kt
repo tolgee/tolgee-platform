@@ -84,7 +84,7 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns only permitted languages (all translation endpoint)`() {
-    userAccount = testData.viewUser
+    userAccount = testData.viewEnOnlyUser
     performProjectAuthGet("/translations/en,de").andAssertThatJson {
       node("de").isAbsent()
       node("en").isPresent
@@ -94,7 +94,7 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns only permitted languages (translation view endpoint)`() {
-    userAccount = testData.viewUser
+    userAccount = testData.viewEnOnlyUser
     performProjectAuthGet("/translations?languages=en&languages=de").andAssertThatJson {
       node("_embedded.keys[0].translations.de").isAbsent()
       node("_embedded.keys[0].translations.en").isPresent
