@@ -146,6 +146,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `doesn't delete screenshot when another reference exists`() {
+    saveTestDataAndPrepare()
+
     performProjectAuthDelete("keys/${testData.keyWithReferences.id}", null).andIsOk
     screenshotService.find(testData.screenshot.id).assert.isNotNull
   }

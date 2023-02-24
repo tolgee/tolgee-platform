@@ -164,7 +164,6 @@ class TranslationService(
     return save(translation)
   }
 
-
   fun save(translation: Translation): Translation {
     val translationTextLength = translation.text?.length ?: 0
     if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
