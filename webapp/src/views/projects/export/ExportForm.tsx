@@ -203,7 +203,7 @@ export const ExportForm = () => {
         );
       }}
     >
-      {({ isSubmitting, handleSubmit, isValid }) => (
+      {({ isSubmitting, handleSubmit, isValid, values }) => (
         <StyledForm onSubmit={handleSubmit}>
           <StateSelector className="states" />
           <LanguageSelector
@@ -211,9 +211,11 @@ export const ExportForm = () => {
             languages={languagesLoadable.data?._embedded?.languages}
           />
           <FormatSelector className="format" />
-          <StyledOptions className="options">
-            <NestedSelector />
-          </StyledOptions>
+          {values.format === 'JSON' && (
+            <StyledOptions className="options">
+              <NestedSelector />
+            </StyledOptions>
+          )}
           <NsSelector className="ns" namespaces={allNamespaces} />
           <div className="submit">
             <LoadingButton
