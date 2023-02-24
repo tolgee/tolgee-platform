@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class OrganizationModelAssembler(
   private val avatarService: AvatarService,
-  private val permissionModelAssembler: PermissionModelAssembler
+  private val permissionModelAssembler: PermissionModelAssembler,
 ) : RepresentationModelAssemblerSupport<OrganizationView, OrganizationModel>(
   OrganizationController::class.java, OrganizationModel::class.java
 ) {
@@ -25,7 +25,7 @@ class OrganizationModelAssembler(
       view.organization.description,
       basePermission = permissionModelAssembler.toModel(basePermission),
       currentUserRole = view.currentUserRole,
-      avatar = avatarService.getAvatarLinks(view.organization.avatarHash)
+      avatar = avatarService.getAvatarLinks(view.organization.avatarHash),
     ).add(link)
   }
 }
