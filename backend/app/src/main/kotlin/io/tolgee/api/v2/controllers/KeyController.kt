@@ -14,6 +14,7 @@ import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyWithScreenshotsModelAssembler
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto

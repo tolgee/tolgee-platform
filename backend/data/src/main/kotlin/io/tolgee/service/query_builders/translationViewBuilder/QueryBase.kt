@@ -83,7 +83,7 @@ class QueryBase<T>(
     queryTranslationFiltering.apply(outdatedFieldMap)
   }
 
-  private fun addTranslationOutdatedField(translation: SetJoin<Key, Translation>, language: Language): Path<Boolean> {
+  private fun addTranslationOutdatedField(translation: ListJoin<Key, Translation>, language: Language): Path<Boolean> {
     val translationOutdated = translation.get(Translation_.outdated)
     this.querySelection[language to TranslationView::outdated] = translationOutdated
     return translationOutdated
