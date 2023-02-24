@@ -22,7 +22,7 @@
         {
           "assets": [
             "CHANGELOG.md",
-            "src/i18n"
+            "webapp/src/i18n"
           ]
         }
       ],
