@@ -725,7 +725,7 @@
   "translations_no_translations" : "Sem traduções",
   "translations_no_translations_action" : "Adicionar nova tradução",
   "translations_no_translations_integrate" : "Guia de integração",
-  "translations_results_count" : "{count, plural, one {1 Chave} other {# Chaves}}",
+  "translations_results_count" : "{count, plural, one {1 chave} other {# chaves}}",
   "translations" : {
     "screenshots" : {
       "delete_tooltip" : "Excluir",

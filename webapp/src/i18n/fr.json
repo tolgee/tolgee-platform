@@ -44,7 +44,7 @@
   "activity_entity_translation.flag_emoji" : "drapeau",
   "activity_entity_translation.name" : "nom",
   "activity_entity_translation.tag" : "tag",
-  "activity_import" : "{KeyCount, plural, \n  one {Une clé importée}\n  other { # clés importées}\n} ({TranslationCount, plural, \n  one {1 traduction} \n  other {# traductions}\n})",
+  "activity_import" : "{KeyCount, plural, \n  one {Une clé importée}\n  other {# clés importées}\n} ({TranslationCount, plural, \n  one {1 traduction} \n  other {# traductions}\n})",
   "activity_key_delete" : "Supprimé {KeyCount, plural, one {1 clé} other {# clés}}",
   "activity_key_name_edit" : "Nom de clé modifié",
   "activity_key_tags_edit" : "Tags de la clé modifiés",
@@ -379,7 +379,7 @@
   "no_exported_result" : "Rien à exporter",
   "no-permissions-on-the-server" : "Vous n'avez aucune permission sur ce serveur. Ce serveur ne permet pas aux utilisateurs de créer des organisations.",
   "no-permissions-title" : "Aucune permission",
-  "no_screenshots_yet" : "Aucune capture d'écran n'a encore été ajoutée. Ajoutez-les en faisant glisser ou en cliquant sur plus.",
+  "no_screenshots_yet" : "Aucune capture d'écran n'a encore été ajoutée.",
   "operation_not_permitted" : "Vos permissions ne sont pas suffisantes pour faire cette opération. ",
   "operation_not_permitted_error" : "Vos permissions ne sont pas suffisantes pour faire cette opération. ",
   "organization_account_subtitle" : "Compte de l'organisation",
@@ -679,7 +679,7 @@
   "translations_no_translations" : "Pas de traductions",
   "translations_no_translations_action" : "Ajouter la nouvelle traduction ",
   "translations_no_translations_integrate" : "Guide d'intégration",
-  "translations_results_count" : "{count, plural, one {1 Clé} other {# Clés}}",
+  "translations_results_count" : "{count, plural, one {1 clé} other {# clés}}",
   "translations" : {
     "screenshots" : {
       "delete_tooltip" : "Supprimer",
