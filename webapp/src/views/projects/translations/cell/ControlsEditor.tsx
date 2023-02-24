@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from '@tolgee/react';
 import { Button, styled } from '@mui/material';
-import { CameraAlt } from '@mui/icons-material';
+import { CameraAlt, ContentCopy } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
@@ -27,10 +27,21 @@ const StyledRightPart = styled('div')`
   gap: 8px;
 `;
 
+const StyledRightestPart = styled('div')`
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 5px;
+  padding: ${({ theme }) => theme.spacing(1, 1.5, 1.5, 0)};
+  gap: 8px;
+`;
+
 type ControlsProps = {
   state?: State;
+  isSourceLanguage?: boolean;
   onSave?: () => void;
   onCancel?: () => void;
+  onInsertSource?: () => void;
   onScreenshots?: () => void;
   onStateChange?: (state: StateType) => void;
   screenshotRef?: React.Ref<any>;
@@ -39,8 +50,10 @@ type ControlsProps = {
 
 export const ControlsEditor: React.FC<ControlsProps> = ({
   state,
+  isSourceLanguage,
   onSave,
   onCancel,
+  onInsertSource,
   onScreenshots,
   onStateChange,
   screenshotRef,
@@ -50,6 +63,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayTransitionButtons = state;
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
+  const displayInsertSource = !isSourceLanguage;
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
 
@@ -99,6 +113,19 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
             </ControlsButton>
           )}
         </StyledRightPart>
+      )}
+
+      {displayInsertSource && (
+        <StyledRightestPart>
+          <ControlsButton
+            onClick={onInsertSource}
+            color="default"
+            data-cy="translations-cell-insert-source-button"
+            tooltip={<T>translations_cell_insert_source</T>}
+          >
+            <ContentCopy fontSize="small" />
+          </ControlsButton>
+        </StyledRightestPart>
       )}
     </>
   );

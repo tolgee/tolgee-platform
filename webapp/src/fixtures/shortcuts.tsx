@@ -49,6 +49,8 @@ export const getKeyVisual = (key: KeyType) => {
       return <KeyRight />;
     case 'Enter':
       return <KeyEnter />;
+    case 'Insert':
+      return 'Ins';
     case 'Action':
       return IS_MAC ? '⌘' : <KeyCtrl />;
     default:

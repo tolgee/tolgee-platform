@@ -128,6 +128,7 @@ type Props = {
   value: string;
   onChange?: (val: string) => void;
   onSave?: (val: string) => void;
+  onInsertSource?: (val?: string) => void;
   onCancel?: () => void;
   background?: string;
   plaintext?: boolean;

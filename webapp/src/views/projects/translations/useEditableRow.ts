@@ -28,6 +28,7 @@ export const useEditableRow = ({
     unregisterElement,
     setEdit,
     changeField,
+    getSourceText,
     setEditForce,
   } = useTranslationsActions();
 
@@ -72,6 +73,14 @@ export const useEditableRow = ({
     });
   };
 
+  const handleInsertSource = async (source: string | undefined) => {
+    if (source) {
+      setValue(source);
+    } else {
+      setValue(await getSourceText(keyId));
+    }
+  };
+
   const handleClose = (force = false) => {
     if (force) {
       setEditForce(undefined);
@@ -102,6 +111,7 @@ export const useEditableRow = ({
     handleOpen,
     handleClose,
     handleSave,
+    handleInsertSource,
     handleModeChange,
     value,
     setValue,

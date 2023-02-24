@@ -116,6 +116,7 @@ export const CellTranslation: React.FC<Props> = ({
     setValue,
     handleOpen,
     handleClose,
+    handleInsertSource,
     handleSave,
     handleModeChange,
     autofocus,
@@ -224,6 +225,7 @@ export const CellTranslation: React.FC<Props> = ({
           onChange={(v) => setValue(v as string)}
           onSave={() => handleSave()}
           onCmdSave={() => handleSave('EDIT_NEXT')}
+          onInsertSource={handleInsertSource}
           onCancel={handleClose}
           autofocus={autofocus}
           state={state}

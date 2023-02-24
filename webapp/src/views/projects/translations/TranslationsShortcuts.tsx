@@ -165,6 +165,9 @@ export const TranslationsShortcuts = () => {
   const cursorMode = useTranslationsSelector((c) => c.cursor?.mode);
 
   const translations = useTranslationsSelector((c) => c.translations);
+  const sourceLanguage = useTranslationsSelector((c) =>
+    c.languages?.find((l) => l.base)
+  )?.tag;
 
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
 
@@ -238,6 +241,12 @@ export const TranslationsShortcuts = () => {
         <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
       ),
       formula: formatShortcut(`${getMetaName()} + E`),
+    },
+    {
+      name: cursorLanguage != sourceLanguage && (
+        <T>translations_cell_insert_source</T>
+      ),
+      formula: formatShortcut(`${getMetaName()} + Insert`),
     },
   ];
 

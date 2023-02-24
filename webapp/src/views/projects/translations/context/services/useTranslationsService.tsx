@@ -247,6 +247,24 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
+  const getTranslations = useApiMutation({
+    url: '/v2/projects/{projectId}/translations',
+    method: 'get',
+  });
+
+  const getSourceText = async (keyId: number) => {
+    const sourceLanguage = props.baseLang!;
+    const sourceTextResponse = await getTranslations.mutateAsync({
+      path: { projectId: props.projectId },
+      query: { filterKeyId: [keyId], languages: [sourceLanguage] },
+    });
+
+    const sourceText =
+      sourceTextResponse._embedded?.keys![0].translations[sourceLanguage]
+        .text || '';
+    return sourceText;
+  };
+
   const setFilters = (filters: FiltersType) => {
     refetchTranslations(() => {
       _setFilters(JSON.stringify(filters));
@@ -357,6 +375,7 @@ export const useTranslationsService = (props: Props) => {
     setLanguages,
     setUrlSearch,
     setFilters,
+    getSourceText,
     updateTranslationKeys,
     updateTranslation,
     insertAsFirst,

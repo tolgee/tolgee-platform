@@ -85,6 +85,7 @@ type Props = {
   translation: TranslationViewModel | undefined;
   onChange: (val: string) => void;
   onSave: () => void;
+  onInsertSource: (val: string | undefined) => void;
   onCmdSave: () => void;
   onCancel: (force: boolean) => void;
   onStateChange: (state: StateType) => void;
@@ -105,6 +106,7 @@ export const TranslationOpened: React.FC<Props> = ({
   translation,
   onChange,
   onSave,
+  onInsertSource,
   onCmdSave,
   onCancel,
   onStateChange,
@@ -134,17 +136,17 @@ export const TranslationOpened: React.FC<Props> = ({
     }
   };
 
-  const baseLanguage = useTranslationsSelector((v) =>
+  const sourceLanguage = useTranslationsSelector((v) =>
     v.languages?.find((l) => l.base)
   )?.tag;
-  const baseTranslation =
-    baseLanguage && keyData.translations[baseLanguage]?.text;
+  const sourceText =
+    sourceLanguage && keyData.translations[sourceLanguage]?.text;
 
   const data = useTranslationTools({
     projectId: project.id,
     keyId: keyData.keyId,
     targetLanguageId: language.id,
-    baseText: baseTranslation,
+    baseText: sourceText,
     enabled: !language.base,
     onValueUpdate: (value) => {
       updateEdit({
@@ -203,18 +205,23 @@ export const TranslationOpened: React.FC<Props> = ({
               onChange={onChange}
               onCancel={() => onCancel(true)}
               onSave={onSave}
+              onInsertSource={() => onInsertSource(sourceText)}
               direction={getLanguageDirection(language.tag)}
               autofocus={autofocus}
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
                 [`${getMeta()}-Enter`]: onCmdSave,
+                [`${getMeta()}-Insert`]: () =>
+                  !language.base && onInsertSource(sourceText),
               }}
             />
           </StyledEditorContainer>
           <StyledEditorControls>
             <ControlsEditor
               state={state}
+              isSourceLanguage={language.base}
               onSave={onSave}
+              onInsertSource={() => onInsertSource(sourceText)}
               onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
             />
