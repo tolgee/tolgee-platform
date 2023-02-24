@@ -1,3 +1,10 @@
+## [3.7.1](https://github.com/tolgee/tolgee-platform/compare/v3.7.0...v3.7.1) (2023-02-24)
+
+
+### Bug Fixes
+
+* remove nested structure selector for xliff ([#1583](https://github.com/tolgee/tolgee-platform/issues/1583)) ([a3353d2](https://github.com/tolgee/tolgee-platform/commit/a3353d22aa773e91ba006cee46b152144c280299))
+
 # [3.7.0](https://github.com/tolgee/tolgee-platform/compare/v3.6.1...v3.7.0) (2023-02-23)
 
 
