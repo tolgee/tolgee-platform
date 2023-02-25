@@ -33,6 +33,8 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
       src={screenshot.src}
       className={className}
       style={{ maxWidth: '100%' }}
+      data-cy="screenshot-image"
+      alt="Screenshot"
     />
   ) : (
     <svg
@@ -42,6 +44,7 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
         width: screenshot.width,
         maxWidth: '100%',
       }}
+      data-cy="screenshot-image"
     >
       <image
         href={screenshot.src}

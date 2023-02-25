@@ -99,7 +99,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
         <StyledScreenshotBox
           onMouseOver={onMouseOver}
           onMouseOut={onMouseOut}
-          data-cy="screenshot-box"
+          data-cy="screenshot-thumbnail"
         >
           {projectPermissions.satisfiesPermission(
             ProjectPermissionType.TRANSLATE
