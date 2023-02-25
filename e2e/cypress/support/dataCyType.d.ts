@@ -280,7 +280,8 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "regenerate-pat-dialog-content" |
         "regenerate-pat-dialog-title" |
-        "screenshot-box" |
+        "screenshot-image" |
+        "screenshot-thumbnail" |
         "search-select" |
         "search-select-item" |
         "search-select-new" |

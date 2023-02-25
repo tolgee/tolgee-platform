@@ -68,7 +68,8 @@ describe('Screenshots', () => {
     cy.get('[data-cy=dropzone]').attachFile('screenshots/test_1.png', {
       subjectType: 'drag-n-drop',
     });
-    cy.xpath("//img[@alt='Screenshot']")
+
+    cy.gcy('screenshot-image')
       .should('be.visible')
       .and(($img) => {
         expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
@@ -79,7 +80,7 @@ describe('Screenshots', () => {
     getCameraButton(1).click();
     cy.contains('No screenshots have been added yet.');
     cy.xpath("//input[@type='file']").attachFile('screenshots/test_1.png');
-    cy.xpath("//img[@alt='Screenshot']")
+    cy.gcy('screenshot-image')
       .should('be.visible')
       .and(($img) => {
         expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
@@ -100,7 +101,7 @@ describe('Screenshots', () => {
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
-      cy.xpath("//img[@alt='Screenshot']")
+      cy.gcy('screenshot-image')
         .should('be.visible')
         .and(($img) => {
           expect($img.length).to.be.equal(3);
@@ -116,7 +117,7 @@ describe('Screenshots', () => {
   it('images and plus button is visible', () => {
     addScreenshot(project.id, keys[3].id, 'screenshots/test_1.png').then(() => {
       getCameraButton(4).click();
-      cy.xpath("//img[@alt='Screenshot']")
+      cy.gcy('screenshot-image')
         .should('be.visible')
         .and(($img) => {
           expect($img.length).to.be.equal(1);
@@ -141,7 +142,7 @@ describe('Screenshots', () => {
 
     Cypress.Promise.all(promises).then(() => {
       getCameraButton(2).click();
-      cy.xpath("//img[@alt='Screenshot']")
+      cy.gcy('screenshot-image')
         .should('be.visible')
         .and(($img) => {
           expect($img.length).to.be.equal(10);
@@ -165,19 +166,21 @@ describe('Screenshots', () => {
       getCameraButton(2).click();
 
       for (let i = 5; i >= 1; i--) {
-        cy.xpath("//img[@alt='Screenshot']")
+        cy.gcy('screenshot-image')
           .should('be.visible')
           .and(($img) => {
             expect($img.length).to.be.equal(i);
           });
-        cy.xpath("//img[@alt='Screenshot']")
+        cy.gcy('screenshot-image')
           .first()
           .trigger('mouseover')
-          .xpath("./ancestor::div[contains(@data-cy, 'screenshot-box')]/button")
+          .xpath(
+            "./ancestor::div[contains(@data-cy, 'screenshot-thumbnail')]/button"
+          )
           .click();
         cy.contains('Confirm').click();
         if (i > 1) {
-          cy.xpath("//img[@alt='Screenshot']")
+          cy.gcy('screenshot-image')
             .should('be.visible')
             .and(($img) => {
               expect($img.length).to.be.equal(i - 1);
