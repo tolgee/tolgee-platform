@@ -1,61 +1,65 @@
 name: Deploy preview
 
 on:
-  push:
-    tags:
-      - preview/stepan/1
-      - preview/stepan/2
-      - preview/honza/1
-      - preview/honza/2
+  pull_request:
+  issue_comment:
+    types: [ created ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: ./.github/actions/pr-preview
+        id: info
 
       - uses: actions/setup-java@v2
+        if: steps.info.outputs.trigger == 'true'
         with:
           java-version: 11
           distribution: adopt
 
       - name: Setup node
         uses: actions/setup-node@v3
+        if: steps.info.outputs.trigger == 'true'
         with:
           node-version: "16.x"
 
       - name: Set git globals
+        if: steps.info.outputs.trigger == 'true'
         run: |
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
 
-      - name: Download translations
-        run: ./gradlew updateStaticTranslations
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
       - name: Login to docker
+        if: steps.info.outputs.trigger == 'true'
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
 
       - name: Set version
+        if: steps.info.outputs.trigger == 'true'
         id: version
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')
 
       - name: Prepare for docker build
+        if: steps.info.outputs.trigger == 'true'
         run: ./gradlew dockerPrepare
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Create docker image
+      - name: Trigger deployment in billing repo
+        if: steps.info.outputs.trigger == 'true'
         run: |
-          docker buildx create --use 
-          docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
-        working-directory: build/docker
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
+            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
+            -d '${{ steps.info.outputs.trigger_payload }}'
 
-      - name: Deploy
-        uses: nickgronow/kubectl@master
-        with:
-          args: '"rollout restart deployment/tolgee-deployment-${{ steps.version.outputs.VERSION }}"'
-          config_data: ${{ secrets.KUBERNETES_DO_SERVICE_CONFIG }}
+#
+#      - name: Create docker image
+#        run: |
+#          docker buildx create --use
+#          docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+#        working-directory: build/docker
