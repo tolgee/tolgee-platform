@@ -6,7 +6,7 @@ package io.tolgee.service.key
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.ScreateScreenshotResult
+import io.tolgee.dtos.CreateScreenshotResult
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.BadRequestException
@@ -156,7 +156,7 @@ class ScreenshotService(
   /**
    * Creates and saves screenshot entity and the corresponding file
    */
-  fun saveScreenshot(image: UploadedImage): ScreateScreenshotResult {
+  fun saveScreenshot(image: UploadedImage): CreateScreenshotResult {
     val img = fileStorage
       .readFile(
         UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.filenameWithExtension
@@ -167,7 +167,7 @@ class ScreenshotService(
       )
     val screenshot = saveScreenshot(img, thumbnail, image.location, Dimension(image.width, image.height))
     imageUploadService.delete(image)
-    return ScreateScreenshotResult(
+    return CreateScreenshotResult(
       screenshot = screenshot,
       originalDimension = Dimension(image.originalWidth, image.originalHeight),
       targetDimension = Dimension(image.width, image.height)
