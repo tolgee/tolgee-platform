@@ -8,6 +8,8 @@ class ImportTranslationBuilder(
 ) : EntityDataBuilder<ImportTranslation, ImportTranslationBuilder> {
   override var self: ImportTranslation =
     ImportTranslation("test translation", importFileBuilder.data.importLanguages[0].self).apply {
-      key = importFileBuilder.data.importKeys.first().self
+      importFileBuilder.data.importKeys.firstOrNull()?.self?.let {
+        key = it
+      }
     }
 }

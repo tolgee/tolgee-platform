@@ -1,30 +1,35 @@
 import React from 'react';
 import { Dialog } from '@mui/material';
 
-import { useConfig } from 'tg.globalContext/helpers';
+import {
+  ScreenshotProps,
+  ScreenshotWithLabels,
+} from 'tg.component/ScreenshotWithLabels';
 
 interface ScreenshotDetailProps {
   onClose: () => void;
-  fileName: string;
   open: boolean;
+  screenshot: ScreenshotProps | undefined;
+  highlightedKeyId: number;
 }
 
-export const ScreenshotDetail: React.FunctionComponent<ScreenshotDetailProps> =
-  (props) => {
-    const config = useConfig();
-
-    return (
-      <Dialog
-        onClose={props.onClose}
-        aria-labelledby="simple-dialog-title"
-        open={props.open}
-        maxWidth={'xl'}
-      >
-        <img
-          style={{ width: '100%' }}
-          src={config.screenshotsUrl + '/' + props.fileName}
-          alt="screenshot"
-        />
-      </Dialog>
-    );
-  };
+export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
+  onClose,
+  open,
+  screenshot,
+}) => {
+  return (
+    <Dialog
+      onClose={onClose}
+      aria-labelledby="simple-dialog-title"
+      open={open}
+      maxWidth="xl"
+    >
+      <div>
+        {screenshot && (
+          <ScreenshotWithLabels showTooltips screenshot={screenshot} />
+        )}
+      </div>
+    </Dialog>
+  );
+};

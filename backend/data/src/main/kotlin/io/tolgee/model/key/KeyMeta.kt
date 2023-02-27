@@ -42,11 +42,17 @@ class KeyMeta(
   var tags: MutableSet<Tag> = mutableSetOf()
 
   fun addComment(author: UserAccount? = null, ft: KeyComment.() -> Unit) {
-    KeyComment(this, author).apply(ft)
+    KeyComment(this, author).apply {
+      ft()
+      comments.add(this)
+    }
   }
 
   fun addCodeReference(author: UserAccount? = null, ft: KeyCodeReference.() -> Unit) {
-    KeyCodeReference(this, author).apply(ft)
+    KeyCodeReference(this, author).apply {
+      ft()
+      codeReferences.add(this)
+    }
   }
 
   companion object {

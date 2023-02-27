@@ -248,7 +248,7 @@ When null, resulting file will be a flat key-value object.
     val pageableWithSort = getSafeSortPageable(pageable)
     val data = translationService.getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
-    val keysWithScreenshots = getKeysWithScreenshots(data.map { it.keyId }.toList())
+    val keysWithScreenshots = getScreenshots(data.map { it.keyId }.toList())
 
     if (keysWithScreenshots != null) {
       data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
@@ -324,12 +324,12 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
 
-  private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
+  private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      return screenshotService.getKeysWithScreenshots(keyIds).associate { it.id to it.screenshots }
+      return screenshotService.getScreenshotsForKeys(keyIds)
     }
     return null
   }

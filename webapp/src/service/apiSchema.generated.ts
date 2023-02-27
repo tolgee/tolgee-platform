@@ -5,7 +5,7 @@
 
 export interface paths {
   "/v2/user": {
-    get: operations["getInfo"];
+    get: operations["getInfo_2"];
     put: operations["updateUser"];
     post: operations["updateUserOld"];
     delete: operations["delete"];
@@ -104,7 +104,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_3"];
-    put: operations["update_1"];
+    put: operations["update_2"];
     delete: operations["delete_5"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
@@ -144,7 +144,7 @@ export interface paths {
   };
   "/v2/pats/{id}": {
     get: operations["get_7"];
-    put: operations["update_3"];
+    put: operations["update_4"];
     delete: operations["delete_7"];
   };
   "/v2/pats/{id}/regenerate": {
@@ -155,7 +155,7 @@ export interface paths {
   };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
-    put: operations["update_4"];
+    put: operations["update_5"];
     delete: operations["delete_8"];
   };
   "/v2/organizations/{id}/leave": {
@@ -169,7 +169,7 @@ export interface paths {
     delete: operations["removeAvatar_2"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_5"];
+    put: operations["update_6"];
     delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
@@ -191,13 +191,20 @@ export interface paths {
     get: operations["getAll"];
     post: operations["createProject"];
   };
-  "/v2/projects/{projectId}/keys/import": {
+  "/v2/projects/{projectId}/keys/info": {
+    post: operations["getInfo"];
+  };
+  "/v2/projects/{projectId}/keys/import-resolvable": {
     post: operations["importKeys"];
+  };
+  "/v2/projects/{projectId}/keys/import": {
+    post: operations["importKeys_2"];
   };
   "/v2/projects/{projectId}/keys/create": {
     post: operations["create"];
   };
   "/v2/projects/{projectId}/keys": {
+    get: operations["getAll_3"];
     post: operations["create_1"];
     delete: operations["delete_3"];
   };
@@ -212,7 +219,7 @@ export interface paths {
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
-    get: operations["getAll_3"];
+    get: operations["getAll_5"];
     post: operations["create_4"];
   };
   "/v2/projects/{projectId}/translations/create-comment": {
@@ -225,7 +232,7 @@ export interface paths {
     post: operations["suggestMachineTranslations"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_5"];
+    get: operations["getAll_7"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
@@ -233,11 +240,11 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/v2/pats": {
-    get: operations["getAll_7"];
+    get: operations["getAll_9"];
     post: operations["create_8"];
   };
   "/v2/organizations": {
-    get: operations["getAll_8"];
+    get: operations["getAll_10"];
     post: operations["create_9"];
   };
   "/v2/image-upload": {
@@ -296,6 +303,9 @@ export interface paths {
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
+  "/v2/projects/{projectId}/keys/search": {
+    get: operations["searchForKey"];
+  };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
@@ -322,7 +332,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
-    get: operations["getAllNamespaces_1"];
+    get: operations["getAllNamespaces_2"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -597,6 +607,32 @@ export interface components {
       screenshotIdsToDelete?: number[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
+      screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
+    };
+    KeyInScreenshotPositionDto: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    KeyScreenshotDto: {
+      text?: string;
+      /** Ids of screenshot uploaded with /v2/image-upload endpoint */
+      uploadedImageId: number;
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+    };
+    KeyInScreenshotModel: {
+      keyId: number;
+      position?: components["schemas"]["KeyInScreenshotPosition"];
+      keyName: string;
+      keyNamespace?: string;
+      originalText?: string;
+    };
+    KeyInScreenshotPosition: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
     };
     KeyWithDataModel: {
       /** Id of key record */
@@ -632,6 +668,10 @@ export interface components {
       fileUrl: string;
       thumbnailUrl: string;
       createdAt?: string;
+      keyReferences: components["schemas"]["KeyInScreenshotModel"][];
+      location?: string;
+      width?: number;
+      height?: number;
     };
     /** Translations object containing values updated in this request */
     TranslationModel: {
@@ -773,12 +813,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
+      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -849,15 +889,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
+      description: string;
+      id: number;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -879,6 +919,53 @@ export interface components {
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
     };
+    GetKeysRequestDto: {
+      keys: components["schemas"]["KeyDefinitionDto"][];
+      /** Tags to return language translations in */
+      languageTags: string[];
+    };
+    KeyDefinitionDto: {
+      name: string;
+      namespace?: string;
+    };
+    CollectionModelKeyWithDataModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithDataModel"][];
+      };
+    };
+    ImportKeysResolvableDto: {
+      keys: components["schemas"]["ImportKeysResolvableItemDto"][];
+    };
+    ImportKeysResolvableItemDto: {
+      /** Key name to set translations for */
+      name: string;
+      /** The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
+      /** Object mapping language tag to translation */
+      translations: {
+        [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
+      };
+    };
+    /** Object mapping language tag to translation */
+    ImportTranslationResolvableDto: {
+      /** Translation text */
+      text: string;
+      /**
+       * Determines, how conflict is resolved.
+       *
+       * - KEEP: Translation is not changed
+       * - OVERRIDE: Translation is overridden
+       * - NEW: New translation is created)
+       */
+      resolution: "KEEP" | "OVERRIDE" | "NEW";
+    };
+    KeyImportResolvableResultModel: {
+      /** List of keys */
+      keys: components["schemas"]["KeyModel"][];
+      /** Map uploadedImageId to screenshot */
+      screenshots: { [key: string]: components["schemas"]["ScreenshotModel"] };
+    };
     ImportKeysDto: {
       keys: components["schemas"]["ImportKeysItemDto"][];
     };
@@ -889,6 +976,8 @@ export interface components {
       namespace?: string;
       /** Object mapping language tag to translation */
       translations: { [key: string]: string };
+      /** Tags of the key */
+      tags?: string[];
     };
     CreateKeyDto: {
       /** Name of the key */
@@ -899,6 +988,7 @@ export interface components {
       tags?: string[];
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -987,11 +1077,19 @@ export interface components {
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
+    ScreenshotInfoDto: {
+      text?: string;
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+      location?: string;
+    };
     CreatePatDto: {
       /** Description of the PAT */
       description: string;
       /** Expiration date in epoch format (milliseconds). When null, token never expires. */
       expiresAt?: number;
+    };
+    ImageUploadInfoDto: {
+      location?: string;
     };
     UploadedImageModel: {
       id: number;
@@ -999,6 +1097,7 @@ export interface components {
       fileUrl: string;
       requestFilename: string;
       createdAt: string;
+      location?: string;
     };
     CreateApiKeyDto: {
       projectId: number;
@@ -1143,6 +1242,33 @@ export interface components {
       bucketSize: number;
       extraCreditBalance: number;
     };
+    KeySearchResultView: {
+      baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
+      name: string;
+      id: number;
+    };
+    KeySearchSearchResultModel: {
+      view?: components["schemas"]["KeySearchResultView"];
+      baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
+      name: string;
+      id: number;
+    };
+    PagedModelKeySearchSearchResultModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeySearchSearchResultModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     CollectionModelKeyModel: {
       _embedded?: {
         keys?: components["schemas"]["KeyModel"][];
@@ -1241,6 +1367,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1252,7 +1379,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1474,12 +1600,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
+      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1532,15 +1658,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
-      description: string;
+      projectName: string;
+      userFullName?: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
+      description: string;
+      id: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1559,7 +1685,7 @@ export interface components {
 }
 
 export interface operations {
-  getInfo: {
+  getInfo_2: {
     responses: {
       /** OK */
       200: {
@@ -2571,7 +2697,7 @@ export interface operations {
       };
     };
   };
-  update_1: {
+  update_2: {
     parameters: {
       path: {
         commentId: number;
@@ -3089,7 +3215,7 @@ export interface operations {
       };
     };
   };
-  update_3: {
+  update_4: {
     parameters: {
       path: {
         id: number;
@@ -3232,7 +3358,7 @@ export interface operations {
       };
     };
   };
-  update_4: {
+  update_5: {
     parameters: {
       path: {
         id: number;
@@ -3403,7 +3529,7 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  update_6: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -3655,7 +3781,71 @@ export interface operations {
       };
     };
   };
+  getInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelKeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeysRequestDto"];
+      };
+    };
+  };
   importKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyImportResolvableResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysResolvableDto"];
+      };
+    };
+  };
+  importKeys_2: {
     parameters: {
       path: {
         projectId: number;
@@ -3712,6 +3902,41 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  getAll_3: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -3933,7 +4158,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_5: {
     parameters: {
       path: {
         translationId: number;
@@ -4106,7 +4331,7 @@ export interface operations {
       };
     };
   };
-  getAll_5: {
+  getAll_7: {
     parameters: {
       path: {
         projectId: number;
@@ -4232,11 +4457,12 @@ export interface operations {
       content: {
         "multipart/form-data": {
           screenshot: string;
+          info?: components["schemas"]["ScreenshotInfoDto"];
         };
       };
     };
   };
-  getAll_7: {
+  getAll_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4295,7 +4521,7 @@ export interface operations {
       };
     };
   };
-  getAll_8: {
+  getAll_10: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -4381,6 +4607,7 @@ export interface operations {
       content: {
         "multipart/form-data": {
           image: string;
+          info?: components["schemas"]["ImageUploadInfoDto"];
         };
       };
     };
@@ -4877,6 +5104,45 @@ export interface operations {
       };
     };
   };
+  searchForKey: {
+    parameters: {
+      query: {
+        /** Search query */
+        search: string;
+        /** Language to search in */
+        languageTag?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelKeySearchSearchResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllKeys: {
     parameters: {
       path: {
@@ -5107,7 +5373,7 @@ export interface operations {
     };
   };
   /** Returns all existing and imported namespaces */
-  getAllNamespaces_1: {
+  getAllNamespaces_2: {
     parameters: {
       path: {
         projectId: number;
@@ -5173,6 +5439,7 @@ export interface operations {
   getAllTranslations: {
     parameters: {
       path: {
+        /** Comma-separated language tags to return translations in. */
         languages: string[];
         projectId: number;
       };
@@ -6164,6 +6431,7 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
+        keyId: number;
         projectId: number;
       };
     };

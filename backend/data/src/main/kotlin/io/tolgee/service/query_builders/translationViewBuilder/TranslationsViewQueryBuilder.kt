@@ -15,8 +15,6 @@ class TranslationsViewQueryBuilder(
   private val sort: Sort,
   private val cursor: Map<String, CursorValue>? = null,
 ) {
-  private lateinit var queryBase: QueryBase<*>
-
   private fun <T> getBaseQuery(query: CriteriaQuery<T>, isKeyIdsQuery: Boolean = false): QueryBase<T> {
     return QueryBase(
       cb = cb,

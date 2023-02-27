@@ -6,24 +6,26 @@ import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import {
+  ScreenshotProps,
+  ScreenshotWithLabels,
+} from 'tg.component/ScreenshotWithLabels';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;
-  screenshotData: components['schemas']['ScreenshotModel'];
-  onDelete: (id: number) => void;
+  screenshot: ScreenshotProps;
+  onDelete: () => void;
 }
 
-const StyledScreenshot = styled('img')`
+const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   z-index: 1;
   transition: transform 0.1s, filter 0.5s;
   &:hover {
-    transform: scale(1.5);
-    filter: blur(2px);
+    transform: scale(1.1);
   }
 `;
 
@@ -88,7 +90,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
       confirmation({
         title: <T>screenshot_delete_title</T>,
         message: <T>screenshot_delete_message</T>,
-        onConfirm: () => props.onDelete(props.screenshotData.id),
+        onConfirm: () => props.onDelete(),
       });
     };
 
@@ -97,7 +99,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
         <StyledScreenshotBox
           onMouseOver={onMouseOver}
           onMouseOut={onMouseOut}
-          data-cy="screenshot-box"
+          data-cy="screenshot-thumbnail"
         >
           {projectPermissions.satisfiesPermission(
             ProjectPermissionType.TRANSLATE
@@ -115,14 +117,10 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
             </Tooltip>
           )}
           <StyledScreenshotOverflowWrapper
-            key={props.screenshotData.id}
+            key={props.screenshot.highlightedKeyId}
             onClick={props.onClick}
           >
-            <StyledScreenshot
-              onMouseDown={(e) => e.preventDefault()}
-              src={`${props.screenshotData.thumbnailUrl}`}
-              alt="Screenshot"
-            />
+            <StyledScreenshotWithLabels screenshot={props.screenshot} />
           </StyledScreenshotOverflowWrapper>
         </StyledScreenshotBox>
       </>

@@ -24,15 +24,16 @@ import org.springframework.boot.test.context.SpringBootTest
 open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
-    dbPopulator.createBase("one", "kim")
-    dbPopulator.createBase("two", "kim")
+    executeInNewTransaction {
+      dbPopulator.createBase("one", "kim")
+      dbPopulator.createBase("two", "kim")
 
-    loginAsUser("kim")
+      loginAsUser("kim")
 
-    dbPopulator.createOrganization("cool", userAccount!!).let { org ->
-      dbPopulator.createProjectWithOrganization("org repo", org)
+      dbPopulator.createOrganization("cool", userAccount!!).let { org ->
+        dbPopulator.createProjectWithOrganization("org repo", org)
+      }
     }
-
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(3)
       it.node("[0].organizationOwner.name").isEqualTo("kim")
@@ -291,7 +292,10 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun setUsersPermissionsOwn() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+    val repo = usersAndOrganizations[1]
+      .organizationRoles[0]
+      .organization!!
+      .projects[0]
 
     loginAsUser(usersAndOrganizations[1].name)
 

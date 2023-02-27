@@ -31,7 +31,26 @@ class ScreenshotModelAssembler(
       thumbnail = thumbnailFilenameWithSignature,
       fileUrl = fileUrl,
       thumbnailUrl = thumbnailUrl,
-      createdAt = entity.createdAt
+      createdAt = entity.createdAt,
+      keyReferences = entity.keyScreenshotReferences.flatMap { reference ->
+        val positions = if (reference.positions.isNullOrEmpty())
+          listOf(null)
+        else
+          reference.positions!!
+
+        positions.map { position ->
+          KeyInScreenshotModel(
+            reference.key.id,
+            position,
+            reference.key.name,
+            reference.key.namespace?.name,
+            reference.originalText
+          )
+        }
+      },
+      location = entity.location,
+      width = entity.width,
+      height = entity.height,
     )
       .add(Link.of(fileUrl, "file"))
       .add(Link.of(thumbnailUrl, "thumbnail"))

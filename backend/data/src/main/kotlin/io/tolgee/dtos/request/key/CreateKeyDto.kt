@@ -25,7 +25,10 @@ data class CreateKeyDto(
   val tags: List<String>? = null,
 
   @Schema(description = "Ids of screenshots uploaded with /v2/image-upload endpoint")
-  val screenshotUploadedImageIds: List<Long>? = null
+  @Deprecated("Use screenshots instead")
+  val screenshotUploadedImageIds: List<Long>? = null,
+
+  val screenshots: List<KeyScreenshotDto>? = null
 ) {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

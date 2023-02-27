@@ -1,25 +1,41 @@
 package io.tolgee.service.key
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.KeyImportResolvableResult
+import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.Project_
+import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta_
+import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace
+import io.tolgee.model.key.Namespace_
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.equalNullable
+import io.tolgee.util.setSimilarityLimit
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import javax.persistence.EntityManager
+import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Join
+import javax.persistence.criteria.JoinType
 
 @Service
 class KeyService(
@@ -28,7 +44,9 @@ class KeyService(
   private val keyMetaService: KeyMetaService,
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val applicationContext: ApplicationContext,
+  private val entityManager: EntityManager
 ) {
   private lateinit var translationService: TranslationService
 
@@ -85,17 +103,38 @@ class KeyService(
       tagService.tagKey(key, it)
     }
 
-    dto.screenshotUploadedImageIds?.let {
-      screenshotService.saveUploadedImages(it, key)
-    }
+    storeScreenshots(dto, key)
 
     return key
+  }
+
+  private fun storeScreenshots(dto: CreateKeyDto, key: Key) {
+    val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
+    val screenshots = dto.screenshots
+
+    if (!screenshotUploadedImageIds.isNullOrEmpty() && !dto.screenshots.isNullOrEmpty()) {
+      throw BadRequestException(Message.PROVIDE_ONLY_ONE_OF_SCREENSHOTS_AND_SCREENSHOT_UPLOADED_IMAGE_IDS)
+    }
+
+    if (!screenshotUploadedImageIds.isNullOrEmpty()) {
+      screenshotService.saveUploadedImages(screenshotUploadedImageIds, key)
+      return
+    }
+
+    if (!screenshots.isNullOrEmpty()) {
+      screenshotService.saveUploadedImages(screenshots, key)
+      return
+    }
   }
 
   @Transactional
   fun create(project: Project, name: String, namespace: String?): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
+    return createWithoutExistenceCheck(project, name, namespace)
+  }
 
+  @Transactional
+  fun createWithoutExistenceCheck(project: Project, name: String, namespace: String?): Key {
     val key = Key(name = name, project = project)
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
@@ -223,6 +262,62 @@ class KeyService(
     }
 
     tagService.tagKeys(toTag)
+  }
+
+  @Transactional
+  fun searchKeys(
+    search: String,
+    languageTag: String?,
+    project: ProjectDto,
+    pageable: Pageable
+  ): Page<KeySearchResultView> {
+    entityManager.setSimilarityLimit(0.00001)
+    return keyRepository.searchKeys(search, project.id, languageTag, pageable)
+  }
+
+  @Transactional
+  fun importKeysResolvable(keys: List<ImportKeysResolvableItemDto>, projectEntity: Project): KeyImportResolvableResult {
+    val importer = ResolvingKeyImporter(
+      applicationContext = applicationContext,
+      keysToImport = keys,
+      projectEntity = projectEntity
+    )
+    return importer()
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  fun getKeysInfo(dto: GetKeysRequestDto, projectId: Long): List<Pair<Key, List<Screenshot>>> {
+    val cb: CriteriaBuilder = entityManager.criteriaBuilder
+    val query = cb.createQuery(Key::class.java)
+    val root = query.from(Key::class.java)
+    val project = root.join(Key_.project)
+    project.on(cb.equal(project.get(Project_.id), projectId))
+    val namespace = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
+    val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
+    keyMeta.fetch(KeyMeta_.tags, JoinType.LEFT)
+    val predicates = dto.keys.map { key ->
+      cb.and(
+        cb.equal(root.get(Key_.name), key.name),
+        cb.equalNullable(namespace.get(Namespace_.name), key.namespace)
+      )
+    }
+
+    val keyPredicates = cb.or(*predicates.toTypedArray())
+
+    query.where(keyPredicates)
+    query.orderBy(cb.asc(namespace.get(Namespace_.name)), cb.asc(root.get(Key_.name)))
+
+    val result = entityManager.createQuery(query).resultList
+    val screenshots = screenshotService.getScreenshotsForKeys(result.map { it.id })
+
+    val translations = translationService.getForKeys(result.map { it.id }, dto.languageTags)
+      .groupBy { it.key.id }
+
+    result.map {
+      it.translations = translations[it.id]?.toMutableList() ?: mutableListOf()
+    }
+
+    return result.map { it to (screenshots[it.id] ?: listOf()) }.toList()
   }
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)

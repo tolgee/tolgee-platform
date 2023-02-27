@@ -1,0 +1,75 @@
+{
+  "keys": [
+    {
+      "name": "test",
+      "translations": {
+        "en": { "text": "Používateľ", "resolution": "OVERRIDE" }
+      }
+    },
+    {
+      "name": "new_with_ns",
+      "translations": {
+        "en": { "text": "Neexistující klíč", "resolution": "NEW" }
+      }
+    },
+    {
+      "name": "asdfasdfasdf",
+      "translations": {
+        "en": {
+          "text": "Hell which is long and long and long and long and long and long and long ",
+          "resolution": "NEW"
+        }
+      }
+    },
+    {
+      "name": "aaaa",
+      "translations": { "en": { "text": "Nice man", "resolution": "NEW" } }
+    },
+    {
+      "name": "second",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    },
+    {
+      "name": "third",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    },
+    {
+      "name": "fifth",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    },
+    {
+      "name": "sixth",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    },
+    {
+      "name": "ninth",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    },
+    {
+      "name": "hello",
+      "translations": { "en": { "text": "Ahoj svet!", "resolution": "NEW" } }
+    },
+    {
+      "name": "my_key",
+      "translations": { "en": { "text": "Nový", "resolution": "NEW" } }
+    },
+    {
+      "name": "new_key",
+      "translations": { "en": { "text": "Nový preklad", "resolution": "NEW" } }
+    },
+    {
+      "name": "key.with.dot",
+      "translations": {
+        "en": { "text": "Testovací uzol", "resolution": "NEW" }
+      }
+    },
+    {
+      "name": "first",
+      "translations": { "en": { "text": "Pekný mužik", "resolution": "NEW" } }
+    },
+    {
+      "name": "seventh",
+      "translations": { "en": { "text": "Pekný muž", "resolution": "NEW" } }
+    }
+  ]
+}

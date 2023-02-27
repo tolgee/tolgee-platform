@@ -36,7 +36,8 @@ class UploadedImageModelAssembler(
       requestFilename = filename,
       fileUrl = fileUrl,
       filename = entity.filename,
-      createdAt = entity.createdAt!!
+      createdAt = entity.createdAt!!,
+      location = entity.location
     )
   }
 }

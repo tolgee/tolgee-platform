@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 
 class KeyBuilder(
@@ -12,7 +13,6 @@ class KeyBuilder(
 
   class DATA {
     var meta: KeyMetaBuilder? = null
-    var screenshots = mutableListOf<ScreenshotBuilder>()
   }
 
   val data = DATA()
@@ -43,5 +43,20 @@ class KeyBuilder(
     return nsBuilder
   }
 
-  fun addScreenshot(ft: FT<Screenshot>) = addOperation(data.screenshots, ft)
+  fun addScreenshot(ft: Screenshot.(reference: KeyScreenshotReference) -> Unit): ScreenshotBuilder {
+    val screenshotBuilder = projectBuilder.addScreenshot {}
+    val reference = projectBuilder.addScreenshotReference {
+      key = this@KeyBuilder.self
+      screenshot = screenshotBuilder.self
+    }
+    ft(screenshotBuilder.self, reference.self)
+    return screenshotBuilder
+  }
+
+  fun addTranslation(languageTag: String, text: String?) {
+    addTranslation {
+      this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
+      this.text = text
+    }
+  }
 }

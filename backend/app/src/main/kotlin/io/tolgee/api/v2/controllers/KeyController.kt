@@ -1,20 +1,28 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.v2.hateoas.key.KeyImportResolvableResultModel
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeySearchResultModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeySearchSearchResultModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeyWithScreenshotsModelAssembler
+import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
+import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
+import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -23,6 +31,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import org.springdoc.api.annotations.ParameterObject
@@ -30,6 +39,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -42,6 +52,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
@@ -63,7 +74,11 @@ class KeyController(
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
   private val applicationContext: ApplicationContext,
-  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>
+  private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>,
+  private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -72,7 +87,7 @@ class KeyController(
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
-    if (dto.screenshotUploadedImageIds != null) {
+    if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
     }
     val key = keyService.create(projectHolder.projectEntity, dto)
@@ -86,7 +101,7 @@ class KeyController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
-    return KeyComplexEditHelper(applicationContext, id, dto).doComplexEdit()
+    return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
   @PutMapping(value = ["/{id}"])
@@ -145,6 +160,61 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
+  }
+
+  @PostMapping("/import-resolvable")
+  @AccessWithApiKey([ApiScope.KEYS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
+  @RequestActivity(ActivityType.IMPORT)
+  fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
+    val uploadedImageToScreenshotMap =
+      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
+    val screenshots = uploadedImageToScreenshotMap.screenshots
+      .map { (uploadedImageId, screenshot) ->
+        uploadedImageId to screenshotModelAssembler.toModel(screenshot)
+      }.toMap()
+
+    val keys = uploadedImageToScreenshotMap.keys
+      .map { key -> keyModelAssembler.toModel(key) }
+
+    return KeyImportResolvableResultModel(keys, screenshots)
+  }
+
+  @GetMapping("/search")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(
+    summary = "This endpoint helps you to find desired key by keyName, " +
+      "base translation or translation in specified language."
+  )
+  fun searchForKey(
+    @RequestParam
+    @Parameter(description = "Search query")
+    search: String,
+    @RequestParam
+    @Parameter(description = "Language to search in")
+    languageTag: String? = null,
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<KeySearchSearchResultModel> {
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable)
+    return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
+  }
+
+  @PostMapping("/info")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.VIEW)
+  @Operation(
+    summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
+      "If key is not found, it's not included in the response."
+  )
+  fun getInfo(
+    @RequestBody
+    @Valid
+    dto: GetKeysRequestDto,
+  ): CollectionModel<KeyWithDataModel> {
+    val result = keyService.getKeysInfo(dto, projectHolder.project.id)
+    return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }
 
   private fun Key.checkInProject() {

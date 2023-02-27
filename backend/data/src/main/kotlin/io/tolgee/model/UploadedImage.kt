@@ -21,9 +21,23 @@ class UploadedImage(
 ) : StandardAuditModel() {
 
   @ColumnDefault("jpg")
+  // legacy is jpg, new is png
   var extension: String? = null
     get() = field ?: "jpg"
 
   val filenameWithExtension
     get() = "$filename.$extension"
+
+  val thumbnailFilenameWithExtension
+    get() = "${filename}_thumbnail.$extension"
+
+  var location: String? = null
+
+  var originalWidth: Int = 0
+
+  var originalHeight: Int = 0
+
+  var width: Int = 0
+
+  var height: Int = 0
 }

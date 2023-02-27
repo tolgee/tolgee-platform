@@ -24,6 +24,6 @@ class KeyWithDataModelAssembler(
       it.language.tag to translationModelAssembler.toModel(it)
     }.toMap(),
     tags = entity.keyMeta?.tags?.map { tagModelAssembler.toModel(it) }?.toSet() ?: setOf(),
-    screenshots = entity.screenshots.map { screenshotModelAssembler.toModel(it) }
+    screenshots = entity.keyScreenshotReferences.map { it.screenshot }.map { screenshotModelAssembler.toModel(it) }
   )
 }

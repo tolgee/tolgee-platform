@@ -4,6 +4,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.MaxUploadedFilesByUserProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UploadedImage
@@ -35,17 +36,31 @@ class ImageUploadService(
   }
 
   @Transactional
-  fun store(image: InputStreamSource, userAccount: UserAccount): UploadedImage {
+  fun store(image: InputStreamSource, userAccount: UserAccount, info: ImageUploadInfoDto?): UploadedImage {
     if (uploadedImageRepository.countAllByUserAccount(userAccount) > maxUploadedFilesByUserProvider()) {
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
 
+    val imageConverter = ImageConverter(image.inputStream)
+    val dimension = imageConverter.originalDimension
+
     val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
-      .apply { extension = "png" }
+      .apply {
+        extension = "png"
+        originalWidth = dimension.width
+        originalHeight = dimension.height
+        width = imageConverter.targetDimension.width
+        height = imageConverter.targetDimension.height
+        location = info?.location
+      }
 
     save(uploadedImageEntity)
-    val processedImage = ImageConverter(image.inputStream).getImage()
+    val processedImage = imageConverter.getImage()
+    val processedThumbnail = imageConverter.getThumbnail()
+
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
+
     return uploadedImageEntity
   }
 
@@ -91,4 +106,6 @@ class ImageUploadService(
 
   val UploadedImage.filePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.filenameWithExtension
+  val UploadedImage.thumbnailFilePath
+    get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.thumbnailFilenameWithExtension
 }

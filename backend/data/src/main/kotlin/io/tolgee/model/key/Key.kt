@@ -9,9 +9,9 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
-import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.WithKeyMeta
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +25,6 @@ import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
-import javax.persistence.OrderBy
 import javax.persistence.PrePersist
 import javax.persistence.PreRemove
 import javax.validation.constraints.NotBlank
@@ -54,19 +53,18 @@ class Key(
   var namespace: Namespace? = null
 
   @OneToMany(mappedBy = "key")
-  var translations: MutableSet<Translation> = mutableSetOf()
+  var translations: MutableList<Translation> = mutableListOf()
 
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null
 
-  @OneToMany(mappedBy = "key")
-  @OrderBy("id")
-  var screenshots: MutableSet<Screenshot> = mutableSetOf()
+  @OneToMany(mappedBy = "key", orphanRemoval = true)
+  var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
 
   constructor(
     name: String,
     project: Project,
-    translations: MutableSet<Translation> = HashSet()
+    translations: MutableList<Translation> = mutableListOf()
   ) : this(name) {
     this.project = project
     this.translations = translations
@@ -91,5 +89,9 @@ class Key(
         eventPublisherProvider.`object`.publishEvent(OnKeyPreRemove(source = this, key))
       }
     }
+  }
+
+  override fun hashCode(): Int {
+    return id.hashCode() * name.hashCode()
   }
 }

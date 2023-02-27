@@ -56,7 +56,7 @@ class Project(
   var permissions: MutableSet<Permission> = LinkedHashSet()
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
-  var keys: MutableSet<Key> = LinkedHashSet()
+  var keys: MutableList<Key> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()

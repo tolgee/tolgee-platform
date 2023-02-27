@@ -2219,7 +2219,8 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665470383084-1">
-        <addUniqueConstraint columnNames="project_id, name" constraintName="namespace_name_project" tableName="namespace"/>
+        <addUniqueConstraint columnNames="project_id, name" constraintName="namespace_name_project"
+                             tableName="namespace"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431777-1">
         <addColumn tableName="import_key">
@@ -2227,7 +2228,10 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431777-2">
-        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_key" constraintName="FK2lyqy9kydj78d72iatgt0c509" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_key"
+                                 constraintName="FK2lyqy9kydj78d72iatgt0c509" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431777-3">
         <dropForeignKeyConstraint baseTableName="import_file" constraintName="FK5yemkngk70scn7l0r4cwlmtn"/>
@@ -2247,6 +2251,130 @@
     <changeSet author="jenik (generated)" id="1673863874294-1">
         <addColumn tableName="translation">
             <column name="outdated" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431778-1">
+        <sql dbms="postgresql">
+            CREATE
+            EXTENSION IF NOT EXISTS unaccent;
+            CREATE
+            EXTENSION IF NOT EXISTS pg_trgm;
+
+            CREATE
+            OR REPLACE FUNCTION public.f_unaccent(text)
+            RETURNS text
+            LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS
+            $func$
+            SELECT public.unaccent('public.unaccent', $1)
+            $func$;
+
+            CREATE INDEX translation_text_unaccent_gin_trgm_index ON translation USING GIN ( lower(f_unaccent(text)) gin_trgm_ops);
+            CREATE INDEX key_name_unaccent_gin_trgm_index ON key USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
+            CREATE INDEX namespace_name_unaccent_gin_trgm_index ON namespace USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674571952168-1">
+        <createTable tableName="key_screenshot_reference">
+            <column name="original_text" type="VARCHAR(255)"/>
+            <column name="positions" type="JSONB"/>
+            <column name="key_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_screenshot_referencePK"/>
+            </column>
+            <column name="screenshot_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_screenshot_referencePK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674571952168-2">
+        <addColumn tableName="screenshot">
+            <column name="path" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674571952168-3">
+        <addForeignKeyConstraint baseColumnNames="screenshot_id" baseTableName="key_screenshot_reference"
+                                 constraintName="FKh8sadml9k6rn9ji3q6u4em6ow" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="screenshot"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674571952168-4">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_screenshot_reference"
+                                 constraintName="FKp6wnbfbgoxnqv6wihs7m63v5t" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1665492431778-2">
+        <sql dbms="postgresql">
+            update screenshot
+            set path = k.project_id || '/' || k.id from key k
+            where k.id = screenshot.key_id;
+
+            insert into key_screenshot_reference(key_id, screenshot_id)
+            select s.key_id, s.id
+            from screenshot s
+                     join key k on k.id = s.key_id;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674574577472-1">
+        <dropForeignKeyConstraint baseTableName="screenshot" constraintName="FKojcltkbo4pxlf41nwlxwkgtjy"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674574577472-2">
+        <dropColumn columnName="key_id" tableName="screenshot"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674815146392-1">
+        <addColumn tableName="uploaded_image">
+            <column name="original_height" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674815146392-2">
+        <addColumn tableName="uploaded_image">
+            <column name="original_width" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674989897818-1">
+        <addColumn tableName="uploaded_image">
+            <column name="height" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1674989897818-2">
+        <addColumn tableName="uploaded_image">
+            <column name="width" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-1">
+        <addColumn tableName="screenshot">
+            <column name="location" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-2">
+        <addColumn tableName="uploaded_image">
+            <column name="location" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676566185273-3">
+        <createIndex indexName="screenshot_location_idx" tableName="screenshot">
+            <column name="location"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676985522838-1">
+        <addColumn tableName="screenshot">
+            <column name="height" type="int4" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1676985522838-2">
+        <addColumn tableName="screenshot">
+            <column name="width" type="int4" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

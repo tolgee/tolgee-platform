@@ -5,13 +5,19 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Encoding
+import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.ApiScope
@@ -32,7 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
@@ -47,7 +53,7 @@ import org.springframework.web.multipart.MultipartFile
   ]
 )
 @Tag(name = "Screenshots")
-class V2ScreenshotController(
+class KeyScreenshotController(
   private val screenshotService: ScreenshotService,
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
@@ -59,17 +65,19 @@ class V2ScreenshotController(
   @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
+  @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
   fun uploadScreenshot(
     @PathVariable keyId: Long,
-    @RequestParam("screenshot") screenshot: MultipartFile,
+    @RequestPart("screenshot") screenshot: MultipartFile,
+    @RequestPart("info", required = false) info: ScreenshotInfoDto?
   ): ResponseEntity<ScreenshotModel> {
     val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
     if (!contentTypes.contains(screenshot.contentType!!)) {
-      throw ValidationException(io.tolgee.constants.Message.FILE_NOT_IMAGE)
+      throw ValidationException(Message.FILE_NOT_IMAGE)
     }
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
-    val screenShotEntity = screenshotService.store(screenshot, keyEntity)
+    val screenShotEntity = screenshotService.store(screenshot, keyEntity, info)
     return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
   }
 
@@ -88,12 +96,22 @@ class V2ScreenshotController(
   @Operation(summary = "Deletes multiple screenshots by ids")
   @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
-  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
+  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>, @PathVariable keyId: Long) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {
-      it.key.checkInProject()
+      it.checkInProject()
     }
-    screenshotService.delete(screenshots)
+    val key = keyService.get(keyId)
+    key.checkInProject()
+    screenshotService.removeScreenshotReferences(key, screenshots)
+  }
+
+  private fun Screenshot.checkInProject() {
+    this.keyScreenshotReferences.forEach {
+      if (it.key.project.id != projectHolder.project.id) {
+        throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+      }
+    }
   }
 
   private fun Key.checkInProject() {

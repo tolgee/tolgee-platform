@@ -5,7 +5,6 @@ interface EntityDataBuilder<T, out BuilderType> {
 
   fun self(ft: T.() -> Unit): T {
     ft(self)
-    this.apply { }
     return self
   }
 

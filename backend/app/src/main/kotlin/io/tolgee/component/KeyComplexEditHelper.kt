@@ -4,9 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
@@ -49,7 +47,7 @@ class KeyComplexEditHelper(
   private var isScreenshotDeleted by Delegates.notNull<Boolean>()
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
 
-  fun doComplexEdit(): KeyWithDataModel {
+  fun doComplexUpdate(): KeyWithDataModel {
     prepareData()
     prepareConditions()
     setActivityHolder()
@@ -129,7 +127,7 @@ class KeyComplexEditHelper(
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
     isKeyModified = key.name != dto.name
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
-    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty()
+    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() && !dto.screenshotsToAdd.isNullOrEmpty()
   }
 
   private fun areTagsModified(
@@ -161,9 +159,19 @@ class KeyComplexEditHelper(
       deleteScreenshots(screenshotIds, key)
     }
 
-    dto.screenshotUploadedImageIds?.let {
+    if (isScreenshotAdded) {
       key.project.checkScreenshotsUploadPermission()
-      screenshotService.saveUploadedImages(it, key)
+    }
+
+    val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
+    if (screenshotUploadedImageIds != null) {
+      screenshotService.saveUploadedImages(screenshotUploadedImageIds, key)
+      return
+    }
+
+    val screenshotsToAdd = dto.screenshotsToAdd
+    if (screenshotsToAdd != null) {
+      screenshotService.saveUploadedImages(screenshotsToAdd, key)
     }
   }
 
@@ -174,12 +182,9 @@ class KeyComplexEditHelper(
     if (screenshotIds.isNotEmpty()) {
       key.project.checkScreenshotsDeletePermission()
     }
-    val screenshots = screenshotService.findByIdIn(screenshotIds).onEach {
-      if (it.key.id != key.id) {
-        throw BadRequestException(Message.SCREENSHOT_NOT_OF_KEY)
-      }
+    screenshotService.findByIdIn(screenshotIds).forEach {
+      screenshotService.removeScreenshotReference(key, it)
     }
-    screenshotService.delete(screenshots)
   }
 
   private fun Project.checkScreenshotsDeletePermission() {

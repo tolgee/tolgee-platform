@@ -39,6 +39,7 @@ import javax.validation.Valid
 @RequestMapping(
   value = [
     "/v2/projects/{projectId}/",
+    "/v2/projects/"
   ]
 )
 @Tag(name = "Namespaces", description = "Manipulates key namespaces")

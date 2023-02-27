@@ -52,7 +52,9 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
       node("requestFilename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it)
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isEqualTo(138412)
+        assertThat(file.readBytes().size)
+          .isGreaterThan(7200)
+          .isLessThan(7500)
       }
     }
   }
@@ -77,7 +79,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   @Test
   fun `returns file`() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filenameWithExtension}""")
     val result = performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
@@ -92,7 +94,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   fun delete() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
     val list = (1..20).map {
-      imageUploadService.store(screenshotFile, userAccount!!)
+      imageUploadService.store(screenshotFile, userAccount!!, null)
     }.toCollection(mutableListOf())
 
     val idsToDelete = list.take(10).map { it.id }.joinToString(",")
@@ -116,7 +118,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   @Test
   fun `doesn't delete when not owning`() {
-    val image = imageUploadService.store(screenshotFile, dbPopulator.createUserIfNotExists("user"))
+    val image = imageUploadService.store(screenshotFile, dbPopulator.createUserIfNotExists("user"), null)
     performAuthDelete("/v2/image-upload/${image.id}", null).andIsForbidden
   }
 

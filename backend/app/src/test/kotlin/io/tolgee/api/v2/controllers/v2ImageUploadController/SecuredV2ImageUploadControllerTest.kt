@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +35,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getScreenshotFileNoTimestamp() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val result = performAuthGet("/uploaded-images/${image.filename}.jpg")
       .andExpect(status().isBadRequest)
@@ -45,7 +46,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
     val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
@@ -59,7 +60,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
   @Test
   fun getFile() {
-    val image = imageUploadService.store(screenshotFile, userAccount!!)
+    val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
     val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
     val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
@@ -77,7 +78,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       node("filename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it + ".png")
         assertThat(file).exists()
-        assertThat(file.readBytes().size).isEqualTo(138412)
+        assertThat(file.readBytes().size).isCloseTo(7365, Offset.offset(200))
       }
       node("requestFilename").isString.satisfies {
         val parts = it.split("?timestamp=")

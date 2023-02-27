@@ -13,6 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -38,7 +40,8 @@ class TranslationService(
   private val importService: ImportService,
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val translationViewDataProvider: TranslationViewDataProvider
+  private val translationViewDataProvider: TranslationViewDataProvider,
+  private val entityManager: EntityManager
 ) {
   @set:Autowired
   @set:Lazy
@@ -138,6 +141,15 @@ class TranslationService(
 
   fun setTranslation(key: Key, language: Language, text: String?): Translation? {
     val translation = getOrCreate(key, language)
+    setTranslation(translation, text)
+    key.translations.add(translation)
+    return translation
+  }
+
+  fun setTranslation(
+    translation: Translation,
+    text: String?
+  ): Translation {
     if (translation.text !== text) {
       translation.resetFlags()
     }
@@ -145,13 +157,11 @@ class TranslationService(
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
       translation.state = TranslationState.TRANSLATED
     }
-    if (text == null || text.isEmpty()) {
+    if (text.isNullOrEmpty()) {
       translation.state = TranslationState.UNTRANSLATED
       translation.text = null
     }
-    val t = save(translation)
-    key.translations.add(t)
-    return t
+    return save(translation)
   }
 
   fun save(translation: Translation): Translation {
@@ -319,5 +329,26 @@ class TranslationService(
 
   fun setOutdatedBatch(keyIds: List<Long>) {
     translationRepository.setOutdated(keyIds)
+  }
+
+  fun get(keyLanguagesMap: Map<Key, List<Language>>): List<Translation> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createQuery(Translation::class.java)
+    val root = query.from(Translation::class.java)
+
+    val predicates = keyLanguagesMap.map { (key, languages) ->
+      cb.and(
+        cb.equal(root.get(Translation_.key), key),
+        root.get(Translation_.language).`in`(languages)
+      )
+    }.toTypedArray()
+
+    query.where(cb.or(*predicates))
+
+    return entityManager.createQuery(query).resultList
+  }
+
+  fun getForKeys(keyIds: List<Long>, languageTags: List<String>): List<Translation> {
+    return translationRepository.getForKeys(keyIds, languageTags)
   }
 }

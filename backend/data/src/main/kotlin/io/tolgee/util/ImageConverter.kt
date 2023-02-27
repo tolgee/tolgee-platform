@@ -10,7 +10,6 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import kotlin.math.floor
-import kotlin.math.min
 import kotlin.math.sqrt
 
 class ImageConverter(
@@ -20,18 +19,31 @@ class ImageConverter(
     ImageIO.read(imageStream)
   }
 
+  val originalDimension: Dimension by lazy {
+    Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
+  }
+
   fun getImage(compressionQuality: Float = 0.5f, targetDimension: Dimension? = null): ByteArrayOutputStream {
     val resizedImage = getScaledImage(targetDimension)
     val bufferedImage = convertToBufferedImage(resizedImage)
     return writeImage(bufferedImage, compressionQuality)
   }
 
-  fun getThumbNail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
-    val side = min(sourceBufferedImage.width, sourceBufferedImage.height)
-    val x = (sourceBufferedImage.width - side) / 2
-    val y = (sourceBufferedImage.height - side) / 2
-    val cropped = sourceBufferedImage.getSubimage(x, y, side, side)
-    val resizedImage = cropped.getScaledInstance(size, size, Image.SCALE_SMOOTH)
+  fun getThumbnail(size: Int = 150, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
+    val originalWidth = sourceBufferedImage.width
+    val originalHeight = sourceBufferedImage.height
+    val newWidth: Int
+    val newHeight: Int
+
+    if (originalWidth > originalHeight) {
+      newWidth = size
+      newHeight = (originalHeight * size) / originalWidth
+    } else {
+      newHeight = size
+      newWidth = (originalWidth * size) / originalHeight
+    }
+
+    val resizedImage = sourceBufferedImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH)
     val bufferedImage = convertToBufferedImage(resizedImage)
     return writeImage(bufferedImage, compressionQuality)
   }
@@ -59,7 +71,7 @@ class ImageConverter(
   }
 
   private fun getScaledImage(targetDimension: Dimension?): Image {
-    val resultingTargetDimension = targetDimension ?: getTargetDimension()
+    val resultingTargetDimension = targetDimension ?: this.targetDimension
     return sourceBufferedImage.getScaledInstance(
       resultingTargetDimension.width,
       resultingTargetDimension.height,
@@ -69,17 +81,16 @@ class ImageConverter(
 
   private fun getWriter() = ImageIO.getImageWritersByFormatName("png").next() as ImageWriter
 
-  private fun getTargetDimension(): Dimension {
-
+  val targetDimension: Dimension by lazy {
     val imagePxs = sourceBufferedImage.height * sourceBufferedImage.width
     val maxPxs = 3000000
     val newHeight = floor(sqrt(maxPxs.toDouble() * sourceBufferedImage.height / sourceBufferedImage.width)).toInt()
     val newWidth = floor(sqrt(maxPxs.toDouble() * sourceBufferedImage.width / sourceBufferedImage.height)).toInt()
 
     if (imagePxs > maxPxs) {
-      return Dimension(newWidth, newHeight)
+      return@lazy Dimension(newWidth, newHeight)
     }
-    return Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
+    return@lazy Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
 
   private fun convertToBufferedImage(img: Image): BufferedImage {

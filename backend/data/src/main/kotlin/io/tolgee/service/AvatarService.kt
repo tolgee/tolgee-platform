@@ -29,7 +29,7 @@ class AvatarService(
     val avatarBytes = avatar.readAllBytes()
     val converter = ImageConverter(avatarBytes.inputStream())
     val large = converter.getImage(-1f, Dimension(200, 200)).toByteArray()
-    val thumb = converter.getThumbNail(50).toByteArray()
+    val thumb = converter.getThumbnail(50).toByteArray()
     val idByteArray = "${entity::class.simpleName}-${entity.id}---".toByteArray()
     val bytesToHash = idByteArray + large
     val hashBinary = MessageDigest.getInstance("SHA-256").digest(bytesToHash)

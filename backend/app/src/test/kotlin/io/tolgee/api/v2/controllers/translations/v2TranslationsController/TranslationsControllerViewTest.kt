@@ -111,7 +111,43 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         node("[0].screenshots").isArray.hasSize(0)
-        node("[3].screenshots").isArray.hasSize(2)
+        node("[2].screenshots") {
+          isArray.hasSize(2)
+          node("[0]") {
+            node("keyReferences") {
+              isArray.hasSize(2)
+              node("[1].keyId").isValidId
+              node("[1].keyName").isEqualTo("key with screenshot 2")
+              node("[1].keyNamespace").isEqualTo(null)
+              node("[1].originalText").isEqualTo("Oh yeah")
+              node("[1].position") {
+                node("x").isEqualTo(100)
+              }
+            }
+          }
+          node("[1]") {
+            node("keyReferences") {
+              isArray.hasSize(1)
+              node("[0].keyId").isValidId
+              node("[0].keyName").isEqualTo("key with screenshot")
+              node("[0].keyNamespace").isEqualTo(null)
+            }
+          }
+        }
+        node("[3].screenshots") {
+          isArray.hasSize(2)
+          node("[0]") {
+            node("keyReferences") {
+              isArray.hasSize(2)
+            }
+          }
+          node("[1]") {
+            node("keyReferences") {
+              isArray.hasSize(1)
+            }
+          }
+        }
+
         node("[3].screenshots[1].fileUrl").isString.endsWith(".jpg").startsWith("http://local")
       }
     }

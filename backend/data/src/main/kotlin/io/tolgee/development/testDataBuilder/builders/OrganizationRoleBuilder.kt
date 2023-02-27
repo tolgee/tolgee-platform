@@ -9,5 +9,6 @@ class OrganizationRoleBuilder(
 
   override var self: OrganizationRole = OrganizationRole().apply {
     organization = organizationBuilder.self
+    organizationBuilder.self.memberRoles.add(this)
   }
 }
