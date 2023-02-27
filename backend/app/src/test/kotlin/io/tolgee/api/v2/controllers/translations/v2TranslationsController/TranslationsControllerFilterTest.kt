@@ -46,6 +46,23 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by complex keyName with dot and commas`() {
+    testData.generateLotOfData()
+    val keyName = testData.addSentenceKey().self.name
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterKeyName=$keyName")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo(keyName)
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters by multiple keyNames`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)

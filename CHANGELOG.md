@@ -1,3 +1,10 @@
+## [3.7.2](https://github.com/tolgee/tolgee-platform/compare/v3.7.1...v3.7.2) (2023-02-24)
+
+
+### Bug Fixes
+
+* release with translations ([#1584](https://github.com/tolgee/tolgee-platform/issues/1584)) ([4eb0640](https://github.com/tolgee/tolgee-platform/commit/4eb064032b0b954f76f15329d1f87b3ce649715e))
+
 ## [3.7.1](https://github.com/tolgee/tolgee-platform/compare/v3.7.0...v3.7.1) (2023-02-24)
 
 

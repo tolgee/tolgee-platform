@@ -50,6 +50,7 @@ import io.tolgee.service.query_builders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.api.annotations.ParameterObject
+import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -58,8 +59,11 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.InitBinder
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -220,12 +224,21 @@ When null, resulting file will be a flat key-value object.
     return translationModelAssembler.toModel(translationService.setState(translation, state))
   }
 
+  @InitBinder("translationFilters")
+  fun customizeBinding(binder: WebDataBinder) {
+    binder.registerCustomEditor(
+      List::class.java,
+      TranslationFilters::filterKeyName.name,
+      CustomCollectionEditor(List::class.java)
+    )
+  }
+
   @GetMapping(value = [""])
   @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   @Operation(summary = "Returns translations in project")
   fun getTranslations(
-    @ParameterObject params: GetTranslationsParams,
+    @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
 
@@ -250,7 +263,7 @@ When null, resulting file will be a flat key-value object.
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
-    @ParameterObject params: TranslationFilters,
+    @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,
   ): SelectAllResponse {
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)

@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.constants.MtServiceType
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
@@ -165,6 +166,15 @@ class TranslationsTestData {
   fun addKeyWithDot() {
     projectBuilder.addKey {
       name = "key.with.dots"
+    }
+  }
+
+  fun addSentenceKey(): KeyBuilder {
+    return projectBuilder.addKey {
+      name = "How strong of a variation to produce. At 0, " +
+        "there will be no effect. At 1, you will get the " +
+        "complete picture with variation seed (except for ancestral " +
+        "samplers, where you will just get something)."
     }
   }
 
