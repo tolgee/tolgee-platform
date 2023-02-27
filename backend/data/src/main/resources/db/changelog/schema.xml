@@ -2258,7 +2258,7 @@
     <changeSet author="jenik (generated)" id="1665492431778-1">
         <sql dbms="postgresql">
             CREATE
-            extension unaccent;
+            EXTENSION IF NOT EXISTS unaccent;
             CREATE
             EXTENSION IF NOT EXISTS pg_trgm;
 
