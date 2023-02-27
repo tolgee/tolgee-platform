@@ -26,7 +26,7 @@ class KeyScreenshotReference {
   lateinit var screenshot: Screenshot
 
   @Type(type = "jsonb")
-  var positions: MutableList<KeyInScreenshotPosition> = mutableListOf()
+  var positions: MutableList<KeyInScreenshotPosition>? = mutableListOf()
 
   var originalText: String? = null
 }

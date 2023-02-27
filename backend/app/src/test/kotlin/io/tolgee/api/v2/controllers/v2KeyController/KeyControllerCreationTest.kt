@@ -211,7 +211,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         imageUploadService.find(screenshotImages.map { it.id })
       ).hasSize(0)
       screenshots.forEach {
-        val position = it.keyScreenshotReferences[0].positions[0]
+        val position = it.keyScreenshotReferences[0].positions!![0]
         assertThat(position.x).isEqualTo(71)
         assertThat(position.y).isEqualTo(85)
         assertThat(position.width).isEqualTo(141)

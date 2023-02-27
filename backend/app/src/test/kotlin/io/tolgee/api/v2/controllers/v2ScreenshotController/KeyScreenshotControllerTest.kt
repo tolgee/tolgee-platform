@@ -63,10 +63,10 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         assertThat(file).exists()
         val reference = screenshots[0].keyScreenshotReferences[0]
         reference.originalText.assert.isEqualTo(text)
-        reference.positions[0].x.assert.isEqualTo(200)
-        reference.positions[0].y.assert.isEqualTo(100)
-        reference.positions[0].width.assert.isEqualTo(40)
-        reference.positions[0].height.assert.isEqualTo(40)
+        reference.positions!![0].x.assert.isEqualTo(200)
+        reference.positions!![0].y.assert.isEqualTo(100)
+        reference.positions!![0].width.assert.isEqualTo(40)
+        reference.positions!![0].height.assert.isEqualTo(40)
       }
     }
   }

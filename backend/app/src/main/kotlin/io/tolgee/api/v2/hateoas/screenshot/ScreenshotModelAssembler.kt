@@ -33,7 +33,11 @@ class ScreenshotModelAssembler(
       thumbnailUrl = thumbnailUrl,
       createdAt = entity.createdAt,
       keyReferences = entity.keyScreenshotReferences.flatMap { reference ->
-        val positions = if (reference.positions.isEmpty()) listOf(null) else reference.positions
+        val positions = if (reference.positions.isNullOrEmpty())
+          listOf(null)
+        else
+          reference.positions!!
+
         positions.map { position ->
           KeyInScreenshotModel(
             reference.key.id,

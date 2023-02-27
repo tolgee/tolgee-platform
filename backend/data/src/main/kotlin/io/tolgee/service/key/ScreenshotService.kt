@@ -102,8 +102,8 @@ class ScreenshotService(
           ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
         val yRatio = newDimension?.height?.toDouble()
           ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
-
-        positions.add(
+        positions = positions ?: mutableListOf()
+        positions!!.add(
           KeyInScreenshotPosition(
             positionDto.x.adjustByRation(xRatio),
             positionDto.y.adjustByRation(yRatio),
