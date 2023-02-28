@@ -132,6 +132,7 @@ class TranslationCommentController(
   @DeleteMapping(value = ["{translationId}/comments/{commentId}"])
   // the permissions are checked in the body! We need to enable authors to delete their comments
   @Operation(summary = "Deletes the translation comment")
+  @AccessWithApiKey
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_DELETE)
   fun delete(@PathVariable commentId: Long) {
     val comment = translationCommentService.get(commentId)
@@ -147,10 +148,6 @@ class TranslationCommentController(
   }
 
   private fun checkEditPermission() {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      securityService.checkApiKeyScopes(setOf(Scope.TRANSLATIONS_COMMENTS_EDIT), authenticationFacade.apiKey)
-      return
-    }
     securityService.checkProjectPermission(
       projectHolder.project.id,
       Scope.TRANSLATIONS_COMMENTS_EDIT

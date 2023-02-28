@@ -32,10 +32,6 @@ class TranslationsTestData {
       username = "franta"
       user = this
     }
-    addUserAccountWithoutOrganization {
-      username = "pepa"
-      keysOnlyUser = this
-    }
     addProject {
       name = "Franta's project"
       organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
@@ -44,11 +40,6 @@ class TranslationsTestData {
       addPermission {
         user = this@TranslationsTestData.user
         type = ProjectPermissionType.MANAGE
-      }
-      addPermission {
-        user = this@TranslationsTestData.keysOnlyUser
-        type = null
-        scopes = arrayOf(Scope.KEYS_VIEW)
       }
       englishLanguage = addLanguage {
         name = "English"
@@ -114,6 +105,23 @@ class TranslationsTestData {
       }
       projectBuilder = this
     }.self
+  }
+
+  fun addKeysViewOnlyUser() {
+    root.apply {
+      addUserAccountWithoutOrganization {
+        username = "pepa"
+        keysOnlyUser = this
+      }
+    }
+
+    projectBuilder.build {
+      addPermission {
+        user = this@TranslationsTestData.keysOnlyUser
+        type = null
+        scopes = arrayOf(Scope.KEYS_VIEW)
+      }
+    }
   }
 
   fun addTranslationsWithStates() {

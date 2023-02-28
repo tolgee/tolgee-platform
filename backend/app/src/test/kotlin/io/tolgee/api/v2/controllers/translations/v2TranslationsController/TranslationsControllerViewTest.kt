@@ -104,7 +104,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `returns empty translations when user has no permissions`() {
+  fun `returns empty translations when user has no view permissions`() {
+    testData.addKeysViewOnlyUser()
     testDataService.saveTestData(testData.root)
     userAccount = testData.keysOnlyUser
     performProjectAuthGet("/translations?sort=id").andIsOk.andAssertThatJson {
