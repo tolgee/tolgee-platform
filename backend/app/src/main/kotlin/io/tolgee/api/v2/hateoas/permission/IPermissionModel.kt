@@ -39,7 +39,8 @@ List of languages current user has TRANSLATE permission to. If null, all languag
   val viewLanguageIds: Collection<Long>?
 
   @get:Schema(
-    description = """List of languages user can change state to. If null, changing state of all language values is permitted.""",
+    description = "List of languages user can change state to. If null, changing state " +
+      "of all language values is permitted.",
     example = "[200001, 200004]"
   )
   val stateChangeLanguageIds: Collection<Long>?
