@@ -273,7 +273,6 @@ class PermissionService(
     languagePermissions: LanguagePermissions,
     projectId: Long
   ) {
-    val allLanguages = languageService.findAll(projectId)
     permission.translateLanguages = languagePermissions.translate.standardize()
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
 

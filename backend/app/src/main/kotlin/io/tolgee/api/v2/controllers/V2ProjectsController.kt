@@ -165,7 +165,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
@@ -184,7 +184,7 @@ V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Revokes user's access")
   @NeedsSuperJwtToken
   fun revokePermission(

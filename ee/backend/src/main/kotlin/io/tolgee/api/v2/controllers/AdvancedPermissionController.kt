@@ -12,6 +12,7 @@ import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.EePermissionService
+import io.tolgee.service.organization.OrganizationRoleService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -21,15 +22,16 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Tag(name = "User invitations to project")
+@Tag(name = "Advanced permissions")
 class AdvancedPermissionController(
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val eePermissionService: EePermissionService,
   private val projectHolder: ProjectHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val organizationRoleService: OrganizationRoleService
 ) {
   @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
@@ -65,6 +67,7 @@ class AdvancedPermissionController(
     )
     @RequestParam scopes: List<String>
   ) {
+    organizationRoleService.checkUserIsOwner(organizationId)
     enabledFeaturesProvider.checkFeatureEnabled(organizationId, Feature.GRANULAR_PERMISSIONS)
     val parsedScopes = Scope.parse(scopes)
     eePermissionService.setOrganizationBasePermission(organizationId, parsedScopes)
