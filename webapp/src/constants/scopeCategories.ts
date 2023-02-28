@@ -3,6 +3,7 @@ import { expandScope, Scope } from 'tg.component/permissions/permissionHelper';
 export function getScopeCategories(t: (key: string) => string) {
   const scopeCategories = [
     {
+      // @tolgee-key scope_category_project_management
       name: t('scope_category_project_management'),
       scopes: [
         'admin',
