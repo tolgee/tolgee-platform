@@ -19,7 +19,8 @@ enum class Scope(
   LANGUAGES_EDIT("languages.edit"),
   ADMIN("admin"),
   PROJECT_EDIT("project.edit"),
-  MEMBERS_VIEW("users.view"),
+  MEMBERS_VIEW("members.view"),
+  MEMBERS_EDIT("members.edit"),
   TRANSLATIONS_COMMENTS_ADD("translation-comments.add"),
   TRANSLATIONS_COMMENTS_EDIT("translation-comments.edit"),
   TRANSLATIONS_COMMENTS_SET_STATE("translation-comments.set-state"),
@@ -74,7 +75,10 @@ enum class Scope(
         HierarchyItem(ACTIVITY_VIEW),
         HierarchyItem(LANGUAGES_EDIT),
         HierarchyItem(PROJECT_EDIT),
-        HierarchyItem(MEMBERS_VIEW),
+        HierarchyItem(
+          MEMBERS_EDIT,
+          listOf(HierarchyItem(MEMBERS_VIEW))
+        ),
         HierarchyItem(
           TRANSLATIONS_COMMENTS_SET_STATE,
           listOf(translationsView)

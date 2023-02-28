@@ -41,7 +41,7 @@ V2ProjectsInvitationController(
 ) {
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @NeedsSuperJwtToken
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
     validatePermissions(invitation)
