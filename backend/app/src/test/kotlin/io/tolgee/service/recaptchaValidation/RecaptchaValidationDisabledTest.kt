@@ -6,7 +6,6 @@ package io.tolgee.service.recaptchaValidation
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.service.security.ReCaptchaValidationService
-import io.tolgee.service.security.ReCaptchaValidationService.Companion
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -33,10 +32,10 @@ class RecaptchaValidationDisabledTest : AbstractSpringTest() {
   @Test
   fun `does not validate`() {
     whenever(
-      restTemplate.postForEntity(any() as String, any(), any() as Class<Companion.Response>)
+      restTemplate.postForEntity(any() as String, any(), any() as Class<ReCaptchaValidationService.Companion.Response>)
     ).then {
       ResponseEntity(
-        Companion.Response().apply {
+        ReCaptchaValidationService.Companion.Response().apply {
           success = false
           challengeTs = Date()
           hostname = ""
@@ -50,7 +49,9 @@ class RecaptchaValidationDisabledTest : AbstractSpringTest() {
 
     verify(restTemplate, times(0))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"),
+        any(),
+        eq(ReCaptchaValidationService.Companion.Response::class.java)
       )
   }
 }

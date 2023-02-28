@@ -6,7 +6,6 @@ package io.tolgee.service.recaptchaValidation
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.service.security.ReCaptchaValidationService
-import io.tolgee.service.security.ReCaptchaValidationService.Companion
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -44,10 +43,10 @@ class RecaptchaValidationTest : AbstractSpringTest() {
   fun setup() {
     Mockito.reset(restTemplate)
     whenever(
-      restTemplate.postForEntity(any() as String, any(), any() as Class<Companion.Response>)
+      restTemplate.postForEntity(any() as String, any(), any() as Class<ReCaptchaValidationService.Companion.Response>)
     ).then {
       ResponseEntity(
-        Companion.Response().apply {
+        ReCaptchaValidationService.Companion.Response().apply {
           success = true
           challengeTs = Date()
           hostname = ""
@@ -64,17 +63,17 @@ class RecaptchaValidationTest : AbstractSpringTest() {
 
     verify(restTemplate, times(1))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(ReCaptchaValidationService.Companion.Response::class.java)
       )
   }
 
   @Test
   fun `returns false when invalid`() {
     whenever(
-      restTemplate.postForEntity(any() as String, any(), any() as Class<Companion.Response>)
+      restTemplate.postForEntity(any() as String, any(), any() as Class<ReCaptchaValidationService.Companion.Response>)
     ).then {
       ResponseEntity(
-        Companion.Response().apply {
+        ReCaptchaValidationService.Companion.Response().apply {
           success = false
           challengeTs = Date()
           hostname = ""
@@ -88,7 +87,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
 
     verify(restTemplate, times(1))
       .postForEntity(
-        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(Companion.Response::class.java)
+        eq("https://www.google.com/recaptcha/api/siteverify"), any(), eq(ReCaptchaValidationService.Companion.Response::class.java)
       )
   }
 }

@@ -47,14 +47,27 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
+@Import(AbstractSpringTest.Companion.TestConfiguration::class)
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
+  companion object {
+    @EnableAutoConfiguration(
+      exclude = [
+        AopAutoConfiguration::class,
+      ],
+    )
+    class TestConfiguration
+  }
+
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
 
