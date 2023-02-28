@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
@@ -66,6 +67,7 @@ class LanguageService(
       projectId,
       userId
     ).computedPermissions.viewLanguageIds
+
     val permitted = if (viewLanguageIds.isNullOrEmpty())
       all
     else
@@ -110,6 +112,12 @@ class LanguageService(
 
   @Transactional
   fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long, userId: Long): Set<Language> {
+    val canViewTranslations =
+      permissionService.getProjectPermissionScopes(projectId, userId)?.contains(Scope.TRANSLATIONS_VIEW) == true
+
+    if (!canViewTranslations) {
+      return emptySet()
+    }
     return if (languages == null) {
       getImplicitLanguages(projectId, userId)
     } else {

@@ -124,7 +124,8 @@ enum class Message {
   LANGUAGE_NOT_PERMITTED,
   SCOPES_HAS_TO_BE_SET,
   SET_EXACTLY_ONE_OF_SCOPES_OR_TYPE,
-  FEATURE_NOT_ENABLED;
+  FEATURE_NOT_ENABLED,
+  LICENSE_KEY_NOT_FOUND;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

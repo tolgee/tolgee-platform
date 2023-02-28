@@ -65,8 +65,8 @@ class KeyController(
   private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>
 ) : IController {
   @PostMapping(value = ["/create", ""])
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithProjectPermission(Scope.KEYS_CREATE)
+  @AccessWithApiKey(scopes = [Scope.KEYS_CREATE])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)

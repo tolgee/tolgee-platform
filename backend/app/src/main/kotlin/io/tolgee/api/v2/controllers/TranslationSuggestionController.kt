@@ -101,6 +101,8 @@ class TranslationSuggestionController(
     val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
 
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
+
     val data = dto.baseText?.let { baseText -> translationMemoryService.suggest(baseText, targetLanguage, pageable) }
       ?: let {
         val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }

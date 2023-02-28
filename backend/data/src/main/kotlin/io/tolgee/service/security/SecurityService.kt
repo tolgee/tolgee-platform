@@ -15,6 +15,7 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.Serializable
 
 @Service
 class SecurityService @Autowired constructor(
@@ -39,21 +40,54 @@ class SecurityService @Autowired constructor(
       throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredPermission: Scope, userAccountDto: UserAccountDto) {
+  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, userAccountDto: UserAccountDto) {
+    checkProjectPermissionOr(projectId, listOf(requiredScopes), userAccountDto)
+  }
+
+  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKey) {
+    checkProjectPermissionOr(listOf(requiredScopes), apiKey)
+  }
+
+  private fun checkProjectPermissionOr(requiredScopes: List<Scope>, apiKey: ApiKey) {
+    this.checkApiKeyScopesOr(requiredScopes, apiKey)
+  }
+
+  fun checkProjectPermissionOr(
+    projectId: Long,
+    requiredScopes: Collection<Scope>,
+    userAccountDto: UserAccountDto
+  ) {
     if (isUserAdmin(userAccountDto)) {
       return
     }
 
-    val usersPermissionScopes = getProjectPermissionScopes(projectId, userAccountDto.id)
+    val allowedScopes = getProjectPermissionScopes(projectId, userAccountDto.id)
       ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
-    if (!usersPermissionScopes.contains(requiredPermission)) {
-      throw PermissionException(Message.OPERATION_NOT_PERMITTED, listOf(requiredPermission.value))
+    checkProjectPermissionOr(projectId, requiredScopes, allowedScopes)
+  }
+
+  fun checkProjectPermissionOr(
+    projectId: Long,
+    requiredScopes: Collection<Scope>,
+    allowedScopes: Array<Scope>
+  ) {
+    if (!allowedScopes.any { requiredScopes.contains(it) }) {
+      @Suppress("UNCHECKED_CAST")
+      throw PermissionException(
+        Message.OPERATION_NOT_PERMITTED,
+        listOf(requiredScopes.map { it.value }) as List<Serializable>
+      )
     }
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
-    checkProjectPermission(projectId, requiredPermission, activeUser)
+    val apiKey = activeApiKey ?: return checkProjectPermission(projectId, requiredPermission, activeUser)
+    return checkProjectPermission(projectId, requiredPermission, apiKey)
+  }
+
+  fun checkProjectPermissionOr(projectId: Long, requiredPermissions: Collection<Scope>) {
+    checkProjectPermissionOr(projectId, requiredPermissions, activeUser)
   }
 
   fun checkLanguageViewPermissionByTag(projectId: Long, languageTags: Collection<String>) {
@@ -171,12 +205,38 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKey) {
-    // checks if user's has permissions to use api key with api key's permissions
-    checkApiKeyScopes(scopes, apiKey.project, apiKey.userAccount)
-    if (!apiKey.scopesEnum.containsAll(scopes)) {
-      throw PermissionException()
+  fun fixInvalidApiKeyWhenRequired(apiKey: ApiKey) {
+    val oldSize = apiKey.scopesEnum.size
+    apiKey.scopesEnum.removeIf {
+      getProjectPermissionScopes(
+        apiKey.project.id,
+        apiKey.userAccount.id
+      )?.contains(it) != true
     }
+    if (oldSize != apiKey.scopesEnum.size) {
+      apiKeyService.save(apiKey)
+    }
+  }
+
+  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKey) {
+    checkApiKeyScopes(apiKey) { expandedScopes ->
+      if (!expandedScopes.toList().containsAll(scopes)) {
+        throw PermissionException()
+      }
+    }
+  }
+
+  fun checkApiKeyScopesOr(scopes: Collection<Scope>, apiKey: ApiKey) {
+    checkApiKeyScopes(apiKey) { expandedScopes ->
+      if (!expandedScopes.any { it in apiKey.scopesEnum }) {
+        throw PermissionException()
+      }
+    }
+  }
+
+  private fun checkApiKeyScopes(apiKey: ApiKey, checkFn: (expandedScopes: Array<Scope>) -> Unit) {
+    val expandedScopes = Scope.expand(apiKey.scopesEnum)
+    checkFn(expandedScopes)
   }
 
   fun checkScreenshotsUploadPermission(projectId: Long) {
@@ -205,5 +265,8 @@ class SecurityService @Autowired constructor(
   }
 
   private val activeUser: UserAccountDto
-    get() = authenticationFacade.userAccount
+    get() = authenticationFacade.userAccountOrNull ?: throw PermissionException()
+
+  private val activeApiKey: ApiKey?
+    get() = authenticationFacade.apiKeyOrNull
 }

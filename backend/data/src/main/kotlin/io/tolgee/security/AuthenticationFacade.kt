@@ -44,6 +44,12 @@ class AuthenticationFacade(
       return authentication.apiKey
     }
 
+  val apiKeyOrNull: ApiKey?
+    get() {
+      val authentication = authentication as? ApiKeyAuthenticationToken
+      return authentication?.apiKey
+    }
+
   val isPatAuthentication: Boolean
     get() = authentication is PatAuthenticationToken
 

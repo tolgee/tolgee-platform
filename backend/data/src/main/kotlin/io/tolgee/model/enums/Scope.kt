@@ -56,7 +56,8 @@ enum class Scope(
           )
         ),
         HierarchyItem(
-          KEYS_CREATE
+          KEYS_CREATE,
+          listOf(keysView)
         ),
         HierarchyItem(
           SCREENSHOTS_UPLOAD,
