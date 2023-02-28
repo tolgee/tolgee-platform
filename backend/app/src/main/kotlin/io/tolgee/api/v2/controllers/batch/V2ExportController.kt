@@ -42,7 +42,7 @@ class V2ExportController(
   private val authenticationFacade: AuthenticationFacade
 ) {
   @GetMapping(value = [""])
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data")
   fun export(
@@ -60,7 +60,7 @@ class V2ExportController(
   }
 
   @PostMapping(value = [""])
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.

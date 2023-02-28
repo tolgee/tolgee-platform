@@ -81,7 +81,7 @@ class KeyController(
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Scope.KEYS_CREATE)
-  @AccessWithApiKey(scopes = [Scope.KEYS_CREATE])
+  @AccessWithApiKey()
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
@@ -102,7 +102,7 @@ class KeyController(
   @Operation(summary = "More")
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   // key permissions are checked separately in method body
-  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey()
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
@@ -111,7 +111,7 @@ class KeyController(
   @PutMapping(value = ["/{id}"])
   @Operation(summary = "Edits key name")
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
@@ -123,7 +123,7 @@ class KeyController(
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs")
   @AccessWithProjectPermission(Scope.KEYS_DELETE)
-  @AccessWithApiKey(scopes = [Scope.KEYS_DELETE])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
@@ -134,7 +134,7 @@ class KeyController(
   @Transactional
   @Operation(summary = "Returns all keys in the project")
   @AccessWithProjectPermission(Scope.KEYS_VIEW)
-  @AccessWithApiKey(scopes = [Scope.KEYS_VIEW])
+  @AccessWithApiKey()
   fun getAll(
     @ParameterObject
     @SortDefault("id")
@@ -148,15 +148,15 @@ class KeyController(
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
   @AccessWithProjectPermission(Scope.KEYS_DELETE)
-  @AccessWithApiKey(scopes = [Scope.KEYS_DELETE])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
     delete(dto.ids.toSet())
   }
 
   @PostMapping("/import")
-  @AccessWithApiKey([ApiScope.KEYS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(
     summary = "Imports new keys with translations. If key already exists, its translations and tags" +
       " are not updated."
@@ -172,8 +172,8 @@ class KeyController(
   }
 
   @PostMapping("/import-resolvable")
-  @AccessWithApiKey([ApiScope.KEYS_EDIT])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
   @RequestActivity(ActivityType.IMPORT)
   fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
@@ -191,8 +191,8 @@ class KeyController(
   }
 
   @GetMapping("/search")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(
     summary = "This endpoint helps you to find desired key by keyName, " +
       "base translation or translation in specified language."
@@ -211,8 +211,8 @@ class KeyController(
   }
 
   @PostMapping("/info")
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.VIEW)
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(
     summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
       "If key is not found, it's not included in the response."

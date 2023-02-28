@@ -52,7 +52,7 @@ class TranslationSuggestionController(
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
-  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
     val targetLanguage = languageService.findById(dto.targetLanguageId)
@@ -92,7 +92,7 @@ class TranslationSuggestionController(
     summary = "Suggests machine translations from translation memory." +
       "\n\nThe result is always sorted by similarity, so sorting is not supported."
   )
-  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   fun suggestTranslationMemory(
     @RequestBody @Valid dto: SuggestRequestDto,

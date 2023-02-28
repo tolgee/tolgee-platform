@@ -39,7 +39,7 @@ class AutoTranslationController(
 ) {
   @PutMapping("")
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey()
   @Operation(
     summary = "Auto translates keys",
     description = """Uses enabled auto-translation methods.

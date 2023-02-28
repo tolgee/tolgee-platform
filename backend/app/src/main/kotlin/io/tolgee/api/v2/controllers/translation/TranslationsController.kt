@@ -106,7 +106,7 @@ class TranslationsController(
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey
   @Operation(
     summary = "Returns all translations for specified languages",
     responses = [
@@ -165,8 +165,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("")
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_EDIT])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
+  @AccessWithApiKey
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   @Operation(summary = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
@@ -187,7 +187,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PostMapping("")
-  @AccessWithApiKey([Scope.KEYS_EDIT])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
@@ -204,7 +204,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping("/{translationId}/set-state/{state}")
-  @AccessWithApiKey([Scope.TRANSLATIONS_STATE_EDIT])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
@@ -252,7 +252,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["select-all"])
-  @AccessWithApiKey([Scope.KEYS_VIEW])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
@@ -271,7 +271,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
-  @AccessWithApiKey([Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Removes "auto translated" indication""")
   @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
@@ -286,7 +286,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/set-outdated-flag/{state}"])
-  @AccessWithApiKey([Scope.TRANSLATIONS_STATE_EDIT])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
   @Operation(summary = """Set's "outdated" indication""")
   @RequestActivity(ActivityType.SET_OUTDATED_FLAG)
@@ -301,7 +301,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["/{translationId:[0-9]+}/history"])
-  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey
   @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Returns history of specific translation. 

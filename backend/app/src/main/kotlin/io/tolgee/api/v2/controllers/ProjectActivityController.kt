@@ -37,7 +37,7 @@ class ProjectActivityController(
 ) {
   @Operation(summary = "Returns project history")
   @AccessWithProjectPermission(Scope.ACTIVITY_VIEW)
-  @AccessWithApiKey(scopes = [Scope.ACTIVITY_VIEW])
+  @AccessWithApiKey()
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getActivity(
     @ParameterObject pageable: Pageable

@@ -69,7 +69,7 @@ class V2LanguagesController(
   @PostMapping(value = [""])
   @Operation(summary = "Creates language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
-  @AccessWithApiKey(scopes = [Scope.LANGUAGES_EDIT])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
@@ -84,7 +84,7 @@ class V2LanguagesController(
   @Operation(summary = "Edits language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
-  @AccessWithApiKey(scopes = [Scope.LANGUAGES_EDIT])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   fun editLanguage(
     @RequestBody @Valid dto: LanguageDto,
@@ -119,7 +119,7 @@ class V2LanguagesController(
   @Operation(summary = "Deletes specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
-  @AccessWithApiKey(scopes = [Scope.LANGUAGES_EDIT])
+  @AccessWithApiKey()
   @NeedsSuperJwtToken
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.findById(languageId)

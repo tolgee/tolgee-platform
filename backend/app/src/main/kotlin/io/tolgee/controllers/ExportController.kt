@@ -38,7 +38,7 @@ class ExportController @Autowired constructor(
   private val authenticationFacade: AuthenticationFacade
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
   @Deprecated("Use v2 export controller")
