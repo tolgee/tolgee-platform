@@ -1,3 +1,16 @@
+# [3.8.0](https://github.com/tolgee/tolgee-platform/compare/v3.7.2...v3.8.0) (2023-02-28)
+
+
+### Bug Fixes
+
+* Ignore commas in keyName filter ([#1586](https://github.com/tolgee/tolgee-platform/issues/1586)) ([eb38575](https://github.com/tolgee/tolgee-platform/commit/eb3857595924ab8502b6ef843bee0a0e2110cc99))
+* Slow key search ([#1590](https://github.com/tolgee/tolgee-platform/issues/1590)) ([077fa57](https://github.com/tolgee/tolgee-platform/commit/077fa5775a3222a74f79c47563cb3fdda574bea4))
+
+
+### Features
+
+* Fixtures for Figma plugin ([#1511](https://github.com/tolgee/tolgee-platform/issues/1511)) ([4b6fe71](https://github.com/tolgee/tolgee-platform/commit/4b6fe71b7937732e034d5cfd77ec36c33e95114a))
+
 ## [3.7.2](https://github.com/tolgee/tolgee-platform/compare/v3.7.1...v3.7.2) (2023-02-24)
 
 

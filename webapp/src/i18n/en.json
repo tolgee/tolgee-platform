@@ -519,6 +519,7 @@
   "permission_dialog_title" : "Permission settings for {name}",
   "permission_item_users_view" : "View users",
   "permission_languages_hint" : "User can edit: {subject}",
+  "permissions_advanced_paid_banner" : "Advanced permissions are a paid feature",
   "permissions_item_activity_view" : "View activity",
   "permissions_item_admin" : "Admin",
   "permissions_item_import" : "Import",

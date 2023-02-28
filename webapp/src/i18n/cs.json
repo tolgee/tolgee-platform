@@ -519,6 +519,7 @@
   "permission_dialog_title" : "Nastavení práv pro {name}",
   "permission_item_users_view" : "Zobrazení uživatelů",
   "permission_languages_hint" : "Uživatel může editovat: {subject}",
+  "permissions_advanced_paid_banner" : "Rozšířená práva jsou placená funkce",
   "permissions_item_activity_view" : "Zobrazení aktivity",
   "permissions_item_admin" : "Admin",
   "permissions_item_import" : "Import",
