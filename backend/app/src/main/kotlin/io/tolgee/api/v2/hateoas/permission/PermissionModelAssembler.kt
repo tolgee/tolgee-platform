@@ -18,7 +18,6 @@ class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermissi
       stateChangeLanguageIds = entity.stateChangeLanguageIds,
       viewLanguageIds = entity.viewLanguageIds,
       type = entity.type,
-      granular = entity.granular ?: false
     )
   }
 }

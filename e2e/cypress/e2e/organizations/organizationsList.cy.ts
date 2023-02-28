@@ -16,7 +16,7 @@ describe('Organization List', () => {
     visit();
   });
 
-  it.only('creates organization', () => {
+  it('creates organization', () => {
     goToNewOrganizationForm();
     gcy('organization-name-field').within(() =>
       cy.get('input').type('What a nice organization')
