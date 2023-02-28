@@ -55,12 +55,12 @@ interface KeyRepository : JpaRepository<Key, Long> {
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-    lower(unaccent(:search)) as searchUnaccent
+    lower(f_unaccent(:search)) as searchUnaccent
     where (
-          lower(unaccent(ns.name)) %> searchUnaccent
-          or lower(unaccent(k.name)) %> searchUnaccent
-          or lower(unaccent(t.text)) %> searchUnaccent
-          or lower(unaccent(bt.text)) %> searchUnaccent
+          lower(f_unaccent(ns.name)) %> searchUnaccent
+          or lower(f_unaccent(k.name)) %> searchUnaccent
+          or lower(f_unaccent(t.text)) %> searchUnaccent
+          or lower(f_unaccent(bt.text)) %> searchUnaccent
           )
        order by 
        (
@@ -81,12 +81,12 @@ interface KeyRepository : JpaRepository<Key, Long> {
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-      lower(unaccent(:search)) as searchUnaccent  
+      lower(f_unaccent(:search)) as searchUnaccent  
       where (
-          lower(unaccent(ns.name)) %> searchUnaccent
-          or lower(unaccent(k.name)) %> searchUnaccent
-          or lower(unaccent(t.text)) %> searchUnaccent
-          or lower(unaccent(bt.text)) %> searchUnaccent
+          lower(f_unaccent(ns.name)) %> searchUnaccent
+          or lower(f_unaccent(k.name)) %> searchUnaccent
+          or lower(f_unaccent(t.text)) %> searchUnaccent
+          or lower(f_unaccent(bt.text)) %> searchUnaccent
           )
       """
   )
