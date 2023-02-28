@@ -64,7 +64,7 @@ class ProjectStatsController(
   @Operation(summary = "Returns project daily amount of events")
   @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
   @AccessWithProjectPermission(Scope.ACTIVITY_VIEW)
-  @AccessWithApiKey([Scope.ACTIVITY_VIEW])
+  @AccessWithApiKey()
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
   }

@@ -54,7 +54,7 @@ class V2ScreenshotController(
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload screenshot for specific key")
   @AccessWithProjectPermission(Scope.SCREENSHOTS_UPLOAD)
-  @AccessWithApiKey([Scope.SCREENSHOTS_UPLOAD])
+  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
   fun uploadScreenshot(
@@ -74,7 +74,7 @@ class V2ScreenshotController(
   @GetMapping("")
   @Operation(summary = "Returns all screenshots for specified key")
   @AccessWithProjectPermission(Scope.SCREENSHOTS_VIEW)
-  @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
+  @AccessWithApiKey()
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
@@ -84,7 +84,7 @@ class V2ScreenshotController(
   @DeleteMapping("/{ids}")
   @AccessWithProjectPermission(Scope.SCREENSHOTS_DELETE)
   @Operation(summary = "Deletes multiple screenshots by ids")
-  @AccessWithApiKey([Scope.SCREENSHOTS_VIEW])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
   fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
     val screenshots = screenshotService.findByIdIn(ids)

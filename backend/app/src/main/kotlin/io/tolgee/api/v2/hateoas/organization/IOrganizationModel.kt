@@ -16,7 +16,7 @@ interface IOrganizationModel {
 
   @get:Schema(example = "This is a beautiful organization full of beautiful and clever people")
   val description: String?
-  val basePermission: PermissionModel
+  val basePermissions: PermissionModel
 
   @get:Schema(
     description = """The role of currently authorized user. 

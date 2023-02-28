@@ -77,7 +77,7 @@ class NamespaceController(
   @PutMapping(value = ["/namespaces/{id}"])
   @Operation(summary = "Update namespace")
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.NAMESPACE_EDIT)
   fun update(
     @PathVariable id: Long,

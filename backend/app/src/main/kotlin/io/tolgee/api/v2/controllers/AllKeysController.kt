@@ -35,7 +35,7 @@ class AllKeysController(
   @Transactional
   @Operation(summary = "Get all keys in project")
   @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   fun getAllKeys(): CollectionModel<KeyModel> {
     val allKeys = keyService.getAllSortedById(projectHolder.project.id)
     return keyModelAssembler.toCollectionModel(allKeys)

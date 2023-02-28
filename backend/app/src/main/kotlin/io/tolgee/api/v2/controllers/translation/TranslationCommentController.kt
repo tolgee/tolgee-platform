@@ -76,7 +76,7 @@ class TranslationCommentController(
 
   @GetMapping(value = ["{translationId}/comments"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   @Operation(summary = "Returns translation comments of translation")
   fun getAll(
     @PathVariable translationId: Long,
@@ -92,7 +92,7 @@ class TranslationCommentController(
 
   @GetMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_VIEW])
+  @AccessWithApiKey()
   @Operation(summary = "Returns single translation comment")
   fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
     val comment = translationCommentService.get(commentId)
@@ -102,7 +102,7 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey()
   @Operation(summary = "Updates single translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_EDIT)
   fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
@@ -117,7 +117,7 @@ class TranslationCommentController(
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
   @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_SET_STATE)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_SET_STATE])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
   fun setState(
     @PathVariable commentId: Long,
@@ -159,7 +159,7 @@ class TranslationCommentController(
 
   @PostMapping(value = ["/create-comment"])
   @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_ADD])
+  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
@@ -194,7 +194,7 @@ class TranslationCommentController(
 
   @PostMapping(value = ["{translationId}/comments"])
   @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
-  @AccessWithApiKey(scopes = [Scope.TRANSLATIONS_COMMENTS_ADD])
+  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)

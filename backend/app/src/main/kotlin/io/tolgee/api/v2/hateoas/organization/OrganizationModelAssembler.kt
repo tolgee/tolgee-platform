@@ -23,7 +23,7 @@ class OrganizationModelAssembler(
       view.organization.name,
       view.organization.slug,
       view.organization.description,
-      basePermission = permissionModelAssembler.toModel(basePermission),
+      basePermissions = permissionModelAssembler.toModel(basePermission),
       currentUserRole = view.currentUserRole,
       avatar = avatarService.getAvatarLinks(view.organization.avatarHash),
     ).add(link)

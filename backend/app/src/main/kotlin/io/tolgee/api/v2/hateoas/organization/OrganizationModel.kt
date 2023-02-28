@@ -16,7 +16,7 @@ open class OrganizationModel(
 
   override val description: String?,
 
-  override val basePermission: PermissionModel,
+  override val basePermissions: PermissionModel,
 
   override val currentUserRole: OrganizationRoleType?,
 

@@ -56,7 +56,7 @@ class TagsController(
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
@@ -67,7 +67,7 @@ class TagsController(
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
   @Operation(summary = "Removes tag with provided id from key with provided id")
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey(scopes = [Scope.KEYS_EDIT])
+  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
