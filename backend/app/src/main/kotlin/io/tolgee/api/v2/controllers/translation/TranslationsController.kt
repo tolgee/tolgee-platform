@@ -225,13 +225,13 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = [""])
-  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Returns translations in project")
+  @AccessWithApiKey
   fun getTranslations(
     @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
+    this.securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_VIEW)
 
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
@@ -252,8 +252,8 @@ When null, resulting file will be a flat key-value object.
   }
 
   @GetMapping(value = ["select-all"])
-  @AccessWithApiKey([Scope.TRANSLATIONS_VIEW])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
+  @AccessWithApiKey([Scope.KEYS_VIEW])
+  @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
     @ParameterObject @ModelAttribute("translationFilters") params: TranslationFilters,

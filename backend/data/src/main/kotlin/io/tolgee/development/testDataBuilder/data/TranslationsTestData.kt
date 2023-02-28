@@ -9,6 +9,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -24,11 +25,16 @@ class TranslationsTestData {
   lateinit var aKey: Key
   lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
+  lateinit var keysOnlyUser: UserAccount
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     val userAccountBuilder = addUserAccount {
       username = "franta"
       user = this
+    }
+    addUserAccountWithoutOrganization {
+      username = "pepa"
+      keysOnlyUser = this
     }
     addProject {
       name = "Franta's project"
@@ -38,6 +44,11 @@ class TranslationsTestData {
       addPermission {
         user = this@TranslationsTestData.user
         type = ProjectPermissionType.MANAGE
+      }
+      addPermission {
+        user = this@TranslationsTestData.keysOnlyUser
+        type = null
+        scopes = arrayOf(Scope.KEYS_VIEW)
       }
       englishLanguage = addLanguage {
         name = "English"
@@ -73,6 +84,7 @@ class TranslationsTestData {
             )
           }
           addComment {
+            author = user
             text = "Comment"
           }
         }
@@ -348,6 +360,7 @@ class TranslationsTestData {
         }.build {
           (1..5).forEach {
             addComment {
+              author = user
               text = "Comment $it"
             }
           }
@@ -359,6 +372,7 @@ class TranslationsTestData {
           .build {
             (1..3).forEach {
               addComment {
+                author = user
                 text = "Comment $it"
               }
             }
@@ -412,18 +426,22 @@ class TranslationsTestData {
           text = "Nice"
         }.build {
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.RESOLVED
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.RESOLVED
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.NEEDS_RESOLUTION
           }
           addComment {
+            author = user
             text = "aaaa"
             state = TranslationCommentState.NEEDS_RESOLUTION
           }

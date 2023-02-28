@@ -104,6 +104,16 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns empty translations when user has no permissions`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.keysOnlyUser
+    performProjectAuthGet("/translations?sort=id").andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].translations.de").isAbsent()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns correct screenshot data`() {
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
@@ -320,7 +330,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
   @Test
   fun `returns select all keys`() {
     testData.generateLotOfData(2000)
@@ -340,7 +350,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testData.addCommentStatesData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?search=commented_key").andAssertThatJson {
+    performProjectAuthGet("/translations?search=commented_key").andIsOk.andAssertThatJson {
       node("""_embedded.keys[0].translations.de.unresolvedCommentCount""").isEqualTo(2)
     }
   }

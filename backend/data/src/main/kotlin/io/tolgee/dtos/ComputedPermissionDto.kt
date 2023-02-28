@@ -11,6 +11,10 @@ class ComputedPermissionDto(
   val origin: ComputedPermissionOrigin = ComputedPermissionOrigin.NONE
 ) : IPermission by permission {
 
+  val expandedScopes: Array<Scope> by lazy {
+    Scope.expand(this.scopes)
+  }
+
   fun checkViewPermitted(vararg languageIds: Long) = checkLanguagePermitted(languageIds.toList(), viewLanguageIds)
   fun checkTranslatePermitted(vararg languageIds: Long) = checkLanguagePermitted(
     languageIds.toList(),
