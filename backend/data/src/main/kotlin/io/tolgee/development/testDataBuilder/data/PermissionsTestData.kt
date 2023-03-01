@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import org.springframework.core.io.ClassPathResource
 
 class PermissionsTestData {
   var projectBuilder: ProjectBuilder
@@ -29,8 +30,9 @@ class PermissionsTestData {
         this.type = ProjectPermissionType.VIEW
       }
 
-      for (i in 1..10) {
+      val keyBuilders = (1..10).map { i ->
         addKey { name = "key-$i" }.build {
+
           listOf(en, de, cs).forEach {
             addTranslation {
               text = "${it.self.name} text $i"
@@ -40,6 +42,11 @@ class PermissionsTestData {
             }
           }
         }
+      }
+
+      keyBuilders[0].apply {
+        val screenshotResource = ClassPathResource("development/testScreenshot.png", this::class.java.getClassLoader())
+        addScreenshot(screenshotResource) {}
       }
     }
   }

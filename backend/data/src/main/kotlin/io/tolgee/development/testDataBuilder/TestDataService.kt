@@ -161,7 +161,11 @@ class TestDataService(
   }
 
   private fun saveScreenshotData(builder: ProjectBuilder) {
-    screenshotService.saveAll(builder.data.screenshots.map { it.self })
+    val screenshotBuilders = builder.data.screenshots
+    screenshotService.saveAll(screenshotBuilders.map { it.self })
+    screenshotBuilders.forEach {
+      screenshotService.storeFiles(it.self, it.image?.toByteArray(), it.thumbnail?.toByteArray())
+    }
     screenshotService.saveAllReferences(builder.data.keyScreenshotReferences.map { it.self })
   }
 

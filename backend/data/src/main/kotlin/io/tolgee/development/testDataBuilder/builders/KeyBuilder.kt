@@ -6,6 +6,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
+import io.tolgee.util.ImageConverter
+import org.springframework.core.io.Resource
 
 class KeyBuilder(
   val projectBuilder: ProjectBuilder
@@ -43,12 +45,28 @@ class KeyBuilder(
     return nsBuilder
   }
 
-  fun addScreenshot(ft: Screenshot.(reference: KeyScreenshotReference) -> Unit): ScreenshotBuilder {
-    val screenshotBuilder = projectBuilder.addScreenshot {}
+  fun addScreenshot(
+    file: Resource? = null,
+    ft: Screenshot.(reference: KeyScreenshotReference) -> Unit
+  ): ScreenshotBuilder {
+
+    val converter = file?.let { ImageConverter(file.inputStream) }
+    val image = converter?.getImage()
+    val thumbnail = converter?.getThumbnail()
+
+    val screenshotBuilder = projectBuilder.addScreenshot {
+      width = converter?.targetDimension?.width ?: 0
+      height = converter?.targetDimension?.height ?: 0
+    }
+
+    screenshotBuilder.image = image
+    screenshotBuilder.thumbnail = thumbnail
+
     val reference = projectBuilder.addScreenshotReference {
       key = this@KeyBuilder.self
       screenshot = screenshotBuilder.self
     }
+
     ft(screenshotBuilder.self, reference.self)
     return screenshotBuilder
   }

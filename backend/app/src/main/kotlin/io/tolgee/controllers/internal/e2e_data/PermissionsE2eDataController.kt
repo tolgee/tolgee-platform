@@ -23,6 +23,7 @@ import org.springframework.web.context.annotation.RequestScope
 @InternalController
 @RequestScope
 class PermissionsE2eDataController(val testDataService: TestDataService) : AbstractE2eDataController() {
+
   @GetMapping(value = ["/generate-with-user"])
   @Transactional
   fun generateWithPermissions(
