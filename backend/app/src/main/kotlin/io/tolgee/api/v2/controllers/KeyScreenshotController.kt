@@ -17,6 +17,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key

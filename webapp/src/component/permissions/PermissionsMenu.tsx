@@ -31,7 +31,7 @@ export const PermissionsMenu: FunctionComponent<{
   onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
   minPermissions?: PermissionType;
-  user: { name?: string; id: number };
+  user?: { name?: string; id: number };
   enableAdvanced?: boolean;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

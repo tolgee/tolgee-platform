@@ -86,7 +86,15 @@ export const PermissionsAdvanced: React.FC<Props> = ({
             ],
           },
           {
-            value: 'users.view',
+            label: t('permissions_item_members'),
+            children: [
+              {
+                value: 'members.view',
+              },
+              {
+                value: 'members.edit',
+              },
+            ],
           },
           {
             value: 'project.edit',

@@ -63,7 +63,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
   return (
     <PermissionsMenu
       onSelect={handleSet}
-      selected={organization.data!.basePermission.type}
+      selected={organization.data!.basePermissions.type}
     />
   );
 };

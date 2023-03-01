@@ -21,7 +21,7 @@ import org.springframework.core.io.Resource
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2KeyInNamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

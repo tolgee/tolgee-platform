@@ -190,15 +190,15 @@ export const ProjectTotals: React.FC<{
   const { satisfiesPermission } = useProjectPermissions();
 
   const isAdmin = satisfiesPermission('admin');
-  const canViewMembers = satisfiesPermission('users.view');
+  const canViewMembers = satisfiesPermission('members.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewTranslations = satisfiesPermission('translations.view');
 
   const tagsPresent = Boolean(stats.tagCount);
   const tagsClickable = tagsPresent && canViewTranslations;
 
-  const membersAccessable = config.authentication && canViewMembers;
-  const membersEditable = membersAccessable && isAdmin;
+  const membersAccessible = config.authentication && canViewMembers;
+  const membersEditable = membersAccessible && isAdmin;
 
   return (
     <>
@@ -279,8 +279,8 @@ export const ProjectTotals: React.FC<{
         <StyledTile
           gridArea="users"
           data-cy="project-dashboard-members"
-          onClick={membersAccessable ? redirectToPermissions : undefined}
-          className={clsx({ clickable: membersAccessable })}
+          onClick={membersAccessible ? redirectToPermissions : undefined}
+          className={clsx({ clickable: membersAccessible })}
         >
           <StyledTileDataItem>
             <StyledTileValue>
