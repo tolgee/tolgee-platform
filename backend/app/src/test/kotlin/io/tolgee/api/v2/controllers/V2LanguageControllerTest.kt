@@ -94,7 +94,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
-  fun `does not deletes language with API key (permissions)`() {
+  fun `does not delete language with API key (permissions)`() {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
       this.userAccount = base.userAccount

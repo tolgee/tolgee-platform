@@ -81,7 +81,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   @Transactional
   fun `lowers permissions for translate view (granular)`() {
     checkUser(testData.viewScopeUser) {
-      assertThat(computedPermissions.scopes).isEmpty()
+      assertThat(computedPermissions.scopes).containsExactly(Scope.KEYS_VIEW)
     }
   }
 
@@ -89,7 +89,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   @Transactional
   fun `lowers permissions for translate edit (granular)`() {
     checkUser(testData.editScopeUser) {
-      assertThat(computedPermissions.scopes).containsExactly(Scope.TRANSLATIONS_VIEW)
+      assertThat(computedPermissions.scopes).containsExactly(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
     }
   }
 
@@ -98,7 +98,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   fun `lowers permissions for translate state change (granular)`() {
     checkUser(testData.stateChangeScopeUser) {
       assertThat(computedPermissions.scopes)
-        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT)
+        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_VIEW)
     }
   }
 
@@ -106,7 +106,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   @Transactional
   fun `lowers permissions for translate state change (only en for all operations) (granular)`() {
     checkUser(testData.stateChangeScopeUserEnForAll) {
-      assertThat(computedPermissions.scopes).isEmpty()
+      assertThat(computedPermissions.scopes).containsExactly(Scope.KEYS_VIEW)
     }
   }
 

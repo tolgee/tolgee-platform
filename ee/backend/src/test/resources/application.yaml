@@ -64,8 +64,19 @@ tolgee:
       secretKey: aaa
   billing:
     enabled: false
+
+management:
+  endpoint:
+    metrics:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE
+

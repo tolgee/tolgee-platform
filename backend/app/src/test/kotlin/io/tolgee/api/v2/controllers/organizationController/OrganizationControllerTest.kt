@@ -37,7 +37,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("_embedded.organizations") {
           isArray.hasSize(6)
           node("[0].name").isEqualTo("user-2's organization 1")
-          node("[0].basePermission.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
+          node("[0].basePermissions.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
@@ -100,7 +100,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
           it.node("[0].name").isEqualTo("user-2's organization 1")
-          it.node("[0].basePermission.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
+          it.node("[0].basePermissions.scopes").isPermissionScopes(ProjectPermissionType.VIEW)
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
@@ -112,7 +112,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
     loginAsUser(users[1].name)
 
-    performAuthGet("/v2/organizations?size=100&sort=basePermission,desc&sort=name,desc")
+    performAuthGet("/v2/organizations?sort=name,desc")
       .andIsOk
       .andPrettyPrint
       .andAssertThatJson
@@ -170,7 +170,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         node("name").isEqualTo(dummyDto.name)
         node("id").isEqualTo(organization.id)
         node("description").isEqualTo(dummyDto.description)
-        node("basePermission") {
+        node("basePermissions") {
           node("scopes").isArray.contains("translations.view")
         }
         node("slug").isEqualTo(dummyDto.slug)
@@ -269,22 +269,24 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   @Test
   fun testEdit() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      performAuthPut(
-        "/v2/organizations/${it.id}",
-        dummyDto.also { organization ->
-          organization.name = "Hello"
-          organization.slug = "hello-1"
-          organization.description = "This is changed description"
+    executeInNewTransaction {
+      this.organizationService.create(dummyDto, userAccount!!).let {
+        performAuthPut(
+          "/v2/organizations/${it.id}",
+          dummyDto.also { organization ->
+            organization.name = "Hello"
+            organization.slug = "hello-1"
+            organization.description = "This is changed description"
+          }
+        ).andIsOk.andPrettyPrint.andAssertThatJson {
+          node("name").isEqualTo("Hello")
+          node("slug").isEqualTo("hello-1")
+          node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+          node("basePermissions") {
+            node("scopes").isPermissionScopes(ProjectPermissionType.VIEW)
+          }
+          node("description").isEqualTo("This is changed description")
         }
-      ).andIsOk.andPrettyPrint.andAssertThatJson {
-        node("name").isEqualTo("Hello")
-        node("slug").isEqualTo("hello-1")
-        node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
-        node("basePermission") {
-          node("scopes").isPermissionScopes(ProjectPermissionType.VIEW)
-        }
-        node("description").isEqualTo("This is changed description")
       }
     }
   }

@@ -6,6 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -44,7 +45,8 @@ class TranslationCommentsTestData {
 
       addPermission {
         user = this@TranslationCommentsTestData.pepa
-        type = ProjectPermissionType.EDIT
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
       }
 
       englishLanguage = addLanguage {

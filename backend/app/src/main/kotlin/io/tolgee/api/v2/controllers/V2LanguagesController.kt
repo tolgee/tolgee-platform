@@ -120,6 +120,7 @@ class V2LanguagesController(
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
   @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
   @NeedsSuperJwtToken
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.findById(languageId)

@@ -213,7 +213,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `does not delete when not manager and not author`() {
+  fun `does not delete when doesn't have edit scope and not author`() {
     userAccount = testData.pepa
     performProjectAuthDelete(
       "translations/${testData.translation.id}/comments/${testData.firstComment.id}",

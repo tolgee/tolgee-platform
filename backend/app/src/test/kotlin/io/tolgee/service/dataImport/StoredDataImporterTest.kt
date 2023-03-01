@@ -3,11 +3,13 @@ package io.tolgee.service.dataImport
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.security.AuthenticationProvider
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -25,11 +27,17 @@ class StoredDataImporterTest : AbstractSpringTest() {
     )
   }
 
+  fun login() {
+    val provider = applicationContext.getBean(AuthenticationProvider::class.java)
+    SecurityContextHolder.getContext().authentication = provider.getAuthentication(importTestData.userAccount)
+  }
+
   @Test
   fun `it successfully imports valid data`() {
     importTestData.translationWithConflict.override = true
     importTestData.setAllResolved()
     testDataService.saveTestData(importTestData.root)
+    login()
     storedDataImporter.doImport()
     translationService.find(importTestData.translationWithConflict.conflict!!.id)!!.let {
       assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
@@ -43,6 +51,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @Test
   fun `it throws bad request`() {
     testDataService.saveTestData(importTestData.root)
+    login()
     Assertions.assertThatExceptionOfType(BadRequestException::class.java).isThrownBy {
       storedDataImporter.doImport()
     }
@@ -63,6 +72,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     }
 
     testDataService.saveTestData(importTestData.root)
+    login()
     Assertions.assertThatExceptionOfType(BadRequestException::class.java).isThrownBy {
       storedDataImporter.doImport()
     }
@@ -76,6 +86,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
       ForceMode.OVERRIDE,
     )
     testDataService.saveTestData(importTestData.root)
+    login()
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
     val forceOverriddenTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
@@ -93,6 +104,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
       importTestData.import,
       ForceMode.OVERRIDE,
     )
+    login()
     storedDataImporter.doImport()
     entityManager.flush()
     entityManager.clear()
@@ -121,6 +133,8 @@ class StoredDataImporterTest : AbstractSpringTest() {
       ForceMode.KEEP,
     )
     testDataService.saveTestData(importTestData.root)
+    login()
+
     storedDataImporter.doImport()
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
     val forceKeptTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id

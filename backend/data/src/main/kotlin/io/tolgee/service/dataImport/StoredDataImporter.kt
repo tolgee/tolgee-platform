@@ -75,33 +75,45 @@ class StoredDataImporter(
     importDataManager.storedLanguages.forEach {
       it.doImport()
     }
-    addAllKeys()
+
+    addKeysAndCheckPermissions()
+
     handleKeyMetas()
 
-    checkPermissionsAndSaveAll()
+    namespaceService.saveAll(namespacesToSave.values)
+
+    val keyEntitiesToSave = saveKeys()
+
+    saveTranslations()
+
+    saveMetaData(keyEntitiesToSave)
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
   }
 
-  private fun checkPermissionsAndSaveAll() {
-    namespaceService.saveAll(namespacesToSave.values)
-    val keyEntitiesToSave = keysToSave.values
-
-    checkKeyPermissions()
-
-    keyService.saveAll(keyEntitiesToSave)
-
-    checkTranslationPermissions()
-
-    translationService.saveAll(translationsToSave)
-
+  private fun saveMetaData(keyEntitiesToSave: MutableCollection<Key>) {
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
-
     keyEntitiesToSave.flatMap {
       it.keyMeta?.codeReferences ?: emptyList()
     }.also { keyMetaService.saveAllCodeReferences(it) }
+  }
+
+  private fun saveTranslations() {
+    checkTranslationPermissions()
+    translationService.saveAll(translationsToSave)
+  }
+
+  private fun saveKeys(): MutableCollection<Key> {
+    val keyEntitiesToSave = keysToSave.values
+    keyService.saveAll(keyEntitiesToSave)
+    return keyEntitiesToSave
+  }
+
+  private fun addKeysAndCheckPermissions() {
+    addAllKeys()
+    checkKeyPermissions()
   }
 
   private fun checkTranslationPermissions() {
