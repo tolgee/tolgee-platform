@@ -7,7 +7,9 @@ import {
   forEachView,
   getCell,
   getCellCancelButton,
+  getCellInsertSourceButton,
   getCellSaveButton,
+  toggleLang,
   translationsBeforeEach,
   visitTranslations,
 } from '../../../common/translations';
@@ -36,6 +38,17 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool key edited').should('be.visible');
         cy.contains('Cool key 02').should('be.visible');
         cy.contains('Cool key 04').should('be.visible');
+      });
+
+      it('insert source into translation', () => {
+        toggleLang('Česky');
+        editCell('Studený přeložený text 1');
+        getCellInsertSourceButton().click();
+
+        cy.get('.CodeMirror')
+          .first()
+          .contains('Cool translated text 1')
+          .should('be.visible');
       });
 
       it('will edit translation', () => {
