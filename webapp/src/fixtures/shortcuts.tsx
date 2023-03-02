@@ -7,6 +7,7 @@ import {
   KeyRight,
   KeyEnter,
   KeyCtrl,
+  KeyShift,
 } from 'tg.component/key/SvgKeys';
 import { IS_MAC } from './isMac';
 
@@ -51,6 +52,8 @@ export const getKeyVisual = (key: KeyType) => {
       return <KeyEnter />;
     case 'Insert':
       return 'Ins';
+    case 'Shift':
+      return <KeyShift />;
     case 'Action':
       return IS_MAC ? '⌘' : <KeyCtrl />;
     default:

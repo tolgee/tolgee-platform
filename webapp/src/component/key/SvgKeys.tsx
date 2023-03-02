@@ -41,6 +41,21 @@ export const KeyEnter = () => (
   </SvgTemplate>
 );
 
+export const KeyShift = () => (
+  <SvgTemplate>
+    <g
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.2"
+      transform="scale(.6)"
+    >
+      <path d="M5.0039 21 18.9961 21ZM15.9961 12 15.9961 17.0039 8.0039 17.0039 8.0039 12 3 12 12 3 21 12ZM15.9961 12"></path>
+    </g>
+  </SvgTemplate>
+);
+
 export const KeyUp = () => <ArrowUpward style={svgStyle} />;
 
 export const KeyDown = () => <ArrowDownward style={svgStyle} />;
