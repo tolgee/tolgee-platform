@@ -119,6 +119,9 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
         <StyledRightestPart>
           <ControlsButton
             onClick={onInsertSource}
+            onMouseDown={(e) => {
+              e.preventDefault();
+            }}
             color="default"
             data-cy="translations-cell-insert-source-button"
             tooltip={<T>translations_cell_insert_source</T>}

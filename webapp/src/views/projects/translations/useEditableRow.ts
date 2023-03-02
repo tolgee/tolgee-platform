@@ -79,13 +79,6 @@ export const useEditableRow = ({
     } else {
       setValue(await getSourceText(keyId));
     }
-
-    if (cellRef.current) {
-      const editor = cellRef.current.querySelector('.CodeMirror-code') as
-        | HTMLDivElement
-        | undefined;
-      editor?.focus();
-    }
   };
 
   const handleClose = (force = false) => {
