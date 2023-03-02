@@ -41,8 +41,11 @@ describe('Views with 5 Translations', () => {
       });
 
       it('insert source into translation', () => {
-        if (!cy.gcy('translations-language-select-form-control').contains('cs'))
-          toggleLang('Česky');
+        cy.gcy('translations-language-select-form-control').then(
+          (selectLanguageControl) => {
+            if (!selectLanguageControl.contains('cs')) toggleLang('Česky');
+          }
+        );
 
         editCell('Studený přeložený text 1');
         getCellInsertSourceButton().click();
