@@ -16,7 +16,7 @@ import {
 import clsx from 'clsx';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
-import { getMetaName } from 'tg.fixtures/isMac';
+import { getMetaName, IS_MAC } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
 
@@ -246,7 +246,9 @@ export const TranslationsShortcuts = () => {
       name: cursorLanguage != sourceLanguage && (
         <T>translations_cell_insert_source</T>
       ),
-      formula: formatShortcut(`${getMetaName()} + Insert`),
+      formula: IS_MAC
+        ? formatShortcut(`${getMetaName()} + Shift + S`)
+        : formatShortcut(`${getMetaName()} + Insert`),
     },
   ];
 

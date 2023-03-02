@@ -7,7 +7,7 @@ import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
-import { getMeta } from 'tg.fixtures/isMac';
+import { getMeta, IS_MAC } from 'tg.fixtures/isMac';
 import {
   useTranslationsActions,
   useTranslationsSelector,
@@ -211,7 +211,7 @@ export const TranslationOpened: React.FC<Props> = ({
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
                 [`${getMeta()}-Enter`]: onCmdSave,
-                [`${getMeta()}-Insert`]: () =>
+                [IS_MAC ? `${getMeta()}-Shift-S` : `${getMeta()}-Insert`]: () =>
                   !language.base && onInsertSource(sourceText),
               }}
             />
