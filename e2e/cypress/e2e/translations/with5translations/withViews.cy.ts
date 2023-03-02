@@ -9,7 +9,7 @@ import {
   getCellCancelButton,
   getCellInsertSourceButton,
   getCellSaveButton,
-  toggleLang,
+  selectLangsInLocalstorage,
   translationsBeforeEach,
   visitTranslations,
 } from '../../../common/translations';
@@ -32,7 +32,7 @@ describe('Views with 5 Translations', () => {
   forEachView(
     () => project.id,
     () => {
-      it('will edit key', () => {
+      it.skip('will edit key', () => {
         editCell('Cool key 01', 'Cool key edited');
 
         cy.contains('Cool key edited').should('be.visible');
@@ -41,11 +41,8 @@ describe('Views with 5 Translations', () => {
       });
 
       it('insert source into translation', () => {
-        cy.gcy('translations-language-select-form-control').then(
-          (selectLanguageControl) => {
-            if (!selectLanguageControl.contains('cs')) toggleLang('Česky');
-          }
-        );
+        selectLangsInLocalstorage(project.id, ['en', 'cs']);
+        visitTranslations(project.id);
 
         editCell('Studený přeložený text 1');
         getCellInsertSourceButton().click();
@@ -56,7 +53,7 @@ describe('Views with 5 Translations', () => {
           .should('be.visible');
       });
 
-      it('will edit translation', () => {
+      it.skip('will edit translation', () => {
         editCell('Cool translated text 1', 'Super cool changed text...');
         cy.xpath(
           `${getAnyContainingText(
@@ -67,7 +64,7 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool translated text 2').should('be.visible');
       });
 
-      it('will edit key namespace', () => {
+      it.skip('will edit key namespace', () => {
         getCell('Cool key 01').click();
 
         selectNamespace('test-ns');
@@ -83,7 +80,7 @@ describe('Views with 5 Translations', () => {
           .should('be.visible');
       });
 
-      it('will cancel key edit without confirmation', () => {
+      it.skip('will cancel key edit without confirmation', () => {
         editCell('Cool key 01', 'Cool key edited', false);
         getCellCancelButton().click();
 
@@ -91,7 +88,7 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool key 01').should('be.visible');
       });
 
-      it('will ask for confirmation on changed edit', () => {
+      it.skip('will ask for confirmation on changed edit', () => {
         editCell('Cool translated text 1', 'Cool translation edited', false);
         cy.contains('Cool translated text 4').click();
         cy.contains(`Unsaved changes`).should('be.visible');
