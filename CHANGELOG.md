@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/tolgee/tolgee-platform/compare/v3.8.0...v3.8.1) (2023-03-03)
+
+
+### Bug Fixes
+
+* Unable to upload screenshot from UI of Tolgee JS ([#1601](https://github.com/tolgee/tolgee-platform/issues/1601)) ([ed6d4ab](https://github.com/tolgee/tolgee-platform/commit/ed6d4ab3f633f3868d28ffdd026ae82562c346d5))
+
 # [3.8.0](https://github.com/tolgee/tolgee-platform/compare/v3.7.2...v3.8.0) (2023-02-28)
 
 

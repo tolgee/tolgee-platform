@@ -527,6 +527,7 @@
   "project_list_keys_count" : "{keysCount, plural, \n=1 {1 clé}\nother {# clés}\n}",
   "project_list_more_button" : "Plus",
   "project_list_translations_button" : "Traductions",
+  "project_members_dialog_close_button" : "Fermer",
   "project_members_dialog_create_link_button" : "Créer le lien",
   "project_members_dialog_email" : "E-mail",
   "project_members_dialog_invite_button" : "Inviter",
