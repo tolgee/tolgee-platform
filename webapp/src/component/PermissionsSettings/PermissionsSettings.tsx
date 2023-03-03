@@ -12,7 +12,6 @@ import {
   PermissionAdvancedState,
   PermissionBasicState,
   PermissionModel,
-  PermissionModelRole,
   PermissionSettingsState,
   RolesMap,
   TabsType,
