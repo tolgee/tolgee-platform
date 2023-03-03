@@ -1,6 +1,9 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 import { internalFetch } from '../common';
 import { cleanTestData, generateTestDataObject } from './generator';
+import { components } from '../../../../../webapp/src/service/apiSchema.generated';
+
+type PermissionModelScopes = components['schemas']['PermissionModel']['scopes'];
 
 export const organizationTestData = generateTestDataObject('organizations');
 
@@ -97,4 +100,32 @@ export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>
     internalFetch(`e2e-data/sensitive-operation-protection/get-totp`),
+};
+
+export type PermissionsOptions = {
+  scopes: PermissionModelScopes;
+  translateLanguages?: string[];
+  viewLanguages?: string[];
+  stateChangeLanguages?: string[];
+};
+
+export const generatePermissionsData = {
+  generate: (options: Partial<PermissionsOptions>) => {
+    const params = new URLSearchParams();
+    Object.entries(options).forEach(([key, values]) => {
+      values.forEach((value) => {
+        if (key === 'scopes') {
+          params.append(key, value.replace(/\.|-/g, '_').toUpperCase());
+        } else {
+          params.append(key, value);
+        }
+      });
+    });
+    return internalFetch(
+      `e2e-data/permissions/generate-with-user?${params.toString()}`
+    );
+  },
+  clean: () => {
+    return internalFetch('e2e-data/permissions/clean');
+  },
 };

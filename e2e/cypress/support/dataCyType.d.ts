@@ -255,6 +255,17 @@ declare namespace DataCy {
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
+        "project-menu-item" |
+        "project-menu-item-api-keys" |
+        "project-menu-item-dashboard" |
+        "project-menu-item-export" |
+        "project-menu-item-import" |
+        "project-menu-item-integrate" |
+        "project-menu-item-languages" |
+        "project-menu-item-members" |
+        "project-menu-item-projects" |
+        "project-menu-item-settings" |
+        "project-menu-item-translations" |
         "project-menu-items" |
         "project-name-field" |
         "project-owner-select" |
