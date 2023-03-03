@@ -15,7 +15,7 @@ export const useOrganization = () => {
     path: { slug: organizationSlug },
     options: {
       onSuccess(data) {
-        updatePreferredOrganization(data);
+        updatePreferredOrganization(data.id);
       },
     },
   });

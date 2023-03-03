@@ -1000,8 +1000,6 @@ export interface components {
       expiresAt?: number;
       lastUsedAt?: number;
       scopes: string[];
-      id: number;
-      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1806,8 +1804,6 @@ export interface components {
       expiresAt?: number;
       lastUsedAt?: number;
       scopes: string[];
-      id: number;
-      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
