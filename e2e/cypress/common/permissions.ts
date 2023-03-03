@@ -1,5 +1,11 @@
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { login, v2apiFetch } from './apiCalls/common';
+import {
+  generatePermissionsData,
+  PermissionsOptions,
+} from './apiCalls/testData/testData';
 import { commentsButton, deleteComment, resolveComment } from './comments';
+import { HOST } from './constants';
 import { waitForGlobalLoading } from './loading';
 import { confirmStandard } from './shared';
 import { editCell } from './translations';
@@ -144,4 +150,24 @@ export function checkItemsInMenu(
       }
     }
   });
+}
+
+export function visitProjectWithPermissions(
+  options: Partial<PermissionsOptions>
+) {
+  let projectId: number;
+  let permissions: ComputedPermissionModel;
+  return generatePermissionsData
+    .clean()
+    .then(() => generatePermissionsData.generate(options))
+    .then((res) => {
+      projectId = res.body.projects[0].id;
+    })
+    .then(() => login('me@me.me'))
+    .then(() => v2apiFetch(`projects/${projectId}`))
+    .then((res) => {
+      permissions = res.body.computedPermission;
+    })
+    .then(() => cy.visit(`${HOST}/projects/${projectId}`))
+    .then(() => ({ projectId, permissions }));
 }
