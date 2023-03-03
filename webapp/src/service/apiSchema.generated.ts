@@ -196,9 +196,6 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/public/licensing/subscription": {
-    post: operations["getMySubscription"];
-  };
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
@@ -522,18 +519,20 @@ export interface components {
     ComputedPermissionModel: {
       permissionModel?: components["schemas"]["PermissionModel"];
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -556,8 +555,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       id: number;
@@ -918,12 +915,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      createdAt: number;
-      updatedAt: number;
       id: number;
       description: string;
+      createdAt: number;
+      updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -993,12 +990,14 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
+      id: number;
+      description: string;
       username?: string;
       projectId: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
+      userFullName?: string;
+      projectName: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1010,15 +1009,6 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
-    };
-    GetMySubscriptionDto: {
-      licenceKey: string;
-    };
-    EeSubscriptionModel: {
-      id?: number;
-      enabledFeatures?: "GRANULAR_PERMISSIONS"[];
-      currentPeriodEnd?: number;
-      cancelAtPeriodEnd: boolean;
     };
     CreateProjectDTO: {
       name: string;
@@ -1306,7 +1296,9 @@ export interface components {
     PrivateOrganizationModel: {
       organizationModel?: components["schemas"]["OrganizationModel"];
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
-      basePermissions: components["schemas"]["PermissionModel"];
+      name: string;
+      id: number;
+      description?: string;
       /**
        * The role of currently authorized user.
        *
@@ -1316,9 +1308,6 @@ export interface components {
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
       slug: string;
-      name: string;
-      id: number;
-      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1394,19 +1383,19 @@ export interface components {
       extraCreditBalance: number;
     };
     KeySearchResultView: {
-      baseTranslation?: string;
-      translation?: string;
-      namespace?: string;
       name: string;
       id: number;
+      namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      baseTranslation?: string;
-      translation?: string;
-      namespace?: string;
       name: string;
       id: number;
+      namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1740,12 +1729,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      expiresAt?: number;
-      lastUsedAt?: number;
-      createdAt: number;
-      updatedAt: number;
       id: number;
       description: string;
+      createdAt: number;
+      updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1798,12 +1787,14 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
+      id: number;
+      description: string;
       username?: string;
       projectId: number;
-      expiresAt?: number;
       lastUsedAt?: number;
+      expiresAt?: number;
+      userFullName?: string;
+      projectName: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -3952,33 +3943,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  getMySubscription: {
-    parameters: {
-      query: {
-        body: components["schemas"]["GetMySubscriptionDto"];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["EeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
       };
     };
   };

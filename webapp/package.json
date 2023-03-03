@@ -71,6 +71,7 @@
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc",
+    "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
     "load-translations": "sh scripts/loadTranslations.sh",
     "generate-scopes": "node ./scripts/generateScopes.js"
   },
@@ -128,6 +129,7 @@
     "prismjs": "1.25.0",
     "react-scripts": "4.0.3",
     "redux-devtools-extension": "^2.13.9",
+    "ts-unused-exports": "^9.0.4",
     "typescript": "^4.3.2",
     "webpack": "4.44.2"
   }

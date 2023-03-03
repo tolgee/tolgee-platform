@@ -88,7 +88,6 @@ declare namespace DataCy {
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
-        "global-list-item" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -251,7 +250,6 @@ declare namespace DataCy {
         "project-list-languages" |
         "project-list-languages-item" |
         "project-list-more-button" |
-        "project-list-owner" |
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
@@ -268,8 +266,6 @@ declare namespace DataCy {
         "project-menu-item-translations" |
         "project-menu-items" |
         "project-name-field" |
-        "project-owner-select" |
-        "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
         "project-settings-delete-button" |
