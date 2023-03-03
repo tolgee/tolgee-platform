@@ -5,13 +5,20 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  styled,
   Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
+import { useTranslate } from '@tolgee/react';
 
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
-import { useTranslate } from '@tolgee/react';
+
+const StyledButton = styled(Button)`
+  padding: 0px;
+  padding-left: 7px;
+  padding-right: 5px;
+`;
 
 export const LanguagePermissionsMenu: FunctionComponent<{
   selected: number[];
@@ -60,7 +67,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
         }
         disableInteractive
       >
-        <Button
+        <StyledButton
           data-cy="permissions-language-menu-button"
           disabled={props.disabled === true}
           {...props.buttonProps}
@@ -75,7 +82,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             disabled={props.disabled}
           />
           <ArrowDropDown fontSize="small" />
-        </Button>
+        </StyledButton>
       </Tooltip>
       <Menu
         data-cy="permissions-languages-menu"

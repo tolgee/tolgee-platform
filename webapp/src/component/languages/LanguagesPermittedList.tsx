@@ -7,26 +7,30 @@ import clsx from 'clsx';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
+const ICON_SIZE = 20;
+
 const StyledContainer = styled('div')`
   display: flex;
-  align-items: center;
+  flex-grow: 1;
   & .disabled {
     opacity: 0.2;
   }
 `;
 
 const StyledLabel = styled('div')`
-  display: block;
+  display: flex;
+  flex-grow: 1;
   flex-shrink: 1;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding: 0px 5px;
 `;
 
 const StyledExtraCircle = styled('div')`
   box-sizing: border-box;
-  width: 20px;
-  height: 20px;
+  width: ${ICON_SIZE}px;
+  height: ${ICON_SIZE}px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,7 +64,7 @@ export const LanguagesPermittedList: React.FC<Props> = ({
       {selectedLanguages.map((l) => (
         <CircledLanguageIcon
           key={l.id}
-          size={20}
+          size={ICON_SIZE}
           flag={l.flagEmoji}
           className={clsx({
             disabled: Array.isArray(disabled)

@@ -156,7 +156,7 @@ export const Hierarchy: React.FC<Props> = ({
 
         {minimalLanguages && displayLanguages && (
           <LanguagePermissionsMenu
-            buttonProps={{ size: 'small' }}
+            buttonProps={{ size: 'small', style: { minWidth: 170 } }}
             disabled={
               (!halfChecked && !fullyChecked) ||
               Boolean(
