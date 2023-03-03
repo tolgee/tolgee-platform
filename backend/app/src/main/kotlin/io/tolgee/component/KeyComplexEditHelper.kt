@@ -127,7 +127,7 @@ class KeyComplexEditHelper(
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
     isKeyModified = key.name != dto.name
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
-    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() && !dto.screenshotsToAdd.isNullOrEmpty()
+    isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
   }
 
   private fun areTagsModified(
