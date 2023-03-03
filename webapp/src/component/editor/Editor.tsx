@@ -237,7 +237,7 @@ export const Editor: React.FC<Props> = ({
           onBeforeChange={(editor, data, value) => {
             handleChange(value);
           }}
-          onKeyDown={onKeyDown}
+          onKeyDown={(...params) => onKeyDown?.(...params)}
           onBlur={() => onBlur?.()}
           onFocus={(e) => {
             onFocus?.();
