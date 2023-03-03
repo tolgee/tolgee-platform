@@ -1,6 +1,6 @@
 import { waitForGlobalLoading } from '../loading';
 import { confirmStandard } from '../shared';
-import { editCell } from '../shortcuts';
+import { editCell } from '../translations';
 import { ProjectInfo } from './shared';
 
 export function testKeys(info: ProjectInfo) {

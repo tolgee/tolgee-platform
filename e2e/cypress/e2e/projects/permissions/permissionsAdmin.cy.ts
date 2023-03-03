@@ -1,7 +1,6 @@
 import {
   checkItemsInMenu,
   RUN,
-  SKIP,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 
@@ -16,7 +15,7 @@ describe('Permissions admin', () => {
         'project-menu-item-members': RUN,
         'project-menu-item-import': RUN,
         'project-menu-item-export': RUN,
-        'project-menu-item-integrate': SKIP,
+        'project-menu-item-integrate': RUN,
       });
     });
   });
