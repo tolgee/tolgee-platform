@@ -1,6 +1,6 @@
 import {
   HierarchyItem,
-  PermissionState,
+  PermissionAdvancedState,
 } from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
 import { useTranslate } from '@tolgee/react';
@@ -9,8 +9,8 @@ import { PaidFeatureBanner } from './PaidFeatureBanner';
 
 type Props = {
   dependencies: HierarchyItem;
-  state: PermissionState;
-  onChange: (value: PermissionState) => void;
+  state: PermissionAdvancedState;
+  onChange: (value: PermissionAdvancedState) => void;
 };
 
 export const PermissionsAdvanced: React.FC<Props> = ({

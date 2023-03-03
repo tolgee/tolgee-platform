@@ -1,15 +1,11 @@
 import { ListItemButton, Box, useTheme, styled, alpha } from '@mui/material';
-import {
-  ALL_LANGUAGES_SCOPES,
-  updateByDependencies,
-} from 'tg.ee/PermissionsAdvanced/hierarchyTools';
+import { ALL_LANGUAGES_SCOPES } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { RoleLanguages } from './RoleLanguages';
 
 import {
   HierarchyItem,
-  PermissionState,
+  PermissionBasicState,
   PermissionModelRole,
   PermissionModelScope,
 } from './types';
@@ -34,9 +30,9 @@ const StyledShield = styled('div')`
 type Props = {
   dependencies: HierarchyItem;
   role: NonNullable<PermissionModelRole>;
-  state: PermissionState;
+  state: PermissionBasicState;
   scopes: PermissionModelScope[];
-  onChange: (value: PermissionState) => void;
+  onChange: (value: PermissionBasicState) => void;
 };
 
 export const PermissionsRole: React.FC<Props> = ({
@@ -47,17 +43,12 @@ export const PermissionsRole: React.FC<Props> = ({
   scopes,
 }) => {
   const theme = useTheme();
-  const allLangs = useProjectLanguages().map((l) => l.id);
   const handleSelect = () => {
     if (role !== state.role) {
-      onChange(
-        updateByDependencies(
-          scopes,
-          { ...state, role, scopes },
-          dependencies,
-          allLangs
-        )
-      );
+      onChange({
+        ...state,
+        role,
+      });
     }
   };
   const { getRoleTranslation, getRoleHint } = useRoleTranslations();
@@ -88,7 +79,11 @@ export const PermissionsRole: React.FC<Props> = ({
         <Box>{getRoleTranslation(role)}</Box>
         <Box>{getRoleHint(role)}</Box>
         {selected && displayLanguages && (
-          <Box onMouseDown={stopAndPrevent()} onClick={stopAndPrevent()}>
+          <Box
+            zIndex={1}
+            onMouseDown={stopAndPrevent()}
+            onClick={stopAndPrevent()}
+          >
             <RoleLanguages
               state={state}
               onChange={onChange}

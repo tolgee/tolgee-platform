@@ -1,55 +1,42 @@
 import { styled, Box } from '@mui/material';
+import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 
-import { RoleLanguage } from './RoleLanguage';
-import { HierarchyItem, PermissionState } from './types';
+import { HierarchyItem, PermissionBasicState } from './types';
 
 const StyledContainer = styled(Box)`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
-  margin-top: 8px;
+  & > * {
+    margin-top: 8px;
+  }
 `;
 
 type Props = {
-  state: PermissionState;
-  onChange: (value: PermissionState) => void;
+  state: PermissionBasicState;
+  onChange: (value: PermissionBasicState) => void;
   dependencies: HierarchyItem;
 };
 
-export const RoleLanguages: React.FC<Props> = ({
-  state,
-  onChange,
-  dependencies,
-}) => {
-  const scopes = state.scopes;
-  return (
+export const RoleLanguages: React.FC<Props> = ({ state, onChange }) => {
+  const show = ['REVIEW', 'TRANSLATE'].includes(state.role!);
+
+  const handleSelect = (values: number[]) => {
+    onChange({
+      ...state,
+      languages: values,
+    });
+  };
+
+  return show ? (
     <StyledContainer>
-      {scopes.includes('translations.view') && (
-        <RoleLanguage
-          scope="translations.view"
-          state={state}
-          onChange={onChange}
-          dependencies={dependencies}
+      <Box display="grid" gridAutoFlow="row" minWidth="200px">
+        {/* <Typography variant="caption">{getScopeTranslation(scope)}</Typography> */}
+        <LanguagePermissionsMenu
+          selected={state.languages || []}
+          onSelect={handleSelect}
         />
-      )}
-
-      {scopes.includes('translations.edit') && (
-        <RoleLanguage
-          scope="translations.edit"
-          state={state}
-          onChange={onChange}
-          dependencies={dependencies}
-        />
-      )}
-
-      {scopes.includes('translations.state-edit') && (
-        <RoleLanguage
-          scope="translations.state-edit"
-          state={state}
-          onChange={onChange}
-          dependencies={dependencies}
-        />
-      )}
+      </Box>
     </StyledContainer>
-  );
+  ) : null;
 };

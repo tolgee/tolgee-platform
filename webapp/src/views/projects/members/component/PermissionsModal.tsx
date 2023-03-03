@@ -56,16 +56,6 @@ export const PermissionsModal: React.FC<Props> = ({
       return;
     }
 
-    const languagePermissions: LanguagePermissions = {};
-
-    settingsState.state.scopes
-      .map(getScopeLanguagePermission)
-      .forEach((property) => {
-        if (property) {
-          languagePermissions[property] = settingsState.state[property];
-        }
-      });
-
     const afterActions = {
       onSuccess() {
         messages.success(<T>permissions_set_message</T>);
@@ -76,24 +66,52 @@ export const PermissionsModal: React.FC<Props> = ({
       },
     };
 
-    if (settingsState.tab === 'advanced' && settingsState.state.scopes) {
+    if (
+      settingsState.tab === 'advanced' &&
+      settingsState.advancedState.scopes
+    ) {
+      const languagePermissions: LanguagePermissions = {};
+
+      settingsState.advancedState.scopes
+        .map(getScopeLanguagePermission)
+        .forEach((property) => {
+          if (property) {
+            languagePermissions[property] =
+              settingsState.advancedState[property];
+          }
+        });
+
       editScopes.mutate(
         {
           path: { userId: user.id, projectId: project.id },
           query: {
-            scopes: settingsState.state.scopes,
+            scopes: settingsState.advancedState.scopes,
             ...languagePermissions,
           },
         },
         afterActions
       );
-    } else if (settingsState.tab === 'basic' && settingsState.state.role) {
+    } else if (settingsState.tab === 'basic' && settingsState.basicState.role) {
+      let languagePermissions: LanguagePermissions = {};
+      const role = settingsState.basicState.role;
+
+      if (role === 'REVIEW') {
+        languagePermissions = {
+          translateLanguages: settingsState.basicState.languages,
+          stateChangeLanguages: settingsState.basicState.languages,
+        };
+      } else if (role === 'TRANSLATE') {
+        languagePermissions = {
+          translateLanguages: settingsState.basicState.languages,
+        };
+      }
+
       editRole.mutate(
         {
           path: {
             userId: user.id,
             projectId: project.id,
-            permissionType: settingsState.state.role,
+            permissionType: settingsState.basicState.role,
           },
           query: {
             ...languagePermissions,

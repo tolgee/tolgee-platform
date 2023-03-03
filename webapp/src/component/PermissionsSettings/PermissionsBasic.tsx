@@ -3,15 +3,15 @@ import { PermissionsRole } from './PermissionsRole';
 
 import {
   HierarchyItem,
-  PermissionState,
+  PermissionBasicState,
   PermissionModelRole,
   RolesMap,
 } from './types';
 
 type Props = {
   dependencies: HierarchyItem;
-  state: PermissionState;
-  onChange: (value: PermissionState) => void;
+  state: PermissionBasicState;
+  onChange: (value: PermissionBasicState) => void;
   roles: RolesMap;
 };
 

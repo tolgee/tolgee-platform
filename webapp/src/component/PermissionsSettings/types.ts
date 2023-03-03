@@ -11,14 +11,19 @@ export type PermissionModelScope = PermissionModel['scopes'][0];
 export type LanguagePermissions =
   operations['setUsersPermissions_1']['parameters']['query'];
 
-export type PermissionState = {
-  role?: PermissionModelRole;
+export type PermissionAdvancedState = {
   scopes: PermissionModelScope[];
 } & LanguagePermissions;
 
+export type PermissionBasicState = {
+  role?: PermissionModelRole;
+  languages?: number[];
+};
+
 export type PermissionSettingsState = {
   tab: TabsType;
-  state: PermissionState;
+  advancedState: PermissionAdvancedState;
+  basicState: PermissionBasicState;
 };
 
 export type HierarchyType = {

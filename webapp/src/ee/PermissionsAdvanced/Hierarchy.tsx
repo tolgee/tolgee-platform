@@ -2,7 +2,7 @@ import { Checkbox, FormControlLabel, styled } from '@mui/material';
 import {
   HierarchyItem,
   HierarchyType,
-  PermissionState,
+  PermissionAdvancedState,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
@@ -39,8 +39,8 @@ const StyledRow = styled('div')`
 type Props = {
   dependencies: HierarchyItem;
   structure: HierarchyType;
-  state: PermissionState;
-  onChange: (value: PermissionState) => void;
+  state: PermissionAdvancedState;
+  onChange: (value: PermissionAdvancedState) => void;
 };
 
 export const Hierarchy: React.FC<Props> = ({
