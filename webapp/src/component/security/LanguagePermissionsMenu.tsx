@@ -40,7 +40,13 @@ export const LanguagePermissionsMenu: FunctionComponent<{
     }
   };
 
-  const selectedLanguages = props.selected
+  const disabledLanguages = Array.isArray(props.disabled)
+    ? (props.disabled as number[])
+    : [];
+
+  const selectedLanguages = Array.from(
+    new Set([...props.selected, ...disabledLanguages])
+  )
     .map((id) => allLanguages.find((l) => l.id === id)!)
     .filter(Boolean);
 
@@ -100,7 +106,13 @@ export const LanguagePermissionsMenu: FunctionComponent<{
                 : props.disabled
             }
           >
-            <Checkbox checked={props.selected.includes(lang.id)} size="small" />
+            <Checkbox
+              checked={
+                props.selected.includes(lang.id) ||
+                disabledLanguages.includes(lang.id)
+              }
+              size="small"
+            />
             <ListItemText primary={lang.name} />
           </MenuItem>
         ))}

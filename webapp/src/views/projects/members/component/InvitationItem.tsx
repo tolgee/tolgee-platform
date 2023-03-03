@@ -131,13 +131,23 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             </span>
           </Tooltip>
         )}
+
         <Tooltip
-          title={t(`permission_type_${invitation.type!.toLowerCase()}_hint`)}
+          title={t(
+            `permission_type_${
+              invitation.type?.toLowerCase() || 'granular'
+            }_hint`
+          )}
         >
           <StyledPermissions>
-            <T keyName={`permission_type_${invitation.type!.toLowerCase()}`} />
+            <T
+              keyName={`permission_type_${
+                invitation.type?.toLowerCase() || 'granular'
+              }`}
+            />
           </StyledPermissions>
         </Tooltip>
+
         <Tooltip title={t('invite_user_invitation_copy_button')}>
           <IconButton size="small" onClick={handleGetLink}>
             <Link />

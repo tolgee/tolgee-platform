@@ -521,18 +521,18 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -916,11 +916,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -991,13 +991,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      description: string;
-      username?: string;
-      projectId: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       userFullName?: string;
       projectName: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
+      username?: string;
+      description: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1298,14 +1298,14 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       name: string;
       id: number;
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
+      description?: string;
       avatar?: components["schemas"]["Avatar"];
       slug: string;
     };
@@ -1385,17 +1385,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1730,11 +1730,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1788,13 +1788,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      description: string;
-      username?: string;
-      projectId: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       userFullName?: string;
       projectName: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
+      username?: string;
+      description: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {

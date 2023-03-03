@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup } from '@mui/material';
+import { Box, Button, ButtonGroup, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
@@ -12,19 +12,24 @@ import {
   PermissionAdvancedState,
   PermissionBasicState,
   PermissionModel,
+  PermissionModelRole,
   PermissionSettingsState,
   RolesMap,
   TabsType,
 } from './types';
 
 type Props = {
+  title: string;
   permissions: PermissionModel;
   onChange: (state: PermissionSettingsState) => void;
+  height?: number;
 };
 
 export const PermissionsSettings: React.FC<Props> = ({
+  title,
   permissions,
   onChange,
+  height = 500,
 }) => {
   const allLangs = useProjectLanguages().map((l) => l.id);
   const [tab, setTab] = useState<TabsType>(
@@ -54,12 +59,16 @@ export const PermissionsSettings: React.FC<Props> = ({
   >(undefined);
 
   useEffect(() => {
-    if (dependenciesLoadable.data && !advancedState) {
+    if (dependenciesLoadable.data && rolesLoadable.data && !advancedState) {
+      const scopes =
+        (permissions.type
+          ? rolesLoadable.data[permissions.type]
+          : permissions.scopes) || [];
       setAdvancedState(
         updateByDependencies(
           permissions.scopes,
           {
-            scopes: permissions.scopes,
+            scopes,
             viewLanguages: permissions.viewLanguageIds || [],
             translateLanguages: permissions.translateLanguageIds || [],
             stateChangeLanguages: permissions.stateChangeLanguageIds || [],
@@ -95,7 +104,8 @@ export const PermissionsSettings: React.FC<Props> = ({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Typography variant="h5">{title}</Typography>
         <ButtonGroup size="small">
           <Button
             color={tab === 'basic' ? 'primary' : 'default'}
@@ -107,11 +117,12 @@ export const PermissionsSettings: React.FC<Props> = ({
             color={tab === 'advanced' ? 'primary' : 'default'}
             onClick={handleChange('advanced')}
           >
-            <T keyName="permission_advanced_title" />
+            <T keyName="permission_granular_title" />
           </Button>
         </ButtonGroup>
       </Box>
-      <Box sx={{ mt: 1 }}>
+
+      <Box sx={{ mt: 1 }} height={height} overflow="auto" mx={-1.5}>
         {tab === 'basic' && (
           <PermissionsBasic
             state={basicState}
@@ -121,11 +132,13 @@ export const PermissionsSettings: React.FC<Props> = ({
           />
         )}
         {tab === 'advanced' && (
-          <PermissionsAdvanced
-            state={advancedState}
-            onChange={setAdvancedState}
-            dependencies={dependenciesLoadable.data}
-          />
+          <Box mx={1.5}>
+            <PermissionsAdvanced
+              state={advancedState}
+              onChange={setAdvancedState}
+              dependencies={dependenciesLoadable.data}
+            />
+          </Box>
         )}
       </Box>
     </Box>

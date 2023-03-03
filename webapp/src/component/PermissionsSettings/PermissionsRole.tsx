@@ -14,6 +14,8 @@ import { useRoleTranslations } from './useRoleTranslations';
 const StyledListItem = styled(ListItemButton)`
   position: relative;
   background-color: unset;
+  padding-left: ${({ theme }) => theme.spacing(1.5)};
+  padding-right: ${({ theme }) => theme.spacing(1.5)};
   &:active {
     background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.16)};
   }

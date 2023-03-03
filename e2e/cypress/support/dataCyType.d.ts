@@ -146,6 +146,7 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
+        "invitation-dialog-close-button" |
         "invitation-dialog-input-field" |
         "invitation-dialog-invite-button" |
         "invitation-dialog-role-button" |

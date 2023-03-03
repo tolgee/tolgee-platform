@@ -143,6 +143,8 @@ export const Hierarchy: React.FC<Props> = ({
         <FormControlLabel
           control={
             <Checkbox
+              size="small"
+              style={{ paddingTop: 4, paddingBottom: 4 }}
               checked={fullyChecked}
               indeterminate={halfChecked}
               onClick={handleToggle}
