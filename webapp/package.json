@@ -72,8 +72,7 @@
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc",
     "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
-    "load-translations": "sh scripts/loadTranslations.sh",
-    "generate-scopes": "node ./scripts/generateScopes.js"
+    "load-translations": "sh scripts/loadTranslations.sh"
   },
   "eslintConfig": {
     "extends": [
