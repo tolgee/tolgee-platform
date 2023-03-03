@@ -3,7 +3,8 @@ import { internalFetch } from '../common';
 import { cleanTestData, generateTestDataObject } from './generator';
 import { components } from '../../../../../webapp/src/service/apiSchema.generated';
 
-type PermissionModelScopes = components['schemas']['PermissionModel']['scopes'];
+export type PermissionModelScopes =
+  components['schemas']['PermissionModel']['scopes'];
 
 export const organizationTestData = generateTestDataObject('organizations');
 
@@ -114,11 +115,7 @@ export const generatePermissionsData = {
     const params = new URLSearchParams();
     Object.entries(options).forEach(([key, values]) => {
       values.forEach((value) => {
-        if (key === 'scopes') {
-          params.append(key, value.replace(/\.|-/g, '_').toUpperCase());
-        } else {
-          params.append(key, value);
-        }
+        params.append(key, value);
       });
     });
     return internalFetch(

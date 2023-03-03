@@ -228,6 +228,8 @@ declare namespace DataCy {
         "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
+        "project-dashboard-activity-chart" |
+        "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
         "project-dashboard-description" |
         "project-dashboard-key-count" |
@@ -242,8 +244,11 @@ declare namespace DataCy {
         "project-dashboard-language-menu-settings" |
         "project-dashboard-members" |
         "project-dashboard-members-count" |
+        "project-dashboard-progress" |
+        "project-dashboard-project-totals" |
         "project-dashboard-reviewed-percentage" |
         "project-dashboard-tags" |
+        "project-dashboard-text" |
         "project-dashboard-translated-percentage" |
         "project-delete-button" |
         "project-leave-button" |

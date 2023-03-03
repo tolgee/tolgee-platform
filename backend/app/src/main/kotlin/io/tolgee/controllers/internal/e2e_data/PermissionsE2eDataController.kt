@@ -27,14 +27,14 @@ class PermissionsE2eDataController(val testDataService: TestDataService) : Abstr
   @GetMapping(value = ["/generate-with-user"])
   @Transactional
   fun generateWithPermissions(
-    @RequestParam scopes: List<Scope>?,
+    @RequestParam scopes: List<String>?,
     @RequestParam type: ProjectPermissionType?,
     @RequestParam viewLanguageTags: List<String>?,
     @RequestParam translateLanguageTags: List<String>?,
     @RequestParam stateChangeLanguageTags: List<String>?
   ): StandardTestDataResult {
     this.permissionsTestData.addUserWithPermissions(
-      scopes = scopes,
+      scopes = Scope.parse(scopes).toList(),
       type = type,
       viewLanguageTags = viewLanguageTags,
       translateLanguageTags = translateLanguageTags,

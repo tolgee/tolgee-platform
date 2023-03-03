@@ -202,7 +202,7 @@ export const ProjectTotals: React.FC<{
 
   return (
     <>
-      <StyledTiles>
+      <StyledTiles data-cy="project-dashboard-project-totals">
         <StyledTile
           gridArea="languages"
           onClick={canEditLanguages ? redirectToLanguages : undefined}
@@ -230,6 +230,7 @@ export const ProjectTotals: React.FC<{
           gridArea="text"
           onClick={canViewKeys ? redirectToTranslations : undefined}
           className={clsx({ clickable: canViewKeys })}
+          data-cy="project-dashboard-text"
         >
           <StyledTileDataItem data-cy="project-dashboard-key-count">
             <StyledTileValue>
@@ -257,6 +258,7 @@ export const ProjectTotals: React.FC<{
           gridArea="progress"
           onClick={canViewKeys ? redirectToTranslations : undefined}
           className={clsx({ clickable: canViewKeys })}
+          data-cy="project-dashboard-progress"
         >
           <StyledTileDataItem data-cy="project-dashboard-translated-percentage">
             <StyledTileValue>
