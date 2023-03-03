@@ -1,5 +1,7 @@
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { commentsButton, deleteComment, resolveComment } from './comments';
 import { waitForGlobalLoading } from './loading';
+import { confirmStandard } from './shared';
 import { editCell } from './translations';
 
 export const SKIP = false;
@@ -14,26 +16,12 @@ export function checkNumberOfMenuItems(count: number) {
     .should('have.length', count);
 }
 
-type DeepOr<T, U> = {
-  [K in keyof T | keyof U]: K extends keyof T
-    ? K extends keyof U
-      ? T[K] | U[K]
-      : T[K]
-    : K extends keyof U
-    ? U[K]
-    : never;
-};
-
 type MenuItem = Exclude<
   DataCy.Value & `project-menu-item-${string}`,
   'project-menu-item-projects'
 >;
 
-type AdditionalValues = {
-  'project-menu-item-dashboard': 'test';
-};
-
-type Settings = Partial<DeepOr<AdditionalValues, Record<MenuItem, boolean>>>;
+type Settings = Partial<Record<MenuItem, boolean>>;
 
 const pageIsPermitted = () => {
   waitForGlobalLoading();
@@ -71,19 +59,56 @@ function testTranslations({ scopes }: ComputedPermissionModel) {
 
   if (scopes.includes('screenshots.view')) {
     cy.gcy('translations-table-cell').first().focus();
-    cy.gcy('translations-cell-screenshots-button').should('exist');
+    cy.gcy('translations-cell-screenshots-button').should('exist').click();
+    cy.gcy('screenshot-thumbnail').should('be.visible');
+    if (scopes.includes('screenshots.delete')) {
+      cy.gcy('screenshot-thumbnail').trigger('mouseover');
+      cy.gcy('screenshot-thumbnail-delete').click();
+      confirmStandard();
+      waitForGlobalLoading();
+      cy.gcy('screenshot-thumbnail').should('not.exist');
+    }
+    if (scopes.includes('screenshots.upload')) {
+      cy.gcy('add-box').should('be.visible');
+    }
+    // close popup
+    cy.get('body').click(0, 0);
   }
 
   if (scopes.includes('translations.view')) {
     cy.gcy('translations-state-indicator').should('be.visible');
+
+    commentsButton(0, 'de').click();
+    cy.gcy('comment-text').should('be.visible');
+
+    if (scopes.includes('translation-comments.set-state')) {
+      resolveComment('comment 1');
+    }
+
+    if (scopes.includes('translation-comments.edit')) {
+      deleteComment('comment 1');
+    }
+
+    if (scopes.includes('translation-comments.add')) {
+      cy.gcy('translations-comments-input')
+        .type('test comment')
+        .type('{enter}');
+      waitForGlobalLoading();
+      cy.gcy('comment-text').contains('test comment').should('be.visible');
+    }
+
+    cy.gcy('translations-cell-close').click();
   } else {
     // no translations shoud be visible when user has no access to them
     cy.gcy('translations-state-indicator').should('not.exist');
   }
 
   if (scopes.includes('translations.edit')) {
-    cy.gcy('translations-table-cell-translation').first().click();
+    cy.gcy('translations-table-cell-translation').eq(1).click();
     cy.gcy('global-editor').should('be.visible');
+    cy.gcy('translation-tools-machine-translation-item').should('be.visible');
+    cy.gcy('translation-tools-translation-memory-item').should('be.visible');
+    cy.gcy('translations-cell-close').click();
   }
 
   if (
@@ -104,9 +129,11 @@ export function checkItemsInMenu(
     const value = settings[item];
 
     if (value !== SKIP) {
+      // go to page
       cy.gcy(item).click();
+      // check if there an error
       pageIsPermitted();
-      // const values = (Array.isArray(settings[item]) ? settings[item] : []) as any;
+
       switch (item as keyof MenuItem) {
         case 'project-menu-item-dashboard':
           testDashboard(permissions);

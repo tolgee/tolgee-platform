@@ -293,6 +293,7 @@ declare namespace DataCy {
         "regenerate-pat-dialog-title" |
         "screenshot-image" |
         "screenshot-thumbnail" |
+        "screenshot-thumbnail-delete" |
         "search-select" |
         "search-select-item" |
         "search-select-new" |

@@ -112,6 +112,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
                 className={clsx({ hover })}
                 onClick={onDeleteClick}
                 size="large"
+                data-cy="screenshot-thumbnail-delete"
               >
                 <StyledDeleteIcon />
               </StyledDeleteIconButton>
