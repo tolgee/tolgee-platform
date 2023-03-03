@@ -192,10 +192,10 @@ export const ProjectTotals: React.FC<{
   const isAdmin = satisfiesPermission('admin');
   const canViewMembers = satisfiesPermission('members.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
-  const canViewTranslations = satisfiesPermission('translations.view');
+  const canViewKeys = satisfiesPermission('keys.view');
 
   const tagsPresent = Boolean(stats.tagCount);
-  const tagsClickable = tagsPresent && canViewTranslations;
+  const tagsClickable = tagsPresent && canViewKeys;
 
   const membersAccessible = config.authentication && canViewMembers;
   const membersEditable = membersAccessible && isAdmin;
@@ -228,8 +228,8 @@ export const ProjectTotals: React.FC<{
 
         <StyledTile
           gridArea="text"
-          onClick={canViewTranslations ? redirectToTranslations : undefined}
-          className={clsx({ clickable: canViewTranslations })}
+          onClick={canViewKeys ? redirectToTranslations : undefined}
+          className={clsx({ clickable: canViewKeys })}
         >
           <StyledTileDataItem data-cy="project-dashboard-key-count">
             <StyledTileValue>
@@ -255,8 +255,8 @@ export const ProjectTotals: React.FC<{
 
         <StyledTile
           gridArea="progress"
-          onClick={canViewTranslations ? redirectToTranslations : undefined}
-          className={clsx({ clickable: canViewTranslations })}
+          onClick={canViewKeys ? redirectToTranslations : undefined}
+          className={clsx({ clickable: canViewKeys })}
         >
           <StyledTileDataItem data-cy="project-dashboard-translated-percentage">
             <StyledTileValue>
