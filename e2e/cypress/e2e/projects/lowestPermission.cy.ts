@@ -7,6 +7,8 @@ import { HOST } from '../../common/constants';
 import {
   checkItemsInMenu,
   ComputedPermissionModel,
+  RUN,
+  SKIP,
 } from '../../common/permissions';
 
 describe('Lowest permissions', () => {
@@ -16,10 +18,10 @@ describe('Lowest permissions', () => {
   it('translations.view', () => {
     visitProject({ scopes: ['translations.view'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-export': RUN,
+        'project-menu-item-integrate': RUN,
       });
     });
   });
@@ -27,149 +29,11 @@ describe('Lowest permissions', () => {
   it('translations.edit', () => {
     visitProject({ scopes: ['translations.edit'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-import': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('keys.edit', () => {
-    visitProject({ scopes: ['keys.edit'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-import': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('screenshots.upload', () => {
-    visitProject({ scopes: ['screenshots.upload'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('screenshots.delete', () => {
-    visitProject({ scopes: ['screenshots.delete'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('screenshots.view', () => {
-    visitProject({ scopes: ['screenshots.view'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('activity.view', () => {
-    visitProject({ scopes: ['activity.view'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('languages.edit', () => {
-    visitProject({ scopes: ['languages.edit'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-languages': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('admin', () => {
-    visitProject({ scopes: ['admin'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-translations': true,
-        'project-menu-item-dashboard': true,
-        'project-menu-item-settings': true,
-        'project-menu-item-languages': true,
-        'project-menu-item-members': true,
-        'project-menu-item-import': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('project.edit', () => {
-    visitProject({ scopes: ['project.edit'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-settings': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('members.view', () => {
-    visitProject({ scopes: ['members.view'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-members': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('members.edit', () => {
-    visitProject({ scopes: ['members.edit'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-members': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('translation-comments.add', () => {
-    visitProject({ scopes: ['translation-comments.add'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('translation-comments.edit', () => {
-    visitProject({ scopes: ['translation-comments.edit'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
-      });
-    });
-  });
-
-  it('translation-comments.set-state', () => {
-    visitProject({ scopes: ['translation-comments.set-state'] }).then(() => {
-      checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-import': RUN,
+        'project-menu-item-export': RUN,
+        'project-menu-item-integrate': RUN,
       });
     });
   });
@@ -177,9 +41,130 @@ describe('Lowest permissions', () => {
   it('translations.state-edit', () => {
     visitProject({ scopes: ['translations.state-edit'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-export': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-export': RUN,
+      });
+    });
+  });
+
+  it('translation-comments.add', () => {
+    visitProject({ scopes: ['translation-comments.add'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-export': SKIP,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('translation-comments.edit', () => {
+    visitProject({ scopes: ['translation-comments.edit'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-export': SKIP,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('translation-comments.set-state', () => {
+    visitProject({ scopes: ['translation-comments.set-state'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-export': SKIP,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('screenshots.view', () => {
+    visitProject({ scopes: ['screenshots.view'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('screenshots.upload', () => {
+    visitProject({ scopes: ['screenshots.upload'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': RUN,
+      });
+    });
+  });
+
+  it('screenshots.delete', () => {
+    visitProject({ scopes: ['screenshots.delete'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('activity.view', () => {
+    visitProject({ scopes: ['activity.view'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+      });
+    });
+  });
+
+  it('languages.edit', () => {
+    visitProject({ scopes: ['languages.edit'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-languages': RUN,
+      });
+    });
+  });
+
+  it('admin', () => {
+    visitProject({ scopes: ['admin'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-translations': RUN,
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-settings': RUN,
+        'project-menu-item-languages': RUN,
+        'project-menu-item-members': RUN,
+        'project-menu-item-import': RUN,
+        'project-menu-item-export': RUN,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('project.edit', () => {
+    visitProject({ scopes: ['project.edit'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-settings': RUN,
+      });
+    });
+  });
+
+  it('members.view', () => {
+    visitProject({ scopes: ['members.view'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-members': RUN,
+      });
+    });
+  });
+
+  it('members.edit', () => {
+    visitProject({ scopes: ['members.edit'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-members': RUN,
       });
     });
   });
@@ -187,9 +172,20 @@ describe('Lowest permissions', () => {
   it('keys.view', () => {
     visitProject({ scopes: ['keys.view'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': RUN,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': SKIP,
+      });
+    });
+  });
+
+  it('keys.edit', () => {
+    visitProject({ scopes: ['keys.edit'] }).then(() => {
+      checkItemsInMenu(permissions, {
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-import': RUN,
+        'project-menu-item-integrate': SKIP,
       });
     });
   });
@@ -197,9 +193,9 @@ describe('Lowest permissions', () => {
   it('keys.delete', () => {
     visitProject({ scopes: ['keys.delete'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': SKIP,
       });
     });
   });
@@ -207,9 +203,9 @@ describe('Lowest permissions', () => {
   it('keys.create', () => {
     visitProject({ scopes: ['keys.create'] }).then(() => {
       checkItemsInMenu(permissions, {
-        'project-menu-item-dashboard': true,
-        'project-menu-item-translations': true,
-        'project-menu-item-integrate': true,
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': RUN,
+        'project-menu-item-integrate': SKIP,
       });
     });
   });

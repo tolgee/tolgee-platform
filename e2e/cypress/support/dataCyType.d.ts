@@ -349,6 +349,7 @@ declare namespace DataCy {
         "translations-state-indicator" |
         "translations-table-cell" |
         "translations-table-cell-language" |
+        "translations-table-cell-translation" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |
