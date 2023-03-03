@@ -566,6 +566,7 @@
   "project_list_keys_count" : "{keysCount, plural, \n  =1 {1 chave}\n  other {# chaves}\n}",
   "project_list_more_button" : "Mais",
   "project_list_translations_button" : "Traduções",
+  "project_members_dialog_close_button" : "Fechar",
   "project_members_dialog_create_link_button" : "Criar link",
   "project_members_dialog_email" : "Email",
   "project_members_dialog_invite_button" : "Convidar",
