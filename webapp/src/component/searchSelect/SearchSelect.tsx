@@ -5,8 +5,8 @@ import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
 import { SearchSelectMulti } from './SearchSelectMulti';
 
-export type SelectItem = {
-  value: string;
+export type SelectItem<T> = {
+  value: T;
   name: string;
 };
 
@@ -19,12 +19,12 @@ const StyledInputContent = styled('div')`
   height: 23px;
 `;
 
-type Props = {
-  onChange?: (value: string | string[]) => void;
-  onSelect?: (value: string) => void;
+type Props<T> = {
+  onChange?: (value: T | T[]) => void;
+  onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
-  items: SelectItem[];
-  value: string | string[] | undefined;
+  items: SelectItem<T>[];
+  value: T | T[] | undefined;
   onAddNew?: (searchValue: string) => void;
   searchPlaceholder?: string;
   title?: string;
@@ -32,11 +32,11 @@ type Props = {
   displaySearch?: boolean;
   popperMinWidth?: string | number;
   multiple?: boolean;
-  renderValue?: (value: string | string[] | undefined) => React.ReactNode;
+  renderValue?: (value: T | T[] | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
 };
 
-export const SearchSelect: React.FC<Props> = ({
+export function SearchSelect<T extends React.Key>({
   onChange,
   onSelect,
   items,
@@ -50,7 +50,7 @@ export const SearchSelect: React.FC<Props> = ({
   multiple,
   renderValue,
   SelectProps,
-}) => {
+}: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -62,7 +62,7 @@ export const SearchSelect: React.FC<Props> = ({
     setIsOpen(true);
   };
 
-  const handleSelect = (newValue: string) => {
+  const handleSelect = (newValue: T) => {
     onSelect?.(newValue);
     if (multiple && Array.isArray(value)) {
       const newValues = value.includes(newValue)
@@ -113,7 +113,7 @@ export const SearchSelect: React.FC<Props> = ({
           <SearchSelectMulti
             open={isOpen}
             onClose={handleClose}
-            value={value as string[]}
+            value={value as T[]}
             onSelect={handleSelect}
             anchorEl={anchorEl.current!}
             items={items}
@@ -143,4 +143,4 @@ export const SearchSelect: React.FC<Props> = ({
       </SearchSelectPopover>
     </Box>
   );
-};
+}

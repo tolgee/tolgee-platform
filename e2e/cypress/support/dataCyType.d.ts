@@ -226,7 +226,6 @@ declare namespace DataCy {
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
         "permissions-language-menu-button" |
-        "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
         "project-dashboard-activity-chart" |

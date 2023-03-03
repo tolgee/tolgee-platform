@@ -1,18 +1,14 @@
-import React, { ComponentProps, FunctionComponent } from 'react';
-import {
-  Button,
-  Checkbox,
-  ListItemText,
-  Menu,
-  MenuItem,
-  styled,
-  Tooltip,
-} from '@mui/material';
+import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
+import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
+import { SearchSelectMulti } from 'tg.component/searchSelect/SearchSelectMulti';
+import { CompactMenuItem } from 'tg.views/projects/translations/Filters/FiltersComponents';
+import { StyledInputContent } from 'tg.component/searchSelect/SearchStyled';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 
 const StyledButton = styled(Button)`
   padding: 0px;
@@ -26,20 +22,21 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   buttonProps?: ComponentProps<typeof Button>;
   disabled?: boolean | number[];
 }> = (props) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const anchorEl = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
   const { t } = useTranslate();
 
   const allLanguages = useProjectLanguages();
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setOpen(false);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = () => {
+    setOpen(true);
   };
 
-  const handleToggle = (langId: number) => () => {
+  const handleToggle = (langId: number) => {
     if (props.selected.includes(langId)) {
       props.onSelect(props.selected.filter((id) => id !== langId));
     } else {
@@ -57,6 +54,8 @@ export const LanguagePermissionsMenu: FunctionComponent<{
     .map((id) => allLanguages.find((l) => l.id === id)!)
     .filter(Boolean);
 
+  const selectedIds = selectedLanguages.map((l) => l.id);
+
   return (
     <>
       <Tooltip
@@ -70,6 +69,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
         <StyledButton
           data-cy="permissions-language-menu-button"
           disabled={props.disabled === true}
+          ref={anchorEl}
           {...props.buttonProps}
           size="small"
           variant="outlined"
@@ -80,50 +80,62 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           <LanguagesPermittedList
             languages={selectedLanguages}
             disabled={props.disabled}
+            maxItems={5}
           />
           <ArrowDropDown fontSize="small" />
         </StyledButton>
       </Tooltip>
-      <Menu
-        data-cy="permissions-languages-menu"
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-      >
-        {allLanguages.map((lang) => (
-          <MenuItem
-            key={lang.id}
-            value={lang.tag}
-            data-cy="translations-language-select-item"
-            onClick={handleToggle(lang.id)}
-            disabled={
-              Array.isArray(props.disabled)
-                ? props.disabled.length === 0 ||
-                  props.disabled.includes(lang.id)
-                : props.disabled
-            }
-          >
-            <Checkbox
-              checked={
-                props.selected.includes(lang.id) ||
-                disabledLanguages.includes(lang.id)
-              }
-              size="small"
-            />
-            <ListItemText primary={lang.name} />
-          </MenuItem>
-        ))}
-      </Menu>
+      {anchorEl && (
+        <Popover
+          anchorEl={anchorEl.current}
+          open={open}
+          onClose={handleClose}
+          disablePortal={false}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <SearchSelectMulti
+            displaySearch={true}
+            searchPlaceholder={t('language_permitted_search')}
+            open={Boolean(anchorEl)}
+            items={allLanguages.map((language) => ({
+              value: language.id,
+              name: language.name,
+            }))}
+            value={selectedIds}
+            minWidth={anchorEl.current?.getBoundingClientRect().width}
+            onSelect={handleToggle}
+            renderOption={(props, option) => (
+              <CompactMenuItem
+                key={option.value}
+                {...props}
+                data-cy="search-select-item"
+                disabled={disabledLanguages.includes(option.value)}
+              >
+                <Checkbox
+                  size="small"
+                  edge="start"
+                  checked={selectedIds.includes(option.value)}
+                />
+                <StyledInputContent>{option.name}</StyledInputContent>
+                <CircledLanguageIcon
+                  size={20}
+                  flag={
+                    allLanguages.find(({ id }) => id === option.value)
+                      ?.flagEmoji
+                  }
+                />
+              </CompactMenuItem>
+            )}
+          />
+        </Popover>
+      )}
     </>
   );
 };

@@ -6,6 +6,7 @@ import {
   IconButton,
   Tooltip,
   FormControl,
+  AutocompleteProps,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
@@ -32,22 +33,30 @@ function PaperComponent(props) {
   return <Box {...other} style={{ width: '100%' }} />;
 }
 
-type Props = {
+type RenderOption<T> = AutocompleteProps<
+  SelectItem<T>,
+  undefined,
+  undefined,
+  undefined
+>['renderOption'];
+
+type Props<T> = {
   open: boolean;
   onClose?: () => void;
-  onSelect?: (value: string) => void;
+  onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
-  value: string[];
+  value: T[];
   onAddNew?: (searchValue: string) => void;
-  items: SelectItem[];
+  items: SelectItem<T>[];
   displaySearch?: boolean;
   searchPlaceholder?: string;
   title?: string;
   addNewTooltip?: string;
   minWidth?: number | string;
+  renderOption?: RenderOption<T>;
 };
 
-export const SearchSelectMulti: React.FC<Props> = ({
+export function SearchSelectMulti<T extends React.Key>({
   open,
   onClose,
   onSelect,
@@ -60,7 +69,8 @@ export const SearchSelectMulti: React.FC<Props> = ({
   title,
   addNewTooltip,
   minWidth = 250,
-}) => {
+  renderOption,
+}: Props<T>) {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
 
@@ -73,13 +83,28 @@ export const SearchSelectMulti: React.FC<Props> = ({
       ? minWidth
       : anchorEl.offsetWidth;
 
+  const defaultRenderOption: RenderOption<T> = (props, option) => (
+    <CompactMenuItem key={option.value} {...props} data-cy="search-select-item">
+      <Checkbox
+        size="small"
+        edge="start"
+        checked={value.includes(option.value)}
+      />
+      <StyledInputContent>{option.name}</StyledInputContent>
+    </CompactMenuItem>
+  );
+
   return (
     <StyledWrapper sx={{ minWidth: width, maxWidth: width }}>
       <FormControl>
         <Autocomplete
           open
           filterOptions={(options, state) => {
-            return options.filter((o) => o.name.startsWith(state.inputValue));
+            return options.filter((o) =>
+              o.name
+                .toLocaleLowerCase()
+                .startsWith(state.inputValue?.toLocaleLowerCase())
+            );
           }}
           options={items || []}
           inputValue={inputValue}
@@ -94,20 +119,7 @@ export const SearchSelectMulti: React.FC<Props> = ({
           getOptionLabel={({ name }) => name}
           PopperComponent={PopperComponent}
           PaperComponent={PaperComponent}
-          renderOption={(props, option) => (
-            <CompactMenuItem
-              key={option.value}
-              {...props}
-              data-cy="search-select-item"
-            >
-              <Checkbox
-                size="small"
-                edge="start"
-                checked={value.includes(option.value)}
-              />
-              <StyledInputContent>{option.name}</StyledInputContent>
-            </CompactMenuItem>
-          )}
+          renderOption={renderOption || defaultRenderOption}
           onChange={(_, newValue) => {
             newValue?.value && onSelect?.(newValue.value);
           }}
@@ -145,4 +157,4 @@ export const SearchSelectMulti: React.FC<Props> = ({
       </FormControl>
     </StyledWrapper>
   );
-};
+}

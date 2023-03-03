@@ -44,14 +44,16 @@ const StyledExtraCircle = styled('div')`
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
   disabled?: boolean | number[];
+  maxItems?: number;
 };
 
 export const LanguagesPermittedList: React.FC<Props> = ({
   languages,
   disabled,
+  maxItems = 3,
   ...props
 }) => {
-  const selectedLanguages = languages?.slice(0, 3) || [];
+  const selectedLanguages = languages?.slice(0, maxItems) || [];
 
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
 
