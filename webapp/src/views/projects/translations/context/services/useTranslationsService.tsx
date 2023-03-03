@@ -68,8 +68,6 @@ export const useTranslationsService = (props: Props) => {
     [filters]
   );
 
-  // wait for initialLangs to not be null
-  const [enabled, setEnabled] = useState(props.initialLangs !== null);
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
 
   const [urlSearch, _setUrlSearch] = useUrlSearchState('search', {
@@ -79,14 +77,16 @@ export const useTranslationsService = (props: Props) => {
   const messaging = useMessage();
 
   const [search, _setSearch] = useState(urlSearch);
-  const [languages, _setLanguages] = useState<string[] | undefined>(undefined);
+  const [languages, _setLanguages] = useState<string[] | undefined>(
+    props.initialLangs || undefined
+  );
 
   const [manuallyInserted, setManuallyInserted] = useState(0);
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
     sort: ['keyNamespace', 'keyName'],
-    languages: undefined,
+    languages: props.initialLangs || [],
   });
 
   useEffect(() => {
@@ -97,18 +97,6 @@ export const useTranslationsService = (props: Props) => {
     }, 500);
     return () => clearTimeout(timer);
   }, [languages]);
-
-  useEffect(() => {
-    if (props.initialLangs !== null) {
-      const languages = props.initialLangs?.slice(0, MAX_LANGUAGES);
-      setEnabled(true);
-      setQuery({
-        ...query,
-        languages: languages,
-      });
-      _setLanguages(languages);
-    }
-  }, [props.initialLangs]);
 
   const [fixedTranslations, setFixedTranslations] = useState<
     DeletableKeyWithTranslationsModelType[] | undefined
@@ -140,9 +128,6 @@ export const useTranslationsService = (props: Props) => {
     query: requestQuery,
     options: {
       cacheTime: 0,
-      // fetch after languages are loaded,
-      // so we dont't try to fetch nonexistant languages
-      enabled: enabled,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (

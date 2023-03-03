@@ -50,13 +50,13 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const selectedLanguages = useTranslationsSelector(
     (c) => c.selectedLanguages
   )!;
-  const allLanguages = useTranslationsSelector((c) => c.languages)!;
+  const languages = useTranslationsSelector((c) => c.languages)!;
 
   const translation = translations?.[0];
 
   const selectedLanguagesMapped = selectedLanguages
     ?.map((l) => {
-      const language = allLanguages?.find(({ tag }) => tag === l);
+      const language = languages?.find(({ tag }) => tag === l);
       return language!;
     })
     .filter(Boolean);
@@ -67,7 +67,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
 
   useGlobalLoading(isFetching);
 
-  return allLanguages && selectedLanguages && translations ? (
+  return languages && selectedLanguages && translations ? (
     <BaseProjectView
       windowTitle={
         keyExists ? translation!.keyName : t('translation_single_create_title')
@@ -92,7 +92,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
       <StyledContainer style={{ marginBottom: bottomPanelHeight + 20 }}>
         <StyledLanguagesMenu>
           <LanguagesSelect
-            languages={allLanguages}
+            languages={languages}
             onChange={selectLanguages}
             value={selectedLanguages}
             context="languages"

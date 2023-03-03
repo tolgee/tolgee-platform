@@ -22,6 +22,7 @@ export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
 
+  const canViewKeys = satisfiesPermission('keys.view');
   const canViewTranslations = satisfiesPermission('translations.view');
   const canEditProject = satisfiesPermission('project.edit');
   const canEditLanguages = satisfiesPermission('languages.edit');
@@ -48,7 +49,7 @@ export const ProjectMenu = ({ id }) => {
         icon={<DashboardIcon />}
         text={t('project_menu_dashboard', 'Project Dashboard')}
       />
-      {canViewTranslations && (
+      {canViewKeys && (
         <SideMenuItem
           linkTo={LINKS.PROJECT_TRANSLATIONS.build({
             [PARAMS.PROJECT_ID]: id,

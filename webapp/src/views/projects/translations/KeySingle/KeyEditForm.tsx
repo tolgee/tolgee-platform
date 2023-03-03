@@ -80,6 +80,8 @@ export const KeyEditForm: React.FC = () => {
   const project = useProject();
   const { satisfiesLanguageAccess, satisfiesPermission } =
     useProjectPermissions();
+  const canViewScreenshots = satisfiesPermission('screenshots.view');
+  const editEnabled = satisfiesPermission('keys.edit');
 
   const translation = useTranslationsSelector((c) => c.translations)?.[0];
   const languages = useTranslationsSelector((c) => c.languages);
@@ -140,10 +142,6 @@ export const KeyEditForm: React.FC = () => {
     );
   };
 
-  useGlobalLoading(updateNamespace.isLoading);
-
-  const editEnabled = satisfiesPermission('keys.edit');
-
   const handleRemoveKey = () => {
     confirmation({
       title: <T>translation_single_delete_title</T>,
@@ -172,6 +170,8 @@ export const KeyEditForm: React.FC = () => {
       },
     });
   };
+
+  useGlobalLoading(updateNamespace.isLoading);
 
   return translation ? (
     <StyledContainer>
@@ -255,14 +255,16 @@ export const KeyEditForm: React.FC = () => {
         })}
       </div>
 
-      <div>
-        <FieldLabel>
-          <T>translation_single_label_screenshots</T>
-        </FieldLabel>
-        <StyledGalleryField>
-          <ScreenshotGallery keyId={translation!.keyId} />
-        </StyledGalleryField>
-      </div>
+      {canViewScreenshots && (
+        <div>
+          <FieldLabel>
+            <T>translation_single_label_screenshots</T>
+          </FieldLabel>
+          <StyledGalleryField>
+            <ScreenshotGallery keyId={translation!.keyId} />
+          </StyledGalleryField>
+        </div>
+      )}
 
       <StyledActions>
         {editEnabled && (

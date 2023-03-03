@@ -79,15 +79,15 @@ export const KeyCreateForm: React.FC<Props> = ({
     translationValues[tag] = '';
   });
 
-  const canEdit = permissions.satisfiesPermission('keys.edit');
+  const canCreateKeys = permissions.satisfiesPermission('keys.create');
   useEffect(() => {
-    if (!canEdit) {
+    if (!canCreateKeys) {
       redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
       messaging.error(<T>translation_single_no_permission_create</T>);
     }
-  }, [canEdit]);
+  }, [canCreateKeys]);
 
-  return canEdit ? (
+  return canCreateKeys ? (
     <Formik
       initialValues={{
         name: keyName,
