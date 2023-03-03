@@ -92,7 +92,6 @@ export const login = (
     })
     .then((res) => {
       token = res.body.accessToken;
-      console.log(token);
       window.localStorage.setItem('jwtToken', token);
     });
 };
