@@ -15,13 +15,13 @@ import {
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellPosition } from '../types';
-import { getMetaName } from 'tg.fixtures/isMac';
+import { getMeta } from 'tg.fixtures/isMac';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
   EDIT: ['Enter'],
   CANCEL: ['Escape'],
-  CHANGE_STATE: [`${getMetaName()} + E`],
+  CHANGE_STATE: [`${getMeta()} + E`],
 } as const;
 
 export type ShortcutsArrayType = [
