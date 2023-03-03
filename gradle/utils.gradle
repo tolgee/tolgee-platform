@@ -1,0 +1,7 @@
+ext.npmCommandName = { ->
+    if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
+        return "npm.cmd"
+    } else {
+        return "npm"
+    }
+}
