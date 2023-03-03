@@ -1,7 +1,10 @@
 import { useMemo, useRef } from 'react';
 import { useTranslate, TFnType } from '@tolgee/react';
 import CodeMirror from 'codemirror';
-import { Controlled as CodeMirrorReact } from 'react-codemirror2-react-17';
+import {
+  Controlled as CodeMirrorReact,
+  DomEvent,
+} from 'react-codemirror2-react-17';
 import { parse } from '@formatjs/icu-messageformat-parser';
 import { GlobalStyles, styled } from '@mui/material';
 import 'codemirror/keymap/sublime';
@@ -140,6 +143,7 @@ type Props = {
   scrollMargins?: Parameters<typeof useScrollMargins>[0];
   autoScrollIntoView?: boolean;
   direction?: Direction;
+  onKeyDown?: DomEvent;
 };
 
 export const Editor: React.FC<Props> = ({
@@ -157,6 +161,7 @@ export const Editor: React.FC<Props> = ({
   scrollMargins,
   autoScrollIntoView,
   direction = 'ltr',
+  onKeyDown,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslate();
@@ -232,6 +237,7 @@ export const Editor: React.FC<Props> = ({
           onBeforeChange={(editor, data, value) => {
             handleChange(value);
           }}
+          onKeyDown={onKeyDown}
           onBlur={() => onBlur?.()}
           onFocus={(e) => {
             onFocus?.();

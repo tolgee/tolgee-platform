@@ -211,8 +211,14 @@ export const TranslationOpened: React.FC<Props> = ({
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
                 [`${getMeta()}-Enter`]: onCmdSave,
-                [IS_MAC ? `${getMeta()}-Shift-S` : `${getMeta()}-Insert`]: () =>
-                  !language.base && onInsertSource(sourceText),
+                [`${getMeta()}-Insert`]: () => {
+                  !language.base && onInsertSource(sourceText);
+                },
+              }}
+              onKeyDown={(_, e) => {
+                if (IS_MAC && e.metaKey && e.shiftKey && e.key === 'S') {
+                  !language.base && onInsertSource(sourceText);
+                }
               }}
             />
           </StyledEditorContainer>
