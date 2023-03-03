@@ -2,13 +2,13 @@ import {
   checkItemsInMenu,
   RUN,
   visitProjectWithPermissions,
-} from '../../../common/permissions';
+} from '../../../common/permissions/main';
 
-describe('Lowest permissions', () => {
+describe('Permissions project', () => {
   it('activity.view', () => {
     visitProjectWithPermissions({ scopes: ['activity.view'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
         });
       }
@@ -17,8 +17,8 @@ describe('Lowest permissions', () => {
 
   it('languages.edit', () => {
     visitProjectWithPermissions({ scopes: ['languages.edit'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-languages': RUN,
         });
@@ -28,8 +28,8 @@ describe('Lowest permissions', () => {
 
   it('project.edit', () => {
     visitProjectWithPermissions({ scopes: ['project.edit'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-settings': RUN,
         });
@@ -39,8 +39,8 @@ describe('Lowest permissions', () => {
 
   it('members.view', () => {
     visitProjectWithPermissions({ scopes: ['members.view'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-members': RUN,
         });
@@ -50,8 +50,8 @@ describe('Lowest permissions', () => {
 
   it('members.edit', () => {
     visitProjectWithPermissions({ scopes: ['members.edit'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-members': RUN,
         });

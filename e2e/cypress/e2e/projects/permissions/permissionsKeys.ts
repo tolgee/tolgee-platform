@@ -3,13 +3,13 @@ import {
   RUN,
   SKIP,
   visitProjectWithPermissions,
-} from '../../../common/permissions';
+} from '../../../common/permissions/main';
 
-describe('Permissions translations', () => {
+describe('Permissions keys', () => {
   it('screenshots.view', () => {
     visitProjectWithPermissions({ scopes: ['screenshots.view'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': SKIP,
@@ -20,8 +20,8 @@ describe('Permissions translations', () => {
 
   it('screenshots.upload', () => {
     visitProjectWithPermissions({ scopes: ['screenshots.upload'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': RUN,
@@ -32,8 +32,8 @@ describe('Permissions translations', () => {
 
   it('screenshots.delete', () => {
     visitProjectWithPermissions({ scopes: ['screenshots.delete'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': SKIP,
@@ -44,8 +44,8 @@ describe('Permissions translations', () => {
 
   it('keys.view', () => {
     visitProjectWithPermissions({ scopes: ['keys.view'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': SKIP,
@@ -56,8 +56,8 @@ describe('Permissions translations', () => {
 
   it('keys.edit', () => {
     visitProjectWithPermissions({ scopes: ['keys.edit'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-import': RUN,
@@ -69,8 +69,8 @@ describe('Permissions translations', () => {
 
   it('keys.delete', () => {
     visitProjectWithPermissions({ scopes: ['keys.delete'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': SKIP,
@@ -81,8 +81,8 @@ describe('Permissions translations', () => {
 
   it('keys.create', () => {
     visitProjectWithPermissions({ scopes: ['keys.create'] }).then(
-      ({ permissions }) => {
-        checkItemsInMenu(permissions, {
+      (projectInfo) => {
+        checkItemsInMenu(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-integrate': SKIP,

@@ -105,9 +105,9 @@ export const sensitiveOperationProtectionTestData = {
 
 export type PermissionsOptions = {
   scopes: PermissionModelScopes;
-  translateLanguages?: string[];
-  viewLanguages?: string[];
-  stateChangeLanguages?: string[];
+  translateLanguageTags?: string[];
+  viewLanguageTags?: string[];
+  stateChangeLanguageTags?: string[];
 };
 
 export const generatePermissionsData = {

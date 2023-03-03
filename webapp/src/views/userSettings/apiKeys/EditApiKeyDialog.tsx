@@ -15,7 +15,8 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { Scopes, useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { Scopes } from 'tg.fixtures/permissions';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
