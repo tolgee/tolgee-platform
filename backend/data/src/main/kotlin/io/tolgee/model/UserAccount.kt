@@ -1,12 +1,18 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType
+import io.tolgee.events.OnUserCountChanged
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import org.springframework.beans.factory.ObjectFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
@@ -16,10 +22,13 @@ import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.OrderBy
+import javax.persistence.PrePersist
+import javax.persistence.PreRemove
 import javax.validation.constraints.NotBlank
 
 @Entity
 @TypeDef(name = "string-array", typeClass = ListArrayType::class)
+@EntityListeners(UserAccount.Companion.UserAccountListener::class)
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -117,5 +126,19 @@ data class UserAccount(
 
   enum class AccountType {
     LOCAL, LDAP, THIRD_PARTY
+  }
+
+  companion object {
+    @Configurable
+    class UserAccountListener {
+      @Autowired
+      lateinit var eventPublisherProvider: ObjectFactory<ApplicationEventPublisher>
+
+      @PrePersist
+      @PreRemove
+      fun prePersistPreRemove(user: UserAccount) {
+        eventPublisherProvider.`object`.publishEvent(OnUserCountChanged(this))
+      }
+    }
   }
 }

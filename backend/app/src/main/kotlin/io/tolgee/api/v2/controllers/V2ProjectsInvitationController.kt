@@ -11,13 +11,13 @@ import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
+import io.tolgee.ee.service.EeInvitationService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.EeInvitationService
 import io.tolgee.service.InvitationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PutMapping

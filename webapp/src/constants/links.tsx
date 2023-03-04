@@ -169,6 +169,11 @@ export class LINKS {
 
   static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
+  static ADMINISTRATION_EE_LICENSE = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'ee-license'
+  );
+
   /**
    * Organizations
    */

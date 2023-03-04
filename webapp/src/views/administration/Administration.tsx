@@ -4,6 +4,7 @@ import { Switch } from 'react-router-dom';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
 import { useState } from 'react';
+import { AdministrationEeLicense } from './AdministrationEeLicense';
 
 export const Administration = () => {
   const [search, setSearch] = useState('');
@@ -16,6 +17,9 @@ export const Administration = () => {
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_USERS.build()}>
           <AdministrationUsers search={search} setSearch={setSearch} />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.build()}>
+          <AdministrationEeLicense />
         </PrivateRoute>
       </Switch>
     </>

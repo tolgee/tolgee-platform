@@ -369,6 +369,10 @@ class UserAccountService(
     return userAccountRepository.findAllPaged(search, pageable)
   }
 
+  fun countAll(): Long {
+    return userAccountRepository.count()
+  }
+
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
 }

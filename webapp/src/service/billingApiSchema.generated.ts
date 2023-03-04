@@ -10,6 +10,9 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
   };
+  "/v2/organizations/{organizationId}/billing/refresh-self-hosted-ee-subscriptions": {
+    put: operations["refreshSelfHostedEeSubscriptions"];
+  };
   "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
     put: operations["prepareUpdateSubscription"];
   };
@@ -18,6 +21,9 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
+  };
+  "/v2/organizations/{organizationId}/billing/setup-ee": {
+    post: operations["setupEeSubscription"];
   };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
@@ -28,8 +34,11 @@ export interface paths {
   "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee-plans": {
+    get: operations["getSelfHostedPlans"];
+  };
   "/v2/organizations/{organizationId}/billing/plans": {
-    get: operations["getPlans_1"];
+    get: operations["getCloudPlans"];
   };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
@@ -62,10 +71,29 @@ export interface components {
       includedMtCredits?: number;
       monthlyPrice: number;
       yearlyPrice: number;
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
+    };
+    CollectionModelSelfHostedEeSubscriptionModel: {
+      _embedded?: {
+        plans?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+      };
+    };
+    SelfHostedEePlanModel: {
+      name: string;
+      public: boolean;
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      includedSeats: number;
+      pricePerSeat: number;
+    };
+    SelfHostedEeSubscriptionModel: {
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      currentPeriodEnd?: number;
+      cancelAtPeriodEnd: boolean;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
     };
     UpdateSubscriptionPrepareRequest: {
       /** Id of the subscription plan */
@@ -93,6 +121,10 @@ export interface components {
     SubscribeModel: {
       url: string;
     };
+    SetupEeRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+    };
     BuyMoreCreditsRequest: {
       priceId: number;
       amount: number;
@@ -113,6 +145,7 @@ export interface components {
       monthlyPrice: number;
       yearlyPrice: number;
       free: boolean;
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -123,6 +156,11 @@ export interface components {
       id: number;
       price: number;
       amount: number;
+    };
+    CollectionModelSelfHostedEePlanModel: {
+      _embedded?: {
+        selfHostedEePlanModels?: components["schemas"]["SelfHostedEePlanModel"][];
+      };
     };
     InvoiceModel: {
       id: number;
@@ -204,6 +242,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ActivePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  refreshSelfHostedEeSubscriptions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
         };
       };
       /** Bad Request */
@@ -307,6 +372,38 @@ export interface operations {
       };
     };
   };
+  setupEeSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SubscribeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetupEeRequest"];
+      };
+    };
+  };
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
       path: {
@@ -383,7 +480,34 @@ export interface operations {
       };
     };
   };
-  getPlans_1: {
+  getSelfHostedPlans: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getCloudPlans: {
     parameters: {
       path: {
         organizationId: number;

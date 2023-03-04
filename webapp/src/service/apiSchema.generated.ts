@@ -41,9 +41,6 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
     put: operations["setUsersPermissions_1"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
-    put: operations["setOrganizationBase"];
-  };
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
@@ -180,6 +177,9 @@ export interface paths {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
   };
+  "/v2/ee-license/set-license-key": {
+    put: operations["setLicenseKey"];
+  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_6"];
     delete: operations["delete_10"];
@@ -198,6 +198,18 @@ export interface paths {
   };
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
+  };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -261,6 +273,9 @@ export interface paths {
   };
   "/v2/image-upload": {
     post: operations["upload"];
+  };
+  "/v2/ee-license/prepare-set-license-key": {
+    post: operations["prepareSetLicenseKey_1"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -416,6 +431,9 @@ export interface paths {
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
+  "/v2/ee-license/info": {
+    get: operations["getInfo_3"];
+  };
   "/v2/api-keys/{keyId}": {
     get: operations["get_10"];
   };
@@ -524,18 +542,6 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -558,6 +564,18 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -802,11 +820,31 @@ export interface components {
       id: number;
       code: string;
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+      )[];
       permittedLanguageIds?: number[];
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
-      permission: components["schemas"]["PermissionModel"];
     };
     AutoTranslationSettingsDto: {
       /** If true, new keys will be automatically translated using translation memory when 100% match is found */
@@ -899,11 +937,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      createdAt: number;
+      updatedAt: number;
       lastUsedAt?: number;
       expiresAt?: number;
       description: string;
-      createdAt: number;
-      updatedAt: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -942,6 +980,16 @@ export interface components {
       invitedUserName?: string;
       invitedUserEmail?: string;
     };
+    SetLicenseKeyDto: {
+      licenseKey: string;
+    };
+    EeUsageModel: {
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      currentPeriodEnd?: number;
+      cancelAtPeriodEnd: boolean;
+      currentUserCount: number;
+      userLimit: number;
+    };
     V2EditApiKeyDto: {
       scopes: string[];
       description?: string;
@@ -974,14 +1022,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      scopes: string[];
+      username?: string;
       lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      username?: string;
-      description: string;
-      userFullName?: string;
       projectName: string;
-      scopes: string[];
+      userFullName?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -992,6 +1040,37 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    GetMySubscriptionDto: {
+      licenseKey: string;
+    };
+    SelfHostedEePlanModel: {
+      name: string;
+      public: boolean;
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      includedSeats: number;
+      pricePerSeat: number;
+    };
+    SelfHostedEeSubscriptionModel: {
+      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      currentPeriodEnd?: number;
+      cancelAtPeriodEnd: boolean;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+    };
+    SetLicenseKeyLicensingDto: {
+      licenseKey: string;
+      seats: number;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      seats: number;
+    };
+    PrepareSetEeLicenceKeyModel: {
+      pricePerSeatMonthly: number;
+      daysUntilPeriodEnd: number;
+      pricePerSeatDaily: number;
+      estimatedTotalThisPeriod: number;
+      seatCount: number;
     };
     CreateProjectDTO: {
       name: string;
@@ -1281,16 +1360,16 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       name: string;
       id: number;
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1332,7 +1411,6 @@ export interface components {
       id: number;
       username: string;
       name?: string;
-      avatar?: components["schemas"]["Avatar"];
       organizationRole?: "MEMBER" | "OWNER";
       organizationBasePermission: components["schemas"]["PermissionModel"];
       directPermission?: components["schemas"]["PermissionModel"];
@@ -1491,7 +1569,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1503,6 +1580,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1714,11 +1792,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
+      createdAt: number;
+      updatedAt: number;
       lastUsedAt?: number;
       expiresAt?: number;
       description: string;
-      createdAt: number;
-      updatedAt: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1758,21 +1836,11 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    SimpleProjectModel: {
-      id: number;
-      name: string;
-      description?: string;
-      slug?: string;
-      avatar?: components["schemas"]["Avatar"];
-      baseLanguage?: components["schemas"]["LanguageModel"];
-    };
     UserAccountWithOrganizationRoleModel: {
       id: number;
       name: string;
       username: string;
-      organizationRole?: "MEMBER" | "OWNER";
-      projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
-      avatar?: components["schemas"]["Avatar"];
+      organizationRole: "MEMBER" | "OWNER";
     };
     ApiKeyWithLanguagesModel: {
       /**
@@ -1782,14 +1850,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      scopes: string[];
+      username?: string;
       lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      username?: string;
-      description: string;
-      userFullName?: string;
       projectName: string;
-      scopes: string[];
+      userFullName?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2223,6 +2291,7 @@ export interface operations {
   setUsersPermissions_1: {
     parameters: {
       path: {
+        projectId: number;
         userId: number;
         permissionType:
           | "NONE"
@@ -2231,37 +2300,12 @@ export interface operations {
           | "REVIEW"
           | "EDIT"
           | "MANAGE";
-        projectId: number;
       };
       query: {
         languages?: number[];
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  setOrganizationBase: {
-    parameters: {
-      path: {
-        userId: number;
-        projectId: number;
       };
     };
     responses: {
@@ -3772,6 +3816,33 @@ export interface operations {
       };
     };
   };
+  setLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeUsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
   update_6: {
     parameters: {
       path: {
@@ -3961,6 +4032,110 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
       };
     };
   };
@@ -4852,6 +5027,33 @@ export interface operations {
           image: string;
           info?: components["schemas"]["ImageUploadInfoDto"];
         };
+      };
+    };
+  };
+  prepareSetLicenseKey_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
       };
     };
   };
@@ -6380,6 +6582,28 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getInfo_3: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeUsageModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

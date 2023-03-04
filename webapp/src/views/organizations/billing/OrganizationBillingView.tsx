@@ -19,6 +19,7 @@ import { CurrentUsage } from './CurrentUsage/CurrentUsage';
 import { BillingPeriodType } from './BillingPlans/PeriodSwitch';
 import { Invoices } from './Invoices/Invoices';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { SelfHostedEe } from './SelfHostedEe';
 
 const StyledCurrent = styled('div')`
   display: grid;
@@ -175,6 +176,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
             </StyledShopping>
           </>
         )}
+      <SelfHostedEe />
     </BaseOrganizationSettingsView>
   );
 };

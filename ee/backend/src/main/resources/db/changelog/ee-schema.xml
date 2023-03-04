@@ -1,0 +1,34 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+    <changeSet author="liquibase_user" id="1677836406861-0">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS ee;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1677945127128-1">
+        <createTable tableName="ee_subscription">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ee_subscriptionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cancel_at_period_end" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_period_end" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled_features" type="VARCHAR[]"/>
+            <column name="license_key" type="VARCHAR(255)"/>
+            <column name="user_limit" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

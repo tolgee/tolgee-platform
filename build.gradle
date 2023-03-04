@@ -99,6 +99,7 @@ project(':server-app').afterEvaluate {
     task stopDbChangelogContainer(type: Exec) {
         commandLine "docker", "rm", "--force", dbSchemaContainerName
         mustRunAfter project(':data').tasks.findByName("diffChangeLog")
+        mustRunAfter project(':ee').tasks.findByName("diffChangeLog")
     }
 
     task diffChangeLog {

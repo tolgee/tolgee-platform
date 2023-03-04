@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
@@ -6,12 +6,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
+import io.tolgee.ee.service.EePermissionService
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.NeedsSuperJwtToken
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.EePermissionService
 import io.tolgee.service.organization.OrganizationRoleService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.web.bind.annotation.PathVariable

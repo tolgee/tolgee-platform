@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.ee.service
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
