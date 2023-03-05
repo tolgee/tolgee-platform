@@ -1,3 +1,10 @@
+## [3.8.2](https://github.com/tolgee/tolgee-platform/compare/v3.8.1...v3.8.2) (2023-03-05)
+
+
+### Bug Fixes
+
+* initial error not showing and only infinite loading ([#1605](https://github.com/tolgee/tolgee-platform/issues/1605)) ([ade4311](https://github.com/tolgee/tolgee-platform/commit/ade43111158fe907154f79e823f9e8f9a34af90e))
+
 ## [3.8.1](https://github.com/tolgee/tolgee-platform/compare/v3.8.0...v3.8.1) (2023-03-03)
 
 
