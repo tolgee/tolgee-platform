@@ -15,7 +15,7 @@ task copyDist(type: Copy) {
 
 task installWebappDeps(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
-    commandLine npmCommandName(), "ci"
+    commandLine npmCommandName, "ci"
     workingDir = webappPath
     inputs.file("${project.projectDir}/webapp/package.json")
     inputs.file("${project.projectDir}/webapp/package-lock.json")
@@ -24,7 +24,7 @@ task installWebappDeps(type: Exec) {
 
 task buildWebapp(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
-    commandLine npmCommandName(), "run", "build"
+    commandLine npmCommandName, "run", "build"
     workingDir = webappPath
     inputs.dir("${project.projectDir}/webapp/")
     outputs.dir("${project.projectDir}/webapp/build/")
@@ -44,6 +44,6 @@ task updateStaticTranslations(type: Exec) {
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
     onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }
     workingDir = webappPath
-    commandLine npmCommandName(), "run", "load-translations"
+    commandLine npmCommandName, "run", "load-translations"
     dependsOn(createBuildDir)
 }

@@ -1,7 +1,7 @@
-ext.npmCommandName = { ->
+ext {
     if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
-        return "npm.cmd"
+        npmCommandName = "npm.cmd"
     } else {
-        return "npm"
+        npmCommandName = "npm"
     }
 }
