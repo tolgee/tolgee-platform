@@ -30,98 +30,133 @@ class BaiduTranslationProvider(
 
   override val supportedLanguages = arrayOf(
     "yue",
+    "yue-hans",
+    "yue-hans-cn",
     "kor",
     "ko",
+    "ko-kr",
     "th",
+    "th-th",
     "pt",
+    "pt-pt",
+    "pt-br",
     "el",
+    "el-gr",
     "bul",
     "bg",
+    "bg-bg",
     "fin",
     "fi",
+    "fi-fi",
     "slo",
     "sk",
+    "sk-sk",
     "cht",
     "zh-hant",
+    "zh-hant-hk",
+    "zh-hant-mo",
+    "zh-hant-tw",
     "zh-tw",
     "zh",
     "zh-hans",
+    "zh-hans-cn",
+    "zh-hans-sg",
+    "zh-hans-hk",
+    "zh-hans-mo",
     "wyw",
     "fra",
     "fr",
+    "fr-fr",
     "ara",
     "ar",
     "de",
+    "de-de",
     "nl",
+    "nl",
+    "nl-nl",
     "est",
     "et",
+    "et-ee",
     "cs",
+    "cs-cz",
     "swe",
     "sv",
+    "sv-se",
     "vie",
     "vi",
+    "vi-vn",
     "en",
+    "en-us",
+    "en-gb",
     "jp",
     "ja",
+    "ja-jp",
     "spa",
     "es",
+    "es-es",
     "ru",
+    "ru-ru",
     "it",
+    "it-it",
     "pl",
+    "pl-pl",
     "dan",
     "da",
+    "da-dk",
     "rom",
     "ro",
+    "ro-ro",
     "hu",
+    "hu-hu",
   )
 
   // https://fanyi-api.baidu.com/doc/21
   // extracted commonly used only
   val languageTagMap = mapOf(
- // "yue"
- // "kor"
+    // "yue"
+    // "kor"
     "ko" to "kor",
- // "th"
- // "pt"
- // "el"
- // "bul"
+    // "th"
+    // "pt"
+    // "el"
+    // "bul"
     "bg" to "bul",
- // "fin"
+    // "fin"
     "fi" to "fin",
- // "slo"
+    // "slo"
     "sk" to "slo",
- // "cht"
+    // "cht"
     "zh-hant" to "cht",
     "zh-tw" to "cht",
- // "zh"
+    // "zh"
     "zh-hans" to "zh",
- // "wyw"
- // "fra"
+    // "wyw"
+    // "fra"
     "fr" to "fra",
- // "ara"
+    // "ara"
     "ar" to "ara",
- // "de"
- // "nl"
+    // "de"
+    // "nl"
     "nl" to "nl",
- // "est"
+    // "est"
     "et" to "est",
- // "cs"
- // "swe"
+    // "cs"
+    // "swe"
     "sv" to "swe",
- // "vie"
+    // "vie"
     "vi" to "vie",
- // "en"
- // "jp"
+    // "en"
+    // "jp"
     "ja" to "jp",
- // "spa"
+    // "spa"
     "es" to "spa",
- // "ru"
- // "it"
- // "pl"
- // "dan"
+    // "ru"
+    // "it"
+    // "pl"
+    // "dan"
     "da" to "dan",
- // "rom"
+    // "rom"
     "ro" to "rom",
- // "hu"
+    // "hu"
   )
 }

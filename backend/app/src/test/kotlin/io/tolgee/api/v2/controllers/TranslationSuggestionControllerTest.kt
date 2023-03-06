@@ -247,7 +247,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (Google, AWS, DeepL, Azure, Baidu)`() {
-    mockDefaultMtBucketSize(4000)
+    mockDefaultMtBucketSize(5000)
     testData.enableAll()
     saveTestData()
 
