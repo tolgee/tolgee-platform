@@ -146,8 +146,10 @@ export const Hierarchy: React.FC<Props> = ({
     <StyledContainer>
       <StyledRow>
         <FormControlLabel
+          permissions-scope={structure.value}
           control={
             <Checkbox
+              data-cy="permissions-advanced-checkbox"
               size="small"
               style={{ paddingTop: 4, paddingBottom: 4 }}
               checked={fullyChecked}

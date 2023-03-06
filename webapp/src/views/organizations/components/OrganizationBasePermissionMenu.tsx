@@ -9,6 +9,7 @@ import { useUpdateBasePermissions } from './useUpdateBasePermissions';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -24,7 +25,24 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
     organizationId: organization.id,
   });
 
+  const confirm = () => {
+    return new Promise<void>((resolve, reject) =>
+      confirmation({
+        message: <T>really_want_to_change_base_permission_confirmation</T>,
+        hardModeText: organization.name?.toUpperCase(),
+        onConfirm: () => {
+          resolve();
+        },
+        onCancel: () => {
+          reject();
+        },
+      })
+    );
+  };
+
   async function handleSubmit(data: PermissionSettingsState) {
+    await confirm();
+
     try {
       await updatePermissions(data);
       messageService.success(<T>organization_member_privileges_set</T>);

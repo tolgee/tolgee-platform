@@ -34,10 +34,13 @@ export const PermissionsModal: React.FC<Props> = ({
   const handleUpdatePermissions = async () => {
     if (settingsState) {
       setLoading(true);
-      onSubmit(settingsState).finally(() => {
-        onClose();
-        setLoading(false);
-      });
+      onSubmit(settingsState)
+        .then(() => {
+          onClose();
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   };
 
@@ -52,7 +55,7 @@ export const PermissionsModal: React.FC<Props> = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>
+        <Button onClick={onClose} data-cy="permissions-menu-close">
           <T keyName="permission_dialog_close" />
         </Button>
         <LoadingButton
@@ -60,6 +63,7 @@ export const PermissionsModal: React.FC<Props> = ({
           onClick={handleUpdatePermissions}
           color="primary"
           variant="contained"
+          data-cy="permissions-menu-save"
         >
           <T keyName="permission_dialog_save" />
         </LoadingButton>

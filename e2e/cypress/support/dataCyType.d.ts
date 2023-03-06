@@ -225,9 +225,14 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
+        "permissions-advanced-checkbox" |
         "permissions-language-menu-button" |
         "permissions-menu" |
+        "permissions-menu-basic" |
         "permissions-menu-button" |
+        "permissions-menu-close" |
+        "permissions-menu-granular" |
+        "permissions-menu-save" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |

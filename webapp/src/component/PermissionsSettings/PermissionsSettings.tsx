@@ -103,19 +103,21 @@ export const PermissionsSettings: React.FC<Props> = ({
   }
 
   return (
-    <Box>
+    <Box data-cy="permissions-menu">
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h5">{title}</Typography>
         <ButtonGroup size="small">
           <Button
             color={tab === 'basic' ? 'primary' : 'default'}
             onClick={handleChange('basic')}
+            data-cy="permissions-menu-basic"
           >
             <T keyName="permission_basic_title" />
           </Button>
           <Button
             color={tab === 'advanced' ? 'primary' : 'default'}
             onClick={handleChange('advanced')}
+            data-cy="permissions-menu-granular"
           >
             <T keyName="permission_granular_title" />
           </Button>

@@ -9,6 +9,10 @@ import {
 } from '../../common/shared';
 import { login } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
+import {
+  permissionsMenuSelectAdvanced,
+  permissionsMenuSelectRole,
+} from '../../common/permissionsMenu';
 
 describe('Organization Settings', () => {
   beforeEach(() => {
@@ -45,14 +49,10 @@ describe('Organization Settings', () => {
     );
   });
 
-  it.only('changes member privileges', () => {
+  it('changes member privileges', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
-    gcy('permissions-menu').within(() => {
-      cy.contains('Translate').click();
-    });
-    confirmHardMode();
-    assertMessage('Permissions set');
+    permissionsMenuSelectRole('Translate');
     visitMemberPrivileges();
     gcy('permissions-menu-button').contains('Translate');
   });
@@ -60,10 +60,7 @@ describe('Organization Settings', () => {
   it("member privileges change doesn't affect profile", () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
-    gcy('permissions-menu').within(() => {
-      cy.contains('Translate').click();
-    });
-    confirmHardMode();
+    permissionsMenuSelectRole('Translate');
     visitProfile();
     gcy('organization-name-field').within(() =>
       cy.get('input').should('have.value', 'Tolgee')
@@ -74,6 +71,12 @@ describe('Organization Settings', () => {
     gcy('organization-description-field').within(() =>
       cy.get('input').should('have.value', 'This is us')
     );
+  });
+
+  it('changes advanced permissions', () => {
+    gcy('organization-side-menu').contains('Member permissions').click();
+    gcy('permissions-menu-button').click();
+    permissionsMenuSelectAdvanced(['keys.create', 'keys.edit']);
   });
 
   it('Gates cannot change Tolgee settings', () => {
