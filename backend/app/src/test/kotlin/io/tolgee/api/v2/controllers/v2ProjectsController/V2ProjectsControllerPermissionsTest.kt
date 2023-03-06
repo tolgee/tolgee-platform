@@ -1,11 +1,15 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.PermissionTestUtil
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -25,6 +29,28 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
       permissionService.getProjectPermissionScopes(project.id, user)
         .let { Assertions.assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `sets user permissions to organization base`() {
+    val testData = PermissionsTestData()
+    val me = testData.addUserWithPermissions(
+      type = ProjectPermissionType.EDIT,
+      organizationBaseScopes = listOf(Scope.KEYS_VIEW)
+    )
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin.self
+    this.projectSupplier = { testData.projectBuilder.self }
+
+    permissionService.getProjectPermissionData(
+      testData.projectBuilder.self.id,
+      me.id
+    ).directPermissions.assert.isNotNull
+    performProjectAuthPut("users/${me.id}/set-by-organization").andIsOk
+    val permissionData = permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id)
+    permissionData.directPermissions.assert.isNull()
+    permissionData.organizationRole.assert.isNotNull
   }
 
   @Test

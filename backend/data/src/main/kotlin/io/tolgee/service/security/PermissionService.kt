@@ -372,4 +372,12 @@ class PermissionService(
 
     return permittedLanguages
   }
+
+  @Transactional
+  fun setOrganizationBasePermissions(projectId: Long, userId: Long) {
+    val project = projectService.get(projectId)
+    organizationRoleService.checkUserIsMemberOrOwner(userId, project.organizationOwner.id)
+    val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
+    delete(permission.id)
+  }
 }
