@@ -80,6 +80,8 @@ class BaiduTranslationProvider(
     "cs",
     "cs-cz",
     "swe",
+    "sl",
+    "sl-si",
     "sv",
     "sv-se",
     "vie",
@@ -124,7 +126,8 @@ class BaiduTranslationProvider(
     // "fin"
     "fi" to "fin",
     // "slo"
-    "sk" to "slo",
+    "sl" to "slo",
+    // "sk"
     // "cht"
     "zh-hant" to "cht",
     "zh-tw" to "cht",
@@ -137,7 +140,6 @@ class BaiduTranslationProvider(
     "ar" to "ara",
     // "de"
     // "nl"
-    "nl" to "nl",
     // "est"
     "et" to "est",
     // "cs"
