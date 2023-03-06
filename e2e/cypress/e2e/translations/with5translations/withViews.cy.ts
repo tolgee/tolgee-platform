@@ -7,7 +7,7 @@ import {
   forEachView,
   getCell,
   getCellCancelButton,
-  getCellInsertSourceButton,
+  getCellInsertBaseButton,
   getCellSaveButton,
   selectLangsInLocalstorage,
   translationsBeforeEach,
@@ -40,12 +40,12 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool key 04').should('be.visible');
       });
 
-      it('insert source into translation', () => {
+      it('insert base into translation', () => {
         selectLangsInLocalstorage(project.id, ['en', 'cs']);
         visitTranslations(project.id);
 
         editCell('Studený přeložený text 1');
-        getCellInsertSourceButton().click();
+        getCellInsertBaseButton().click();
 
         cy.get('.CodeMirror')
           .first()

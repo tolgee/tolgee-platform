@@ -149,8 +149,8 @@ export const [
     fetchMore() {
       return translationService.fetchNextPage();
     },
-    getSourceText(keyId: number) {
-      return translationService.getSourceText(keyId);
+    getBaseText(keyId: number) {
+      return translationService.getBaseText(keyId);
     },
     changeField(value: ChangeValue) {
       return editService.changeField(value);

@@ -165,7 +165,7 @@ export const TranslationsShortcuts = () => {
   const cursorMode = useTranslationsSelector((c) => c.cursor?.mode);
 
   const translations = useTranslationsSelector((c) => c.translations);
-  const sourceLanguage = useTranslationsSelector((c) =>
+  const baseLanguage = useTranslationsSelector((c) =>
     c.languages?.find((l) => l.base)
   )?.tag;
 
@@ -243,8 +243,8 @@ export const TranslationsShortcuts = () => {
       formula: formatShortcut(`${getMetaName()} + E`),
     },
     {
-      name: cursorLanguage != sourceLanguage && (
-        <T>translations_cell_insert_source</T>
+      name: cursorLanguage != baseLanguage && (
+        <T>translations_cell_insert_base</T>
       ),
       formula: IS_MAC
         ? formatShortcut(`${getMetaName()} + Shift + S`)

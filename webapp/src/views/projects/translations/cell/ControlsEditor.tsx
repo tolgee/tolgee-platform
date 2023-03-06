@@ -38,10 +38,10 @@ const StyledRightestPart = styled('div')`
 
 type ControlsProps = {
   state?: State;
-  isSourceLanguage?: boolean;
+  isBaseLanguage?: boolean;
   onSave?: () => void;
   onCancel?: () => void;
-  onInsertSource?: () => void;
+  onInsertBase?: () => void;
   onScreenshots?: () => void;
   onStateChange?: (state: StateType) => void;
   screenshotRef?: React.Ref<any>;
@@ -50,10 +50,10 @@ type ControlsProps = {
 
 export const ControlsEditor: React.FC<ControlsProps> = ({
   state,
-  isSourceLanguage,
+  isBaseLanguage,
   onSave,
   onCancel,
-  onInsertSource,
+  onInsertBase,
   onScreenshots,
   onStateChange,
   screenshotRef,
@@ -63,7 +63,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayTransitionButtons = state;
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
-  const displayInsertSource = !isSourceLanguage;
+  const displayInsertBase = !isBaseLanguage;
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
 
@@ -115,16 +115,16 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
         </StyledRightPart>
       )}
 
-      {displayInsertSource && (
+      {displayInsertBase && (
         <StyledRightestPart>
           <ControlsButton
-            onClick={onInsertSource}
+            onClick={onInsertBase}
             onMouseDown={(e) => {
               e.preventDefault();
             }}
             color="default"
-            data-cy="translations-cell-insert-source-button"
-            tooltip={<T>translations_cell_insert_source</T>}
+            data-cy="translations-cell-insert-base-button"
+            tooltip={<T>translations_cell_insert_base</T>}
           >
             <ContentCopy fontSize="small" />
           </ControlsButton>

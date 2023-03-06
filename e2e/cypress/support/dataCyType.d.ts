@@ -312,7 +312,7 @@ declare namespace DataCy {
         "translations-cell-close" |
         "translations-cell-comments-button" |
         "translations-cell-edit-button" |
-        "translations-cell-insert-source-button" |
+        "translations-cell-insert-base-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-tab-comments" |

@@ -252,17 +252,17 @@ export const useTranslationsService = (props: Props) => {
     method: 'get',
   });
 
-  const getSourceText = async (keyId: number) => {
-    const sourceLanguage = props.baseLang!;
-    const sourceTextResponse = await getTranslations.mutateAsync({
+  const getBaseText = async (keyId: number) => {
+    const baseLanguage = props.baseLang!;
+    const baseTextResponse = await getTranslations.mutateAsync({
       path: { projectId: props.projectId },
-      query: { filterKeyId: [keyId], languages: [sourceLanguage] },
+      query: { filterKeyId: [keyId], languages: [baseLanguage] },
     });
 
-    const sourceText =
-      sourceTextResponse._embedded?.keys![0].translations[sourceLanguage]
-        .text || '';
-    return sourceText;
+    const baseText =
+      baseTextResponse._embedded?.keys![0].translations[baseLanguage].text ||
+      '';
+    return baseText;
   };
 
   const setFilters = (filters: FiltersType) => {
@@ -375,7 +375,7 @@ export const useTranslationsService = (props: Props) => {
     setLanguages,
     setUrlSearch,
     setFilters,
-    getSourceText,
+    getBaseText,
     updateTranslationKeys,
     updateTranslation,
     insertAsFirst,

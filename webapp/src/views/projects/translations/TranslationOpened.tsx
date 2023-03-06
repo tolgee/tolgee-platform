@@ -85,7 +85,7 @@ type Props = {
   translation: TranslationViewModel | undefined;
   onChange: (val: string) => void;
   onSave: () => void;
-  onInsertSource: (val: string | undefined) => void;
+  onInsertBase: (val: string | undefined) => void;
   onCmdSave: () => void;
   onCancel: (force: boolean) => void;
   onStateChange: (state: StateType) => void;
@@ -106,7 +106,7 @@ export const TranslationOpened: React.FC<Props> = ({
   translation,
   onChange,
   onSave,
-  onInsertSource,
+  onInsertBase,
   onCmdSave,
   onCancel,
   onStateChange,
@@ -136,17 +136,16 @@ export const TranslationOpened: React.FC<Props> = ({
     }
   };
 
-  const sourceLanguage = useTranslationsSelector((v) =>
+  const baseLanguage = useTranslationsSelector((v) =>
     v.languages?.find((l) => l.base)
   )?.tag;
-  const sourceText =
-    sourceLanguage && keyData.translations[sourceLanguage]?.text;
+  const baseText = baseLanguage && keyData.translations[baseLanguage]?.text;
 
   const data = useTranslationTools({
     projectId: project.id,
     keyId: keyData.keyId,
     targetLanguageId: language.id,
-    baseText: sourceText,
+    baseText: baseText,
     enabled: !language.base,
     onValueUpdate: (value) => {
       updateEdit({
@@ -205,19 +204,19 @@ export const TranslationOpened: React.FC<Props> = ({
               onChange={onChange}
               onCancel={() => onCancel(true)}
               onSave={onSave}
-              onInsertSource={() => onInsertSource(sourceText)}
+              onInsertBase={() => onInsertBase(baseText)}
               direction={getLanguageDirection(language.tag)}
               autofocus={autofocus}
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
                 [`${getMeta()}-Enter`]: onCmdSave,
                 [`${getMeta()}-Insert`]: () => {
-                  !language.base && onInsertSource(sourceText);
+                  !language.base && onInsertBase(baseText);
                 },
               }}
               onKeyDown={(_, e) => {
                 if (IS_MAC && e.metaKey && e.shiftKey && e.key === 'S') {
-                  !language.base && onInsertSource(sourceText);
+                  !language.base && onInsertBase(baseText);
                 }
               }}
             />
@@ -225,9 +224,9 @@ export const TranslationOpened: React.FC<Props> = ({
           <StyledEditorControls>
             <ControlsEditor
               state={state}
-              isSourceLanguage={language.base}
+              isBaseLanguage={language.base}
               onSave={onSave}
-              onInsertSource={() => onInsertSource(sourceText)}
+              onInsertBase={() => onInsertBase(baseText)}
               onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
             />
