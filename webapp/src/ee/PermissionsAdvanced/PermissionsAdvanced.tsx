@@ -1,5 +1,6 @@
 import {
   HierarchyItem,
+  LanguageModel,
   PermissionAdvancedState,
 } from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
@@ -11,12 +12,14 @@ type Props = {
   dependencies: HierarchyItem;
   state: PermissionAdvancedState;
   onChange: (value: PermissionAdvancedState) => void;
+  allLangs?: LanguageModel[];
 };
 
 export const PermissionsAdvanced: React.FC<Props> = ({
   dependencies,
   state,
   onChange,
+  allLangs,
 }) => {
   const { t } = useTranslate();
   const { preferredOrganization } = usePreferredOrganization();
@@ -32,6 +35,7 @@ export const PermissionsAdvanced: React.FC<Props> = ({
       dependencies={dependencies}
       state={state}
       onChange={onChange}
+      allLangs={allLangs}
       structure={{
         value: 'admin',
         children: [

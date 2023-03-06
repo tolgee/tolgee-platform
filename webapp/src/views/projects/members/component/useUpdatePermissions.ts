@@ -8,13 +8,9 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 type Props = {
   userId: number;
   projectId: number;
-  after: {
-    onSuccess(): void;
-    onError(e: any): void;
-  };
 };
 
-export const useUpdatePermissions = ({ after, userId, projectId }: Props) => {
+export const useUpdatePermissions = ({ userId, projectId }: Props) => {
   const editRole = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
     method: 'put',
@@ -27,53 +23,54 @@ export const useUpdatePermissions = ({ after, userId, projectId }: Props) => {
     invalidatePrefix: '/v2/projects/{projectId}/users',
   });
 
-  const updatePermissions = (settingsState: PermissionSettingsState) => {
-    if (!settingsState) {
-      return;
-    }
+  return {
+    isLoading: editRole.isLoading || editScopes.isLoading,
+    async updatePermissions(settingsState: PermissionSettingsState) {
+      if (!settingsState) {
+        return;
+      }
 
-    if (
-      settingsState.tab === 'advanced' &&
-      settingsState.advancedState.scopes
-    ) {
-      const languagePermissions: LanguagePermissions = {};
+      if (
+        settingsState.tab === 'advanced' &&
+        settingsState.advancedState.scopes
+      ) {
+        const languagePermissions: LanguagePermissions = {};
 
-      settingsState.advancedState.scopes
-        .map(getScopeLanguagePermission)
-        .forEach((property) => {
-          if (property) {
-            languagePermissions[property] =
-              settingsState.advancedState[property];
-          }
-        });
+        settingsState.advancedState.scopes
+          .map(getScopeLanguagePermission)
+          .forEach((property) => {
+            if (property) {
+              languagePermissions[property] =
+                settingsState.advancedState[property];
+            }
+          });
 
-      editScopes.mutate(
-        {
+        await editScopes.mutateAsync({
           path: { userId, projectId },
           query: {
             scopes: settingsState.advancedState.scopes,
             ...languagePermissions,
           },
-        },
-        after
-      );
-    } else if (settingsState.tab === 'basic' && settingsState.basicState.role) {
-      let languagePermissions: LanguagePermissions = {};
-      const role = settingsState.basicState.role;
+        });
+      } else if (
+        settingsState.tab === 'basic' &&
+        settingsState.basicState.role
+      ) {
+        let languagePermissions: LanguagePermissions = {};
+        const role = settingsState.basicState.role;
 
-      if (role === 'REVIEW') {
-        languagePermissions = {
-          translateLanguages: settingsState.basicState.languages,
-          stateChangeLanguages: settingsState.basicState.languages,
-        };
-      } else if (role === 'TRANSLATE') {
-        languagePermissions = {
-          translateLanguages: settingsState.basicState.languages,
-        };
-      }
+        if (role === 'REVIEW') {
+          languagePermissions = {
+            translateLanguages: settingsState.basicState.languages,
+            stateChangeLanguages: settingsState.basicState.languages,
+          };
+        } else if (role === 'TRANSLATE') {
+          languagePermissions = {
+            translateLanguages: settingsState.basicState.languages,
+          };
+        }
 
-      editRole.mutate(
-        {
+        await editRole.mutateAsync({
           path: {
             userId,
             projectId,
@@ -82,14 +79,8 @@ export const useUpdatePermissions = ({ after, userId, projectId }: Props) => {
           query: {
             ...languagePermissions,
           },
-        },
-        after
-      );
-    }
-  };
-
-  return {
-    isLoading: editRole.isLoading || editScopes.isLoading,
-    updatePermissions,
+        });
+      }
+    },
   };
 };

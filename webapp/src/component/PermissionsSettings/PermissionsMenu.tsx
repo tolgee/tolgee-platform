@@ -2,22 +2,29 @@ import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { PermissionsModal } from './PermissionsModal';
-import { PermissionModel } from '../../../../component/PermissionsSettings/types';
+import {
+  LanguageModel,
+  PermissionModel,
+  PermissionSettingsState,
+} from './types';
 import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTranslations';
 
 type Props = {
+  allLangs?: LanguageModel[];
   buttonTooltip?: string;
-  // onSelect: (value: PermissionType) => void;
+  nameInTitle?: string;
   buttonProps?: ComponentProps<typeof Button>;
-  user: { name?: string; id: number };
   permissions: PermissionModel;
+  onSubmit: (settings: PermissionSettingsState) => Promise<void>;
 };
 
 export const PermissionsMenu: FunctionComponent<Props> = ({
+  allLangs,
   buttonTooltip,
   buttonProps,
-  user,
+  nameInTitle,
   permissions,
+  onSubmit,
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -25,7 +32,7 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
     setOpen(false);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     setOpen(true);
   };
 
@@ -49,9 +56,11 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
       </Tooltip>
       {open && (
         <PermissionsModal
-          user={user}
+          allLangs={allLangs}
+          nameInTitle={nameInTitle}
           onClose={handleClose}
           permissions={permissions}
+          onSubmit={onSubmit}
         />
       )}
     </>

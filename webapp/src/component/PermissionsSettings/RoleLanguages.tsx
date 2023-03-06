@@ -1,7 +1,7 @@
 import { styled, Box } from '@mui/material';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 
-import { HierarchyItem, PermissionBasicState } from './types';
+import { LanguageModel, PermissionBasicState } from './types';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -15,10 +15,14 @@ const StyledContainer = styled(Box)`
 type Props = {
   state: PermissionBasicState;
   onChange: (value: PermissionBasicState) => void;
-  dependencies: HierarchyItem;
+  allLangs: LanguageModel[];
 };
 
-export const RoleLanguages: React.FC<Props> = ({ state, onChange }) => {
+export const RoleLanguages: React.FC<Props> = ({
+  state,
+  onChange,
+  allLangs,
+}) => {
   const show = ['REVIEW', 'TRANSLATE'].includes(state.role!);
 
   const handleSelect = (values: number[]) => {
@@ -35,6 +39,7 @@ export const RoleLanguages: React.FC<Props> = ({ state, onChange }) => {
         <LanguagePermissionsMenu
           selected={state.languages || []}
           onSelect={handleSelect}
+          allLanguages={allLangs}
         />
       </Box>
     </StyledContainer>

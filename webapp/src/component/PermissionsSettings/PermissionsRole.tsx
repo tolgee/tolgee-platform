@@ -5,7 +5,7 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { RoleLanguages } from './RoleLanguages';
 
 import {
-  HierarchyItem,
+  LanguageModel,
   PermissionBasicState,
   PermissionModelRole,
   PermissionModelScope,
@@ -42,19 +42,19 @@ const StyledTypography = styled(Typography)`
 `;
 
 type Props = {
-  dependencies: HierarchyItem;
   role: NonNullable<PermissionModelRole>;
   state: PermissionBasicState;
   scopes: PermissionModelScope[];
   onChange: (value: PermissionBasicState) => void;
+  allLangs?: LanguageModel[];
 };
 
 export const PermissionsRole: React.FC<Props> = ({
-  dependencies,
   state,
   role,
   onChange,
   scopes,
+  allLangs,
 }) => {
   const handleSelect = () => {
     if (role !== state.role) {
@@ -77,7 +77,7 @@ export const PermissionsRole: React.FC<Props> = ({
           {getRoleTranslation(role)}
         </StyledTypography>
         <Box>{getRoleHint(role)}</Box>
-        {selected && displayLanguages && (
+        {selected && displayLanguages && allLangs && (
           <Box
             zIndex={1}
             onMouseDown={stopAndPrevent()}
@@ -86,7 +86,7 @@ export const PermissionsRole: React.FC<Props> = ({
             <RoleLanguages
               state={state}
               onChange={onChange}
-              dependencies={dependencies}
+              allLangs={allLangs}
             />
           </Box>
         )}

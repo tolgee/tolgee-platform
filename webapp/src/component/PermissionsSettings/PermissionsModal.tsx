@@ -3,54 +3,42 @@ import { T, useTranslate } from '@tolgee/react';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 
 import {
+  LanguageModel,
   PermissionModel,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
-import { useProject } from 'tg.hooks/useProject';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { useUpdatePermissions } from './useUpdatePermissions';
 
 type Props = {
+  allLangs?: LanguageModel[];
   onClose: () => void;
-  user: { name?: string; id: number };
+  nameInTitle?: string;
   permissions: PermissionModel;
+  onSubmit: (settings: PermissionSettingsState) => Promise<void>;
 };
 
 export const PermissionsModal: React.FC<Props> = ({
+  allLangs,
   onClose,
-  user,
+  nameInTitle,
   permissions,
+  onSubmit,
 }) => {
   const { t } = useTranslate();
-  const messages = useMessage();
-  const project = useProject();
+  const [loading, setLoading] = useState(false);
 
   const [settingsState, setSettingsState] = useState<
     PermissionSettingsState | undefined
   >(undefined);
 
-  const afterActions = {
-    onSuccess() {
-      messages.success(<T>permissions_set_message</T>);
-      onClose();
-    },
-    onError(e) {
-      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
-    },
-  };
-
-  const { updatePermissions, isLoading } = useUpdatePermissions({
-    userId: user.id,
-    projectId: project.id,
-    after: afterActions,
-  });
-
-  const handleUpdatePermissions = () => {
+  const handleUpdatePermissions = async () => {
     if (settingsState) {
-      updatePermissions(settingsState);
+      setLoading(true);
+      onSubmit(settingsState).finally(() => {
+        onClose();
+        setLoading(false);
+      });
     }
   };
 
@@ -58,9 +46,10 @@ export const PermissionsModal: React.FC<Props> = ({
     <Dialog open={true} onClose={onClose} fullWidth>
       <DialogContent sx={{ minHeight: 400 }}>
         <PermissionsSettings
-          title={t('permission_dialog_title', { name: user.name })}
+          title={t('permission_dialog_title', { name: nameInTitle || '' })}
           permissions={permissions}
           onChange={setSettingsState}
+          allLangs={allLangs}
         />
       </DialogContent>
       <DialogActions>
@@ -68,7 +57,7 @@ export const PermissionsModal: React.FC<Props> = ({
           <T keyName="permission_dialog_close" />
         </Button>
         <LoadingButton
-          loading={isLoading}
+          loading={loading}
           onClick={handleUpdatePermissions}
           color="primary"
           variant="contained"

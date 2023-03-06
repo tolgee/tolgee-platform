@@ -2,24 +2,24 @@ import { List } from '@mui/material';
 import { PermissionsRole } from './PermissionsRole';
 
 import {
-  HierarchyItem,
+  LanguageModel,
   PermissionBasicState,
   PermissionModelRole,
   RolesMap,
 } from './types';
 
 type Props = {
-  dependencies: HierarchyItem;
   state: PermissionBasicState;
   onChange: (value: PermissionBasicState) => void;
   roles: RolesMap;
+  allLangs?: LanguageModel[];
 };
 
 export const PermissionsBasic: React.FC<Props> = ({
-  dependencies,
   state,
   onChange,
   roles,
+  allLangs,
 }) => {
   const rolesList = Object.keys(roles);
 
@@ -33,7 +33,7 @@ export const PermissionsBasic: React.FC<Props> = ({
             state={state}
             scopes={roles[role]}
             onChange={onChange}
-            dependencies={dependencies}
+            allLangs={allLangs}
           />
         );
       })}

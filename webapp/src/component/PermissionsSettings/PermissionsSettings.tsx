@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { updateByDependencies } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { PermissionsBasic } from './PermissionsBasic';
 import {
+  LanguageModel,
   PermissionAdvancedState,
   PermissionBasicState,
   PermissionModel,
@@ -22,6 +22,7 @@ type Props = {
   permissions: PermissionModel;
   onChange: (state: PermissionSettingsState) => void;
   height?: number;
+  allLangs?: LanguageModel[];
 };
 
 export const PermissionsSettings: React.FC<Props> = ({
@@ -29,8 +30,8 @@ export const PermissionsSettings: React.FC<Props> = ({
   permissions,
   onChange,
   height = 500,
+  allLangs,
 }) => {
-  const allLangs = useProjectLanguages().map((l) => l.id);
   const [tab, setTab] = useState<TabsType>(
     permissions.type ? 'basic' : 'advanced'
   );
@@ -73,11 +74,11 @@ export const PermissionsSettings: React.FC<Props> = ({
             stateChangeLanguages: permissions.stateChangeLanguageIds || [],
           },
           dependenciesLoadable.data,
-          allLangs
+          allLangs?.map((l) => l.id) || []
         )
       );
     }
-  }, [dependenciesLoadable.data]);
+  }, [dependenciesLoadable.data, rolesLoadable.data, advancedState]);
 
   useEffect(() => {
     if (advancedState) {
@@ -127,7 +128,7 @@ export const PermissionsSettings: React.FC<Props> = ({
             state={basicState}
             onChange={setBasicState}
             roles={rolesLoadable.data as RolesMap}
-            dependencies={dependenciesLoadable.data}
+            allLangs={allLangs}
           />
         )}
         {tab === 'advanced' && (
@@ -136,6 +137,7 @@ export const PermissionsSettings: React.FC<Props> = ({
               state={advancedState}
               onChange={setAdvancedState}
               dependencies={dependenciesLoadable.data}
+              allLangs={allLangs}
             />
           </Box>
         )}

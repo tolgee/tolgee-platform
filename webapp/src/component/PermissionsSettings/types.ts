@@ -38,3 +38,5 @@ export type RolesMap = Record<
 >;
 
 export type HierarchyItem = components['schemas']['HierarchyItem'];
+
+export type LanguageModel = components['schemas']['LanguageModel'];

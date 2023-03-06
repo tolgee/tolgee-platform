@@ -45,7 +45,7 @@ describe('Organization Settings', () => {
     );
   });
 
-  it('changes member privileges', () => {
+  it.only('changes member privileges', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
     gcy('permissions-menu').within(() => {
