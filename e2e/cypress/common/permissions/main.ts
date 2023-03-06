@@ -1,5 +1,5 @@
 import Bluebird from 'cypress/types/bluebird';
-import { login, v2apiFetchPromise } from '../apiCalls/common';
+import { login } from '../apiCalls/common';
 import {
   generatePermissionsData,
   PermissionsOptions,
@@ -8,12 +8,7 @@ import { HOST } from '../constants';
 import { selectLangsInLocalstorage } from '../translations';
 import { testDashboard } from './dashboard';
 import { testKeys } from './keys';
-import {
-  LanguageModel,
-  pageIsPermitted,
-  ProjectInfo,
-  ProjectModel,
-} from './shared';
+import { getProjectInfo, pageIsPermitted, ProjectInfo } from './shared';
 import { testTranslations } from './translations';
 
 export const SKIP = false;
@@ -59,9 +54,8 @@ export function checkItemsInMenu(projectInfo: ProjectInfo, settings: Settings) {
 export function visitProjectWithPermissions(
   options: Partial<PermissionsOptions>
 ): Bluebird<ProjectInfo> {
+  let projectInfo: ProjectInfo;
   let projectId: number;
-  let project: ProjectModel;
-  let languages: LanguageModel[];
 
   // combining regular promises with cypress promises results in this shit
   return new Cypress.Promise<ProjectInfo>((resolve) => {
@@ -73,22 +67,14 @@ export function visitProjectWithPermissions(
       })
       .then(() => login('me@me.me'))
       .then(() => selectLangsInLocalstorage(projectId, ['en', 'de', 'cs']))
+      .then(() => getProjectInfo(projectId))
+      .then((data) => {
+        projectInfo = data;
+      })
       .then(() =>
-        Promise.all([
-          v2apiFetchPromise(`projects/${projectId}`).then((r) => r.body),
-          v2apiFetchPromise(`projects/${projectId}/languages`).then(
-            (r) => r.body
-          ),
-        ])
-          .then(([pdata, ldata]) => {
-            project = pdata;
-            languages = ldata._embedded.languages;
-          })
-          .then(() =>
-            cy
-              .visit(`${HOST}/projects/${projectId}`)
-              .then(() => resolve({ project, languages }))
-          )
+        cy
+          .visit(`${HOST}/projects/${projectId}`)
+          .then(() => resolve(projectInfo))
       );
   });
 }

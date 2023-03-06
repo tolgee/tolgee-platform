@@ -52,7 +52,7 @@ describe('Organization Settings', () => {
   it('changes member privileges', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
-    permissionsMenuSelectRole('Translate');
+    permissionsMenuSelectRole('Translate', { confirm: true });
     visitMemberPrivileges();
     gcy('permissions-menu-button').contains('Translate');
   });
@@ -60,7 +60,7 @@ describe('Organization Settings', () => {
   it("member privileges change doesn't affect profile", () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
-    permissionsMenuSelectRole('Translate');
+    permissionsMenuSelectRole('Translate', { confirm: true });
     visitProfile();
     gcy('organization-name-field').within(() =>
       cy.get('input').should('have.value', 'Tolgee')
@@ -76,7 +76,9 @@ describe('Organization Settings', () => {
   it('changes advanced permissions', () => {
     gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
-    permissionsMenuSelectAdvanced(['keys.create', 'keys.edit']);
+    permissionsMenuSelectAdvanced(['keys.create', 'keys.edit'], {
+      confirm: true,
+    });
   });
 
   it('Gates cannot change Tolgee settings', () => {

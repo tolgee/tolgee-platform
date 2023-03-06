@@ -8,7 +8,7 @@ import { getCell } from '../state';
 import { LanguageModel, pageIsPermitted, ProjectInfo } from './shared';
 
 function getLanguageId(languages: LanguageModel[], tag: string) {
-  return languages.find((l) => l.tag === tag).id;
+  return languages.find((l) => l.tag === tag)?.id;
 }
 
 function getRowTexts(row: number) {

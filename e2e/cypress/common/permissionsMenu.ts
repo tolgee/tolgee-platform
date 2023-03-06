@@ -1,15 +1,24 @@
 import { Scopes } from '../../../webapp/src/fixtures/permissions';
 import { assertMessage, confirmHardMode } from './shared';
 
-export const permissionsMenuSelectRole = (role: string) => {
+type Options = {
+  confirm: boolean;
+};
+
+export const permissionsMenuSelectRole = (role: string, options?: Options) => {
   cy.gcy('permissions-menu-basic').click();
   cy.gcy('permissions-menu').contains(role).click();
   cy.gcy('permissions-menu-save').click();
-  confirmHardMode();
+  if (options?.confirm) {
+    confirmHardMode();
+  }
   assertMessage('Permissions set');
 };
 
-export const permissionsMenuSelectAdvanced = (scopes: Scopes) => {
+export const permissionsMenuSelectAdvanced = (
+  scopes: Scopes,
+  options?: Options
+) => {
   cy.gcy('permissions-menu-granular').click();
   // uncheck all
   for (const _ in [0, 1]) {
@@ -26,6 +35,8 @@ export const permissionsMenuSelectAdvanced = (scopes: Scopes) => {
   });
 
   cy.gcy('permissions-menu-save').click();
-  confirmHardMode();
+  if (options?.confirm) {
+    confirmHardMode();
+  }
   assertMessage('Permissions set');
 };

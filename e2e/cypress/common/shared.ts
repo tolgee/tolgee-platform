@@ -4,6 +4,8 @@ import { Scope } from './types';
 import { waitForGlobalLoading } from './loading';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
+import { ProjectInfo } from './permissions/shared';
+import { v2apiFetchPromise } from './apiCalls/common';
 
 export const allScopes: Scope[] = [
   'keys.edit',

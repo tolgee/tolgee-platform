@@ -1,5 +1,7 @@
+import { createKey } from '../apiCalls/common';
 import { waitForGlobalLoading } from '../loading';
-import { confirmStandard } from '../shared';
+import { assertMessage, confirmStandard } from '../shared';
+import { createTag } from '../tags';
 import { editCell } from '../translations';
 import { ProjectInfo } from './shared';
 
@@ -10,6 +12,7 @@ export function testKeys(info: ProjectInfo) {
 
   if (scopes.includes('keys.edit')) {
     editCell('key-1', 'new-key');
+    createTag('Test tag');
   }
 
   if (scopes.includes('screenshots.view')) {
@@ -36,5 +39,16 @@ export function testKeys(info: ProjectInfo) {
   ) {
     cy.gcy('translations-table-cell-translation').first().click();
     cy.gcy('global-editor').should('not.exist');
+  }
+
+  if (scopes.includes('keys.create')) {
+    createKey(info.project.id, 'new_test_key', { en: 'Test translation' });
+  }
+
+  if (scopes.includes('keys.delete')) {
+    cy.gcy('translations-row-checkbox').first().click();
+    cy.gcy('translations-delete-button').click();
+    confirmStandard();
+    assertMessage('Translations deleted!');
   }
 }
