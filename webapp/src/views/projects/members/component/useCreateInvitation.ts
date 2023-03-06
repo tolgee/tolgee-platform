@@ -1,28 +1,23 @@
 import {
+  LanguageModel,
   LanguagePermissions,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
 import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
-import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-
-type ProjectInvitationModel = components['schemas']['ProjectInvitationModel'];
 
 type Props = {
   projectId: number;
-  after: {
-    onSuccess(data: ProjectInvitationModel): void;
-    onError(e: any): void;
-  };
+  allLangs: LanguageModel[];
 };
 
-type MutateProps = {
+export type CreateInvitationData = {
   permissions: PermissionSettingsState;
   email?: string;
   name?: string;
 };
 
-export const useCreateInvitation = ({ after, projectId }: Props) => {
+export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
   const invite = useApiMutation({
     url: '/v2/projects/{projectId}/invite',
     method: 'put',
@@ -30,11 +25,7 @@ export const useCreateInvitation = ({ after, projectId }: Props) => {
   });
 
   return {
-    createInvitation: ({ permissions, email, name }: MutateProps) => {
-      if (!permissions) {
-        return;
-      }
-
+    async createInvitation({ permissions, email, name }: CreateInvitationData) {
       if (permissions.tab === 'advanced' && permissions.advancedState.scopes) {
         const languagePermissions: LanguagePermissions = {};
 
@@ -47,52 +38,49 @@ export const useCreateInvitation = ({ after, projectId }: Props) => {
             }
           });
 
-        invite.mutate(
-          {
-            path: { projectId },
-            content: {
-              'application/json': {
-                email,
-                name,
-                scopes: permissions.advancedState.scopes,
-                ...languagePermissions,
-              },
+        return invite.mutateAsync({
+          path: { projectId },
+          content: {
+            'application/json': {
+              email,
+              name,
+              scopes: permissions.advancedState.scopes,
+              ...languagePermissions,
             },
           },
-          after
-        );
+        });
       } else if (permissions.tab === 'basic' && permissions.basicState.role) {
         let languagePermissions: LanguagePermissions = {};
         const role = permissions.basicState.role;
 
         if (role === 'REVIEW') {
           languagePermissions = {
+            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: permissions.basicState.languages,
             stateChangeLanguages: permissions.basicState.languages,
           };
         } else if (role === 'TRANSLATE') {
           languagePermissions = {
+            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: permissions.basicState.languages,
           };
         }
 
-        invite.mutate(
-          {
-            path: {
-              projectId,
-            },
-            content: {
-              'application/json': {
-                type: role,
-                email,
-                name,
-                ...languagePermissions,
-              },
+        return invite.mutateAsync({
+          path: {
+            projectId,
+          },
+          content: {
+            'application/json': {
+              type: role,
+              email,
+              name,
+              ...languagePermissions,
             },
           },
-          after
-        );
+        });
       }
+      throw new Error('Incorrect data');
     },
     isLoading: invite.isLoading,
   };

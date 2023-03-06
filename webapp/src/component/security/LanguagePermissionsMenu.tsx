@@ -100,7 +100,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           }}
         >
           <SearchSelectMulti
-            displaySearch={true}
+            displaySearch={props.allLanguages.length > 10}
             searchPlaceholder={t('language_permitted_search')}
             open={Boolean(anchorEl)}
             items={props.allLanguages.map((language) => ({

@@ -193,6 +193,7 @@ export const Hierarchy: React.FC<Props> = ({
               structure={child}
               state={state}
               onChange={onChange}
+              allLangs={allLangs}
             />
           );
         })}

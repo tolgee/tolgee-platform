@@ -62,16 +62,16 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const { updatePermissions } = useUpdatePermissions({
     userId: user.id,
     projectId: project.id,
+    allLangs,
   });
 
-  function handleSubmit(data: PermissionSettingsState) {
-    return updatePermissions(data)
-      .then(() => {
-        messages.success(<T>permissions_set_message</T>);
-      })
-      .catch((e) => {
-        parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
-      });
+  async function handleSubmit(data: PermissionSettingsState) {
+    try {
+      await updatePermissions(data);
+      messages.success(<T>permissions_set_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
   }
 
   return (
@@ -85,7 +85,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
       <StyledItemActions>
         <PermissionsMenu
           allLangs={allLangs}
-          nameInTitle={user.name}
+          title={t('permission_dialog_title', { name: user.name })}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')

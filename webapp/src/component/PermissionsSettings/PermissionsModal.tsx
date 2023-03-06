@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 
 import {
@@ -13,7 +13,7 @@ import { PermissionsSettings } from 'tg.component/PermissionsSettings/Permission
 type Props = {
   allLangs?: LanguageModel[];
   onClose: () => void;
-  nameInTitle?: string;
+  title: string;
   permissions: PermissionModel;
   onSubmit: (settings: PermissionSettingsState) => Promise<void>;
 };
@@ -21,11 +21,10 @@ type Props = {
 export const PermissionsModal: React.FC<Props> = ({
   allLangs,
   onClose,
-  nameInTitle,
+  title,
   permissions,
   onSubmit,
 }) => {
-  const { t } = useTranslate();
   const [loading, setLoading] = useState(false);
 
   const [settingsState, setSettingsState] = useState<
@@ -46,7 +45,7 @@ export const PermissionsModal: React.FC<Props> = ({
     <Dialog open={true} onClose={onClose} fullWidth>
       <DialogContent sx={{ minHeight: 400 }}>
         <PermissionsSettings
-          title={t('permission_dialog_title', { name: nameInTitle || '' })}
+          title={title}
           permissions={permissions}
           onChange={setSettingsState}
           allLangs={allLangs}

@@ -12,7 +12,7 @@ import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTra
 type Props = {
   allLangs?: LanguageModel[];
   buttonTooltip?: string;
-  nameInTitle?: string;
+  title: string;
   buttonProps?: ComponentProps<typeof Button>;
   permissions: PermissionModel;
   onSubmit: (settings: PermissionSettingsState) => Promise<void>;
@@ -22,7 +22,7 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
   allLangs,
   buttonTooltip,
   buttonProps,
-  nameInTitle,
+  title,
   permissions,
   onSubmit,
 }) => {
@@ -57,7 +57,7 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
       {open && (
         <PermissionsModal
           allLangs={allLangs}
-          nameInTitle={nameInTitle}
+          title={title}
           onClose={handleClose}
           permissions={permissions}
           onSubmit={onSubmit}

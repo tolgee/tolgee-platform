@@ -16,7 +16,6 @@ import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
 
 import { useProject } from 'tg.hooks/useProject';
-import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -27,8 +26,11 @@ import {
   PermissionModel,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
-import { useCreateInvitation } from './useCreateInvitation';
-type ProjectInvitationModel = components['schemas']['ProjectInvitationModel'];
+import {
+  CreateInvitationData,
+  useCreateInvitation,
+} from './useCreateInvitation';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 
 const messaging = container.resolve(MessageService);
 
@@ -47,34 +49,16 @@ type Props = {
 export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
   const { t } = useTranslate();
   const project = useProject();
+  const langauges = useProjectLanguages();
 
   const initialPermissions: PermissionModel = {
     type: 'TRANSLATE',
     scopes: [],
   };
 
-  const afterActions = {
-    onSuccess(data: ProjectInvitationModel) {
-      if (!data.invitedUserEmail) {
-        copy(
-          LINKS.ACCEPT_INVITATION.buildWithOrigin({
-            [PARAMS.INVITATION_CODE]: data.code,
-          })
-        );
-        messaging.success(<T keyName="invite_user_invitation_copy_success" />);
-      } else {
-        messaging.success(<T keyName="invite_user_invitation_email_success" />);
-      }
-      onClose();
-    },
-    onError(e) {
-      parseErrorResponse(e).forEach((e) => messaging.error(<T>{e}</T>));
-    },
-  };
-
   const { createInvitation, isLoading } = useCreateInvitation({
     projectId: project.id,
-    after: afterActions,
+    allLangs: langauges,
   });
 
   const [settingsState, setSettingsState] = useState<
@@ -82,6 +66,25 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
   >(undefined);
 
   const yupSchema = useMemo(() => Validation.INVITE_DIALOG_PROJECT(t), [t]);
+
+  async function handleCreateInvitation(data: CreateInvitationData) {
+    try {
+      const result = await createInvitation(data);
+      if (!result.invitedUserEmail) {
+        copy(
+          LINKS.ACCEPT_INVITATION.buildWithOrigin({
+            [PARAMS.INVITATION_CODE]: result.code,
+          })
+        );
+        messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+      } else {
+        messaging.success(<T keyName="invite_user_invitation_email_success" />);
+      }
+      onClose();
+    } catch (e) {
+      parseErrorResponse(e).forEach((e_1) => messaging.error(<T>{e_1}</T>));
+    }
+  }
 
   return (
     <Dialog {...{ open, onClose }} fullWidth>
@@ -94,7 +97,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
         validateOnMount={true}
         onSubmit={(data) => {
           if (settingsState) {
-            createInvitation({
+            return handleCreateInvitation({
               email: data.type === 'email' ? data.text : undefined,
               name: data.type === 'link' ? data.text : undefined,
               permissions: settingsState,
@@ -157,6 +160,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   title={t('project_members_dialog_permission_title')}
                   permissions={initialPermissions}
                   onChange={setSettingsState}
+                  allLangs={langauges}
                 />
               </DialogContent>
               <DialogActions>
