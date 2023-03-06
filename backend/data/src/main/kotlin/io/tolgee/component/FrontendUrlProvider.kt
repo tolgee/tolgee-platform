@@ -23,4 +23,8 @@ class FrontendUrlProvider(
   fun getBillingUrl(organizationSlug: String): String {
     return "${this.url}/organizations/$organizationSlug/billing"
   }
+
+  fun getBillingSelfHostedSubscriptionsUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/billing/self-hosted-ee"
+  }
 }

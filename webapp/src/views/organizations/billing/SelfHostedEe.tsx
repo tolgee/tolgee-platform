@@ -1,64 +1,47 @@
 import { useTranslate } from '@tolgee/react';
-import { Button, Dialog } from '@mui/material';
-import {
-  useBillingApiMutation,
-  useBillingApiQuery,
-} from 'tg.service/http/useQueryApi';
+import { Button } from '@mui/material';
+import { SelfHostedEeDialog } from './SelfHostedEeDialog';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
-import { useState } from 'react';
+import { matchPath, useHistory } from 'react-router-dom';
 
 export const SelfHostedEe = () => {
   const { t } = useTranslate();
 
-  const organization = useOrganization();
+  const history = useHistory();
 
-  const plansLoadable = useBillingApiQuery({
-    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee-plans`,
-    method: 'get',
-    path: {
-      organizationId: organization!.id,
-    },
+  const organization = useOrganization()!;
+
+  const isSelfHostedRoute = matchPath(location.pathname, {
+    path: LINKS.ORGANIZATION_BILLING_SELF_HOSTED_EE.template,
+    exact: true,
+    strict: true,
   });
-
-  const setupMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/setup-ee',
-    method: 'post',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data.url;
-      },
-    },
-  });
-
-  const [open, setOpen] = useState(false);
 
   return (
     <>
       <Button
         onClick={() => {
-          setOpen(true);
+          history.push(
+            LINKS.ORGANIZATION_BILLING_SELF_HOSTED_EE.build({
+              [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+            })
+          );
         }}
       >
         {t('organization-billing-get-self-hosted-key')}
       </Button>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        {plansLoadable.data?._embedded?.plans?.map((plan) => (
-          <Button
-            key={plan.id}
-            onClick={() => {
-              setupMutation.mutate({
-                path: { organizationId: organization!.id },
-                content: {
-                  'application/json': { planId: plan.id },
-                },
-              });
-            }}
-          >
-            Setup plan {plan.name}
-          </Button>
-        ))}
-      </Dialog>
+      <SelfHostedEeDialog
+        open={!!isSelfHostedRoute?.isExact}
+        onClose={() =>
+          history.push(
+            LINKS.ORGANIZATION_BILLING.build({
+              [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+            })
+          )
+        }
+      />
     </>
   );
 };

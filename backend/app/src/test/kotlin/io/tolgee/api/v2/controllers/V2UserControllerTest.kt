@@ -57,7 +57,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.find(requestDTO.email)
+    val fromDb = userAccountService.findActive(requestDTO.email)
     Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
   }
 
@@ -68,7 +68,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
       currentPassword = initialPassword
     )
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.find(initialUsername)
+    val fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
       .describedAs("Password is changed").isTrue
   }
@@ -184,7 +184,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     testDataService.saveTestData(testData.root)
     userAccount = testData.franta
     performAuthDelete("/v2/user").andIsOk
-    userAccountService.find(testData.franta.id).assert.isNull()
+    userAccountService.findActive(testData.franta.id).assert.isNull()
     permissionService.findById(testData.frantasPermissionInOlgasProject.id).assert.isNull()
     translationCommentService.find(testData.frantasComment.id).assert.isNotNull
     patService.find(testData.frantasPat.id).assert.isNull()
@@ -220,7 +220,7 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     testDataService.saveTestData(testData.root)
     userAccount = testData.olga
     performAuthDelete("/v2/user").andIsOk
-    userAccountService.find(testData.olga.id).assert.isNull()
+    userAccountService.findActive(testData.olga.id).assert.isNull()
     organizationService.find(testData.pepaFrantaOrganization.id).assert.isNotNull
   }
 

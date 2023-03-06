@@ -172,7 +172,7 @@ class StartupImportService(
 
   private fun getInitialUserAccount(): UserAccount? {
     val userAccount = userAccountService
-      .find(properties.authentication.initialUsername)
+      .findActive(properties.authentication.initialUsername)
     return userAccount
   }
 }

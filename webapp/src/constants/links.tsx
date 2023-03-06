@@ -202,6 +202,11 @@ export class LINKS {
 
   static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
+  static ORGANIZATION_BILLING_SELF_HOSTED_EE = Link.ofParent(
+    LINKS.ORGANIZATION_BILLING,
+    'self-hosted-ee'
+  );
+
   /**
    * Project stuff
    */

@@ -34,6 +34,9 @@ export interface paths {
   "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee-subscriptions": {
+    get: operations["getSelfHostedEeSubscriptions"];
+  };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee-plans": {
     get: operations["getSelfHostedPlans"];
   };
@@ -79,10 +82,11 @@ export interface components {
     };
     CollectionModelSelfHostedEeSubscriptionModel: {
       _embedded?: {
-        plans?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+        subscriptions?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
       };
     };
     SelfHostedEePlanModel: {
+      id: number;
       name: string;
       public: boolean;
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
@@ -90,9 +94,10 @@ export interface components {
       pricePerSeat: number;
     };
     SelfHostedEeSubscriptionModel: {
-      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      id: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      createdAt: string;
       plan: components["schemas"]["SelfHostedEePlanModel"];
     };
     UpdateSubscriptionPrepareRequest: {
@@ -159,7 +164,7 @@ export interface components {
     };
     CollectionModelSelfHostedEePlanModel: {
       _embedded?: {
-        selfHostedEePlanModels?: components["schemas"]["SelfHostedEePlanModel"][];
+        plans?: components["schemas"]["SelfHostedEePlanModel"][];
       };
     };
     InvoiceModel: {
@@ -464,6 +469,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSelfHostedEeSubscriptions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
         };
       };
       /** Bad Request */

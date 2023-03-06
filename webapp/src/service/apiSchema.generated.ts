@@ -187,6 +187,12 @@ export interface paths {
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
   };
+  "/v2/administration/users/{userId}/enable": {
+    put: operations["enableUser"];
+  };
+  "/v2/administration/users/{userId}/disable": {
+    put: operations["disableUser"];
+  };
   "/v2/administration/users/{userId}/set-role/{role}": {
     put: operations["setRole"];
   };
@@ -542,6 +548,18 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -564,18 +582,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -877,6 +883,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       globalServerRole: "USER" | "ADMIN";
       deleted: boolean;
+      disabled: boolean;
     };
     TranslationCommentDto: {
       text: string;
@@ -937,10 +944,10 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1022,13 +1029,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      scopes: string[];
-      username?: string;
-      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
+      lastUsedAt?: number;
+      username?: string;
+      scopes: string[];
       description: string;
     };
     SuperTokenRequest: {
@@ -1045,6 +1052,7 @@ export interface components {
       licenseKey: string;
     };
     SelfHostedEePlanModel: {
+      id: number;
       name: string;
       public: boolean;
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
@@ -1052,9 +1060,10 @@ export interface components {
       pricePerSeat: number;
     };
     SelfHostedEeSubscriptionModel: {
-      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      id: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      createdAt: string;
       plan: components["schemas"]["SelfHostedEePlanModel"];
     };
     SetLicenseKeyLicensingDto: {
@@ -1360,15 +1369,15 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       name: string;
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
       description?: string;
     };
     PublicBillingConfigurationDTO: {
@@ -1447,17 +1456,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1792,10 +1801,10 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
-      expiresAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1850,13 +1859,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      scopes: string[];
-      username?: string;
-      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
       projectId: number;
       expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
+      lastUsedAt?: number;
+      username?: string;
+      scopes: string[];
       description: string;
     };
     PagedModelUserAccountModel: {
@@ -3927,6 +3936,52 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["RegenerateApiKeyDto"];
+      };
+    };
+  };
+  enableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  disableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };

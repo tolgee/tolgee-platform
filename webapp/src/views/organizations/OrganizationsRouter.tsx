@@ -38,7 +38,7 @@ const SpecificOrganizationRouter = () => {
             <OrganizationMemberPrivilegesView />
           </PrivateRoute>
           {config.billing.enabled && (
-            <PrivateRoute exact path={LINKS.ORGANIZATION_BILLING.template}>
+            <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
               <OrganizationBillingView />
             </PrivateRoute>
           )}

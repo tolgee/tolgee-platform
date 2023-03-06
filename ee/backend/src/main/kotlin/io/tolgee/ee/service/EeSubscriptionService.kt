@@ -48,7 +48,7 @@ class EeSubscriptionService(
       val entity = EeSubscription().apply {
         this.licenseKey = licenseKey
         this.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
-        this.enabledFeatures = responseBody.enabledFeatures
+        this.enabledFeatures = responseBody.plan.enabledFeatures
       }
       return eeSubscriptionRepository.save(entity)
     }
@@ -56,10 +56,8 @@ class EeSubscriptionService(
     throw IllegalStateException("Licence not obtained.")
   }
 
-
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAll()
-
 
     val response = try {
       postRequest<PrepareSetEeLicenceKeyModel>(
@@ -94,7 +92,7 @@ class EeSubscriptionService(
   fun reportUsage() {
     val subscription = getSubscription()
     if (subscription != null) {
-      val seats = userAccountService.countAll()
+      val seats = userAccountService.countAllEnabled()
       postRequest<Any>(
         "${eeProperties.licenseServer}${eeProperties.reportUsagePath}",
         ReportUsageDto(subscription.licenseKey, seats)
@@ -102,4 +100,3 @@ class EeSubscriptionService(
     }
   }
 }
-

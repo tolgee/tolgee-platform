@@ -2458,4 +2458,9 @@
             select api_key_id, 'KEYS_DELETE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1678110170883-1">
+        <addColumn tableName="user_account">
+            <column name="disabled_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -57,7 +57,7 @@ abstract class AbstractE2eDataController {
       return@tryUntilItDoesntBreakConstraint executeInNewTransaction(transactionManager) {
         try {
           testData.data.userAccounts.forEach {
-            userAccountService.find(it.self.username)?.let { user ->
+            userAccountService.findActive(it.self.username)?.let { user ->
               userAccountService.delete(user)
             }
           }

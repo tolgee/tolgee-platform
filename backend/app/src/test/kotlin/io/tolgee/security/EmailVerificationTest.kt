@@ -84,7 +84,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
       .andExpect(status().isOk).andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-    assertThat(userAccountService.find(createUser.username)!!.username).isEqualTo("this.is@new.email")
+    assertThat(userAccountService.findActive(createUser.username)!!.username).isEqualTo("this.is@new.email")
   }
 
   @Test
@@ -123,25 +123,25 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   @Test
   fun signUpSavesVerification() {
     perform()
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
     verify(javaMailSender).send(messageArgumentCaptor.capture())
 
     assertThat(messageArgumentCaptor.value.subject).isEqualTo("Tolgee e-mail verification")
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService.find(user.id)).isNotNull
+    assertThat(userAccountService.findActive(user.id)).isNotNull
   }
 
   @Test
   fun `uses frontend url over provided callback url`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
     perform()
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService.find(user.id)).isNotNull
+    assertThat(userAccountService.findActive(user.id)).isNotNull
   }
 
   private fun getMessageContent(): String {
@@ -160,7 +160,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     tolgeeProperties.frontEndUrl = null
     perform()
 
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
   }

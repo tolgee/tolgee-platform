@@ -10,6 +10,7 @@ import { AdministrationNav } from './AdministrationNav';
 import { DebugCustomerAccountButton } from './DebugCustomerAccountButton';
 import { RoleSelector } from './RoleSelector';
 import { DeleteUserButton } from './DeleteUserButton';
+import { ToggleUserButton } from './ToggleUserButton';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -69,6 +70,7 @@ export const AdministrationUsers = ({
                 </ListItemText>
                 <ListItemSecondaryAction>
                   <Box display="flex" justifyContent="center">
+                    <ToggleUserButton user={u} />
                     <DeleteUserButton user={u} />
                     <DebugCustomerAccountButton userId={u.id} />
                     <Box display="flex" ml={1}>
