@@ -6,6 +6,7 @@ import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
+import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
@@ -66,6 +67,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var baiduApiService: BaiduApiService
+
+  @Autowired
+  @MockBean
   lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache
@@ -123,6 +128,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any() as String,
       )
     ).thenReturn("Translated with Azure Cognitive")
+
+    whenever(
+      baiduApiService.translate(
+        any() as String,
+        any() as String,
+        any() as String,
+      )
+    ).thenReturn("Translated with Baidu")
   }
 
   private fun initTestData() {
@@ -233,7 +246,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests using just enabled services (Google, AWS, DeepL, Azure)`() {
+  fun `it suggests using just enabled services (Google, AWS, DeepL, Azure, Baidu)`() {
     mockDefaultMtBucketSize(4000)
     testData.enableAll()
     saveTestData()
@@ -244,8 +257,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("GOOGLE").isEqualTo("Translated with Google")
         node("DEEPL").isEqualTo("Translated with DeepL")
         node("AZURE").isEqualTo("Translated with Azure Cognitive")
+        node("BAIDU").isEqualTo("Translated with Baidu")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(400)
+      node("translationCreditsBalanceAfter").isEqualTo(500)
     }
   }
 

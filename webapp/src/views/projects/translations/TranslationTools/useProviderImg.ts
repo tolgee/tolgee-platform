@@ -13,6 +13,8 @@ export const useProviderImg = () => {
         return `/images/providers/deepl-logo-${palette.mode}.svg`;
       case 'AZURE':
         return `/images/providers/azure-cognitive-logo.svg`;
+      case 'BAIDU':
+        return `/images/providers/baidu-icon.svg`;
       default:
         return null;
     }
