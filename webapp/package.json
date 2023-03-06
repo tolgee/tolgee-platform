@@ -17,7 +17,7 @@
     "@sentry/browser": "^6.10.0",
     "@stomp/stompjs": "^6.1.2",
     "@tolgee/format-icu": "^5.0.0",
-    "@tolgee/react": "^5.2.0",
+    "@tolgee/react": "^5.4.3",
     "clsx": "^1.1.1",
     "codemirror": "^5.62.0",
     "copy-to-clipboard": "^3.3.1",
