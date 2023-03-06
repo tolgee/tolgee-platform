@@ -11,6 +11,4 @@ class PublicEnabledFeaturesProvider() : EnabledFeaturesProvider {
   var forceEnabled: List<Feature>? = null
 
   override fun get(organizationId: Long): Array<Feature> = forceEnabled?.toTypedArray() ?: emptyArray()
-
-
 }
