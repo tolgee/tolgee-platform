@@ -12,7 +12,6 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.security.MessageDigest
-import kotlin.random.Random
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -53,7 +52,7 @@ class BaiduApiService(
   private fun getSalt(): String {
     val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     return (1..16)
-      .map { Random.nextInt(0, charPool.size).let { charPool[it] } }
+      .map { charPool.random() }
       .joinToString("")
   }
 
