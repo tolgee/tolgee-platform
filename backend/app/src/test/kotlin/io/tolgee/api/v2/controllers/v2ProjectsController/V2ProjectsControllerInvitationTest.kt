@@ -113,7 +113,6 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (higher)`() {
-
     invitationTestUtil.perform { getLang ->
       type = ProjectPermissionType.EDIT
       translateLanguages = setOf(getLang("en"))
