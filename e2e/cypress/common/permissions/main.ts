@@ -5,6 +5,7 @@ import {
   PermissionsOptions,
 } from '../apiCalls/testData/testData';
 import { HOST } from '../constants';
+import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
 import { testDashboard } from './dashboard';
 import { testKeys } from './keys';
@@ -51,30 +52,30 @@ export function checkItemsInMenu(projectInfo: ProjectInfo, settings: Settings) {
   });
 }
 
-export function visitProjectWithPermissions(
-  options: Partial<PermissionsOptions>
-): Bluebird<ProjectInfo> {
-  let projectInfo: ProjectInfo;
-  let projectId: number;
+type UserMail = 'admin@admin.com' | 'member@member.com' | 'me@me.me';
 
-  // combining regular promises with cypress promises results in this shit
+export function loginAndGetInfo(user: UserMail, projectId: number) {
+  return login(user)
+    .then(() => selectLangsInLocalstorage(projectId, ['en', 'de', 'cs']))
+    .then(() => getProjectInfo(projectId));
+}
+
+export function visitProjectWithPermissions(
+  options: Partial<PermissionsOptions>,
+  user: UserMail = 'me@me.me'
+): Bluebird<ProjectInfo> {
   return new Cypress.Promise<ProjectInfo>((resolve) => {
     generatePermissionsData
       .clean()
       .then(() => generatePermissionsData.generate(options))
       .then((res) => {
-        projectId = res.body.projects[0].id;
+        return res.body.projects[0].id;
       })
-      .then(() => login('me@me.me'))
-      .then(() => selectLangsInLocalstorage(projectId, ['en', 'de', 'cs']))
-      .then(() => getProjectInfo(projectId))
-      .then((data) => {
-        projectInfo = data;
-      })
-      .then(() =>
-        cy
-          .visit(`${HOST}/projects/${projectId}`)
-          .then(() => resolve(projectInfo))
+      .then((projectId) => loginAndGetInfo(user, projectId))
+      .then((projectInfo) =>
+        visitProjectDashboard(projectInfo.project.id).then(() =>
+          resolve(projectInfo)
+        )
       );
   });
 }
