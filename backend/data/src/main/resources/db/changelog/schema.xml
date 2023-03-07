@@ -2379,4 +2379,12 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1678176720859-1">
+        <dropDefaultValue columnDataType="boolean" columnName="outdated" tableName="translation"/>
+    </changeSet>
+    <changeSet id="1678176720859-1" author="jenik">
+        <sql>
+            ALTER TABLE key_screenshot_reference ALTER COLUMN original_text TYPE text;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

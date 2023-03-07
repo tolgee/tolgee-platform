@@ -6,6 +6,7 @@ import io.tolgee.model.key.Key
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.IdClass
@@ -28,5 +29,6 @@ class KeyScreenshotReference {
   @Type(type = "jsonb")
   var positions: MutableList<KeyInScreenshotPosition>? = mutableListOf()
 
+  @Column(columnDefinition = "text", length = 5000)
   var originalText: String? = null
 }
