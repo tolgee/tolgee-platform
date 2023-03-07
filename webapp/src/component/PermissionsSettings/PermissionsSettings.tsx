@@ -17,6 +17,8 @@ import {
   TabsType,
 } from './types';
 
+import { getLanguagesByRole } from './utils';
+
 type Props = {
   title: string;
   permissions: PermissionModel;
@@ -49,9 +51,7 @@ export const PermissionsSettings: React.FC<Props> = ({
 
   const [basicState, setBasicState] = useState<PermissionBasicState>({
     role: permissions.type,
-    languages: permissions.stateChangeLanguageIds?.length
-      ? permissions.stateChangeLanguageIds
-      : permissions.translateLanguageIds,
+    languages: getLanguagesByRole(permissions) || undefined,
   });
 
   const [advancedState, setAdvancedState] = useState<

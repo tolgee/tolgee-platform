@@ -105,9 +105,12 @@ const SCOPE_TO_LANG_PROPERTY_MAP = {
 
 type ValueOf<T> = T[keyof T];
 
+export type LanguageProperty = ValueOf<typeof SCOPE_TO_LANG_PROPERTY_MAP>;
+export type LanguageScope = keyof typeof SCOPE_TO_LANG_PROPERTY_MAP;
+
 export const getScopeLanguagePermission = (
   scope: PermissionModelScope | undefined
-): ValueOf<typeof SCOPE_TO_LANG_PROPERTY_MAP> | undefined => {
+): LanguageScope | undefined => {
   if (!scope) {
     return undefined;
   }

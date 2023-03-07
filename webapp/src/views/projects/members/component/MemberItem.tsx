@@ -13,6 +13,7 @@ import { T } from '@tolgee/react';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -83,6 +84,10 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         )}
       </StyledItemText>
       <StyledItemActions>
+        <LanguagePermissionSummary
+          permissions={user.computedPermission}
+          allLangs={allLangs}
+        />
         <PermissionsMenu
           allLangs={allLangs}
           title={t('permission_dialog_title', { name: user.name })}
