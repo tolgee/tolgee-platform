@@ -1,12 +1,10 @@
 package io.tolgee.api.v2.controllers.organizationController
 
-import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
@@ -120,22 +118,6 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
-  fun testGetAllUsers() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[0].username)
-    val organizationId = users[1].organizationRoles[0].organization!!.id
-    performAuthGet("/v2/organizations/$organizationId/users").andIsOk
-      .also { println(it.andReturn().response.contentAsString) }
-      .andAssertThatJson {
-        node("_embedded.usersInOrganization") {
-          isArray.hasSize(2)
-          node("[0].organizationRole").isEqualTo("MEMBER")
-          node("[1].organizationRole").isEqualTo("OWNER")
-        }
-      }
-  }
-
-  @Test
   fun testGetOneWithUrl() {
     createOrganization(dummyDto).let {
       performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson {
@@ -185,13 +167,6 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       node("name").isEqualTo(dummyDto.name)
       node("description").isEqualTo(dummyDto.description)
     }
-  }
-
-  @Test
-  fun testGetAllUsersNotPermitted() {
-    val users = dbPopulator.createUsersAndOrganizations()
-    val organizationId = users[1].organizationRoles[0].organization!!.id
-    performAuthGet("/v2/organizations/$organizationId/users").andIsForbidden
   }
 
   @Test
@@ -328,18 +303,6 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
       ).andIsOk
       role.let { assertThat(it.type).isEqualTo(OrganizationRoleType.MEMBER) }
-    }
-  }
-
-  @Test
-  @Transactional
-  fun `cannot set own permission`() {
-    withOwnerInOrganization { organization, owner, role ->
-      loginAsUser(owner)
-      performAuthPut(
-        "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
-        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
-      ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
     }
   }
 

@@ -1,5 +1,6 @@
 package io.tolgee.service.organization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
@@ -12,12 +13,12 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -25,7 +26,8 @@ class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  private val entityManager: EntityManager,
+  @Lazy
+  private val permissionService: PermissionService,
   private val organizationRepository: OrganizationRepository,
   @Lazy
   private val userPreferencesService: UserPreferencesService,
@@ -125,9 +127,16 @@ class OrganizationRoleService(
   }
 
   fun removeUser(organizationId: Long, userId: Long) {
-    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
+    val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
       organizationRoleRepository.delete(it)
+      it
     }
+    val permissions = permissionService.removeAllProjectInOrganization(organizationId, userId)
+
+    if (role == null && permissions.isEmpty()) {
+      throw NotFoundException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+    }
+
     userPreferencesService.refreshPreferredOrganization(userId)
   }
 

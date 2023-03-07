@@ -22,16 +22,21 @@ class PermissionsTestData {
     organizationBuilder = admin.defaultOrganizationBuilder
 
     val member = addUserAccount { username = "member@member.com" }
+    addUserAccount { username = "no@no.no" }
+
+    val orgOnly = addUserAccount { username = "org@org.org" }
+
+    organizationBuilder.build {
+      addRole {
+        user = orgOnly.self
+        type = OrganizationRoleType.MEMBER
+      }
+    }
 
     projectBuilder = addProject { name = "Project" }.build {
       val en = addEnglish()
       val de = addGerman()
       val cs = addCzech()
-
-      addPermission {
-        this.user = admin.self
-        this.type = ProjectPermissionType.MANAGE
-      }
 
       addPermission {
         this.user = member.self
@@ -46,7 +51,10 @@ class PermissionsTestData {
               text = "${it.self.name} text $i"
               language = it.self
             }.build {
-              addComment { text = "comment $i" }
+              addComment {
+                text = "comment $i"
+                author = admin.self
+              }
             }
           }
         }

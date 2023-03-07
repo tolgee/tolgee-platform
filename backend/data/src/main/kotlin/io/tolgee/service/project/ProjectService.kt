@@ -347,4 +347,12 @@ class ProjectService constructor(
   fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project> {
     return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
+
+  fun getProjectsWithDirectPermissions(id: Long, userIds: List<Long>): Map<Long, List<Project>> {
+    val result = projectRepository.getProjectsWithDirectPermissions(id, userIds)
+    return result
+      .map { it[0] as Long to it[1] as Project }
+      .groupBy { it.first }
+      .mapValues { it.value.map { it.second } }
+  }
 }

@@ -1,9 +1,12 @@
 package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
+import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -39,6 +42,26 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
     assertThat(userPreferencesService.find(testData.jirina.id)!!.preferredOrganization?.name)
       .isNotEqualTo(testData.jirinaOrg.name)
+  }
+
+  @Test
+  fun `removes all direct permissions when leaving`() {
+    val testData = PermissionsTestData()
+    val me = testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
+    testDataService.saveTestData(testData.root)
+    userAccount = me
+
+    permissionService.getProjectPermissionData(
+      testData.projectBuilder.self.id,
+      me.id
+    ).directPermissions.assert.isNotNull
+
+    performAuthPut("/v2/organizations/${testData.organizationBuilder.self.id}/leave", null).andIsOk
+
+    permissionService.getProjectPermissionData(
+      testData.projectBuilder.self.id,
+      me.id
+    ).directPermissions.assert.isNull()
   }
 
   @Test

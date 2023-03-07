@@ -380,4 +380,10 @@ class PermissionService(
     val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }
+
+  fun removeAllProjectInOrganization(organizationId: Long, userId: Long): List<Permission> {
+    val permissions = permissionRepository.findAllByOrganizationAndUserId(organizationId, userId)
+    permissions.forEach { delete(it) }
+    return permissions
+  }
 }

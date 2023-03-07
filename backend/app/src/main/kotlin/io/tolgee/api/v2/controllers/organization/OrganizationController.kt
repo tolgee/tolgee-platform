@@ -25,6 +25,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -39,8 +40,10 @@ import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
@@ -74,7 +77,9 @@ import javax.validation.Valid
 class OrganizationController(
   private val organizationService: OrganizationService,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
-  private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
+  private val arrayUserResourcesAssembler: PagedResourcesAssembler<
+    Pair<UserAccountWithOrganizationRoleView, List<Project>>
+    >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
@@ -87,6 +92,7 @@ class OrganizationController(
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
+  private val projectService: ProjectService
 ) {
   @PostMapping
   @Transactional
@@ -155,12 +161,20 @@ class OrganizationController(
   @DenyPatAccess
   fun getAllUsers(
     @PathVariable("id") id: Long,
-    @ParameterObject @SortDefault(sort = ["name"], direction = Sort.Direction.ASC) pageable: Pageable,
+    @ParameterObject @SortDefault(sort = ["name", "username"], direction = Sort.Direction.ASC) pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<UserAccountWithOrganizationRoleModel> {
     organizationRoleService.checkUserIsMemberOrOwner(id)
     val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
-    return arrayUserResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
+    val userIds = allInOrganization.content.map { it.id }
+    val projectsWithDirectPermission = projectService.getProjectsWithDirectPermissions(id, userIds)
+    val pairs = allInOrganization.content.map { user ->
+      user to (projectsWithDirectPermission[user.id] ?: emptyList())
+    }
+
+    val data = PageImpl(pairs, allInOrganization.pageable, allInOrganization.totalElements)
+
+    return arrayUserResourcesAssembler.toModel(data, userAccountWithOrganizationRoleModelAssembler)
   }
 
   @PutMapping("/{id:[0-9]+}/leave")
@@ -171,7 +185,6 @@ class OrganizationController(
       if (!organizationService.isThereAnotherOwner(id)) {
         throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
-      organizationRoleService.checkUserIsMemberOrOwner(id)
       organizationRoleService.leave(id)
     } ?: throw NotFoundException()
   }
