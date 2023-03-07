@@ -1,3 +1,10 @@
+# [3.9.0](https://github.com/tolgee/tolgee-platform/compare/v3.8.3...v3.9.0) (2023-03-07)
+
+
+### Features
+
+* Editor -> "Insert base text" button ([#1597](https://github.com/tolgee/tolgee-platform/issues/1597)) ([eb0b7d9](https://github.com/tolgee/tolgee-platform/commit/eb0b7d9f45d5e9c5b4eed6c10a6d8b0dd26dbf92))
+
 ## [3.8.3](https://github.com/tolgee/tolgee-platform/compare/v3.8.2...v3.8.3) (2023-03-07)
 
 

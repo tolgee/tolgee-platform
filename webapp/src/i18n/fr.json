@@ -592,7 +592,7 @@
   "sign_up_form_full_name" : "Nom complet",
   "sign_up_form_organization_name" : "Nom de l'organisation",
   "sign_up_submit_button" : "Envoyer",
-  "sign_up_success_needs_verification_message" : "Merci de vous être inscrit. Vous allez recevoir un e-mail de confirmation. Suivez les instructions contenues dans cet e-mail. ",
+  "sign_up_success_needs_verification_message" : "Merci de vous être inscrit. Vous allez recevoir un e-mail de confirmation. Suivez les instructions contenues dans cet e-mail.",
   "sign_up_success_title" : "Succès !",
   "sign-up-terms-and-conditions-message" : "En cliquant sur Envoyer, je reconnais avoir lu et accepté les Tolgee \n <Link>\n Conditions d'utilisation\n </Link>",
   "sign_up_title" : "Inscription",
