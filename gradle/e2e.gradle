@@ -1,3 +1,4 @@
+apply from: './gradle/utils.gradle'
 import groovy.io.FileType
 
 import java.time.Duration
@@ -65,7 +66,7 @@ task installE2eDeps(type: Exec, group: "e2e") {
     inputs.file("$E2E_DIR/package-lock.json")
     outputs.dir("$E2E_DIR/node_modules")
 
-    commandLine "npm", "install"
+    commandLine npmCommandName, "install"
     workingDir E2E_DIR
 }
 
@@ -73,7 +74,7 @@ task runE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
     def specs = getE2eTestsToRun().join(",")
 
-    commandLine "npm", "run", "cy:run", "--", "--spec", specs
+    commandLine npmCommandName, "run", "cy:run", "--", "--spec", specs
 
     workingDir E2E_DIR
 
@@ -88,7 +89,7 @@ task saveServerLogs(type: Exec, group: "e2E"){
 task openE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
 
-    commandLine "npm", "run", "cy:open"
+    commandLine npmCommandName, "run", "cy:open"
 
     workingDir E2E_DIR
 
@@ -96,7 +97,7 @@ task openE2e(type: Exec, group: "e2e") {
 }
 
 task openE2eDev(type: Exec, group: "e2e") {
-    commandLine "npm", "run", "cy:open"
+    commandLine npmCommandName, "run", "cy:open"
 
     environment "CYPRESS_HOST", "http://localhost:8081"
 
@@ -104,7 +105,7 @@ task openE2eDev(type: Exec, group: "e2e") {
 }
 
 task openBillingE2eDev(type: Exec, group: "e2e") {
-    commandLine "npm", "run", "cy:open"
+    commandLine npmCommandName, "run", "cy:open"
 
     environment "CYPRESS_HOST", "http://localhost:8081"
 
@@ -112,7 +113,7 @@ task openBillingE2eDev(type: Exec, group: "e2e") {
 }
 
 task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
-    commandLine "npm", "run", "startConcurrently"
+    commandLine npmCommandName, "run", "startConcurrently"
 
     environment "REACT_APP_API_URL", "http://localhost:8201"
     environment "PORT", "8081"
