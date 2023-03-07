@@ -1,8 +1,7 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { deleteProject } from '../../common/apiCalls/common';
-import { visitProjectDashboard } from '../../common/languages';
 import { waitForGlobalLoading } from '../../common/loading';
-import { assertMessage } from '../../common/shared';
+import { assertMessage, visitProjectDashboard } from '../../common/shared';
 
 import {
   create4Translations,

@@ -1,9 +1,8 @@
 /// <reference types="cypress" />
 
 import { avatarTestData } from '../common/apiCalls/testData/testData';
-import { visitProjectSettings } from '../common/languages';
 import { login } from '../common/apiCalls/common';
-import { gcy, gcyChain } from '../common/shared';
+import { gcy, gcyChain, visitProjectSettings } from '../common/shared';
 import 'cypress-file-upload';
 import { HOST } from '../common/constants';
 

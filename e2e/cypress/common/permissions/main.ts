@@ -4,7 +4,6 @@ import {
   generatePermissionsData,
   PermissionsOptions,
 } from '../apiCalls/testData/testData';
-import { HOST } from '../constants';
 import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
 import { testDashboard } from './dashboard';

@@ -1,9 +1,5 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import {
-  deleteLanguage,
-  visitLanguageSettings,
-  visitProjectLanguages,
-} from '../../common/languages';
+import { deleteLanguage, visitLanguageSettings } from '../../common/languages';
 import {
   createTranslation,
   toggleLang,
@@ -16,6 +12,7 @@ import {
   getAnyContainingText,
   getClosestContainingText,
 } from '../../common/xPath';
+import { visitProjectLanguages } from '../../common/shared';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
