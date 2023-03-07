@@ -10,11 +10,11 @@ import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissio
 import {
   checkChildren,
   getChildScopes,
-  getMinimalLanguages,
+  getLanguagesUnion,
   getScopeLanguagePermission,
   updateByDependencies,
   getBlockingScopes,
-  ALL_LANGUAGES_SCOPES,
+  updateByDependenciesSoftly,
   isAllLanguages,
 } from './hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
@@ -72,11 +72,7 @@ export const Hierarchy: React.FC<Props> = ({
   // meaning if we toggle this, nothing outside gets broken
   const blockingScopes = getBlockingScopes(myScopes, scopes, dependencies);
 
-  const blockedLanguages = getMinimalLanguages(
-    blockingScopes,
-    state,
-    allLangIds
-  );
+  const blockedLanguages = getLanguagesUnion(blockingScopes, state, allLangIds);
 
   const disabled = Boolean(blockingScopes.length);
 
@@ -90,7 +86,7 @@ export const Hierarchy: React.FC<Props> = ({
     structure.label ||
     (structure.value ? getScopeTranslation(structure.value) : undefined);
 
-  const minimalLanguages = getMinimalLanguages(
+  const minimalLanguages = getLanguagesUnion(
     structure.value
       ? [structure.value]
       : myScopes.filter((sc) => scopes.includes(sc)),
@@ -98,11 +94,7 @@ export const Hierarchy: React.FC<Props> = ({
     []
   );
 
-  const displayLanguages =
-    allLangs?.length &&
-    minimalLanguages &&
-    structure.value &&
-    !ALL_LANGUAGES_SCOPES.includes(structure.value!);
+  const displayLanguages = Boolean(structure.value && myLanguageProps.length);
 
   const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
     let newScopes = [...state.scopes];
@@ -138,7 +130,9 @@ export const Hierarchy: React.FC<Props> = ({
       });
     } else {
       // get myScopes and also their required scopes
-      onChange(updateByDependencies(myScopes, state, dependencies, allLangIds));
+      onChange(
+        updateByDependenciesSoftly(myScopes, state, dependencies, allLangIds)
+      );
     }
   };
 
@@ -166,22 +160,12 @@ export const Hierarchy: React.FC<Props> = ({
             buttonProps={{ size: 'small', style: { minWidth: 170 } }}
             disabled={
               (!halfChecked && !fullyChecked) ||
-              Boolean(
-                blockingScopes.find((scope) =>
-                  ALL_LANGUAGES_SCOPES.includes(scope)
-                )
-              ) ||
-              blockedLanguages
+              (blockedLanguages !== false && isAllLanguages(blockedLanguages)
+                ? allLangIds
+                : blockedLanguages)
             }
             allLanguages={allLangs}
-            selected={
-              !blockedLanguages
-                ? minimalLanguages
-                : isAllLanguages(blockedLanguages, allLangIds) &&
-                  isAllLanguages(minimalLanguages, allLangIds)
-                ? []
-                : minimalLanguages
-            }
+            selected={minimalLanguages}
             onSelect={(value) => updateLanguagePermissions(value)}
           />
         )}

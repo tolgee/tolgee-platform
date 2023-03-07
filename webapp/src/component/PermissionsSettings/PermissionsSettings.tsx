@@ -2,7 +2,6 @@ import { Box, Button, ButtonGroup, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { updateByDependencies } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -64,19 +63,12 @@ export const PermissionsSettings: React.FC<Props> = ({
         (permissions.type
           ? rolesLoadable.data[permissions.type]
           : permissions.scopes) || [];
-      setAdvancedState(
-        updateByDependencies(
-          permissions.scopes,
-          {
-            scopes,
-            viewLanguages: permissions.viewLanguageIds || [],
-            translateLanguages: permissions.translateLanguageIds || [],
-            stateChangeLanguages: permissions.stateChangeLanguageIds || [],
-          },
-          dependenciesLoadable.data,
-          allLangs?.map((l) => l.id) || []
-        )
-      );
+      setAdvancedState({
+        scopes,
+        viewLanguages: permissions.viewLanguageIds || [],
+        translateLanguages: permissions.translateLanguageIds || [],
+        stateChangeLanguages: permissions.stateChangeLanguageIds || [],
+      });
     }
   }, [dependenciesLoadable.data, rolesLoadable.data, advancedState]);
 

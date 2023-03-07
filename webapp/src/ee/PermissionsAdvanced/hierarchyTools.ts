@@ -117,7 +117,7 @@ export const getScopeLanguagePermission = (
   return SCOPE_TO_LANG_PROPERTY_MAP[scope];
 };
 
-export const getMinimalLanguages = (
+export const getLanguagesUnion = (
   scopes: PermissionModelScope[],
   permittedLanguages: LanguagePermissions,
   allLangs: number[]
@@ -126,20 +126,52 @@ export const getMinimalLanguages = (
   let all = false;
   scopes.forEach((scope) => {
     const languageProp = getScopeLanguagePermission(scope);
-    const dependantLanguages = languageProp && permittedLanguages[languageProp];
-    dependantLanguages?.forEach((langId) => result.add(langId));
-    if (
-      dependantLanguages?.length === 0 ||
-      ALL_LANGUAGES_SCOPES.includes(scope)
-    ) {
-      all = true;
+    if (languageProp) {
+      const dependantLanguages =
+        languageProp && permittedLanguages[languageProp];
+      dependantLanguages?.forEach((langId) => result.add(langId));
+      if (
+        isAllLanguages(dependantLanguages) ||
+        ALL_LANGUAGES_SCOPES.includes(scope)
+      ) {
+        all = true;
+      }
     }
   });
-  return all ? allLangs : result.size ? Array.from(result) : false;
+  return all ? [] : result.size ? Array.from(result) : false;
 };
 
-export const isAllLanguages = (langs: number[], allLangs: number[]) => {
-  return langs.length === 0 || allLangs.every((lid) => langs.includes(lid));
+export const getLanguagesIntersection = (
+  scopes: PermissionModelScope[],
+  permittedLanguages: LanguagePermissions,
+  allLangs: number[]
+) => {
+  let result: number[] = [];
+  scopes.forEach((scope) => {
+    const languageProp = getScopeLanguagePermission(scope);
+    const dependantLanguages = languageProp && permittedLanguages[languageProp];
+
+    if (!isSubset(result, dependantLanguages)) {
+      if (isAllLanguages(result)) {
+        result = allLangs;
+      }
+      result = result.filter((l) => dependantLanguages.includes(l));
+    }
+  });
+  return Array.from(result);
+};
+
+export const isSubset = (subset: number[], wholeSet: number[]) => {
+  if (isAllLanguages(wholeSet)) {
+    return true;
+  } else if (isAllLanguages(subset)) {
+    return false;
+  }
+  return !subset.find((item) => !wholeSet.includes(item));
+};
+
+export const isAllLanguages = (langs: number[] | undefined) => {
+  return !langs?.length;
 };
 
 export const updateByDependencies = (
@@ -153,35 +185,54 @@ export const updateByDependencies = (
     scopes: Array.from(new Set([...currentState.scopes, ...myScopes])),
   };
   myScopes.forEach((myScope) => {
-    const minimalLanguages = getMinimalLanguages([myScope], newState, allLangs);
-    const minimalIsAll =
-      minimalLanguages !== false && isAllLanguages(minimalLanguages, allLangs);
+    const minimalLanguages = getLanguagesUnion([myScope], newState, allLangs);
     getRequiredScopes(myScope, dependencies).forEach((requiredScope) => {
       if (!newState.scopes.includes(requiredScope)) {
         // add required scope to selected scopes
         newState.scopes = [...newState.scopes, requiredScope];
       }
       const languageProp = getScopeLanguagePermission(requiredScope);
-      if (minimalLanguages && languageProp && requiredScope !== myScope) {
-        const requiredIsAll = isAllLanguages(
-          newState[languageProp] || [],
-          allLangs
-        );
-        if (!minimalIsAll && requiredIsAll) {
-          newState[languageProp] = allLangs;
-        } else if (minimalIsAll) {
-          // add all languages, so they can be deselected
-          newState[languageProp] = [];
-        } else if (!requiredIsAll) {
-          // add language to the list
-          minimalLanguages.forEach((l) => {
-            if (!newState[languageProp]?.includes(l)) {
-              newState[languageProp] = [...(newState[languageProp] || []), l];
-            }
-          });
-        }
+      if (
+        minimalLanguages !== false &&
+        languageProp &&
+        requiredScope !== myScope &&
+        !isSubset(minimalLanguages, currentState[languageProp])
+      ) {
+        newState[languageProp] = minimalLanguages;
       }
     });
+  });
+  return newState;
+};
+
+export const updateByDependenciesSoftly = (
+  myScopes: PermissionModelScope[],
+  currentState: PermissionAdvancedState,
+  dependencies: HierarchyItem,
+  allLangs: number[]
+) => {
+  const newState = {
+    ...currentState,
+    scopes: Array.from(new Set([...currentState.scopes, ...myScopes])),
+  };
+  myScopes.forEach((myScope) => {
+    if (!newState.scopes.includes(myScope)) {
+      // add required scope to selected scopes
+      newState.scopes = [...newState.scopes, myScope];
+    }
+    const languageProp = getScopeLanguagePermission(myScope);
+    if (languageProp) {
+      const requiredScopes = getRequiredScopes(myScope, dependencies);
+      const maximalLanguages = getLanguagesIntersection(
+        requiredScopes,
+        newState,
+        allLangs
+      );
+
+      if (!isSubset(newState[languageProp], maximalLanguages)) {
+        newState[languageProp] = maximalLanguages;
+      }
+    }
   });
   return newState;
 };

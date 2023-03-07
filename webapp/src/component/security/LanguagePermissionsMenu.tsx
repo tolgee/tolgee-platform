@@ -9,6 +9,7 @@ import { CompactMenuItem } from 'tg.views/projects/translations/Filters/FiltersC
 import { StyledInputContent } from 'tg.component/searchSelect/SearchStyled';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
+import { isAllLanguages } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 
 const StyledButton = styled(Button)`
   padding: 0px;
@@ -35,23 +36,26 @@ export const LanguagePermissionsMenu: FunctionComponent<{
     setOpen(true);
   };
 
-  const handleToggle = (langId: number) => {
-    if (props.selected.includes(langId)) {
-      props.onSelect(props.selected.filter((id) => id !== langId));
-    } else {
-      props.onSelect([...props.selected, langId]);
-    }
-  };
-
   const disabledLanguages = Array.isArray(props.disabled)
     ? (props.disabled as number[])
     : [];
 
-  const selectedLanguages = Array.from(
-    new Set([...props.selected, ...disabledLanguages])
-  )
+  const selected =
+    disabledLanguages.length && isAllLanguages(props.selected)
+      ? props.allLanguages.map((l) => l.id)
+      : props.selected;
+
+  const selectedLanguages = selected
     .map((id) => props.allLanguages.find((l) => l.id === id)!)
     .filter(Boolean);
+
+  const handleToggle = (langId: number) => {
+    if (selected.includes(langId)) {
+      props.onSelect(selected.filter((id) => id !== langId));
+    } else {
+      props.onSelect([...props.selected, langId]);
+    }
+  };
 
   const selectedIds = selectedLanguages.map((l) => l.id);
 
@@ -59,7 +63,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
     <>
       <Tooltip
         title={
-          selectedLanguages?.length
+          props.selected?.length
             ? selectedLanguages.map((l) => l.name || l.tag).join(', ')
             : t('languages_permitted_list_all')
         }
@@ -77,7 +81,9 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           onClick={handleClick}
         >
           <LanguagesPermittedList
-            languages={selectedLanguages}
+            languages={props.selected.map(
+              (lid) => props.allLanguages.find((l) => l.id === lid)!
+            )}
             disabled={props.disabled}
             maxItems={5}
           />
