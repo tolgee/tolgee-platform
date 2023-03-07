@@ -30,6 +30,7 @@ class AdvancedPermissionController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationRoleService: OrganizationRoleService
 ) {
+  @Suppress("MVCPathVariableInspection")
   @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
   @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
   @Operation(summary = "Sets user's direct permission")

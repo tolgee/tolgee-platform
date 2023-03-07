@@ -73,6 +73,12 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
         node("permittedLanguageIds").isArray.hasSize(2)
         node("invitedUserName").isEqualTo("Franta")
         node("invitedUserEmail").isEqualTo("a@a.a")
+        node("permission") {
+          node("type").isEqualTo("TRANSLATE")
+          node("stateChangeLanguageIds").isArray.hasSize(0)
+          node("translateLanguageIds").isArray.hasSize(2)
+          node("viewLanguageIds").isArray.hasSize(0)
+        }
       }
     }
   }
@@ -86,7 +92,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     }.andIsOk
     val invitation = invitationTestUtil.getInvitation(result)
     invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
-    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains("en") // ads also to view
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
   }
 
   @Test
@@ -94,11 +100,24 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   fun `invites user to project with languages (review)`() {
     val result = invitationTestUtil.perform { getLang ->
       type = ProjectPermissionType.REVIEW
+      translateLanguages = setOf(getLang("en"))
       stateChangeLanguages = setOf(getLang("en"))
     }.andIsOk
     val invitation = invitationTestUtil.getInvitation(result)
     invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
-    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains("en") // ads also to view
+    invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot set different languages (review)`() {
+    val result = invitationTestUtil.perform { getLang ->
+      type = ProjectPermissionType.REVIEW
+      translateLanguages = setOf(getLang("en"))
+      stateChangeLanguages = setOf()
+    }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS)
   }
 
   @Test

@@ -189,9 +189,7 @@ class PermissionService(
   ): Permission {
     val type = params.type ?: throw IllegalStateException("Permission type cannot be null")
 
-    params.languagePermissions.let {
-      validateLanguagePermissions(it, type)
-    }
+    validateLanguagePermissions(params.languagePermissions, type)
 
     val permission = Permission(
       invitation = invitation,
@@ -275,13 +273,12 @@ class PermissionService(
   ) {
     permission.translateLanguages = languagePermissions.translate.standardize()
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
+    permission.viewLanguages = languagePermissions.view.standardize()
 
-    permission.viewLanguages = (
-      (
-        languagePermissions.view?.toMutableSet()
-          ?: mutableSetOf()
-        ) + permission.translateLanguages + permission.stateChangeLanguages
-      ).standardize()
+    if (permission.viewLanguages.isNotEmpty()) {
+      permission.viewLanguages.addAll(permission.translateLanguages)
+      permission.viewLanguages.addAll(permission.stateChangeLanguages)
+    }
   }
 
   private fun validateLanguagePermissions(
@@ -290,22 +287,31 @@ class PermissionService(
   ) {
     val isTranslate = newPermissionType == ProjectPermissionType.TRANSLATE
     val isReview = newPermissionType == ProjectPermissionType.REVIEW
-    val isView = newPermissionType == ProjectPermissionType.VIEW
 
     val hasTranslateLanguages = !languagePermissions.translate.isNullOrEmpty()
     val hasViewLanguages = !languagePermissions.view.isNullOrEmpty()
     val hasStateChangeLanguages = !languagePermissions.stateChange.isNullOrEmpty()
 
-    if (hasViewLanguages && (!isTranslate && !isReview && !isView)) {
-      throw BadRequestException(Message.ONLY_TRANSLATE_REVIEW_OR_VIEW_PERMISSION_ACCEPTS_VIEW_LANGUAGES)
+    if (hasViewLanguages) {
+      throw BadRequestException(Message.CANNOT_SET_VIEW_LANGUAGES_WITHOUT_FOR_LEVEL_BASED_PERMISSIONS)
+    }
+
+    if (hasStateChangeLanguages && (!isReview)) {
+      throw BadRequestException(Message.ONLY_REVIEW_PERMISSION_ACCEPTS_STATE_CHANGE_LANGUAGES)
     }
 
     if (hasTranslateLanguages && (!isTranslate && !isReview)) {
       throw BadRequestException(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
     }
 
-    if (hasStateChangeLanguages && (!isReview)) {
-      throw BadRequestException(Message.ONLY_REVIEW_PERMISSION_ACCEPTS_STATE_CHANGE_LANGUAGES)
+    if (isReview && (hasTranslateLanguages || hasStateChangeLanguages)) {
+      val equal = languagePermissions.stateChange?.size == languagePermissions.translate?.size &&
+        languagePermissions.stateChange?.containsAll(languagePermissions.translate ?: emptyList()) ?: false
+      if (!equal) {
+        throw BadRequestException(
+          Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS
+        )
+      }
     }
   }
 
