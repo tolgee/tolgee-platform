@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.enabledFeaturesProvider.PublicEnabledFeaturesProvider
+import io.tolgee.component.PublicEnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.fixtures.andHasErrorMessage

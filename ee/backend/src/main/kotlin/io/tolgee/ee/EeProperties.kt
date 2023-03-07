@@ -7,7 +7,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 class EeProperties(
   var licenseServer: String = "https://app.tolgee.io",
-  val setPath: String = "/v2/public/licensing/set-key",
-  val prepareSetKeyPath: String = "/v2/public/licensing/prepare-set-key",
-  val reportUsagePath: String = "/v2/public/licensing/report-usage",
 )

@@ -3,8 +3,10 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { styled } from '@mui/material';
-import { AdministrationNav } from './AdministrationNav';
+import { AdministrationNav } from '../AdministrationNav';
 import { SetupLicenceKey } from './SetupLicenceKey';
+import { RefreshButton } from './RefreshButton';
+import { ReleaseKeyButton } from './ReleaseKeyButton';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -39,8 +41,9 @@ export const AdministrationEeLicense = () => {
           <AdministrationNav />
           {info ? (
             <>
-              {t('ee-license-is-set')}
-              todo: more info here
+              <RefreshButton />
+              <ReleaseKeyButton />
+              <pre>{JSON.stringify(info, null, 2)}</pre>
             </>
           ) : (
             <SetupLicenceKey />

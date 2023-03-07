@@ -2,7 +2,8 @@ package io.tolgee.ee.data
 
 enum class SubscriptionStatus {
   ACTIVE,
-  CANCELLED,
+  CANCELED,
   PAST_DUE,
-  UNPAID
+  UNPAID,
+  ERROR
 }

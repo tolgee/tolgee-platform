@@ -2,10 +2,10 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.ee.api.v2.hateoas.EeUsageModel
 import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
+import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModel
+import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
-import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.security.UserAccountService
@@ -22,14 +22,15 @@ import org.springframework.web.bind.annotation.RestController
 class EeLicenseController(
   private val securityService: SecurityService,
   private val eeSubscriptionService: EeSubscriptionService,
-  private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService,
+  private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler
 ) {
   @PutMapping("set-license-key")
   @Operation(summary = "Sets the EE licence key for this instance")
-  fun setLicenseKey(@RequestBody body: SetLicenseKeyDto): EeUsageModel {
+  fun setLicenseKey(@RequestBody body: SetLicenseKeyDto): EeSubscriptionModel {
     securityService.checkUserIsServerAdmin()
     val eeSubscription = eeSubscriptionService.setLicenceKey(body.licenseKey)
-    return getEeUsageModel(eeSubscription)
+    return eeSubscriptionModelAssembler.toModel(eeSubscription)
   }
 
   @PostMapping("prepare-set-license-key")
@@ -39,22 +40,23 @@ class EeLicenseController(
     return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
   }
 
-  @GetMapping("info")
-  @Operation(summary = "Returns the info about the current EE subscription")
-  fun getInfo(): EeUsageModel? {
-    val eeSubscription = eeSubscriptionService.getSubscription()
-    return eeSubscription?.let { getEeUsageModel(it) }
+  @PutMapping("/refresh")
+  fun refreshSubscription(): EeSubscriptionModel? {
+    eeSubscriptionService.refreshSubscription()
+    val eeSubscription = eeSubscriptionService.getSubscription() ?: return null
+    return eeSubscriptionModelAssembler.toModel(eeSubscription)
   }
 
-  fun getEeUsageModel(eeSubscription: EeSubscription): EeUsageModel {
-    val currentUserCount = userAccountService.countAll()
+  @GetMapping("info")
+  @Operation(summary = "Returns the info about the current EE subscription")
+  fun getInfo(): EeSubscriptionModel? {
+    val eeSubscription = eeSubscriptionService.getSubscription()
+    return eeSubscription?.let { eeSubscriptionModelAssembler.toModel(it) }
+  }
 
-    return EeUsageModel(
-      enabledFeatures = eeSubscription.enabledFeatures,
-      currentPeriodEnd = eeSubscription.currentPeriodEnd?.time,
-      cancelAtPeriodEnd = eeSubscription.cancelAtPeriodEnd,
-      currentUserCount = currentUserCount,
-      userLimit = eeSubscription.userLimit
-    )
+  @PutMapping("release-license-key")
+  @Operation(summary = "Removes the EE licence key from this instance")
+  fun release() {
+    eeSubscriptionService.releaseSubscription()
   }
 }

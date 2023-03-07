@@ -15,6 +15,7 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { CancelSelfHostedEeSubscriptionButton } from './CancelSelfHostedEeSubscriptionButton';
 
 export const SelfHostedEeDialog = (props: {
   open: boolean;
@@ -95,6 +96,7 @@ export const SelfHostedEeDialog = (props: {
                 <Box key={subscription.id}>
                   {subscription.plan.name} | Subscribed:{' '}
                   {new Date(subscription.createdAt).toString()}
+                  <CancelSelfHostedEeSubscriptionButton id={subscription.id} />
                 </Box>
               ))}
             </Box>

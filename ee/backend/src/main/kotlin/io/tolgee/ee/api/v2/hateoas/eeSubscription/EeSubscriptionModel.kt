@@ -1,16 +1,19 @@
-package io.tolgee.ee.api.v2.hateoas
+package io.tolgee.ee.api.v2.hateoas.eeSubscription
 
 import io.tolgee.constants.Feature
+import io.tolgee.ee.data.SubscriptionStatus
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
+import java.util.*
 
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
-open class EeUsageModel(
+open class EeSubscriptionModel(
   val enabledFeatures: Array<Feature>,
   val currentPeriodEnd: Long?,
   val cancelAtPeriodEnd: Boolean,
   val currentUserCount: Long,
-  val userLimit: Long
-) : RepresentationModel<EeUsageModel>(), Serializable
+  val status: SubscriptionStatus,
+  var lastValidCheck: Date?
+) : RepresentationModel<EeSubscriptionModel>(), Serializable

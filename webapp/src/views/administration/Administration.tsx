@@ -4,7 +4,7 @@ import { Switch } from 'react-router-dom';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
 import { useState } from 'react';
-import { AdministrationEeLicense } from './AdministrationEeLicense';
+import { AdministrationEeLicense } from './eeLicense/AdministrationEeLicense';
 
 export const Administration = () => {
   const [search, setSearch] = useState('');

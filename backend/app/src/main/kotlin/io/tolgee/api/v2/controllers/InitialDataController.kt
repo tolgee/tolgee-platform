@@ -6,6 +6,8 @@ import io.tolgee.api.v2.hateoas.InitialDataModel
 import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.controllers.ConfigurationController
 import io.tolgee.controllers.IController
+import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
+import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
@@ -27,14 +28,17 @@ class InitialDataController(
   private val authenticationFacade: AuthenticationFacade,
   private val userController: V2UserController,
   private val userPreferencesService: UserPreferencesService,
-  private val preferredOrganizationFacade: PreferredOrganizationFacade
+  private val preferredOrganizationFacade: PreferredOrganizationFacade,
+  private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler,
+  private val eeSubscriptionService: EeSubscriptionService
 ) : IController {
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
   fun get(): InitialDataModel {
 
     val data = InitialDataModel(
-      serverConfiguration = configurationController.getPublicConfiguration()
+      serverConfiguration = configurationController.getPublicConfiguration(),
+      eeSubscription = eeSubscriptionService.getSubscription()?.let { eeSubscriptionModelAssembler.toModel(it) }
     )
 
     val userAccount = authenticationFacade.userAccountOrNull

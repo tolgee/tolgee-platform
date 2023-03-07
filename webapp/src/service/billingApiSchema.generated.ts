@@ -19,6 +19,9 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     put: operations["cancelSubscription"];
   };
+  "/v2/organizations/{organizationId}/billing/cancel-self-hosted-ee-subscription/{subscriptionId}": {
+    put: operations["cancelEeSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
   };
@@ -99,6 +102,7 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       createdAt: string;
       plan: components["schemas"]["SelfHostedEePlanModel"];
+      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
     };
     UpdateSubscriptionPrepareRequest: {
       /** Id of the subscription plan */
@@ -326,6 +330,30 @@ export interface operations {
     parameters: {
       path: {
         organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  cancelEeSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+        subscriptionId: number;
       };
     };
     responses: {

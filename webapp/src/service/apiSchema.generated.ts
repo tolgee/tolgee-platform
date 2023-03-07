@@ -180,6 +180,12 @@ export interface paths {
   "/v2/ee-license/set-license-key": {
     put: operations["setLicenseKey"];
   };
+  "/v2/ee-license/release-license-key": {
+    put: operations["release"];
+  };
+  "/v2/ee-license/refresh": {
+    put: operations["refreshSubscription"];
+  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_6"];
     delete: operations["delete_10"];
@@ -213,6 +219,9 @@ export interface paths {
   };
   "/v2/public/licensing/report-usage": {
     post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
   };
   "/v2/public/licensing/prepare-set-key": {
     post: operations["prepareSetLicenseKey"];
@@ -548,12 +557,6 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
       /** List of languages user can translate to. If null, all languages editing is permitted. */
       translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, changing state of all language values is permitted. */
@@ -582,6 +585,12 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -944,10 +953,10 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -990,12 +999,13 @@ export interface components {
     SetLicenseKeyDto: {
       licenseKey: string;
     };
-    EeUsageModel: {
+    EeSubscriptionModel: {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentUserCount: number;
-      userLimit: number;
+      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      lastValidCheck?: string;
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -1029,13 +1039,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      userFullName?: string;
-      projectName: string;
+      username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      username?: string;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
       description: string;
     };
     SuperTokenRequest: {
@@ -1065,6 +1075,7 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       createdAt: string;
       plan: components["schemas"]["SelfHostedEePlanModel"];
+      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
     };
     SetLicenseKeyLicensingDto: {
       licenseKey: string;
@@ -1073,6 +1084,10 @@ export interface components {
     ReportUsageDto: {
       licenseKey: string;
       seats: number;
+    };
+    ReportErrorDto: {
+      stackTrace: string;
+      licenseKey: string;
     };
     PrepareSetEeLicenceKeyModel: {
       pricePerSeatMonthly: number;
@@ -1345,6 +1360,7 @@ export interface components {
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       languageTag?: string;
+      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
     };
     MtServiceDTO: {
       enabled: boolean;
@@ -1369,7 +1385,6 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       name: string;
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -1378,6 +1393,7 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       avatar?: components["schemas"]["Avatar"];
       slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       description?: string;
     };
     PublicBillingConfigurationDTO: {
@@ -1456,17 +1472,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1801,10 +1817,10 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1859,13 +1875,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      userFullName?: string;
-      projectName: string;
+      username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      username?: string;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
       description: string;
     };
     PagedModelUserAccountModel: {
@@ -3830,7 +3846,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["EeUsageModel"];
+          "*/*": components["schemas"]["EeSubscriptionModel"];
         };
       };
       /** Bad Request */
@@ -3849,6 +3865,46 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  release: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  refreshSubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -4164,6 +4220,29 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
       };
     };
   };
@@ -6656,7 +6735,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["EeUsageModel"];
+          "*/*": components["schemas"]["EeSubscriptionModel"];
         };
       };
       /** Bad Request */

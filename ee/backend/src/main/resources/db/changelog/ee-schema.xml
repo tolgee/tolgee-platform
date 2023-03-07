@@ -31,4 +31,17 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1678208452734-1">
+        <addColumn tableName="ee_subscription">
+            <column name="last_valid_check" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1678208452734-2">
+        <addColumn tableName="ee_subscription">
+            <column defaultValue="ACTIVE" name="status" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1678208452734-3">
+        <dropColumn columnName="user_limit" tableName="ee_subscription"/>
+    </changeSet>
 </databaseChangeLog>
