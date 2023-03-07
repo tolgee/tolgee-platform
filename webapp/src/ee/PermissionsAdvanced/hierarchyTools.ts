@@ -195,10 +195,15 @@ export const updateByDependencies = (
       if (
         minimalLanguages !== false &&
         languageProp &&
-        requiredScope !== myScope &&
-        !isSubset(minimalLanguages, currentState[languageProp])
+        !isSubset(minimalLanguages, newState[languageProp])
       ) {
-        newState[languageProp] = minimalLanguages;
+        if (isAllLanguages(minimalLanguages)) {
+          newState[languageProp] = [];
+        } else {
+          newState[languageProp] = Array.from(
+            new Set([...newState[languageProp], ...minimalLanguages])
+          );
+        }
       }
     });
   });

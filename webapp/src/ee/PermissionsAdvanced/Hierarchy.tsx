@@ -16,6 +16,7 @@ import {
   getBlockingScopes,
   updateByDependenciesSoftly,
   isAllLanguages,
+  ALL_LANGUAGES_SCOPES,
 } from './hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
 
@@ -79,6 +80,10 @@ export const Hierarchy: React.FC<Props> = ({
   const fullyChecked =
     scopeIncluded || (!structure.value && childrenCheckedAll);
   const halfChecked = !structure.value && !fullyChecked && childrenCheckedSome;
+
+  const fullyBlocked = Boolean(
+    blockingScopes.find((scope) => ALL_LANGUAGES_SCOPES.includes(scope))
+  );
 
   const { getScopeTranslation } = useScopeTranslations();
 
@@ -159,6 +164,7 @@ export const Hierarchy: React.FC<Props> = ({
           <LanguagePermissionsMenu
             buttonProps={{ size: 'small', style: { minWidth: 170 } }}
             disabled={
+              fullyBlocked ||
               (!halfChecked && !fullyChecked) ||
               (blockedLanguages !== false && isAllLanguages(blockedLanguages)
                 ? allLangIds
