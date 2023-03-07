@@ -1,3 +1,10 @@
+## [3.8.3](https://github.com/tolgee/tolgee-platform/compare/v3.8.2...v3.8.3) (2023-03-07)
+
+
+### Bug Fixes
+
+* Error when screenshot text too long ([#1611](https://github.com/tolgee/tolgee-platform/issues/1611)) ([e4cd636](https://github.com/tolgee/tolgee-platform/commit/e4cd63644e2106c2a553a7268cf1b38705a33547))
+
 ## [3.8.2](https://github.com/tolgee/tolgee-platform/compare/v3.8.1...v3.8.2) (2023-03-05)
 
 
