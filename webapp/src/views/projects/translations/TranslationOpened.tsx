@@ -7,7 +7,7 @@ import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
-import { getMeta } from 'tg.fixtures/isMac';
+import { getMeta, IS_MAC } from 'tg.fixtures/isMac';
 import {
   useTranslationsActions,
   useTranslationsSelector,
@@ -85,6 +85,7 @@ type Props = {
   translation: TranslationViewModel | undefined;
   onChange: (val: string) => void;
   onSave: () => void;
+  onInsertBase: (val: string | undefined) => void;
   onCmdSave: () => void;
   onCancel: (force: boolean) => void;
   onStateChange: (state: StateType) => void;
@@ -105,6 +106,7 @@ export const TranslationOpened: React.FC<Props> = ({
   translation,
   onChange,
   onSave,
+  onInsertBase,
   onCmdSave,
   onCancel,
   onStateChange,
@@ -137,14 +139,13 @@ export const TranslationOpened: React.FC<Props> = ({
   const baseLanguage = useTranslationsSelector((v) =>
     v.languages?.find((l) => l.base)
   )?.tag;
-  const baseTranslation =
-    baseLanguage && keyData.translations[baseLanguage]?.text;
+  const baseText = baseLanguage && keyData.translations[baseLanguage]?.text;
 
   const data = useTranslationTools({
     projectId: project.id,
     keyId: keyData.keyId,
     targetLanguageId: language.id,
-    baseText: baseTranslation,
+    baseText: baseText,
     enabled: !language.base,
     onValueUpdate: (value) => {
       updateEdit({
@@ -203,18 +204,29 @@ export const TranslationOpened: React.FC<Props> = ({
               onChange={onChange}
               onCancel={() => onCancel(true)}
               onSave={onSave}
+              onInsertBase={() => onInsertBase(baseText)}
               direction={getLanguageDirection(language.tag)}
               autofocus={autofocus}
               shortcuts={{
                 [`${getMeta()}-E`]: handleStateChange,
                 [`${getMeta()}-Enter`]: onCmdSave,
+                [`${getMeta()}-Insert`]: () => {
+                  !language.base && onInsertBase(baseText);
+                },
+              }}
+              onKeyDown={(_, e) => {
+                if (IS_MAC && e.metaKey && e.shiftKey && e.key === 'S') {
+                  !language.base && onInsertBase(baseText);
+                }
               }}
             />
           </StyledEditorContainer>
           <StyledEditorControls>
             <ControlsEditor
               state={state}
+              isBaseLanguage={language.base}
               onSave={onSave}
+              onInsertBase={() => onInsertBase(baseText)}
               onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
             />

@@ -16,7 +16,7 @@ import {
 import clsx from 'clsx';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
-import { getMetaName } from 'tg.fixtures/isMac';
+import { getMetaName, IS_MAC } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
 
@@ -165,6 +165,9 @@ export const TranslationsShortcuts = () => {
   const cursorMode = useTranslationsSelector((c) => c.cursor?.mode);
 
   const translations = useTranslationsSelector((c) => c.translations);
+  const baseLanguage = useTranslationsSelector((c) =>
+    c.languages?.find((l) => l.base)
+  )?.tag;
 
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
 
@@ -238,6 +241,14 @@ export const TranslationsShortcuts = () => {
         <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
       ),
       formula: formatShortcut(`${getMetaName()} + E`),
+    },
+    {
+      name: cursorLanguage != baseLanguage && (
+        <T>translations_cell_insert_base</T>
+      ),
+      formula: IS_MAC
+        ? formatShortcut(`${getMetaName()} + Shift + S`)
+        : formatShortcut(`${getMetaName()} + Insert`),
     },
   ];
 

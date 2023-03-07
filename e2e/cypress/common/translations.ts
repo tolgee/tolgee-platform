@@ -19,6 +19,10 @@ export function getCellSaveButton() {
   return cy.gcy('translations-cell-save-button');
 }
 
+export function getCellInsertBaseButton() {
+  return cy.gcy('translations-cell-insert-base-button');
+}
+
 export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };

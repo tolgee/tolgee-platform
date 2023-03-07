@@ -20,7 +20,7 @@ const StyledContainer = styled('span')`
   top: -1px;
   width: 20px;
   vertical-align: bottom;
-  font-size: ${({ theme }) => theme.typography.caption.fontSize};
+  font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
 `;
 
 export const KeyTemplate: React.FC = ({ children }) => {

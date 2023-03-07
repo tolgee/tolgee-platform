@@ -6,11 +6,10 @@ import {
   KeyLeft,
   KeyRight,
   KeyEnter,
-  KeyCtrl,
+  KeyShift,
 } from 'tg.component/key/SvgKeys';
-import { IS_MAC } from './isMac';
 
-export type KeyType = 'Ctrl' | 'Alt' | 'Shift' | 'Meta' | 'Action' | string;
+export type KeyType = 'Ctrl' | 'Alt' | 'Shift' | 'Meta' | 'Cmd' | string;
 
 export type KeyMap = Record<string, ReadonlyArray<KeyType> | Array<KeyType>>;
 
@@ -27,9 +26,9 @@ const matchesKey = (e: KeyboardEvent, key: KeyType) => {
     case 'Shift':
       return e.shiftKey;
     case 'Meta':
+    case 'Cmd':
       return e.metaKey;
-    case 'Action':
-      return IS_MAC ? e.metaKey : e.ctrlKey;
+
     default:
       return key.length === 1
         ? e.key === key.toLocaleLowerCase()
@@ -49,8 +48,12 @@ export const getKeyVisual = (key: KeyType) => {
       return <KeyRight />;
     case 'Enter':
       return <KeyEnter />;
-    case 'Action':
-      return IS_MAC ? '⌘' : <KeyCtrl />;
+    case 'Insert':
+      return 'Ins';
+    case 'Shift':
+      return <KeyShift />;
+    case 'Cmd':
+      return '⌘';
     default:
       return key.length === 1 ? key.toUpperCase() : key;
   }
