@@ -1,19 +1,37 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.constants.Message
+import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import org.springframework.core.io.ClassPathResource
 
 class PermissionsTestData {
   var projectBuilder: ProjectBuilder
+  var organizationBuilder: OrganizationBuilder
+  var admin: UserAccountBuilder
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    val admin = addUserAccount { username = "admin@admin.com" }
+    admin = addUserAccount { username = "admin@admin.com" }
+    organizationBuilder = admin.defaultOrganizationBuilder
+
     val member = addUserAccount { username = "member@member.com" }
+    addUserAccount { username = "no@no.no" }
+
+    val orgOnly = addUserAccount { username = "org@org.org" }
+
+    organizationBuilder.build {
+      addRole {
+        user = orgOnly.self
+        type = OrganizationRoleType.MEMBER
+      }
+    }
 
     projectBuilder = addProject { name = "Project" }.build {
       val en = addEnglish()
@@ -21,12 +39,7 @@ class PermissionsTestData {
       val cs = addCzech()
 
       addPermission {
-        this.user = admin.self
-        this.type = ProjectPermissionType.MANAGE
-      }
-
-      addPermission {
-        this.user = admin.self
+        this.user = member.self
         this.type = ProjectPermissionType.VIEW
       }
 
@@ -38,7 +51,10 @@ class PermissionsTestData {
               text = "${it.self.name} text $i"
               language = it.self
             }.build {
-              addComment { text = "comment $i" }
+              addComment {
+                text = "comment $i"
+                author = admin.self
+              }
             }
           }
         }
@@ -52,12 +68,13 @@ class PermissionsTestData {
   }
 
   fun addUserWithPermissions(
-    scopes: List<Scope>?,
-    type: ProjectPermissionType?,
-    viewLanguageTags: List<String>?,
-    translateLanguageTags: List<String>?,
-    stateChangeLanguageTags: List<String>?
-  ) {
+    scopes: List<Scope>? = null,
+    type: ProjectPermissionType? = null,
+    viewLanguageTags: List<String>? = null,
+    translateLanguageTags: List<String>? = null,
+    stateChangeLanguageTags: List<String>? = null,
+    organizationBaseScopes: List<Scope>? = null,
+  ): UserAccount {
     val me = root.addUserAccount {
       username = "me@me.me"
     }
@@ -72,6 +89,18 @@ class PermissionsTestData {
         stateChangeLanguages = getLanguagesByTags(stateChangeLanguageTags)
       }
     }
+
+    if (organizationBaseScopes != null) {
+      organizationBuilder.self.basePermission.type = null
+      organizationBuilder.self.basePermission.scopes = organizationBaseScopes.toTypedArray()
+      organizationBuilder.build {
+        addRole {
+          user = me.self
+          this.type = OrganizationRoleType.MEMBER
+        }
+      }
+    }
+    return me.self
   }
 
   fun getLanguagesByTags(tags: List<String>?) = tags?.map { tag ->

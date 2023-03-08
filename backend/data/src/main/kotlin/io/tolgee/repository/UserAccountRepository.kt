@@ -53,11 +53,16 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   ): Optional<UserAccount>
 
   @Query(
-    """select userAccount.id as id, userAccount.name as name, userAccount.username as username, memberRole.type as organizationRole from UserAccount userAccount 
-        join OrganizationRole memberRole on memberRole.user = userAccount and memberRole.organization.id = :organizationId
-        where ((lower(userAccount.name)
+    """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole
+        from UserAccount ua 
+        left join ua.organizationRoles mr on mr.organization.id = :organizationId
+        left join ua.permissions pp
+        left join pp.project p
+        left join p.organizationOwner o on o.id = :organizationId
+        where (pp is not null or mr is not null) and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%')) 
-        or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+        or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+        group by ua.id, mr.type
         """
   )
   fun getAllInOrganization(

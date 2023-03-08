@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.hateoas.invitation
 
+import io.tolgee.api.v2.hateoas.permission.PermissionModel
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.enums.Scope
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.util.*
@@ -10,10 +10,12 @@ import java.util.*
 open class ProjectInvitationModel(
   val id: Long,
   val code: String,
+  @Deprecated("Use permission object instead")
   val type: ProjectPermissionType?,
-  val scopes: Array<Scope>,
+  @Deprecated("Use permission object instead")
   val permittedLanguageIds: List<Long>?,
   val createdAt: Date,
   val invitedUserName: String?,
-  val invitedUserEmail: String?
+  val invitedUserEmail: String?,
+  val permission: PermissionModel
 ) : RepresentationModel<ProjectInvitationModel>()

@@ -89,7 +89,7 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
   @Transactional
   fun `lowers permissions for translate edit (granular)`() {
     checkUser(testData.editScopeUser) {
-      assertThat(computedPermissions.scopes).containsExactly(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+      assertThat(computedPermissions.scopes).containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
     }
   }
 

@@ -24,7 +24,10 @@ class InvitationTestUtil(
       ProjectInviteUserDto().apply {
         fn(
           this
-        ) { tag -> testData.projectBuilder.self.languages.find { it.tag == tag }!!.id }
+        ) { tag ->
+          testData.projectBuilder.data.languages.find { it.self.tag == tag }?.self?.id
+            ?: throw NullPointerException("Language $tag not found")
+        }
       }
     )
   }

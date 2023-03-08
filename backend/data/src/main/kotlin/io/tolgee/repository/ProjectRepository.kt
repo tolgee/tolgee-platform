@@ -113,4 +113,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """
   )
   fun findAllWithUserOwnerIds(): List<Long>
+
+  @Query(
+    """
+    select pp.user.id, p 
+    from Project p
+    join p.permissions pp on pp.user.id in :userIds
+    join fetch p.baseLanguage
+    where p.organizationOwner.id = :organizationId
+  """
+  )
+  fun getProjectsWithDirectPermissions(organizationId: Long, userIds: List<Long>): List<Array<Any>>
 }

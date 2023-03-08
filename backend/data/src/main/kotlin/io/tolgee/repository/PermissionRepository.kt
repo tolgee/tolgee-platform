@@ -68,4 +68,14 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     """
   )
   fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission>
+
+  @Query(
+    """
+    from Permission p 
+    join p.project pr
+    join pr.organizationOwner oo on oo.id = :organizationId 
+    where p.user.id = :userId
+  """
+  )
+  fun findAllByOrganizationAndUserId(organizationId: Long, userId: Long): List<Permission>
 }

@@ -169,17 +169,30 @@ V2ProjectsController(
   @Operation(summary = "Sets user's direct permission")
   @NeedsSuperJwtToken
   fun setUsersPermissions(
-    @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
     @ParameterObject params: SetPermissionLanguageParams
   ) {
     projectPermissionFacade.checkNotCurrentUser(userId)
     permissionService.setUserDirectPermission(
-      projectId = projectId,
+      projectId = projectHolder.project.id,
       userId = userId,
       newPermissionType = permissionType,
-      languages = projectPermissionFacade.getLanguages(params, projectId)
+      languages = projectPermissionFacade.getLanguages(params, projectHolder.project.id)
+    )
+  }
+
+  @PutMapping("/{projectId}/users/{userId}/set-by-organization")
+  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
+  @Operation(summary = "Removes user's explicit project permission. User will have base permissions from organization.")
+  @NeedsSuperJwtToken
+  fun setOrganizationBase(
+    @PathVariable("userId") userId: Long,
+  ) {
+    projectPermissionFacade.checkNotCurrentUser(userId)
+    permissionService.setOrganizationBasePermissions(
+      projectId = projectHolder.project.id,
+      userId = userId,
     )
   }
 
