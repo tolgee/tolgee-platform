@@ -1,8 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
-import com.amazonaws.services.translate.AmazonTranslate
-import com.amazonaws.services.translate.model.TranslateTextRequest
-import com.amazonaws.services.translate.model.TranslateTextResult
+import software.amazon.awssdk.services.translate.TranslateClient
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -12,23 +10,19 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class AwsMtValueProvider(
   private val awsMachineTranslationProperties: AwsMachineTranslationProperties,
-  private val amazonTranslate: AmazonTranslate?
+  private val amazonTranslate: TranslateClient?
 ) : AbstractMtValueProvider() {
   override val isEnabled: Boolean
-    get() = !awsMachineTranslationProperties.accessKey.isNullOrEmpty() &&
-      !awsMachineTranslationProperties.secretKey.isNullOrEmpty()
+    get() = awsMachineTranslationProperties.enabled
 
   override fun calculateProviderPrice(text: String): Int {
     return text.length * 100
   }
 
   override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    val request: TranslateTextRequest = TranslateTextRequest()
-      .withText(text)
-      .withSourceLanguageCode(sourceTag)
-      .withTargetLanguageCode(targetTag)
-    val result: TranslateTextResult = translateService.translateText(request)
-    return result.translatedText
+    return translateService.translateText { b ->
+      b.sourceLanguageCode(sourceTag).targetLanguageCode(targetTag).text(text)
+    }.translatedText()
   }
 
   private val translateService by lazy {

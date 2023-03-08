@@ -4,8 +4,6 @@
 
 package io.tolgee.component.fileStorage
 
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.model.AmazonS3Exception
 import io.findify.s3mock.S3Mock
 import io.tolgee.component.fileStorage.FileStorageS3Test.Companion.BUCKET_NAME
 import io.tolgee.testing.ContextRecreatingTest
@@ -17,6 +15,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.S3Exception
 
 @ContextRecreatingTest
 @SpringBootTest(
@@ -36,7 +37,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Autowired
-  lateinit var s3: AmazonS3
+  lateinit var s3: S3Client
 
   lateinit var s3Mock: S3Mock
 
@@ -44,7 +45,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   fun setup() {
     s3Mock = S3Mock.Builder().withPort(29090).withInMemoryBackend().build()
     s3Mock.start()
-    s3.createBucket(BUCKET_NAME)
+    s3.createBucket { req -> req.bucket(BUCKET_NAME) }
   }
 
   @AfterAll
@@ -54,29 +55,29 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @Test
   fun testGetFile() {
-    s3.putObject(BUCKET_NAME, testFilePath, testFileContent)
+    s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     val fileByteContent = testFileContent.toByteArray(charset("UTF-8"))
     assertThat(fileStorage.readFile(testFilePath)).isEqualTo(fileByteContent)
   }
 
   @Test
   fun testDeleteFile() {
-    s3.putObject(BUCKET_NAME, testFilePath, testFileContent)
+    s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     fileStorage.deleteFile(testFilePath)
-    assertThatExceptionOfType(AmazonS3Exception::class.java).isThrownBy { s3.getObject(BUCKET_NAME, testFilePath) }
+    assertThatExceptionOfType(S3Exception::class.java).isThrownBy { s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) } }
   }
 
   @Test
   fun testStoreFile() {
     fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
     assertThat(
-      s3.getObject(BUCKET_NAME, testFilePath).objectContent.readAllBytes()
+      s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes()
     ).isEqualTo(testFileContent.toByteArray())
   }
 
   @Test
   fun testFileExists() {
-    s3.putObject(BUCKET_NAME, testFilePath, testFileContent)
+    s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     assertThat(fileStorage.fileExists(testFilePath)).isTrue
   }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 open class AwsMachineTranslationProperties(
   override var defaultEnabled: Boolean = true,
   override var defaultPrimary: Boolean = false,
+  var enabled: Boolean = false,
   var accessKey: String? = null,
   var secretKey: String? = null,
   var region: String? = "eu-central-1"

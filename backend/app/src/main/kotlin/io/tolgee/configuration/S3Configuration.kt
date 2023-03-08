@@ -4,15 +4,18 @@
 
 package io.tolgee.configuration
 
-import com.amazonaws.auth.AWSCredentials
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.S3Configuration
+import software.amazon.awssdk.services.s3.endpoints.S3EndpointProvider
+import software.amazon.awssdk.services.s3.endpoints.internal.DefaultS3EndpointProvider
+import java.net.URI
 
 @Configuration
 class S3Configuration(private val properties: TolgeeProperties) {
@@ -20,19 +23,24 @@ class S3Configuration(private val properties: TolgeeProperties) {
   private val s3config = properties.fileStorage.s3
 
   @Bean
-  fun s3(): AmazonS3? {
+  fun s3(): S3Client? {
     if (s3config.enabled) {
-      val credentials: AWSCredentials = BasicAWSCredentials(
-        s3config.accessKey,
-        s3config.secretKey
-      )
+      val chain = when (s3config.accessKey.isNullOrEmpty()
+                     || s3config.secretKey.isNullOrEmpty()) {
+        true -> DefaultCredentialsProvider.create()
+        false -> StaticCredentialsProvider.create(AwsBasicCredentials.create(
+          s3config.accessKey, s3config.secretKey))
+      }
 
-      val endpointConfig = AwsClientBuilder.EndpointConfiguration(s3config.endpoint, s3config.signingRegion)
-
-      return AmazonS3ClientBuilder.standard().withCredentials(AWSStaticCredentialsProvider(credentials))
-        .withEndpointConfiguration(endpointConfig)
-        .enablePathStyleAccess()
-        .build()
+      val builder = S3Client.builder().credentialsProvider(chain).serviceConfiguration(
+        S3Configuration.builder().pathStyleAccessEnabled(true).build())
+      if (!s3config.endpoint.isNullOrEmpty()) {
+        builder.endpointOverride(URI.create(s3config.endpoint))
+      }
+      if (!s3config.signingRegion.isNullOrEmpty()) {
+        builder.region(Region.of(s3config.signingRegion))
+      }
+      return builder.build()
     }
     return null
   }
