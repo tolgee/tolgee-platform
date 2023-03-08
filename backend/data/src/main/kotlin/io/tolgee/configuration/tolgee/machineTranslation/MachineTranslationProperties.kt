@@ -8,5 +8,6 @@ open class MachineTranslationProperties(
   var aws: AwsMachineTranslationProperties = AwsMachineTranslationProperties(),
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
   var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
+  var baidu: BaiduMachineTranslationProperties = BaiduMachineTranslationProperties(),
   var freeCreditsAmount: Long = -1,
 )

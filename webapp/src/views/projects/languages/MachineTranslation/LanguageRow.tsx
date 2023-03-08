@@ -46,6 +46,8 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
         return 'DeepL';
       case 'AZURE':
         return 'Azure Cognitive';
+      case 'BAIDU':
+        return 'Baidu';
       default:
         return provider;
     }

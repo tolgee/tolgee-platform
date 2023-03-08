@@ -15,7 +15,8 @@ class SuggestResultModel(
       "GOOGLE": "This was translated by Google",
       "AWS": "This was translated by AWS",
       "DEEPL": "This was translated by DeepL",
-      "AZURE": "This was translated by Azure Cognitive"
+      "AZURE": "This was translated by Azure Cognitive",
+      "BAIDU": "This was translated by Baidu"
     }
   """
   )
