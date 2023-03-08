@@ -39,6 +39,7 @@ const StyledContent = styled('div')`
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(2)};
   min-height: 75px;
+  margin-bottom: 20px;
 `;
 
 type Props = {
@@ -162,7 +163,10 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                 />
               </DialogContent>
               <DialogActions>
-                <Button data-cy="invitation-dialog-close-button">
+                <Button
+                  onClick={onClose}
+                  data-cy="invitation-dialog-close-button"
+                >
                   {t('project_members_dialog_close_button')}
                 </Button>
                 <LoadingButton
