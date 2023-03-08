@@ -135,9 +135,15 @@ export const Hierarchy: React.FC<Props> = ({
       });
     } else {
       // get myScopes and also their required scopes
-      onChange(
-        updateByDependenciesSoftly(myScopes, state, dependencies, allLangIds)
-      );
+      if (structure.value && ALL_LANGUAGES_SCOPES.includes(structure.value)) {
+        onChange(
+          updateByDependencies(myScopes, state, dependencies, allLangIds)
+        );
+      } else {
+        onChange(
+          updateByDependenciesSoftly(myScopes, state, dependencies, allLangIds)
+        );
+      }
     }
   };
 

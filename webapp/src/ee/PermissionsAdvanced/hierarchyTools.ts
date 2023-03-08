@@ -185,7 +185,9 @@ export const updateByDependencies = (
     scopes: Array.from(new Set([...currentState.scopes, ...myScopes])),
   };
   myScopes.forEach((myScope) => {
-    const minimalLanguages = getLanguagesUnion([myScope], newState, allLangs);
+    const minimalLanguages = ALL_LANGUAGES_SCOPES.includes(myScope)
+      ? []
+      : getLanguagesUnion([myScope], newState, allLangs);
     getRequiredScopes(myScope, dependencies).forEach((requiredScope) => {
       if (!newState.scopes.includes(requiredScope)) {
         // add required scope to selected scopes
