@@ -1,9 +1,10 @@
 import { useTranslate } from '@tolgee/react';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Box } from '@mui/material';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { LanguageModel, PermissionModel } from './types';
 import { getLanguagesByRole } from './utils';
 import { LanguagePermissionCategory, LanguagesHint } from './LaguagesHint';
+import { Language } from '@mui/icons-material';
 
 type Props = {
   permissions: PermissionModel;
@@ -51,9 +52,9 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
         />
       }
     >
-      <div>
+      <Box display="flex" alignItems="center">
         {isVarious ? (
-          t('languages_permitted_list_various')
+          <Language fontSize="small" />
         ) : (
           <LanguagesPermittedList
             languages={displayed?.map(
@@ -61,7 +62,7 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
             )}
           />
         )}
-      </div>
+      </Box>
     </Tooltip>
   );
 }
