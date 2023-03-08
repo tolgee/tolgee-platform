@@ -55,13 +55,11 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
 
         if (role === 'REVIEW') {
           languagePermissions = {
-            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: permissions.basicState.languages,
             stateChangeLanguages: permissions.basicState.languages,
           };
         } else if (role === 'TRANSLATE') {
           languagePermissions = {
-            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: permissions.basicState.languages,
           };
         }

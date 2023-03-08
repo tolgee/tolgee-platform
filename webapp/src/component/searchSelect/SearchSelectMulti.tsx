@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Checkbox,
   Autocomplete,
@@ -54,6 +54,7 @@ type Props<T> = {
   actionTooltip?: string;
   actionIcon?: React.ReactNode;
   minWidth?: number | string;
+  maxWidth?: number | string;
   renderOption?: RenderOption<T>;
 };
 
@@ -70,7 +71,8 @@ export function SearchSelectMulti<T extends React.Key>({
   title,
   actionTooltip: addNewTooltip,
   actionIcon,
-  minWidth = 250,
+  minWidth,
+  maxWidth,
   renderOption,
 }: Props<T>) {
   const [inputValue, setInputValue] = useState('');
@@ -80,10 +82,14 @@ export function SearchSelectMulti<T extends React.Key>({
     onAddNew?.(inputValue);
   };
 
-  const width =
-    !anchorEl || anchorEl.offsetWidth < minWidth
-      ? minWidth
-      : anchorEl.offsetWidth;
+  const [fixedWidth, setFixedWidth] = useState<number>();
+
+  const wrapperEl = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // let wrapper render and then fix it's width so it doesnt change when searching
+    setTimeout(() => setFixedWidth(wrapperEl.current?.offsetWidth), 0);
+  }, [items, minWidth, maxWidth]);
 
   const defaultRenderOption: RenderOption<T> = (props, option) => (
     <CompactMenuItem key={option.value} {...props} data-cy="search-select-item">
@@ -97,7 +103,13 @@ export function SearchSelectMulti<T extends React.Key>({
   );
 
   return (
-    <StyledWrapper sx={{ minWidth: width, maxWidth: width }}>
+    <StyledWrapper
+      ref={wrapperEl}
+      sx={{
+        minWidth: fixedWidth || minWidth || anchorEl?.offsetWidth,
+        maxWidth: fixedWidth || maxWidth,
+      }}
+    >
       <FormControl>
         <Autocomplete
           open

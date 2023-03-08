@@ -1,5 +1,4 @@
 import {
-  LanguageModel,
   LanguagePermissions,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
@@ -9,14 +8,9 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 type Props = {
   userId: number;
   projectId: number;
-  allLangs: LanguageModel[];
 };
 
-export const useUpdatePermissions = ({
-  userId,
-  projectId,
-  allLangs,
-}: Props) => {
+export const useUpdatePermissions = ({ userId, projectId }: Props) => {
   const editRole = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
     method: 'put',
@@ -67,13 +61,11 @@ export const useUpdatePermissions = ({
 
         if (role === 'REVIEW') {
           languagePermissions = {
-            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: settingsState.basicState.languages,
             stateChangeLanguages: settingsState.basicState.languages,
           };
         } else if (role === 'TRANSLATE') {
           languagePermissions = {
-            viewLanguages: allLangs.map((l) => l.id),
             translateLanguages: settingsState.basicState.languages,
           };
         }

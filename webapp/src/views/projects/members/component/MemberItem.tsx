@@ -63,7 +63,6 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const { updatePermissions } = useUpdatePermissions({
     userId: user.id,
     projectId: project.id,
-    allLangs,
   });
 
   async function handleSubmit(data: PermissionSettingsState) {

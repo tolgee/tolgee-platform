@@ -26,7 +26,6 @@ export const StyledInputContent = styled('div')`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  contain: size;
   height: 23px;
   width: 100%;
 `;

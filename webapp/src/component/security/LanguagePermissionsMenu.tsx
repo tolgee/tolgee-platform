@@ -126,11 +126,12 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             open={Boolean(anchorEl)}
             items={allItems}
             value={selectedIds}
-            minWidth={300}
+            anchorEl={anchorEl.current || undefined}
             onAction={!isAll && listIsLong ? handleSelectAll : undefined}
             actionIcon={<CheckBox fontSize="small" />}
             actionTooltip={t('languages_permitted_list_select_all')}
             onSelect={handleToggle}
+            maxWidth={400}
             renderOption={(renderProps, option) => (
               <CompactMenuItem
                 key={option.value}
@@ -138,25 +139,19 @@ export const LanguagePermissionsMenu: FunctionComponent<{
                 data-cy="search-select-item"
                 disabled={disabledLanguages.includes(option.value)}
               >
-                {option.value === -1 ? (
-                  <StyledInputContent>{option.name}</StyledInputContent>
-                ) : (
-                  <>
-                    <Checkbox
-                      size="small"
-                      edge="start"
-                      checked={selectedIds.includes(option.value)}
-                    />
-                    <StyledInputContent>{option.name}</StyledInputContent>
-                    <CircledLanguageIcon
-                      size={20}
-                      flag={
-                        props.allLanguages.find(({ id }) => id === option.value)
-                          ?.flagEmoji
-                      }
-                    />
-                  </>
-                )}
+                <Checkbox
+                  size="small"
+                  edge="start"
+                  checked={selectedIds.includes(option.value)}
+                />
+                <StyledInputContent>{option.name}</StyledInputContent>
+                <CircledLanguageIcon
+                  size={20}
+                  flag={
+                    props.allLanguages.find(({ id }) => id === option.value)
+                      ?.flagEmoji
+                  }
+                />
               </CompactMenuItem>
             )}
           />
