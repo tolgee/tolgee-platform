@@ -3,7 +3,6 @@ import { Box, Select, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
-import { SearchSelectMulti } from './SearchSelectMulti';
 
 export type SelectItem<T> = {
   value: T;
@@ -20,19 +19,18 @@ const StyledInputContent = styled('div')`
 `;
 
 type Props<T> = {
-  onChange?: (value: T | T[]) => void;
+  onChange?: (value: T) => void;
   onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
   items: SelectItem<T>[];
-  value: T | T[] | undefined;
+  value: T | undefined;
   onAddNew?: (searchValue: string) => void;
   searchPlaceholder?: string;
   title?: string;
   addNewTooltip?: string;
   displaySearch?: boolean;
   popperMinWidth?: string | number;
-  multiple?: boolean;
-  renderValue?: (value: T | T[] | undefined) => React.ReactNode;
+  renderValue?: (value: T | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
 };
 
@@ -47,7 +45,6 @@ export function SearchSelect<T extends React.Key>({
   addNewTooltip,
   displaySearch = true,
   popperMinWidth,
-  multiple,
   renderValue,
   SelectProps,
 }: Props<T>) {
@@ -64,14 +61,7 @@ export function SearchSelect<T extends React.Key>({
 
   const handleSelect = (newValue: T) => {
     onSelect?.(newValue);
-    if (multiple && Array.isArray(value)) {
-      const newValues = value.includes(newValue)
-        ? value.filter((i) => i !== newValue)
-        : [...value, newValue];
-      onChange?.(newValues);
-    } else {
-      onChange?.(newValue);
-    }
+    onChange?.(newValue);
   };
 
   const myRenderValue = () => (
@@ -109,37 +99,20 @@ export function SearchSelect<T extends React.Key>({
         onClose={handleClose}
         anchorEl={anchorEl.current!}
       >
-        {multiple ? (
-          <SearchSelectMulti
-            open={isOpen}
-            onClose={handleClose}
-            value={value as T[]}
-            onSelect={handleSelect}
-            anchorEl={anchorEl.current!}
-            items={items}
-            onAddNew={handleOnAddNew}
-            displaySearch={displaySearch}
-            searchPlaceholder={searchPlaceholder}
-            title={title}
-            addNewTooltip={addNewTooltip}
-            minWidth={popperMinWidth}
-          />
-        ) : (
-          <SearchSelectContent
-            open={isOpen}
-            onClose={handleClose}
-            selected={value as string | undefined}
-            onSelect={handleSelect}
-            anchorEl={anchorEl.current!}
-            items={items}
-            onAddNew={handleOnAddNew}
-            displaySearch={displaySearch}
-            searchPlaceholder={searchPlaceholder}
-            title={title}
-            addNewTooltip={addNewTooltip}
-            minWidth={popperMinWidth}
-          />
-        )}
+        <SearchSelectContent
+          open={isOpen}
+          onClose={handleClose}
+          selected={value as string | undefined}
+          onSelect={handleSelect}
+          anchorEl={anchorEl.current!}
+          items={items}
+          onAddNew={handleOnAddNew}
+          displaySearch={displaySearch}
+          searchPlaceholder={searchPlaceholder}
+          title={title}
+          addNewTooltip={addNewTooltip}
+          minWidth={popperMinWidth}
+        />
       </SearchSelectPopover>
     </Box>
   );

@@ -30,7 +30,6 @@ export const PermissionsSettings: React.FC<Props> = ({
   title,
   permissions,
   onChange,
-  height = 500,
   allLangs,
 }) => {
   const [tab, setTab] = useState<TabsType>(
@@ -116,7 +115,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         </ButtonGroup>
       </Box>
 
-      <Box sx={{ mt: 1 }} height={height} overflow="auto" mx={-1.5}>
+      <Box sx={{ mt: 1 }} overflow="auto" mx={-1.5}>
         {tab === 'basic' && (
           <PermissionsBasic
             state={basicState}

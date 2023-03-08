@@ -46,12 +46,13 @@ type Props<T> = {
   onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
   value: T[];
-  onAddNew?: (searchValue: string) => void;
+  onAction?: (searchValue: string) => void;
   items: SelectItem<T>[];
   displaySearch?: boolean;
   searchPlaceholder?: string;
   title?: string;
-  addNewTooltip?: string;
+  actionTooltip?: string;
+  actionIcon?: React.ReactNode;
   minWidth?: number | string;
   renderOption?: RenderOption<T>;
 };
@@ -62,12 +63,13 @@ export function SearchSelectMulti<T extends React.Key>({
   onSelect,
   anchorEl,
   value,
-  onAddNew,
+  onAction: onAddNew,
   items,
   displaySearch,
   searchPlaceholder,
   title,
-  addNewTooltip,
+  actionTooltip: addNewTooltip,
+  actionIcon,
   minWidth = 250,
   renderOption,
 }: Props<T>) {
@@ -147,7 +149,7 @@ export function SearchSelectMulti<T extends React.Key>({
                     sx={{ ml: 0.5 }}
                     data-cy="search-select-new"
                   >
-                    <Add />
+                    {actionIcon || <Add />}
                   </IconButton>
                 </Tooltip>
               )}

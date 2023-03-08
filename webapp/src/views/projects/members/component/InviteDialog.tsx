@@ -108,7 +108,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
         {({ values, handleSubmit, isValid, ...formik }) => {
           return (
             <form onSubmit={handleSubmit}>
-              <DialogContent>
+              <DialogContent sx={{ height: 'min(80vh, 700px)' }}>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography variant="h5">
                     {t('project_members_dialog_title')}
@@ -153,9 +153,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     )}
                   </Field>
                 </StyledContent>
-              </DialogContent>
 
-              <DialogContent>
                 <PermissionsSettings
                   title={t('project_members_dialog_permission_title')}
                   permissions={initialPermissions}

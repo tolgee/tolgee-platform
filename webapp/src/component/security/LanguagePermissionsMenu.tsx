@@ -1,6 +1,6 @@
 import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
 import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown, CheckBox } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
@@ -23,6 +23,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   buttonProps?: ComponentProps<typeof Button>;
   disabled?: boolean | number[];
   allLanguages: LanguageModel[];
+  selectAllButton?: boolean;
 }> = (props) => {
   const anchorEl = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -49,6 +50,11 @@ export const LanguagePermissionsMenu: FunctionComponent<{
     .map((id) => props.allLanguages.find((l) => l.id === id)!)
     .filter(Boolean);
 
+  const handleSelectAll = () => {
+    props.onSelect([]);
+    handleClose();
+  };
+
   const handleToggle = (langId: number) => {
     if (selected.includes(langId)) {
       props.onSelect(selected.filter((id) => id !== langId));
@@ -58,6 +64,15 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   };
 
   const selectedIds = selectedLanguages.map((l) => l.id);
+
+  const allItems = props.allLanguages.map((language) => ({
+    value: language.id,
+    name: language.name,
+  }));
+
+  const isAll = isAllLanguages(props.selected);
+
+  const listIsLong = props.allLanguages.length > 10;
 
   return (
     <>
@@ -106,15 +121,15 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           }}
         >
           <SearchSelectMulti
-            displaySearch={props.allLanguages.length > 10}
+            displaySearch={listIsLong}
             searchPlaceholder={t('language_permitted_search')}
             open={Boolean(anchorEl)}
-            items={props.allLanguages.map((language) => ({
-              value: language.id,
-              name: language.name,
-            }))}
+            items={allItems}
             value={selectedIds}
-            minWidth={anchorEl.current?.getBoundingClientRect().width}
+            minWidth={300}
+            onAction={!isAll && listIsLong ? handleSelectAll : undefined}
+            actionIcon={<CheckBox fontSize="small" />}
+            actionTooltip={t('languages_permitted_list_select_all')}
             onSelect={handleToggle}
             renderOption={(renderProps, option) => (
               <CompactMenuItem
@@ -123,19 +138,25 @@ export const LanguagePermissionsMenu: FunctionComponent<{
                 data-cy="search-select-item"
                 disabled={disabledLanguages.includes(option.value)}
               >
-                <Checkbox
-                  size="small"
-                  edge="start"
-                  checked={selectedIds.includes(option.value)}
-                />
-                <StyledInputContent>{option.name}</StyledInputContent>
-                <CircledLanguageIcon
-                  size={20}
-                  flag={
-                    props.allLanguages.find(({ id }) => id === option.value)
-                      ?.flagEmoji
-                  }
-                />
+                {option.value === -1 ? (
+                  <StyledInputContent>{option.name}</StyledInputContent>
+                ) : (
+                  <>
+                    <Checkbox
+                      size="small"
+                      edge="start"
+                      checked={selectedIds.includes(option.value)}
+                    />
+                    <StyledInputContent>{option.name}</StyledInputContent>
+                    <CircledLanguageIcon
+                      size={20}
+                      flag={
+                        props.allLanguages.find(({ id }) => id === option.value)
+                          ?.flagEmoji
+                      }
+                    />
+                  </>
+                )}
               </CompactMenuItem>
             )}
           />

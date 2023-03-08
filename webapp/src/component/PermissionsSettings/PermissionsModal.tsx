@@ -46,7 +46,7 @@ export const PermissionsModal: React.FC<Props> = ({
 
   return (
     <Dialog open={true} onClose={onClose} fullWidth>
-      <DialogContent sx={{ minHeight: 400 }}>
+      <DialogContent sx={{ height: 'min(80vh, 530px)' }}>
         <PermissionsSettings
           title={title}
           permissions={permissions}
