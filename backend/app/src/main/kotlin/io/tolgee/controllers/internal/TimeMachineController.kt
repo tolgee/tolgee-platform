@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @RestController
@@ -23,10 +25,20 @@ import java.util.*
 class TimeMachineController(
   val currentDateProvider: CurrentDateProvider
 ) {
-  @PutMapping(value = ["/{time}"])
+  @PutMapping(value = ["/{dateTimeString}"])
   @Operation(description = "Set's the time machine, so the app is using this date as current date")
-  fun setTime(@PathVariable @Schema(description = "Current unix timestamp (milliseconds)") time: Long) {
-    currentDateProvider.forcedDate = Date(time)
+  fun setTime(
+    @PathVariable
+    @Schema(description = "Current unix timestamp (milliseconds), or in yyyy-MM-dd HH:mm:ss z")
+    dateTimeString: String
+  ) {
+    val timestamp = try {
+      dateTimeString.toLong()
+    } catch (e: Exception) {
+      val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
+      ZonedDateTime.parse(dateTimeString, formatter).toInstant().toEpochMilli()
+    }
+    currentDateProvider.forcedDate = Date(timestamp)
   }
 
   @DeleteMapping(value = [""])

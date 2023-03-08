@@ -1,6 +1,8 @@
 package io.tolgee.component
 
+import io.tolgee.development.OnDateForced
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Scope
 import org.springframework.data.auditing.AuditingHandler
@@ -13,13 +15,18 @@ import java.util.*
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class CurrentDateProvider(
   @Lazy
-  auditingHandler: AuditingHandler
+  auditingHandler: AuditingHandler,
+  private val applicationEventPublisher: ApplicationEventPublisher
 ) : DateTimeProvider {
   init {
     auditingHandler.setDateTimeProvider(this)
   }
 
   var forcedDate: Date? = null
+    set(value) {
+      field = value
+      applicationEventPublisher.publishEvent(OnDateForced(this, value))
+    }
 
   val date: Date
     get() {
