@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 
@@ -28,8 +29,9 @@ class KeyBuilder(
     return addOperation(projectBuilder.data.translations, builder, ft)
   }
 
-  fun addMeta(ft: FT<KeyMeta>) {
+  fun addMeta(ft: FT<KeyMeta>): KeyMetaBuilder {
     data.meta = KeyMetaBuilder(keyBuilder = this).apply { ft(this.self) }
+    return data.meta!!
   }
 
   fun setNamespace(name: String?): NamespaceBuilder? {
@@ -58,5 +60,24 @@ class KeyBuilder(
       this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
       this.text = text
     }
+  }
+
+  fun addTag(name: String): Tag {
+    val meta = this.data.meta ?: addMeta { }
+
+    val tags = projectBuilder.data.keys
+      .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
+
+    if (tags.size > 1) {
+      throw IllegalStateException("More than one tag with name $name in the project")
+    }
+
+    val tag = tags.firstOrNull() ?: Tag().apply {
+      this.name = name
+      this.project = projectBuilder.self
+    }
+
+    meta.self.tags.add(tag)
+    return tag
   }
 }

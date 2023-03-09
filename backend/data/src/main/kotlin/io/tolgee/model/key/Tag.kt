@@ -38,7 +38,7 @@ class Tag : StandardAuditModel() {
 
   override fun hashCode(): Int {
     var result = super.hashCode()
-    result = 31 * result + name.hashCode()
+    result = 31 * result + name.hashCode() + project.id.hashCode()
     return result
   }
 }

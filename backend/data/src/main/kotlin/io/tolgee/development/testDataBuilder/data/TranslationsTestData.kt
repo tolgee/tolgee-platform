@@ -12,7 +12,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
-import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
 
@@ -64,18 +63,11 @@ class TranslationsTestData {
           mtProvider = MtServiceType.GOOGLE
           aKeyGermanTranslation = this
         }.build {
-          addMeta {
-            tags.add(
-              Tag().apply {
-                this.project = this@project.self
-                name = "Cool tag"
-              }
-            )
-          }
           addComment {
             text = "Comment"
           }
         }
+        addTag("Cool tag")
       }
 
       val zKeyBuilder = addKey {
@@ -88,16 +80,7 @@ class TranslationsTestData {
           text = "A translation"
           auto = true
         }.build {
-          addMeta {
-            self {
-              tags.add(
-                Tag().apply {
-                  this.project = this@project.self
-                  name = "Lame tag"
-                }
-              )
-            }
-          }
+          addTag("Lame tag")
         }
       }
       projectBuilder = this
@@ -223,38 +206,17 @@ class TranslationsTestData {
       addKey {
         name = "Key with tag"
       }.build {
-        addMeta {
-          tags.add(
-            Tag().apply {
-              name = "Cool tag"
-              project = root.data.projects[0].self
-            }
-          )
-        }
+        addTag("Cool tag")
       }
       addKey {
         name = "Another key with tag"
       }.build {
-        addMeta {
-          tags.add(
-            Tag().apply {
-              name = "Another cool tag"
-              project = root.data.projects[0].self
-            }
-          )
-        }
+        addTag("Another cool tag")
       }
       addKey {
         name = "Key with tag 2"
       }.build {
-        addMeta {
-          tags.add(
-            Tag().apply {
-              name = "Cool tag"
-              project = root.data.projects[0].self
-            }
-          )
-        }
+        addTag("Cool tag")
       }
     }
   }
