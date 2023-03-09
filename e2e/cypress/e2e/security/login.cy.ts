@@ -64,8 +64,8 @@ context('Login', () => {
     cy.xpath("//*[@name='email']").type(username);
     cy.contains('Send request').click();
     cy.contains(
-      'Request successfully sent! If you are signed up using this e-mail,' +
-        ' you will receive an e-mail with a link for password reset. Check your mail box.'
+      'Request successfully sent! If you are signed up using this email,' +
+        ' you will receive an email with a link for password reset. Check your mail box.'
     );
     getParsedResetPasswordEmail().then((r) => {
       cy.visit(r.resetLink);
