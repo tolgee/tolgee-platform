@@ -8,6 +8,7 @@ import {
 } from '../../common/translations';
 import { assertTooltip, gcy, selectInProjectMenu } from '../../common/shared';
 import { stateColors } from '../../common/state';
+import { deleteProject } from '../../common/apiCalls/common';
 
 describe('Translation states', () => {
   let project: ProjectDTO = null;
@@ -20,10 +21,10 @@ describe('Translation states', () => {
         visit();
       });
   });
-  //
-  // afterEach(() => {
-  //   deleteProject(project.id);
-  // });
+
+  afterEach(() => {
+    deleteProject(project.id);
+  });
 
   it('shows state indicator', () => {
     assertHasState('Cool translated text 1', 'Translated');
