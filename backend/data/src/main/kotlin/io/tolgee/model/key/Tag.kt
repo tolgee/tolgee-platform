@@ -4,12 +4,15 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import javax.persistence.Entity
 import javax.persistence.FetchType
+import javax.persistence.Index
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OrderBy
+import javax.persistence.Table
 import javax.validation.constraints.NotEmpty
 
 @Entity
+@Table(indexes = [Index(columnList = "project_id, name", unique = true)])
 class Tag : StandardAuditModel() {
   @field:NotEmpty
   var name: String = ""
