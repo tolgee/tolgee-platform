@@ -76,7 +76,7 @@ export const IntegrateView: FunctionComponent = () => {
           <StepContent>
             <React.Suspense fallback={<BoxLoading />}>
               {selectedWeapon && selectedApiKey && (
-                <Box data-cy="integrate-guide">
+                <Box data-cy="integrate-guide" mb={12}>
                   <MdxProvider
                     modifyValue={(code) => {
                       return code
