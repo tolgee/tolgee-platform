@@ -1,3 +1,10 @@
+# [3.10.0](https://github.com/tolgee/tolgee-platform/compare/v3.9.0...v3.10.0) (2023-03-10)
+
+
+### Features
+
+* **mt:** Baidu machine translation support ([#1606](https://github.com/tolgee/tolgee-platform/issues/1606)) ([34b69cb](https://github.com/tolgee/tolgee-platform/commit/34b69cb09eab58d07dc57122e141e28db1b9a31a))
+
 # [3.9.0](https://github.com/tolgee/tolgee-platform/compare/v3.8.3...v3.9.0) (2023-03-07)
 
 
