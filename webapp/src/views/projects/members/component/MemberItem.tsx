@@ -122,7 +122,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           }}
           modalProps={{
             allLangs,
-            title: t('permission_dialog_title', { name: user.name }),
+            title: user.name || user.username,
             permissions: user.computedPermission,
             onSubmit: handleSubmit,
             isInheritedFromOrganization:
