@@ -1,12 +1,24 @@
+import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, styled, Tooltip } from '@mui/material';
+import {
+  IconButton,
+  styled,
+  Tooltip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Link as MuiLink,
+} from '@mui/material';
 import { Clear } from '@mui/icons-material';
 import { useUser } from 'tg.globalContext/helpers';
+import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from './RemoveUserButton';
 import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
+import { LINKS, PARAMS } from 'tg.constants/links';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -46,13 +58,21 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();
 
+  const [projectsOpen, setProjectsOpen] = useState(false);
+
   return (
     <StyledListItem data-cy="organization-member-item">
       <StyledItemText>
         {user.name} ({user.username}){' '}
       </StyledItemText>
       <StyledItemActions>
-        <UpdateRoleButton user={user} />
+        {user.organizationRole ? (
+          <UpdateRoleButton user={user} />
+        ) : (
+          <Button size="small" onClick={() => setProjectsOpen(true)}>
+            {t('organization_users_project_access')}
+          </Button>
+        )}
 
         {currentUser?.id === user.id ? (
           <Tooltip title={t('organization_users_leave')}>
@@ -68,6 +88,28 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
           <RemoveUserButton userId={user.id} userName={user.username} />
         )}
       </StyledItemActions>
+      {projectsOpen && (
+        <Dialog open={true} onClose={() => setProjectsOpen(false)} fullWidth>
+          <DialogTitle>{t('organization_users_projects_title')}</DialogTitle>
+          <DialogContent sx={{ minHeight: 200 }}>
+            <p>{t('organization_users_projects_description')}</p>
+            <ul>
+              {user.projectsWithDirectPermission.map((project) => (
+                <li key={project.id}>
+                  <Link
+                    component={MuiLink}
+                    to={LINKS.PROJECT.build({
+                      [PARAMS.PROJECT_ID]: project.id,
+                    })}
+                  >
+                    {project.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </DialogContent>
+        </Dialog>
+      )}
     </StyledListItem>
   );
 };
