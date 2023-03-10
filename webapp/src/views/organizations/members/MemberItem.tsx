@@ -10,7 +10,7 @@ import {
   DialogContent,
   Link as MuiLink,
 } from '@mui/material';
-import { Clear } from '@mui/icons-material';
+import { Clear, Info } from '@mui/icons-material';
 import { useUser } from 'tg.globalContext/helpers';
 import { Link } from 'react-router-dom';
 
@@ -48,6 +48,10 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
+const StyledInfo = styled(Info)`
+  opacity: 0.5;
+`;
+
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
   organizationId: number;
@@ -69,9 +73,14 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
         {user.organizationRole ? (
           <UpdateRoleButton user={user} />
         ) : (
-          <Button size="small" onClick={() => setProjectsOpen(true)}>
-            {t('organization_users_project_access')}
-          </Button>
+          <>
+            <Tooltip title={t('organization_users_project_access_hint')}>
+              <StyledInfo fontSize="small" />
+            </Tooltip>
+            <Button size="small" onClick={() => setProjectsOpen(true)}>
+              {t('organization_users_project_access')}
+            </Button>
+          </>
         )}
 
         {currentUser?.id === user.id ? (

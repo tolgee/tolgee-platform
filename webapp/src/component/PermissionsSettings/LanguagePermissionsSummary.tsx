@@ -2,9 +2,8 @@ import { useTranslate } from '@tolgee/react';
 import { Tooltip, Box } from '@mui/material';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { LanguageModel, PermissionModel } from './types';
-import { getLanguagesByRole } from './utils';
 import { LanguagePermissionCategory, LanguagesHint } from './LaguagesHint';
-import { Language } from '@mui/icons-material';
+import { useMemo } from 'react';
 
 type Props = {
   permissions: PermissionModel;
@@ -34,13 +33,19 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
     },
   ];
 
-  if (!categories.find((c) => Boolean(c.data?.length))) {
+  const languagesUnion = useMemo(() => {
+    return Array.from(
+      new Set([
+        ...(viewLanguageIds || []),
+        ...(translateLanguageIds || []),
+        ...(stateChangeLanguageIds || []),
+      ])
+    );
+  }, [viewLanguageIds, translateLanguageIds, stateChangeLanguageIds]);
+
+  if (languagesUnion.length === 0) {
     return null;
   }
-
-  const displayed = getLanguagesByRole(permissions);
-
-  const isVarious = displayed === null;
 
   return (
     <Tooltip
@@ -54,15 +59,11 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
       disableInteractive
     >
       <Box display="flex" alignItems="center">
-        {isVarious ? (
-          <Language fontSize="small" />
-        ) : (
-          <LanguagesPermittedList
-            languages={displayed?.map(
-              (langId) => allLangs.find((l) => l.id === langId)!
-            )}
-          />
-        )}
+        <LanguagesPermittedList
+          languages={languagesUnion?.map(
+            (langId) => allLangs.find((l) => l.id === langId)!
+          )}
+        />
       </Box>
     </Tooltip>
   );

@@ -97,7 +97,7 @@ export const PermissionsModal: React.FC<PermissionModalProps> = ({
                   loading={resetLoading}
                   onClick={handleReset}
                   data-cy="permissions-menu-reset-to-organization"
-                  variant="contained"
+                  variant="outlined"
                   color="secondary"
                 >
                   <T keyName="permission_dialog_reset_to_organization" />
