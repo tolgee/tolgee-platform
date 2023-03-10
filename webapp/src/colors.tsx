@@ -77,6 +77,10 @@ export const colors = {
       primary: '#ff0000',
       secondary: '#ffc0cb',
     },
+    tooltip: {
+      background: '#ffffff',
+      text: '#111111',
+    },
   },
   dark: {
     white: '#dddddd',
@@ -129,5 +133,9 @@ export const colors = {
       primary: '#ff0000',
       secondary: '#ffc0cb',
     } as Marker,
+    tooltip: {
+      background: '#394556',
+      text: '#efefef',
+    },
   },
 } as const;
