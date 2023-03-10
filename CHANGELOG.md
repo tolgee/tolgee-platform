@@ -1,3 +1,10 @@
+## [3.10.1](https://github.com/tolgee/tolgee-platform/compare/v3.10.0...v3.10.1) (2023-03-10)
+
+
+### Bug Fixes
+
+* update ssr integration guides ([#1620](https://github.com/tolgee/tolgee-platform/issues/1620)) ([f3719ae](https://github.com/tolgee/tolgee-platform/commit/f3719ae7e2cb5ddc0e9b410163eb02622ef0ab52))
+
 # [3.10.0](https://github.com/tolgee/tolgee-platform/compare/v3.9.0...v3.10.0) (2023-03-10)
 
 
