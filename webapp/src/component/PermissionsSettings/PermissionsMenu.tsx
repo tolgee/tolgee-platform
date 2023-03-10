@@ -2,9 +2,7 @@ import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { PermissionModalProps, PermissionsModal } from './PermissionsModal';
-import { PermissionModel, PermissionSettingsState } from './types';
 import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTranslations';
-import { ScopesHint } from './ScopesHint';
 
 type Props = {
   buttonTooltip?: string;

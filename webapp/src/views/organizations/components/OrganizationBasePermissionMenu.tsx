@@ -53,9 +53,11 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
 
   return (
     <PermissionsMenu
-      onSubmit={handleSubmit}
-      permissions={organization.basePermissions}
-      title={t('organization_member_privileges_title')}
+      modalProps={{
+        onSubmit: handleSubmit,
+        title: t('organization_member_privileges_title'),
+        permissions: organization.basePermissions,
+      }}
     />
   );
 };
