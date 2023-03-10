@@ -6,7 +6,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
-
+const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 export interface OAuthService {
   id: string;
   authenticationUrl: string;
@@ -50,6 +50,8 @@ export const oauth2Service = (
   authorizationUrl: string,
   scopes: string[] = []
 ): OAuthService => {
+  const state = crypto.randomUUID();
+  localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
   const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
     [PARAMS.SERVICE_TYPE]: 'oauth2',
   });
@@ -58,7 +60,7 @@ export const oauth2Service = (
     authenticationUrl: encodeURI(
       `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes
         .map((scope) => `${scope}`)
-        .join('+')}`
+        .join('+')}&state=${state}`
     ),
     buttonIcon: <LoginIcon />,
     loginButtonTitle: 'login_oauth2_login_button',
