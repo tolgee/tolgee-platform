@@ -80,8 +80,4 @@ describe('Organization Settings', () => {
   const visitProfile = () => {
     cy.visit(`${HOST}/organizations/tolgee/profile`);
   };
-
-  const visitMemberPrivileges = () => {
-    cy.visit(`${HOST}/organizations/tolgee/member-privileges`);
-  };
 });
