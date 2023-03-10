@@ -1,5 +1,6 @@
 import 'cypress-file-upload';
 import {
+  assertMessage,
   confirmStandard,
   gcy,
   goToPage,
@@ -12,7 +13,10 @@ import { waitForGlobalLoading } from '../../common/loading';
 
 import { projectTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { permissionsMenuSelectRole } from '../../common/permissionsMenu';
+import {
+  permissionsMenuSelectAdvanced,
+  permissionsMenuSelectRole,
+} from '../../common/permissionsMenu';
 import {
   checkItemsInMenu,
   loginAndGetInfo,
@@ -124,7 +128,7 @@ describe('Project members', () => {
       permissionsMenuSelectRole('Translate', { languages: ['Czech'] });
 
       loginAndGetInfo('me@me.me', info.project.id).then((info) => {
-        expect(info.project.computedPermission.viewLanguageIds.length).equal(3);
+        expect(info.project.computedPermission.viewLanguageIds.length).equal(0);
         expect(
           info.project.computedPermission.translateLanguageIds.length
         ).equal(1);
@@ -145,7 +149,7 @@ describe('Project members', () => {
       permissionsMenuSelectRole('Review', { languages: ['Czech'] });
 
       loginAndGetInfo('me@me.me', info.project.id).then((info) => {
-        expect(info.project.computedPermission.viewLanguageIds.length).equal(3);
+        expect(info.project.computedPermission.viewLanguageIds.length).equal(0);
         expect(
           info.project.computedPermission.translateLanguageIds.length
         ).equal(1);
@@ -161,6 +165,63 @@ describe('Project members', () => {
           'project-menu-item-integrate': RUN,
         });
       });
+    });
+
+    it('selects Review role for the user', () => {
+      visitProjectMembers(info.project.id);
+      openMemberSettings('me@me.me');
+      permissionsMenuSelectRole('Review', { languages: ['Czech'] });
+
+      loginAndGetInfo('me@me.me', info.project.id).then((info) => {
+        expect(info.project.computedPermission.viewLanguageIds.length).equal(0);
+        expect(
+          info.project.computedPermission.translateLanguageIds.length
+        ).equal(1);
+        expect(
+          info.project.computedPermission.stateChangeLanguageIds.length
+        ).equal(1);
+        visitProjectDashboard(info.project.id);
+        checkItemsInMenu(info, {
+          'project-menu-item-dashboard': RUN,
+          'project-menu-item-translations': RUN,
+          'project-menu-item-import': RUN,
+          'project-menu-item-export': RUN,
+          'project-menu-item-integrate': RUN,
+        });
+      });
+    });
+
+    it('selects granular permissions for the user', () => {
+      visitProjectMembers(info.project.id);
+      openMemberSettings('me@me.me');
+      permissionsMenuSelectAdvanced([
+        'activity.view',
+        'keys.view',
+        'project.edit',
+      ]);
+      loginAndGetInfo('me@me.me', info.project.id).then((info) => {
+        visitProjectDashboard(info.project.id);
+        checkItemsInMenu(info, {
+          'project-menu-item-dashboard': RUN,
+          'project-menu-item-translations': RUN,
+          'project-menu-item-settings': RUN,
+          'project-menu-item-integrate': RUN,
+        });
+      });
+    });
+
+    it('resets user permissions to organization', () => {
+      visitProjectMembers(info.project.id);
+      openMemberSettings('org@org.org');
+      cy.gcy('permissions-menu-inherited-message').should('be.visible');
+      permissionsMenuSelectRole('Translate');
+
+      openMemberSettings('org@org.org');
+      cy.gcy('permissions-menu-reset-to-organization')
+        .should('be.visible')
+        .click();
+
+      assertMessage('Permissions reset');
     });
   });
 });

@@ -10,7 +10,7 @@ export const permissionsMenuSelectRole = (role: string, options?: Options) => {
   cy.gcy('permissions-menu-basic').click();
   cy.gcy('permissions-menu').contains(role).click();
 
-  if (options.languages) {
+  if (options?.languages) {
     cy.gcy('permissions-language-menu-button').click();
 
     options.languages?.forEach((lang) => {
@@ -34,15 +34,16 @@ export const permissionsMenuSelectAdvanced = (
   cy.gcy('permissions-menu-granular').click();
   // uncheck all
   for (const _ in [0, 1]) {
-    cy.gcy('permissions-advanced-checkbox')
+    Cypress.$('permissions-advanced-checkbox')
       .find('input:checked:enabled')
-      .each(($el) => $el.trigger('click'));
+      .each(($el) => ($el as any).trigger('click'));
   }
 
   // check scopes
   scopes.forEach((scope) => {
     cy.get('[permissions-scope="' + scope + '"]')
       .find('input')
+      .focus()
       .check();
   });
 

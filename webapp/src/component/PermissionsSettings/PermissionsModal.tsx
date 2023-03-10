@@ -78,7 +78,9 @@ export const PermissionsModal: React.FC<PermissionModalProps> = ({
   return (
     <Dialog open={true} onClose={onClose} fullWidth>
       {isInheritedFromOrganization && (
-        <StyledBanner>{t('permission_dialog_inherited_message')}</StyledBanner>
+        <StyledBanner data-cy="permissions-menu-inherited-message">
+          {t('permission_dialog_inherited_message')}
+        </StyledBanner>
       )}
       <DialogContent sx={{ height: 'min(80vh, 530px)' }}>
         <PermissionsSettings
