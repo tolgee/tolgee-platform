@@ -51,6 +51,7 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
           allLangs={allLangs}
         />
       }
+      disableInteractive
     >
       <Box display="flex" alignItems="center">
         {isVarious ? (

@@ -23,8 +23,17 @@ export const useUpdatePermissions = ({ userId, projectId }: Props) => {
     invalidatePrefix: '/v2/projects/{projectId}/users',
   });
 
+  const setByOrganization = useApiMutation({
+    url: '/v2/projects/{projectId}/users/{userId}/set-by-organization',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/users',
+  });
+
   return {
     isLoading: editRole.isLoading || editScopes.isLoading,
+    async setByOrganization() {
+      await setByOrganization.mutateAsync({ path: { projectId, userId } });
+    },
     async updatePermissions(settingsState: PermissionSettingsState) {
       if (!settingsState) {
         return;

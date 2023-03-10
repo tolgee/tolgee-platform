@@ -95,7 +95,12 @@ export const PermissionsSettings: React.FC<Props> = ({
 
   return (
     <Box data-cy="permissions-menu">
-      <Box display="flex" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mb={2}
+      >
         <Typography variant="h5">{title}</Typography>
         <ButtonGroup size="small">
           <Button

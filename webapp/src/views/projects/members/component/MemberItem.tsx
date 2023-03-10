@@ -1,5 +1,6 @@
 import { useTranslate } from '@tolgee/react';
-import { Chip, styled } from '@mui/material';
+import { Chip, styled, Tooltip } from '@mui/material';
+import { Info } from '@mui/icons-material';
 
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
@@ -14,6 +15,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesHint } from 'tg.component/PermissionsSettings/ScopesHint';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -43,6 +45,10 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
+const StyledInfo = styled(Info)`
+  opacity: 0.5;
+`;
+
 type Props = {
   user: UserAccountInProjectModel;
 };
@@ -60,7 +66,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
 
   const messages = useMessage();
 
-  const { updatePermissions } = useUpdatePermissions({
+  const { updatePermissions, setByOrganization } = useUpdatePermissions({
     userId: user.id,
     projectId: project.id,
   });
@@ -69,6 +75,18 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
     try {
       await updatePermissions(data);
       messages.success(<T>permissions_set_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
+  }
+
+  const isOrganzationMember = Boolean(user.organizationRole);
+  const hasDirectPermissions = Boolean(user.directPermission);
+
+  async function handleResetToOrganization() {
+    try {
+      await setByOrganization();
+      messages.success(<T>permissions_reset_message</T>);
     } catch (e) {
       parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
     }
@@ -83,13 +101,14 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         )}
       </StyledItemText>
       <StyledItemActions>
+        <Tooltip title={<ScopesHint scopes={user.computedPermission.scopes} />}>
+          <StyledInfo fontSize="small" color="inherit" />
+        </Tooltip>
         <LanguagePermissionSummary
           permissions={user.computedPermission}
           allLangs={allLangs}
         />
         <PermissionsMenu
-          allLangs={allLangs}
-          title={t('permission_dialog_title', { name: user.name })}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
@@ -101,8 +120,18 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             size: 'small',
             disabled: !isAdmin || isCurrentUser || isOwner,
           }}
-          permissions={user.computedPermission}
-          onSubmit={handleSubmit}
+          modalProps={{
+            allLangs,
+            title: t('permission_dialog_title', { name: user.name }),
+            permissions: user.computedPermission,
+            onSubmit: handleSubmit,
+            isInheritedFromOrganization:
+              !hasDirectPermissions && isOrganzationMember,
+            onResetToOrganization:
+              hasDirectPermissions && isOrganzationMember
+                ? handleResetToOrganization
+                : undefined,
+          }}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

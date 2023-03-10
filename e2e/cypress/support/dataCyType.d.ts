@@ -232,6 +232,7 @@ declare namespace DataCy {
         "permissions-menu-button" |
         "permissions-menu-close" |
         "permissions-menu-granular" |
+        "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |

@@ -35,8 +35,8 @@ const StyledExtraCircle = styled('div')`
   align-items: center;
   justify-content: center;
   margin: 2px;
-  background: ${({ theme }) => theme.palette.grey[400]};
-  color: ${({ theme }) => theme.palette.common.black};
+  background: ${({ theme }) => theme.palette.emphasis[300]};
+  color: ${({ theme }) => theme.palette.text.primary};
   border-radius: 50%;
   font-size: 10px;
 `;
