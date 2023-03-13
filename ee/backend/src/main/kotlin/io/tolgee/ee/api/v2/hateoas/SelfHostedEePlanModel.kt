@@ -14,4 +14,5 @@ class SelfHostedEePlanModel(
   val enabledFeatures: Array<Feature> = arrayOf(),
   val includedSeats: Long = 0L,
   val pricePerSeat: BigDecimal = BigDecimal(0),
+  val subscriptionPrice: BigDecimal = BigDecimal(0),
 ) : RepresentationModel<SelfHostedEePlanModel>()

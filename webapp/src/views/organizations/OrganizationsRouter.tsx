@@ -13,6 +13,8 @@ import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
 import { OrganizationBillingView } from './billing/OrganizationBillingView';
+import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
+import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -38,9 +40,17 @@ const SpecificOrganizationRouter = () => {
             <OrganizationMemberPrivilegesView />
           </PrivateRoute>
           {config.billing.enabled && (
-            <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
-              <OrganizationBillingView />
-            </PrivateRoute>
+            <>
+              <PrivateRoute path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
+                <OrganizationSubscriptionsView />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.ORGANIZATION_INVOICES.template}>
+                <OrganizationInvoicesView />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
+                <OrganizationBillingView />
+              </PrivateRoute>
+            </>
           )}
         </>
       ) : (

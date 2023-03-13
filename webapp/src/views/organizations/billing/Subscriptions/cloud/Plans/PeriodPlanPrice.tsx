@@ -25,7 +25,7 @@ type Props = {
   period: BillingPeriodType;
 };
 
-export const PlanPrice: React.FC<Props> = ({ price, period }) => {
+export const PeriodPlanPrice: React.FC<Props> = ({ price, period }) => {
   const formatMoney = useMoneyFormatter();
   const { t } = useTranslate();
 

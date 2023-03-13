@@ -13,11 +13,12 @@ export const StyledContent = styled('div')`
   padding-top: 25px;
   display: grid;
   gap: 8px;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
     'title '
     'info  '
     'action';
+  height: 100%;
 `;
 
 export const StyledSubtitle = styled('div')`

@@ -46,6 +46,9 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/plans": {
     get: operations["getCloudPlans"];
   };
+  "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage": {
+    get: operations["getUsage"];
+  };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
     get: operations["getInvoicePdf"];
@@ -53,6 +56,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/invoices/": {
     /** Returns organization invoices */
     get: operations["getInvoices"];
+  };
+  "/v2/organizations/{organizationId}/billing/expected-usage": {
+    get: operations["getExpectedUsage"];
+  };
+  "/v2/organizations/{organizationId}/billing/expected-usage/{subscriptionId}": {
+    get: operations["getExpectedUsage_1"];
   };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
@@ -95,6 +104,7 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       includedSeats: number;
       pricePerSeat: number;
+      subscriptionPrice: number;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -102,7 +112,7 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       createdAt: string;
       plan: components["schemas"]["SelfHostedEePlanModel"];
-      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
     };
     UpdateSubscriptionPrepareRequest: {
       /** Id of the subscription plan */
@@ -171,6 +181,19 @@ export interface components {
         plans?: components["schemas"]["SelfHostedEePlanModel"][];
       };
     };
+    UsageItemModel: {
+      from: number;
+      to: number;
+      seats: number;
+      milliseconds: number;
+      total: number;
+      emptySeats: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      periods: components["schemas"]["UsageItemModel"][];
+      total: number;
+    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -180,6 +203,7 @@ export interface components {
       total: number;
       /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
       pdfReady: boolean;
+      hasUsage: boolean;
     };
     PageMetadata: {
       size?: number;
@@ -594,6 +618,33 @@ export interface operations {
       };
     };
   };
+  getUsage: {
+    parameters: {
+      path: {
+        invoiceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns organization invoices */
   getInvoicePdf: {
     parameters: {
@@ -643,6 +694,57 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelInvoiceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getExpectedUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getExpectedUsage_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UsageModel"];
         };
       };
       /** Bad Request */

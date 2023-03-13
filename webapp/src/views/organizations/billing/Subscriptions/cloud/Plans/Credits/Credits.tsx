@@ -1,12 +1,12 @@
 import { FC, useMemo, useState } from 'react';
 import { Box, Slider, styled } from '@mui/material';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { useOrganization } from '../../../../../useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { getPossibleValues } from './creditsUtil';

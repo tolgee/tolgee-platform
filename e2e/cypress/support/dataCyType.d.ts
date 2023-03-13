@@ -41,13 +41,13 @@ declare namespace DataCy {
         "billing-actual-period" |
         "billing-actual-period-end" |
         "billing-extra-credits-buy" |
-        "billing-invoice-number" |
         "billing-limit-exceeded-popover" |
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |
         "billing-plan-subtitle" |
         "billing-plan-title" |
+        "billing-subscriptions-cloud-button" |
         "billing-upgrade-preview-confirm-button" |
         "comment" |
         "comment-menu" |
@@ -87,7 +87,6 @@ declare namespace DataCy {
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
         "global-editor" |
-        "global-empty-list" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |

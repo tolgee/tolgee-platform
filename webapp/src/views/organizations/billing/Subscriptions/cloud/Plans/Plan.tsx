@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Box } from '@mui/material';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -8,10 +8,10 @@ import { PlanInfo } from './PlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
 import { PlanTitle } from './PlanTitle';
-import { PlanPrice } from './PlanPrice';
-import { PrepareUpgradeDialog } from '../PrepareUpgradeDialog';
-import { PeriodSwitch, BillingPeriodType } from './PeriodSwitch';
-import { StyledPlan, StyledSubtitle, StyledContent } from './StyledPlan';
+import { PeriodPlanPrice } from './PeriodPlanPrice';
+import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
+import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
+import { StyledContent, StyledPlan, StyledSubtitle } from './StyledPlan';
 import { confirmation } from 'tg.hooks/confirmation';
 
 type PlanModel = components['schemas']['PlanModel'];
@@ -77,7 +77,7 @@ export const Plan: FC<Props> = ({
             justifyContent="space-between"
             alignItems="center"
           >
-            <PlanPrice
+            <PeriodPlanPrice
               price={
                 period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
               }

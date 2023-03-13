@@ -1,12 +1,11 @@
 import { FC, useState } from 'react';
-import { Box, Button, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useDateFormatter, useMoneyFormatter } from 'tg.hooks/useLocale';
 import { DownloadButton } from './DownloadButton';
-import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useTranslate } from '@tolgee/react';
 import {
@@ -14,17 +13,16 @@ import {
   StyledBillingSectionHeader,
   StyledBillingSectionTitle,
 } from '../BillingSection';
-import { InvoicesModal } from './InvoicesModal';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 const StyledGrid = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  max-width: 500px;
+  grid-template-columns: 1fr 1fr 1fr auto auto;
 `;
 
 const StyledContainer = styled('div')`
   display: grid;
-  gap: 10px;
+  gap: 20px;
   padding-top: 10px;
   align-items: center;
 `;
@@ -35,22 +33,21 @@ const StyledItem = styled(Box)`
   padding: 4px 0px;
 `;
 
-const ITEMS_COUNT = 3;
-
 export const Invoices: FC = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
 
-  const [showAll, setShowAll] = useState(false);
-
   const formatPrice = useMoneyFormatter();
   const formatDate = useDateFormatter();
+
+  const [page, setPage] = useState(0);
 
   const invoicesLoadable = useBillingApiQuery({
     url: '/v2/organizations/{organizationId}/billing/invoices/',
     method: 'get',
     query: {
-      size: 3,
+      page: page,
+      size: 20,
     },
     path: {
       organizationId: organization!.id,
@@ -60,9 +57,6 @@ export const Invoices: FC = () => {
     },
   });
 
-  const showAllButton =
-    (invoicesLoadable.data?.page?.totalElements || 0) > ITEMS_COUNT;
-
   useGlobalLoading(invoicesLoadable.isFetching);
 
   return (
@@ -70,49 +64,34 @@ export const Invoices: FC = () => {
       <StyledBillingSectionTitle>
         <StyledBillingSectionHeader>
           <span>{t('billing_customer_invoices_title')}</span>
-          {showAllButton && (
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              onClick={() => setShowAll(true)}
-            >
-              {t('billing_customer_invoices_all_button')}
-            </Button>
-          )}
         </StyledBillingSectionHeader>
       </StyledBillingSectionTitle>
       <StyledContainer>
         <PaginatedHateoasList
+          onPageChange={(p) => setPage(p)}
           listComponent={StyledGrid}
           wrapperComponent={'div'}
           emptyPlaceholder={
-            invoicesLoadable.isLoading ? (
-              <BoxLoading />
-            ) : (
-              t('billing_invoices_empty')
-            )
+            <EmptyListMessage loading={invoicesLoadable.isLoading}>
+              {t('billing_invoices_empty')}
+            </EmptyListMessage>
           }
           renderItem={(item) => (
             <>
-              <StyledItem data-cy="billing-invoice-number">
-                {item.number}
-              </StyledItem>
+              <StyledItem>{item.number}</StyledItem>
               <StyledItem>{formatDate(item.createdAt)}</StyledItem>
-              <StyledItem>
-                {formatPrice(item.total, { maximumFractionDigits: 2 })}
-              </StyledItem>
+              <StyledItem>{formatPrice(item.total)}</StyledItem>
               <StyledItem>
                 <Box>
                   <DownloadButton invoice={item} />
                 </Box>
               </StyledItem>
+              <StyledItem></StyledItem>
             </>
           )}
           loadable={invoicesLoadable}
         />
       </StyledContainer>
-      {showAll && <InvoicesModal onClose={() => setShowAll(false)} />}
     </StyledBillingSection>
   );
 };
