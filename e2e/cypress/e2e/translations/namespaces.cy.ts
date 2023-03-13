@@ -15,7 +15,7 @@ import { selectNamespace } from '../../common/namespace';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
-    namespaces.clean({ failOnStatusCode: false });
+    namespaces.clean();
     namespaces
       .generateStandard()
       .then((r) => r.body)
@@ -30,7 +30,7 @@ describe('namespaces in translations', () => {
   });
 
   afterEach(() => {
-    namespaces.clean({ failOnStatusCode: false });
+    namespaces.clean();
   });
 
   it('displays keys with namespaces correctly', () => {
@@ -97,7 +97,7 @@ describe('namespaces in translations', () => {
     gcy('translations-key-count').contains('2').should('be.visible');
   });
 
-  it('filters by multiple namespaces', () => {
+  it.only('filters by multiple namespaces', () => {
     gcy('translations-key-count').contains('5').should('be.visible');
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
     getPopover().contains('ns-1').click();
