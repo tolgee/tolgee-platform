@@ -20,30 +20,9 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         name = "test key"
         existingTagKey = this
       }.build {
-        addMeta {
-          self {
-            tags.add(
-              Tag().apply {
-                project = projectBuilder.self
-                name = "test"
-              }
-            )
-            tags.add(
-              Tag().apply {
-                project = projectBuilder.self
-                name = "existing tag"
-                existingTag = this
-              }
-            )
-            tags.add(
-              Tag().apply {
-                project = projectBuilder.self
-                name = "existing tag 2"
-                existingTag2 = this
-              }
-            )
-          }
-        }
+        addTag("test")
+        existingTag = addTag("existing tag")
+        existingTag2 = addTag("existing tag 2")
       }
       addKey {
         name = "existing tag key 2"
@@ -58,17 +37,8 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         addKey {
           name = "test key $keyNum"
         }.build {
-          addMeta {
-            self {
-              (1..20).forEach { tagNum ->
-                tags.add(
-                  Tag().apply {
-                    project = projectBuilder.self
-                    name = "tag $keyNum $tagNum"
-                  }
-                )
-              }
-            }
+          (1..20).forEach { tagNum ->
+            addTag("tag $keyNum $tagNum")
           }
         }
       }
@@ -81,17 +51,8 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         addKey {
           name = "test key from lot of $keyNum"
         }.build {
-          addMeta {
-            self {
-              (1..2).forEach { tagNum ->
-                tags.add(
-                  Tag().apply {
-                    project = projectBuilder.self
-                    name = "tag from lot of $tagNum"
-                  }
-                )
-              }
-            }
+          (1..2).forEach { tagNum ->
+            addTag("tag from lot of $tagNum")
           }
         }
       }

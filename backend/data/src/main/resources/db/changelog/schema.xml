@@ -2387,4 +2387,7 @@
             ALTER TABLE key_screenshot_reference ALTER COLUMN original_text TYPE text;
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1678365585479-1">
+        <addUniqueConstraint columnNames="project_id, name" constraintName="UKsyjijfmo4txo7n7qvpu5so0ej" tableName="tag"/>
+    </changeSet>
 </databaseChangeLog>
