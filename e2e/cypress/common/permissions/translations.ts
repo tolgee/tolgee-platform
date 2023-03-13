@@ -24,8 +24,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
 
   function languageAccess(scope: ScopeWithLanguage, tag: string) {
     return satisfiesLanguageAccess(
-      project,
-      scopes,
+      project.computedPermission,
       scope,
       getLanguageId(languages, tag)
     );

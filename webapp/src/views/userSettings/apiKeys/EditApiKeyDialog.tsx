@@ -14,9 +14,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { Scopes } from 'tg.fixtures/permissions';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
@@ -39,6 +38,10 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     method: 'get',
     path: {
       keyId: id,
+    },
+    options: {
+      cacheTime: 0,
+      staleTime: 0,
     },
   });
 
@@ -66,10 +69,6 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const { t } = useTranslate();
 
-  const projectPermissions = useProjectPermissions();
-
-  const availableScopes = new Set(projectPermissions.scopes ?? []);
-
   const handleEdit = (value) =>
     editMutation.mutateAsync(
       {
@@ -90,6 +89,10 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
         },
       }
     );
+
+  const availableScopes = new Set(
+    projectLoadable.data?.computedPermission?.scopes ?? []
+  );
 
   const getInitialValues = () => {
     const scopes = apiKeyLoadable.data?.scopes as Scopes;

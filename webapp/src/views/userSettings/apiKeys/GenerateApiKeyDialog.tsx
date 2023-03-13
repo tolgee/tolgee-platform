@@ -24,7 +24,8 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
+import { ProjectModel } from 'tg.fixtures/permissions';
 
 interface Value {
   scopes: string[];
@@ -70,10 +71,6 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     invalidatePrefix: '/v2/api-keys',
   });
 
-  const projectPermissions = useProjectPermissions();
-
-  const availableScopes = new Set(projectPermissions.scopes ?? []);
-
   const handleGenerate = (value) => {
     if (props.project) {
       value.projectId = props.project.id;
@@ -99,14 +96,15 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const expirationDateOptions = useExpirationDateOptions();
 
-  const getInitialValues = () => {
-    const projectId =
-      projects.data?._embedded?.projects?.[0]?.id || props.project?.id;
+  const getProject = () => {
+    return projects.data?._embedded?.projects?.[0] || props.project;
+  };
 
+  const getInitialValues = (project: ProjectModel) => {
     return {
-      projectId: projectId,
+      projectId: project.id,
       //all scopes checked by default
-      scopes: availableScopes,
+      scopes: new Set(project.computedPermission.scopes),
       description: props.initialDescriptionValue || '',
       expiresAt: expirationDateOptions[0].time,
     };
@@ -138,16 +136,26 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                 onSubmit={handleGenerate}
                 saveActionLoadable={generateMutation}
                 onCancel={() => onDialogClose()}
-                initialValues={getInitialValues()}
+                initialValues={getInitialValues(getProject()!)}
                 validationSchema={Validation.CREATE_API_KEY}
               >
                 {(formikProps: FormikProps<Value>) => {
+                  const project = getProject()!;
+
+                  const projectPermissions = getPermissionTools(
+                    project.computedPermission
+                  );
+
+                  const availableScopes = new Set(
+                    projectPermissions.scopes ?? []
+                  );
+
                   useEffect(() => {
                     formikProps.setFieldValue(
                       'scopes',
                       setsIntersection(
                         availableScopes,
-                        formikProps.values.scopes as any
+                        new Set(formikProps.values.scopes)
                       )
                     );
                   }, [formikProps.values.projectId]);

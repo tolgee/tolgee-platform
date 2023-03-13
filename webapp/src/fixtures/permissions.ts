@@ -7,6 +7,8 @@ type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type Scope = ArrayElement<NonNullable<Scopes>>;
 
+type PermissionModel = components['schemas']['PermissionModel'];
+
 export const SCOPE_TO_LANG_PROPERTY_MAP = {
   'translations.view': 'viewLanguageIds',
   'translations.edit': 'translateLanguageIds',
@@ -20,17 +22,15 @@ export function satisfiesPermission(scopes: Scope[], scope: Scope): boolean {
 }
 
 export function satisfiesLanguageAccess(
-  project: ProjectModel,
-  scopes: Scope[],
+  permissions: PermissionModel,
   scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP,
   languageId: number | undefined
 ): boolean {
-  if (!satisfiesPermission(scopes, scope)) {
+  if (!satisfiesPermission(permissions.scopes, scope)) {
     return false;
   }
 
-  const allowedLanguages =
-    project.computedPermission[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
+  const allowedLanguages = permissions[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
 
   if (!allowedLanguages?.length) {
     return true;
