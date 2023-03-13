@@ -10,10 +10,15 @@ import { login } from '../../common/apiCalls/common';
 
 describe('Organization List', () => {
   beforeEach(() => {
-    login();
     organizationTestData.clean();
-    organizationTestData.generate();
-    visit();
+    organizationTestData
+      .generate()
+      .then(() => login())
+      .then(() => visit());
+  });
+
+  afterEach(() => {
+    organizationTestData.clean();
   });
 
   it('creates organization', () => {
