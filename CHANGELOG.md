@@ -1,3 +1,10 @@
+## [3.10.3](https://github.com/tolgee/tolgee-platform/compare/v3.10.2...v3.10.3) (2023-03-13)
+
+
+### Performance Improvements
+
+* Word count performance improvements ([#1626](https://github.com/tolgee/tolgee-platform/issues/1626)) ([8b2e6a4](https://github.com/tolgee/tolgee-platform/commit/8b2e6a47de8b15bfa54b3f8a29fc01e7527f0381))
+
 ## [3.10.2](https://github.com/tolgee/tolgee-platform/compare/v3.10.1...v3.10.2) (2023-03-13)
 
 
