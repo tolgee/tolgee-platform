@@ -6,14 +6,10 @@ import { commentsButton, deleteComment, resolveComment } from '../comments';
 import { waitForGlobalLoading } from '../loading';
 import { getCell } from '../state';
 import {
-  LanguageModel,
+  getLanguageId,
   pageAcessibleWithoutErrors,
   ProjectInfo,
 } from './shared';
-
-function getLanguageId(languages: LanguageModel[], tag: string) {
-  return languages.find((l) => l.tag === tag)?.id;
-}
 
 function getRowTexts(row: number) {
   return [

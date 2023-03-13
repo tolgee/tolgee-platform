@@ -1,14 +1,36 @@
+import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
 import { createKey } from '../apiCalls/common';
 import { waitForGlobalLoading } from '../loading';
 import { assertMessage, confirmStandard } from '../shared';
 import { createTag } from '../tags';
 import { editCell } from '../translations';
-import { ProjectInfo } from './shared';
+import { getLanguageId, getLanguages, ProjectInfo } from './shared';
 
 export function testKeys(info: ProjectInfo) {
   const { project } = info;
   const scopes = project.computedPermission.scopes;
   cy.gcy('translations-table-cell').contains('key-1').should('be.visible');
+
+  // test if user can select only from viewable languages
+  cy.gcy('translations-language-select-form-control').click();
+  getLanguages().forEach(([tag, name]) => {
+    if (
+      satisfiesLanguageAccess(
+        project.computedPermission,
+        'translations.view',
+        getLanguageId(info.languages, tag)
+      )
+    ) {
+      cy.gcy('translations-language-select-item')
+        .contains(name)
+        .should('be.visible');
+    } else {
+      cy.gcy('translations-language-select-item')
+        .contains(name)
+        .should('not.exist');
+    }
+  });
+  cy.get('body').click(0, 0);
 
   if (scopes.includes('keys.edit')) {
     editCell('key-1', 'new-key');

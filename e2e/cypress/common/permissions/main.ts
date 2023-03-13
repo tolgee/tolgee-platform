@@ -7,6 +7,7 @@ import {
 import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
 import { testDashboard } from './dashboard';
+import { testExport } from './export';
 import { testKeys } from './keys';
 import {
   getProjectInfo,
@@ -53,6 +54,9 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
         case 'project-menu-item-translations':
           testKeys(projectInfo);
           testTranslations(projectInfo);
+          break;
+        case 'project-menu-item-export':
+          testExport(projectInfo);
           break;
       }
     }
