@@ -36,13 +36,13 @@ class CursorPredicateProvider(
       val condition: Predicate
       if (value.direction == Sort.Direction.ASC) {
         condition = if (isUnique)
-          cb.greaterThan(expression, value.value)
+          cb.greaterThan(expression, value.value!!)
         else
           cb.greaterThanOrEqualToNullable(expression, value.value)
         strongCondition = cb.greaterThanNullable(expression, value.value)
       } else {
         condition = if (isUnique)
-          cb.lessThan(expression, value.value)
+          cb.lessThan(expression, value.value!!)
         else
           cb.lessThanOrEqualToNullable(expression, value.value)
         strongCondition = cb.lessThanNullable(expression, value.value)

@@ -55,8 +55,6 @@ repositories {
     jcenter()
 }
 
-sourceCompatibility = 11
-
 idea {
     module {
         generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
@@ -89,9 +87,8 @@ configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/d
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-compileKotlin {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {

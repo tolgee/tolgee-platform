@@ -47,7 +47,9 @@ repositories {
     jcenter()
 }
 
-sourceCompatibility = 11
+kotlin {
+    jvmToolchain(11)
+}
 
 idea {
     module {
@@ -63,11 +65,6 @@ allOpen {
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.beans.factory.annotation.Configurable")
-}
-
-compileKotlin {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {
