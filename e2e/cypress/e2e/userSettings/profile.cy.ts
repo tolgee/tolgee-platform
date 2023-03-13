@@ -14,7 +14,7 @@ describe('User profile', () => {
   const INITIAL_EMAIL = 'honza@honza.com';
   const INITIAL_PASSWORD = 'honzaaaaaaaa';
   const EMAIL_VERIFICATION_TEXT =
-    'When you change your email, new e-mail will be set after its verification';
+    'When you change your email, new email will be set after its verification';
   const NEW_EMAIL = 'pavel@honza.com';
 
   function visit() {
@@ -40,14 +40,14 @@ describe('User profile', () => {
     cy.contains(EMAIL_VERIFICATION_TEXT).should('be.visible');
     cy.xpath("//*[@name='currentPassword']").clear().type(INITIAL_PASSWORD);
     cy.gcy('global-form-save-button').click();
-    cy.contains('E-mail waiting for verification: pavel@honza.com').should(
+    cy.contains('Email waiting for verification: pavel@honza.com').should(
       'be.visible'
     );
     getParsedEmailVerification().then((v) => {
       cy.visit(v.verifyEmailLink);
-      assertMessage('E-mail was verified');
+      assertMessage('Email was verified');
       visit();
-      cy.contains('E-mail waiting for verification: pavel@honza.com').should(
+      cy.contains('Email waiting for verification: pavel@honza.com').should(
         'not.exist'
       );
       cy.get('form').findInputByName('email').should('have.value', NEW_EMAIL);
