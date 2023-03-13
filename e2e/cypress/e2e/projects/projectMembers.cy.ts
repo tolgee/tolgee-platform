@@ -18,7 +18,7 @@ import {
   permissionsMenuSelectRole,
 } from '../../common/permissionsMenu';
 import {
-  checkItemsInMenu,
+  checkPermissions,
   loginAndGetInfo,
   RUN,
   visitProjectWithPermissions,
@@ -133,7 +133,7 @@ describe('Project members', () => {
           info.project.computedPermission.translateLanguageIds.length
         ).equal(1);
         visitProjectDashboard(info.project.id);
-        checkItemsInMenu(info, {
+        checkPermissions(info, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-import': RUN,
@@ -157,7 +157,7 @@ describe('Project members', () => {
           info.project.computedPermission.stateChangeLanguageIds.length
         ).equal(1);
         visitProjectDashboard(info.project.id);
-        checkItemsInMenu(info, {
+        checkPermissions(info, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-import': RUN,
@@ -181,7 +181,7 @@ describe('Project members', () => {
           info.project.computedPermission.stateChangeLanguageIds.length
         ).equal(1);
         visitProjectDashboard(info.project.id);
-        checkItemsInMenu(info, {
+        checkPermissions(info, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-import': RUN,
@@ -201,7 +201,7 @@ describe('Project members', () => {
       ]);
       loginAndGetInfo('me@me.me', info.project.id).then((info) => {
         visitProjectDashboard(info.project.id);
-        checkItemsInMenu(info, {
+        checkPermissions(info, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-settings': RUN,

@@ -1,5 +1,5 @@
 import {
-  checkItemsInMenu,
+  checkPermissions,
   RUN,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
@@ -10,7 +10,7 @@ describe('Permissions per language', () => {
       scopes: ['translations.view'],
       viewLanguageTags: ['en', 'de'],
     }).then((projectInfo) => {
-      checkItemsInMenu(projectInfo, {
+      checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
         'project-menu-item-export': RUN,
@@ -24,7 +24,7 @@ describe('Permissions per language', () => {
       scopes: ['translations.edit'],
       translateLanguageTags: ['de'],
     }).then((projectInfo) => {
-      checkItemsInMenu(projectInfo, {
+      checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
         'project-menu-item-import': RUN,
@@ -39,7 +39,7 @@ describe('Permissions per language', () => {
       scopes: ['translations.view', 'translations.state-edit'],
       stateChangeLanguageTags: ['de'],
     }).then((projectInfo) => {
-      checkItemsInMenu(projectInfo, {
+      checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
         'project-menu-item-export': RUN,
@@ -54,7 +54,7 @@ describe('Permissions per language', () => {
       translateLanguageTags: ['cs'],
       stateChangeLanguageTags: ['de'],
     }).then((projectInfo) => {
-      checkItemsInMenu(projectInfo, {
+      checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
         'project-menu-item-import': RUN,

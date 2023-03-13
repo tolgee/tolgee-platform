@@ -8,16 +8,24 @@ import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
 import { testDashboard } from './dashboard';
 import { testKeys } from './keys';
-import { getProjectInfo, pageIsPermitted, ProjectInfo } from './shared';
+import {
+  getProjectInfo,
+  pageAcessibleWithoutErrors,
+  ProjectInfo,
+} from './shared';
 import { testTranslations } from './translations';
 
 export const SKIP = false;
 export const RUN = true;
 
-export function checkNumberOfMenuItems(count: number) {
+export function checkNumberOfMenuItems(items: MenuItem[]) {
   cy.gcy('project-menu-items')
     .findDcy('project-menu-item')
-    .should('have.length', count);
+    // there is an extra item "projects"
+    .should('have.length', items.length + 1);
+  items.forEach((item) => {
+    cy.gcy(item).should('be.visible');
+  });
 }
 
 type MenuItem = Exclude<
@@ -27,8 +35,8 @@ type MenuItem = Exclude<
 
 type Settings = Partial<Record<MenuItem, boolean>>;
 
-export function checkItemsInMenu(projectInfo: ProjectInfo, settings: Settings) {
-  checkNumberOfMenuItems(Object.keys(settings).length + 1);
+export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
+  checkNumberOfMenuItems(Object.keys(settings) as MenuItem[]);
   Object.keys(settings).forEach((item: MenuItem) => {
     const value = settings[item];
 
@@ -36,7 +44,7 @@ export function checkItemsInMenu(projectInfo: ProjectInfo, settings: Settings) {
       // go to page
       cy.gcy(item).click();
       // check if there an error
-      pageIsPermitted();
+      pageAcessibleWithoutErrors();
 
       switch (item as keyof MenuItem) {
         case 'project-menu-item-dashboard':

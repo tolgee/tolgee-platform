@@ -5,7 +5,11 @@ import {
 import { commentsButton, deleteComment, resolveComment } from '../comments';
 import { waitForGlobalLoading } from '../loading';
 import { getCell } from '../state';
-import { LanguageModel, pageIsPermitted, ProjectInfo } from './shared';
+import {
+  LanguageModel,
+  pageAcessibleWithoutErrors,
+  ProjectInfo,
+} from './shared';
 
 function getLanguageId(languages: LanguageModel[], tag: string) {
   return languages.find((l) => l.tag === tag)?.id;
@@ -74,7 +78,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
           .findDcy('translation-state-button')
           .should('exist')
           .click();
-        pageIsPermitted();
+        pageAcessibleWithoutErrors();
       } else if (languageAccess('translations.view', lang)) {
         getCell(text).trigger('mouseover');
         getCell(text).findDcy('translation-state-button').should('not.exist');

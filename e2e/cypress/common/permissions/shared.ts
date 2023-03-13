@@ -10,7 +10,7 @@ export type ProjectInfo = {
   languages: LanguageModel[];
 };
 
-export const pageIsPermitted = () => {
+export const pageAcessibleWithoutErrors = () => {
   waitForGlobalLoading();
   cy.get('.SnackbarItem-variantError', { timeout: 0 }).should('not.exist');
 };
@@ -19,9 +19,7 @@ export function getProjectInfo(projectId: number) {
   return new Cypress.Promise<ProjectInfo>((resolve) =>
     Promise.all([
       v2apiFetchPromise(`projects/${projectId}`).then((r) => r.body),
-      v2apiFetchPromise(`projects/${projectId}/languages`).then(
-        (r_1) => r_1.body
-      ),
+      v2apiFetchPromise(`projects/${projectId}/languages`).then((r) => r.body),
     ]).then(([pdata, ldata]) =>
       resolve({ project: pdata, languages: ldata._embedded.languages })
     )

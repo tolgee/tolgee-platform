@@ -1,5 +1,5 @@
 import {
-  checkItemsInMenu,
+  checkPermissions,
   RUN,
   SKIP,
   visitProjectWithPermissions,
@@ -9,7 +9,7 @@ describe('Permissions translations', () => {
   it('translations.view', () => {
     visitProjectWithPermissions({ scopes: ['translations.view'] }).then(
       (projectInfo) => {
-        checkItemsInMenu(projectInfo, {
+        checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-export': RUN,
@@ -22,7 +22,7 @@ describe('Permissions translations', () => {
   it('translations.edit', () => {
     visitProjectWithPermissions({ scopes: ['translations.edit'] }).then(
       (projectInfo) => {
-        checkItemsInMenu(projectInfo, {
+        checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
           'project-menu-item-import': RUN,
@@ -36,7 +36,7 @@ describe('Permissions translations', () => {
   it('translations.state-edit', () => {
     visitProjectWithPermissions({ scopes: ['translations.state-edit'] }).then(
       (projectInfo) => {
-        checkItemsInMenu(projectInfo, {
+        checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-export': RUN,
         });
@@ -47,7 +47,7 @@ describe('Permissions translations', () => {
   it('translation-comments.add', () => {
     visitProjectWithPermissions({ scopes: ['translation-comments.add'] }).then(
       (projectInfo) => {
-        checkItemsInMenu(projectInfo, {
+        checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-export': SKIP,
@@ -60,7 +60,7 @@ describe('Permissions translations', () => {
   it('translation-comments.edit', () => {
     visitProjectWithPermissions({ scopes: ['translation-comments.edit'] }).then(
       (projectInfo) => {
-        checkItemsInMenu(projectInfo, {
+        checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
           'project-menu-item-export': SKIP,
@@ -74,7 +74,7 @@ describe('Permissions translations', () => {
     visitProjectWithPermissions({
       scopes: ['translation-comments.set-state'],
     }).then((projectInfo) => {
-      checkItemsInMenu(projectInfo, {
+      checkPermissions(projectInfo, {
         'project-menu-item-dashboard': SKIP,
         'project-menu-item-translations': RUN,
         'project-menu-item-export': SKIP,
