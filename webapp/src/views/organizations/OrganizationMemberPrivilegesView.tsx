@@ -6,6 +6,7 @@ import { BaseOrganizationSettingsView } from './components/BaseOrganizationSetti
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
 import { useOrganization } from './useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 
 export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -30,8 +31,9 @@ export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
         <T>organization_member_privileges_text</T>
       </Typography>
 
-      <Box mt={2}>
+      <Box mt={2} display="flex" gap="8px" alignItems="center">
         <OrganizationBasePermissionMenu organization={organization!} />
+        <ScopesInfo scopes={organization!.basePermissions.scopes} />
       </Box>
     </BaseOrganizationSettingsView>
   );

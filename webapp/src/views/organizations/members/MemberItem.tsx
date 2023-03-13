@@ -19,6 +19,7 @@ import { RemoveUserButton } from './RemoveUserButton';
 import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -52,6 +53,13 @@ const StyledInfo = styled(Info)`
   opacity: 0.5;
 `;
 
+const StyledItemUser = styled('div')`
+  display: flex;
+  margin-left: 8px;
+  flex-grow: 1;
+  align-items: center;
+`;
+
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
   organizationId: number;
@@ -66,9 +74,12 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
 
   return (
     <StyledListItem data-cy="organization-member-item">
-      <StyledItemText>
-        {user.name} ({user.username}){' '}
-      </StyledItemText>
+      <StyledItemUser>
+        <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
+        <StyledItemText>
+          {user.name} ({user.username}){' '}
+        </StyledItemText>
+      </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (
           <UpdateRoleButton user={user} />

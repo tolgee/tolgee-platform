@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.organization
 
 import io.tolgee.api.v2.hateoas.project.SimpleProjectModel
+import io.tolgee.dtos.Avatar
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -11,5 +12,6 @@ data class UserAccountWithOrganizationRoleModel(
   val name: String,
   var username: String,
   var organizationRole: OrganizationRoleType?,
-  var projectsWithDirectPermission: List<SimpleProjectModel>
+  var projectsWithDirectPermission: List<SimpleProjectModel>,
+  var avatar: Avatar?
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()

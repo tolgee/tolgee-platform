@@ -7,4 +7,5 @@ interface UserAccountWithOrganizationRoleView {
   val name: String
   var username: String
   var organizationRole: OrganizationRoleType
+  var avatarHash: String?
 }

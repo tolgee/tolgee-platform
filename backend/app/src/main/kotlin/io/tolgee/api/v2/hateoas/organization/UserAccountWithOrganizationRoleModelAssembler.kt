@@ -4,12 +4,14 @@ import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.api.v2.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.Project
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
 class UserAccountWithOrganizationRoleModelAssembler(
-  private val simpleProjectModelAssembler: SimpleProjectModelAssembler
+  private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
+  private val avatarService: AvatarService
 ) :
   RepresentationModelAssemblerSupport<
     Pair<UserAccountWithOrganizationRoleView, List<Project>>, UserAccountWithOrganizationRoleModel
@@ -23,7 +25,8 @@ class UserAccountWithOrganizationRoleModelAssembler(
       name = data.first.name,
       username = data.first.username,
       organizationRole = data.first.organizationRole,
-      projectsWithDirectPermission = data.second.map { simpleProjectModelAssembler.toModel(it) }
+      projectsWithDirectPermission = data.second.map { simpleProjectModelAssembler.toModel(it) },
+      avatar = avatarService.getAvatarLinks(data.first.avatarHash)
     )
   }
 }

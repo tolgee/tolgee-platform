@@ -12,6 +12,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 
 const messaging = container.resolve(MessageService);
 
@@ -101,6 +102,8 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
       </StyledItemText>
       <StyledItemActions>
+        <ScopesInfo scopes={invitation.permission.scopes} />
+
         <LanguagePermissionSummary
           permissions={invitation.permission}
           allLangs={languages}

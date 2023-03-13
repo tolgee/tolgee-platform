@@ -280,7 +280,8 @@ class UserAccountService(
         organizationRole = it.organizationRole,
         directPermission = it.directPermission,
         organizationBasePermission = organizationBasePermission,
-        permittedLanguageIds = permittedLanguageMap[it.id]
+        permittedLanguageIds = permittedLanguageMap[it.id],
+        avatarHash = it.avatarHash
       )
     }
   }
