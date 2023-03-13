@@ -1,3 +1,10 @@
+## [3.10.2](https://github.com/tolgee/tolgee-platform/compare/v3.10.1...v3.10.2) (2023-03-13)
+
+
+### Bug Fixes
+
+* Unique index on tag table ([#1617](https://github.com/tolgee/tolgee-platform/issues/1617)) ([11b36f4](https://github.com/tolgee/tolgee-platform/commit/11b36f40636dacff05ee16819ece1bfa9b977bbf))
+
 ## [3.10.1](https://github.com/tolgee/tolgee-platform/compare/v3.10.0...v3.10.1) (2023-03-10)
 
 
