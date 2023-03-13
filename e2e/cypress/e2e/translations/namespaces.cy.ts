@@ -97,15 +97,15 @@ describe('namespaces in translations', () => {
     gcy('translations-key-count').contains('2').should('be.visible');
   });
 
-  // it('filters by multiple namespaces', () => {
-  //   gcy('translations-key-count').contains('5').should('be.visible');
-  //   selectInSelect(gcy('translations-filter-select'), 'Namespaces');
-  //   getPopover().contains('ns-1').click();
-  //   getPopover().contains('ns-2').click();
-  //   cy.focused().type('{Esc}');
-  //   cy.focused().type('{Esc}');
-  //   gcy('translations-key-count').contains('3').should('be.visible');
-  // });
+  it.only('filters by multiple namespaces', () => {
+    gcy('translations-key-count').contains('5').should('be.visible');
+    selectInSelect(gcy('translations-filter-select'), 'Namespaces');
+    getPopover().contains('ns-1').click();
+    getPopover().contains('ns-2').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    gcy('translations-key-count').contains('3').should('be.visible');
+  });
 
   it('rename namespace', () => {
     gcy('translations-key-count').contains('5').should('be.visible');
