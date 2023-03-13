@@ -120,13 +120,11 @@ describe('Organization Members', () => {
   };
 
   function leaveOrganization() {
-    gcy('global-paginated-list').within(() => {
-      cy.contains('admin')
-        .closestDcy('organization-member-item')
-        .within(() => {
-          cy.gcy('organization-member-leave-button').click();
-        });
-    });
+    cy.contains('admin')
+      .closestDcy('organization-member-item')
+      .within(() => {
+        cy.gcy('organization-member-leave-button').click();
+      });
     confirmStandard();
   }
 });

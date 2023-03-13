@@ -126,8 +126,6 @@ describe('Organization List', () => {
     });
   });
 
-  it('', () => {});
-
   after(() => {
     organizationTestData.clean();
   });
