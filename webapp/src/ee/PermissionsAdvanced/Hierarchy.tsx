@@ -1,4 +1,5 @@
-import { Checkbox, FormControlLabel, styled } from '@mui/material';
+import { Checkbox, FormControlLabel, Tooltip, styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 import {
   HierarchyItem,
   HierarchyType,
@@ -52,6 +53,7 @@ export const Hierarchy: React.FC<Props> = ({
   onChange,
   allLangs,
 }) => {
+  const { t } = useTranslate();
   const allLangIds = allLangs?.map((l) => l.id) || [];
   const { scopes } = state;
   const scopeIncluded = structure.value && scopes.includes(structure.value);
@@ -150,21 +152,36 @@ export const Hierarchy: React.FC<Props> = ({
   return (
     <StyledContainer>
       <StyledRow>
-        <FormControlLabel
-          permissions-scope={structure.value}
-          control={
-            <Checkbox
-              data-cy="permissions-advanced-checkbox"
-              size="small"
-              style={{ paddingTop: 4, paddingBottom: 4 }}
-              checked={fullyChecked}
-              indeterminate={halfChecked}
-              onClick={handleToggle}
-              disabled={disabled}
-            />
+        <Tooltip
+          key={structure.value}
+          enterDelay={1000}
+          enterNextDelay={1000}
+          title={
+            (disabled && structure.value
+              ? t('permissions_advanced_item_blocked', {
+                  scopes: blockingScopes.join(', '),
+                })
+              : structure.value) || ''
           }
-          label={label}
-        />
+          placement="left"
+          disableInteractive
+        >
+          <FormControlLabel
+            permissions-scope={structure.value}
+            control={
+              <Checkbox
+                data-cy="permissions-advanced-checkbox"
+                size="small"
+                style={{ paddingTop: 4, paddingBottom: 4 }}
+                checked={fullyChecked}
+                indeterminate={halfChecked}
+                onClick={handleToggle}
+                disabled={disabled}
+              />
+            }
+            label={label}
+          />
+        </Tooltip>
 
         {minimalLanguages && displayLanguages && allLangs && (
           <LanguagePermissionsMenu

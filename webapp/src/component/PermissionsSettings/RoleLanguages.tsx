@@ -35,7 +35,6 @@ export const RoleLanguages: React.FC<Props> = ({
   return show ? (
     <StyledContainer>
       <Box display="grid" gridAutoFlow="row" minWidth="200px">
-        {/* <Typography variant="caption">{getScopeTranslation(scope)}</Typography> */}
         <LanguagePermissionsMenu
           selected={state.languages || []}
           onSelect={handleSelect}
