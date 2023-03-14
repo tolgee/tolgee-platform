@@ -7,9 +7,9 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { useEffect } from 'react';
-import { CancelSelfHostedEeSubscriptionButton } from '../../CancelSelfHostedEeSubscriptionButton';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { Plan } from './Plan';
+import { SelfHostedEePlan } from './SelfHostedEePlan';
+import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -53,16 +53,6 @@ export const SelfHostedEeSubscriptions = () => {
     method: 'put',
   });
 
-  const setupMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/setup-ee',
-    method: 'post',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data.url;
-      },
-    },
-  });
-
   useEffect(() => {
     if (isSuccess) {
       refreshSubscriptions.mutate(
@@ -84,17 +74,16 @@ export const SelfHostedEeSubscriptions = () => {
   return (
     <>
       <Box mb={4}>
-        <Typography variant="h6">
+        <Typography variant="h6" mb={2}>
           {t('organization-billing-self-hosted-active-subscriptions')}
         </Typography>
         {activeSubscriptions ? (
           <Box>
             {activeSubscriptions.map((subscription) => (
-              <Box key={subscription.id}>
-                {subscription.plan.name} | Subscribed:{' '}
-                {new Date(subscription.createdAt).toString()}
-                <CancelSelfHostedEeSubscriptionButton id={subscription.id} />
-              </Box>
+              <SelfHostedEeActiveSubscription
+                key={subscription.id}
+                subscription={subscription}
+              />
             ))}
           </Box>
         ) : (
@@ -111,7 +100,7 @@ export const SelfHostedEeSubscriptions = () => {
       </Typography>
       <StyledShopping>
         {plansLoadable.data?._embedded?.plans?.map((plan) => (
-          <Plan key={plan.id} planModel={plan} />
+          <SelfHostedEePlan key={plan.id} plan={plan} />
         ))}
       </StyledShopping>
     </>

@@ -37,6 +37,9 @@ class EeSubscription : AuditModel() {
   @field:NotBlank
   lateinit var licenseKey: String
 
+  @field:ColumnDefault("Plan")
+  lateinit var name: String
+
   @field:NotNull
   var currentPeriodEnd: Date? = null
 

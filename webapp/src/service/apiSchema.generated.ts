@@ -557,12 +557,12 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, changing state of all language values is permitted. */
       stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages view is permitted. */
       viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -953,8 +953,8 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      createdAt: number;
       updatedAt: number;
+      createdAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
       description: string;
@@ -1000,11 +1000,13 @@ export interface components {
       licenseKey: string;
     };
     EeSubscriptionModel: {
+      name: string;
+      licenseKey: string;
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentUserCount: number;
-      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
       lastValidCheck?: string;
     };
     V2EditApiKeyDto: {
@@ -1044,8 +1046,8 @@ export interface components {
       expiresAt?: number;
       lastUsedAt?: number;
       scopes: string[];
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       description: string;
     };
     SuperTokenRequest: {
@@ -1068,14 +1070,17 @@ export interface components {
       enabledFeatures: "GRANULAR_PERMISSIONS"[];
       includedSeats: number;
       pricePerSeat: number;
+      subscriptionPrice: number;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
-      createdAt: string;
+      createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
-      status: "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      licenseKey?: string;
+      estimatedCosts?: number;
     };
     SetLicenseKeyLicensingDto: {
       licenseKey: string;
@@ -1817,8 +1822,8 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      createdAt: number;
       updatedAt: number;
+      createdAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
       description: string;
@@ -1880,8 +1885,8 @@ export interface components {
       expiresAt?: number;
       lastUsedAt?: number;
       scopes: string[];
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       description: string;
     };
     PagedModelUserAccountModel: {

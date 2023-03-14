@@ -62,6 +62,7 @@ class EeSubscriptionService(
     if (responseBody != null) {
       val entity = EeSubscription().apply {
         this.licenseKey = licenseKey
+        this.name = responseBody.plan.name
         this.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
         this.enabledFeatures = responseBody.plan.enabledFeatures
         this.lastValidCheck = currentDateProvider.date

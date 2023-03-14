@@ -92,6 +92,7 @@ class UserAccountService(
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
     return userAccount
   }
 

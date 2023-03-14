@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { BillingPeriodType } from './PeriodSwitch';
-import { Plan } from './Plan';
+import { CloudPlan } from './CloudPlan';
 
 type PlanModel = components['schemas']['PlanModel'];
 type ActivePlanModel = components['schemas']['ActivePlanModel'];
@@ -37,7 +37,7 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
         return (
           <StyledPlanWrapper key={plan.id}>
             {activePlan && (
-              <Plan
+              <CloudPlan
                 plan={plan}
                 isActive={isActive}
                 isEnded={isEnded}

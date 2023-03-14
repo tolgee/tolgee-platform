@@ -1,16 +1,22 @@
 import { styled } from '@mui/material';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
-const StyledAction = styled('div')`
+export const ActionArea = styled('div')`
   grid-area: action;
+`;
+
+export const StyledActionArea = styled(ActionArea)`
   justify-self: end;
+  align-self: end;
+  gap: 8px;
+  display: flex;
 `;
 
 type Props = React.ComponentProps<typeof LoadingButton>;
 
 export const PlanActionButton: React.FC<Props> = (props) => {
   return (
-    <StyledAction>
+    <StyledActionArea>
       <LoadingButton
         data-cy="billing-plan-action-button"
         variant="outlined"
@@ -18,6 +24,6 @@ export const PlanActionButton: React.FC<Props> = (props) => {
         size="small"
         {...props}
       />
-    </StyledAction>
+    </StyledActionArea>
   );
 };

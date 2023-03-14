@@ -14,6 +14,7 @@ import {
   StyledBillingSectionTitle,
 } from '../BillingSection';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { InvoiceUsage } from './InvoiceUsage';
 
 const StyledGrid = styled('div')`
   display: grid;
@@ -86,7 +87,9 @@ export const Invoices: FC = () => {
                   <DownloadButton invoice={item} />
                 </Box>
               </StyledItem>
-              <StyledItem></StyledItem>
+              <StyledItem>
+                <InvoiceUsage invoice={item} />
+              </StyledItem>
             </>
           )}
           loadable={invoicesLoadable}

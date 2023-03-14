@@ -1,9 +1,9 @@
 import { T, useTranslate } from '@tolgee/react';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { useOrganization } from '../useOrganization';
 import { confirmation } from 'tg.hooks/confirmation';
+import { PlanActionButton } from './Subscriptions/cloud/Plans/PlanActionButton';
 
 export const CancelSelfHostedEeSubscriptionButton = (props: { id: number }) => {
   const { t } = useTranslate();
@@ -39,12 +39,12 @@ export const CancelSelfHostedEeSubscriptionButton = (props: { id: number }) => {
   }
 
   return (
-    <LoadingButton
+    <PlanActionButton
       onClick={onClick}
       variant="outlined"
       loading={cancelMutation.isLoading}
     >
       {t('organization-billing-self-hosted-cancel-subscription-button')}
-    </LoadingButton>
+    </PlanActionButton>
   );
 };

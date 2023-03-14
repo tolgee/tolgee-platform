@@ -1,19 +1,13 @@
-import { Box, styled } from '@mui/material';
+import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { MtHint } from 'tg.component/billing/MtHint';
+import { PlanInfo } from '../../common/PlanInfo';
+import React from 'react';
 
 type PlanModel = components['schemas']['PlanModel'];
-
-const StyledInfo = styled(Box)`
-  display: grid;
-  justify-content: space-between;
-  grid-template-columns: 1fr 16px 1fr;
-  padding-bottom: 8px;
-  justify-items: center;
-`;
 
 const StyledItem = styled('div')`
   display: grid;
@@ -39,10 +33,10 @@ type Props = {
   plan: PlanModel;
 };
 
-export const PlanInfo: React.FC<Props> = ({ plan }) => {
+export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
   const formatNumber = useNumberFormatter();
   return (
-    <StyledInfo gridArea="info">
+    <PlanInfo>
       <StyledItem>
         <StyledNumber>{formatNumber(plan.translationLimit!)}</StyledNumber>
         <StyledName>
@@ -61,6 +55,6 @@ export const PlanInfo: React.FC<Props> = ({ plan }) => {
           />
         </StyledName>
       </StyledItem>
-    </StyledInfo>
+    </PlanInfo>
   );
 };

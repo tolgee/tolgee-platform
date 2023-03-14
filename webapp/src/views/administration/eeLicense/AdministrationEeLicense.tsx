@@ -5,8 +5,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { styled } from '@mui/material';
 import { AdministrationNav } from '../AdministrationNav';
 import { SetupLicenceKey } from './SetupLicenceKey';
-import { RefreshButton } from './RefreshButton';
-import { ReleaseKeyButton } from './ReleaseKeyButton';
+import { ActiveEeLicense } from './ActiveEeLicense';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -39,15 +38,7 @@ export const AdministrationEeLicense = () => {
           loading={infoLoadable.isFetching}
         >
           <AdministrationNav />
-          {info ? (
-            <>
-              <RefreshButton />
-              <ReleaseKeyButton />
-              <pre>{JSON.stringify(info, null, 2)}</pre>
-            </>
-          ) : (
-            <SetupLicenceKey />
-          )}
+          {info ? <ActiveEeLicense info={info} /> : <SetupLicenceKey />}
         </BaseView>
       </DashboardPage>
     </StyledWrapper>

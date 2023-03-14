@@ -7,30 +7,20 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../../../../useOrganization';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { getPossibleValues } from './creditsUtil';
-import { StyledContent, StyledPlan } from '../StyledPlan';
-import { PlanTitle } from '../PlanTitle';
+import { Plan, PlanContent } from '../../../common/Plan';
+import { PlanTitle } from '../../../common/PlanTitle';
 import { MtHint } from 'tg.component/billing/MtHint';
-
-const StyledContainer = styled('div')`
-  display: grid;
-  gap: 10px;
-`;
+import { PlanActionButton } from '../PlanActionButton';
 
 const StyledSliderWrapper = styled('div')`
   display: grid;
 `;
 
-const StyledBottomRow = styled('div')`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-`;
-
 const StyledPrice = styled('div')`
   display: grid;
+  grid-area: price;
 `;
 
 const StyledCreditAmount = styled(Box)`
@@ -111,8 +101,8 @@ export const Credits: FC = () => {
     sliderPossibleValues?.[sliderValue];
 
   return (
-    <StyledPlan>
-      <StyledContent>
+    <Plan>
+      <PlanContent>
         <PlanTitle
           title={
             <T
@@ -121,7 +111,7 @@ export const Credits: FC = () => {
             />
           }
         />
-        <StyledContainer>
+        <Box gridArea="info">
           <StyledSliderWrapper>
             <StyledCreditAmount>
               {formatNumber(Math.round(totalAmount / 100))}
@@ -137,28 +127,24 @@ export const Credits: FC = () => {
               aria-labelledby="non-linear-slider"
             />
           </StyledSliderWrapper>
-          <StyledBottomRow>
-            <StyledPrice>
-              <StyledAmount>{formatPrice(totalPrice)}</StyledAmount>
-              <StyledFullAmount>
-                {regularPrice !== undefined && formatPrice(regularPrice)}
-              </StyledFullAmount>
-            </StyledPrice>
-            <Box>
-              <LoadingButton
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => buy(priceId, itemQuantity)}
-                loading={buyMutation.isLoading}
-                data-cy="billing-extra-credits-buy"
-              >
-                {t('billing_extra_credits_buy')}
-              </LoadingButton>
-            </Box>
-          </StyledBottomRow>
-        </StyledContainer>
-      </StyledContent>
-    </StyledPlan>
+        </Box>
+        <StyledPrice>
+          <StyledAmount>{formatPrice(totalPrice)}</StyledAmount>
+          <StyledFullAmount>
+            {regularPrice !== undefined && formatPrice(regularPrice)}
+          </StyledFullAmount>
+        </StyledPrice>
+        <PlanActionButton
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={() => buy(priceId, itemQuantity)}
+          loading={buyMutation.isLoading}
+          data-cy="billing-extra-credits-buy"
+        >
+          {t('billing_extra_credits_buy')}
+        </PlanActionButton>
+      </PlanContent>
+    </Plan>
   );
 };

@@ -44,4 +44,9 @@
     <changeSet author="jenik (generated)" id="1678208452734-3">
         <dropColumn columnName="user_limit" tableName="ee_subscription"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1678793463746-1">
+        <addColumn tableName="ee_subscription">
+            <column defaultValue="Plan" name="name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

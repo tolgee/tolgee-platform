@@ -1,0 +1,31 @@
+import { FC } from 'react';
+import { useTranslate } from '@tolgee/react';
+import { useMoneyFormatter } from 'tg.hooks/useLocale';
+import { TableCell, TableRow } from '@mui/material';
+
+export const TotalRow: FC<{ total: number }> = ({ total }) => {
+  const { t } = useTranslate();
+
+  const formatMoney = useMoneyFormatter();
+
+  return (
+    <TableRow>
+      <TableCell
+        colSpan={5}
+        sx={{
+          borderBottom: 'none',
+        }}
+      >
+        <b>{t('invoice_usage_dialog_table_total')}</b>
+      </TableCell>
+      <TableCell
+        align="right"
+        sx={{
+          borderBottom: 'none',
+        }}
+      >
+        {formatMoney(total)}
+      </TableCell>
+    </TableRow>
+  );
+};

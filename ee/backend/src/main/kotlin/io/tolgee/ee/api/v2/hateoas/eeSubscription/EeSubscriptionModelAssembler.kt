@@ -14,6 +14,8 @@ class EeSubscriptionModelAssembler(
     val currentUserCount = userAccountService.countAll()
 
     return EeSubscriptionModel(
+      name = eeSubscription.name,
+      licenseKey = eeSubscription.licenseKey,
       enabledFeatures = eeSubscription.enabledFeatures,
       currentPeriodEnd = eeSubscription.currentPeriodEnd?.time,
       cancelAtPeriodEnd = eeSubscription.cancelAtPeriodEnd,

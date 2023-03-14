@@ -3,6 +3,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Table,
+  TableBody,
   Tooltip,
 } from '@mui/material';
 import { DataUsage } from '@mui/icons-material';
@@ -12,6 +14,12 @@ import { useTranslate } from '@tolgee/react';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import Dialog from '@mui/material/Dialog';
 import { useOrganization } from '../../useOrganization';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { PeriodRew } from '../common/usage/PeriodRew';
+import { SubscriptionRow } from '../common/usage/SubscriptionRow';
+import { UsageTableHead } from '../common/usage/UsageTableHead';
+import { TotalRow } from '../common/usage/TotalRow';
+import { TotalTable } from '../common/usage/TotalTable';
 
 export const InvoiceUsage: FC<{
   invoice: components['schemas']['InvoiceModel'];
@@ -26,6 +34,7 @@ export const InvoiceUsage: FC<{
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage',
     method: 'get',
     path: {
+      organizationId: organization!.id,
       invoiceId: invoice.id,
     },
     options: {
@@ -48,9 +57,31 @@ export const InvoiceUsage: FC<{
               </Tooltip>
             </IconButton>
           </Box>
-          <Dialog open={open} onClose={() => setOpen(false)}>
+          <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
             <DialogTitle>{t('invoice_usage_dialog_title')}</DialogTitle>
-            <DialogContent></DialogContent>
+            <DialogContent>
+              {usage.data ? (
+                <>
+                  <Table>
+                    <UsageTableHead />
+                    <TableBody>
+                      <SubscriptionRow price={usage.data?.subscriptionPrice} />
+                      {(usage.data?.periods || []).map((period) => (
+                        <PeriodRew key={period.from} period={period} />
+                      ))}
+                      <TotalRow total={usage.data.total} />
+                    </TableBody>
+                  </Table>
+
+                  <TotalTable
+                    invoice={invoice}
+                    totalWithoutVat={usage.data.total}
+                  />
+                </>
+              ) : (
+                <EmptyListMessage loading={usage.isLoading} />
+              )}
+            </DialogContent>
           </Dialog>
         </>
       )}

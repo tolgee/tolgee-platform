@@ -10,6 +10,8 @@ import java.util.*
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
 open class EeSubscriptionModel(
+  val name: String,
+  val licenseKey: String,
   val enabledFeatures: Array<Feature>,
   val currentPeriodEnd: Long?,
   val cancelAtPeriodEnd: Boolean,

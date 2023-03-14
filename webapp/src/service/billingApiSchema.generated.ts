@@ -57,11 +57,8 @@ export interface paths {
     /** Returns organization invoices */
     get: operations["getInvoices"];
   };
-  "/v2/organizations/{organizationId}/billing/expected-usage": {
-    get: operations["getExpectedUsage"];
-  };
   "/v2/organizations/{organizationId}/billing/expected-usage/{subscriptionId}": {
-    get: operations["getExpectedUsage_1"];
+    get: operations["getExpectedUsage"];
   };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
@@ -110,9 +107,11 @@ export interface components {
       id: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
-      createdAt: string;
+      createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
       status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      licenseKey?: string;
+      estimatedCosts?: number;
     };
     UpdateSubscriptionPrepareRequest: {
       /** Id of the subscription plan */
@@ -184,13 +183,14 @@ export interface components {
     UsageItemModel: {
       from: number;
       to: number;
-      seats: number;
       milliseconds: number;
       total: number;
-      emptySeats: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
     };
     UsageModel: {
-      subscriptionPrice?: number;
+      subscriptionPrice: number;
       periods: components["schemas"]["UsageItemModel"][];
       total: number;
     };
@@ -201,6 +201,7 @@ export interface components {
       createdAt: number;
       /** The Total amount with tax */
       total: number;
+      taxRatePercentage?: number;
       /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
       pdfReady: boolean;
       hasUsage: boolean;
@@ -621,6 +622,7 @@ export interface operations {
   getUsage: {
     parameters: {
       path: {
+        organizationId: number;
         invoiceId: number;
       };
     };
@@ -711,29 +713,6 @@ export interface operations {
     };
   };
   getExpectedUsage: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getExpectedUsage_1: {
     parameters: {
       path: {
         organizationId: number;
