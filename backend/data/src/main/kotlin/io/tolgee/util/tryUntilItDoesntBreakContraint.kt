@@ -15,3 +15,5 @@ fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
 
   throw exception!!
 }
+
+class RepeatedlyThrowingConstraintViolationException : RuntimeException()

@@ -10,6 +10,7 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import java.io.FileNotFoundException
@@ -54,7 +55,11 @@ abstract class AbstractE2eDataController {
   @GetMapping(value = ["/clean"])
   open fun cleanup(): Any? {
     return tryUntilItDoesntBreakConstraint {
-      return@tryUntilItDoesntBreakConstraint executeInNewTransaction(transactionManager) {
+      return@tryUntilItDoesntBreakConstraint executeInNewTransaction(
+        transactionManager,
+        TransactionDefinition.ISOLATION_SERIALIZABLE
+      ) {
+        entityManager.clear()
         try {
           testData.data.userAccounts.forEach {
             userAccountService.find(it.self.username)?.let { user ->
