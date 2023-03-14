@@ -83,7 +83,7 @@ export const AdministrationOrganizations = ({
                       data-cy="administration-organizations-projects-button"
                       variant="contained"
                       onClick={() => {
-                        updatePreferredOrganization(o);
+                        updatePreferredOrganization(o.id);
                         history.push(LINKS.PROJECTS.build());
                       }}
                     >

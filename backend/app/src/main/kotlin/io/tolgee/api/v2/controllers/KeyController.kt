@@ -100,7 +100,6 @@ class KeyController(
 
   @PutMapping(value = ["/{id}/complex-update"])
   @Operation(summary = "More")
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   // key permissions are checked separately in method body
   @AccessWithApiKey()
   @Transactional

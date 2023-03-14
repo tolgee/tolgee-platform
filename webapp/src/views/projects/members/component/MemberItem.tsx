@@ -1,12 +1,21 @@
 import { useTranslate } from '@tolgee/react';
 import { Chip, styled } from '@mui/material';
+import { T } from '@tolgee/react';
 
-import { PermissionsMenu } from 'tg.views/projects/members/component/PermissionsMenu';
+import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
 import RevokePermissionsButton from './RevokePermissionsButton';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useUpdatePermissions } from './useUpdatePermissions';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -36,6 +45,13 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
+const StyledItemUser = styled('div')`
+  display: flex;
+  margin-left: 8px;
+  flex-grow: 1;
+  align-items: center;
+`;
+
 type Props = {
   user: UserAccountInProjectModel;
 };
@@ -46,21 +62,57 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
   const isAdmin = satisfiesPermission('admin');
+  const allLangs = useProjectLanguages();
 
   const isCurrentUser = currentUser?.id === user.id;
   const isOwner = user.organizationRole === 'OWNER';
 
+  const messages = useMessage();
+
+  const { updatePermissions, setByOrganization } = useUpdatePermissions({
+    userId: user.id,
+    projectId: project.id,
+  });
+
+  async function handleSubmit(data: PermissionSettingsState) {
+    try {
+      await updatePermissions(data);
+      messages.success(<T>permissions_set_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
+  }
+
+  const isOrganzationMember = Boolean(user.organizationRole);
+  const hasDirectPermissions = Boolean(user.directPermission);
+
+  async function handleResetToOrganization() {
+    try {
+      await setByOrganization();
+      messages.success(<T>permissions_reset_message</T>);
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+    }
+  }
+
   return (
     <StyledListItem data-cy="project-member-item">
-      <StyledItemText>
-        {user.name} ({user.username}){' '}
-        {user.organizationRole && (
-          <Chip size="small" label={project.organizationOwner?.name} />
-        )}
-      </StyledItemText>
+      <StyledItemUser>
+        <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
+        <StyledItemText>
+          {user.name} ({user.username}){' '}
+          {user.organizationRole && (
+            <Chip size="small" label={project.organizationOwner?.name} />
+          )}
+        </StyledItemText>
+      </StyledItemUser>
       <StyledItemActions>
+        <ScopesInfo scopes={user.computedPermission.scopes} />
+        <LanguagePermissionSummary
+          permissions={user.computedPermission}
+          allLangs={allLangs}
+        />
         <PermissionsMenu
-          user={user}
           buttonTooltip={
             isOwner && !isCurrentUser
               ? t('user_is_owner_of_organization_tooltip')
@@ -72,7 +124,18 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             size: 'small',
             disabled: !isAdmin || isCurrentUser || isOwner,
           }}
-          permissions={user.computedPermission}
+          modalProps={{
+            allLangs,
+            title: user.name || user.username,
+            permissions: user.computedPermission,
+            onSubmit: handleSubmit,
+            isInheritedFromOrganization:
+              !hasDirectPermissions && isOrganzationMember,
+            onResetToOrganization:
+              hasDirectPermissions && isOrganzationMember
+                ? handleResetToOrganization
+                : undefined,
+          }}
         />
         <RevokePermissionsButton user={user} />
       </StyledItemActions>

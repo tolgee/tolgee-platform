@@ -9,4 +9,5 @@ interface UserAccountInProjectView {
   val username: String
   val organizationRole: OrganizationRoleType?
   val directPermission: Permission?
+  val avatarHash: String?
 }

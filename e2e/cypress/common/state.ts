@@ -13,8 +13,15 @@ export const getCell = (translationText: string) => {
     .closestDcy('translations-table-cell');
 };
 
-const getStateIndicator = (translationText: string) => {
+export const getStateIndicator = (translationText: string) => {
   return getCell(translationText).findDcy('translations-state-indicator');
+};
+
+export const setStateToReviewed = (translationText: string) => {
+  getCell(translationText)
+    .trigger('mouseover')
+    .findDcy('translation-state-button')
+    .click();
 };
 
 export const assertHasState = (

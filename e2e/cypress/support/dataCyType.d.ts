@@ -88,7 +88,6 @@ declare namespace DataCy {
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
-        "global-list-item" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -147,6 +146,7 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
+        "invitation-dialog-close-button" |
         "invitation-dialog-input-field" |
         "invitation-dialog-invite-button" |
         "invitation-dialog-role-button" |
@@ -225,10 +225,18 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
+        "permissions-advanced-checkbox" |
         "permissions-language-menu-button" |
-        "permissions-languages-menu" |
         "permissions-menu" |
+        "permissions-menu-basic" |
         "permissions-menu-button" |
+        "permissions-menu-close" |
+        "permissions-menu-granular" |
+        "permissions-menu-inherited-message" |
+        "permissions-menu-reset-to-organization" |
+        "permissions-menu-save" |
+        "project-dashboard-activity-chart" |
+        "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
         "project-dashboard-description" |
         "project-dashboard-key-count" |
@@ -243,22 +251,33 @@ declare namespace DataCy {
         "project-dashboard-language-menu-settings" |
         "project-dashboard-members" |
         "project-dashboard-members-count" |
+        "project-dashboard-progress" |
+        "project-dashboard-project-totals" |
         "project-dashboard-reviewed-percentage" |
         "project-dashboard-tags" |
+        "project-dashboard-text" |
         "project-dashboard-translated-percentage" |
         "project-delete-button" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
         "project-list-more-button" |
-        "project-list-owner" |
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
+        "project-menu-item" |
+        "project-menu-item-api-keys" |
+        "project-menu-item-dashboard" |
+        "project-menu-item-export" |
+        "project-menu-item-import" |
+        "project-menu-item-integrate" |
+        "project-menu-item-languages" |
+        "project-menu-item-members" |
+        "project-menu-item-projects" |
+        "project-menu-item-settings" |
+        "project-menu-item-translations" |
         "project-menu-items" |
         "project-name-field" |
-        "project-owner-select" |
-        "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
         "project-settings-delete-button" |
@@ -281,6 +300,7 @@ declare namespace DataCy {
         "regenerate-pat-dialog-title" |
         "screenshot-image" |
         "screenshot-thumbnail" |
+        "screenshot-thumbnail-delete" |
         "search-select" |
         "search-select-item" |
         "search-select-new" |
@@ -337,6 +357,7 @@ declare namespace DataCy {
         "translations-state-indicator" |
         "translations-table-cell" |
         "translations-table-cell-language" |
+        "translations-table-cell-translation" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |

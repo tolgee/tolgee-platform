@@ -43,6 +43,7 @@ type Props = {
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { satisfiesPermission } = useProjectPermissions();
+  const canCreateKeys = satisfiesPermission('keys.create');
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
@@ -93,7 +94,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             </StyledToggleButton>
           </ButtonGroup>
 
-          {satisfiesPermission('keys.edit') && (
+          {canCreateKeys && (
             <Button
               startIcon={<Add />}
               color="primary"

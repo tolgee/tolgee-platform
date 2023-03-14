@@ -22,14 +22,17 @@ export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
 
+  const canViewKeys = satisfiesPermission('keys.view');
   const canViewTranslations = satisfiesPermission('translations.view');
   const canEditProject = satisfiesPermission('project.edit');
   const canEditLanguages = satisfiesPermission('languages.edit');
-  const canViewUsers = satisfiesPermission('members.view');
+  const canViewUsers =
+    config.authentication && satisfiesPermission('members.view');
   const canImport =
+    canViewKeys &&
     (satisfiesPermission('translations.edit') ||
-      satisfiesPermission('keys.edit')) &&
-    satisfiesPermission('keys.view');
+      satisfiesPermission('keys.edit'));
+  const canIntegrate = canViewKeys;
 
   const { t } = useTranslate();
 
@@ -42,19 +45,22 @@ export const ProjectMenu = ({ id }) => {
         linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
         icon={<ProjectsIcon />}
         text={t('project_menu_projects')}
+        data-cy="project-menu-item-projects"
       />
       <SideMenuItem
         linkTo={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: id })}
         icon={<DashboardIcon />}
         text={t('project_menu_dashboard', 'Project Dashboard')}
+        data-cy="project-menu-item-dashboard"
       />
-      {canViewTranslations && (
+      {canViewKeys && (
         <SideMenuItem
           linkTo={LINKS.PROJECT_TRANSLATIONS.build({
             [PARAMS.PROJECT_ID]: id,
           })}
           icon={<TranslationIcon />}
           text={t('project_menu_translations')}
+          data-cy="project-menu-item-translations"
           matchAsPrefix
         />
       )}
@@ -67,6 +73,7 @@ export const ProjectMenu = ({ id }) => {
             matchAsPrefix
             icon={<SettingsIcon />}
             text={t('project_menu_project_settings')}
+            data-cy="project-menu-item-settings"
           />
         )}
         {canEditLanguages && (
@@ -77,9 +84,10 @@ export const ProjectMenu = ({ id }) => {
             matchAsPrefix
             icon={<LanguageIcon />}
             text={t('project_menu_languages')}
+            data-cy="project-menu-item-languages"
           />
         )}
-        {config.authentication && canViewUsers && (
+        {canViewUsers && (
           <>
             <SideMenuItem
               linkTo={LINKS.PROJECT_PERMISSIONS.build({
@@ -87,6 +95,7 @@ export const ProjectMenu = ({ id }) => {
               })}
               icon={<PersonOutline />}
               text={t('project_menu_members')}
+              data-cy="project-menu-item-members"
             />
           </>
         )}
@@ -97,6 +106,7 @@ export const ProjectMenu = ({ id }) => {
             })}
             icon={<ImportIcon />}
             text={t('project_menu_import')}
+            data-cy="project-menu-item-import"
           />
         )}
       </>
@@ -108,20 +118,25 @@ export const ProjectMenu = ({ id }) => {
           })}
           icon={<ExportIcon />}
           text={t('project_menu_export')}
+          data-cy="project-menu-item-export"
         />
       )}
-      <SideMenuItem
-        linkTo={LINKS.PROJECT_INTEGRATE.build({
-          [PARAMS.PROJECT_ID]: id,
-        })}
-        icon={<Devices />}
-        text={t('project_menu_integrate')}
-      />
+      {canIntegrate && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_INTEGRATE.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<Devices />}
+          text={t('project_menu_integrate')}
+          data-cy="project-menu-item-integrate"
+        />
+      )}
       {!config.authentication && (
         <SideMenuItem
           linkTo={LINKS.USER_API_KEYS.build()}
           icon={<VpnKey />}
           text={t('project_menu_api_keys')}
+          data-cy="project-menu-item-api-keys"
         />
       )}
     </SideMenu>

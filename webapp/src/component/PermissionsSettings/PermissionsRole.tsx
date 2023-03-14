@@ -1,63 +1,67 @@
-import { ListItemButton, Box, useTheme, styled, alpha } from '@mui/material';
-import {
-  ALL_LANGUAGES_SCOPES,
-  updateByDependencies,
-} from 'tg.ee/PermissionsAdvanced/hierarchyTools';
+import { Box, styled, alpha, Typography } from '@mui/material';
+import clsx from 'clsx';
+import { ALL_LANGUAGES_SCOPES } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { RoleLanguages } from './RoleLanguages';
 
 import {
-  HierarchyItem,
-  PermissionState,
+  LanguageModel,
+  PermissionBasicState,
   PermissionModelRole,
   PermissionModelScope,
 } from './types';
 import { useRoleTranslations } from './useRoleTranslations';
 
-const StyledListItem = styled(ListItemButton)`
+const StyledListItem = styled('div')`
   position: relative;
   background-color: unset;
-  &:active {
-    background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.16)};
+  padding: ${({ theme }) => theme.spacing(1, 1.5)};
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  transition: background-color 0.2s ease-in, border-color 0.05s ease-in;
+
+  &:hover {
+    background-color: ${({ theme }) => alpha(theme.palette.emphasis[100], 0.8)};
+  }
+
+  &.selected {
+    background-color: ${({ theme }) => theme.palette.emphasis[100]};
+    border-color: ${({ theme }) => theme.palette.divider2.main};
   }
 `;
 
-const StyledShield = styled('div')`
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
+const StyledTypography = styled(Typography)`
+  font-weight: 500;
+  font-size: 15px;
+
+  &.selected {
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
 `;
 
 type Props = {
-  dependencies: HierarchyItem;
   role: NonNullable<PermissionModelRole>;
-  state: PermissionState;
+  state: PermissionBasicState;
   scopes: PermissionModelScope[];
-  onChange: (value: PermissionState) => void;
+  onChange: (value: PermissionBasicState) => void;
+  allLangs?: LanguageModel[];
 };
 
 export const PermissionsRole: React.FC<Props> = ({
-  dependencies,
   state,
   role,
   onChange,
   scopes,
+  allLangs,
 }) => {
-  const theme = useTheme();
-  const allLangs = useProjectLanguages().map((l) => l.id);
   const handleSelect = () => {
     if (role !== state.role) {
-      onChange(
-        updateByDependencies(
-          scopes,
-          { ...state, role, scopes },
-          dependencies,
-          allLangs
-        )
-      );
+      onChange({
+        ...state,
+        role,
+      });
     }
   };
   const { getRoleTranslation, getRoleHint } = useRoleTranslations();
@@ -67,32 +71,22 @@ export const PermissionsRole: React.FC<Props> = ({
   );
 
   return (
-    <StyledListItem
-      selected={selected}
-      onClick={handleSelect}
-      style={{
-        cursor: selected ? 'default' : 'pointer',
-        backgroundColor: selected
-          ? alpha(theme.palette.primary.main, 0.16)
-          : undefined,
-      }}
-    >
-      {selected && (
-        <StyledShield
-          onMouseEnter={stopAndPrevent()}
-          onClick={stopAndPrevent()}
-          onMouseDown={stopAndPrevent()}
-        />
-      )}
+    <StyledListItem onClick={handleSelect} className={clsx({ selected })}>
       <Box>
-        <Box>{getRoleTranslation(role)}</Box>
+        <StyledTypography className={clsx({ selected })}>
+          {getRoleTranslation(role)}
+        </StyledTypography>
         <Box>{getRoleHint(role)}</Box>
-        {selected && displayLanguages && (
-          <Box onMouseDown={stopAndPrevent()} onClick={stopAndPrevent()}>
+        {selected && displayLanguages && allLangs && (
+          <Box
+            zIndex={1}
+            onMouseDown={stopAndPrevent()}
+            onClick={stopAndPrevent()}
+          >
             <RoleLanguages
               state={state}
               onChange={onChange}
-              dependencies={dependencies}
+              allLangs={allLangs}
             />
           </Box>
         )}

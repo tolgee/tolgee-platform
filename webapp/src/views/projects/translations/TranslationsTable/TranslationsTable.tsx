@@ -76,7 +76,7 @@ export const TranslationsTable = () => {
         translationsLanguages?.map((lang) => {
           return languages.find((l) => l.tag === lang)!;
         }, [] as any[]) || []
-      );
+      ).filter(Boolean);
     } else {
       return [];
     }
@@ -122,15 +122,20 @@ export const TranslationsTable = () => {
     >
       <StyledHeaderRow>
         {columns.map((tag, i) => {
-          const language = languages!.find((lang) => lang.tag === tag)!;
+          const language = languages?.find((lang) => lang.tag === tag);
           return tag ? (
-            <StyledHeaderCell key={i} style={{ width: columnSizesPercent[i] }}>
-              <CellLanguage
-                colIndex={i - 1}
-                onResize={startResize}
-                language={language}
-              />
-            </StyledHeaderCell>
+            language && (
+              <StyledHeaderCell
+                key={i}
+                style={{ width: columnSizesPercent[i] }}
+              >
+                <CellLanguage
+                  colIndex={i - 1}
+                  onResize={startResize}
+                  language={language}
+                />
+              </StyledHeaderCell>
+            )
           ) : (
             <StyledHeaderCell
               key={i}

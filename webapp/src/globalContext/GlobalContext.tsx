@@ -4,7 +4,6 @@ import { globalContext } from './globalActions';
 import { createProviderNew } from 'tg.fixtures/createProviderNew';
 import { components } from 'tg.service/apiSchema.generated';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
 type UsageModel = components['schemas']['UsageModel'];
 
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
@@ -17,10 +16,8 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     });
 
     const actions = {
-      updatePreferredOrganization: (
-        organization: number | OrganizationModel
-      ) => {
-        return initialData.updatePreferredOrganization(organization);
+      updatePreferredOrganization: (organizationId: number) => {
+        return initialData.updatePreferredOrganization(organizationId);
       },
       refetchInitialData: () => {
         return initialData.refetchInitialData();

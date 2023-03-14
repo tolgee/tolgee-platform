@@ -1,10 +1,11 @@
+import { setLanguageData, visitLanguageSettings } from '../../common/languages';
 import {
-  setLanguageData,
-  visitLanguageSettings,
+  assertMessage,
+  gcy,
+  selectInSelect,
   visitProjectLanguages,
   visitProjectSettings,
-} from '../../common/languages';
-import { assertMessage, gcy, selectInSelect } from '../../common/shared';
+} from '../../common/shared';
 import { languagesTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 

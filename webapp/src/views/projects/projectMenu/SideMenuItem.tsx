@@ -3,15 +3,6 @@ import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, Tooltip } from '@mui/material';
 
-type SideMenuItemProps = {
-  linkTo?: string;
-  icon: React.ReactElement;
-  text: string;
-  selected?: boolean;
-  matchAsPrefix?: boolean;
-  hidden?: boolean;
-};
-
 const StyledItem = styled('li')`
   display: flex;
   list-style: none;
@@ -44,6 +35,16 @@ const StyledItem = styled('li')`
   }
 `;
 
+type Props = {
+  linkTo?: string;
+  icon: React.ReactElement;
+  text: string;
+  selected?: boolean;
+  matchAsPrefix?: boolean;
+  hidden?: boolean;
+  'data-cy': string;
+};
+
 export function SideMenuItem({
   linkTo,
   icon,
@@ -51,7 +52,8 @@ export function SideMenuItem({
   selected,
   matchAsPrefix,
   hidden,
-}: SideMenuItemProps) {
+  ...props
+}: Props) {
   const match = useLocation();
 
   const isSelected = selected
@@ -61,9 +63,10 @@ export function SideMenuItem({
     : match.pathname === linkTo;
 
   return (
-    <StyledItem>
+    <StyledItem data-cy="project-menu-item">
       <Tooltip title={text} placement="right" classes={{ tooltip: 'tooltip' }}>
         <Link
+          data-cy={props['data-cy']}
           aria-label={text}
           to={linkTo as string}
           tabIndex={hidden ? -1 : undefined}

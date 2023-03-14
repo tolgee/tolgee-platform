@@ -105,10 +105,9 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const inDomComments = displayComments || active || lastFocusable;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = `auto ${spots
-    .slice(1)
-    .map(() => '28px')
-    .join(' ')}`;
+  const gridTemplateColumns = spots
+    .map((spot) => (spot === 'state' ? 'auto' : '28px'))
+    .join(' ');
 
   return (
     <StyledControlsWrapper

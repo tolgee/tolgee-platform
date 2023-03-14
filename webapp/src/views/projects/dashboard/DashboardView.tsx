@@ -146,10 +146,16 @@ export const DashboardView = () => {
             </Box>
             {canViewActivity && (
               <>
-                <Box gridArea="activityList">
+                <Box
+                  gridArea="activityList"
+                  data-cy="project-dashboard-activity-list"
+                >
                   <ActivityList activityLoadable={activityLoadable} />
                 </Box>
-                <Box gridArea="activityChart">
+                <Box
+                  gridArea="activityChart"
+                  data-cy="project-dashboard-activity-chart"
+                >
                   <DailyActivityChart
                     dailyActivity={dailyActivityLoadable.data}
                   />

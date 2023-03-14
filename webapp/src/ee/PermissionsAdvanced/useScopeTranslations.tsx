@@ -24,8 +24,8 @@ export const useScopeTranslations = () => {
     'keys.view': t('permissions_item_keys_view'),
     'keys.delete': t('permissions_item_keys_delete'),
     'project.edit': t('permissions_item_project_edit'),
-    'members.view': t('permission_item_members_view'),
-    'members.edit': t('permission_item_members_edit'),
+    'members.view': t('permissions_item_members_view'),
+    'members.edit': t('permissions_item_members_edit'),
     'languages.edit': t('permissions_item_languages_edit'),
     'activity.view': t('permissions_item_activity_view'),
   };

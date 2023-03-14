@@ -1,23 +1,19 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Tooltip } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { PermissionsModal } from './PermissionsModal';
-import { PermissionModel } from '../../../../component/PermissionsSettings/types';
+import { PermissionModalProps, PermissionsModal } from './PermissionsModal';
 import { useRoleTranslations } from 'tg.component/PermissionsSettings/useRoleTranslations';
 
 type Props = {
   buttonTooltip?: string;
-  // onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
-  user: { name?: string; id: number };
-  permissions: PermissionModel;
+  modalProps: Omit<PermissionModalProps, 'onClose'>;
 };
 
 export const PermissionsMenu: FunctionComponent<Props> = ({
   buttonTooltip,
   buttonProps,
-  user,
-  permissions,
+  modalProps,
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -25,7 +21,7 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
     setOpen(false);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     setOpen(true);
   };
 
@@ -42,18 +38,12 @@ export const PermissionsMenu: FunctionComponent<Props> = ({
             aria-haspopup="true"
             onClick={handleClick}
           >
-            {getRoleTranslation(permissions.type || 'ADVANCED')}
+            {getRoleTranslation(modalProps.permissions.type || 'ADVANCED')}
             <ArrowDropDown fontSize="small" />
           </Button>
         </span>
       </Tooltip>
-      {open && (
-        <PermissionsModal
-          user={user}
-          onClose={handleClose}
-          permissions={permissions}
-        />
-      )}
+      {open && <PermissionsModal {...modalProps} onClose={handleClose} />}
     </>
   );
 };

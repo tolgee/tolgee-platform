@@ -16,6 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands';
 import 'cypress-promise/register';
+import { internalFetch } from '../common/apiCalls/common';
 
 require('cypress-xpath');
 
@@ -36,4 +37,11 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 
 Cypress.on('window:before:load', (win) => {
   win.localStorage.setItem('__tolgee_currentLanguage', 'en');
+});
+
+before(() => {
+  // turn on GRANULAR_PERMISSIONS
+  internalFetch('features/toggle?feature=GRANULAR_PERMISSIONS&enabled=true', {
+    method: 'put',
+  });
 });

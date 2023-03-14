@@ -32,7 +32,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
       { content: { 'application/json': values } },
       {
         onSuccess: (organization) => {
-          updatePreferredOrganization(organization);
+          updatePreferredOrganization(organization.id);
           redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
           messageService.success(<T>organization_created_message</T>);
         },

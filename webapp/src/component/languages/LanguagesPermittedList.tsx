@@ -7,32 +7,36 @@ import clsx from 'clsx';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
+const ICON_SIZE = 20;
+
 const StyledContainer = styled('div')`
   display: flex;
-  align-items: center;
+  flex-grow: 1;
   & .disabled {
     opacity: 0.2;
   }
 `;
 
 const StyledLabel = styled('div')`
-  display: block;
+  display: flex;
+  flex-grow: 1;
   flex-shrink: 1;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding: 0px 5px;
 `;
 
 const StyledExtraCircle = styled('div')`
   box-sizing: border-box;
-  width: 20px;
-  height: 20px;
+  width: ${ICON_SIZE}px;
+  height: ${ICON_SIZE}px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 2px;
-  background: ${({ theme }) => theme.palette.grey[400]};
-  color: ${({ theme }) => theme.palette.common.black};
+  background: ${({ theme }) => theme.palette.emphasis[300]};
+  color: ${({ theme }) => theme.palette.text.primary};
   border-radius: 50%;
   font-size: 10px;
 `;
@@ -40,14 +44,16 @@ const StyledExtraCircle = styled('div')`
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
   disabled?: boolean | number[];
+  maxItems?: number;
 };
 
 export const LanguagesPermittedList: React.FC<Props> = ({
   languages,
   disabled,
+  maxItems = 3,
   ...props
 }) => {
-  const selectedLanguages = languages?.slice(0, 3) || [];
+  const selectedLanguages = languages?.slice(0, maxItems) || [];
 
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
 
@@ -60,7 +66,7 @@ export const LanguagesPermittedList: React.FC<Props> = ({
       {selectedLanguages.map((l) => (
         <CircledLanguageIcon
           key={l.id}
-          size={20}
+          size={ICON_SIZE}
           flag={l.flagEmoji}
           className={clsx({
             disabled: Array.isArray(disabled)

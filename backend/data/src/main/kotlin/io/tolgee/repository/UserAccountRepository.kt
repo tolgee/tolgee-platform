@@ -53,7 +53,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   ): Optional<UserAccount>
 
   @Query(
-    """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole
+    """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,
+          ua.avatarHash as avatarHash
         from UserAccount ua 
         left join ua.organizationRoles mr on mr.organization.id = :organizationId
         left join ua.permissions pp
@@ -73,7 +74,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
-        select ua.id as id, ua.name as name, ua.username as username, p as directPermission, orl.type as organizationRole 
+        select ua.id as id, ua.name as name, ua.username as username, p as directPermission,
+          orl.type as organizationRole, ua.avatarHash as avatarHash 
         from UserAccount ua, Project r 
         left join fetch Permission p on ua = p.user and p.project.id = :projectId
         left join OrganizationRole orl on orl.user = ua and r.organizationOwner = orl.organization

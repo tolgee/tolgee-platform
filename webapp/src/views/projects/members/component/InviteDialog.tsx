@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Field, Formik } from 'formik';
 import {
   Box,
@@ -7,43 +7,39 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
+  Typography,
   styled,
   TextField,
-  Typography,
 } from '@mui/material';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
 
-import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { PermissionsMenu } from 'tg.component/permissions/PermissionsMenu';
-import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
-import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
+import {
+  PermissionModel,
+  PermissionSettingsState,
+} from 'tg.component/PermissionsSettings/types';
+import {
+  CreateInvitationData,
+  useCreateInvitation,
+} from './useCreateInvitation';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 
 const messaging = container.resolve(MessageService);
-
-type PermissionType = NonNullable<
-  NonNullable<components['schemas']['ProjectModel']['directPermission']>['type']
->;
 
 const StyledContent = styled('div')`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(2)};
-  margin-bottom: ${({ theme }) => theme.spacing(2)};
-  min-height: 150px;
-`;
-
-const StyledPermissions = styled('div')`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing(1)};
+  min-height: 75px;
+  margin-bottom: 20px;
 `;
 
 type Props = {
@@ -54,74 +50,70 @@ type Props = {
 export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
   const { t } = useTranslate();
   const project = useProject();
-  const invite = useApiMutation({
-    url: '/v2/projects/{projectId}/invite',
-    method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/invitations',
+  const langauges = useProjectLanguages();
+
+  const initialPermissions: PermissionModel = {
+    type: 'TRANSLATE',
+    scopes: [],
+  };
+
+  const { createInvitation, isLoading } = useCreateInvitation({
+    projectId: project.id,
+    allLangs: langauges,
   });
 
+  const [settingsState, setSettingsState] = useState<
+    PermissionSettingsState | undefined
+  >(undefined);
+
   const yupSchema = useMemo(() => Validation.INVITE_DIALOG_PROJECT(t), [t]);
+
+  async function handleCreateInvitation(data: CreateInvitationData) {
+    try {
+      const result = await createInvitation(data);
+      if (!result.invitedUserEmail) {
+        copy(
+          LINKS.ACCEPT_INVITATION.buildWithOrigin({
+            [PARAMS.INVITATION_CODE]: result.code,
+          })
+        );
+        messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+      } else {
+        messaging.success(<T keyName="invite_user_invitation_email_success" />);
+      }
+      onClose();
+    } catch (e) {
+      parseErrorResponse(e).forEach((e_1) => messaging.error(<T>{e_1}</T>));
+    }
+  }
 
   return (
     <Dialog {...{ open, onClose }} fullWidth>
       <Formik
         initialValues={{
-          permission: 'MANAGE' as PermissionType,
-          permissionLanguages: [],
           type: 'email' as 'email' | 'link',
           text: '',
         }}
         validationSchema={yupSchema}
         validateOnMount={true}
         onSubmit={(data) => {
-          invite.mutate(
-            {
-              path: { projectId: project.id },
-              content: {
-                'application/json': {
-                  type: data.permission,
-                  languages:
-                    data.permission === 'TRANSLATE'
-                      ? data.permissionLanguages
-                      : undefined,
-                  email: data.type === 'email' ? data.text : undefined,
-                  name: data.type === 'link' ? data.text : undefined,
-                },
-              },
-            },
-            {
-              onSuccess(data) {
-                if (!data.invitedUserEmail) {
-                  copy(
-                    LINKS.ACCEPT_INVITATION.buildWithOrigin({
-                      [PARAMS.INVITATION_CODE]: data.code,
-                    })
-                  );
-                  messaging.success(
-                    <T keyName="invite_user_invitation_copy_success" />
-                  );
-                } else {
-                  messaging.success(
-                    <T keyName="invite_user_invitation_email_success" />
-                  );
-                }
-                onClose();
-              },
-              onError(e) {
-                parseErrorResponse(e).forEach((e) =>
-                  messaging.error(<T>{e}</T>)
-                );
-              },
-            }
-          );
+          if (settingsState) {
+            return handleCreateInvitation({
+              email: data.type === 'email' ? data.text : undefined,
+              name: data.type === 'link' ? data.text : undefined,
+              permissions: settingsState,
+            });
+          }
         }}
       >
         {({ values, handleSubmit, isValid, ...formik }) => {
           return (
             <form onSubmit={handleSubmit}>
-              <DialogTitle>
-                <Box display="flex" justifyContent="space-between">
-                  <span>{t('project_members_dialog_title')}</span>
+              <DialogContent sx={{ height: 'min(80vh, 700px)' }}>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                  <Typography variant="h5">
+                    {t('project_members_dialog_title')}
+                  </Typography>
                   <ButtonGroup>
                     <Button
                       size="small"
@@ -143,35 +135,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     </Button>
                   </ButtonGroup>
                 </Box>
-              </DialogTitle>
-              <DialogContent>
                 <StyledContent>
-                  <div>
-                    <Typography variant="caption">
-                      {t('invite_user_permission_label')}
-                    </Typography>
-                    {/*todo: Proper Permission*/}
-                    <StyledPermissions>
-                      <PermissionsMenu
-                        selected={values.permission}
-                        onSelect={(permission) =>
-                          formik.setFieldValue('permission', permission)
-                        }
-                        buttonProps={{
-                          size: 'small',
-                        }}
-                      />
-                      {values.permission === 'TRANSLATE' && (
-                        <LanguagePermissionsMenu
-                          selected={values.permissionLanguages}
-                          onSelect={(langs) =>
-                            formik.setFieldValue('permissionLanguages', langs)
-                          }
-                        />
-                      )}
-                    </StyledPermissions>
-                  </div>
-
                   <Field name="text">
                     {({ field, meta }) => (
                       <TextField
@@ -190,15 +154,27 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     )}
                   </Field>
                 </StyledContent>
+
+                <PermissionsSettings
+                  title={t('project_members_dialog_permission_title')}
+                  permissions={initialPermissions}
+                  onChange={setSettingsState}
+                  allLangs={langauges}
+                />
               </DialogContent>
               <DialogActions>
+                <Button
+                  onClick={onClose}
+                  data-cy="invitation-dialog-close-button"
+                >
+                  {t('project_members_dialog_close_button')}
+                </Button>
                 <LoadingButton
                   variant="contained"
                   color="primary"
                   type="submit"
-                  disabled={!isValid}
                   data-cy="invitation-dialog-invite-button"
-                  loading={invite.isLoading}
+                  loading={isLoading}
                 >
                   {values.type === 'email'
                     ? t('project_members_dialog_invite_button')

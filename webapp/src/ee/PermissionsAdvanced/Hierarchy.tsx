@@ -1,21 +1,23 @@
-import { Checkbox, FormControlLabel, styled } from '@mui/material';
+import { Checkbox, FormControlLabel, Tooltip, styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 import {
   HierarchyItem,
   HierarchyType,
-  PermissionState,
+  LanguageModel,
+  PermissionAdvancedState,
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import {
   checkChildren,
   getChildScopes,
-  getMinimalLanguages,
+  getLanguagesUnion,
   getScopeLanguagePermission,
   updateByDependencies,
   getBlockingScopes,
-  ALL_LANGUAGES_SCOPES,
+  updateByDependenciesSoftly,
   isAllLanguages,
+  ALL_LANGUAGES_SCOPES,
 } from './hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
 
@@ -39,8 +41,9 @@ const StyledRow = styled('div')`
 type Props = {
   dependencies: HierarchyItem;
   structure: HierarchyType;
-  state: PermissionState;
-  onChange: (value: PermissionState) => void;
+  state: PermissionAdvancedState;
+  onChange: (value: PermissionAdvancedState) => void;
+  allLangs?: LanguageModel[];
 };
 
 export const Hierarchy: React.FC<Props> = ({
@@ -48,9 +51,10 @@ export const Hierarchy: React.FC<Props> = ({
   structure,
   state,
   onChange,
+  allLangs,
 }) => {
-  const languages = useProjectLanguages();
-  const allLangs = languages.map((l) => l.id);
+  const { t } = useTranslate();
+  const allLangIds = allLangs?.map((l) => l.id) || [];
   const { scopes } = state;
   const scopeIncluded = structure.value && scopes.includes(structure.value);
   const { childrenCheckedSome, childrenCheckedAll } = checkChildren(
@@ -71,7 +75,7 @@ export const Hierarchy: React.FC<Props> = ({
   // meaning if we toggle this, nothing outside gets broken
   const blockingScopes = getBlockingScopes(myScopes, scopes, dependencies);
 
-  const blockedLanguages = getMinimalLanguages(blockingScopes, state, allLangs);
+  const blockedLanguages = getLanguagesUnion(blockingScopes, state, allLangIds);
 
   const disabled = Boolean(blockingScopes.length);
 
@@ -79,13 +83,17 @@ export const Hierarchy: React.FC<Props> = ({
     scopeIncluded || (!structure.value && childrenCheckedAll);
   const halfChecked = !structure.value && !fullyChecked && childrenCheckedSome;
 
+  const fullyBlocked = Boolean(
+    blockingScopes.find((scope) => ALL_LANGUAGES_SCOPES.includes(scope))
+  );
+
   const { getScopeTranslation } = useScopeTranslations();
 
   const label =
     structure.label ||
     (structure.value ? getScopeTranslation(structure.value) : undefined);
 
-  const minimalLanguages = getMinimalLanguages(
+  const minimalLanguages = getLanguagesUnion(
     structure.value
       ? [structure.value]
       : myScopes.filter((sc) => scopes.includes(sc)),
@@ -93,11 +101,7 @@ export const Hierarchy: React.FC<Props> = ({
     []
   );
 
-  const displayLanguages =
-    allLangs.length > 1 &&
-    minimalLanguages &&
-    structure.value &&
-    !ALL_LANGUAGES_SCOPES.includes(structure.value!);
+  const displayLanguages = Boolean(structure.value && myLanguageProps.length);
 
   const updateScopes = (scopes: PermissionModelScope[], value: boolean) => {
     let newScopes = [...state.scopes];
@@ -121,7 +125,7 @@ export const Hierarchy: React.FC<Props> = ({
       newState[langProp!] = value;
     });
     onChange(
-      updateByDependencies(affectedScopes, newState, dependencies, allLangs)
+      updateByDependencies(affectedScopes, newState, dependencies, allLangIds)
     );
   };
 
@@ -133,45 +137,64 @@ export const Hierarchy: React.FC<Props> = ({
       });
     } else {
       // get myScopes and also their required scopes
-      onChange(updateByDependencies(myScopes, state, dependencies, allLangs));
+      if (structure.value && ALL_LANGUAGES_SCOPES.includes(structure.value)) {
+        onChange(
+          updateByDependencies(myScopes, state, dependencies, allLangIds)
+        );
+      } else {
+        onChange(
+          updateByDependenciesSoftly(myScopes, state, dependencies, allLangIds)
+        );
+      }
     }
   };
 
   return (
     <StyledContainer>
       <StyledRow>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={fullyChecked}
-              indeterminate={halfChecked}
-              onClick={handleToggle}
-              disabled={disabled}
-            />
+        <Tooltip
+          key={structure.value}
+          enterDelay={1000}
+          enterNextDelay={1000}
+          title={
+            (disabled && structure.value
+              ? t('permissions_advanced_item_blocked', {
+                  scopes: blockingScopes.join(', '),
+                })
+              : structure.value) || ''
           }
-          label={label}
-        />
+          placement="left"
+          disableInteractive
+        >
+          <FormControlLabel
+            permissions-scope={structure.value}
+            control={
+              <Checkbox
+                data-cy="permissions-advanced-checkbox"
+                size="small"
+                style={{ paddingTop: 4, paddingBottom: 4 }}
+                checked={fullyChecked}
+                indeterminate={halfChecked}
+                onClick={handleToggle}
+                disabled={disabled}
+              />
+            }
+            label={label}
+          />
+        </Tooltip>
 
-        {minimalLanguages && displayLanguages && (
+        {minimalLanguages && displayLanguages && allLangs && (
           <LanguagePermissionsMenu
-            buttonProps={{ size: 'small' }}
+            buttonProps={{ size: 'small', style: { minWidth: 180 } }}
             disabled={
+              fullyBlocked ||
               (!halfChecked && !fullyChecked) ||
-              Boolean(
-                blockingScopes.find((scope) =>
-                  ALL_LANGUAGES_SCOPES.includes(scope)
-                )
-              ) ||
-              blockedLanguages
+              (blockedLanguages !== false && isAllLanguages(blockedLanguages)
+                ? allLangIds
+                : blockedLanguages)
             }
-            selected={
-              !blockedLanguages
-                ? minimalLanguages
-                : isAllLanguages(blockedLanguages, allLangs) &&
-                  isAllLanguages(minimalLanguages, allLangs)
-                ? []
-                : minimalLanguages
-            }
+            allLanguages={allLangs}
+            selected={minimalLanguages}
             onSelect={(value) => updateLanguagePermissions(value)}
           />
         )}
@@ -185,6 +208,7 @@ export const Hierarchy: React.FC<Props> = ({
               structure={child}
               state={state}
               onChange={onChange}
+              allLangs={allLangs}
             />
           );
         })}

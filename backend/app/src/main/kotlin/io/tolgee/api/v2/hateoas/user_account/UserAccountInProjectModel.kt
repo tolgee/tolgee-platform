@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.user_account
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModel
 import io.tolgee.api.v2.hateoas.permission.PermissionModel
+import io.tolgee.dtos.Avatar
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -12,6 +13,7 @@ data class UserAccountInProjectModel(
   val id: Long,
   val username: String,
   var name: String?,
+  var avatar: Avatar?,
   val organizationRole: OrganizationRoleType?,
   val organizationBasePermission: PermissionModel,
   val directPermission: PermissionModel?,

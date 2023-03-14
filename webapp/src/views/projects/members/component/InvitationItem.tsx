@@ -1,11 +1,9 @@
-import { useCallback } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { IconButton, styled, Tooltip } from '@mui/material';
 import { Clear, Link } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -13,6 +11,8 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 
 const messaging = container.resolve(MessageService);
 
@@ -67,14 +67,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const isAdmin = satisfiesPermission('admin');
 
-  const findLanguage = useCallback(
-    (languageId: number) => {
-      const result = languages.find((language) => language.id === languageId);
-      return result!;
-    },
-    [languages]
-  );
-
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
     method: 'delete',
@@ -102,8 +94,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
     messaging.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
-  const permission = invitation.type;
-
   useGlobalLoading(deleteInvitation.isLoading);
 
   return (
@@ -112,32 +102,29 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
       </StyledItemText>
       <StyledItemActions>
-        {permission === 'TRANSLATE' && (
-          <Tooltip
-            title={t('permission_languages_hint', {
-              subject: invitation.permittedLanguageIds?.length
-                ? invitation.permittedLanguageIds
-                    .map((l) => findLanguage(l).name)
-                    .join(', ')
-                : t('languages_permitted_list_all'),
-            })}
-          >
-            <span>
-              <LanguagesPermittedList
-                languages={invitation.permittedLanguageIds?.map(
-                  (permittedLanguageId) => findLanguage(permittedLanguageId)
-                )}
-              />
-            </span>
-          </Tooltip>
-        )}
+        <ScopesInfo scopes={invitation.permission.scopes} />
+
+        <LanguagePermissionSummary
+          permissions={invitation.permission}
+          allLangs={languages}
+        />
+
         <Tooltip
-          title={t(`permission_type_${invitation.type!.toLowerCase()}_hint`)}
+          title={t(
+            `permission_type_${
+              invitation.type?.toLowerCase() || 'granular'
+            }_hint`
+          )}
         >
           <StyledPermissions>
-            <T keyName={`permission_type_${invitation.type!.toLowerCase()}`} />
+            <T
+              keyName={`permission_type_${
+                invitation.type?.toLowerCase() || 'granular'
+              }`}
+            />
           </StyledPermissions>
         </Tooltip>
+
         <Tooltip title={t('invite_user_invitation_copy_button')}>
           <IconButton size="small" onClick={handleGetLink}>
             <Link />

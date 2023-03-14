@@ -32,8 +32,8 @@ export const useRoleTranslations = () => {
       hint: t('permission_type_manage_hint'),
     },
     ADVANCED: {
-      label: t('permission_type_advanced'),
-      hint: t('permission_type_advanced_hint'),
+      label: t('permission_type_granular'),
+      hint: t('permission_type_granular_hint'),
     },
   };
 

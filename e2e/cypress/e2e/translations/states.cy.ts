@@ -7,7 +7,12 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { assertTooltip, gcy, selectInProjectMenu } from '../../common/shared';
-import { stateColors } from '../../common/state';
+import {
+  getCell,
+  getStateIndicator,
+  setStateToReviewed,
+  stateColors,
+} from '../../common/state';
 
 describe('Translation states', () => {
   let project: ProjectDTO = null;
@@ -45,24 +50,6 @@ describe('Translation states', () => {
       .click();
     assertHasState('Cool translated text 2', 'Translated');
   });
-
-  const setStateToReviewed = (translationText: string) => {
-    getCell(translationText)
-      .trigger('mouseover')
-      .findDcy('translation-state-button')
-      .click();
-  };
-
-  const getStateIndicator = (translationText: string) => {
-    return getCell(translationText).findDcy('translations-state-indicator');
-  };
-
-  const getCell = (translationText: string) => {
-    return cy
-      .contains(translationText)
-      .should('be.visible')
-      .closestDcy('translations-table-cell');
-  };
 
   const assertHasState = (
     translationText: string,
