@@ -27,7 +27,11 @@ export const RefreshButton = () => {
   }
 
   return (
-    <LoadingButton onClick={onClick} loading={refreshMutation.isLoading}>
+    <LoadingButton
+      onClick={onClick}
+      loading={refreshMutation.isLoading}
+      variant="outlined"
+    >
       <Tooltip title={t('ee-license-refresh-tooltip')}>
         <Refresh />
       </Tooltip>
