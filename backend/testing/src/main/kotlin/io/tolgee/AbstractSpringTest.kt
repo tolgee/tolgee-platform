@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -220,6 +221,10 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   }
 
   fun <T> executeInNewTransaction(fn: () -> T): T {
-    return io.tolgee.util.executeInNewTransaction(platformTransactionManager, fn)
+    return io.tolgee.util.executeInNewTransaction(
+      platformTransactionManager,
+      TransactionDefinition.ISOLATION_DEFAULT,
+      fn
+    )
   }
 }
