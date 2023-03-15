@@ -12,7 +12,11 @@ export const SelfHostedEeActiveSubscription: FC<{
   subscription: components['schemas']['SelfHostedEeSubscriptionModel'];
 }> = ({ subscription }) => {
   return (
-    <Plan>
+    <Plan
+      sx={(theme) => ({
+        border: `1px solid #c39dae`,
+      })}
+    >
       <PlanContent>
         <ActivePlanTitle
           name={subscription.plan.name}

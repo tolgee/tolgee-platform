@@ -1002,7 +1002,17 @@ export interface components {
     EeSubscriptionModel: {
       name: string;
       licenseKey: string;
-      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentUserCount: number;
@@ -1067,7 +1077,17 @@ export interface components {
       id: number;
       name: string;
       public: boolean;
-      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
       includedSeats: number;
       pricePerSeat: number;
       subscriptionPrice: number;
@@ -1387,7 +1407,17 @@ export interface components {
     };
     PrivateOrganizationModel: {
       organizationModel?: components["schemas"]["OrganizationModel"];
-      enabledFeatures: "GRANULAR_PERMISSIONS"[];
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
       name: string;
       id: number;
       /**

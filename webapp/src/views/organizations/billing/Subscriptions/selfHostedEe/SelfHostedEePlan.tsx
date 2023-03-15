@@ -41,7 +41,7 @@ export const SelfHostedEePlan = (props: {
 
           <Box sx={{ gridArea: 'info' }}>
             <Box>{description}</Box>
-            <IncludedFeatures plan={props.plan} />
+            <IncludedFeatures features={props.plan.enabledFeatures} />
           </Box>
           <PlanPrice
             pricePerSeat={props.plan.pricePerSeat}
