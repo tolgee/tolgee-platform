@@ -5,7 +5,9 @@ import io.tolgee.testing.assertions.Assertions
 import org.assertj.core.api.AbstractStringAssert
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -43,6 +45,10 @@ class EmailTestUtil() {
         )
         .getBodyPart(0).content as String
     }
+
+  fun verifyEmailSent() {
+    verify(javaMailSender).send(any<MimeMessage>())
+  }
 
   val assertEmailTo: AbstractStringAssert<*>
     get() {
