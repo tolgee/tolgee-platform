@@ -5,12 +5,16 @@ import io.tolgee.testing.assertions.Assertions
 import org.assertj.core.api.AbstractBooleanAssert
 import org.assertj.core.api.AbstractDateAssert
 import org.assertj.core.api.AbstractLongAssert
+import org.assertj.core.api.AbstractStringAssert
 import org.assertj.core.api.IterableAssert
 import org.assertj.core.api.ObjectArrayAssert
 import org.assertj.core.api.ObjectAssert
 import java.util.*
 
 inline val <reified T> T.assert: ObjectAssert<T>
+  get() = Assertions.assertThat(this)
+
+inline val String.assert: AbstractStringAssert<*>
   get() = Assertions.assertThat(this)
 
 inline val Date?.assert: AbstractDateAssert<*> get() = Assertions.assertThat(this)

@@ -7,6 +7,10 @@ import io.tolgee.model.enums.OrganizationRoleType
 
 class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
 
+  companion object {
+    operator fun invoke(fn: (TestDataBuilder.() -> Unit) = {}) = TestDataBuilder(fn)
+  }
+
   class DATA {
     val userAccounts = mutableListOf<UserAccountBuilder>()
     val projects = mutableListOf<ProjectBuilder>()

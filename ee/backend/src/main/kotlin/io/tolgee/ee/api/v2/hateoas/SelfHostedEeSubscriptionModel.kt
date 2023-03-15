@@ -11,7 +11,6 @@ import java.math.BigDecimal
 open class SelfHostedEeSubscriptionModel(
   val id: Long = 0,
   val currentPeriodEnd: Long? = null,
-  val cancelAtPeriodEnd: Boolean = false,
   val createdAt: Long = 0,
   val plan: SelfHostedEePlanModel = SelfHostedEePlanModel(),
   val status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
