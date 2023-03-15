@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { confirmation } from 'tg.hooks/confirmation';
 
 export const SetupLicenceKey = () => {
@@ -33,18 +33,23 @@ export const SetupLicenceKey = () => {
               message: (
                 <Box>
                   <Box>
-                    {t('ee-license-key-confirmation-message', {
-                      price: data.pricePerSeatMonthly,
-                    })}
+                    <T
+                      keyName="ee-license-key-confirmation-message"
+                      params={{
+                        price: data.plan.pricePerSeat,
+                        includedSeats: data.plan.includedSeats,
+                      }}
+                    />
                   </Box>
 
                   <Box>
-                    Estimated costs by this billing period: // todo translate
-                  </Box>
-                  <Box>
-                    {data.daysUntilPeriodEnd} days until period end * €
-                    {data.pricePerSeatDaily} per seat day * {data.seatCount}{' '}
-                    seats = €{data.estimatedTotalThisPeriod}
+                    <T
+                      keyName="ee-license-key-confirmation-message-estimate"
+                      params={{
+                        additional:
+                          data.usage.total - data.usage.subscriptionPrice,
+                      }}
+                    />
                   </Box>
                 </Box>
               ),

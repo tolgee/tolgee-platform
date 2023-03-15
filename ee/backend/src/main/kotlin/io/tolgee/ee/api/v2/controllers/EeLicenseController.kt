@@ -8,7 +8,6 @@ import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.service.security.SecurityService
-import io.tolgee.service.security.UserAccountService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController
 class EeLicenseController(
   private val securityService: SecurityService,
   private val eeSubscriptionService: EeSubscriptionService,
-  private val userAccountService: UserAccountService,
   private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler
 ) {
   @PutMapping("set-license-key")

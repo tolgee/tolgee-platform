@@ -67,6 +67,15 @@ class TestDataService(
   private val patService: PatService,
   private val namespaceService: NamespaceService
 ) : Logging {
+
+  @Transactional
+  fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
+    val builder = TestDataBuilder()
+    ft(builder)
+    saveTestData(builder)
+    return builder
+  }
+
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     prepare()
@@ -93,6 +102,19 @@ class TestDataService(
     }
 
     updateLanguageStats(builder)
+  }
+
+  @Transactional
+  fun cleanTestData(builder: TestDataBuilder) {
+    builder.data.userAccounts.forEach {
+      userAccountService.findActive(it.self.username)?.let { user ->
+        userAccountService.delete(user)
+      }
+    }
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
+    }
+    additionalTestDataSavers.forEach { it.clean(builder) }
   }
 
   private fun updateLanguageStats(builder: TestDataBuilder) {
@@ -332,13 +354,5 @@ class TestDataService(
 
   private fun clearEntityManager() {
     entityManager.clear()
-  }
-
-  @Transactional
-  fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
-    val builder = TestDataBuilder()
-    ft(builder)
-    saveTestData(builder)
-    return builder
   }
 }

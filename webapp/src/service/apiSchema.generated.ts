@@ -1115,11 +1115,22 @@ export interface components {
       licenseKey: string;
     };
     PrepareSetEeLicenceKeyModel: {
-      pricePerSeatMonthly: number;
-      daysUntilPeriodEnd: number;
-      pricePerSeatDaily: number;
-      estimatedTotalThisPeriod: number;
-      seatCount: number;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    UsageItemModel: {
+      from: number;
+      to: number;
+      milliseconds: number;
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice: number;
+      periods: components["schemas"]["UsageItemModel"][];
+      total: number;
     };
     CreateProjectDTO: {
       name: string;
@@ -1872,23 +1883,6 @@ export interface components {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
-    };
-    UsageModel: {
-      organizationId: number;
-      /** Current balance of standard credits. Standard credits are refilled every month. */
-      creditBalance: number;
-      /** How many credits are included in your current plan. */
-      includedMtCredits: number;
-      /** Date when credits were refilled. (In epoch format.) */
-      creditBalanceRefilledAt: number;
-      /** Date when credits will be refilled. (In epoch format.) */
-      creditBalanceNextRefillAt: number;
-      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
-      extraCreditBalance: number;
-      /** How many translations can be stored within your organization. */
-      translationLimit: number;
-      /** How many translations are currently stored within your organization. */
-      currentTranslations: number;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {

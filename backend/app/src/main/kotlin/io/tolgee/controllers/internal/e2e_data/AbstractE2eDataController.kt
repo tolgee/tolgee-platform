@@ -56,14 +56,7 @@ abstract class AbstractE2eDataController {
     return tryUntilItDoesntBreakConstraint {
       return@tryUntilItDoesntBreakConstraint executeInNewTransaction(transactionManager) {
         try {
-          testData.data.userAccounts.forEach {
-            userAccountService.findActive(it.self.username)?.let { user ->
-              userAccountService.delete(user)
-            }
-          }
-          testData.data.organizations.forEach { organizationBuilder ->
-            organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
-          }
+          testDataService.cleanTestData(this.testData)
         } catch (e: FileNotFoundException) {
           return@executeInNewTransaction ResponseEntity.internalServerError().body(e.stackTraceToString())
         }
