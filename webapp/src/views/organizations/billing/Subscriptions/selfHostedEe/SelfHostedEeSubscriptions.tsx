@@ -33,7 +33,7 @@ export const SelfHostedEeSubscriptions = () => {
   const isSuccess = params.get('success') === '';
 
   const plansLoadable = useBillingApiQuery({
-    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee-plans`,
+    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee/plans`,
     method: 'get',
     path: {
       organizationId: organization!.id,
@@ -41,7 +41,7 @@ export const SelfHostedEeSubscriptions = () => {
   });
 
   const activeSubscriptionsLoadable = useBillingApiQuery({
-    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee-subscriptions`,
+    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions`,
     method: 'get',
     path: {
       organizationId: organization!.id,
@@ -49,7 +49,7 @@ export const SelfHostedEeSubscriptions = () => {
   });
 
   const refreshSubscriptions = useBillingApiMutation({
-    url: `/v2/organizations/{organizationId}/billing/refresh-self-hosted-ee-subscriptions`,
+    url: `/v2/organizations/{organizationId}/billing/self-hosted-ee/refresh-subscriptions`,
     method: 'put',
   });
 

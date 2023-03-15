@@ -35,7 +35,7 @@ export const SelfHostedEeEstimatedCosts: FC<{
   const organization = useOrganization();
 
   const usage = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/expected-usage/{subscriptionId}',
+    url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/expected-usage',
     method: 'get',
     path: {
       organizationId: organization!.id,

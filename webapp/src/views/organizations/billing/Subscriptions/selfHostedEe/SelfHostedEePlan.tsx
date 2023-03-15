@@ -24,7 +24,7 @@ export const SelfHostedEePlan = (props: {
         });
 
   const subscribeMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/setup-ee',
+    url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions',
     method: 'post',
     options: {
       onSuccess: (data) => {

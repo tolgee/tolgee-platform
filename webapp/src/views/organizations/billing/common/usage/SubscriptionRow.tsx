@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { TableCell, TableRow } from '@mui/material';
 
 export const SubscriptionRow = (props: {
-  price: components['schemas']['UsageModel']['subscriptionPrice'];
+  price: components['schemas']['MeteredUsageModel']['subscriptionPrice'];
 }) => {
   const formatMoney = useMoneyFormatter();
 

@@ -5,9 +5,9 @@ import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 
 @Component
-class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> {
-  override fun toModel(data: UsageData): UsageModel {
-    return UsageModel(
+class MeteredUsageModelAssembler : RepresentationModelAssembler<UsageData, MeteredUsageModel> {
+  override fun toModel(data: UsageData): MeteredUsageModel {
+    return MeteredUsageModel(
       subscriptionPrice = data.subscriptionPrice,
       periods = data.usage.map {
         UsageItemModel(

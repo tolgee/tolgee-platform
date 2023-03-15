@@ -13,8 +13,8 @@ export const CancelSelfHostedEeSubscriptionButton = (props: { id: number }) => {
   const organization = useOrganization();
 
   const cancelMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/cancel-self-hosted-ee-subscription/{subscriptionId}',
-    method: 'put',
+    url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}',
+    method: 'delete',
     invalidatePrefix: '/v2/organizations/{organizationId}/billing',
     options: {
       onSuccess: () => {

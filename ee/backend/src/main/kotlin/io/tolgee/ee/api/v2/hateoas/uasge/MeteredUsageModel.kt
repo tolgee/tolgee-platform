@@ -7,8 +7,8 @@ import java.math.BigDecimal
 
 @Suppress("unused")
 @Relation(collectionRelation = "invoices", itemRelation = "invoice")
-open class UsageModel(
+open class MeteredUsageModel(
   val subscriptionPrice: BigDecimal = 0.toBigDecimal(),
   val periods: List<UsageItemModel> = emptyList(),
   val total: BigDecimal = 0.toBigDecimal(),
-) : RepresentationModel<UsageModel>(), Serializable
+) : RepresentationModel<MeteredUsageModel>(), Serializable
