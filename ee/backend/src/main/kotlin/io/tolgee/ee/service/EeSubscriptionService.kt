@@ -19,7 +19,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,7 +48,7 @@ class EeSubscriptionService(
 
   fun setLicenceKey(licenseKey: String): EeSubscription {
     val seats = userAccountService.countAll()
-    val response = try {
+    val responseBody = try {
       postRequest<SelfHostedEeSubscriptionModel>(
         setPath,
         SetLicenseKeyLicensingDto(licenseKey, seats)
@@ -58,7 +57,6 @@ class EeSubscriptionService(
       throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
     }
 
-    val responseBody = response.body
     if (responseBody != null) {
       val entity = EeSubscription().apply {
         this.licenseKey = licenseKey
@@ -76,7 +74,7 @@ class EeSubscriptionService(
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAll()
 
-    val response = try {
+    val responseBody = try {
       postRequest<PrepareSetEeLicenceKeyModel>(
         prepareSetKeyPath,
         SetLicenseKeyLicensingDto(licenseKey, seats),
@@ -85,7 +83,6 @@ class EeSubscriptionService(
       throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
     }
 
-    val responseBody = response.body
     if (responseBody != null) {
       return responseBody
     }
@@ -93,17 +90,20 @@ class EeSubscriptionService(
     throw IllegalStateException("Licence not obtained")
   }
 
-  private inline fun <reified T> postRequest(url: String, body: Any): ResponseEntity<T> {
+  private inline fun <reified T> postRequest(url: String, body: Any): T? {
     val bodyJson = jacksonObjectMapper().writeValueAsString(body)
     val headers = HttpHeaders().apply {
       contentType = MediaType.APPLICATION_JSON
     }
-    return restTemplate.exchange(
+
+    val stringResponse = restTemplate.exchange(
       "${eeProperties.licenseServer}$url",
       HttpMethod.POST,
       HttpEntity(bodyJson, headers),
-      T::class.java
+      String::class.java
     )
+
+    return jacksonObjectMapper().readValue(stringResponse.body, T::class.java)
   }
 
   @Scheduled(fixedDelay = 1000 * 60 * 5)
@@ -155,7 +155,7 @@ class EeSubscriptionService(
   }
 
   private fun getRemoteSubscriptionInfo(subscription: EeSubscription): SelfHostedEeSubscriptionModel? {
-    val response = try {
+    val responseBody = try {
       postRequest<SelfHostedEeSubscriptionModel>(
         subscriptionInfoPath,
         GetMySubscriptionDto(subscription.licenseKey),
@@ -164,7 +164,7 @@ class EeSubscriptionService(
       subscription.status = SubscriptionStatus.CANCELED
       null
     }
-    return response?.body
+    return responseBody
   }
 
   fun reportError(error: String) {
@@ -196,7 +196,14 @@ class EeSubscriptionService(
   fun releaseSubscription() {
     val subscription = getSubscription()
     if (subscription != null) {
-      reportUsage(subscription, 0)
+      try {
+        reportUsage(subscription, 0)
+      } catch (e: HttpClientErrorException.NotFound) {
+        val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
+        if (!licenceKeyNotFound) {
+          throw e
+        }
+      }
       eeSubscriptionRepository.deleteAll()
     }
   }

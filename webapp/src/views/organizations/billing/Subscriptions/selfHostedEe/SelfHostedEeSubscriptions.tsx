@@ -21,6 +21,12 @@ const StyledShopping = styled('div')`
   }
 `;
 
+const StyledActive = styled('div')`
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+`;
+
 export const SelfHostedEeSubscriptions = () => {
   const { t } = useTranslate();
 
@@ -78,14 +84,14 @@ export const SelfHostedEeSubscriptions = () => {
           {t('organization-billing-self-hosted-active-subscriptions')}
         </Typography>
         {activeSubscriptions ? (
-          <Box>
+          <StyledActive>
             {activeSubscriptions.map((subscription) => (
               <SelfHostedEeActiveSubscription
                 key={subscription.id}
                 subscription={subscription}
               />
             ))}
-          </Box>
+          </StyledActive>
         ) : (
           <EmptyListMessage
             height="200px"

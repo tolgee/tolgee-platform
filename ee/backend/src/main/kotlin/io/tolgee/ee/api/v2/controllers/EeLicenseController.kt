@@ -40,6 +40,7 @@ class EeLicenseController(
 
   @PutMapping("/refresh")
   fun refreshSubscription(): EeSubscriptionModel? {
+    securityService.checkUserIsServerAdmin()
     eeSubscriptionService.refreshSubscription()
     val eeSubscription = eeSubscriptionService.getSubscription() ?: return null
     return eeSubscriptionModelAssembler.toModel(eeSubscription)
@@ -48,6 +49,7 @@ class EeLicenseController(
   @GetMapping("info")
   @Operation(summary = "Returns the info about the current EE subscription")
   fun getInfo(): EeSubscriptionModel? {
+    securityService.checkUserIsServerAdmin()
     val eeSubscription = eeSubscriptionService.getSubscription()
     return eeSubscription?.let { eeSubscriptionModelAssembler.toModel(it) }
   }
@@ -55,6 +57,7 @@ class EeLicenseController(
   @PutMapping("release-license-key")
   @Operation(summary = "Removes the EE licence key from this instance")
   fun release() {
+    securityService.checkUserIsServerAdmin()
     eeSubscriptionService.releaseSubscription()
   }
 }

@@ -37,10 +37,13 @@ class EmailTestUtil() {
     whenever(javaMailSender.send(messageArgumentCaptor.capture())).thenAnswer { }
   }
 
-  val messageContent: String
-    get() {
-      return (
-        (messageArgumentCaptor.firstValue.content as MimeMultipart)
+  val firstMessageContent: String
+    get() = messageContents.first()
+
+  val messageContents: List<String>
+    get() = messageArgumentCaptor.allValues.map {
+      (
+        (it.content as MimeMultipart)
           .getBodyPart(0).content as MimeMultipart
         )
         .getBodyPart(0).content as String
