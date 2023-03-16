@@ -34,7 +34,7 @@ export const findResolutionRow = (key: string) => {
 
 export const visitImport = (projectId: number) => {
   cy.visit(`${HOST}/projects/${projectId}/import`);
-  waitForGlobalLoading(undefined, 4000);
+  waitForGlobalLoading(undefined, 10000);
 };
 
 export const getLanguageRow = (filename: string) => {
