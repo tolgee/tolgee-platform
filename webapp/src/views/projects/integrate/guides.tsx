@@ -87,4 +87,12 @@ export const guides = [
       () => import('!babel-loader!@mdx-js/loader!./guides/Svelte.mdx')
     ),
   },
+  {
+    name: 'Figma',
+    icon: getTechnologyImgComponent('figma'),
+    guide: React.lazy(
+      // @ts-ignore
+      () => import('!babel-loader!@mdx-js/loader!./guides/Figma.mdx')
+    ),
+  },
 ] as Guide[];
