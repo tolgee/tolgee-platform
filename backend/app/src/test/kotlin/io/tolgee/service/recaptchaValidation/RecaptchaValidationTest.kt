@@ -44,7 +44,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
   fun setup() {
     Mockito.reset(restTemplate)
     whenever(
-      restTemplate.postForEntity(any() as String, any(), any() as Class<Companion.Response>)
+      restTemplate.postForEntity(any<String>(), any(), any<Class<Companion.Response>>())
     ).then {
       ResponseEntity(
         Companion.Response().apply {

@@ -100,10 +100,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     whenever(
       googleTranslate.translate(
-        any() as String,
-        any() as Translate.TranslateOption,
-        any() as Translate.TranslateOption,
-        any() as Translate.TranslateOption
+        any<String>(),
+        any(),
+        any(),
+        any()
       )
     ).thenReturn(googleTranslationMock)
 
@@ -115,25 +115,25 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     whenever(
       deeplApiService.translate(
-        any() as String,
-        any() as String,
-        any() as String,
+        any(),
+        any(),
+        any(),
       )
     ).thenReturn("Translated with DeepL")
 
     whenever(
       azureCognitiveApiService.translate(
-        any() as String,
-        any() as String,
-        any() as String,
+        any(),
+        any(),
+        any(),
       )
     ).thenReturn("Translated with Azure Cognitive")
 
     whenever(
       baiduApiService.translate(
-        any() as String,
-        any() as String,
-        any() as String,
+        any(),
+        any(),
+        any(),
       )
     ).thenReturn("Translated with Baidu")
   }

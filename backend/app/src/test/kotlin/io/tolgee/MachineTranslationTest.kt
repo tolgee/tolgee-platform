@@ -30,10 +30,10 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     whenever(
       googleTranslate.translate(
-        any() as String,
-        any() as Translate.TranslateOption,
-        any() as Translate.TranslateOption,
-        any() as Translate.TranslateOption
+        any<String>(),
+        any(),
+        any(),
+        any()
       )
     ).thenReturn(googleTranslationMock)
 
