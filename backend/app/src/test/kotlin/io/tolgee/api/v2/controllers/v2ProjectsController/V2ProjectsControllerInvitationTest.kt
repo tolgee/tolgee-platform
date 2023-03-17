@@ -8,7 +8,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andHasErrorMessage
@@ -27,35 +27,26 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/"), JavaMailSenderMocked {
+class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"
     private const val INVITED_NAME = "Franta"
   }
 
-  @Autowired
-  @MockBean
-  override lateinit var javaMailSender: JavaMailSender
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
-
   @BeforeEach
   @AfterEach
   fun reset() {
     tolgeeProperties.frontEndUrl = null
+    emailTestUtil.initMocks()
   }
+
+  private lateinit var emailTestUtil: EmailTestUtil
 
   val invitationTestUtil: InvitationTestUtil by lazy {
     InvitationTestUtil(this, applicationContext)
@@ -158,12 +149,12 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `sends invitation e-mail`() {
     val code = inviteWithUserWithNameAndEmail()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    val messageContent = messageArgumentCaptor.value.tolgeeStandardMessageContent
+    val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
     assertThat(messageContent).contains("http://localhost/")
-    assertEmailTo().isEqualTo(INVITED_EMAIL)
+    emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
   @Test
@@ -171,9 +162,9 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   fun `uses frontEnd url when possible`() {
     tolgeeProperties.frontEndUrl = "dummy_fe_url"
     inviteWithUserWithNameAndEmail()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    val messageContent = messageArgumentCaptor.value.tolgeeStandardMessageContent
+    val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains("dummy_fe_url")
   }
 

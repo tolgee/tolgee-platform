@@ -5,7 +5,7 @@ import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTe
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -17,17 +17,13 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
-import javax.mail.internet.MimeMessage
 
 @ContextRecreatingTest
 @SpringBootTest(
@@ -35,11 +31,7 @@ import javax.mail.internet.MimeMessage
     "tolgee.front-end-url=https://fake.frontend.url"
   ]
 )
-class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
-
-  @MockBean
-  @Autowired
-  override lateinit var javaMailSender: JavaMailSender
+class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
@@ -47,7 +39,13 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
   @Autowired
   lateinit var passwordEncoder: PasswordEncoder
 
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
+
+  @BeforeEach
+  fun init() {
+    emailTestUtil.initMocks()
+  }
 
   @Test
   fun `it updates the user profile`() {
@@ -121,8 +119,8 @@ class V2UserControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
     )
     performAuthPut("/v2/user", requestDTO).andIsOk
 
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
-    assertThat(messageArgumentCaptor.value.tolgeeStandardMessageContent)
+    emailTestUtil.verifyEmailSent()
+    assertThat(emailTestUtil.messageContents.single())
       .contains(tolgeeProperties.frontEndUrl.toString())
 
     tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification

@@ -3,32 +3,24 @@ package io.tolgee.security
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
-import javax.mail.internet.MimeMessage
 
-class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+class EmailVerificationTest : AbstractControllerTest() {
 
   @Autowired
-  @MockBean
-  override lateinit var javaMailSender: JavaMailSender
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
@@ -124,9 +116,9 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   fun signUpSavesVerification() {
     perform()
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    assertThat(messageArgumentCaptor.value.subject).isEqualTo("Tolgee e-mail verification")
+    assertThat(emailTestUtil.messageArgumentCaptor.firstValue.subject).isEqualTo("Tolgee e-mail verification")
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
@@ -145,8 +137,8 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   }
 
   private fun getMessageContent(): String {
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
-    return messageArgumentCaptor.value.tolgeeStandardMessageContent
+    emailTestUtil.verifyEmailSent()
+    return emailTestUtil.messageContents.single()
   }
 
   @Test

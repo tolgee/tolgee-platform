@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
@@ -17,24 +17,18 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
-class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMocked {
+class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
     loginAsUser(initialUsername)
+    emailTestUtil.initMocks()
   }
 
-  @MockBean
   @Autowired
-  override lateinit var javaMailSender: JavaMailSender
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @Test
   fun `does not return when has no project permission`() {
