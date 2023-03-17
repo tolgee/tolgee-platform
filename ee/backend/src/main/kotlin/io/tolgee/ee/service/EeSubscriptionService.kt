@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
@@ -103,10 +104,12 @@ class EeSubscriptionService(
       String::class.java
     )
 
-    return jacksonObjectMapper().readValue(stringResponse.body, T::class.java)
+    return jacksonObjectMapper()
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .readValue(stringResponse.body, T::class.java)
   }
 
-  @Scheduled(fixedDelay = 1000 * 60 * 5)
+  @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
   @Transactional
   fun checkSubscription() {
     val subscription = getSubscription()

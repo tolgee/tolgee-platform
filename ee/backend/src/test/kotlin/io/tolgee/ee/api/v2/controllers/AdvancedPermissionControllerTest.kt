@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.component.PublicEnabledFeaturesProvider
 import io.tolgee.constants.Feature

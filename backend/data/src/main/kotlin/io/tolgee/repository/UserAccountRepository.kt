@@ -139,7 +139,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     value = """
-    select count(ua) from UserAccount ua where ua.disabledAt is null
+    select count(ua) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null
   """
   )
   fun countAllEnabled(): Long

@@ -96,6 +96,7 @@ class UserAccountService(
     return userAccount
   }
 
+  @Transactional
   fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
     dtoToEntity(request).let {
       it.role = role
