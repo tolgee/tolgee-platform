@@ -1,3 +1,10 @@
+# [3.11.0](https://github.com/tolgee/tolgee-platform/compare/v3.10.3...v3.11.0) (2023-03-17)
+
+
+### Features
+
+* Figma integration guide ([#1618](https://github.com/tolgee/tolgee-platform/issues/1618)) ([9d4bf72](https://github.com/tolgee/tolgee-platform/commit/9d4bf7289f866209a7dab0131a4f9631ce328aa2))
+
 ## [3.10.3](https://github.com/tolgee/tolgee-platform/compare/v3.10.2...v3.10.3) (2023-03-13)
 
 
