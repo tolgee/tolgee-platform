@@ -12,6 +12,8 @@ ext {
         ]
 
         liquibase {
+            jvmArgs "-Dliquibase.duplicateFileMode=WARN"
+
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {
@@ -21,7 +23,6 @@ ext {
                     username liveDb.username
                     password liveDb.password
                     driver liveDb.driver
-                    duplicateFileMode 'WARN'
                     excludeObjects "table:batch_job_execution_context," +
                             "batch_step_execution_seq," +
                             "batch_job_seq," +
