@@ -109,12 +109,12 @@ class OpenApiConfiguration {
     excludedPaths: Array<String> = arrayOf(),
     name: String
   ): GroupedOpenApi? {
-    val operationHandlers = HashMap<Operation, HandlerMethod>()
+    val operationHandlers = HashMap<String, HandlerMethod>()
     val handlerPaths = HashMap<Method, MutableList<String>>()
 
     return GroupedOpenApi.builder().group(name)
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-        operationHandlers[operation] = handlerMethod
+        operationHandlers[operation.operationId] = handlerMethod
         operation
       }
       .pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
@@ -122,7 +122,7 @@ class OpenApiConfiguration {
       .addOpenApiCustomiser { openApi ->
         openApi.paths.forEach { (path, value) ->
           value.readOperations().forEach { operation ->
-            operationHandlers[operation]?.method?.let { method ->
+            operationHandlers[operation.operationId]?.method?.let { method ->
               handlerPaths[method] = handlerPaths[method].let {
                 it?.run {
                   add(path)
@@ -146,7 +146,7 @@ class OpenApiConfiguration {
             val pathContainsProjectId = pathEntry.key.contains("{$PROJECT_ID_PARAMETER}")
             val parameterIsMissingAtAll = !pathContainsProjectId && !isParameterConsumed
             val otherMethodPathContainsProjectId = handlerPaths[
-              operationHandlers[operation]
+              operationHandlers[operation.operationId]
                 ?.method
             ]?.any { it.contains("{projectId}") }
               ?: false
@@ -195,7 +195,7 @@ class OpenApiConfiguration {
   }
 
   fun apiKeyGroupForPaths(paths: Array<String>, excludedPaths: Array<String>, name: String): GroupedOpenApi? {
-    val operationHandlers = HashMap<Operation, HandlerMethod>()
+    val operationHandlers = HashMap<String, HandlerMethod>()
 
     return GroupedOpenApi.builder().group(name)
       .pathsToExclude(*excludedPaths)
@@ -206,9 +206,11 @@ class OpenApiConfiguration {
           val operations = ArrayList<Operation>()
           val newPathItem = PathItem()
           val oldPathItem = pathEntry.value
-          oldPathItem.readOperations().forEach { operation ->
-            val annotation = operationHandlers[operation]
-              ?.getMethodAnnotation(AccessWithApiKey::class.java)
+          val oldOperations = oldPathItem.readOperations()
+          oldOperations.forEach { operation ->
+            val handlers = operationHandlers
+            val handler = operationHandlers[operation.operationId]
+            val annotation = handler?.getMethodAnnotation(AccessWithApiKey::class.java)
 
             if (annotation != null) {
               val containsProjectIdParam = pathEntry.key
@@ -236,7 +238,7 @@ class OpenApiConfiguration {
         openApi?.tags?.removeIf { !usedTags.contains(it.name) }
       }
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-        operationHandlers[operation] = handlerMethod
+        operationHandlers[operation.operationId] = handlerMethod
         operation
       }.handleLinks().build()
   }

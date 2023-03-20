@@ -45,7 +45,6 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = 11
 
 allOpen {
     annotation("javax.persistence.Entity")
@@ -59,13 +58,8 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-compileKotlin {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
