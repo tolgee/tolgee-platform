@@ -37,7 +37,7 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
   } as any;
 
   return (
-    <Box {...wrapperProps}>
+    <Box data-cy="global-empty-list" {...wrapperProps}>
       <Fade in={!loading} mountOnEnter unmountOnExit>
         <div>
           <SadEmotionMessage {...otherProps}>
