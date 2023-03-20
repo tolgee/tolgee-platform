@@ -2,8 +2,8 @@ import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../../../../useOrganization';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 
 type Period = components['schemas']['SubscribeRequest']['period'];
 

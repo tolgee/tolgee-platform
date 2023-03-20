@@ -73,6 +73,7 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
       <Box mb={2}>
         <ButtonGroup>
           <ButtonGroupRouterItem
+            data-cy="billing-subscriptions-cloud-button"
             link={LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
               [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
             })}
@@ -81,6 +82,7 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
             {t('organization_subscriptions_cloud_button')}
           </ButtonGroupRouterItem>
           <ButtonGroupRouterItem
+            data-cy="billing-subscriptions-self-hosted-ee-button"
             exact={true}
             link={LINKS.ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE.build({
               [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
