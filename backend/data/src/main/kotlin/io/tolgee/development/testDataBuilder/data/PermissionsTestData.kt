@@ -39,11 +39,6 @@ class PermissionsTestData {
       val cs = addCzech()
 
       addPermission {
-        this.user = admin.self
-        this.type = ProjectPermissionType.MANAGE
-      }
-
-      addPermission {
         this.user = member.self
         this.type = ProjectPermissionType.VIEW
       }

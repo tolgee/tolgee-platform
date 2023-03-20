@@ -154,6 +154,17 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
     }
   }
 
+  @Test
+  fun `view contains at least the scopes from translate and state change`() {
+    permissionTestUtil.checkSetPermissionsWithLanguages("", { getLang ->
+      "scopes=translations.edit&scopes=translations.state-edit&translateLanguages=${getLang("en")}&" +
+        "stateChangeLanguages=${getLang("de")}&viewLanguages=${getLang("en")}"
+    }) { data, getLangId ->
+      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
+        .containsExactlyInAnyOrder(getLangId("en"), getLangId("de"))
+    }
+  }
+
   private fun performSetScopesBaseOrganization(org: Organization): ResultActions {
     return performAuthPut(
       "/v2/organizations/${org.id}/set-base-permissions?scopes=translations.edit&scopes=translations.state-edit",
