@@ -18,6 +18,7 @@ import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.NamespaceService
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
 @RestController

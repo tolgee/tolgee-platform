@@ -5,11 +5,11 @@ import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.validation.constraints.Size
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.validation.constraints.Size
 
 @Entity
 class ImportFile(

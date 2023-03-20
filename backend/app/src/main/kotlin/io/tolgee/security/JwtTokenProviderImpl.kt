@@ -17,12 +17,12 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.JwtToken.Companion.JWT_TOKEN_SUPER_EXPIRATION_CLAIM
 import io.tolgee.service.security.UserAccountService
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.crypto.SecretKey
-import javax.servlet.http.HttpServletRequest
 
 @Component
 class JwtTokenProviderImpl(

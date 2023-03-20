@@ -2,6 +2,8 @@ package io.tolgee.fixtures
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AbstractStringAssert
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentCaptor
@@ -9,8 +11,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
 
 interface JavaMailSenderMocked {
   var javaMailSender: JavaMailSender

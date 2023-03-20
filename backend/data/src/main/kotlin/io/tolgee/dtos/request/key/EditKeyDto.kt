@@ -2,8 +2,8 @@ package io.tolgee.dtos.request.key
 
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
-import javax.validation.constraints.NotBlank
 
 data class EditKeyDto(
   @field:NotBlank

@@ -8,6 +8,8 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

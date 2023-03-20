@@ -1,6 +1,5 @@
 package io.tolgee.security.third_party
 
-import com.sun.istack.Nullable
 import io.tolgee.configuration.tolgee.OAuth2AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -22,6 +21,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import javax.annotation.Nullable
 
 @Component
 class OAuth2Delegate(

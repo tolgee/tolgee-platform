@@ -7,13 +7,13 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import java.io.FileNotFoundException
-import javax.persistence.EntityManager
 
 abstract class AbstractE2eDataController {
   abstract val testData: TestDataBuilder

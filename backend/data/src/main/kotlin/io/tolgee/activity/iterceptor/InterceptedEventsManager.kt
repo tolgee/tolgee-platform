@@ -17,7 +17,7 @@ import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import org.hibernate.Transaction
-import org.hibernate.collection.internal.AbstractPersistentCollection
+import org.hibernate.collection.spi.AbstractPersistentCollection
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
@@ -39,7 +39,7 @@ class InterceptedEventsManager(
   }
 
   fun onCollectionModification(collection: Any?, key: Serializable?) {
-    if (collection !is AbstractPersistentCollection || collection !is Collection<*> || key !is Long) {
+    if (collection !is AbstractPersistentCollection<*> || collection !is Collection<*> || key !is Long) {
       return
     }
 

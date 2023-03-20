@@ -23,6 +23,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -31,7 +32,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 @Transactional

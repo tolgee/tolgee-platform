@@ -3,9 +3,9 @@ package io.tolgee.dtos.request.apiKey
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.model.enums.ApiScope
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 import java.util.stream.Collectors
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
 data class EditApiKeyDto(
   @field:NotNull

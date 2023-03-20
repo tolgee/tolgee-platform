@@ -4,10 +4,10 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
 import java.util.*
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.Predicate
 
 class QueryGlobalFiltering(
   private val params: TranslationFilters,

@@ -27,14 +27,13 @@ import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.key.KeyMetaService
-import org.hibernate.annotations.QueryHints
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -165,7 +164,7 @@ class ImportService(
   fun findKeys(import: Import): List<ImportKey> {
     var result: List<ImportKey> = entityManager.createQuery(
       """
-            select distinct ik from ImportKey ik 
+            select ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
@@ -173,19 +172,17 @@ class ImportService(
             """
     )
       .setParameter("import", import)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     result = entityManager.createQuery(
       """
-            select distinct ik from ImportKey ik 
+            select ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
         """
     ).setParameter("keys", result)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     return result

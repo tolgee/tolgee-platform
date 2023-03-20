@@ -14,10 +14,10 @@ import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
+import jakarta.persistence.EntityManager
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 @Transactional

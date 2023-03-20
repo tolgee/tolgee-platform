@@ -3,7 +3,7 @@ package io.tolgee.service.query_builders.translationViewBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
-import javax.persistence.criteria.Selection
+import jakarta.persistence.criteria.Selection
 import kotlin.reflect.KProperty1
 
 class QuerySelection : LinkedHashMap<String, Selection<*>>() {

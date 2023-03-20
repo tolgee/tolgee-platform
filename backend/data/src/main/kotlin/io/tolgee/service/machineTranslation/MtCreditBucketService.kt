@@ -10,10 +10,10 @@ import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import jakarta.transaction.Transactional
 import org.apache.commons.lang3.time.DateUtils
 import org.springframework.stereotype.Service
 import java.util.*
-import javax.transaction.Transactional
 
 @Service
 class MtCreditBucketService(

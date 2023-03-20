@@ -2,12 +2,12 @@ package io.tolgee.dtos.request.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.request.LanguageDto
-import javax.validation.Valid
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 
 data class CreateProjectDTO(
   @field:NotBlank @field:Size(min = 3, max = 50)

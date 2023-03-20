@@ -7,6 +7,9 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.SecurityService
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -14,9 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class ApiKeyAuthFilter(

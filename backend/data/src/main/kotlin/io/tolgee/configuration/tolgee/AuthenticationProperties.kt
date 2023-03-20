@@ -6,9 +6,7 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
-@ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
 class AuthenticationProperties(
   @E2eRuntimeMutable

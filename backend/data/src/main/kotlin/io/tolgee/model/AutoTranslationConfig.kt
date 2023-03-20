@@ -1,7 +1,7 @@
 package io.tolgee.model
 
-import javax.persistence.Entity
-import javax.persistence.OneToOne
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToOne
 
 @Entity
 class AutoTranslationConfig : StandardAuditModel() {

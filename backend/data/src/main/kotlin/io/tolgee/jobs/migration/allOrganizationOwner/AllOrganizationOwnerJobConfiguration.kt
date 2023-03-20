@@ -9,6 +9,7 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
+import jakarta.persistence.EntityManager
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.Sort.Direction
-import javax.persistence.EntityManager
 import javax.sql.DataSource
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")

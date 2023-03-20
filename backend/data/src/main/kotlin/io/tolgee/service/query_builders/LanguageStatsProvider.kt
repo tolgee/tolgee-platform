@@ -9,14 +9,14 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
-import javax.persistence.EntityManager
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.ListJoin
-import javax.persistence.criteria.Root
-import javax.persistence.criteria.Selection
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.Selection
 
 open class LanguageStatsProvider(
   val entityManager: EntityManager,

@@ -6,10 +6,8 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties(prefix = "tolgee")
-@ConstructorBinding
 open class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),

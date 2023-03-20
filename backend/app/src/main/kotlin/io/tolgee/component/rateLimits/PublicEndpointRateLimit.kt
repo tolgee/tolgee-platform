@@ -1,9 +1,9 @@
 package io.tolgee.component.rateLimits
 
 import io.tolgee.security.rateLimis.RateLimit
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Rate limit for login or register from IP

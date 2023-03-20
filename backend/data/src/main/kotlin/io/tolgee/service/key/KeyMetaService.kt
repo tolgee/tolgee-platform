@@ -10,11 +10,10 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
-import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(
@@ -60,7 +59,7 @@ class KeyMetaService(
   fun getWithFetchedData(import: Import): List<KeyMeta> {
     var result: List<KeyMeta> = entityManager.createQuery(
       """
-            select distinct ikm from KeyMeta ikm
+            select ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.file if
@@ -68,19 +67,17 @@ class KeyMetaService(
             """
     )
       .setParameter("import", import)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
       """
-            select distinct ikm from KeyMeta ikm
+            select ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result
@@ -89,25 +86,23 @@ class KeyMetaService(
   fun getWithFetchedData(project: Project): List<KeyMeta> {
     var result: List<KeyMeta> = entityManager.createQuery(
       """
-            select distinct ikm from KeyMeta ikm
+            select ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
             where k.project = :project 
             """
     )
       .setParameter("project", project)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
       """
-            select distinct ikm from KeyMeta ikm
+            select ikm from KeyMeta ikm
             join ikm.key k
             left join fetch ikm.codeReferences ikc
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result

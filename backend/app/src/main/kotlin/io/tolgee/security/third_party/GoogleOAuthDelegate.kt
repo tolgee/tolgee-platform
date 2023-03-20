@@ -1,6 +1,5 @@
 package io.tolgee.security.third_party
 
-import com.sun.istack.Nullable
 import io.tolgee.configuration.tolgee.GoogleAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import javax.annotation.Nullable
 
 @Component
 class GoogleOAuthDelegate(

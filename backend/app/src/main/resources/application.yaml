@@ -17,6 +17,8 @@ spring:
         types:
           print:
             banner: false
+        temp:
+          use_jdbc_metadata_defaults: true
   batch:
     job:
       enabled: false
@@ -83,4 +85,3 @@ management:
       enabled: false
     mail:
       enabled: false
-

@@ -10,13 +10,13 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.service.key.ScreenshotService.Companion.SCREENSHOTS_STORAGE_FOLDER_NAME
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 @CrossOrigin(origins = ["*"])

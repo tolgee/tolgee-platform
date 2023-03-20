@@ -1,6 +1,5 @@
 package io.tolgee.security.third_party
 
-import com.sun.istack.Nullable
 import io.tolgee.configuration.tolgee.GithubAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.util.*
 import java.util.stream.Collectors
+import javax.annotation.Nullable
 
 @Component
 class GithubOAuthDelegate(

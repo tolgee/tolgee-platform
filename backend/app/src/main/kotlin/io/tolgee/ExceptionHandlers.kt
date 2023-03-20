@@ -11,6 +11,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
+import jakarta.persistence.EntityNotFoundException
 import org.hibernate.QueryException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -28,7 +29,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
-import javax.persistence.EntityNotFoundException
 
 @RestControllerAdvice
 class ExceptionHandlers {

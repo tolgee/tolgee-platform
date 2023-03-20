@@ -13,12 +13,9 @@ import io.tolgee.security.rateLimits.RateLimitsFilterFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.BeanIds
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
@@ -32,8 +29,10 @@ class WebSecurityConfig @Autowired constructor(
   private val disabledAuthenticationFilter: DisabledAuthenticationFilter,
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
   private val patAuthFilter: PatAuthFilter
-) : WebSecurityConfigurerAdapter() {
-  override fun configure(http: HttpSecurity) {
+) {
+
+  @Bean
+  fun filterChain(http: HttpSecurity): SecurityFilterChain? {
     http
       .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
       .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
@@ -50,8 +49,8 @@ class WebSecurityConfig @Autowired constructor(
         rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.AFTER_AUTHORIZATION),
         ProjectPermissionFilter::class.java
       )
-      .authorizeRequests()
-      .antMatchers(
+      .authorizeHttpRequests()
+      .requestMatchers(
         "/api/public/**",
         "/webjars/**",
         "/swagger-ui.html",
@@ -59,29 +58,38 @@ class WebSecurityConfig @Autowired constructor(
         "/v2/api-docs",
         "/v2/public/**",
       ).permitAll()
-      .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
+      .requestMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**")
+      .authenticated()
       .and().sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-    return
+
+    return http.build()
   }
 
-  override fun configure(auth: AuthenticationManagerBuilder) {
-    val ldapConfiguration = configuration.authentication.ldap
-    if (ldapConfiguration.enabled) {
-      auth
-        .ldapAuthentication()
-        .contextSource()
-        .url(ldapConfiguration.urls + ldapConfiguration.baseDn)
-        .managerDn(ldapConfiguration.securityPrincipal)
-        .managerPassword(ldapConfiguration.principalPassword)
-        .and()
-        .userDnPatterns(ldapConfiguration.userDnPattern)
-      return
-    }
-  }
+  // todo fix ldap
 
-  @Bean(BeanIds.AUTHENTICATION_MANAGER)
-  override fun authenticationManagerBean(): AuthenticationManager {
-    return super.authenticationManagerBean()
-  }
+  //  @Bean
+//  fun ldapAuthenticationManager(
+//    contextSource: BaseLdapPathContextSource?
+//  ): AuthenticationManager? {
+//    val factory = LdapBindAuthenticationManagerFactory(contextSource)
+//    factory.setUserDnPatterns("uid={0},ou=people")
+//    factory.setUserDetailsContextMapper(PersonContextMapper())
+//    return factory.createAuthenticationManager()
+//  }
+//
+//  override fun configure(auth: AuthenticationManagerBuilder) {
+//    val ldapConfiguration = configuration.authentication.ldap
+//    if (ldapConfiguration.enabled) {
+//      auth
+//        .ldapAuthentication()
+//        .contextSource()
+//        .url(ldapConfiguration.urls + ldapConfiguration.baseDn)
+//        .managerDn(ldapConfiguration.securityPrincipal)
+//        .managerPassword(ldapConfiguration.principalPassword)
+//        .and()
+//        .userDnPatterns(ldapConfiguration.userDnPattern)
+//      return
+//    }
+//  }
 }

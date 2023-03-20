@@ -24,6 +24,10 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
 import io.tolgee.util.setSimilarityLimit
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -32,10 +36,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
 
 @Service
 class KeyService(

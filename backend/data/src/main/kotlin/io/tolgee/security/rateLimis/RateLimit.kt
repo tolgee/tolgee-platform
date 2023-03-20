@@ -1,7 +1,7 @@
 package io.tolgee.security.rateLimis
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.context.ApplicationContext
-import javax.servlet.http.HttpServletRequest
 
 interface RateLimit {
   val urlMatcher: Regex

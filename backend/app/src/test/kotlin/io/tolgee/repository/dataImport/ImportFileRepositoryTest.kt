@@ -5,11 +5,11 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatExceptionOfType
+import jakarta.validation.ConstraintViolationException
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
-import javax.validation.ConstraintViolationException
 
 @Transactional
 @SpringBootTest

@@ -6,7 +6,7 @@ package io.tolgee.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import org.apache.http.impl.client.HttpClientBuilder
+import jakarta.servlet.MultipartConfigElement
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,7 +22,6 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
-import javax.servlet.MultipartConfigElement
 
 @Configuration
 @EnableScheduling
@@ -56,7 +55,7 @@ class WebConfiguration(
   fun restTemplate(): RestTemplate {
     return RestTemplate(
       HttpComponentsClientHttpRequestFactory().apply {
-        this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
+        //       this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
       }
     )
   }

@@ -1,7 +1,6 @@
 package io.tolgee
 
 import io.tolgee.configuration.Banner
-import org.redisson.spring.starter.RedissonAutoConfiguration
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.actuate.autoconfigure.endpoint.jmx.JmxEndpointAutoConfiguration
 import org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration
@@ -23,7 +22,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 @SpringBootApplication(
   exclude = [
-    RedissonAutoConfiguration::class,
+    // RedissonAutoConfiguration::class,
     CompositeMeterRegistryAutoConfiguration::class,
     DataSourcePoolMetricsAutoConfiguration::class,
     DiskSpaceHealthContributorAutoConfiguration::class,

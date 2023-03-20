@@ -6,9 +6,9 @@ import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
-import javax.annotation.PreDestroy
 import kotlin.reflect.KClass
 
 open class ActivityHolder(

@@ -8,11 +8,11 @@ import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
 import io.tolgee.service.LanguageService
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
 
 @Service
 class MtServiceConfigService(

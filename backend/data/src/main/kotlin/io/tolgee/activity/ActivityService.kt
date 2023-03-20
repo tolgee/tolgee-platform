@@ -7,13 +7,13 @@ import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.util.executeInNewTransaction
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 class ActivityService(

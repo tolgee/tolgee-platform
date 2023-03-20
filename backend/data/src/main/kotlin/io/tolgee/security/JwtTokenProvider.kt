@@ -1,8 +1,8 @@
 package io.tolgee.security
 
 import io.tolgee.dtos.cacheable.UserAccountDto
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.Authentication
-import javax.servlet.http.HttpServletRequest
 
 interface JwtTokenProvider {
   fun generateToken(userId: Long, isSuper: Boolean = false): JwtToken

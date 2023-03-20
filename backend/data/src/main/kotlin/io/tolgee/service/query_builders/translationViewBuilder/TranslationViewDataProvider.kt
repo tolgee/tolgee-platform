@@ -5,12 +5,12 @@ import io.tolgee.model.Language
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.service.key.TagService
 import io.tolgee.service.query_builders.CursorUtil
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class TranslationViewDataProvider(

@@ -1,9 +1,9 @@
 package io.tolgee.dtos.request.pat
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.NotBlank
 
 @Validated
 data class CreatePatDto(

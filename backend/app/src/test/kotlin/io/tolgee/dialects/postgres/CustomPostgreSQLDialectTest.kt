@@ -2,12 +2,12 @@ package io.tolgee.dialects.postgres
 
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

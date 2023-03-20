@@ -9,25 +9,25 @@ import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreRemove
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.FetchType
-import javax.persistence.Index
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.PrePersist
-import javax.persistence.PreRemove
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)

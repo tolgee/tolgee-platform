@@ -4,14 +4,14 @@ import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.service.security.PatService
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class PatAuthFilter(

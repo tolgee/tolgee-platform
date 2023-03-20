@@ -7,9 +7,9 @@ import io.tolgee.model.Language
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import java.io.InputStream
-import javax.persistence.EntityManager
 
 @Service
 class ExportService(

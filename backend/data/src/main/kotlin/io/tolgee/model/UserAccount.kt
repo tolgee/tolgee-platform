@@ -1,25 +1,23 @@
 package io.tolgee.model
 
-import com.vladmihalcea.hibernate.type.array.ListArrayType
+import com.vladmihalcea.hibernate.type.array.StringArrayType
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
 import java.util.*
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.validation.constraints.NotBlank
 
 @Entity
-@TypeDef(name = "string-array", typeClass = ListArrayType::class)
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +40,7 @@ data class UserAccount(
   @Column(name = "totp_key", columnDefinition = "bytea")
   var totpKey: ByteArray? = null
 
-  @Type(type = "string-array")
+  @Type(StringArrayType::class)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
   var mfaRecoveryCodes: List<String> = emptyList()
 

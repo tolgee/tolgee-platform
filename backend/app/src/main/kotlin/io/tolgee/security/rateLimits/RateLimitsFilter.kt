@@ -9,6 +9,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.rateLimis.RateLimit
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
 import io.tolgee.security.rateLimis.UsageEntry
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -17,9 +20,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerExceptionResolver
 import java.util.concurrent.locks.Lock
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class RateLimitsFilter(
   private val cacheManager: CacheManager,

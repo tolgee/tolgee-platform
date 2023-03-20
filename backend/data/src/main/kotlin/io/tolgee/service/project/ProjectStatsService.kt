@@ -7,11 +7,11 @@ import io.tolgee.model.Project_
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.query_builders.ProjectStatsProvider
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.JoinType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import javax.persistence.EntityManager
-import javax.persistence.criteria.JoinType
 
 @Transactional
 @Service

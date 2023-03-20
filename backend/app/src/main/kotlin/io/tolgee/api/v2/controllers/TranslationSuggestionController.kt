@@ -22,6 +22,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.translation.TranslationMemoryService
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])

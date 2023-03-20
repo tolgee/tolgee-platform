@@ -18,6 +18,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,7 +29,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
 @SpringBootTest
 @AutoConfigureMockMvc

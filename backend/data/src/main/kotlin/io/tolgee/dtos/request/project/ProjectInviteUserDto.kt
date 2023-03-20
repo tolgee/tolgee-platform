@@ -2,9 +2,9 @@ package io.tolgee.dtos.request.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.Permission.ProjectPermissionType
-import javax.validation.constraints.Email
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 
 data class ProjectInviteUserDto(
   @field:NotNull

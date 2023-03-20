@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
+        classpath "org.hibernate:hibernate-gradle-plugin:6.0.0.Alpha6"
     }
 }
 
@@ -61,19 +61,19 @@ idea {
     }
 }
 
-hibernate {
-    enhance {
-        enableLazyInitialization = true
-        enableDirtyTracking = true
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
-    }
-}
+//hibernate {
+//    enhance {
+//        enableLazyInitialization = true
+//        enableDirtyTracking = true
+//        enableAssociationManagement = false
+//        enableExtendedEnhancement = false
+//    }
+//}
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -88,7 +88,7 @@ diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -111,8 +111,8 @@ dependencies {
      * DB
      */
     runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.hibernate:hibernate-jpamodelgen'
-    kapt "org.hibernate:hibernate-jpamodelgen"
+    implementation 'org.hibernate:hibernate-jpamodelgen:6.1.7.Final'
+    kapt "org.hibernate:hibernate-jpamodelgen:6.1.7.Final"
 
     /**
      * Liquibase
@@ -162,9 +162,10 @@ dependencies {
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
     implementation libs.sentry
-    implementation "com.vladmihalcea:hibernate-types-55:2.14.1"
-    liquibaseRuntime "com.vladmihalcea:hibernate-types-55:2.14.1"
+    implementation "com.vladmihalcea:hibernate-types-60:2.21.1"
+    liquibaseRuntime "com.vladmihalcea:hibernate-types-60:2.21.1"
     implementation 'com.eatthepath:java-otp:0.4.0'
+    implementation 'org.dom4j:dom4j:2.1.4'
 
     /**
      * Google translation API
@@ -191,7 +192,7 @@ test {
 
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+//project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

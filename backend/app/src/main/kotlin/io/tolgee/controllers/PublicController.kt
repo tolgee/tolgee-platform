@@ -1,7 +1,6 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.node.TextNode
-import com.sun.istack.NotNull
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.email.TolgeeEmailSender
@@ -26,6 +25,9 @@ import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserCredentialsService
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -38,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
-import javax.validation.Valid
-import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/api/public")

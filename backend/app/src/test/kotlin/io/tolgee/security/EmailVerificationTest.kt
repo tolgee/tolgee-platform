@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,7 +21,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
-import javax.mail.internet.MimeMessage
 
 class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
 

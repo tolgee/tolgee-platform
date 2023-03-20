@@ -39,6 +39,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.security.UserAccountService
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -63,7 +64,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])

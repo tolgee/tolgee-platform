@@ -16,6 +16,7 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.mail.internet.MimeMessage
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
@@ -27,7 +28,6 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
-import javax.mail.internet.MimeMessage
 
 @ContextRecreatingTest
 @SpringBootTest(

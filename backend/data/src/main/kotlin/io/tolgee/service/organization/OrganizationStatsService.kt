@@ -1,8 +1,8 @@
 package io.tolgee.service.organization
 
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import javax.persistence.EntityManager
 
 @Service
 class OrganizationStatsService(

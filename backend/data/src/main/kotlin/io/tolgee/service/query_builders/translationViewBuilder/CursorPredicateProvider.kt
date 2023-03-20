@@ -8,11 +8,11 @@ import io.tolgee.util.greaterThanNullable
 import io.tolgee.util.greaterThanOrEqualToNullable
 import io.tolgee.util.lessThanNullable
 import io.tolgee.util.lessThanOrEqualToNullable
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Selection
 import org.springframework.data.domain.Sort
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Selection
 
 class CursorPredicateProvider(
   private val cb: CriteriaBuilder,

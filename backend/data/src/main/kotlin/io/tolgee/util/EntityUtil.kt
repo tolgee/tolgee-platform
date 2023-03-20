@@ -1,7 +1,7 @@
 package io.tolgee.util
 
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class EntityUtil(

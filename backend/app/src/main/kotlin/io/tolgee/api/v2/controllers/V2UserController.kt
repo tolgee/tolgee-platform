@@ -20,6 +20,7 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
+import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -35,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("/v2/user")

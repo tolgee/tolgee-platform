@@ -7,14 +7,14 @@ import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.ManyToMany
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.OrderBy
-import javax.persistence.PrePersist
-import javax.persistence.PreUpdate
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
 
 @Entity
 @EntityListeners(KeyMeta.Companion.KeyMetaListener::class)
