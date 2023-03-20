@@ -40,7 +40,9 @@ class SignUpService(
       invitationService.accept(invitation.code, user)
     }
 
-    if (invitation == null || !dto.organizationName.isNullOrBlank()) {
+    val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations
+
+    if (canCreateOrganization && (invitation == null || !dto.organizationName.isNullOrBlank())) {
       val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
       organizationService.createPreferred(user, name)
     }

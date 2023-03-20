@@ -14,7 +14,6 @@ type OrganizationModel = components['schemas']['OrganizationModel'];
 
 export const useInitialDataService = () => {
   const actions = container.resolve(GlobalActions);
-  const invitationCodeService = container.resolve(InvitationCodeService);
   const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
@@ -41,7 +40,7 @@ export const useInitialDataService = () => {
         // switch ui language, once user is signed in
         tolgee.changeLanguage(data.languageTag);
       }
-      const invitationCode = invitationCodeService.getCode();
+      const invitationCode = InvitationCodeService.getCode();
       actions.updateSecurity.dispatch({
         allowPrivate:
           !data?.serverConfiguration?.authentication || Boolean(data.userInfo),

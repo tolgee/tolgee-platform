@@ -24,7 +24,6 @@ export class SecurityService {
     private http: ApiV1HttpService,
     private tokenService: TokenService,
     private messageService: MessageService,
-    private invitationCodeService: InvitationCodeService,
     private apiSchemaService: ApiSchemaHttpService
   ) {}
 
@@ -32,7 +31,7 @@ export class SecurityService {
     type: string,
     code: string
   ): Promise<TokenDTO> => {
-    const invitationCode = this.invitationCodeService.getCode();
+    const invitationCode = InvitationCodeService.getCode();
     const invitationCodeQueryPart = invitationCode
       ? '&invitationCode=' + invitationCode
       : '';
@@ -42,7 +41,7 @@ export class SecurityService {
     const response = await fetch(
       `${API_URL}public/authorize_oauth/${type}?code=${code}&redirect_uri=${redirectUri}${invitationCodeQueryPart}`
     );
-    this.invitationCodeService.disposeCode();
+    InvitationCodeService.disposeCode();
     return this.handleLoginResponse(response);
   };
 
@@ -138,7 +137,7 @@ export class SecurityService {
 
     this.tokenService.setToken(tokenDTO.accessToken);
 
-    const code = this.invitationCodeService.getCode();
+    const code = InvitationCodeService.getCode();
     if (code) {
       try {
         await this.apiSchemaService.schemaRequest(
@@ -152,7 +151,7 @@ export class SecurityService {
           throw e;
         }
       }
-      this.invitationCodeService.disposeCode();
+      InvitationCodeService.disposeCode();
     }
     return tokenDTO;
   }
