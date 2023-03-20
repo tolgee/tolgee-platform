@@ -147,8 +147,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns info`() {
     prepareSubscription()
-    performAuthPut(
-      "/v2/ee-license/info", null
+    performAuthGet(
+      "/v2/ee-license/info"
     ).andIsOk
   }
 

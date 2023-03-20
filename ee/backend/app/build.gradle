@@ -63,14 +63,6 @@ dependencies {
     implementation libs.springDocOpenApiDataRest
     implementation libs.springDocOpenApiHateoas
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation(project(":testing"))
-    testImplementation(project(":server-app"))
-    testImplementation libs.jsonUnitAssert
-    testImplementation libs.mockito
-    testImplementation libs.stripe
-    testImplementation libs.jacksonModuleKotlin
-
     implementation libs.hibernateTypes
 
     /**

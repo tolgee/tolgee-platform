@@ -12,8 +12,6 @@ ext {
         ]
 
         liquibase {
-            jvmArgs "-Dliquibase.duplicateFileMode=WARN"
-
             activities {
                 //noinspection GroovyAssignabilityCheck
                 main {

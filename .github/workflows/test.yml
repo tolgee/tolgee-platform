@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test", "ee:test" ]
+        command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test", "ee-test:test" ]
     steps:
       - uses: actions/checkout@v3
 

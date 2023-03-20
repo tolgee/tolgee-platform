@@ -166,7 +166,7 @@ dependencies {
     /**
      * EE MODULE
      */
-    implementation(project(':ee'))
+    implementation(project(':ee-app'))
 }
 
 test {
