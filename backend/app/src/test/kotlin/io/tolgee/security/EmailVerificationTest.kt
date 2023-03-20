@@ -29,6 +29,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun setup() {
     resetProperties()
     tolgeeProperties.authentication.needsEmailVerification = true
+    emailTestUtil.initMocks()
   }
 
   @AfterEach

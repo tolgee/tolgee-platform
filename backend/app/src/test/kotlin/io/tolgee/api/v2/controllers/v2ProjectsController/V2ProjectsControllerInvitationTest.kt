@@ -27,6 +27,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -46,6 +47,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     emailTestUtil.initMocks()
   }
 
+  @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
 
   val invitationTestUtil: InvitationTestUtil by lazy {
