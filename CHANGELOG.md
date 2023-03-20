@@ -1,3 +1,10 @@
+## [3.11.1](https://github.com/tolgee/tolgee-platform/compare/v3.11.0...v3.11.1) (2023-03-20)
+
+
+### Bug Fixes
+
+* Update Spring and Kotlin ([#1629](https://github.com/tolgee/tolgee-platform/issues/1629)) ([762da78](https://github.com/tolgee/tolgee-platform/commit/762da787433dd513d37e417327d4acc6ade58c7e))
+
 # [3.11.0](https://github.com/tolgee/tolgee-platform/compare/v3.10.3...v3.11.0) (2023-03-17)
 
 
