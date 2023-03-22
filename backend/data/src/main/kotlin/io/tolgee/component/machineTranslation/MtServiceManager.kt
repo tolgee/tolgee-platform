@@ -1,6 +1,8 @@
 package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
+import io.tolgee.component.machineTranslation.metadata.Metadata
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
@@ -30,13 +32,6 @@ class MtServiceManager(
 
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  private val providers by lazy {
-    MtServiceType.values().associateWith { applicationContext.getBean(it.providerClass) }
-  }
-
-  val serviceCount: Int
-    get() = providers.size
-
   /**
    * Translates a text using All services
    */
@@ -44,28 +39,14 @@ class MtServiceManager(
     text: String,
     sourceLanguageTag: String,
     targetLanguageTag: String,
-    services: List<MtServiceType>
+    services: List<MtServiceType>,
+    metadata: Metadata?
   ): Map<MtServiceType, TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       services.map { service ->
-        async { service to translate(text, sourceLanguageTag, targetLanguageTag, service) }
+        async { service to translate(text, sourceLanguageTag, targetLanguageTag, service, metadata) }
       }.awaitAll().toMap()
     }
-  }
-
-  fun translate(
-    text: String,
-    sourceLanguageTag: String,
-    targetLanguageTag: String,
-    serviceType: MtServiceType
-  ): TranslateResult {
-    val params = getParams(text, sourceLanguageTag, targetLanguageTag, serviceType)
-
-    if (internalProperties.fakeMtProviders) {
-      return getFaked(params)
-    }
-
-    return findInCache(params) ?: translateWithProvider(params)
   }
 
   private fun findInCache(
@@ -84,7 +65,14 @@ class MtServiceManager(
     var translated: String? = null
     try {
       translated = params.serviceType.getProvider()
-        .translate(params.text, params.sourceLanguageTag, params.targetLanguageTag)
+        .translate(
+          ProviderTranslateParams(
+            params.text,
+            params.sourceLanguageTag,
+            params.targetLanguageTag,
+            params.metadata
+          )
+        )
     } catch (e: Exception) {
       logger.error(
         """An exception occurred while translating 
@@ -101,7 +89,8 @@ class MtServiceManager(
         params.text,
         params.serviceType,
         params.sourceLanguageTag,
-        params.targetLanguageTag
+        params.targetLanguageTag,
+        params.metadata
       )
     } ?: 0
 
@@ -120,12 +109,14 @@ class MtServiceManager(
     text: String,
     sourceLanguageTag: String,
     targetLanguageTag: String,
-    serviceType: MtServiceType
+    serviceType: MtServiceType,
+    metadata: Metadata?
   ) = TranslationParams(
     text = text,
     sourceLanguageTag = sourceLanguageTag,
     targetLanguageTag = targetLanguageTag,
-    serviceType = serviceType
+    serviceType = serviceType,
+    metadata = metadata
   )
 
   private fun getFaked(
@@ -134,7 +125,13 @@ class MtServiceManager(
     return TranslateResult(
       "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
-      calculatePrice(params.text, params.serviceType, params.sourceLanguageTag, params.targetLanguageTag),
+      calculatePrice(
+        params.text,
+        params.serviceType,
+        params.sourceLanguageTag,
+        params.targetLanguageTag,
+        params.metadata
+      ),
       params.serviceType
     )
   }
@@ -151,35 +148,54 @@ class MtServiceManager(
 
   private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
+  fun translate(
+    text: String,
+    sourceLanguageTag: String,
+    targetLanguageTag: String,
+    serviceType: MtServiceType,
+    metadata: Metadata? = null
+  ): TranslateResult {
+    val params = getParams(text, sourceLanguageTag, targetLanguageTag, serviceType, metadata)
+
+    if (internalProperties.fakeMtProviders) {
+      return getFaked(params)
+    }
+
+    return findInCache(params) ?: translateWithProvider(params)
+  }
+
   /**
-   * Translates a text using All services
+   * Translates a text using single service
    */
   fun translate(
     text: String,
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
-    service: MtServiceType
+    service: MtServiceType,
+    metadata: Map<String, Metadata>? = null
   ): List<TranslateResult> {
     return if (!internalProperties.fakeMtProviders)
       translateToMultipleTargets(
         serviceType = service,
         text = text,
         sourceLanguageTag = sourceLanguageTag,
-        targetLanguageTags = targetLanguageTags
+        targetLanguageTags = targetLanguageTags,
+        metadata = metadata
       )
-    else targetLanguageTags.map { getFaked(getParams(text, sourceLanguageTag, it, service)) }
+    else targetLanguageTags.map { getFaked(getParams(text, sourceLanguageTag, it, service, null)) }
   }
 
-  fun translateToMultipleTargets(
+  private fun translateToMultipleTargets(
     serviceType: MtServiceType,
     text: String,
     sourceLanguageTag: String,
-    targetLanguageTags: List<String>
+    targetLanguageTags: List<String>,
+    metadata: Map<String, Metadata>? = null
   ): List<TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       targetLanguageTags.map { targetLanguageTag ->
         async {
-          translate(text, sourceLanguageTag, targetLanguageTag, serviceType)
+          translate(text, sourceLanguageTag, targetLanguageTag, serviceType, metadata?.get(targetLanguageTag))
         }
       }.awaitAll()
     }
@@ -192,9 +208,11 @@ class MtServiceManager(
     text: String,
     service: MtServiceType,
     sourceLanguageTag: String,
-    targetLanguageTag: String
+    targetLanguageTag: String,
+    metadata: Metadata?
   ): Int {
-    return service.getProvider().calculatePrice(text, sourceLanguageTag, targetLanguageTag)
+    return service.getProvider()
+      .calculatePrice(ProviderTranslateParams(text, sourceLanguageTag, targetLanguageTag, metadata))
   }
 
   /**
@@ -204,9 +222,19 @@ class MtServiceManager(
     text: String,
     services: List<MtServiceType>,
     sourceLanguageTag: String,
-    targetLanguageTag: String
+    targetLanguageTag: String,
+    metadata: Metadata?
   ): Int {
-    return services.getProviders().values.sumOf { it.calculatePrice(text, sourceLanguageTag, targetLanguageTag) }
+    return services.getProviders().values.sumOf {
+      it.calculatePrice(
+        ProviderTranslateParams(
+          text,
+          sourceLanguageTag,
+          targetLanguageTag,
+          metadata
+        )
+      )
+    }
   }
 
   fun List<MtServiceType>.getProviders():

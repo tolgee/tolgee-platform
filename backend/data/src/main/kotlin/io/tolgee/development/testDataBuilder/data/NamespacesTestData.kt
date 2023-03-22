@@ -25,8 +25,8 @@ class NamespacesTestData : BaseTestData() {
 
     projectBuilder.apply {
       addKey("key", null)
-      keyInNs1 = addKey("key", "ns-1")
-      singleKeyInNs2 = addKey("key", "ns-2")
+      keyInNs1 = addKeyWithTranslation("key", "ns-1")
+      singleKeyInNs2 = addKeyWithTranslation("key", "ns-2")
       addKey("key2", null)
       addKey("key2", "ns-1")
 
@@ -61,7 +61,7 @@ class NamespacesTestData : BaseTestData() {
     }
   }
 
-  private fun ProjectBuilder.addKey(keyName: String, namespace: String?): Key {
+  private fun ProjectBuilder.addKeyWithTranslation(keyName: String, namespace: String?): Key {
     val keyBuilder = this.addKey {
       name = keyName
     }.build {

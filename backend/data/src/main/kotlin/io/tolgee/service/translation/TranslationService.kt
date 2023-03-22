@@ -286,14 +286,24 @@ class TranslationService(
     val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
       ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
-    if ((baseTranslationText.length) < 3) {
+    return getTranslationMemorySuggestions(baseTranslationText, key, baseLanguage, targetLanguage, pageable)
+  }
+
+  fun getTranslationMemorySuggestions(
+    sourceTranslationText: String,
+    key: Key?,
+    sourceLanguage: Language,
+    targetLanguage: Language,
+    pageable: Pageable
+  ): Page<TranslationMemoryItemView> {
+    if ((sourceTranslationText.length) < 3) {
       return Page.empty(pageable)
     }
 
     return translationRepository.getTranslateMemorySuggestions(
-      baseTranslationText = baseTranslationText,
+      baseTranslationText = sourceTranslationText,
       key = key,
-      baseLanguage = baseLanguage,
+      baseLanguage = sourceLanguage,
       targetLanguage = targetLanguage,
       pageable = pageable
     )

@@ -15,11 +15,11 @@ class GoogleTranslationProvider(
   override val isEnabled: Boolean
     get() = !googleMachineTranslationProperties.apiKey.isNullOrEmpty()
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
+  override fun translateViaProvider(params: ProviderTranslateParams): String? {
     return translateService.translate(
-      text,
-      Translate.TranslateOption.sourceLanguage(sourceTag),
-      Translate.TranslateOption.targetLanguage(targetTag),
+      params.text,
+      Translate.TranslateOption.sourceLanguage(params.sourceLanguageTag),
+      Translate.TranslateOption.targetLanguage(params.targetLanguageTag),
       Translate.TranslateOption.format("text")
     ).translatedText
   }

@@ -15,8 +15,12 @@ class AzureCognitiveTranslationProvider(
   override val isEnabled: Boolean
     get() = !azureCognitiveTranslationProperties.authKey.isNullOrEmpty()
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    return azureCognitiveApiService.translate(text, sourceTag.uppercase(), targetTag.uppercase())
+  override fun translateViaProvider(params: ProviderTranslateParams): String? {
+    return azureCognitiveApiService.translate(
+      params.text,
+      params.sourceLanguageTag.uppercase(),
+      params.targetLanguageTag.uppercase()
+    )
   }
 
   override fun calculateProviderPrice(text: String): Int {

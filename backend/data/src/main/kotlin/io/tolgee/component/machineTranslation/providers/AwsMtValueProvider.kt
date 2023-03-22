@@ -22,11 +22,11 @@ class AwsMtValueProvider(
     return text.length * 100
   }
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
+  override fun translateViaProvider(params: ProviderTranslateParams): String? {
     val request: TranslateTextRequest = TranslateTextRequest()
-      .withText(text)
-      .withSourceLanguageCode(sourceTag)
-      .withTargetLanguageCode(targetTag)
+      .withText(params.text)
+      .withSourceLanguageCode(params.sourceLanguageTag)
+      .withTargetLanguageCode(params.targetLanguageTag)
     val result: TranslateTextResult = translateService.translateText(request)
     return result.translatedText
   }
