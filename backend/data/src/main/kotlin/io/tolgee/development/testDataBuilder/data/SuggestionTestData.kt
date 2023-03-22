@@ -100,7 +100,7 @@ class SuggestionTestData : BaseTestData() {
 
   private fun ProjectBuilder.addBigMetas() {
     addBigMeta {
-      keyName = "key 5"
+      keyName = "key 4"
       namespace = null
       location = "home"
       this.contextData = listOf("I am other item")
