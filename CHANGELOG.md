@@ -1,3 +1,10 @@
+## [3.11.3](https://github.com/tolgee/tolgee-platform/compare/v3.11.2...v3.11.3) (2023-03-23)
+
+
+### Bug Fixes
+
+* Keys Import > Error when no tags provided (fixes [#1637](https://github.com/tolgee/tolgee-platform/issues/1637)) ([#1640](https://github.com/tolgee/tolgee-platform/issues/1640)) ([5967ed8](https://github.com/tolgee/tolgee-platform/commit/5967ed8027afb6c460073cb2c34d972dd9e03ca5))
+
 ## [3.11.2](https://github.com/tolgee/tolgee-platform/compare/v3.11.1...v3.11.2) (2023-03-22)
 
 
