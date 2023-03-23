@@ -232,6 +232,17 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
                 mapOf("en" to "hello"),
               "tags" to listOf("tag1", "tag2", "test")
             ),
+            mapOf(
+              "name" to "key_without_tags",
+              "translations" to
+                mapOf("en" to "hello"),
+            ),
+            mapOf(
+              "name" to "key_with_empty_tags",
+              "translations" to
+                mapOf("en" to "hello"),
+              "tags" to listOf<String>()
+            ),
           )
       )
     ).andIsOk
@@ -245,6 +256,27 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key!!.keyMeta!!.tags.assert.hasSize(3)
       key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `imports single key with no tags`() {
+    saveTestDataAndPrepare()
+
+    projectSupplier = { testData.project }
+    performProjectAuthPost(
+      "keys/import",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "first_key",
+              "translations" to
+                mapOf("en" to "hello"),
+            ),
+          )
+      )
+    ).andIsOk
   }
 
   @ProjectJWTAuthTestMethod

@@ -48,9 +48,12 @@ class TagService(
   }
 
   fun tagKeys(map: Map<Key, List<String>>) {
+    if (map.isEmpty()) {
+      return
+    }
+
     val keysWithTags = keyService.getKeysWithTags(map.keys).associateBy { it.id }
-    val projectId = keysWithTags.map { it.value.project.id }.toSet().singleOrNull()
-      ?: throw BadRequestException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+    val projectId = getSingleProjectId(keysWithTags)
 
     val existingTags = this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }
 
@@ -76,6 +79,20 @@ class TagService(
         keyMetaService.save(keyMeta)
       }
     }
+  }
+
+  private fun getSingleProjectId(keysWithTags: Map<Long, Key>): Long {
+    val projectIds = keysWithTags.map { it.value.project.id }.toSet()
+
+    if (projectIds.size > 1) {
+      throw BadRequestException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+    }
+
+    if (projectIds.isEmpty()) {
+      throw IllegalStateException("No project found? This should not happen.")
+    }
+
+    return projectIds.single()
   }
 
   private fun getFromProject(projectId: Long, tags: Collection<String>): List<Tag> {
