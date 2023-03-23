@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.constants.MtServiceType
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import net.datafaker.Faker
@@ -21,75 +22,95 @@ class SuggestionTestData : BaseTestData() {
         originalName = "Deutsch"
       }.self
 
-      addKey {
-        name = "key 1"
-      }.build keyBuilder@{
-        addTranslation {
-          language = englishLanguage
-          key = this@keyBuilder.self
-          text = "Beautiful"
-        }
-        addTranslation {
-          language = germanLanguage
-          key = this@keyBuilder.self
-          text = "Wunderschönen"
-        }
-      }
-      addKey {
-        name = "key 2"
-        thisIsBeautifulKey = this
-      }.build keyBuilder@{
-        addTranslation {
-          language = englishLanguage
-          key = this@keyBuilder.self
-          text = "This is beautiful"
-        }
-        addTranslation {
+      addKeys()
+      addBigMetas()
+    }
+  }
 
-          language = germanLanguage
-          key = this@keyBuilder.self
-          text = "Das ist schön"
-        }
+  private fun ProjectBuilder.addKeys() {
+    addKey {
+      name = "key 1"
+    }.build keyBuilder@{
+      addTranslation {
+        language = englishLanguage
+        key = this@keyBuilder.self
+        text = "Beautiful"
       }
-      addKey {
-        name = "key 5"
-        thisIsBeautifulKey = this
-      }.build keyBuilder@{
-        addTranslation {
-          language = englishLanguage
-          key = this@keyBuilder.self
-          text = "This is beautiful even more"
-        }
-        addTranslation {
-          language = germanLanguage
-          key = this@keyBuilder.self
-          text = "Das ist sehr schön"
-        }
+      addTranslation {
+        language = germanLanguage
+        key = this@keyBuilder.self
+        text = "Wunderschönen"
       }
-      addKey {
-        name = "key 3"
-      }.build keyBuilder@{
-        addTranslation {
-          language = englishLanguage
-          key = this@keyBuilder.self
-          text = "This is different"
-        }
-        addTranslation {
-          language = germanLanguage
-          key = this@keyBuilder.self
-          text = "Das ist anders"
-        }
+    }
+    addKey {
+      name = "key 2"
+    }.build keyBuilder@{
+      addTranslation {
+        language = englishLanguage
+        key = this@keyBuilder.self
+        text = "This is beautiful"
       }
-      addKey {
-        name = "key 4"
-        beautifulKey = this
-      }.build keyBuilder@{
-        addTranslation {
-          language = englishLanguage
-          key = this@keyBuilder.self
-          text = "Beautiful"
-        }
+      addTranslation {
+
+        language = germanLanguage
+        key = this@keyBuilder.self
+        text = "Das ist schön"
       }
+    }
+    addKey {
+      name = "key 5"
+      thisIsBeautifulKey = this
+    }.build keyBuilder@{
+      addTranslation {
+        language = englishLanguage
+        key = this@keyBuilder.self
+        text = "This is beautiful even more"
+      }
+      addTranslation {
+        language = germanLanguage
+        key = this@keyBuilder.self
+        text = "Das ist sehr schön"
+      }
+    }
+    addKey {
+      name = "key 3"
+    }.build keyBuilder@{
+      addTranslation {
+        language = englishLanguage
+        key = this@keyBuilder.self
+        text = "This is different"
+      }
+      addTranslation {
+        language = germanLanguage
+        key = this@keyBuilder.self
+        text = "Das ist anders"
+      }
+    }
+    addKey {
+      name = "key 4"
+      beautifulKey = this
+    }.build keyBuilder@{
+      addTranslation {
+        language = englishLanguage
+        key = this@keyBuilder.self
+        text = "Beautiful"
+      }
+    }
+  }
+
+  private fun ProjectBuilder.addBigMetas() {
+    addBigMeta {
+      keyName = "key 4"
+      namespace = null
+      location = "home"
+      this.contextData = listOf("I am other item")
+    }
+
+    addBigMeta {
+      keyName = "key 1"
+      namespace = null
+      location = "home"
+      this.contextData = listOf("I am an example data item")
     }
   }
 
@@ -101,13 +122,21 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
+  fun enableTolgee() {
+    projectBuilder.addMtServiceConfig {
+      this.targetLanguage = germanLanguage
+      this.enabledServices = mutableSetOf(MtServiceType.TOLGEE)
+      this.primaryService = MtServiceType.TOLGEE
+    }
+  }
+
   fun enableAll() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
       this.enabledServices =
         mutableSetOf(
           MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL, MtServiceType.AZURE,
-          MtServiceType.BAIDU
+          MtServiceType.BAIDU, MtServiceType.TOLGEE
         )
       this.primaryService = MtServiceType.AWS
     }
