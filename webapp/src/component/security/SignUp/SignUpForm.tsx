@@ -1,17 +1,16 @@
-import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
-import { Box, Typography, Link } from '@mui/material';
+import { Box, Link, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
 
-import { StandardForm } from 'tg.component/common/form/StandardForm';
+import {
+  LoadableType,
+  StandardForm,
+} from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { AppState } from 'tg.store/index';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { SetPasswordFields } from '../SetPasswordFields';
-
-const invitationService = container.resolve(InvitationCodeService);
+import { useConfig } from 'tg.globalContext/helpers';
 
 export type SignUpType = {
   name: string;
@@ -24,17 +23,19 @@ export type SignUpType = {
 
 type Props = {
   onSubmit: (v) => void;
+  loadable: LoadableType;
 };
 
 export const SignUpForm = (props: Props) => {
-  const orgRequired = !invitationService.getCode();
-  const state = useSelector((state: AppState) => state.signUp.loadables.signUp);
+  const config = useConfig();
+  const orgRequired =
+    !InvitationCodeService.getCode() && config.userCanCreateOrganizations;
   const { t } = useTranslate();
 
   return (
     <StandardForm
       rootSx={{ mb: 1 }}
-      saveActionLoadable={state}
+      saveActionLoadable={props.loadable}
       initialValues={
         {
           password: '',
@@ -52,7 +53,7 @@ export const SignUpForm = (props: Props) => {
             color="primary"
             type="submit"
             variant="contained"
-            loading={state.loading}
+            loading={props.loadable.loading}
           >
             <T>sign_up_submit_button</T>
           </LoadingButton>

@@ -11,7 +11,6 @@ import { ErrorActions } from './global/ErrorActions';
 import { GlobalActions } from './global/GlobalActions';
 import { MessageActions } from './global/MessageActions';
 import { RedirectionActions } from './global/RedirectionActions';
-import { SignUpActions } from './global/SignUpActions';
 import { TranslationActions } from './project/TranslationActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
@@ -29,7 +28,6 @@ const appReducer = (appState, action) =>
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
-    signUp: implicitReducer.create(container.resolve(SignUpActions)),
   })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {

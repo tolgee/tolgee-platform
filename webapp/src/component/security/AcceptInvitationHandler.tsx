@@ -19,7 +19,6 @@ interface AcceptInvitationHandlerProps {}
 const globalActions = container.resolve(GlobalActions);
 const redirectActions = container.resolve(RedirectionActions);
 const messaging = container.resolve(MessageService);
-const invitationCodeService = container.resolve(InvitationCodeService);
 const tokenService = container.resolve(TokenService);
 
 const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
@@ -36,7 +35,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
 
     useEffect(() => {
       if (!tokenService.getToken()) {
-        invitationCodeService.setCode(code);
+        InvitationCodeService.setCode(code);
         globalActions.allowRegistration.dispatch();
         redirectActions.redirect.dispatch(LINKS.LOGIN.build());
         messaging.success(<T>invitation_log_in_first</T>);
