@@ -2,6 +2,9 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.TranslateResult
+import io.tolgee.component.machineTranslation.metadata.BigMetaItem
+import io.tolgee.component.machineTranslation.metadata.ExampleItem
+import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
@@ -11,9 +14,11 @@ import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
+import io.tolgee.service.BigMetaService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,7 +28,9 @@ class MtService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
+  private val mtServiceConfigService: MtServiceConfigService,
+  private val bigMetaService: BigMetaService
 ) {
   fun getMachineTranslations(key: Key, targetLanguage: Language):
     Map<MtServiceType, String?>? {
@@ -34,16 +41,16 @@ class MtService(
       return null
     }
 
-    return getMachineTranslations(key.project, baseTranslationText, baseLanguage, targetLanguage)
+    return getMachineTranslations(key.project, baseTranslationText, key.id, baseLanguage, targetLanguage)
   }
 
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
-    targetLanguage: Language
+    targetLanguage: Language,
   ): Map<MtServiceType, String?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
-    return getMachineTranslations(project, baseTranslationText, baseLanguage, targetLanguage)
+    return getMachineTranslations(project, baseTranslationText, null, baseLanguage, targetLanguage)
   }
 
   fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
@@ -51,12 +58,13 @@ class MtService(
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
       ?: return targetLanguages.map { null }
-    return getPrimaryMachineTranslations(key.project, baseTranslationText, baseLanguage, targetLanguages)
+    return getPrimaryMachineTranslations(key.project, baseTranslationText, key.id, baseLanguage, targetLanguages)
   }
 
   private fun getPrimaryMachineTranslations(
     project: Project,
     baseTranslationText: String,
+    keyId: Long?,
     baseLanguage: Language,
     targetLanguages: List<Language>
   ): List<TranslateResult?> {
@@ -69,13 +77,22 @@ class MtService(
       .mapIndexed { idx, lang -> idx to lang }
       .groupBy { primaryServices[it.second.id] }
 
+    val metadata = getMetadata(
+      baseLanguage,
+      targetLanguages.filter { primaryServices[it.id]?.usesMetadata == true },
+      baseTranslationText,
+      keyId,
+      true
+    )
+
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
       service?.let {
         val translateResults = machineTranslationManager.translate(
           prepared.text,
           baseLanguage.tag,
           languageIdxPairs.map { it.second.tag },
-          service
+          service,
+          metadata = metadata
         )
 
         val withReplacedParams = translateResults.map { translateResult ->
@@ -99,6 +116,7 @@ class MtService(
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
+    keyId: Long?,
     baseLanguage: Language,
     targetLanguage: Language
   ): Map<MtServiceType, String?>? {
@@ -106,8 +124,21 @@ class MtService(
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
+    val anyNeedsMetadata = enabledServices.any { it.usesMetadata }
+
+    val metadata =
+      getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata)
+
+    publishOnBeforeEvent(prepared, project, expectedPrice)
+
     val results = machineTranslationManager
-      .translateUsingAll(prepared.text, baseLanguage.tag, targetLanguage.tag, enabledServices)
+      .translateUsingAll(
+        text = prepared.text,
+        sourceLanguageTag = baseLanguage.tag,
+        targetLanguageTag = targetLanguage.tag,
+        services = enabledServices,
+        metadata = metadata
+      )
 
     val actualPrice = results.entries.sumOf { it.value.actualPrice }
 
@@ -140,5 +171,63 @@ class MtService(
       replaced = replaced.replace(placeholder, text)
     }
     return replaced
+  }
+
+  private fun getExamples(
+    sourceLanguage: Language,
+    targetLanguage: Language,
+    text: String
+  ): List<ExampleItem> {
+    return translationService.getTranslationMemorySuggestions(
+      sourceTranslationText = text,
+      key = null,
+      sourceLanguage = sourceLanguage,
+      targetLanguage = targetLanguage,
+      pageable = PageRequest.of(0, 5)
+    ).content.map {
+      ExampleItem(source = it.keyName, target = it.baseTranslationText, key = it.targetTranslationText)
+    }
+  }
+
+  private fun getMetadata(
+    sourceLanguage: Language,
+    targetLanguages: List<Language>,
+    text: String,
+    keyId: Long?,
+    needsMetadata: Boolean
+  ): Map<String, Metadata>? {
+    if (!needsMetadata) {
+      return null
+    }
+
+    val bigMetaEntities = keyId?.let { bigMetaService.getAllForKey(it) } ?: emptyList()
+
+    return targetLanguages.associate { targetLanguage ->
+      targetLanguage.tag to
+        Metadata(
+          examples = getExamples(sourceLanguage, targetLanguage, text),
+          bigMetaItems = bigMetaEntities.map {
+            BigMetaItem(
+              namespace = it.namespace,
+              keyName = it.keyName,
+              location = it.location,
+              contextData = it.contextData,
+              type = it.type
+            )
+          }
+        )
+    }
+  }
+
+  private fun getMetadata(
+    sourceLanguage: Language,
+    targetLanguages: Language,
+    text: String,
+    keyId: Long?,
+    needsMetadata: Boolean = true
+  ): Metadata? {
+    return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata)?.get(
+      targetLanguages.tag
+    )
   }
 }

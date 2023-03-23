@@ -16,8 +16,12 @@ class BaiduTranslationProvider(
     get() = !baiduMachineTranslationProperties.appId.isNullOrEmpty() &&
       !baiduMachineTranslationProperties.appSecret.isNullOrEmpty()
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    return baiduApiService.translate(text, getLanguageTag(sourceTag), getLanguageTag(targetTag))
+  override fun translateViaProvider(params: ProviderTranslateParams): String? {
+    return baiduApiService.translate(
+      params.text,
+      getLanguageTag(params.sourceLanguageTag),
+      getLanguageTag(params.targetLanguageTag)
+    )
   }
 
   override fun calculateProviderPrice(text: String): Int {

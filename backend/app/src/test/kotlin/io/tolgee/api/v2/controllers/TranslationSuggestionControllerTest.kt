@@ -7,6 +7,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
+import io.tolgee.component.machineTranslation.providers.TolgeeTranslateApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
@@ -18,12 +19,15 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addMonths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -73,9 +77,15 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
+
+  @Autowired
+  @MockBean
   lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache
+
+  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateApiService.Companion.TolgeeTranslateParams>
 
   @BeforeEach
   fun setup() {
@@ -139,6 +149,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
       )
     ).thenReturn("Translated with Baidu")
+
+    tolgeeTranslateParamsCaptor = argumentCaptor()
+
+    whenever(
+      tolgeeTranslateApiService.translate(
+        tolgeeTranslateParamsCaptor.capture(),
+      )
+    ).thenReturn("Translated with Tolgee Translator")
   }
 
   private fun initTestData() {
@@ -249,8 +267,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests using just enabled services (Google, AWS, DeepL, Azure, Baidu)`() {
-    mockDefaultMtBucketSize(5000)
+  fun `it suggests using all enabled services (Google, AWS, DeepL, Azure, Baidu, Tolgee)`() {
+    mockDefaultMtBucketSize(6000)
     testData.enableAll()
     saveTestData()
 
@@ -261,8 +279,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("DEEPL").isEqualTo("Translated with DeepL")
         node("AZURE").isEqualTo("Translated with Azure Cognitive")
         node("BAIDU").isEqualTo("Translated with Baidu")
+        node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
       node("translationCreditsBalanceAfter").isEqualTo(5)
+      node("translationCreditsBalanceAfter").isEqualTo(600)
     }
   }
 
@@ -344,6 +364,26 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
     whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
     performMtRequestAndExpectAfterBalance(10)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it uses Tolgee correctly`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableTolgee()
+    saveTestData()
+
+    performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations") {
+        node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
+      }
+      node("translationCreditsBalanceAfter").isEqualTo(5100)
+    }
+
+    tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
+    val metadata = tolgeeTranslateParamsCaptor.firstValue.metadata
+    metadata!!.examples.assert.hasSize(2)
+    metadata.bigMetaItems.assert.hasSize(2)
   }
 
   private fun testMtCreditConsumption() {

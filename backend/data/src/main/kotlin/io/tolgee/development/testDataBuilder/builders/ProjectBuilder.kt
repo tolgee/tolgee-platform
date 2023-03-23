@@ -13,6 +13,7 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.keyBigMeta.BigMeta
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
@@ -43,6 +44,7 @@ class ProjectBuilder(
     var namespaces = mutableListOf<NamespaceBuilder>()
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
     var screenshots = mutableListOf<ScreenshotBuilder>()
+    var bigMetas = mutableListOf<BigMetaBuilder>()
   }
 
   var data = DATA()
@@ -58,6 +60,22 @@ class ProjectBuilder(
     addOperation(data.languages, ft)
 
   fun addKey(ft: FT<Key>) = addOperation(data.keys, ft)
+
+  fun addKey(namespace: String? = null, keyName: String, ft: (KeyBuilder.() -> Unit)? = null): KeyBuilder {
+    return addKey(keyName, ft).build { setNamespace(namespace) }
+  }
+
+  fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
+    return addKey {
+      name = keyName
+    }.apply {
+      ft?.let {
+        apply(it)
+      }
+    }
+  }
+
+  fun addBigMeta(ft: FT<BigMeta>): BigMetaBuilder = addOperation(data.bigMetas, ft)
 
   fun addTranslation(ft: FT<Translation>) = addOperation(data.translations, ft)
 
