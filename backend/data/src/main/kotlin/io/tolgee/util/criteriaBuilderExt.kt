@@ -1,8 +1,12 @@
 package io.tolgee.util
 
+import javax.persistence.EntityManager
+import javax.persistence.TypedQuery
 import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Expression
 import javax.persistence.criteria.Predicate
+import javax.persistence.criteria.Root
 
 fun CriteriaBuilder.greaterThanNullable(
   expression: Expression<String>,
@@ -52,4 +56,14 @@ fun CriteriaBuilder.equalNullable(
     return this.isNull(expression)
   }
   return this.equal(expression, value)
+}
+
+inline fun <reified RootT, reified Result> EntityManager.query(
+  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Void
+): TypedQuery<Result>? {
+  val cb = this.criteriaBuilder
+  val cq = cb.createQuery(Result::class.java)
+  val root = cq.from(RootT::class.java)
+  fn(cq, cb, root)
+  return this.createQuery(cq)
 }

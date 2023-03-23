@@ -101,46 +101,46 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is caching machine translations`() {
-    whenever(googleTranslationProvider.translate(any(), any(), any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different service)`() {
-    whenever(googleTranslationProvider.translate(any(), any(), any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.AWS)
-    verify(awsTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(awsTranslationProvider, times(1)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different targetLang)`() {
-    whenever(googleTranslationProvider.translate(any(), any(), any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate("Hello", "en", "en", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(2)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(2)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different sourceLang)`() {
-    whenever(googleTranslationProvider.translate(any(), any(), any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate("Hello", "de", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(2)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(2)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different input)`() {
-    whenever(googleTranslationProvider.translate(any(), any(), any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
     mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(1)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate("Hello", "de", "de", MtServiceType.GOOGLE)
-    verify(googleTranslationProvider, times(2)).translate(any(), any(), any())
+    verify(googleTranslationProvider, times(2)).translate(any())
   }
 }
