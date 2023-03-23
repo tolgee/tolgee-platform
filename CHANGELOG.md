@@ -1,3 +1,10 @@
+## [3.11.4](https://github.com/tolgee/tolgee-platform/compare/v3.11.3...v3.11.4) (2023-03-23)
+
+
+### Bug Fixes
+
+* Organization created on sign up when disabled ([#1635](https://github.com/tolgee/tolgee-platform/issues/1635)) ([d8d3600](https://github.com/tolgee/tolgee-platform/commit/d8d360015d32e4893a2dd9cfa48e018b965289c0))
+
 ## [3.11.3](https://github.com/tolgee/tolgee-platform/compare/v3.11.2...v3.11.3) (2023-03-23)
 
 
