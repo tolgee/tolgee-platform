@@ -97,7 +97,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
   }
 
   const encodedOtpName = encodeURIComponent(`Tolgee (${user.username})`);
-  const otpUri = `otpauth://totp/${encodedOtpName})?secret=${secret}`;
+  const otpUri = `otpauth://totp/${encodedOtpName}?secret=${secret}`;
 
   return (
     <Dialog
