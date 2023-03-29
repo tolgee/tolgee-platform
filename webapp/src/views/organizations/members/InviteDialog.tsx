@@ -25,6 +25,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useOrganization } from '../useOrganization';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -106,7 +107,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
               },
               onError(e) {
                 parseErrorResponse(e).forEach((e) =>
-                  messaging.error(<T>{e}</T>)
+                  messaging.error(<TranslatedError code={e} />)
                 );
               },
             }

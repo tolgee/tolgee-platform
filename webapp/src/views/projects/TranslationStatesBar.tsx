@@ -98,7 +98,7 @@ export function TranslationStatesBar(props: {
             backgroundColor: translationStates[legendItemProps.state].color,
           }}
         />
-        <T>{translationStates[legendItemProps.state].translationKey}</T>:&nbsp;
+        {translationStates[legendItemProps.state].translation}:&nbsp;
         {percent >= 1 ? (
           <T
             params={{
@@ -124,7 +124,7 @@ export function TranslationStatesBar(props: {
         {visibleStates.map((state, idx) => (
           <Tooltip
             key={idx}
-            title={<T>{translationStates[state].translationKey}</T>}
+            title={translationStates[state].translation}
             open={props.hideTooltips ? false : undefined}
           >
             <Box

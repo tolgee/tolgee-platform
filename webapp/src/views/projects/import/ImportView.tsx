@@ -20,6 +20,7 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messageService = container.resolve(MessageService);
 
@@ -53,7 +54,7 @@ export const ImportView: FunctionComponent = () => {
   useEffect(() => {
     if (applyImportHelper.error) {
       const parsed = parseErrorResponse(applyImportHelper.error);
-      messageService.error(<T>{parsed[0]}</T>);
+      messageService.error(<TranslatedError code={parsed[0]} />);
     }
   }, [applyImportHelper.error]);
 

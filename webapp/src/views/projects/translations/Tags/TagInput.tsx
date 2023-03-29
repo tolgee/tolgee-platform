@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Autocomplete, styled } from '@mui/material';
 import { useDebounce } from 'use-debounce';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
@@ -55,6 +55,7 @@ export const TagInput: React.FC<Props> = ({
 }) => {
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
+  const { t } = useTranslate();
 
   const project = useProject();
 
@@ -86,7 +87,7 @@ export const TagInput: React.FC<Props> = ({
     .map((tag) => ({
       label: tag,
       value: tag,
-      translation: '',
+      new: false,
     }));
 
   return (
@@ -108,7 +109,7 @@ export const TagInput: React.FC<Props> = ({
             filtered.push({
               value: search,
               label: '',
-              translation: 'translations_tag_create',
+              new: true,
             });
           }
           return filtered;
@@ -128,11 +129,9 @@ export const TagInput: React.FC<Props> = ({
           return (
             <MenuItem {...attrs}>
               <StyledOption data-cy="tag-autocomplete-option">
-                {option.translation ? (
-                  <T params={{ tag: search }}>{option.translation}</T>
-                ) : (
-                  option.label
-                )}
+                {option.new
+                  ? t('translations_tag_create', { tag: search })
+                  : option.label}
               </StyledOption>
             </MenuItem>
           );

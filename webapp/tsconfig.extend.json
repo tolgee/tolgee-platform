@@ -11,7 +11,8 @@
       "tg.service/*": ["service/*"],
       "tg.views/*": ["views/*"],
       "tg.error/*": ["error/*"],
-      "tg.svgs/*": ["svgs/*"]
+      "tg.svgs/*": ["svgs/*"],
+      "tg.translationTools/*": ["translationTools/*"]
     }
   }
 }

@@ -11,6 +11,7 @@ import { AvatarEditDialog } from './AvatarEditDialog';
 import { useConfig } from 'tg.globalContext/helpers';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { components } from 'tg.service/apiSchema.generated';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 export type AvatarOwner = {
   name?: string;
@@ -157,7 +158,9 @@ export const ProfileAvatar: FC<{
             // eslint-disable-next-line no-console
             console.error(e);
             const parsed = parseErrorResponse(e);
-            parsed.forEach((error) => messageService.error(<T>{error}</T>));
+            parsed.forEach((error) =>
+              messageService.error(<TranslatedError code={error} />)
+            );
           }
           setAvatarMenuAnchorEl(undefined);
         }}

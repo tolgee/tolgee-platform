@@ -22,6 +22,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Button } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FieldError } from 'tg.component/FormField';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -107,7 +108,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 helpers.setErrors(e.STANDARD_VALIDATION);
               } else {
                 parseErrorResponse(e).forEach((message) =>
-                  messaging.error(<T>{message}</T>)
+                  messaging.error(<TranslatedError code={message} />)
                 );
               }
             },

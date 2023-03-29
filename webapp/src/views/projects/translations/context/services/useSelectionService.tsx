@@ -9,6 +9,7 @@ import { useDeleteKeys } from 'tg.service/TranslationHooks';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useTranslationsService } from './useTranslationsService';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
@@ -62,7 +63,9 @@ export const useSelectionService = ({ translations }: Props) => {
               },
               onError(e) {
                 const parsed = parseErrorResponse(e);
-                parsed.forEach((error) => messaging.error(<T>{error}</T>));
+                parsed.forEach((error) =>
+                  messaging.error(<TranslatedError code={error} />)
+                );
                 reject(e);
               },
             }

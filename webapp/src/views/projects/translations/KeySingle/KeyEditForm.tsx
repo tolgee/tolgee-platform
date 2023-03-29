@@ -26,6 +26,7 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -164,7 +165,9 @@ export const KeyEditForm: React.FC = () => {
             },
             onError(e) {
               const parsed = parseErrorResponse(e);
-              parsed.forEach((error) => messaging.error(<T>{error}</T>));
+              parsed.forEach((error) =>
+                messaging.error(<TranslatedError code={error} />)
+              );
             },
           }
         );

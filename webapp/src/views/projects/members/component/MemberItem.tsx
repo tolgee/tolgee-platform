@@ -13,6 +13,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -79,7 +80,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         },
         onError(e) {
           parseErrorResponse(e).forEach((err) =>
-            messageService.error(<T>{err}</T>)
+            messageService.error(<TranslatedError code={err} />)
           );
         },
       }

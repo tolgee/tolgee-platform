@@ -19,6 +19,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { confirmation } from 'tg.hooks/confirmation';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type Props = {
   namespace: NsBannerRecord;
@@ -72,7 +73,9 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
                     onError(err) {
                       helpers.setFieldError(
                         'namespace',
-                        (<T keyName={parseErrorResponse(err)[0]} />) as any
+                        (
+                          <TranslatedError code={parseErrorResponse(err)[0]} />
+                        ) as any
                       );
                     },
                     onSuccess() {

@@ -94,7 +94,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                         variant="outlined"
                         style={{ marginBottom: '0.5rem' }}
                       >
-                        <T>{provider.loginButtonTitle}</T>
+                        {provider.loginButtonTitle}
                       </Button>
                     </React.Fragment>
                   ))}

@@ -1,5 +1,4 @@
 import { styled, Tooltip } from '@mui/material';
-import { T } from '@tolgee/react';
 
 import { translationStates } from 'tg.constants/translationStates';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
@@ -45,7 +44,7 @@ export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
   );
 
   return state && translationStates[state] ? (
-    <Tooltip title={<T noWrap>{translationStates[state].translationKey}</T>}>
+    <Tooltip title={translationStates[state].translation}>
       {getContent()}
     </Tooltip>
   ) : (

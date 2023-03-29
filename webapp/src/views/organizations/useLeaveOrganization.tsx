@@ -8,6 +8,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messageService = container.resolve(MessageService);
 
@@ -23,7 +24,9 @@ export const useLeaveOrganization = () => {
       },
       onError(e) {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messageService.error(<T>{error}</T>));
+        parsed.forEach((error) =>
+          messageService.error(<TranslatedError code={error} />)
+        );
       },
     },
     fetchOptions: {

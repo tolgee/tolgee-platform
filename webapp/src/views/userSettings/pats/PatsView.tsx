@@ -50,12 +50,11 @@ export const PatsView: FunctionComponent = () => {
       >
         <Box sx={{ my: 2 }}>
           <T
+            keyName="pats-description"
             params={{
               link: <StyledLink to={LINKS.USER_API_KEYS.build()} />,
             }}
-          >
-            pats-description
-          </T>
+          />
         </Box>
         <PaginatedHateoasList
           wrapperComponentProps={{ className: 'listWrapper' }}

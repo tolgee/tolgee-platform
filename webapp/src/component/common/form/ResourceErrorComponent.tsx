@@ -6,6 +6,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { ErrorResponseDto } from 'tg.service/response.types';
 
 import { Alert } from '../Alert';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 export const ResourceErrorComponent: FunctionComponent<{
   error: ErrorResponseDto | any;
@@ -16,7 +17,7 @@ export const ResourceErrorComponent: FunctionComponent<{
         parseErrorResponse(props.error).map((e, index) => (
           <Box ml={-2} mr={-2} key={index}>
             <Alert severity="error">
-              <T>{e}</T>
+              <TranslatedError code={e} />
             </Alert>
           </Box>
         ))}

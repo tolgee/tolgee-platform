@@ -1,4 +1,5 @@
 import { getDiffVersion } from './activityTools';
+import { T } from '@tolgee/react';
 import {
   EntityOptions,
   Reference,
@@ -27,7 +28,7 @@ const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {
 
 export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
   Translation: {
-    label: 'activity_entity_translation',
+    label: <T keyName="activity_entity_translation" />,
     description: ['key'],
     fields: {
       text: { type: 'text' },
@@ -48,12 +49,12 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Language: {
-    label: 'activity_entity_language',
+    label: <T keyName="activity_entity_language" />,
     fields: {
-      tag: { label: 'activity_entity_translation.tag' },
-      name: { label: 'activity_entity_translation.name' },
+      tag: { label: <T keyName="activity_entity_translation.tag" /> },
+      name: { label: <T keyName="activity_entity_translation.name" /> },
       flagEmoji: {
-        label: 'activity_entity_translation.flag_emoji',
+        label: <T keyName="activity_entity_translation.flag_emoji" />,
         type: 'language_flag',
       },
     },
@@ -77,10 +78,13 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Key: {
-    label: 'activity_entity_key',
+    label: <T keyName="activity_entity_key" />,
     fields: {
-      name: { label: 'activity_entity_key.name' },
-      namespace: { type: 'namespace', label: 'activity_entity_key.namespace' },
+      name: { label: <T keyName="activity_entity_key.name" /> },
+      namespace: {
+        type: 'namespace',
+        label: <T keyName="activity_entity_key.namespace" />,
+      },
     },
     references: ({
       modifications,
@@ -109,9 +113,12 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   KeyMeta: {
-    label: 'activity_entity_key_meta',
+    label: <T keyName="activity_entity_key_meta" />,
     fields: {
-      tags: { type: 'key_tags', label: 'activity_entity_key_meta.tags' },
+      tags: {
+        type: 'key_tags',
+        label: <T keyName="activity_entity_key_meta.tags" />,
+      },
     },
     references: ({ relations }) => {
       const result: Reference[] = [];
@@ -123,7 +130,7 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   TranslationComment: {
-    label: 'activity_entity_translation_comment',
+    label: <T keyName="activity_entity_translation_comment" />,
     description: ['comment'],
     fields: {
       text: {
@@ -148,7 +155,7 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Screenshot: {
-    label: 'activity_entity_screenshot',
+    label: <T keyName="activity_entity_screenshot" />,
     fields: {},
     references: ({ relations }) => {
       const result: Reference[] = [];
@@ -160,19 +167,22 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Project: {
-    label: 'activity_entity_project',
+    label: <T keyName="activity_entity_project" />,
     fields: {
-      name: { label: 'activity_entity_project.name' },
+      name: { label: <T keyName="activity_entity_project.name" /> },
       baseLanguage: {
         type: 'project_language',
-        label: 'activity_entity_project.language',
+        label: <T keyName="activity_entity_project.language" />,
       },
     },
   },
   Namespace: {
-    label: 'activity_entity_namespace',
+    label: <T keyName="activity_entity_namespace" />,
     fields: {
-      name: { type: 'namespace', label: 'activity_entity_namespace.name' },
+      name: {
+        type: 'namespace',
+        label: <T keyName="activity_entity_namespace.name" />,
+      },
     },
   },
 };
@@ -181,35 +191,35 @@ export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
 > = {
   CREATE_PROJECT: {
-    label: 'activity_create_project',
+    label: <T keyName="activity_create_project" />,
   },
   SET_TRANSLATIONS: {
-    label: 'activity_set_translation',
+    label: <T keyName="activity_set_translation" />,
     entities: { Translation: true },
   },
   DISMISS_AUTO_TRANSLATED_STATE: {
-    label: 'activity_dismiss_auto_translated_state',
+    label: <T keyName="activity_dismiss_auto_translated_state" />,
     entities: { Translation: true },
   },
   SET_TRANSLATION_STATE: {
-    label: 'activity_set_translation_state',
+    label: <T keyName="activity_set_translation_state" />,
     entities: { Translation: true },
   },
   SET_OUTDATED_FLAG: {
-    label: 'activity_set_outdated_flag',
+    label: <T keyName="activity_set_outdated_flag" />,
     entities: { Translation: true },
   },
   KEY_DELETE: {
-    label: 'activity_key_delete',
+    label: <T keyName="activity_key_delete" />,
     entities: { Key: [] },
     titleReferences: [],
   },
   KEY_NAME_EDIT: {
-    label: 'activity_key_name_edit',
+    label: <T keyName="activity_key_name_edit" />,
     entities: { Key: ['name'] },
   },
   CREATE_KEY: {
-    label: 'activity_create_key',
+    label: <T keyName="activity_create_key" />,
     entities: {
       Translation: ['text', 'autoTranslation'],
       KeyMeta: true,
@@ -217,7 +227,7 @@ export const actionsConfiguration: Partial<
     },
   },
   COMPLEX_EDIT: {
-    label: 'activity_complex_edit',
+    label: <T keyName="activity_complex_edit" />,
     entities: {
       Translation: true,
       Key: ['name', 'namespace'],
@@ -225,57 +235,57 @@ export const actionsConfiguration: Partial<
     },
   },
   DELETE_LANGUAGE: {
-    label: 'activity_delete_language',
+    label: <T keyName="activity_delete_language" />,
     entities: { Language: [] },
   },
   EDIT_LANGUAGE: {
-    label: 'activity_edit_language',
+    label: <T keyName="activity_edit_language" />,
     entities: { Language: true },
   },
   CREATE_LANGUAGE: {
-    label: 'activity_create_language',
+    label: <T keyName="activity_create_language" />,
     entities: { Language: [] },
   },
   SCREENSHOT_ADD: {
-    label: 'activity_screenshot_add',
+    label: <T keyName="activity_screenshot_add" />,
     entities: { Screenshot: [] },
   },
   SCREENSHOT_DELETE: {
-    label: 'activity_screenshot_delete',
+    label: <T keyName="activity_screenshot_delete" />,
     entities: { Screenshot: [] },
   },
   TRANSLATION_COMMENT_ADD: {
-    label: 'activity_translation_comment_add',
+    label: <T keyName="activity_translation_comment_add" />,
     entities: { TranslationComment: ['text'] },
   },
   TRANSLATION_COMMENT_SET_STATE: {
-    label: 'activity_translation_comment_set_state',
+    label: <T keyName="activity_translation_comment_set_state" />,
     entities: { TranslationComment: true },
     titleReferences: ['key'],
   },
   TRANSLATION_COMMENT_DELETE: {
-    label: 'activity_translation_comment_delete',
+    label: <T keyName="activity_translation_comment_delete" />,
     entities: { TranslationComment: ['text'] },
   },
   IMPORT: {
-    label: 'activity_import',
+    label: <T keyName="activity_import" />,
   },
   KEY_TAGS_EDIT: {
-    label: 'activity_key_tags_edit',
+    label: <T keyName="activity_key_tags_edit" />,
     entities: { KeyMeta: true },
   },
   TRANSLATION_HISTORY_ADD: {
-    label: 'activity_translation_history_add',
+    label: <T keyName="activity_translation_history_add" />,
   },
   TRANSLATION_HISTORY_MODIFY: {
-    label: 'activity_translation_history_modify',
+    label: <T keyName="activity_translation_history_modify" />,
   },
   EDIT_PROJECT: {
-    label: 'activity_edit_project',
+    label: <T keyName="activity_edit_project" />,
     entities: { Project: true },
   },
   NAMESPACE_EDIT: {
-    label: 'activity_edit_namespace',
+    label: <T keyName="activity_edit_namespace" />,
     entities: { Namespace: true },
   },
 };

@@ -16,6 +16,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -68,7 +69,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         },
         onError(e) {
           parseErrorResponse(e).forEach((message) =>
-            messaging.error(<T>{message}</T>)
+            messaging.error(<TranslatedError code={message} />)
           );
         },
       }

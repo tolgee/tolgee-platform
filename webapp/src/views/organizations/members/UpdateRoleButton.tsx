@@ -11,6 +11,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
 import { useOrganization } from '../useOrganization';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messagingService = container.resolve(MessageService);
 
@@ -44,7 +45,7 @@ export const UpdateRoleButton: FunctionComponent<{
             },
             onError(e) {
               parseErrorResponse(e).forEach((err) =>
-                messagingService.error(<T>{err}</T>)
+                messagingService.error(<TranslatedError code={err} />)
               );
             },
           }

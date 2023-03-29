@@ -79,7 +79,7 @@ export const LanguageLabels: React.FC<Props> = ({ data }) => {
                 sx={{ background: translationStates[item.status].color }}
               />
               <Box data-cy="project-dashboard-language-label-state">
-                <T keyName={translationStates[item.status].translationKey} />
+                {translationStates[item.status].translation}
               </Box>
               <Box ml={2} data-cy="project-dashboard-language-label-percentage">
                 <PercentFormat number={item.percent} />

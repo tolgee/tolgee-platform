@@ -1,5 +1,4 @@
 import { styled } from '@mui/material';
-import { T } from '@tolgee/react';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { DiffValue } from '../types';
 
@@ -29,9 +28,7 @@ const getTranslation = (state: StateType) => {
   return translationState ? (
     <StyleWrapper>
       <StyledDot style={{ background: translationState.color }} />
-      <div>
-        <T keyName={translationState.translationKey} />
-      </div>
+      <div>{translationState.translation}</div>
     </StyleWrapper>
   ) : (
     ''

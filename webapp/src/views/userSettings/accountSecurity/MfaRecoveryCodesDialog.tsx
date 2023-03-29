@@ -106,7 +106,10 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
               validationSchema={Validation.USER_MFA_VIEW_RECOVERY}
             >
               <Typography>
-                <T params={{ b: <b /> }}>account-security-mfa-recovery-info</T>
+                <T
+                  keyName="account-security-mfa-recovery-info"
+                  params={{ b: <b /> }}
+                />
               </Typography>
               <TextField
                 inputProps={{

@@ -12,6 +12,7 @@ import { TokenService } from '../TokenService';
 import { errorCapture } from './errorCapture';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -122,7 +123,7 @@ export class ApiHttpService {
               }
               if (r.status == 400 && !options.disableBadRequestHandling) {
                 this.messageService.error(
-                  <T>{parseErrorResponse(resObject)[0]}</T>
+                  <TranslatedError code={parseErrorResponse(resObject)[0]} />
                 );
               }
               if (r.status >= 400 && r.status <= 500) {

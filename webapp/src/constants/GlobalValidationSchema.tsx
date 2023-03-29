@@ -71,14 +71,12 @@ export class Validation {
     Yup.object().shape({
       ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
       name: Yup.string().required(),
-      email: Yup.string()
-        .email()
-        .required()
-        .test(
-          'checkEmailUnique',
-          t('validation_email_not_unique'),
-          Validation.createEmailValidation()
-        ),
+      email: Yup.string().email().required().test(
+        'checkEmailUnique',
+        // @tolgee-key validation_email_not_unique
+        t('validation_email_not_unique'),
+        Validation.createEmailValidation()
+      ),
       organizationName: orgRequired
         ? Yup.string().min(3).max(50).required()
         : Yup.string(),
@@ -162,6 +160,7 @@ export class Validation {
       .required()
       .max(20)
       .matches(/^[^,]*$/, {
+        // @tolgee-key validation_cannot_contain_coma
         message: t('validation_cannot_contain_coma'),
       });
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
@@ -194,10 +193,12 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       languages: Yup.array()
         .required()
+        // @tolgee-key project_creation_add_at_least_one_language
         .min(1, t('project_creation_add_at_least_one_language'))
         .of(Validation.LANGUAGE(t).nullable())
         .test(
           'language-repeated',
+          // @tolgee-key create_project_validation_language_repeated
           t('create_project_validation_language_repeated'),
           (values) =>
             new Set(values?.map((i) => i?.name)).size ==
@@ -246,6 +247,7 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       slug: slugSyncValidation.test(
         'slugUnique',
+        // @tolgee-key validation_slug_not_unique
         t('validation_slug_not_unique'),
         slugUniqueDebouncedAsyncValidation
       ),
@@ -261,9 +263,12 @@ export class Validation {
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
+              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
+              // @tolgee-key { keyName: 'Validation - required field' }
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : // @tolgee-key { keyName: 'Validation - required field' }
+            Yup.string().required(t('Validation - required field'))
       ),
     });
 
@@ -274,9 +279,12 @@ export class Validation {
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
+              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
+              // @tolgee-key { keyName: 'Validation - required field' }
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : // @tolgee-key { keyName: 'Validation - required field' }
+            Yup.string().required(t('Validation - required field'))
       ),
     });
 

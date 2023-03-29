@@ -9,6 +9,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { useDeleteTag, usePutTag } from 'tg.service/TranslationHooks';
 import { AddTag, RemoveTag } from '../types';
 import { useTranslationsService } from './useTranslationsService';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -47,7 +48,9 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+        parsed.forEach((error) =>
+          messaging.error(<TranslatedError code={error} />)
+        );
       });
 
   const addTag = (data: AddTag) =>
@@ -74,7 +77,9 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+        parsed.forEach((error) =>
+          messaging.error(<TranslatedError code={error} />)
+        );
         // return never fullfilling promise to prevent after action
         return new Promise(() => {});
       });

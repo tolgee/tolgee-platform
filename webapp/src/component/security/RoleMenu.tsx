@@ -8,10 +8,10 @@ import {
   Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { T, useTranslate } from '@tolgee/react';
 
 import { OrganizationRoleType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
+import { useOrgRoleTranslation } from 'tg.translationTools/useOrgRoleTranslation';
 
 type RoleType =
   components['schemas']['UserAccountWithOrganizationRoleModel']['organizationRole'];
@@ -30,8 +30,9 @@ type Props = {
 };
 
 export const RoleMenu: React.FC<Props> = (props) => {
-  const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const translateRole = useOrgRoleTranslation();
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -43,7 +44,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Tooltip title={t(`organization_role_type_${props.role}_hint`)}>
+      <Tooltip title={translateRole(props.role, true)}>
         <span>
           <Button
             data-cy="organization-role-menu-button"
@@ -54,8 +55,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
             aria-haspopup="true"
             onClick={handleClick}
           >
-            <T>{`organization_role_type_${props.role}`}</T>{' '}
-            <ArrowDropDown fontSize="small" />
+            {translateRole(props.role)} <ArrowDropDown fontSize="small" />
           </Button>
         </span>
       </Tooltip>
@@ -87,8 +87,8 @@ export const RoleMenu: React.FC<Props> = (props) => {
           >
             <StyledListItemText
               data-cy="organization-role-select-item"
-              primary={<T>{`organization_role_type_${k}`}</T>}
-              secondary={<T>{`organization_role_type_${k}_hint`}</T>}
+              primary={translateRole(k)}
+              secondary={translateRole(k, true)}
               secondaryTypographyProps={{ className: 'textSecondary' }}
             />
           </MenuItem>

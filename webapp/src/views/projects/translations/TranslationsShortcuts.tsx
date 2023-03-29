@@ -210,12 +210,7 @@ export const TranslationsShortcuts = () => {
         const nextState =
           focusedCell &&
           getCellNextState(focusedCell.keyId, focusedCell.language);
-        return (
-          nextState &&
-          translationStates[nextState] && (
-            <T>{translationStates[nextState].translationKey}</T>
-          )
-        );
+        return nextState && translationStates[nextState]?.translation;
       }
       case 'MOVE':
         return <T>translations_shortcuts_move</T>;
@@ -237,9 +232,9 @@ export const TranslationsShortcuts = () => {
       formula: formatShortcut(`${getMetaName()} + Enter`),
     },
     {
-      name: cursorKeyIdNextState && translationStates[cursorKeyIdNextState] && (
-        <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
-      ),
+      name:
+        cursorKeyIdNextState &&
+        translationStates[cursorKeyIdNextState]?.translation,
       formula: formatShortcut(`${getMetaName()} + E`),
     },
     {
@@ -258,14 +253,14 @@ export const TranslationsShortcuts = () => {
     document.activeElement?.className === 'CodeMirror-code';
 
   const items = (
-    editorIsActive
+    (editorIsActive
       ? getEditorShortcuts()
       : availableActions.map(([action, keys]) => ({
           name: getActionTranslation(action as any),
           formula: keys.map((f, i) => (
             <React.Fragment key={i}>{formatShortcut(f)}</React.Fragment>
           )),
-        }))
+        }))) as any[]
   ).filter((i) => i.name);
 
   return (
