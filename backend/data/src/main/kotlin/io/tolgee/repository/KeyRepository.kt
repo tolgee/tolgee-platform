@@ -23,7 +23,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """
   )
   fun getByNameAndNamespace(projectId: Long, name: String, namespace: String?): Optional<Key>
-
+  
   @Query(
     """
       from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId

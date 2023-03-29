@@ -15,6 +15,8 @@ export const useProviderImg = () => {
         return `/images/providers/azure-cognitive-logo.svg`;
       case 'BAIDU':
         return `/images/providers/baidu-icon.svg`;
+      case 'TOLGEE':
+        return `/images/providers/tolgee-logo-${palette.mode}.svg`;
       default:
         return null;
     }

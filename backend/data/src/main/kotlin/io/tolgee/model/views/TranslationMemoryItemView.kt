@@ -5,4 +5,5 @@ interface TranslationMemoryItemView {
   val targetTranslationText: String
   val keyName: String
   val similarity: Float
+  val keyId: Long
 }
