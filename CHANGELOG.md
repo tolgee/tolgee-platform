@@ -1,3 +1,10 @@
+## [3.11.5](https://github.com/tolgee/tolgee-platform/compare/v3.11.4...v3.11.5) (2023-03-29)
+
+
+### Bug Fixes
+
+* OTP name contains double ending brackets ([#1645](https://github.com/tolgee/tolgee-platform/issues/1645)) ([7c521dc](https://github.com/tolgee/tolgee-platform/commit/7c521dcbfc9bbdec57a63a46603049db87e55ca9))
+
 ## [3.11.4](https://github.com/tolgee/tolgee-platform/compare/v3.11.3...v3.11.4) (2023-03-23)
 
 
