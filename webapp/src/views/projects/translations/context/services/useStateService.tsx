@@ -1,5 +1,4 @@
 import { container } from 'tsyringe';
-import { T } from '@tolgee/react';
 
 import { usePutTranslationState } from 'tg.service/TranslationHooks';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';

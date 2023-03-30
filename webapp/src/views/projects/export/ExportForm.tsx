@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, CircularProgress, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';

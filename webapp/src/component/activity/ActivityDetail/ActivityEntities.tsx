@@ -52,7 +52,7 @@ export const ActivityEntities: React.FC<Props> = ({
           <React.Fragment key={i}>
             <StyledSeparator gridColumn="1 / span 2" />
             <StyledEntityTitle sx={{ gridColumn: '1 / span 2' }}>
-              {entity.options.label}
+              {entity.options.label?.()}
               <EntityDescription entity={entity} />
             </StyledEntityTitle>
             {entity.fields.map((field, i) => {
@@ -65,9 +65,7 @@ export const ActivityEntities: React.FC<Props> = ({
               });
               return value ? (
                 <React.Fragment key={i}>
-                  {field.options.label && (
-                    <StyledFieldLabel>{field.options.label}</StyledFieldLabel>
-                  )}
+                  {label && <StyledFieldLabel>{label?.()}</StyledFieldLabel>}
                   <StyledFieldContent
                     gridColumn={!label ? '1 / span 2' : undefined}
                   >

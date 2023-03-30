@@ -28,7 +28,9 @@ const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {
 
 export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
   Translation: {
-    label: <T keyName="activity_entity_translation" />,
+    label(params) {
+      return <T keyName="activity_entity_translation" params={params} />;
+    },
     description: ['key'],
     fields: {
       text: { type: 'text' },
@@ -49,12 +51,33 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Language: {
-    label: <T keyName="activity_entity_language" />,
+    label(params) {
+      return <T keyName="activity_entity_language" params={params} />;
+    },
     fields: {
-      tag: { label: <T keyName="activity_entity_translation.tag" /> },
-      name: { label: <T keyName="activity_entity_translation.name" /> },
+      tag: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_translation.tag" params={params} />
+          );
+        },
+      },
+      name: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_translation.name" params={params} />
+          );
+        },
+      },
       flagEmoji: {
-        label: <T keyName="activity_entity_translation.flag_emoji" />,
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation.flag_emoji"
+              params={params}
+            />
+          );
+        },
         type: 'language_flag',
       },
     },
@@ -78,12 +101,20 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Key: {
-    label: <T keyName="activity_entity_key" />,
+    label(params) {
+      return <T keyName="activity_entity_key" params={params} />;
+    },
     fields: {
-      name: { label: <T keyName="activity_entity_key.name" /> },
+      name: {
+        label(params) {
+          return <T keyName="activity_entity_key.name" params={params} />;
+        },
+      },
       namespace: {
         type: 'namespace',
-        label: <T keyName="activity_entity_key.namespace" />,
+        label(params) {
+          return <T keyName="activity_entity_key.namespace" params={params} />;
+        },
       },
     },
     references: ({
@@ -113,11 +144,15 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   KeyMeta: {
-    label: <T keyName="activity_entity_key_meta" />,
+    label(params) {
+      return <T keyName="activity_entity_key_meta" params={params} />;
+    },
     fields: {
       tags: {
         type: 'key_tags',
-        label: <T keyName="activity_entity_key_meta.tags" />,
+        label(params) {
+          return <T keyName="activity_entity_key_meta.tags" params={params} />;
+        },
       },
     },
     references: ({ relations }) => {
@@ -130,7 +165,11 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   TranslationComment: {
-    label: <T keyName="activity_entity_translation_comment" />,
+    label(params) {
+      return (
+        <T keyName="activity_entity_translation_comment" params={params} />
+      );
+    },
     description: ['comment'],
     fields: {
       text: {
@@ -155,7 +194,9 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Screenshot: {
-    label: <T keyName="activity_entity_screenshot" />,
+    label(params) {
+      return <T keyName="activity_entity_screenshot" params={params} />;
+    },
     fields: {},
     references: ({ relations }) => {
       const result: Reference[] = [];
@@ -167,21 +208,35 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
     },
   },
   Project: {
-    label: <T keyName="activity_entity_project" />,
+    label(params) {
+      return <T keyName="activity_entity_project" params={params} />;
+    },
     fields: {
-      name: { label: <T keyName="activity_entity_project.name" /> },
+      name: {
+        label(params) {
+          return <T keyName="activity_entity_project.name" params={params} />;
+        },
+      },
       baseLanguage: {
         type: 'project_language',
-        label: <T keyName="activity_entity_project.language" />,
+        label(params) {
+          return (
+            <T keyName="activity_entity_project.language" params={params} />
+          );
+        },
       },
     },
   },
   Namespace: {
-    label: <T keyName="activity_entity_namespace" />,
+    label(params) {
+      return <T keyName="activity_entity_namespace" params={params} />;
+    },
     fields: {
       name: {
         type: 'namespace',
-        label: <T keyName="activity_entity_namespace.name" />,
+        label(params) {
+          return <T keyName="activity_entity_namespace.name" params={params} />;
+        },
       },
     },
   },
@@ -191,35 +246,53 @@ export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
 > = {
   CREATE_PROJECT: {
-    label: <T keyName="activity_create_project" />,
+    label(params) {
+      return <T keyName="activity_create_project" params={params} />;
+    },
   },
   SET_TRANSLATIONS: {
-    label: <T keyName="activity_set_translation" />,
+    label(params) {
+      return <T keyName="activity_set_translation" params={params} />;
+    },
     entities: { Translation: true },
   },
   DISMISS_AUTO_TRANSLATED_STATE: {
-    label: <T keyName="activity_dismiss_auto_translated_state" />,
+    label(params) {
+      return (
+        <T keyName="activity_dismiss_auto_translated_state" params={params} />
+      );
+    },
     entities: { Translation: true },
   },
   SET_TRANSLATION_STATE: {
-    label: <T keyName="activity_set_translation_state" />,
+    label(params) {
+      return <T keyName="activity_set_translation_state" params={params} />;
+    },
     entities: { Translation: true },
   },
   SET_OUTDATED_FLAG: {
-    label: <T keyName="activity_set_outdated_flag" />,
+    label(params) {
+      return <T keyName="activity_set_outdated_flag" params={params} />;
+    },
     entities: { Translation: true },
   },
   KEY_DELETE: {
-    label: <T keyName="activity_key_delete" />,
+    label(params) {
+      return <T keyName="activity_key_delete" params={params} />;
+    },
     entities: { Key: [] },
     titleReferences: [],
   },
   KEY_NAME_EDIT: {
-    label: <T keyName="activity_key_name_edit" />,
+    label(params) {
+      return <T keyName="activity_key_name_edit" params={params} />;
+    },
     entities: { Key: ['name'] },
   },
   CREATE_KEY: {
-    label: <T keyName="activity_create_key" />,
+    label(params) {
+      return <T keyName="activity_create_key" params={params} />;
+    },
     entities: {
       Translation: ['text', 'autoTranslation'],
       KeyMeta: true,
@@ -227,7 +300,9 @@ export const actionsConfiguration: Partial<
     },
   },
   COMPLEX_EDIT: {
-    label: <T keyName="activity_complex_edit" />,
+    label(params) {
+      return <T keyName="activity_complex_edit" params={params} />;
+    },
     entities: {
       Translation: true,
       Key: ['name', 'namespace'],
@@ -235,57 +310,91 @@ export const actionsConfiguration: Partial<
     },
   },
   DELETE_LANGUAGE: {
-    label: <T keyName="activity_delete_language" />,
+    label(params) {
+      return <T keyName="activity_delete_language" params={params} />;
+    },
     entities: { Language: [] },
   },
   EDIT_LANGUAGE: {
-    label: <T keyName="activity_edit_language" />,
+    label(params) {
+      return <T keyName="activity_edit_language" params={params} />;
+    },
     entities: { Language: true },
   },
   CREATE_LANGUAGE: {
-    label: <T keyName="activity_create_language" />,
+    label(params) {
+      return <T keyName="activity_create_language" params={params} />;
+    },
     entities: { Language: [] },
   },
   SCREENSHOT_ADD: {
-    label: <T keyName="activity_screenshot_add" />,
+    label(params) {
+      return <T keyName="activity_screenshot_add" params={params} />;
+    },
     entities: { Screenshot: [] },
   },
   SCREENSHOT_DELETE: {
-    label: <T keyName="activity_screenshot_delete" />,
+    label(params) {
+      return <T keyName="activity_screenshot_delete" params={params} />;
+    },
     entities: { Screenshot: [] },
   },
   TRANSLATION_COMMENT_ADD: {
-    label: <T keyName="activity_translation_comment_add" />,
+    label(params) {
+      return <T keyName="activity_translation_comment_add" params={params} />;
+    },
     entities: { TranslationComment: ['text'] },
   },
   TRANSLATION_COMMENT_SET_STATE: {
-    label: <T keyName="activity_translation_comment_set_state" />,
+    label(params) {
+      return (
+        <T keyName="activity_translation_comment_set_state" params={params} />
+      );
+    },
     entities: { TranslationComment: true },
     titleReferences: ['key'],
   },
   TRANSLATION_COMMENT_DELETE: {
-    label: <T keyName="activity_translation_comment_delete" />,
+    label(params) {
+      return (
+        <T keyName="activity_translation_comment_delete" params={params} />
+      );
+    },
     entities: { TranslationComment: ['text'] },
   },
   IMPORT: {
-    label: <T keyName="activity_import" />,
+    label(params) {
+      return <T keyName="activity_import" params={params} />;
+    },
   },
   KEY_TAGS_EDIT: {
-    label: <T keyName="activity_key_tags_edit" />,
+    label(params) {
+      return <T keyName="activity_key_tags_edit" params={params} />;
+    },
     entities: { KeyMeta: true },
   },
   TRANSLATION_HISTORY_ADD: {
-    label: <T keyName="activity_translation_history_add" />,
+    label(params) {
+      return <T keyName="activity_translation_history_add" params={params} />;
+    },
   },
   TRANSLATION_HISTORY_MODIFY: {
-    label: <T keyName="activity_translation_history_modify" />,
+    label(params) {
+      return (
+        <T keyName="activity_translation_history_modify" params={params} />
+      );
+    },
   },
   EDIT_PROJECT: {
-    label: <T keyName="activity_edit_project" />,
+    label(params) {
+      return <T keyName="activity_edit_project" params={params} />;
+    },
     entities: { Project: true },
   },
   NAMESPACE_EDIT: {
-    label: <T keyName="activity_edit_namespace" />,
+    label(params) {
+      return <T keyName="activity_edit_namespace" params={params} />;
+    },
     entities: { Namespace: true },
   },
 };

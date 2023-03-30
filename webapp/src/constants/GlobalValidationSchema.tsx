@@ -1,10 +1,12 @@
-import { T, TFnType } from '@tolgee/react';
+import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
+
+type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -64,10 +66,7 @@ export class Validation {
       }
     }, container.resolve(SignUpService).validateEmail);
 
-  static readonly SIGN_UP = (
-    t: (key: string) => string,
-    orgRequired: boolean
-  ) =>
+  static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
     Yup.object().shape({
       ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
       name: Yup.string().required(),
@@ -155,7 +154,7 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFnType) =>
+  static readonly LANGUAGE_TAG = (t: TFunType) =>
     Yup.string()
       .required()
       .max(20)
@@ -166,7 +165,7 @@ export class Validation {
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFnType) =>
+  static readonly LANGUAGE = (t: TFunType) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
@@ -214,7 +213,7 @@ export class Validation {
   });
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: (key: string) => string,
+    t: TFunType,
     slugInitialValue?: string
   ) => {
     const slugSyncValidation = Yup.string()
@@ -255,7 +254,7 @@ export class Validation {
     });
   };
 
-  static readonly INVITE_DIALOG_PROJECT = (t: (key: string) => string) =>
+  static readonly INVITE_DIALOG_PROJECT = (t: TFunType) =>
     Yup.object({
       permission: Yup.string(),
       permissionLanguages: Yup.array(Yup.string()),
@@ -265,14 +264,14 @@ export class Validation {
           ? Yup.string()
               // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
-              // @tolgee-key { keyName: 'Validation - required field' }
+              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : // @tolgee-key { keyName: 'Validation - required field' }
+          : // @tolgee-key Validation - required field
             Yup.string().required(t('Validation - required field'))
       ),
     });
 
-  static readonly INVITE_DIALOG_ORGANIZATION = (t: (key: string) => string) =>
+  static readonly INVITE_DIALOG_ORGANIZATION = (t: TFunType) =>
     Yup.object({
       permission: Yup.string(),
       type: Yup.string(),
@@ -281,9 +280,9 @@ export class Validation {
           ? Yup.string()
               // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
-              // @tolgee-key { keyName: 'Validation - required field' }
+              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : // @tolgee-key { keyName: 'Validation - required field' }
+          : // @tolgee-key Validation - required field
             Yup.string().required(t('Validation - required field'))
       ),
     });

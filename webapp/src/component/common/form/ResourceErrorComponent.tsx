@@ -1,6 +1,5 @@
 import { default as React, FunctionComponent } from 'react';
 import { Box } from '@mui/material';
-import { T } from '@tolgee/react';
 
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { ErrorResponseDto } from 'tg.service/response.types';

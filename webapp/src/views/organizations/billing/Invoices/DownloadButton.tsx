@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { useTranslate } from '@tolgee/react';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';

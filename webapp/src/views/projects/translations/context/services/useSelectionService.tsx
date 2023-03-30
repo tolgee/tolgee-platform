@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { container } from 'tsyringe';
-import { useTranslate, T } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';

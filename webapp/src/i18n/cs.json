@@ -875,6 +875,7 @@
   "translations_tags_no_results" : "Nic nenalezeno",
   "translation_state_change" : "Označit jako \"{newState}\"",
   "translation_state_machine_translated" : "Strojově přeloženo",
+  "translation_state_mark_as" : "Označit jako",
   "translation_state_needs_review" : "Potřebuje kontrolu",
   "translation_state_reviewed" : "Zkontrolováno",
   "translation_state_translated" : "Přeloženo",

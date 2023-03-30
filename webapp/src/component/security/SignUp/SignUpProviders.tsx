@@ -1,5 +1,4 @@
 import { Box, Button, styled } from '@mui/material';
-import { T } from '@tolgee/react';
 import { ReactComponent as ComeIn } from 'tg.svgs/signup/comeIn.svg';
 
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
@@ -40,7 +39,7 @@ export const SignUpProviders = () => {
           variant="outlined"
           style={{ marginBottom: '0.5rem' }}
         >
-          <T>{provider.signUpButtonTitle}</T>
+          {provider.signUpButtonTitle}
         </Button>
       ))}
       <Box display="flex" flexGrow="1" alignItems="end" justifyContent="center">

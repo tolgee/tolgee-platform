@@ -1,4 +1,3 @@
-import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
 

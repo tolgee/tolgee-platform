@@ -38,15 +38,11 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     titleParameters[`${entity}Count`] = value;
   });
 
-  let title = activity.translation;
-  // pass params to T component
-  if (title) {
-    title = { ...title, props: { ...title.props, params: titleParameters } };
-  }
+  const title = activity.translation;
 
   return (
     <StyledContainer>
-      <StyledText>{title ? title : activity.type}</StyledText>
+      <StyledText>{title?.(titleParameters) || activity.type}</StyledText>
       <AnyReference data={filteredReferences} />
     </StyledContainer>
   );

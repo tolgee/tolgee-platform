@@ -8,7 +8,6 @@ import {
   Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { useTranslate } from '@tolgee/react';
 
 import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
@@ -34,7 +33,6 @@ export const PermissionsMenu: FunctionComponent<{
   minPermissions?: PermissionType;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { t } = useTranslate();
 
   const handleClose = () => {
     setAnchorEl(null);

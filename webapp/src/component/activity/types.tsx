@@ -55,7 +55,7 @@ export type FieldTypeEnum =
   | 'outdated';
 
 export type FieldOptionsObj = {
-  label?: React.ReactElement;
+  label?: (params?: TranslateParams) => React.ReactElement;
   type?: FieldTypeEnum;
   compute?: (data: any) => any;
 };
@@ -96,7 +96,7 @@ export type ReferenceBuilder = (data: ModifiedEntityModel) => Reference[];
 
 export type Field = {
   name: string;
-  label?: React.ReactElement;
+  label?: (params?: TranslateParams) => React.ReactElement;
   value: DiffValue<any>;
   options: FieldOptionsObj;
   languageTag?: string;
@@ -106,7 +106,7 @@ export type EntityOptions = {
   references?: ReferenceBuilder;
   fields: Record<string, FieldOptions>;
   description?: Reference['type'][];
-  label: React.ReactElement;
+  label: (params?: TranslateParams) => React.ReactElement;
 };
 
 export type Entity = {
@@ -117,7 +117,7 @@ export type Entity = {
 };
 
 export type Activity = {
-  translation: React.ReactElement | undefined;
+  translation: ((params?: TranslateParams) => React.ReactElement) | undefined;
   type: ActivityTypeEnum;
   entities: Entity[];
   references: Reference[];
@@ -126,7 +126,7 @@ export type Activity = {
 };
 
 export type ActivityOptions = {
-  label: React.ReactElement;
+  label: (params?: TranslateParams) => React.ReactElement;
   description?: (data: ProjectActivityModel) => string;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];
