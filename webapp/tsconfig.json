@@ -2,11 +2,7 @@
   "extends": "./tsconfig.extend.json",
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -26,8 +22,5 @@
     "preserveSymlinks": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src",
-    "tolgee.dev.d.ts"
-  ]
+  "include": ["src", "tolgee.dev.d.ts"]
 }
