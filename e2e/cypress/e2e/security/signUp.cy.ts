@@ -124,7 +124,7 @@ context('Sign up', () => {
   it('Signs up without email verification', () => {
     disableEmailVerification();
     fillAndSubmitForm();
-    assertMessage('Thanks for your sign up!');
+    assertMessage('Thank you for signing up!');
     cy.contains('Projects');
   });
 
@@ -148,7 +148,7 @@ context('Sign up', () => {
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
       fillAndSubmitForm(false);
-      assertMessage('Thanks for your sign up!');
+      assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
     });
   });
@@ -161,7 +161,7 @@ context('Sign up', () => {
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
       fillAndSubmitForm(false);
-      assertMessage('Thanks for your sign up!');
+      assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
     });
   });
