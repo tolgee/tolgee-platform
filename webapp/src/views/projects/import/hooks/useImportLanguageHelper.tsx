@@ -56,11 +56,12 @@ export const useImportLanguageHelper = (
           },
         }),
 
-      title: <T>import_delete_language_dialog_title</T>,
+      title: <T keyName="import_delete_language_dialog_title" />,
       message: (
-        <T params={{ languageName: row.name }}>
-          import_delete_language_dialog_message
-        </T>
+        <T
+          keyName="import_delete_language_dialog_message"
+          params={{ languageName: row.name }}
+        />
       ),
     });
   };

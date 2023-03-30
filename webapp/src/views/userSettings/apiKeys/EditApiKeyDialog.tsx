@@ -87,7 +87,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       },
       {
         onSuccess: () => {
-          messageService.success(<T>api_key_successfully_edited</T>);
+          messageService.success(<T keyName="api_key_successfully_edited" />);
           redirect(LINKS.USER_API_KEYS);
         },
       }
@@ -123,7 +123,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       data-cy="api-keys-create-edit-dialog"
     >
       <DialogTitle>
-        <T>edit_api_key_title</T>
+        <T keyName="edit_api_key_title" />
       </DialogTitle>
       <DialogContent>
         <>

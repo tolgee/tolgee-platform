@@ -55,7 +55,7 @@ export const SignUpForm = (props: Props) => {
             variant="contained"
             loading={props.loadable.loading}
           >
-            <T>sign_up_submit_button</T>
+            <T keyName="sign_up_submit_button" />
           </LoadingButton>
         </Box>
       }
@@ -63,18 +63,18 @@ export const SignUpForm = (props: Props) => {
     >
       <TextField
         name="name"
-        label={<T>sign_up_form_full_name</T>}
+        label={<T keyName="sign_up_form_full_name" />}
         variant="standard"
       />
       <TextField
         name="email"
-        label={<T>sign_up_form_email</T>}
+        label={<T keyName="sign_up_form_email" />}
         variant="standard"
       />
       {orgRequired && (
         <TextField
           name="organizationName"
-          label={<T>sign_up_form_organization_name</T>}
+          label={<T keyName="sign_up_form_organization_name" />}
           variant="standard"
         />
       )}

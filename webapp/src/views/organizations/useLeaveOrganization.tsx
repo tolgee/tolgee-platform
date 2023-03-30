@@ -18,7 +18,7 @@ export const useLeaveOrganization = () => {
     method: 'put',
     options: {
       onSuccess() {
-        messageService.success(<T>organization_left_message</T>);
+        messageService.success(<T keyName="organization_left_message" />);
         history.push(LINKS.PROJECTS.build());
         refetchInitialData();
       },
@@ -38,7 +38,7 @@ export const useLeaveOrganization = () => {
 
   return (id: number) => {
     confirmation({
-      message: <T>really_leave_organization_confirmation_message</T>,
+      message: <T keyName="really_leave_organization_confirmation_message" />,
       onConfirm: () => leaveLoadable.mutate({ path: { id } }),
     });
   };

@@ -102,7 +102,7 @@ export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       },
       {
         onSuccess: () => {
-          messageService.success(<T>api_key_successfully_edited</T>);
+          messageService.success(<T keyName="api_key_successfully_edited" />);
           redirect(LINKS.USER_API_KEYS);
         },
       }
@@ -123,7 +123,9 @@ export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       },
       {
         onSuccess(data) {
-          messageService.success(<T>api_key_successfully_generated</T>);
+          messageService.success(
+            <T keyName="api_key_successfully_generated" />
+          );
           if (props.onSaved) {
             props.onSaved(data);
             return;
@@ -175,14 +177,14 @@ export const ApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     >
       <DialogTitle>
         {props.editKey ? (
-          <T>edit_api_key_title</T>
+          <T keyName="edit_api_key_title" />
         ) : (
-          <T>generate_api_key_title</T>
+          <T keyName="generate_api_key_title" />
         )}
       </DialogTitle>
       <DialogContent>
         {(projects.data && projects.data?._embedded === undefined && (
-          <T>cannot_add_api_key_without_project_message</T>
+          <T keyName="cannot_add_api_key_without_project_message" />
         )) || (
           <>
             {props.loading && <BoxLoading />}

@@ -54,7 +54,7 @@ export const ProjectTransferModal: FC<{
       },
       {
         onSuccess() {
-          messaging.success(<T>project_transferred_message</T>);
+          messaging.success(<T keyName="project_transferred_message" />);
         },
         onError(e) {
           throw new Error(e);
@@ -90,12 +90,12 @@ export const ProjectTransferModal: FC<{
       data-cy={'project-transfer-dialog'}
     >
       <DialogTitle id="transfer-dialog-title">
-        <T>transfer_project_dialog_title</T>
+        <T keyName="transfer_project_dialog_title" />
       </DialogTitle>
       <DialogContent>
         <Box minWidth={500} mb={2}>
           <Alert severity="warning" icon={<Warning />}>
-            <T>tranfer_project_dialog_warning</T>
+            <T keyName="tranfer_project_dialog_warning" />
           </Alert>
           <Autocomplete
             id="transfer-project-owner-select"
@@ -113,7 +113,7 @@ export const ProjectTransferModal: FC<{
             renderOption={(props, option) => (
               <MenuItem {...props}>
                 <span data-cy="project-transfer-autocomplete-suggested-option">
-                  {option.name} (<T>transfer_option_organization</T>)
+                  {option.name} (<T keyName="transfer_option_organization" />)
                 </span>
               </MenuItem>
             )}
@@ -125,7 +125,7 @@ export const ProjectTransferModal: FC<{
                 onChange={(e) => {
                   setSearch(e.target.value);
                 }}
-                label={<T>project_transfer_autocomplete_label</T>}
+                label={<T keyName="project_transfer_autocomplete_label" />}
                 margin="normal"
                 InputProps={{
                   ...params.InputProps,
@@ -140,7 +140,7 @@ export const ProjectTransferModal: FC<{
         <Box>
           <Box mt={2} mb={1}>
             <Typography>
-              <T>project_transfer_rewrite_project_name_to_confirm_message</T>
+              <T keyName="project_transfer_rewrite_project_name_to_confirm_message" />
             </Typography>
             <TextField
               variant="standard"
@@ -150,9 +150,10 @@ export const ProjectTransferModal: FC<{
               }
               fullWidth
               label={
-                <T params={{ text: project.name.toUpperCase() }}>
-                  hard_mode_confirmation_rewrite_text
-                </T>
+                <T
+                  keyName="hard_mode_confirmation_rewrite_text"
+                  params={{ text: project.name.toUpperCase() }}
+                />
               }
             />
           </Box>
@@ -162,7 +163,7 @@ export const ProjectTransferModal: FC<{
         <Box pr={2} pb={1} display="flex">
           <Box mr={1}>
             <Button onClick={() => props.onClose()}>
-              <T>confirmation_dialog_cancel</T>
+              <T keyName="confirmation_dialog_cancel" />
             </Button>
           </Box>
           <Button
@@ -172,7 +173,7 @@ export const ProjectTransferModal: FC<{
             onClick={onTransfer}
             data-cy="transfer-project-apply-button"
           >
-            <T>transfer_project_apply_button</T>
+            <T keyName="transfer_project_apply_button" />
           </Button>
         </Box>
       </DialogActions>

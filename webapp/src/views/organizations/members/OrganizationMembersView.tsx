@@ -99,7 +99,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
       <Box mt={4} />
       <PaginatedHateoasList
         loadable={membersLoadable}
-        title={<T>organization_members_view_title</T>}
+        title={<T keyName="organization_members_view_title" />}
         onSearchChange={setSearch}
         onPageChange={setPage}
         emptyPlaceholder={

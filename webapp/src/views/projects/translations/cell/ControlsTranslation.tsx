@@ -130,7 +130,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={CELL_SHOW_ON_HOVER}
-          tooltip={<T>translations_cell_edit</T>}
+          tooltip={<T keyName="translations_cell_edit" />}
         >
           <Edit fontSize="small" />
         </ControlsButton>
@@ -144,7 +144,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
             [CELL_SHOW_ON_HOVER]: !commentsPresent,
             [CELL_HIGHLIGHT_ON_HOVER]: onlyResolved,
           })}
-          tooltip={<T>translation_cell_comments</T>}
+          tooltip={<T keyName="translation_cell_comments" />}
         >
           {onlyResolved ? (
             <StyledBadge

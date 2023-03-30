@@ -136,23 +136,25 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
 
     if (files.length > MAX_FILE_COUNT) {
       result.errors.push(
-        <T>translations.screenshots.validation.too_many_files</T>
+        <T keyName="translations.screenshots.validation.too_many_files" />
       );
     }
 
     files.forEach((file) => {
       if (file.size > config.maxUploadFileSize * 1024) {
         result.errors.push(
-          <T params={{ filename: file.name }}>
-            translations.screenshots.validation.file_too_big
-          </T>
+          <T
+            keyName="translations.screenshots.validation.file_too_big"
+            params={{ filename: file.name }}
+          />
         );
       }
       if (ALLOWED_UPLOAD_TYPES.indexOf(file.type) < 0) {
         result.errors.push(
-          <T params={{ filename: file.name }}>
-            translations.screenshots.validation.unsupported_format
-          </T>
+          <T
+            keyName="translations.screenshots.validation.unsupported_format"
+            params={{ filename: file.name }}
+          />
         );
       }
     });
@@ -186,7 +188,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
 
       if (errorHappened) {
         messageService.error(
-          <T>translations.screenshots.some_screenshots_not_uploaded</T>
+          <T keyName="translations.screenshots.some_screenshots_not_uploaded" />
         );
       }
       screenshotsLoadable.refetch();

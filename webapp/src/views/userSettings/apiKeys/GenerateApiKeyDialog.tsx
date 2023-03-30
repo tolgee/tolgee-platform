@@ -99,7 +99,9 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
       },
       {
         onSuccess(data) {
-          messageService.success(<T>api_key_successfully_generated</T>);
+          messageService.success(
+            <T keyName="api_key_successfully_generated" />
+          );
           props.onGenerated(data);
           onDialogClose();
         },
@@ -137,11 +139,11 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
       data-cy="api-keys-create-edit-dialog"
     >
       <DialogTitle>
-        <T>generate_api_key_title</T>
+        <T keyName="generate_api_key_title" />
       </DialogTitle>
       <DialogContent>
         {(projects.data && projects.data?._embedded === undefined && (
-          <T>cannot_add_api_key_without_project_message</T>
+          <T keyName="cannot_add_api_key_without_project_message" />
         )) || (
           <>
             {props.loading && <BoxLoading />}

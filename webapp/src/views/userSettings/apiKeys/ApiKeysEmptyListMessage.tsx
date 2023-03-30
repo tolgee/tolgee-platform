@@ -13,10 +13,16 @@ export const ApiKeysEmptyListMessage = (props: { loading: boolean }) => (
         to={LINKS.USER_API_KEYS_GENERATE.build()}
         color="primary"
       >
-        <T keyName="api-keys-empty-action">Create new Project API key</T>
+        <T
+          keyName="api-keys-empty-action"
+          defaultValue="Create new Project API key"
+        />
       </Button>
     }
   >
-    <T keyName="api-keys-empty-message">No Project API key added yet</T>
+    <T
+      keyName="api-keys-empty-message"
+      defaultValue="No Project API key added yet"
+    />
   </EmptyListMessage>
 );

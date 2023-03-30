@@ -137,7 +137,7 @@ export const useComments = ({
       return;
     }
     if (!inputValue) {
-      messaging.error(<T>global_empty_value</T>);
+      messaging.error(<T keyName="global_empty_value" />);
       return;
     }
     addComment

@@ -67,7 +67,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
       color="inherit"
       onClick={keepAllExisting}
     >
-      <T>import_resolution_accept_old</T>
+      <T keyName="import_resolution_accept_old" />
     </Button>
   );
   const overrideAllButton = (
@@ -79,7 +79,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
       color="inherit"
       onClick={overrideAll}
     >
-      <T>import_resolution_accept_imported</T>
+      <T keyName="import_resolution_accept_imported" />
     </Button>
   );
 
@@ -100,7 +100,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
             <Box pl={1}>
               <Typography>
                 <b>
-                  <T>import_resolve_header_key</T>
+                  <T keyName="import_resolve_header_key" />
                 </b>
               </Typography>
             </Box>
@@ -110,7 +110,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
               <Box pl={1} flexGrow={1}>
                 <Typography>
                   <b>
-                    <T>import_resolve_header_existing</T>
+                    <T keyName="import_resolve_header_existing" />
                   </b>
                 </Typography>
               </Box>
@@ -122,7 +122,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
               <Box flexGrow={1}>
                 <Typography>
                   <b>
-                    <T>import_resolve_header_new</T>
+                    <T keyName="import_resolve_header_new" />
                   </b>
                 </Typography>
               </Box>

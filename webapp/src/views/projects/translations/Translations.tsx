@@ -75,11 +75,11 @@ export const Translations = () => {
         loading={isLoading || isFetching}
         hint={
           <Button onClick={handleClearFilters} color="primary">
-            <T>translations_nothing_found_action</T>
+            <T keyName="translations_nothing_found_action" />
           </Button>
         }
       >
-        <T>translations_nothing_found</T>
+        <T keyName="translations_nothing_found" />
       </EmptyListMessage>
     ) : (
       <EmptyListMessage
@@ -88,7 +88,7 @@ export const Translations = () => {
           canAdd && (
             <>
               <Button onClick={handleAddTranslation} color="primary">
-                <T>translations_no_translations_action</T>
+                <T keyName="translations_no_translations_action" />
               </Button>
               <Box display="inline" p={1}>
                 |
@@ -100,13 +100,13 @@ export const Translations = () => {
                 })}
                 color="primary"
               >
-                <T>translations_no_translations_integrate</T>
+                <T keyName="translations_no_translations_integrate" />
               </Button>
             </>
           )
         }
       >
-        <T>translations_no_translations</T>
+        <T keyName="translations_no_translations" />
       </EmptyListMessage>
     );
 

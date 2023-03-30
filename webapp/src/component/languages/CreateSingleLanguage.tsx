@@ -49,7 +49,7 @@ export const CreateSingleLanguage: FunctionComponent<{
           refetchUsage();
           props.onCreated && props.onCreated(data);
           setValue(null);
-          messageService.success(<T>language_created_message</T>);
+          messageService.success(<T keyName="language_created_message" />);
         },
       }
     );

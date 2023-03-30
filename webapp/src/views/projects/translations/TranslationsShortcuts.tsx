@@ -213,9 +213,9 @@ export const TranslationsShortcuts = () => {
         return nextState && translationStates[nextState]?.translation;
       }
       case 'MOVE':
-        return <T>translations_shortcuts_move</T>;
+        return <T keyName="translations_shortcuts_move" />;
       case 'EDIT':
-        return <T>translations_cell_edit</T>;
+        return <T keyName="translations_cell_edit" />;
     }
   };
 
@@ -224,11 +224,11 @@ export const TranslationsShortcuts = () => {
 
   const getEditorShortcuts = () => [
     {
-      name: <T>translations_cell_save</T>,
+      name: <T keyName="translations_cell_save" />,
       formula: formatShortcut('Enter'),
     },
     {
-      name: <T>translations_cell_save_and_continue</T>,
+      name: <T keyName="translations_cell_save_and_continue" />,
       formula: formatShortcut(`${getMetaName()} + Enter`),
     },
     {
@@ -239,7 +239,7 @@ export const TranslationsShortcuts = () => {
     },
     {
       name: cursorLanguage != baseLanguage && (
-        <T>translations_cell_insert_base</T>
+        <T keyName="translations_cell_insert_base" />
       ),
       formula: IS_MAC
         ? formatShortcut(`${getMetaName()} + Shift + S`)

@@ -93,7 +93,7 @@ export const SignUpView: FunctionComponent = () => {
       {
         onSuccess: (data) => {
           if (data.accessToken) {
-            message.success(<T>Thanks for your sign up!</T>);
+            message.success(<T keyName="sign_up_success_message" />);
             InvitationCodeService.disposeCode();
             tokenService.setToken(data.accessToken);
             globalActions.setJWTToken.dispatch(data.accessToken);
@@ -129,7 +129,7 @@ export const SignUpView: FunctionComponent = () => {
         content={
           signUpMutation.isSuccess && config.needsEmailVerification ? (
             <Alert severity="success">
-              <T>sign_up_success_needs_verification_message</T>
+              <T keyName="sign_up_success_needs_verification_message" />
             </Alert>
           ) : (
             <StyledGrid>

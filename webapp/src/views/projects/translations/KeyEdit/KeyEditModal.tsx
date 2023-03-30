@@ -179,7 +179,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 data-cy="translations-cell-cancel-button"
                 onClick={onClose}
               >
-                <T>global_cancel_button</T>
+                <T keyName="global_cancel_button" />
               </Button>
               <Box ml={1}>
                 <LoadingButton
@@ -190,7 +190,7 @@ export const KeyEditModal: React.FC<Props> = ({
                   type="submit"
                   onClick={() => submitForm()}
                 >
-                  <T>global_form_save</T>
+                  <T keyName="global_form_save" />
                 </LoadingButton>
               </Box>
             </DialogActions>

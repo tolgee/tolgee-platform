@@ -141,7 +141,7 @@ export const TranslationsTable = () => {
               }}
               className="keyCell"
             >
-              <T>translation_grid_key_text</T>
+              <T keyName="translation_grid_key_text" />
             </StyledHeaderCell>
           );
         })}

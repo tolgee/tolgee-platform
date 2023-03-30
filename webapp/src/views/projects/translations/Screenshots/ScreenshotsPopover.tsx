@@ -34,7 +34,7 @@ export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
         <Box width="408px">
           <Box p={2}>
             <Typography>
-              <T>translations_screenshots_popover_title</T>
+              <T keyName="translations_screenshots_popover_title" />
             </Typography>
           </Box>
           <ScreenshotGallery keyId={props.keyId} />

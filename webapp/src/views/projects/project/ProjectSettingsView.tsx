@@ -44,7 +44,10 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const confirm = (options: ConfirmationDialogProps) =>
-    confirmation({ title: <T>delete_project_dialog_title</T>, ...options });
+    confirmation({
+      title: <T keyName="delete_project_dialog_title" />,
+      ...options,
+    });
 
   const handleEdit = (values: ValueType) => {
     const data = {
@@ -58,7 +61,9 @@ export const ProjectSettingsView: FunctionComponent = () => {
       },
       {
         onSuccess() {
-          messageService.success(<T>project_successfully_edited_message</T>);
+          messageService.success(
+            <T keyName="project_successfully_edited_message" />
+          );
         },
       }
     );
@@ -67,16 +72,17 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const handleDelete = () => {
     confirm({
       message: (
-        <T params={{ name: project.name }}>
-          delete_project_confirmation_message
-        </T>
+        <T
+          keyName="delete_project_confirmation_message"
+          params={{ name: project.name }}
+        />
       ),
       onConfirm: () =>
         deleteLoadable.mutate(
           { path: { projectId: project.id } },
           {
             onSuccess() {
-              messageService.success(<T>project_deleted_message</T>);
+              messageService.success(<T keyName="project_deleted_message" />);
             },
           }
         ),
@@ -104,7 +110,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
     const projectLanguages = useProjectLanguages();
     return (
       <BaseLanguageSelect
-        label={<T>project_settings_base_language</T>}
+        label={<T keyName="project_settings_base_language" />}
         name="baseLanguageId"
         languages={projectLanguages}
       />
@@ -143,13 +149,13 @@ export const ProjectSettingsView: FunctionComponent = () => {
               onClick={() => leave(project.name, project.id)}
               loading={isLeaving}
             >
-              <T>project_leave_button</T>
+              <T keyName="project_leave_button" />
             </LoadingButton>
           }
         >
           <TextField
             variant="standard"
-            label={<T>project_settings_name_label</T>}
+            label={<T keyName="project_settings_name_label" />}
             name="name"
             required={true}
             data-cy="project-settings-name"
@@ -158,7 +164,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
             variant="standard"
             minRows={1}
             multiline
-            label={<T>project_settings_description_label</T>}
+            label={<T keyName="project_settings_description_label" />}
             name="description"
             data-cy="project-settings-description"
           />
@@ -168,7 +174,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
         </StandardForm>
         <Box mt={2} mb={1}>
           <Typography variant={'h5'}>
-            <T>project_settings_danger_zone_title</T>
+            <T keyName="project_settings_danger_zone_title" />
           </Typography>
         </Box>
         <DangerZone

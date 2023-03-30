@@ -26,9 +26,10 @@ export const RemoveUserButton = (props: {
   const removeUser = () => {
     confirmation({
       message: (
-        <T params={{ userName: props.userName }}>
-          really_remove_user_confirmation
-        </T>
+        <T
+          keyName="really_remove_user_confirmation"
+          params={{ userName: props.userName }}
+        />
       ),
       onConfirm: () =>
         removeUserLoadable.mutate(
@@ -40,7 +41,7 @@ export const RemoveUserButton = (props: {
           },
           {
             onSuccess: () => {
-              messageService.success(<T>organization_user_deleted</T>);
+              messageService.success(<T keyName="organization_user_deleted" />);
             },
           }
         ),

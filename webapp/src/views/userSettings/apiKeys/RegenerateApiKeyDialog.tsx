@@ -76,7 +76,7 @@ export const RegenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
       data-cy="api-keys-create-edit-dialog"
     >
       <DialogTitle>
-        <T>regenerate_api_key_title</T>
+        <T keyName="regenerate_api_key_title" />
       </DialogTitle>
       <DialogContent>
         <>

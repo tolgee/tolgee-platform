@@ -46,9 +46,10 @@ export const ImportFileIssuesDialog: FunctionComponent<{
         {row && (
           <>
             <DialogTitle id="import-file-issues-dialog">
-              <T params={{ fileName: row.importFileName }}>
-                import_file_issues_title
-              </T>
+              <T
+                keyName="import_file_issues_title"
+                params={{ fileName: row.importFileName }}
+              />
             </DialogTitle>
             <DialogContent>
               <PaginatedHateoasList

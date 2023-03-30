@@ -16,7 +16,7 @@ export const PatExpiryInfo = (props: {
     ) : (
       <Box sx={(theme) => ({ color: theme.palette.success.main })}>
         {!props.pat.expiresAt ? (
-          <T>pat_never_expires</T>
+          <T keyName="pat_never_expires" />
         ) : (
           <T
             params={{ date: props.pat.expiresAt }}

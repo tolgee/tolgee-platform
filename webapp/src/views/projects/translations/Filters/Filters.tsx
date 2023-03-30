@@ -128,17 +128,20 @@ export const Filters = () => {
               variant="body2"
             >
               {value.length === 0 ? (
-                <T>translations_filter_placeholder</T>
+                <T keyName="translations_filter_placeholder" />
               ) : (
                 (value.length === 1 && getFilterName(value[0])) || (
-                  <T params={{ filtersNum: String(activeFilters.length) }}>
-                    translations_filters_text
-                  </T>
+                  <T
+                    keyName="translations_filters_text"
+                    params={{ filtersNum: String(activeFilters.length) }}
+                  />
                 )
               )}
             </StyledInputText>
             {Boolean(activeFilters.length) && (
-              <Tooltip title={<T noWrap>translations_filters_heading_clear</T>}>
+              <Tooltip
+                title={<T keyName="translations_filters_heading_clear" />}
+              >
                 <StyledClearButton
                   size="small"
                   onClick={stopAndPrevent(handleClearFilters)}

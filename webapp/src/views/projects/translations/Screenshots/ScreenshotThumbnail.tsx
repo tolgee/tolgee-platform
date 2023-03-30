@@ -88,8 +88,8 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
 
     const onDeleteClick = () => {
       confirmation({
-        title: <T>screenshot_delete_title</T>,
-        message: <T>screenshot_delete_message</T>,
+        title: <T keyName="screenshot_delete_title" />,
+        message: <T keyName="screenshot_delete_message" />,
         onConfirm: () => props.onDelete(),
       });
     };
@@ -105,7 +105,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
             ProjectPermissionType.TRANSLATE
           ) && (
             <Tooltip
-              title={<T noWrap>translations.screenshots.delete_tooltip</T>}
+              title={<T keyName="translations.screenshots.delete_tooltip" />}
             >
               <StyledDeleteIconButton
                 className={clsx({ hover })}

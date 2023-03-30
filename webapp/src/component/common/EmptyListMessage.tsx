@@ -33,7 +33,7 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
       <Fade in={!loading} mountOnEnter unmountOnExit>
         <div>
           <SadEmotionMessage hint={hint}>
-            {children || <T>global_empty_list_message</T>}
+            {children || <T keyName="global_empty_list_message" />}
           </SadEmotionMessage>
         </div>
       </Fade>

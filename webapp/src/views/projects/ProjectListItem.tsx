@@ -32,7 +32,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
             variant="outlined"
             to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: r.id })}
           >
-            <T>project_settings_button</T>
+            <T keyName="project_settings_button" />
           </Button>
         </ListItemSecondaryAction>
       )}

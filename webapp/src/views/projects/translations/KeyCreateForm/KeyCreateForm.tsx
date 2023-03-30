@@ -63,7 +63,7 @@ export const KeyCreateForm: React.FC<Props> = ({
       },
       {
         onSuccess(data) {
-          messaging.success(<T>translations_key_created</T>);
+          messaging.success(<T keyName="translations_key_created" />);
           onSuccess?.(data);
           refetchUsage();
         },
@@ -85,7 +85,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   useEffect(() => {
     if (!canEdit) {
       redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-      messaging.error(<T>translation_single_no_permission_create</T>);
+      messaging.error(<T keyName="translation_single_no_permission_create" />);
     }
   }, [canEdit]);
 

@@ -167,22 +167,23 @@ export const TranslationOpened: React.FC<Props> = ({
         >
           {editEnabled && (
             <StyledTab
-              label={<T>translations_cell_tab_edit</T>}
+              label={<T keyName="translations_cell_tab_edit" />}
               value="editor"
               data-cy="translations-cell-tab-edit"
             />
           )}
           <StyledTab
             label={
-              <T params={{ count: String(translation?.commentCount || 0) }}>
-                translations_cell_tab_comments
-              </T>
+              <T
+                keyName="translations_cell_tab_comments"
+                params={{ count: String(translation?.commentCount || 0) }}
+              />
             }
             value="comments"
             data-cy="translations-cell-tab-comments"
           />
           <StyledTab
-            label={<T>translations_cell_tab_history</T>}
+            label={<T keyName="translations_cell_tab_history" />}
             value="history"
             data-cy="translations-cell-tab-history"
           />

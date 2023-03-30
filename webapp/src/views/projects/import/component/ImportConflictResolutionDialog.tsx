@@ -55,7 +55,7 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
               <CloseIcon />
             </IconButton>
             <StyledTitle variant="h6">
-              <T>import_resolve_conflicts_title</T>
+              <T keyName="import_resolve_conflicts_title" />
             </StyledTitle>
           </Toolbar>
         </StyledAppBar>

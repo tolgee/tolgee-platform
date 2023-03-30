@@ -77,7 +77,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
           size="small"
           data-cy="translations-cell-cancel-button"
         >
-          <T>translations_cell_cancel</T>
+          <T keyName="translations_cell_cancel" />
         </Button>
         <LoadingButton
           onClick={onSave}
@@ -87,7 +87,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
           loading={isEditLoading}
           data-cy="translations-cell-save-button"
         >
-          <T>translations_cell_save</T>
+          <T keyName="translations_cell_save" />
         </LoadingButton>
       </StyledLeftPart>
 
@@ -103,7 +103,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
             <ControlsButton
               onClick={onScreenshots}
               ref={screenshotRef}
-              tooltip={<T>translations_screenshots_tooltip</T>}
+              tooltip={<T keyName="translations_screenshots_tooltip" />}
               data-cy="translations-cell-screenshots-button"
             >
               <CameraAlt
@@ -124,7 +124,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
             }}
             color="default"
             data-cy="translations-cell-insert-base-button"
-            tooltip={<T>translations_cell_insert_base</T>}
+            tooltip={<T keyName="translations_cell_insert_base" />}
           >
             <ContentCopy fontSize="small" />
           </ControlsButton>

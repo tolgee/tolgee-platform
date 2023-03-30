@@ -20,7 +20,7 @@ export const AvatarEditDialog = (props: {
 }) => (
   <Dialog open={true} onClose={props.onCancel}>
     <DialogTitle id="transfer-dialog-title">
-      <T>user-profile.edit-avatar</T>
+      <T keyName="user-profile.edit-avatar" />
     </DialogTitle>
     <DialogContent>
       <AvatarEdit src={props.src} cropperRef={props.cropperRef} />
@@ -31,7 +31,7 @@ export const AvatarEditDialog = (props: {
         onClick={props.onCancel}
         type="button"
       >
-        <T>confirmation_dialog_cancel</T>
+        <T keyName="confirmation_dialog_cancel" />
       </Button>
       <LoadingButton
         loading={props.isUploading}
@@ -41,7 +41,7 @@ export const AvatarEditDialog = (props: {
         type="submit"
         onClick={props.onSave}
       >
-        <T>global_form_save</T>
+        <T keyName="global_form_save" />
       </LoadingButton>
     </DialogActions>
   </Dialog>

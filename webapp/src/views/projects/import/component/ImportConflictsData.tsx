@@ -71,7 +71,7 @@ export const ImportConflictsData: FunctionComponent<{
         </>
       ) : (
         <EmptyListMessage>
-          <T>import_resolve_conflicts_empty_list_message</T>
+          <T keyName="import_resolve_conflicts_empty_list_message" />
         </EmptyListMessage>
       )}
       <Box display="flex" justifyContent="flex-end" p={4}>

@@ -69,7 +69,7 @@ export const LanguageEditView = () => {
       },
       {
         onSuccess() {
-          messageService.success(<T>language_edited_message</T>);
+          messageService.success(<T keyName="language_edited_message" />);
           redirect(LINKS.PROJECT_LANGUAGES, {
             [PARAMS.PROJECT_ID]: projectId,
           });
@@ -89,7 +89,7 @@ export const LanguageEditView = () => {
       {
         onSuccess() {
           refetchUsage();
-          messageService.success(<T>language_deleted_message</T>);
+          messageService.success(<T keyName="language_deleted_message" />);
           redirect(LINKS.PROJECT_LANGUAGES, {
             [PARAMS.PROJECT_ID]: projectId,
           });
@@ -143,23 +143,24 @@ export const LanguageEditView = () => {
             onClick={() => {
               if (languageLoadable.data?.base) {
                 return messageService.error(
-                  <T>cannot_delete_base_language_message</T>
+                  <T keyName="cannot_delete_base_language_message" />
                 );
               }
               confirmationMessage({
                 message: (
-                  <T params={{ name: languageLoadable.data!.name }}>
-                    delete_language_confirmation
-                  </T>
+                  <T
+                    keyName="delete_language_confirmation"
+                    params={{ name: languageLoadable.data!.name }}
+                  />
                 ),
                 hardModeText: languageLoadable.data!.name.toUpperCase(),
-                confirmButtonText: <T>global_delete_button</T>,
+                confirmButtonText: <T keyName="global_delete_button" />,
                 confirmButtonColor: 'secondary',
                 onConfirm: onDelete,
               });
             }}
           >
-            <T>delete_language_button</T>
+            <T keyName="delete_language_button" />
           </Button>
         }
       >

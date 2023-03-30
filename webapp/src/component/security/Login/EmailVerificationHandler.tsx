@@ -33,7 +33,7 @@ export const EmailVerificationHandler: FunctionComponent<OAuthRedirectionHandler
     useEffect(() => {
       if (data) {
         signUpService.verifyEmail(data.accessToken);
-        messageService.success(<T>email_verified_message</T>);
+        messageService.success(<T keyName="email_verified_message" />);
         redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
       }
     }, [data]);

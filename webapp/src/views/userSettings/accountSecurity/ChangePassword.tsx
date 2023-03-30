@@ -30,7 +30,7 @@ export const ChangePassword: FunctionComponent = () => {
       {
         onSuccess(r) {
           securityService.setToken(r.accessToken!);
-          messagesService.success(<T>password-updated</T>);
+          messagesService.success(<T keyName="password-updated" />);
         },
       }
     );
@@ -41,7 +41,7 @@ export const ChangePassword: FunctionComponent = () => {
   return (
     <Box>
       <Typography variant="h6">
-        <T>Password</T>
+        <T keyName="Password" />
       </Typography>
       <StandardForm
         saveActionLoadable={updatePassword}
@@ -58,7 +58,7 @@ export const ChangePassword: FunctionComponent = () => {
         <TextField
           name="currentPassword"
           type="password"
-          label={<T>current-password</T>}
+          label={<T keyName="current-password" />}
           variant="standard"
         />
         <SetPasswordFields />

@@ -39,7 +39,7 @@ export const useApplyImportHelper = (
         {
           onSuccess() {
             dataHelper.refetchData();
-            message.success(<T>import-successful-message</T>);
+            message.success(<T keyName="import-successful-message" />);
           },
         }
       );

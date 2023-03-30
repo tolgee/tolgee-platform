@@ -35,15 +35,14 @@ const RevokePermissionsButton = (props: {
       leave(project.name, project.id);
     } else {
       confirmation({
-        title: <T>revoke_access_confirmation_title</T>,
+        title: <T keyName="revoke_access_confirmation_title" />,
         message: (
           <T
+            keyName="project_permissions_revoke_user_access_message"
             params={{
               userName: props.user.name || props.user.username!,
             }}
-          >
-            project_permissions_revoke_user_access_message
-          </T>
+          />
         ),
         onConfirm: () => {
           revokeAccess.mutate(
@@ -55,7 +54,7 @@ const RevokePermissionsButton = (props: {
             },
             {
               onSuccess() {
-                messageService.success(<T>access_revoked_message</T>);
+                messageService.success(<T keyName="access_revoked_message" />);
               },
             }
           );
@@ -70,10 +69,10 @@ const RevokePermissionsButton = (props: {
   let tooltip = undefined as ReactElement | undefined;
 
   if (hasOrganizationRole) {
-    tooltip = <T>user_is_part_of_organization_tooltip</T>;
+    tooltip = <T keyName="user_is_part_of_organization_tooltip" />;
     isDisabled = true;
   } else if (currentUser!.id === props.user.id) {
-    tooltip = <T>project_leave_button</T>;
+    tooltip = <T keyName="project_leave_button" />;
   }
 
   const Wrapper: FunctionComponent = (props) =>

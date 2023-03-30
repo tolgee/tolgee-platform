@@ -35,7 +35,7 @@ export const RoleSelector: FC<{
           },
           {
             onSuccess: () => {
-              message.success(<T>administration_role_set_success</T>);
+              message.success(<T keyName="administration_role_set_success" />);
               onSuccess();
             },
           }
@@ -53,10 +53,10 @@ export const RoleSelector: FC<{
       onChange={(e) => setRole(user.id, e.target.value as any)}
     >
       <MenuItem value={'USER'}>
-        <T>administration_user_role_user</T>
+        <T keyName="administration_user_role_user" />
       </MenuItem>
       <MenuItem value={'ADMIN'}>
-        <T>administration_user_role_admin</T>
+        <T keyName="administration_user_role_admin" />
       </MenuItem>
     </Select>
   );

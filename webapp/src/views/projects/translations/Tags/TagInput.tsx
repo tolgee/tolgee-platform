@@ -98,7 +98,7 @@ export const TagInput: React.FC<Props> = ({
         autoHighlight
         noOptionsText={
           <StyledOption>
-            <T>translations_tags_no_results</T>
+            <T keyName="translations_tags_no_results" />
           </StyledOption>
         }
         PopperComponent={CustomPopper}

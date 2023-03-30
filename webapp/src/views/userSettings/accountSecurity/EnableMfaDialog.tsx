@@ -108,7 +108,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
       data-cy="mfa-enable-dialog"
     >
       <DialogTitle data-cy="mfa-enable-dialog-title">
-        <T>account-security-mfa-enable-mfa</T>
+        <T keyName="account-security-mfa-enable-mfa" />
       </DialogTitle>
       <DialogContent data-cy="mfa-enable-dialog-content">
         <Box
@@ -118,7 +118,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
         >
           <Box flex={0} flexShrink={0}>
             <Typography>
-              <T>account-security-mfa-enable-step-one</T>
+              <T keyName="account-security-mfa-enable-step-one" />
             </Typography>
             <Box display="flex" justifyContent="center" flex={1}>
               <WhiteBox p={2} mt={1} mb={1}>
@@ -126,7 +126,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
               </WhiteBox>
             </Box>
             <Typography variant="body2" mb={0.5}>
-              <T>account-security-mfa-enable-manual-entry</T>
+              <T keyName="account-security-mfa-enable-manual-entry" />
             </Typography>
             <code data-cy="mfa-enable-dialog-totp-key">
               {secret.replace(/.{4}(?=.)/g, '$& ')}
@@ -134,7 +134,7 @@ export const EnableMfaDialog: FunctionComponent = () => {
           </Box>
           <Box flex={1}>
             <Typography mb={2}>
-              <T>account-security-mfa-enable-step-two</T>
+              <T keyName="account-security-mfa-enable-step-two" />
             </Typography>
             <StandardForm
               onSubmit={(values) => {

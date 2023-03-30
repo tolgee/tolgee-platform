@@ -83,7 +83,7 @@ export const ImportTranslationsDialog: FunctionComponent<{
               <CloseIcon />
             </IconButton>
             <StyledTitle variant="h6">
-              <T>import_show_translations_title</T>
+              <T keyName="import_show_translations_title" />
             </StyledTitle>
           </Toolbar>
         </StyledAppBar>

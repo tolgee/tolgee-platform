@@ -34,7 +34,7 @@ export const DebugCustomerAccountButton = (props: { userId: number }) => {
         );
       }}
     >
-      <T>administration_user_debug</T>
+      <T keyName="administration_user_debug" />
     </Button>
   );
 };

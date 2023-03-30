@@ -13,14 +13,14 @@ export const AdministrationNav = () => {
           data-cy="administration-tabs-organizations"
           component={Link}
           to={LINKS.ADMINISTRATION_ORGANIZATIONS.build()}
-          label={<T>administration_organizations</T>}
+          label={<T keyName="administration_organizations" />}
           value={LINKS.ADMINISTRATION_ORGANIZATIONS.build()}
         />
         <Tab
           data-cy="administration-tabs-users"
           component={Link}
           to={LINKS.ADMINISTRATION_USERS.build()}
-          label={<T>administration_users</T>}
+          label={<T keyName="administration_users" />}
           value={LINKS.ADMINISTRATION_USERS.build()}
         />
       </Tabs>

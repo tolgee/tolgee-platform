@@ -84,9 +84,9 @@ export const ProfileAvatar: FC<{
         // eslint-disable-next-line no-console
         console.error(e);
         if (e.code == 'file_too_big') {
-          messageService.error(<T>file_too_big</T>);
+          messageService.error(<T keyName="file_too_big" />);
         }
-        messageService.error(<T>global-upload-not-successful</T>);
+        messageService.error(<T keyName="global-upload-not-successful" />);
       } finally {
         setUploading(false);
         if (fileRef.current) {
@@ -105,7 +105,7 @@ export const ProfileAvatar: FC<{
     const file = e.target?.files?.[0];
     if (file) {
       if (file.size > config.maxUploadFileSize * 1024) {
-        messageService.error(<T>file_too_big</T>);
+        messageService.error(<T keyName="file_too_big" />);
         return;
       }
       file2Base64(file).then((base64) => {

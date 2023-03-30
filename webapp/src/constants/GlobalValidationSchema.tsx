@@ -17,21 +17,25 @@ Yup.setLocale({
     default: 'field_invalid',
     // eslint-disable-next-line react/display-name
     required: () => {
-      return <T>{'Validation - required field'}</T>;
+      return <T keyName="Validation - required field" />;
     },
   },
   string: {
     // eslint-disable-next-line react/display-name
-    email: () => <T>validation_email_is_not_valid</T>,
+    email: () => <T keyName="validation_email_is_not_valid" />,
     // eslint-disable-next-line react/display-name
     min: ({ min }) => (
-      <T params={{ min: min.toString() }}>Field should have at least n chars</T>
+      <T
+        keyName="Field should have at least n chars"
+        params={{ min: min.toString() }}
+      />
     ),
     // eslint-disable-next-line react/display-name
     max: ({ max }) => (
-      <T params={{ max: max.toString() }}>
-        Field should have maximum of n chars
-      </T>
+      <T
+        keyName="Field should have maximum of n chars"
+        params={{ max: max.toString() }}
+      />
     ),
   },
 });
@@ -222,7 +226,7 @@ export class Validation {
       .max(60)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
-          <T>slug_validation_can_contain_just_lowercase_numbers_hyphens</T>
+          <T keyName="slug_validation_can_contain_just_lowercase_numbers_hyphens" />
         ),
       });
 

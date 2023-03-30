@@ -41,7 +41,9 @@ export const UserProfileView: FunctionComponent = () => {
       { content: { 'application/json': v } },
       {
         onSuccess() {
-          messagesService.success(<T>User data - Successfully updated!</T>);
+          messagesService.success(
+            <T keyName="User data - Successfully updated!" />
+          );
           refetchInitialData();
         },
       }
@@ -72,7 +74,7 @@ export const UserProfileView: FunctionComponent = () => {
             <TextField
               variant="standard"
               name="name"
-              label={<T>User settings - Full name</T>}
+              label={<T keyName="User settings - Full name" />}
             />
             <TextField
               variant="standard"
@@ -81,25 +83,24 @@ export const UserProfileView: FunctionComponent = () => {
               helperText={
                 isManaged ? t('managed-account-field-hint') : undefined
               }
-              label={<T>User settings - E-mail</T>}
+              label={<T keyName="User settings - E-mail" />}
             />
             {user?.emailAwaitingVerification && (
               <Box>
                 <Typography variant="body1">
                   <T
+                    keyName="email_waiting_for_verification"
                     params={{
                       email: user.emailAwaitingVerification!,
                     }}
-                  >
-                    email_waiting_for_verification
-                  </T>
+                  />
                 </Typography>
               </Box>
             )}
 
             {emailChanged && config.needsEmailVerification && (
               <Typography variant="body1">
-                <T>your_email_was_changed_verification_message</T>
+                <T keyName="your_email_was_changed_verification_message" />
               </Typography>
             )}
           </Grid>
@@ -109,7 +110,7 @@ export const UserProfileView: FunctionComponent = () => {
           <TextField
             name="currentPassword"
             type="password"
-            label={<T>current-password</T>}
+            label={<T keyName="current-password" />}
             variant="standard"
           />
         )}
@@ -126,7 +127,7 @@ export const UserProfileView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T>managed-account-notice</T>
+          <T keyName="managed-account-notice" />
         </Alert>
       )}
       {user && (

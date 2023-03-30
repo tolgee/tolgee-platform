@@ -25,13 +25,13 @@ export const LanguageModifyFields: FC<{
     <>
       <TextField
         variant="standard"
-        label={<T>language_create_edit_english_name_label</T>}
+        label={<T keyName="language_create_edit_english_name_label" />}
         name="name"
         required={true}
       />
       <TextField
         variant="standard"
-        label={<T>language_create_edit_original_name_label</T>}
+        label={<T keyName="language_create_edit_original_name_label" />}
         name="originalName"
         required={true}
       />
@@ -44,7 +44,7 @@ export const LanguageModifyFields: FC<{
           <TextField
             variant="standard"
             fullWidth
-            label={<T>language_create_edit_abbreviation</T>}
+            label={<T keyName="language_create_edit_abbreviation" />}
             name="tag"
             required={true}
             onValueChange={() => validateTag()}
@@ -52,7 +52,7 @@ export const LanguageModifyFields: FC<{
           {!tagValid && (
             <Box mb={4}>
               <Alert severity="warning">
-                <T>invalid_language_tag</T>
+                <T keyName="invalid_language_tag" />
               </Alert>
             </Box>
           )}

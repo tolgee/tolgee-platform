@@ -102,24 +102,26 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     };
 
     if (files.length > MAX_FILE_COUNT) {
-      result.errors.push(<T>import_max_file_count_message</T>);
+      result.errors.push(<T keyName="import_max_file_count_message" />);
     }
 
     files.forEach((file) => {
       if (file.size > config.maxUploadFileSize * 1024) {
         result.errors.push(
-          <T params={{ filename: file.name }}>
-            translations.screenshots.validation.file_too_big
-          </T>
+          <T
+            keyName="translations.screenshots.validation.file_too_big"
+            params={{ filename: file.name }}
+          />
         );
       }
       const extension =
         file.name.indexOf('.') > -1 ? file.name.replace(/.*\.(.+)$/, '$1') : '';
       if (ALLOWED_EXTENSIONS.indexOf(extension) < 0) {
         result.errors.push(
-          <T params={{ filename: file.name }}>
-            translations.screenshots.validation.unsupported_format
-          </T>
+          <T
+            keyName="translations.screenshots.validation.unsupported_format"
+            params={{ filename: file.name }}
+          />
         );
       }
     });
@@ -152,7 +154,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           accept={ALLOWED_EXTENSIONS.join(',')}
         />
         <Typography variant="body1">
-          <T>import_file_input_drop_file_text</T>
+          <T keyName="import_file_input_drop_file_text" />
         </Typography>
         <Box mt={2} mb={2}>
           <LoadingButton
@@ -163,11 +165,11 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             variant="outlined"
             color="primary"
           >
-            <T>import_file_input_select_file_button</T>
+            <T keyName="import_file_input_select_file_button" />
           </LoadingButton>
         </Box>
         <Typography variant="body1">
-          <T>import_file_supported_formats</T>
+          <T keyName="import_file_supported_formats" />
         </Typography>
       </StyledRoot>
     </ImportFileDropzone>

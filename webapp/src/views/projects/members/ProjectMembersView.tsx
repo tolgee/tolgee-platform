@@ -69,11 +69,11 @@ export const ProjectMembersView: FunctionComponent = () => {
       {project.organizationOwnerSlug && (
         <Box mb={2}>
           <Typography component={Box} alignItems={'center'} variant={'body1'}>
-            <T>project_permission_information_text_base_permission_before</T>{' '}
+            <T keyName="project_permission_information_text_base_permission_before" />{' '}
             {translatePermission(project.organizationOwnerBasePermissions!)}
           </Typography>
 
-          <T>project_permission_information_text_base_permission_after</T>
+          <T keyName="project_permission_information_text_base_permission_after" />
         </Box>
       )}
       <ProjectLanguagesProvider>

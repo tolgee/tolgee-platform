@@ -22,19 +22,19 @@ export const useLeaveProject = () => {
     options: {
       onSuccess() {
         refetchInitialData();
-        messaging.success(<T>project_successfully_left</T>);
+        messaging.success(<T keyName="project_successfully_left" />);
         history.push(LINKS.PROJECTS.build());
       },
       onError(e) {
         switch (e.code) {
           case 'cannot_leave_project_with_organization_role':
             messaging.error(
-              <T>cannot_leave_project_with_organization_role_error_message</T>
+              <T keyName="cannot_leave_project_with_organization_role_error_message" />
             );
             break;
           default:
             messaging.error(
-              <T params={{ code: e.code }}>unexpected_error_message</T>
+              <T keyName="unexpected_error_message" params={{ code: e.code }} />
             );
         }
       },
@@ -49,8 +49,8 @@ export const useLeaveProject = () => {
 
   const leave = (projectName: string, projectId: number) => {
     confirmation({
-      title: <T>leave_project_confirmation_title</T>,
-      message: <T>leave_project_confirmation_message</T>,
+      title: <T keyName="leave_project_confirmation_title" />,
+      message: <T keyName="leave_project_confirmation_message" />,
       hardModeText: projectName.toUpperCase(),
       onConfirm() {
         setIsLeaving(true);

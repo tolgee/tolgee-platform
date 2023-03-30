@@ -76,7 +76,7 @@ export class ApiHttpService {
               if (r.status == 401 && !options.disableAuthHandling) {
                 // eslint-disable-next-line no-console
                 console.warn('Redirecting to login - unauthorized user');
-                this.messageService.error(<T>expired_jwt_token</T>);
+                this.messageService.error(<T keyName="expired_jwt_token" />);
                 redirectionActions.redirect.dispatch(LINKS.LOGIN.build());
                 this.tokenService.disposeToken();
                 location.reload();
@@ -108,7 +108,9 @@ export class ApiHttpService {
                     LINKS.AFTER_LOGIN.build()
                   );
                 }
-                this.messageService.error(<T>operation_not_permitted_error</T>);
+                this.messageService.error(
+                  <T keyName="operation_not_permitted_error" />
+                );
                 Sentry.captureException(new Error('Operation not permitted'));
                 reject({ ...resObject, __handled: true });
                 return;
@@ -119,7 +121,9 @@ export class ApiHttpService {
                     LINKS.AFTER_LOGIN.build()
                   );
                 }
-                this.messageService.error(<T>resource_not_found_message</T>);
+                this.messageService.error(
+                  <T keyName="resource_not_found_message" />
+                );
               }
               if (r.status == 400 && !options.disableBadRequestHandling) {
                 this.messageService.error(

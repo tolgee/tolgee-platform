@@ -9,6 +9,7 @@ import { TokenService } from './TokenService';
 import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, TokenDTO } from './response.types';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const API_URL = process.env.REACT_APP_API_URL + '/api/';
 
@@ -93,7 +94,7 @@ export class SecurityService {
       code,
       password,
     } as ResetPasswordPostRequest);
-    this.messageService.success(<T>Password successfully reset</T>);
+    this.messageService.success(<T keyName="password_reset_message" />);
     return res;
   };
 
@@ -146,7 +147,7 @@ export class SecurityService {
         )({ path: { code } });
       } catch (e) {
         if (e.code === 'invitation_code_does_not_exist_or_expired') {
-          this.messageService.error(<T>{e.code}</T>);
+          this.messageService.error(<TranslatedError code={e.code} />);
         } else {
           throw e;
         }

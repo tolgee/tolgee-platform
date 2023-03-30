@@ -85,7 +85,7 @@ export const LanguageSelector: React.FC<{
   items.push(
     <StyledItem key={0} value={NEW_LANGUAGE_VALUE} className="addNewItem">
       <StyledAddIcon fontSize="small" />
-      <T>import_result_language_menu_add_new</T>
+      <T keyName="import_result_language_menu_add_new" />
     </StyledItem>
   );
 
@@ -98,7 +98,7 @@ export const LanguageSelector: React.FC<{
         data-cy="import-row-language-select-form-control"
       >
         <InputLabel shrink id="import_row_language_select">
-          <T>import_language_select</T>
+          <T keyName="import_language_select" />
         </InputLabel>
         <Select
           variant="standard"
@@ -126,7 +126,7 @@ export const LanguageSelector: React.FC<{
         </Select>
         {importData.applyTouched && !props.value && (
           <FormHelperText>
-            <T>import_existing_language_not_selected_error</T>
+            <T keyName="import_existing_language_not_selected_error" />
           </FormHelperText>
         )}
       </FormControl>

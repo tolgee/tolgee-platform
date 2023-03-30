@@ -37,7 +37,7 @@ export const GeneratePatDialog: FunctionComponent<{
   return (
     <Dialog open={true} onClose={onDialogClose} fullWidth maxWidth={'xs'}>
       <DialogTitle data-cy="generate-pat-dialog-title">
-        <T>generate_pat_title</T>
+        <T keyName="generate_pat_title" />
       </DialogTitle>
       <DialogContent data-cy="generate-pat-dialog-content">
         <StandardForm

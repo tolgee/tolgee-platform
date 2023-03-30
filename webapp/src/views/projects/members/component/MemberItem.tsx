@@ -75,7 +75,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
       {
         onSuccess() {
           if (showMessage) {
-            messageService.success(<T>permissions_set_message</T>);
+            messageService.success(<T keyName="permissions_set_message" />);
           }
         },
         onError(e) {
@@ -89,7 +89,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
 
   const changePermissionConfirm = (permissionType, languages) => {
     confirmation({
-      message: <T>change_permissions_confirmation</T>,
+      message: <T keyName="change_permissions_confirmation" />,
       onConfirm: () => changePermission(permissionType, languages, true),
     });
   };

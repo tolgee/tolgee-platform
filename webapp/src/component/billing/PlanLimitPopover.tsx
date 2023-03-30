@@ -83,7 +83,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
           type="button"
           color="secondary"
         >
-          <T>plan_limit_dialog_close</T>
+          <T keyName="plan_limit_dialog_close" />
         </Button>
         {isOwner && (
           <Button
@@ -91,7 +91,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
             color="primary"
             onClick={handleConfirm}
           >
-            <T>plan_limit_dialog_go_to_billing</T>
+            <T keyName="plan_limit_dialog_go_to_billing" />
           </Button>
         )}
       </DialogActions>

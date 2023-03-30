@@ -87,7 +87,7 @@ export const AdministrationOrganizations = ({
                         history.push(LINKS.PROJECTS.build());
                       }}
                     >
-                      <T>administration_organization_projects</T>
+                      <T keyName="administration_organization_projects" />
                     </Button>
                     <Box ml={1}>
                       <Button
@@ -98,7 +98,7 @@ export const AdministrationOrganizations = ({
                           [PARAMS.ORGANIZATION_SLUG]: o.slug,
                         })}
                       >
-                        <T>administration_organizations_settings</T>
+                        <T keyName="administration_organizations_settings" />
                       </Button>
                     </Box>
                   </Box>
