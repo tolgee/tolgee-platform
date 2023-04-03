@@ -8,8 +8,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.keyBigMeta.BigMeta
 import io.tolgee.model.views.BigMetaView
+import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.BigMetaService
@@ -28,7 +30,12 @@ import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
 @RestController
-@RequestMapping("/v2/projects/{projectId:\\d+}")
+@RequestMapping(
+  value = [
+    "/v2/projects/{projectId:\\d+}",
+    "/v2/projects"
+  ]
+)
 @Tag(name = "Big Meta data about the keys in project")
 class BigMetaController(
   private val bigMetaService: BigMetaService,
@@ -38,6 +45,7 @@ class BigMetaController(
 ) {
   @PostMapping("/big-meta")
   @Operation(summary = "Stores a bigMeta for a project")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   fun store(@RequestBody @Valid data: BigMetaDto): List<BigMetaModel> {
     val stored = bigMetaService.store(data, projectHolder.projectEntity)

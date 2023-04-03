@@ -361,4 +361,12 @@ class TranslationService(
   fun getForKeys(keyIds: List<Long>, languageTags: List<String>): List<Translation> {
     return translationRepository.getForKeys(keyIds, languageTags)
   }
+
+  fun findAllByKey(
+    keyNames: List<String>,
+    project: Project,
+    languages: List<Language>
+  ): List<Translation> {
+    return translationRepository.findAllByKey(keyNames, project, languages)
+  }
 }

@@ -11,29 +11,39 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.util.*
+import kotlin.collections.HashMap
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class TolgeeTranslateApiService(
   private val tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties,
-  private val restTemplate: RestTemplate,
+  private val restTemplate: RestTemplate
 ) {
 
   fun translate(params: TolgeeTranslateParams): String? {
     val headers = HttpHeaders()
     headers.add("Something", null)
 
-    val requestBody: List<TolgeeTranslateRequest> = listOf(TolgeeTranslateRequest(params.text, params.metadata))
+    val closeItems = params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
+    val examples = params.metadata?.examples?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
+
+    val requestBody = TolgeeTranslateRequest(
+      params.text,
+      params.keyName,
+      params.sourceTag,
+      params.targetTag,
+      examples,
+      closeItems
+    )
     val request = HttpEntity(requestBody, headers)
 
-    val response: ResponseEntity<LinkedList<TolgeeTranslateResponse>> = restTemplate.exchange(
-      "${tolgeeMachineTranslationProperties.url}/translate",
+    val response: ResponseEntity<TolgeeTranslateResponse> = restTemplate.exchange(
+      "${tolgeeMachineTranslationProperties.url}/api/openai/translate",
       HttpMethod.POST,
       request
     )
 
-    return response.body?.first?.translations?.first()?.text
+    return response.body?.output
       ?: throw RuntimeException(response.toString())
   }
 
@@ -41,21 +51,29 @@ class TolgeeTranslateApiService(
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
   companion object {
+    class TolgeeTranslateRequest(
+      val input: String,
+      val keyName: String?,
+      val source: String,
+      val target: String?,
+      val examples: List<TolgeeTranslateExample>?,
+      val closeItems: List<TolgeeTranslateExample>?,
+    )
+
     class TolgeeTranslateParams(
       val text: String,
+      val keyName: String?,
       val sourceTag: String,
       val targetTag: String,
       val metadata: Metadata?
     )
 
-    class TolgeeTranslateRequest(val text: String, val metadata: Metadata?)
-    class TolgeeTranslateResponse {
-      var translations: List<TolgeeTranslations>? = null
-    }
+    class TolgeeTranslateExample(
+      var keyName: String,
+      var source: String,
+      var target: String
+    )
 
-    class TolgeeTranslations {
-      var text: String? = null
-      var to: String? = null
-    }
+    class TolgeeTranslateResponse(val output: String)
   }
 }

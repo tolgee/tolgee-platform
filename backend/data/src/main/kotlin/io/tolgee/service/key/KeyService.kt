@@ -4,6 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.GetKeysRequestDto
+import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto

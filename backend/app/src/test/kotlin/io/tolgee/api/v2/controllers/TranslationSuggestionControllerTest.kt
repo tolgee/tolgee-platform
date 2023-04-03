@@ -383,7 +383,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
     val metadata = tolgeeTranslateParamsCaptor.firstValue.metadata
     metadata!!.examples.assert.hasSize(2)
-    metadata.bigMetaItems.assert.hasSize(2)
+    metadata.context.assert.hasSize(2)
   }
 
   private fun testMtCreditConsumption() {

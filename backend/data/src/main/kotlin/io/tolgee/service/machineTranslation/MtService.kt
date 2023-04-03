@@ -2,12 +2,12 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.TranslateResult
-import io.tolgee.component.machineTranslation.metadata.BigMetaItem
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
@@ -15,6 +15,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.service.BigMetaService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationEventPublisher
@@ -30,7 +31,8 @@ class MtService(
   private val mtServiceConfigService: MtServiceConfigService,
   private val tolgeeProperties: TolgeeProperties,
   private val mtServiceConfigService: MtServiceConfigService,
-  private val bigMetaService: BigMetaService
+  private val bigMetaService: BigMetaService,
+  private val keyService: KeyService
 ) {
   fun getMachineTranslations(key: Key, targetLanguage: Language):
     Map<MtServiceType, String?>? {
@@ -47,7 +49,7 @@ class MtService(
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
-    targetLanguage: Language,
+    targetLanguage: Language
   ): Map<MtServiceType, String?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
     return getMachineTranslations(project, baseTranslationText, null, baseLanguage, targetLanguage)
@@ -77,18 +79,23 @@ class MtService(
       .mapIndexed { idx, lang -> idx to lang }
       .groupBy { primaryServices[it.second.id] }
 
+    val keyName = keyId?.let { projectService.keyService.get(it) }?.name
+
     val metadata = getMetadata(
       baseLanguage,
       targetLanguages.filter { primaryServices[it.id]?.usesMetadata == true },
       baseTranslationText,
       keyId,
-      true
+      true,
+      project
     )
 
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
       service?.let {
         val translateResults = machineTranslationManager.translate(
           prepared.text,
+          baseTranslationText,
+          keyName,
           baseLanguage.tag,
           languageIdxPairs.map { it.second.tag },
           service,
@@ -127,13 +134,17 @@ class MtService(
     val anyNeedsMetadata = enabledServices.any { it.usesMetadata }
 
     val metadata =
-      getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata)
+      getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata, project)
+
+    val keyName = keyId?.let { keyService.get(it) }?.name
 
     publishOnBeforeEvent(prepared, project, expectedPrice)
 
     val results = machineTranslationManager
       .translateUsingAll(
         text = prepared.text,
+        textRaw = baseTranslationText,
+        keyName = keyName,
         sourceLanguageTag = baseLanguage.tag,
         targetLanguageTag = targetLanguage.tag,
         services = enabledServices,
@@ -176,7 +187,8 @@ class MtService(
   private fun getExamples(
     sourceLanguage: Language,
     targetLanguage: Language,
-    text: String
+    text: String,
+    keyId: Long?
   ): List<ExampleItem> {
     return translationService.getTranslationMemorySuggestions(
       sourceTranslationText = text,
@@ -184,9 +196,44 @@ class MtService(
       sourceLanguage = sourceLanguage,
       targetLanguage = targetLanguage,
       pageable = PageRequest.of(0, 5)
-    ).content.map {
-      ExampleItem(source = it.keyName, target = it.baseTranslationText, key = it.targetTranslationText)
-    }
+    ).content
+      .filter { it.keyId != keyId }
+      .map {
+        ExampleItem(key = it.keyName, source = it.baseTranslationText, target = it.targetTranslationText)
+      }
+  }
+
+  private fun getCloseItems(
+    sourceLanguage: Language,
+    targetLanguage: Language,
+    keys: List<MetaMapper.Companion.MetaKey>,
+    project: Project,
+    keyId: Long?
+  ): List<ExampleItem> {
+    val keyNames = keys.map { it.keyName }
+    val sourceTranslations = this.translationService.findAllByKey(
+      keyNames,
+      project,
+      listOf(sourceLanguage)
+    )
+
+    val targetTranslations = this.translationService.findAllByKey(
+      keyNames,
+      project,
+      listOf(targetLanguage)
+    )
+
+    return sourceTranslations
+      .filter { !it.text.isNullOrEmpty() }
+      .map {
+        ExampleItem(
+          key = it.key.name,
+          source = it.text ?: "",
+          target = if (it.key.id != keyId) {
+            targetTranslations.find { target -> target.key.id == it.key.id }?.text ?: ""
+          } else ""
+        )
+      }
   }
 
   private fun getMetadata(
@@ -194,7 +241,8 @@ class MtService(
     targetLanguages: List<Language>,
     text: String,
     keyId: Long?,
-    needsMetadata: Boolean
+    needsMetadata: Boolean,
+    project: Project
   ): Map<String, Metadata>? {
     if (!needsMetadata) {
       return null
@@ -202,19 +250,20 @@ class MtService(
 
     val bigMetaEntities = keyId?.let { bigMetaService.getAllForKey(it) } ?: emptyList()
 
+    val keys = bigMetaEntities.lastOrNull().let {
+      val meta = (it?.contextData as? HashMap<*, *>)
+      val metaJson = meta?.get("surroundingKeys")?.toString()
+      metaJson?.let {
+        val metaMapper = MetaMapper()
+        metaMapper.getMeta(metaJson)
+      } ?: listOf()
+    }
+
     return targetLanguages.associate { targetLanguage ->
       targetLanguage.tag to
         Metadata(
-          examples = getExamples(sourceLanguage, targetLanguage, text),
-          bigMetaItems = bigMetaEntities.map {
-            BigMetaItem(
-              namespace = it.namespace,
-              keyName = it.keyName,
-              location = it.location,
-              contextData = it.contextData,
-              type = it.type
-            )
-          }
+          examples = getExamples(sourceLanguage, targetLanguage, text, keyId),
+          closeItems = getCloseItems(sourceLanguage, targetLanguage, keys, project, keyId)
         )
     }
   }
@@ -224,9 +273,10 @@ class MtService(
     targetLanguages: Language,
     text: String,
     keyId: Long?,
-    needsMetadata: Boolean = true
+    needsMetadata: Boolean = true,
+    project: Project
   ): Metadata? {
-    return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata)?.get(
+    return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata, project)?.get(
       targetLanguages.tag
     )
   }
