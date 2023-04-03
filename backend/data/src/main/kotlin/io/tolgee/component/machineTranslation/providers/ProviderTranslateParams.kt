@@ -4,7 +4,9 @@ import io.tolgee.component.machineTranslation.metadata.Metadata
 
 data class ProviderTranslateParams(
   val text: String,
+  val textRaw: String,
+  val keyName: String?,
   var sourceLanguageTag: String,
   var targetLanguageTag: String,
-  val metadata: Metadata?
+  val metadata: Metadata? = null
 )

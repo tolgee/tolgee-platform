@@ -19,7 +19,8 @@ class TolgeeTranslationProvider(
   override fun translateViaProvider(params: ProviderTranslateParams): String? {
     return tolgeeTranslateApiService.translate(
       TolgeeTranslateApiService.Companion.TolgeeTranslateParams(
-        params.text,
+        params.textRaw,
+        params.keyName,
         params.sourceLanguageTag,
         params.targetLanguageTag,
         params.metadataOrThrow()
