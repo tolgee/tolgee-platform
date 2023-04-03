@@ -69,7 +69,7 @@
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc",
     "tsc:prod": "tsc --project tsconfig.prod.json",
-    "load-translations": "sh scripts/loadTranslations.sh"
+    "load-translations": "tolgee pull ./src/i18n -o"
   },
   "eslintConfig": {
     "extends": [
