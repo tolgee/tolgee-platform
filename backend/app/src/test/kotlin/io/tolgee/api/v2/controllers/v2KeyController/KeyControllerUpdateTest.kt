@@ -136,6 +136,7 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
       ComplexEditKeyDto(
         name = testData.firstKey.name,
         translations = mapOf("en" to "Oh yes!"),
+        tags = listOf()
       )
     ).andIsOk
   }

@@ -17,6 +17,7 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 import kotlin.properties.Delegates
 
@@ -63,15 +64,18 @@ class KeyComplexEditHelper(
       tagService.updateTags(key, dtoTags)
     }
 
-    if (isKeyModified) {
-      key.project.checkKeysEditPermission()
-    }
-
     if (isScreenshotAdded || isScreenshotDeleted) {
       updateScreenshotsWithPermissionCheck(dto, key)
     }
 
-    return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name, dto.namespace))
+    var edited = key
+
+    if (isKeyModified) {
+      key.project.checkKeysEditPermission()
+      edited = keyService.edit(key, dto.name, dto.namespace)
+    }
+
+    return keyWithDataModelAssembler.toModel(edited)
   }
 
   private fun setActivityHolder() {
@@ -126,7 +130,7 @@ class KeyComplexEditHelper(
   private fun prepareConditions() {
     areTranslationsModified = !modifiedTranslations.isNullOrEmpty()
     areTagsModified = dtoTags != null && areTagsModified(key, dtoTags)
-    isKeyModified = key.name != dto.name
+    isKeyModified = key.name != dto.name || getSafeNamespace(key.namespace?.name) != getSafeNamespace(dto.namespace)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
     isScreenshotAdded = !dto.screenshotUploadedImageIds.isNullOrEmpty() || !dto.screenshotsToAdd.isNullOrEmpty()
   }
@@ -135,10 +139,11 @@ class KeyComplexEditHelper(
     key: Key,
     dtoTags: List<String>
   ): Boolean {
-    val existingTagsContainAllNewTags = key.keyMeta?.tags?.map { it.name }?.containsAll(dtoTags) ?: false
-    val newTagsContainAllExistingTags = dtoTags.containsAll(key.keyMeta?.tags?.map { it.name } ?: listOf())
+    val currentTags = key.keyMeta?.tags?.map { it.name } ?: listOf()
+    val currentTagsContainAllNewTags = currentTags.containsAll(dtoTags)
+    val newTagsContainAllCurrentTags = dtoTags.containsAll(currentTags)
 
-    return !existingTagsContainAllNewTags || !newTagsContainAllExistingTags
+    return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
 
   private fun filterModifiedOnly(
