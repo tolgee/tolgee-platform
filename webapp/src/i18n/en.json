@@ -758,7 +758,7 @@
   "sign_up_form_full_name" : "Full name",
   "sign_up_form_organization_name" : "Organization name",
   "sign_up_submit_button" : "Submit",
-  "sign_up_success_message" : "Thank you for your signing up!",
+  "sign_up_success_message" : "Thank you for signing up!",
   "sign_up_success_needs_verification_message" : "Thank you for signing up. To verify your email please follow instructions sent to provided email address.",
   "sign_up_success_title" : "Success!",
   "sign-up-terms-and-conditions-message" : "By clicking Submit, I agree that I have read and accepted the Tolgee \n                  <Link>\n                    Terms of Use\n                  </Link>",
