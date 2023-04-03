@@ -11,6 +11,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 
 class KeysTestData {
+  lateinit var enOnlyUserAccount: UserAccount
   lateinit var keyWithReferences: Key
   lateinit var project: Project
   var project2: Project
@@ -21,7 +22,7 @@ class KeysTestData {
   lateinit var german: Language
   lateinit var screenshot: Screenshot
 
-  lateinit var projectBuilder: ProjectBuilder
+  var projectBuilder: ProjectBuilder
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     val userAccountBuilder = addUserAccount {
@@ -96,6 +97,16 @@ class KeysTestData {
           }
         }
       }
+    }
+
+    addUserAccountWithoutOrganization {
+      username = "enOnly"
+      projectBuilder.addPermission {
+        user = this@addUserAccountWithoutOrganization
+        type = Permission.ProjectPermissionType.TRANSLATE
+        languages = mutableSetOf(english)
+      }
+      enOnlyUserAccount = this
     }
   }
 

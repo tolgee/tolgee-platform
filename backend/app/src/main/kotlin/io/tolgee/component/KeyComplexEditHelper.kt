@@ -53,6 +53,7 @@ class KeyComplexEditHelper(
     setActivityHolder()
 
     if (modifiedTranslations != null && areTranslationsModified) {
+      projectHolder.projectEntity.checkTranslationsEditPermission()
       securityService.checkLanguageTagPermissions(modifiedTranslations!!.keys, projectHolder.project.id)
       translationService.setForKey(key, translations = modifiedTranslations!!)
     }
@@ -74,7 +75,7 @@ class KeyComplexEditHelper(
   }
 
   private fun setActivityHolder() {
-    if (!isOnlyOneOperation) {
+    if (!isSingleOperation) {
       activityHolder.activity = ActivityType.COMPLEX_EDIT
       return
     }
@@ -105,7 +106,7 @@ class KeyComplexEditHelper(
     }
   }
 
-  private val isOnlyOneOperation: Boolean
+  private val isSingleOperation: Boolean
     get() {
       return arrayOf(
         areTranslationsModified,
@@ -159,6 +160,10 @@ class KeyComplexEditHelper(
       deleteScreenshots(screenshotIds, key)
     }
 
+    addScreenshots(key, dto)
+  }
+
+  private fun addScreenshots(key: Key, dto: ComplexEditKeyDto) {
     if (isScreenshotAdded) {
       key.project.checkScreenshotsUploadPermission()
     }
@@ -199,6 +204,13 @@ class KeyComplexEditHelper(
       securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
     }
     securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.EDIT)
+  }
+
+  private fun Project.checkTranslationsEditPermission() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_EDIT), authenticationFacade.apiKey)
+    }
+    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
   }
 
   private fun Key.checkInProject() {

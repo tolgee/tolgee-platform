@@ -29,6 +29,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.key.KeySearchResultView
@@ -96,9 +97,9 @@ class KeyController(
 
   @PutMapping(value = ["/{id}/complex-update"])
   @Operation(summary = "More")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithAnyProjectPermission
   // key permissions are checked separately in method body
-  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()

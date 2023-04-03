@@ -123,6 +123,23 @@ class KeyControllerUpdateTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      ApiScope.TRANSLATIONS_EDIT,
+    ]
+  )
+  @Test
+  fun `can modify permitted language translations`() {
+    this.userAccount = testData.enOnlyUserAccount
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        translations = mapOf("en" to "Oh yes!"),
+      )
+    ).andIsOk
+  }
+
   @Test
   @ProjectApiKeyAuthTestMethod(
     scopes = [
