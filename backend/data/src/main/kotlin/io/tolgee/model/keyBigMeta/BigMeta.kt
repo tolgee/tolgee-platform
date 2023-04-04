@@ -17,7 +17,6 @@ import javax.persistence.Table
 @Table(
   indexes = [
     Index(columnList = "key_name, namespace"),
-    Index(columnList = "key_name, namespace, location, project_id", unique = true)
   ]
 )
 @TypeDefs(
@@ -35,7 +34,5 @@ class BigMeta : StandardAuditModel() {
   var location: String? = null
 
   @Type(type = "jsonb")
-  var contextData: Any? = null
-
-  var type: BigMetaType = BigMetaType.SCRAPE
+  var contextData: List<SurroundingKey>? = null
 }

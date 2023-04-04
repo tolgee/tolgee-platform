@@ -39,8 +39,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
             "namespace" to "hehe",
             "keyName" to "haha",
             "location" to "hoho",
-            "type" to "SCRAPE",
-            "contextData" to mapOf("huhu" to "haha")
+            "contextData" to listOf(mapOf("name" to "a", "namespace" to "b"))
           ),
         )
       )
@@ -66,14 +65,14 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it lists for key`() {
     performProjectAuthGet("keys/${testData.yepKey.id}/big-meta").andIsOk.andPrettyPrint.andAssertThatJson {
       node("_embedded.bigMeta") {
-        isArray.hasSize(3)
+        isArray.hasSize(1)
         node("[0]") {
-          node("id").isEqualTo(testData.someBigMeta.id)
           node("contextData").isEqualTo(
             """
-            {
-              "random data a" : "haha"
-            }
+           [ {
+            "name" : "key",
+            "namespace" : null
+          } ]
             """.trimIndent()
           )
         }

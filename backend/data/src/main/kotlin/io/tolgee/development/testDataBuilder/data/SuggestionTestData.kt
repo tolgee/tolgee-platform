@@ -4,6 +4,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import io.tolgee.model.keyBigMeta.SurroundingKey
 import net.datafaker.Faker
 import java.util.*
 
@@ -100,17 +101,27 @@ class SuggestionTestData : BaseTestData() {
 
   private fun ProjectBuilder.addBigMetas() {
     addBigMeta {
-      keyName = "key 4"
+      keyName = beautifulKey.name
+      namespace = beautifulKey.namespace?.name
+      location = "home"
+      this.contextData = listOf(
+        SurroundingKey("key 1", null),
+        SurroundingKey("key 2", null)
+      )
+    }
+
+    addBigMeta {
+      keyName = "key 2"
       namespace = null
       location = "home"
-      this.contextData = listOf("I am other item")
+      this.contextData = listOf(SurroundingKey("key 1", null))
     }
 
     addBigMeta {
       keyName = "key 1"
       namespace = null
       location = "home"
-      this.contextData = listOf("I am an example data item")
+      this.contextData = listOf(SurroundingKey("key 4", null))
     }
   }
 

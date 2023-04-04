@@ -2409,9 +2409,6 @@
             <column name="project_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1679489925501-2">
-        <addUniqueConstraint columnNames="key_name, namespace, location, project_id" constraintName="UKe9uxeg0ih2b1l1lyjlt6u06yh" tableName="big_meta"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1679489925501-3">
         <createIndex indexName="IDXb5ynlon1syt94o92e6k7x5ap7" tableName="big_meta">
             <column name="key_name"/>
@@ -2420,5 +2417,16 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1679489925501-4">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="big_meta" constraintName="FK34t2uce2rplndbeea5tonfi3o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1679489925501-5">
+        <sql>
+            create unique index on public.big_meta (key_name, namespace, location, project_id) where namespace is not null;
+        </sql>
+        <sql>
+            create unique index on public.big_meta (key_name, location, project_id) where namespace is null;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1680627312536-1">
+        <dropColumn columnName="type" tableName="big_meta"/>
     </changeSet>
 </databaseChangeLog>

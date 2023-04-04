@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.LanguageTagConvertor
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.helpers.IcuParamsReplacer
 
 abstract class AbstractMtValueProvider : MtValueProvider {
   abstract val supportedLanguages: Array<String>?
@@ -26,12 +27,17 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       return params.text
     }
 
+    val prepared = prepareText(params.text)
+
     return translateViaProvider(
       params.apply {
+        text = prepared.text
         sourceLanguageTag = suitableSourceTag
         targetLanguageTag = suitableTargetTag
       }
-    )
+    )?.let {
+      prepared.addParams(it)
+    }
   }
 
   override fun calculatePrice(params: ProviderTranslateParams): Int {
@@ -45,7 +51,9 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       return 0
     }
 
-    return calculateProviderPrice(params.text)
+    val prepared = prepareText(params.text)
+
+    return calculateProviderPrice(prepared.text)
   }
 
   /**
@@ -59,4 +67,8 @@ abstract class AbstractMtValueProvider : MtValueProvider {
    * All inputs are already checked.
    */
   protected abstract fun calculateProviderPrice(text: String): Int
+
+  protected open fun prepareText(string: String): IcuParamsReplacer.ReplaceIcuResult {
+    return IcuParamsReplacer.extract(string)
+  }
 }

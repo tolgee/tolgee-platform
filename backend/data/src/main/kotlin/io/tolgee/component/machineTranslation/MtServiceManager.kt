@@ -37,8 +37,6 @@ class MtServiceManager(
    */
   fun translateUsingAll(
     text: String,
-    textRaw: String,
-    keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTag: String,
     services: List<MtServiceType>,
@@ -46,7 +44,7 @@ class MtServiceManager(
   ): Map<MtServiceType, TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       services.map { service ->
-        async { service to translate(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, service, metadata) }
+        async { service to translate(text, sourceLanguageTag, targetLanguageTag, service, metadata) }
       }.awaitAll().toMap()
     }
   }
@@ -70,8 +68,6 @@ class MtServiceManager(
         .translate(
           ProviderTranslateParams(
             params.text,
-            params.textRaw,
-            params.keyName,
             params.sourceLanguageTag,
             params.targetLanguageTag,
             params.metadata,
@@ -112,20 +108,16 @@ class MtServiceManager(
 
   private fun getParams(
     text: String,
-    textRaw: String,
-    keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTag: String,
     serviceType: MtServiceType,
     metadata: Metadata?
   ) = TranslationParams(
     text = text,
-    textRaw = textRaw,
     sourceLanguageTag = sourceLanguageTag,
     targetLanguageTag = targetLanguageTag,
     serviceType = serviceType,
     metadata = metadata,
-    keyName = keyName
   )
 
   private fun getFaked(
@@ -159,20 +151,18 @@ class MtServiceManager(
 
   fun translate(
     text: String,
-    textRaw: String,
-    keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTag: String,
     serviceType: MtServiceType,
     metadata: Metadata? = null
   ): TranslateResult {
-    val params = getParams(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, serviceType, metadata)
+    val params = getParams(text, sourceLanguageTag, targetLanguageTag, serviceType, metadata)
 
     if (internalProperties.fakeMtProviders) {
       return getFaked(params)
     }
 
-    return translateWithProvider(params)
+    return findInCache(params) ?: translateWithProvider(params)
   }
 
   /**
@@ -180,8 +170,6 @@ class MtServiceManager(
    */
   fun translate(
     text: String,
-    textRaw: String,
-    keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
     service: MtServiceType,
@@ -190,21 +178,17 @@ class MtServiceManager(
     return if (!internalProperties.fakeMtProviders)
       translateToMultipleTargets(
         serviceType = service,
-        textRaw = textRaw,
-        keyName = keyName,
         text = text,
         sourceLanguageTag = sourceLanguageTag,
         targetLanguageTags = targetLanguageTags,
         metadata = metadata
       )
-    else targetLanguageTags.map { getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null)) }
+    else targetLanguageTags.map { getFaked(getParams(text, sourceLanguageTag, it, service, null)) }
   }
 
   private fun translateToMultipleTargets(
     serviceType: MtServiceType,
     text: String,
-    textRaw: String,
-    keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
     metadata: Map<String, Metadata>? = null
@@ -214,8 +198,6 @@ class MtServiceManager(
         async {
           translate(
             text,
-            textRaw,
-            keyName,
             sourceLanguageTag,
             targetLanguageTag,
             serviceType,
@@ -237,7 +219,7 @@ class MtServiceManager(
     metadata: Metadata?
   ): Int {
     return service.getProvider()
-      .calculatePrice(ProviderTranslateParams(text, text, null, sourceLanguageTag, targetLanguageTag, metadata))
+      .calculatePrice(ProviderTranslateParams(text, sourceLanguageTag, targetLanguageTag, metadata))
   }
 
   /**
@@ -254,8 +236,6 @@ class MtServiceManager(
       it.calculatePrice(
         ProviderTranslateParams(
           text,
-          text,
-          null,
           sourceLanguageTag,
           targetLanguageTag,
           metadata

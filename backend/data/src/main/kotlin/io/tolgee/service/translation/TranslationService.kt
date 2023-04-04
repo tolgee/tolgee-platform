@@ -10,8 +10,13 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.Project_
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyNameAndNamespace
+import io.tolgee.model.key.Key_
+import io.tolgee.model.key.Namespace
+import io.tolgee.model.key.Namespace_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -23,6 +28,8 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.util.equalNullable
+import io.tolgee.util.query
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -32,6 +39,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.persistence.EntityManager
+import javax.persistence.criteria.Join
+import javax.persistence.criteria.JoinType
 
 @Service
 @Transactional
@@ -290,18 +299,18 @@ class TranslationService(
   }
 
   fun getTranslationMemorySuggestions(
-    sourceTranslationText: String,
+    sourceText: String,
     key: Key?,
     sourceLanguage: Language,
     targetLanguage: Language,
     pageable: Pageable
   ): Page<TranslationMemoryItemView> {
-    if ((sourceTranslationText.length) < 3) {
+    if ((sourceText.length) < 3) {
       return Page.empty(pageable)
     }
 
     return translationRepository.getTranslateMemorySuggestions(
-      baseTranslationText = sourceTranslationText,
+      baseTranslationText = sourceText,
       key = key,
       baseLanguage = sourceLanguage,
       targetLanguage = targetLanguage,
@@ -356,6 +365,29 @@ class TranslationService(
     query.where(cb.or(*predicates))
 
     return entityManager.createQuery(query).resultList
+  }
+
+  fun getAll(projectId: Long, keys: List<KeyNameAndNamespace>, languages: List<Language>): List<Translation> {
+    val query = entityManager.query<Translation, Translation> { cb, root ->
+      val key = root.fetch(Translation_.key) as Join<Translation, Key>
+      val namespace = key.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
+
+      val keyPredicates = keys.map {
+        cb.and(
+          cb.equal(key.get(Key_.name), it.name),
+          cb.equalNullable(namespace.get(Namespace_.name), it.namespace)
+        )
+      }
+
+      this.where(
+        cb.and(
+          cb.or(*keyPredicates.toTypedArray()),
+          cb.or(*languages.map { cb.equal(root.get(Translation_.language), it) }.toTypedArray()),
+          cb.equal(key.get(Key_.project).get(Project_.id), projectId)
+        )
+      )
+    }
+    return query.resultList
   }
 
   fun getForKeys(keyIds: List<Long>, languageTags: List<String>): List<Translation> {

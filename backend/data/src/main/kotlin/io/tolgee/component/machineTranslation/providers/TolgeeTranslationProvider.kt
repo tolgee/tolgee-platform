@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.helpers.IcuParamsReplacer
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -19,8 +20,7 @@ class TolgeeTranslationProvider(
   override fun translateViaProvider(params: ProviderTranslateParams): String? {
     return tolgeeTranslateApiService.translate(
       TolgeeTranslateApiService.Companion.TolgeeTranslateParams(
-        params.textRaw,
-        params.keyName,
+        params.text,
         params.sourceLanguageTag,
         params.targetLanguageTag,
         params.metadataOrThrow()
@@ -40,4 +40,8 @@ class TolgeeTranslationProvider(
   }
 
   override val supportedLanguages = null
+
+  override fun prepareText(string: String): IcuParamsReplacer.ReplaceIcuResult {
+    return IcuParamsReplacer.doNothing(string)
+  }
 }

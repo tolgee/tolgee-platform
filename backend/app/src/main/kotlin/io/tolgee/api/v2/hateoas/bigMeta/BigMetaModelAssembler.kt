@@ -20,7 +20,6 @@ class BigMetaModelAssembler(
       keyName = view.bigMeta.keyName,
       location = view.bigMeta.location,
       key = view.key?.let { keyModelAssembler.toModel(it) },
-      type = view.bigMeta.type,
       contextData = view.bigMeta.contextData
     )
   }

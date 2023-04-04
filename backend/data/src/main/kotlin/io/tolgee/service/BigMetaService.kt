@@ -31,7 +31,6 @@ class BigMetaService(
       executeInNewTransaction(transactionManager) {
         data.items.map { item ->
           val bigMeta = findOrCreate(item, project).apply {
-            type = item.type
             contextData = item.contextData
           }
           getView(save(bigMeta))
@@ -90,10 +89,10 @@ class BigMetaService(
   }
 
   fun getAllForKeyPaged(projectId: Long, keyId: Long, pageable: Pageable): Page<BigMetaView> {
-    return this.bigMetaRepository.getMetasWithSameLocation(projectId, keyId, pageable)
+    return this.bigMetaRepository.getMetas(projectId, keyId, pageable)
   }
 
   fun getAllForKey(keyId: Long): List<BigMeta> {
-    return this.bigMetaRepository.getMetasWithSameLocation(keyId)
+    return this.bigMetaRepository.getMetas(keyId)
   }
 }

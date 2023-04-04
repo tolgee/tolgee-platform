@@ -1,5 +1,6 @@
 package io.tolgee.unit
 
+import io.tolgee.helpers.IcuParamsReplacer
 import io.tolgee.helpers.TextHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ class TextHelperTest {
 
   @Test
   fun `replaces ICU params in standard text`() {
-    val result = TextHelper.replaceIcuParams("Hello! I am standard text!")
+    val result = IcuParamsReplacer.extract("Hello! I am standard text!")
     assertThat(result.text)
       .isEqualTo("Hello! I am standard text!")
     assertThat(result.params.size).isEqualTo(0)
@@ -25,7 +26,7 @@ class TextHelperTest {
 
   @Test
   fun `replaces ICU params in text with params`() {
-    val result = TextHelper.replaceIcuParams(
+    val result = IcuParamsReplacer.extract(
       "{name} Hello! " +
         "{aaa, plural, " +
         "one {What} " +
@@ -43,7 +44,7 @@ class TextHelperTest {
 
   @Test
   fun `replaces ICU params with escaping`() {
-    val result = TextHelper.replaceIcuParams(
+    val result = IcuParamsReplacer.extract(
       "'{name} Hello! " +
         "{aaa, plural, " +
         "one {What} " +

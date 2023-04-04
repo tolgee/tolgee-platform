@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import kotlin.collections.HashMap
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -24,12 +23,14 @@ class TolgeeTranslateApiService(
     val headers = HttpHeaders()
     headers.add("Something", null)
 
-    val closeItems = params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
+    val closeItems =
+      params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
     val examples = params.metadata?.examples?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
 
     val requestBody = TolgeeTranslateRequest(
       params.text,
-      params.keyName,
+      params.metadata?.keyName,
+      params.metadata?.keyNamespace,
       params.sourceTag,
       params.targetTag,
       examples,
@@ -54,6 +55,7 @@ class TolgeeTranslateApiService(
     class TolgeeTranslateRequest(
       val input: String,
       val keyName: String?,
+      val keyNamespace: String?,
       val source: String,
       val target: String?,
       val examples: List<TolgeeTranslateExample>?,
@@ -62,7 +64,6 @@ class TolgeeTranslateApiService(
 
     class TolgeeTranslateParams(
       val text: String,
-      val keyName: String?,
       val sourceTag: String,
       val targetTag: String,
       val metadata: Metadata?

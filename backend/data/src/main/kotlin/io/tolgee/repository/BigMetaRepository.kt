@@ -15,65 +15,47 @@ interface BigMetaRepository : JpaRepository<BigMeta, Long> {
   @Query(
     """
       select 
-        bmr as bigMeta, 
-        kr as key
+        bm as bigMeta,
+        k as key
       from BigMeta bm
       join Key k on bm.keyName = k.name and k.id = :keyId
-      left join k.namespace n
-      join BigMeta bmr on 
-        bm.project = bmr.project and 
-        bmr.location = bm.location
+      left join fetch k.namespace n
         
-      left join Key kr on bmr.keyName = kr.name 
-      left join fetch kr.namespace nr
       where 
-       bm.project.id = :projectId and 
-       (kr is null or (nr is null and kr.namespace is null and bmr.namespace is null) or nr.name = bmr.namespace) and
+       bm.project.id = k.project.id and k.project.id = :projectId and
        ((n is null and k.namespace is null and bm.namespace is null) or n.name = bm.namespace)
-       group by bmr.id, kr.id, nr.id
-       order by bmr.id
+       group by bm.id, k.id, n.id
+       order by bm.id
     """,
     countQuery = """
       select count(bm) from BigMeta bm
       join Key k on bm.keyName = k.name and k.id = :keyId
       left join k.namespace n
-
-      join BigMeta bmr on 
-        bm.project = bmr.project and 
-        bmr.location = bm.location
         
-      left join Key kr on bmr.keyName = kr.name 
-      left join kr.namespace nr
       where 
-       bm.project.id = :projectId and 
-       k.id = :keyId and
-       (kr is null or (nr is null and kr.namespace is null and bmr.namespace is null) or nr.name = bmr.namespace) and
+       bm.project.id = k.project.id and k.project.id = :projectId and
        ((n is null and k.namespace is null and bm.namespace is null) or n.name = bm.namespace)
-       group by bmr.id, kr.id, nr.id
-       order by bmr.id
+       group by bm.id, k.id, n.id
     """
   )
-  fun getMetasWithSameLocation(projectId: Long, keyId: Long, pageable: Pageable): Page<BigMetaView>
+  fun getMetas(projectId: Long, keyId: Long, pageable: Pageable): Page<BigMetaView>
 
   @Query(
     """
       select 
-        bmr
+        bm
       from BigMeta bm
       join Key k on bm.keyName = k.name and k.id = :keyId
       left join k.namespace n
-      join BigMeta bmr on 
-        bm.project = bmr.project and 
-        bmr.location = bm.location
         
       where 
        bm.project.id = k.project.id and 
        ((n is null and k.namespace is null and bm.namespace is null) or n.name = bm.namespace)
-       group by bmr.id
-       order by bmr.id
+       group by bm.id
+       order by bm.id
     """
   )
-  fun getMetasWithSameLocation(keyId: Long): List<BigMeta>
+  fun getMetas(keyId: Long): List<BigMeta>
 
   @Query(
     """
