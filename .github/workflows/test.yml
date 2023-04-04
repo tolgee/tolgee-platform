@@ -278,6 +278,10 @@ jobs:
         run: npm run eslint
         working-directory: ./webapp
 
+      - name: Keys extraction check
+        run: npm run check-translations
+        working-directory: ./webapp
+
       - name: Load newest translations
         run: npm run load-translations
         working-directory: ./webapp

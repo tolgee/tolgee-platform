@@ -37,11 +37,13 @@ export const PatsView: FunctionComponent = () => {
     pat: null as components['schemas']['RevealedPatModel'] | null,
   });
 
+  const test = 'pats_view';
+
   return (
     <>
       <BaseUserSettingsView
         windowTitle={t('pats_title')}
-        title={t('pats_title')}
+        title={t(test)}
         loading={list.isFetching}
         navigation={[[t('user_menu_pats'), LINKS.USER_PATS.build()]]}
         hideChildrenOnLoading={false}
