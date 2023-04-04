@@ -709,7 +709,7 @@
   "translations_tag_label" : "Tag",
   "translations_tags_loading" : "Laden...",
   "translations_tags_no_results" : "Nichts gefunden",
-  "translation_state_change" : "Markieren als \"{newState}\"",
+  "translation_state_change" : "Markieren als {newState}",
   "translation_state_machine_translated" : "Maschinell übersetzt",
   "translation_state_needs_review" : "Bedarf Überprüfung",
   "translation_state_reviewed" : "Überprüft",

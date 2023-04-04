@@ -702,7 +702,7 @@
   "translations_tag_label" : "tag",
   "translations_tags_loading" : "\nChargement en cours...",
   "translations_tags_no_results" : "Rien trouvé",
-  "translation_state_change" : "Marquer comme \"{newState}\"",
+  "translation_state_change" : "Marquer comme {newState}",
   "translation_state_machine_translated" : "Traduction automatique",
   "translation_state_needs_review" : "Besoin de contrôle",
   "translation_state_reviewed" : "Contrôlé",

@@ -728,7 +728,7 @@
   "translations_tag_label" : "etiqueta",
   "translations_tags_loading" : "Cargando...",
   "translations_tags_no_results" : "Nada encontrado",
-  "translation_state_change" : "Marcar como \"{newState}\"",
+  "translation_state_change" : "Marcar como {newState}",
   "translation_state_machine_translated" : "Traducción automática",
   "translation_state_needs_review" : "Necesita revisión",
   "translation_state_reviewed" : "Revisado",

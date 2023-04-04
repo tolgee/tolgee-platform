@@ -1,3 +1,10 @@
+## [3.11.6](https://github.com/tolgee/tolgee-platform/compare/v3.11.5...v3.11.6) (2023-04-04)
+
+
+### Bug Fixes
+
+* Complex Edit doesn't require translate edit permission (fixes [#1649](https://github.com/tolgee/tolgee-platform/issues/1649) ) and keys edit when tags empty array (fixes [#1643](https://github.com/tolgee/tolgee-platform/issues/1643)) ([#1650](https://github.com/tolgee/tolgee-platform/issues/1650)) ([b4e5406](https://github.com/tolgee/tolgee-platform/commit/b4e54061c83486d482438d1520c6556389c2cd36))
+
 ## [3.11.5](https://github.com/tolgee/tolgee-platform/compare/v3.11.4...v3.11.5) (2023-03-29)
 
 
