@@ -7,6 +7,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
+import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -63,11 +64,9 @@ class NamespaceService(
 
   fun findOrCreate(name: String?, projectId: Long): Namespace? {
     return tryUntilItDoesntBreakConstraint {
-      find(getSafeName(name), projectId) ?: create(name, projectId)
+      find(getSafeNamespace(name), projectId) ?: create(name, projectId)
     }
   }
-
-  fun getSafeName(name: String?) = if (name.isNullOrBlank()) null else name
 
   fun create(name: String?, projectId: Long): Namespace? {
     if (name.isNullOrBlank()) {

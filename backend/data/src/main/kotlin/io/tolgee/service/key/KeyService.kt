@@ -23,6 +23,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
+import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.setSimilarityLimit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -231,7 +232,7 @@ class KeyService(
     val toTag = mutableMapOf<Key, List<String>>()
 
     keys.forEach { keyDto ->
-      val safeNamespace = namespaceService.getSafeName(keyDto.namespace)
+      val safeNamespace = getSafeNamespace(keyDto.namespace)
       if (!existing.containsKey(safeNamespace to keyDto.name)) {
         val key = Key(
           name = keyDto.name,
