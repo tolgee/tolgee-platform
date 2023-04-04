@@ -1,7 +1,8 @@
-import { useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
+import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 import { ControlsButton } from './ControlsButton';
 import { StateIcon } from './StateIcon';
 
@@ -18,7 +19,7 @@ export const StateTransitionButtons: React.FC<Props> = ({
   onStateChange,
   className,
 }) => {
-  const { t } = useTranslate();
+  const translateState = useStateTranslation();
 
   const nextState: StateType =
     (state && translationStates[state]?.next) || 'TRANSLATED';
@@ -30,9 +31,14 @@ export const StateTransitionButtons: React.FC<Props> = ({
           data-cy="translation-state-button"
           onClick={() => onStateChange?.(nextState)}
           className={className}
-          tooltip={t('translation_state_change', {
-            newState: t(translationStates[nextState]?.translationKey || ''),
-          })}
+          tooltip={
+            <>
+              <T
+                keyName="translation_state_change"
+                params={{ newState: translateState(nextState) }}
+              />
+            </>
+          }
         >
           <StateIcon state={state} fontSize="small" />
         </ControlsButton>

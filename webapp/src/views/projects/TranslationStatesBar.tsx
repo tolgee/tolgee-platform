@@ -98,17 +98,16 @@ export function TranslationStatesBar(props: {
             backgroundColor: translationStates[legendItemProps.state].color,
           }}
         />
-        <T>{translationStates[legendItemProps.state].translationKey}</T>:&nbsp;
+        {translationStates[legendItemProps.state].translation}:&nbsp;
         {percent >= 1 ? (
           <T
+            keyName="project_dashboard_translations_percent"
             params={{
               percent: percent / 100,
             }}
-          >
-            project_dashboard_translations_percent
-          </T>
+          />
         ) : (
-          <T>project_dashboard_translations_less_then_1_percent</T>
+          <T keyName="project_dashboard_translations_less_then_1_percent" />
         )}
       </Box>
     );
@@ -124,7 +123,7 @@ export function TranslationStatesBar(props: {
         {visibleStates.map((state, idx) => (
           <Tooltip
             key={idx}
-            title={<T>{translationStates[state].translationKey}</T>}
+            title={translationStates[state].translation}
             open={props.hideTooltips ? false : undefined}
           >
             <Box

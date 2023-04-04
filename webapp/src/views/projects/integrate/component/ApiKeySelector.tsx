@@ -91,7 +91,7 @@ export const ApiKeySelector: FC<{
               data-cy="integrate-api-key-selector-create-new-item"
             >
               <StyledItemWrapper className="addItem">
-                <T>api_key_selector_create_new</T>
+                <T keyName="api_key_selector_create_new" />
                 <StyledAddIcon fontSize="small" />
               </StyledItemWrapper>
             </MenuItem>

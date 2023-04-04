@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { Alert, Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { T } from '@tolgee/react';
@@ -6,11 +6,15 @@ import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useFileIssueTranslation } from 'tg.translationTools/useFileIssueTranslation';
+import { useFileIssuePeramTranslation } from 'tg.translationTools/useFileIssueParamTranslation';
 
 export const ImportFileIssuesDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
 }> = (props) => {
+  const translateFileIssue = useFileIssueTranslation();
+  const translateFileParamIssue = useFileIssuePeramTranslation();
   const project = useProject();
   const row = props.row;
   const [page, setPage] = useState(0);
@@ -42,9 +46,10 @@ export const ImportFileIssuesDialog: FunctionComponent<{
         {row && (
           <>
             <DialogTitle id="import-file-issues-dialog">
-              <T params={{ fileName: row.importFileName }}>
-                import_file_issues_title
-              </T>
+              <T
+                keyName="import_file_issues_title"
+                params={{ fileName: row.importFileName }}
+              />
             </DialogTitle>
             <DialogContent>
               <PaginatedHateoasList
@@ -57,18 +62,17 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                 renderItem={(i) => (
                   <>
                     <Alert severity="warning" icon={<Warning />}>
-                      {i.type && (
-                        <T>{`file_issue_type_${i.type!.toLowerCase()}`}</T>
-                      )}
+                      {i.type && translateFileIssue(i.type.toLowerCase())}
                       &nbsp;(
                       {i.params &&
                         i.params!.map(
                           (param, idx) =>
                             param.value && (
                               <>
-                                <T
-                                  params={{ value: param.value! }}
-                                >{`import_file_issue_param_type_${param.type.toLowerCase()}`}</T>
+                                {translateFileParamIssue(
+                                  param.type.toLowerCase(),
+                                  param.value!
+                                )}
                                 {idx < i.params!.length - 1 && ', '}
                               </>
                             )

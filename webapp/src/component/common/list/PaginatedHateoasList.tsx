@@ -11,6 +11,7 @@ import {
 import { EmptyListMessage } from '../EmptyListMessage';
 import SearchField from '../form/fields/SearchField';
 import { OverridableListWrappers, SimpleList } from './SimpleList';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 // get item type from TData
 export type InferItemType<TData> = TData extends HateoasListData<
@@ -90,9 +91,9 @@ export const PaginatedHateoasList = <
         <Box mt={2}>
           <Alert severity="error">
             {typeof loadable.error.code === 'string' ? (
-              <T>{loadable.error.code}</T>
+              <TranslatedError code={loadable.error.code} />
             ) : (
-              <T>simple_paginated_list_error_message</T>
+              <T keyName="simple_paginated_list_error_message" />
             )}
           </Alert>
         </Box>

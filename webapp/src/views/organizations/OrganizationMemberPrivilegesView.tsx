@@ -27,7 +27,7 @@ export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
       ]}
     >
       <Typography variant="body1">
-        <T>organization_member_privileges_text</T>
+        <T keyName="organization_member_privileges_text" />
       </Typography>
 
       <Box mt={2}>

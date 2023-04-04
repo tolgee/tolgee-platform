@@ -162,7 +162,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
               <Invoices />
             </StyledCurrent>
             <Typography variant="h6">
-              <T>organization_pricing_plans_title</T>
+              <T keyName="organization_pricing_plans_title" />
             </Typography>
             <StyledShopping>
               <BillingPlans

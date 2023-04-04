@@ -24,7 +24,7 @@ export const getLanguagesContent = ({ languages, value, onChange }: Props) => {
       : putBaseLangFirst([...value, lang], baseLang);
 
     if (!result?.length) {
-      messaging.error(<T>set_at_least_one_language_error</T>);
+      messaging.error(<T keyName="set_at_least_one_language_error" />);
       return;
     }
     onChange(result);

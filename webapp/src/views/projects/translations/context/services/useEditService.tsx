@@ -16,6 +16,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { AfterCommand, ChangeValue, Direction, Edit, SetEdit } from '../types';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useProject } from 'tg.hooks/useProject';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
@@ -219,7 +220,9 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       data.onSuccess?.();
     } catch (e) {
       const parsed = parseErrorResponse(e);
-      parsed.forEach((error) => messaging.error(<T>{error}</T>));
+      parsed.forEach((error) =>
+        messaging.error(<TranslatedError code={error} />)
+      );
     }
     return;
   };

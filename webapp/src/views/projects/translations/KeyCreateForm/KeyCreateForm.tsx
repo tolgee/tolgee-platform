@@ -16,6 +16,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -62,13 +63,13 @@ export const KeyCreateForm: React.FC<Props> = ({
       },
       {
         onSuccess(data) {
-          messaging.success(<T>translations_key_created</T>);
+          messaging.success(<T keyName="translations_key_created" />);
           onSuccess?.(data);
           refetchUsage();
         },
         onError(e) {
           parseErrorResponse(e).forEach((message) =>
-            messaging.error(<T>{message}</T>)
+            messaging.error(<TranslatedError code={message} />)
           );
         },
       }
@@ -84,7 +85,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   useEffect(() => {
     if (!canEdit) {
       redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-      messaging.error(<T>translation_single_no_permission_create</T>);
+      messaging.error(<T keyName="translation_single_no_permission_create" />);
     }
   }, [canEdit]);
 

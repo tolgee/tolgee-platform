@@ -27,6 +27,7 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "src"
+    "src",
+    "tolgee.dev.d.ts"
   ]
 }

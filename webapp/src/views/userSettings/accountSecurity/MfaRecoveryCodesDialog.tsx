@@ -70,13 +70,13 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
         data-cy="mfa-recovery-codes-dialog"
       >
         <DialogTitle data-cy="mfa-recovery-codes-dialog-title">
-          <T>account-security-mfa-recovery-codes</T>
+          <T keyName="account-security-mfa-recovery-codes" />
         </DialogTitle>
         <DialogContent data-cy="mfa-recovery-codes-dialog-content">
           {codes ? (
             <Box>
               <Typography mb={2}>
-                <T>account-security-mfa-recovery-codes-description</T>
+                <T keyName="account-security-mfa-recovery-codes-description" />
               </Typography>
               <Grid container spacing={2} component="ul">
                 {codes.map((code) => (
@@ -106,7 +106,10 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
               validationSchema={Validation.USER_MFA_VIEW_RECOVERY}
             >
               <Typography>
-                <T params={{ b: <b /> }}>account-security-mfa-recovery-info</T>
+                <T
+                  keyName="account-security-mfa-recovery-info"
+                  params={{ b: <b /> }}
+                />
               </Typography>
               <TextField
                 inputProps={{
@@ -117,7 +120,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
                 label={t('Password')}
               />
               <Typography variant="body2" mb={2}>
-                <T>account-security-mfa-recovery-info-invalidate</T>
+                <T keyName="account-security-mfa-recovery-info-invalidate" />
               </Typography>
             </StandardForm>
           )}
@@ -129,7 +132,7 @@ export const MfaRecoveryCodesDialog: FunctionComponent<MfaRecoveryCodesDialogPro
               onClick={() => onDialogClose()}
               type="button"
             >
-              <T>global_close_button</T>
+              <T keyName="global_close_button" />
             </Button>
           </DialogActions>
         )}

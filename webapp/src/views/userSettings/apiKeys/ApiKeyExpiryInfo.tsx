@@ -16,7 +16,7 @@ export const ApiKeyExpiryInfo = (props: {
     ) : (
       <Box sx={(theme) => ({ color: theme.palette.success.main })}>
         {!props.apiKey.expiresAt ? (
-          <T>api-key_never_expires</T>
+          <T keyName="api-key_never_expires" />
         ) : (
           <T
             params={{ date: props.apiKey.expiresAt }}

@@ -55,7 +55,7 @@ export const EditPatDialog: FunctionComponent = () => {
       data-cy="api-keys-create-edit-dialog"
     >
       <DialogTitle data-cy="edit-pat-dialog-title">
-        <T>edit_pat_title</T>
+        <T keyName="edit_pat_title" />
       </DialogTitle>
       <DialogContent data-cy="edit-pat-dialog-content">
         <StandardForm

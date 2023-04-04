@@ -23,11 +23,11 @@ export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
         data-cy="import-conflicts-not-resolved-dialog"
       >
         <DialogTitle id="import-not-resolved-error-dialog-title">
-          <T>import_not_resolved_error_dialog_title</T>
+          <T keyName="import_not_resolved_error_dialog_title" />
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <T>import_not_resolved_error_dialog_message_text</T>
+            <T keyName="import_not_resolved_error_dialog_message_text" />
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -36,14 +36,14 @@ export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
             color="secondary"
             data-cy="import-conflicts-not-resolved-dialog-cancel-button"
           >
-            <T>import_not_resolved_error_dialog_cancel_button</T>
+            <T keyName="import_not_resolved_error_dialog_cancel_button" />
           </Button>
           <Button
             onClick={props.onResolve}
             color="primary"
             data-cy="import-conflicts-not-resolved-dialog-resolve-button"
           >
-            <T>import_resolve_conflicts_button</T>
+            <T keyName="import_resolve_conflicts_button" />
           </Button>
         </DialogActions>
       </Dialog>

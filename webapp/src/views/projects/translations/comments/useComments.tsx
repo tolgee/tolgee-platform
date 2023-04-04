@@ -12,6 +12,7 @@ import {
 import { MessageService } from 'tg.service/MessageService';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 type PagedModelTranslationCommentModel =
@@ -136,7 +137,7 @@ export const useComments = ({
       return;
     }
     if (!inputValue) {
-      messaging.error(<T>global_empty_value</T>);
+      messaging.error(<T keyName="global_empty_value" />);
       return;
     }
     addComment
@@ -172,7 +173,9 @@ export const useComments = ({
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+        parsed.forEach((error) =>
+          messaging.error(<TranslatedError code={error} />)
+        );
       });
   };
 

@@ -48,7 +48,7 @@ export const ProjectSettingsLanguages = () => {
     <Box mb={6}>
       <Box mt={4}>
         <Typography variant="h5">
-          <T>create_language_title</T>
+          <T keyName="create_language_title" />
         </Typography>
       </Box>
       <Box mb={2}>
@@ -105,7 +105,7 @@ export const ProjectSettingsLanguages = () => {
         <>
           <Box mt={4} mb={2}>
             <Typography variant="h5">
-              <T>machine_translation_title</T>
+              <T keyName="machine_translation_title" />
             </Typography>
           </Box>
           <MachineTranslation />
@@ -114,7 +114,7 @@ export const ProjectSettingsLanguages = () => {
 
       <Box mt={4} mb={0}>
         <Typography variant="h5">
-          <T>machine_translation_new_keys_title</T>
+          <T keyName="machine_translation_new_keys_title" />
         </Typography>
       </Box>
       <AutoTranslations mtEnabled={mtEnabled} />

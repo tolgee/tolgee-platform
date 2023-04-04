@@ -49,7 +49,10 @@ export const OrganizationSwitch: React.FC<Props> = ({
         ref={anchorEl}
       >
         <ListItemText sx={{ flexGrow: 1 }}>
-          <T keyName="user_menu_organization_switch">Switch organization</T>
+          <T
+            keyName="user_menu_organization_switch"
+            defaultValue="Switch organization"
+          />
         </ListItemText>
         <ArrowDropDown />
       </MenuItem>

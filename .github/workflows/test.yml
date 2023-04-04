@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ main, release ]
+    branches: [main, release]
   pull_request:
 
 jobs:
@@ -53,12 +53,17 @@ jobs:
 
   backend-test:
     name: Backend testing ‍🔎
-    needs: [ backend-build ]
+    needs: [backend-build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test" ]
+        command:
+          [
+            "server-app:runContextRecreatingTests",
+            "server-app:runStandardTests",
+            "data:test",
+          ]
     steps:
       - uses: actions/checkout@v3
 
@@ -111,14 +116,14 @@ jobs:
             ./**/build/reports/**/*
 
   e2e:
-    needs: [ frontend-build, backend-build, e2e-install-deps ]
+    needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-latest
     name: E2E testing ‍🔎
     strategy:
       fail-fast: false
       matrix:
-        total_jobs: [ 10 ]
-        job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        total_jobs: [10]
+        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
       - uses: actions/checkout@v3
 
@@ -271,6 +276,20 @@ jobs:
 
       - name: Eslint
         run: npm run eslint
+        working-directory: ./webapp
+
+      - name: Keys extraction check
+        run: npm run check-translations
+        working-directory: ./webapp
+
+      - name: Load newest translations
+        run: npm run load-translations
+        working-directory: ./webapp
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+
+      - name: Check missing translation keys
+        run: npm run tsc:prod
         working-directory: ./webapp
 
   e2e-code-checks:

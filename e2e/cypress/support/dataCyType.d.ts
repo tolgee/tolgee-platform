@@ -258,8 +258,6 @@ declare namespace DataCy {
         "project-member-revoke-button" |
         "project-menu-items" |
         "project-name-field" |
-        "project-owner-select" |
-        "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
         "project-settings-delete-button" |

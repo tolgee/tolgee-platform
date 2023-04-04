@@ -119,8 +119,8 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   const handleDelete = () => {
     handleClose();
     confirmation({
-      message: <T>translations_comments_delete_confirmation</T>,
-      confirmButtonText: <T>translations_comments_delete_button</T>,
+      message: <T keyName="translations_comments_delete_confirmation" />,
+      confirmButtonText: <T keyName="translations_comments_delete_button" />,
       onConfirm: () => onDelete?.(data.id),
     });
   };

@@ -38,7 +38,7 @@ export const TagAdd: React.FC<Props> = ({
       <StyledAddIcon data-cy="translations-tags-add" />
       {withFullLabel && (
         <StyledLabel>
-          <T>translations_tag_label</T>
+          <T keyName="translations_tag_label" />
         </StyledLabel>
       )}
     </Wrapper>

@@ -74,7 +74,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
                 color="primary"
               />
             }
-            label={<T>import_conflicts_filter_show_resolved_label</T>}
+            label={<T keyName="import_conflicts_filter_show_resolved_label" />}
           />
         </Grid>
       </Grid>

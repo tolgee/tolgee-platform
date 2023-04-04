@@ -704,6 +704,7 @@
   "translations_tags_no_results" : "Rien trouvé",
   "translation_state_change" : "Marquer comme {newState}",
   "translation_state_machine_translated" : "Traduction automatique",
+  "translation_state_mark_as" : "Marquer comme",
   "translation_state_needs_review" : "Besoin de contrôle",
   "translation_state_reviewed" : "Contrôlé",
   "translation_state_translated" : "Traduit",

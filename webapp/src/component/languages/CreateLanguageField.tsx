@@ -77,7 +77,7 @@ export const CreateLanguageField: FC<{
                   props.onSubmit?.(props.value);
                 }}
               >
-                <T>language_create_add</T>
+                <T keyName="language_create_add" />
               </Button>
             </Box>
           )}

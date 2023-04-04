@@ -43,7 +43,7 @@ export const ProjectCreateView: FunctionComponent = () => {
       {
         onSuccess() {
           updatePreferredOrganization(values.organizationId);
-          messageService.success(<T>project_created_message</T>);
+          messageService.success(<T keyName="project_created_message" />);
         },
       }
     );
@@ -99,7 +99,7 @@ export const ProjectCreateView: FunctionComponent = () => {
                     variant="standard"
                     autoFocus
                     data-cy="project-name-field"
-                    label={<T>create_project_name_label</T>}
+                    label={<T keyName="create_project_name_label" />}
                     name="name"
                     required={true}
                   />
@@ -107,13 +107,13 @@ export const ProjectCreateView: FunctionComponent = () => {
               </Grid>
               <Box mb={2}>
                 <Typography variant="h6">
-                  <T>project_create_languages_title</T>
+                  <T keyName="project_create_languages_title" />
                 </Typography>
               </Box>
               <CreateProjectLanguagesArrayField />
               <Box mt={4}>
                 <Typography variant="h6">
-                  <T>project_create_base_language_label</T>
+                  <T keyName="project_create_base_language_label" />
                 </Typography>
                 <BaseLanguageSelect
                   valueKey="tag"

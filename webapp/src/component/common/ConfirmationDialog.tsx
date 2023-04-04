@@ -11,10 +11,10 @@ import { T } from '@tolgee/react';
 
 export class ConfirmationDialogProps {
   open?: boolean = true;
-  message?: ReactNode = (<T>confirmation_dialog_message</T>);
-  confirmButtonText?: ReactNode = (<T>confirmation_dialog_confirm</T>);
-  cancelButtonText?: ReactNode = (<T>confirmation_dialog_cancel</T>);
-  title?: ReactNode = (<T>confirmation_dialog_title</T>);
+  message?: ReactNode = (<T keyName="confirmation_dialog_message" />);
+  confirmButtonText?: ReactNode = (<T keyName="confirmation_dialog_confirm" />);
+  cancelButtonText?: ReactNode = (<T keyName="confirmation_dialog_cancel" />);
+  title?: ReactNode = (<T keyName="confirmation_dialog_title" />);
   hardModeText?: string | null = null;
   confirmButtonColor?: PropTypes.Color = 'primary';
   cancelButtonColor?: PropTypes.Color = 'default';
@@ -63,9 +63,10 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                 data-cy={'global-confirmation-hard-mode-text-field'}
                 fullWidth={true}
                 label={
-                  <T params={{ text: props.hardModeText }}>
-                    hard_mode_confirmation_rewrite_text
-                  </T>
+                  <T
+                    keyName="hard_mode_confirmation_rewrite_text"
+                    params={{ text: props.hardModeText }}
+                  />
                 }
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

@@ -18,20 +18,24 @@ export const useExpirationDateOptions = () => {
         time: time,
         value: `${time}`,
         label: (
-          <T params={{ days: days }} keyName="expiration-date-days-option">
-            {'{days} days'}
-          </T>
+          <T
+            params={{ days: days }}
+            keyName="expiration-date-days-option"
+            defaultValue="{days} days"
+          />
         ),
       };
     });
     options.push({
       value: 'never',
-      label: <T keyName="expiration-never-option">{'Never expires'}</T>,
+      label: (
+        <T keyName="expiration-never-option" defaultValue="Never expires" />
+      ),
       time: null,
     });
     options.push({
       value: 'custom',
-      label: <T keyName="expiration-custom-option">{'Custom'}</T>,
+      label: <T keyName="expiration-custom-option" defaultValue="Custom" />,
       time: null,
     });
     return options;

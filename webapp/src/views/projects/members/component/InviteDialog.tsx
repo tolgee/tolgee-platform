@@ -26,6 +26,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -109,7 +110,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
               },
               onError(e) {
                 parseErrorResponse(e).forEach((e) =>
-                  messaging.error(<T>{e}</T>)
+                  messaging.error(<TranslatedError code={e} />)
                 );
               },
             }

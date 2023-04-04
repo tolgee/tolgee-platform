@@ -1,5 +1,4 @@
 import React from 'react';
-import { T } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { Activity } from '../types';
@@ -53,7 +52,7 @@ export const ActivityEntities: React.FC<Props> = ({
           <React.Fragment key={i}>
             <StyledSeparator gridColumn="1 / span 2" />
             <StyledEntityTitle sx={{ gridColumn: '1 / span 2' }}>
-              <T keyName={entity.options.label} />
+              {entity.options.label?.()}
               <EntityDescription entity={entity} />
             </StyledEntityTitle>
             {entity.fields.map((field, i) => {
@@ -66,11 +65,7 @@ export const ActivityEntities: React.FC<Props> = ({
               });
               return value ? (
                 <React.Fragment key={i}>
-                  {field.options.label && (
-                    <StyledFieldLabel>
-                      <T keyName={field.options.label} />:
-                    </StyledFieldLabel>
-                  )}
+                  {label && <StyledFieldLabel>{label?.()}</StyledFieldLabel>}
                   <StyledFieldContent
                     gridColumn={!label ? '1 / span 2' : undefined}
                   >

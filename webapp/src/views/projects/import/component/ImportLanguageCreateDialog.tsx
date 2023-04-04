@@ -17,7 +17,7 @@ export const ImportLanguageCreateDialog: FunctionComponent<{
       maxWidth={'md'}
     >
       <DialogTitle id="form-dialog-title">
-        <T>import_add_new_language_dialog_title</T>
+        <T keyName="import_add_new_language_dialog_title" />
       </DialogTitle>
       <DialogContent>
         <Box minWidth={600}>

@@ -12,7 +12,7 @@ export const UserName = (props: {
 }) => {
   return props?.deleted === true ? (
     <StyledFormerUserName data-cy="former-user-name">
-      <T>former-user-name</T>
+      <T keyName="former-user-name" />
     </StyledFormerUserName>
   ) : (
     <>{props?.name || props?.username}</>

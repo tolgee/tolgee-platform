@@ -1,3 +1,4 @@
+import { TranslateParams } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
@@ -54,7 +55,7 @@ export type FieldTypeEnum =
   | 'outdated';
 
 export type FieldOptionsObj = {
-  label?: string;
+  label?: (params?: TranslateParams) => React.ReactElement;
   type?: FieldTypeEnum;
   compute?: (data: any) => any;
 };
@@ -95,7 +96,7 @@ export type ReferenceBuilder = (data: ModifiedEntityModel) => Reference[];
 
 export type Field = {
   name: string;
-  label?: string;
+  label?: (params?: TranslateParams) => React.ReactElement;
   value: DiffValue<any>;
   options: FieldOptionsObj;
   languageTag?: string;
@@ -105,7 +106,7 @@ export type EntityOptions = {
   references?: ReferenceBuilder;
   fields: Record<string, FieldOptions>;
   description?: Reference['type'][];
-  label: string;
+  label: (params?: TranslateParams) => React.ReactElement;
 };
 
 export type Entity = {
@@ -116,7 +117,7 @@ export type Entity = {
 };
 
 export type Activity = {
-  translationKey: string | undefined;
+  translation: ((params?: TranslateParams) => React.ReactElement) | undefined;
   type: ActivityTypeEnum;
   entities: Entity[];
   references: Reference[];
@@ -125,7 +126,7 @@ export type Activity = {
 };
 
 export type ActivityOptions = {
-  label: string;
+  label: (params?: TranslateParams) => React.ReactElement;
   description?: (data: ProjectActivityModel) => string;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];

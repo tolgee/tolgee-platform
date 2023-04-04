@@ -46,7 +46,7 @@ export const LanguageModifyForm: FC<{
                   onClick={() => props.onCancel()}
                   data-cy="languages-modify-cancel-button"
                 >
-                  <T>global_form_cancel</T>
+                  <T keyName="global_form_cancel" />
                 </Button>
               </Box>
               <Button
@@ -56,7 +56,7 @@ export const LanguageModifyForm: FC<{
                 data-cy="languages-modify-apply-button"
                 onClick={formikProps.submitForm}
               >
-                <T>languages_modify_ok_button</T>
+                <T keyName="languages_modify_ok_button" />
               </Button>
             </Box>
           </Box>

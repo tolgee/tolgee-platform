@@ -31,7 +31,7 @@ export const CreateProjectLanguagesArrayField: FC = () => {
                   onClick={addItem}
                   color="primary"
                 >
-                  <T>language_create_add</T>
+                  <T keyName="language_create_add" />
                 </Button>
               </Box>
             )

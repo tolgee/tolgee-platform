@@ -19,11 +19,11 @@ export const AvatarEditMenu: FC<{
         onClose={onClose}
       >
         <MenuItem onClick={onUpload} data-cy="avatar-upload-button">
-          <T>user-profile.upload-avatar-menu-item</T>
+          <T keyName="user-profile.upload-avatar-menu-item" />
         </MenuItem>
         {canRemove && (
           <MenuItem onClick={onRemove} data-cy="avatar-remove-button">
-            <T>user-profile.remove-avatar-menu-item</T>
+            <T keyName="user-profile.remove-avatar-menu-item" />
           </MenuItem>
         )}
       </Menu>

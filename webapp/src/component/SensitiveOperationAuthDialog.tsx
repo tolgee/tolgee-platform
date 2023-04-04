@@ -63,7 +63,7 @@ export const SensitiveOperationAuthDialog = () => {
         </Typography>
         <StandardForm
           rootSx={{ mb: 0 }}
-          submitButtonInner={<T>sensitive-auth-submit-button</T>}
+          submitButtonInner={<T keyName="sensitive-auth-submit-button" />}
           saveActionLoadable={superTokenMutation}
           onCancel={onCancel}
           initialValues={{ otp: '', password: '' } as Value}
@@ -82,7 +82,7 @@ export const SensitiveOperationAuthDialog = () => {
                     'data-cy': 'sensitive-dialog-otp-input',
                   }}
                   name="otp"
-                  label={<T>account-security-mfa-otp-code</T>}
+                  label={<T keyName="account-security-mfa-otp-code" />}
                   variant="standard"
                 />
               </>
@@ -93,7 +93,7 @@ export const SensitiveOperationAuthDialog = () => {
                 }}
                 name="password"
                 type="password"
-                label={<T>login_password_label</T>}
+                label={<T keyName="login_password_label" />}
                 variant="standard"
               />
             )}

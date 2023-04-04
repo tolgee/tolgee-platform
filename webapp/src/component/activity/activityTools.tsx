@@ -167,7 +167,7 @@ export const buildActivity = (
   const options = actionsConfiguration[data.type];
 
   const result: Activity = {
-    translationKey: options?.label,
+    translation: options?.label,
     type: data.type,
     entities: [],
     references: [],

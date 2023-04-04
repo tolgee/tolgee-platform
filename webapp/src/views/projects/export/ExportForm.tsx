@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, CircularProgress, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -16,6 +16,7 @@ import { FORMATS, FormatSelector } from './FormatSelector';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
 import { NestedSelector } from './NestedSelector';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -194,7 +195,9 @@ export const ExportForm = () => {
               a.click();
             },
             onError(error) {
-              parseErrorResponse(error).map((e) => messaging.error(<T>{e}</T>));
+              parseErrorResponse(error).map((e) =>
+                messaging.error(<TranslatedError code={e} />)
+              );
             },
             onSettled() {
               actions.setSubmitting(false);

@@ -65,7 +65,7 @@ export const ProjectListItemMenu: FC<{
             })}
             data-cy="project-settings-button"
           >
-            <T noWrap>project_settings_button</T>
+            <T keyName="project_settings_button" />
           </MenuItem>
         )}
         <MenuItem
@@ -74,7 +74,7 @@ export const ProjectListItemMenu: FC<{
             leave(props.projectName, props.projectId);
           }}
         >
-          <T noWrap>project_leave_button</T>
+          <T keyName="project_leave_button" />
         </MenuItem>
       </Menu>
     </>

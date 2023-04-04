@@ -36,7 +36,7 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
               data-cy="export-state-selector"
               renderValue={(values: StateType[]) =>
                 values
-                  .map((val) => t(translationStates[val]?.translationKey))
+                  .map((val) => translationStates[val]?.translation)
                   .join(', ')
               }
               multiple
@@ -49,7 +49,7 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
                 >
                   <Checkbox checked={field.value.includes(state)} />
                   <ListItemText
-                    primary={t(translationStates[state].translationKey)}
+                    primary={translationStates[state].translation}
                   />
                 </MenuItem>
               ))}

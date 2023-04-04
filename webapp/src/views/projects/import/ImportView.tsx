@@ -20,6 +20,7 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messageService = container.resolve(MessageService);
 
@@ -53,7 +54,7 @@ export const ImportView: FunctionComponent = () => {
   useEffect(() => {
     if (applyImportHelper.error) {
       const parsed = parseErrorResponse(applyImportHelper.error);
-      messageService.error(<T>{parsed[0]}</T>);
+      messageService.error(<TranslatedError code={parsed[0]} />);
     }
   }, [applyImportHelper.error]);
 
@@ -119,12 +120,12 @@ export const ImportView: FunctionComponent = () => {
               onClick={() => {
                 confirmation({
                   onConfirm: () => dataHelper.onCancel(),
-                  title: <T>import_cancel_confirmation_title</T>,
-                  message: <T>import_cancel_confirmation_message</T>,
+                  title: <T keyName="import_cancel_confirmation_title" />,
+                  message: <T keyName="import_cancel_confirmation_message" />,
                 });
               }}
             >
-              <T>import_cancel_button</T>
+              <T keyName="import_cancel_button" />
             </LoadingButton>
           </Box>
           <Box>
@@ -135,7 +136,7 @@ export const ImportView: FunctionComponent = () => {
               onClick={onApply}
               loading={applyImportHelper.loading}
             >
-              <T>import_apply_button</T>
+              <T keyName="import_apply_button" />
             </LoadingButton>
           </Box>
         </Box>

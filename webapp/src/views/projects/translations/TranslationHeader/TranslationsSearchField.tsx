@@ -18,7 +18,7 @@ const TranslationsSearchField = (
   return (
     <TextField
       data-cy="global-search-field"
-      label={<T>standard_search_label</T>}
+      label={<T keyName="standard_search_label" />}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">

@@ -39,7 +39,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={CELL_SHOW_ON_HOVER}
-          tooltip={<T>translations_cell_edit</T>}
+          tooltip={<T keyName="translations_cell_edit" />}
         >
           <Edit fontSize="small" />
         </ControlsButton>
@@ -48,7 +48,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
         <ControlsButton
           onClick={onScreenshots}
           ref={screenshotRef}
-          tooltip={<T>translations_screenshots_tooltip</T>}
+          tooltip={<T keyName="translations_screenshots_tooltip" />}
           data-cy="translations-cell-screenshots-button"
           className={
             screenshotsPresent || screenshotsOpen

@@ -21,6 +21,7 @@ import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { useIsAdmin } from 'tg.globalContext/helpers';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -81,7 +82,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
           } else {
             organization.refetch();
           }
-          messageService.success(<T>organization_updated_message</T>);
+          messageService.success(<T keyName="organization_updated_message" />);
         },
       }
     );
@@ -93,18 +94,20 @@ export const OrganizationProfileView: FunctionComponent = () => {
   const handleDelete = () => {
     confirmation({
       hardModeText: organization.data?.name.toUpperCase(),
-      message: <T>delete_organization_confirmation_message</T>,
+      message: <T keyName="delete_organization_confirmation_message" />,
       onConfirm: () =>
         deleteOrganization.mutate(
           { path: { id: organization.data!.id } },
           {
             onSuccess: async () => {
-              messageService.success(<T>organization_deleted_message</T>);
+              messageService.success(
+                <T keyName="organization_deleted_message" />
+              );
               await refetchInitialData();
               history.push(LINKS.PROJECTS.build());
             },
             onError(e) {
-              messageService.error(<T>{e.code}</T>);
+              messageService.error(<TranslatedError code={e.code} />);
             },
           }
         ),
@@ -156,7 +159,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
                 onClick={handleLeave}
                 disabled={notMember}
               >
-                <T>organization_leave_button</T>
+                <T keyName="organization_leave_button" />
               </Button>
             </Box>
           }
@@ -169,7 +172,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
 
         <Box mt={2} mb={1}>
           <Typography variant={'h5'}>
-            <T>project_settings_danger_zone_title</T>
+            <T keyName="project_settings_danger_zone_title" />
           </Typography>
         </Box>
         <DangerZone
@@ -184,7 +187,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
                   disabled={readOnly}
                   data-cy="organization-profile-delete-button"
                 >
-                  <T>organization_delete_button</T>
+                  <T keyName="organization_delete_button" />
                 </DangerButton>
               ),
             },

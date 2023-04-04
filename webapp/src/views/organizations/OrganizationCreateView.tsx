@@ -35,7 +35,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
         onSuccess: (organization) => {
           updatePreferredOrganization(organization);
           redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
-          messageService.success(<T>organization_created_message</T>);
+          messageService.success(<T keyName="organization_created_message" />);
         },
       }
     );
@@ -54,7 +54,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
         windowTitle={t('create_organization_title')}
         lg={6}
         md={8}
-        title={<T>create_organization_title</T>}
+        title={<T keyName="create_organization_title" />}
         initialValues={initialValues}
         onSubmit={onSubmit}
         saveActionLoadable={loadable}

@@ -132,7 +132,7 @@ export const Comments: React.FC<Props> = ({
                 loading={comments.isFetchingNextPage}
                 data-cy="translations-comments-load-more-button"
               >
-                <T>translations_comments_load_more</T>
+                <T keyName="translations_comments_load_more" />
               </LoadingButton>
             </StyledLoadMore>
           )}

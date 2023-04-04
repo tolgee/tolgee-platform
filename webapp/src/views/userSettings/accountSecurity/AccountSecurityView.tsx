@@ -50,7 +50,7 @@ export const AccountSecurityView: FunctionComponent = () => {
         containerMaxWidth="md"
       >
         <Typography mb={2}>
-          <T>account-security-set-password-third-party-info</T>
+          <T keyName="account-security-set-password-third-party-info" />
         </Typography>
         <Box>
           {!!loadable.error && <Alert severity="error">{loadable.error}</Alert>}
@@ -59,7 +59,7 @@ export const AccountSecurityView: FunctionComponent = () => {
               severity="success"
               data-cy="account-security-set-password-instructions-sent"
             >
-              <T>account-security-set-password-instructions-sent</T>
+              <T keyName="account-security-set-password-instructions-sent" />
             </Alert>
           )}
           <LoadingButton
@@ -74,7 +74,7 @@ export const AccountSecurityView: FunctionComponent = () => {
               )
             }
           >
-            <T>account-security-set-password</T>
+            <T keyName="account-security-set-password" />
           </LoadingButton>
         </Box>
       </BaseUserSettingsView>
@@ -92,7 +92,7 @@ export const AccountSecurityView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T>managed-account-notice</T>
+          <T keyName="managed-account-notice" />
         </Alert>
       )}
       {!isManaged && <ChangePassword />}

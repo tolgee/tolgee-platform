@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { useTranslate } from '@tolgee/react';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -9,6 +8,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type DownloadButtonProps = {
   invoice: components['schemas']['InvoiceModel'];
@@ -19,7 +19,6 @@ const messaging = container.resolve(MessageService);
 export const DownloadButton: FC<DownloadButtonProps> = (props) => {
   const organization = useOrganization();
   const config = useConfig();
-  const { t } = useTranslate();
 
   const pdfMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf',
@@ -51,7 +50,9 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
           setTimeout(() => URL.revokeObjectURL(a.href), 7000);
         },
         onError(error) {
-          parseErrorResponse(error).map((e) => messaging.error(t(e)));
+          parseErrorResponse(error).map((e) =>
+            messaging.error(<TranslatedError code={e} />)
+          );
         },
       }
     );

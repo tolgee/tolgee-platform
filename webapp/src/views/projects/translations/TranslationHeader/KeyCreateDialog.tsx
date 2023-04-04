@@ -90,7 +90,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
     <>
       <DialogTitle>
         <StyledTitle>
-          <T>translation_single_create_title</T>
+          <T keyName="translation_single_create_title" />
           <LanguagesSelect
             languages={languages || []}
             value={selectedLanguages}

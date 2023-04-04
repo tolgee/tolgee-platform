@@ -27,7 +27,7 @@ export const AdminInfo = (props: {
     >
       {props.adminAccess && (
         <Box data-cy="administration-access-message">
-          <T>administration-access-message</T>
+          <T keyName="administration-access-message" />
         </Box>
       )}
       {props.debuggingCustomerAccount && (
@@ -39,7 +39,7 @@ export const AdminInfo = (props: {
           data-cy="administration-debug-customer-account-message"
         >
           <Box>
-            <T>administration-debugging-customer-account-message</T>
+            <T keyName="administration-debugging-customer-account-message" />
           </Box>
           <Box ml={2}>
             <StyledExitDebugButton
@@ -51,7 +51,7 @@ export const AdminInfo = (props: {
                 history.push(LINKS.ADMINISTRATION_USERS.build());
               }}
             >
-              <T>administration-exit-debug-customer-account</T>
+              <T keyName="administration-exit-debug-customer-account" />
             </StyledExitDebugButton>
           </Box>
         </Box>

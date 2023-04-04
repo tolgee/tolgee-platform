@@ -53,7 +53,7 @@ export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
         variant="standard"
         data-cy={'organization-name-field'}
         fullWidth
-        label={<T>create_organization_name_label</T>}
+        label={<T keyName="create_organization_name_label" />}
         name="name"
         required={true}
         disabled={disabled}
@@ -67,19 +67,18 @@ export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
           data-cy={'organization-address-part-field'}
           disabled={slugDisabled || disabled}
           fullWidth
-          label={<T>create_organization_slug_label</T>}
+          label={<T keyName="create_organization_slug_label" />}
           name="slug"
           required={true}
           helperText={
             <T
+              keyName="organization_your_address_to_access_organization"
               params={{
                 address: LINKS.ORGANIZATION.buildWithOrigin({
                   [PARAMS.ORGANIZATION_SLUG]: slugValue,
                 }),
               }}
-            >
-              organization_your_address_to_access_organization
-            </T>
+            />
           }
         />
       </Box>
@@ -88,7 +87,7 @@ export const OrganizationFields: React.FC<Props> = ({ disabled }) => {
         variant="standard"
         data-cy={'organization-description-field'}
         fullWidth
-        label={<T>create_organization_description_label</T>}
+        label={<T keyName="create_organization_description_label" />}
         name="description"
         disabled={disabled}
       />

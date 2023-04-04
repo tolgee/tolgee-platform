@@ -11,6 +11,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
 import { useOrganization } from '../useOrganization';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messagingService = container.resolve(MessageService);
 
@@ -28,7 +29,7 @@ export const UpdateRoleButton: FunctionComponent<{
 
   const handleSet = (type) => {
     confirmation({
-      message: <T>really_want_to_change_role_confirmation</T>,
+      message: <T keyName="really_want_to_change_role_confirmation" />,
       onConfirm: () =>
         setRole.mutate(
           {
@@ -38,13 +39,13 @@ export const UpdateRoleButton: FunctionComponent<{
           {
             onSuccess: () => {
               messagingService.success(
-                <T>organization_role_changed_message</T>
+                <T keyName="organization_role_changed_message" />
               );
               queryClient.invalidateQueries([]);
             },
             onError(e) {
               parseErrorResponse(e).forEach((err) =>
-                messagingService.error(<T>{err}</T>)
+                messagingService.error(<TranslatedError code={err} />)
               );
             },
           }

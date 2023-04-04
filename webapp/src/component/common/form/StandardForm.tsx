@@ -80,7 +80,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                         data-cy="global-form-cancel-button"
                         onClick={onCancel}
                       >
-                        <T>global_form_cancel</T>
+                        <T keyName="global_form_cancel" />
                       </Button>
                       <Box ml={1}>
                         <LoadingButton
@@ -91,7 +91,9 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                           disabled={props.loading || disabled}
                           type="submit"
                         >
-                          {props.submitButtonInner || <T>global_form_save</T>}
+                          {props.submitButtonInner || (
+                            <T keyName="global_form_save" />
+                          )}
                         </LoadingButton>
                       </Box>
                     </Box>

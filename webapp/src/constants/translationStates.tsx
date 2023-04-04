@@ -1,23 +1,25 @@
+import { T } from '@tolgee/react';
+
 export type StateType = 'UNTRANSLATED' | 'TRANSLATED' | 'REVIEWED';
 
 type StateStruct = Record<
   StateType,
-  { translationKey: string; color: string; next: StateType | null }
+  { translation: React.ReactElement; color: string; next: StateType | null }
 >;
 
 export const translationStates: StateStruct = {
   UNTRANSLATED: {
-    translationKey: 'translation_state_untranslated',
+    translation: <T keyName="translation_state_untranslated" />,
     color: '#C4C4C4',
     next: null,
   },
   TRANSLATED: {
-    translationKey: 'translation_state_translated',
+    translation: <T keyName="translation_state_translated" />,
     color: '#FFCE00',
     next: 'REVIEWED',
   },
   REVIEWED: {
-    translationKey: 'translation_state_reviewed',
+    translation: <T keyName="translation_state_reviewed" />,
     color: '#17AD18',
     next: 'TRANSLATED',
   },

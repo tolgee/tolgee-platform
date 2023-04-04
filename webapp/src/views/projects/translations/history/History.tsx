@@ -151,7 +151,7 @@ export const History: React.FC<Props> = ({ translation, language }) => {
               loading={history.isFetchingNextPage}
               data-cy="translations-history-load-more-button"
             >
-              <T>translations_history_load_more</T>
+              <T keyName="translations_history_load_more" />
             </LoadingButton>
           </StyledLoadMore>
         )}

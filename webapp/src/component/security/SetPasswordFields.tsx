@@ -13,13 +13,13 @@ export const SetPasswordFields: FunctionComponent<SetPasswordFieldsProps> = (
       <TextField
         name="password"
         type="password"
-        label={<T>Password</T>}
+        label={<T keyName="Password" />}
         variant="standard"
       />
       <TextField
         name="passwordRepeat"
         type="password"
-        label={<T>Password confirmation</T>}
+        label={<T keyName="Password confirmation" />}
         variant="standard"
       />
     </>

@@ -34,7 +34,9 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
 
   const handleSet = (type: Permission) => {
     confirmation({
-      message: <T>really_want_to_change_base_permission_confirmation</T>,
+      message: (
+        <T keyName="really_want_to_change_base_permission_confirmation" />
+      ),
       hardModeText: organization.data?.name?.toUpperCase(),
       onConfirm: () => {
         const dto: OrganizationDto = {
@@ -50,7 +52,9 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
           },
           {
             onSuccess: () => {
-              messageService.success(<T>organization_member_privileges_set</T>);
+              messageService.success(
+                <T keyName="organization_member_privileges_set" />
+              );
               organization.refetch();
             },
           }

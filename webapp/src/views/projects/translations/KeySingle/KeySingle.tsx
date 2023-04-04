@@ -81,7 +81,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
           keyExists ? (
             translation!.keyName
           ) : (
-            <T>translation_single_create_title</T>
+            <T keyName="translation_single_create_title" />
           ),
           window.location.pathname + window.location.search,
         ],

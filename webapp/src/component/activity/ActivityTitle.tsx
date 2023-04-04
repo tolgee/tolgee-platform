@@ -1,4 +1,3 @@
-import { T } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 import { Activity, Reference } from './types';
 import { AnyReference } from './references/AnyReference';
@@ -39,15 +38,11 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     titleParameters[`${entity}Count`] = value;
   });
 
+  const title = activity.translation;
+
   return (
     <StyledContainer>
-      <StyledText>
-        {activity.translationKey ? (
-          <T keyName={activity.translationKey} params={titleParameters}></T>
-        ) : (
-          activity.type
-        )}
-      </StyledText>
+      <StyledText>{title?.(titleParameters) || activity.type}</StyledText>
       <AnyReference data={filteredReferences} />
     </StyledContainer>
   );

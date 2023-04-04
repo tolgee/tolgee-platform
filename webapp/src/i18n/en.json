@@ -881,6 +881,7 @@
   "translations_tags_no_results" : "Nothing found",
   "translation_state_change" : "Mark as {newState}",
   "translation_state_machine_translated" : "Machine translated",
+  "translation_state_mark_as" : "Mark as",
   "translation_state_needs_review" : "Needs review",
   "translation_state_reviewed" : "Reviewed",
   "translation_state_translated" : "Translated",

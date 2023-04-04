@@ -6,13 +6,13 @@ import { Link, Clear } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
-import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
 
 const messaging = container.resolve(MessageService);
 
@@ -62,6 +62,8 @@ type Props = {
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
+
+  const translatePermission = usePermissionTranslation();
 
   const findLanguage = useCallback(
     (languageId: number) => {
@@ -127,17 +129,9 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             </span>
           </Tooltip>
         )}
-        <Tooltip
-          title={t(
-            `permission_type_${projectPermissionTypes[invitation.type!]}_hint`
-          )}
-        >
+        <Tooltip title={translatePermission(invitation.type, true)}>
           <StyledPermissions>
-            <T
-              keyName={`permission_type_${
-                projectPermissionTypes[invitation.type!]
-              }`}
-            />
+            {translatePermission(invitation.type)}
           </StyledPermissions>
         </Tooltip>
 

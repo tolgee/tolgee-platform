@@ -3,6 +3,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import GoogleIcon from '@mui/icons-material/Google';
 import LoginIcon from '@mui/icons-material/Login';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { T } from '@tolgee/react';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -11,8 +12,8 @@ export interface OAuthService {
   id: string;
   authenticationUrl: string;
   buttonIcon: React.ReactElement;
-  loginButtonTitle: string;
-  signUpButtonTitle: string;
+  loginButtonTitle: React.ReactElement;
+  signUpButtonTitle: React.ReactElement;
 }
 
 export const gitHubService = (clientId: string): OAuthService => {
@@ -25,8 +26,8 @@ export const gitHubService = (clientId: string): OAuthService => {
       `${GITHUB_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`
     ),
     buttonIcon: <GitHubIcon />,
-    loginButtonTitle: 'login_github_login_button',
-    signUpButtonTitle: 'login_github_signup_button',
+    loginButtonTitle: <T keyName="login_github_login_button" />,
+    signUpButtonTitle: <T keyName="login_github_signup_button" />,
   };
 };
 
@@ -40,8 +41,8 @@ export const googleService = (clientId: string): OAuthService => {
       `${GOOGLE_BASE}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+email+https://www.googleapis.com/auth/userinfo.profile`
     ),
     buttonIcon: <GoogleIcon />,
-    loginButtonTitle: 'login_google_login_button',
-    signUpButtonTitle: 'login_google_signup_button',
+    loginButtonTitle: <T keyName="login_google_login_button" />,
+    signUpButtonTitle: <T keyName="login_google_signup_button" />,
   };
 };
 
@@ -61,7 +62,7 @@ export const oauth2Service = (
         .join('+')}`
     ),
     buttonIcon: <LoginIcon />,
-    loginButtonTitle: 'login_oauth2_login_button',
-    signUpButtonTitle: 'login_oauth2_signup_button',
+    loginButtonTitle: <T keyName="login_oauth2_login_button" />,
+    signUpButtonTitle: <T keyName="login_oauth2_signup_button" />,
   };
 };

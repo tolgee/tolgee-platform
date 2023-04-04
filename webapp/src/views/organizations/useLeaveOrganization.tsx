@@ -8,6 +8,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messageService = container.resolve(MessageService);
 
@@ -17,13 +18,15 @@ export const useLeaveOrganization = () => {
     method: 'put',
     options: {
       onSuccess() {
-        messageService.success(<T>organization_left_message</T>);
+        messageService.success(<T keyName="organization_left_message" />);
         history.push(LINKS.PROJECTS.build());
         refetchInitialData();
       },
       onError(e) {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messageService.error(<T>{error}</T>));
+        parsed.forEach((error) =>
+          messageService.error(<TranslatedError code={error} />)
+        );
       },
     },
     fetchOptions: {
@@ -35,7 +38,7 @@ export const useLeaveOrganization = () => {
 
   return (id: number) => {
     confirmation({
-      message: <T>really_leave_organization_confirmation_message</T>,
+      message: <T keyName="really_leave_organization_confirmation_message" />,
       onConfirm: () => leaveLoadable.mutate({ path: { id } }),
     });
   };

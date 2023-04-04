@@ -46,7 +46,7 @@ export const IntegrateView: FunctionComponent = () => {
       <Stepper activeStep={activeStep} orientation="vertical">
         <Step expanded={true}>
           <StepLabel data-cy="integrate-choose-your-weapon-step-label">
-            <T>integrate_choose_your_weapon</T>
+            <T keyName="integrate_choose_your_weapon" />
           </StepLabel>
           <StepContent data-cy="integrate-choose-your-weapon-step-content">
             <WeaponSelector
@@ -57,7 +57,7 @@ export const IntegrateView: FunctionComponent = () => {
         </Step>
         <Step expanded={activeStep > 0}>
           <StepLabel data-cy="integrate-select-api-key-step-label">
-            <T>integrate_step_select_api_key</T>
+            <T keyName="integrate_step_select_api_key" />
           </StepLabel>
           <StepContent data-cy="integrate-select-api-key-step-content">
             <ApiKeySelector
@@ -71,7 +71,7 @@ export const IntegrateView: FunctionComponent = () => {
         </Step>
         <Step>
           <StepLabel>
-            <T>integrate_step_integrate</T>
+            <T keyName="integrate_step_integrate" />
           </StepLabel>
           <StepContent>
             <React.Suspense fallback={<BoxLoading />}>

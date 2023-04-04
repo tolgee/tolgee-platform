@@ -13,10 +13,13 @@ export const PatEmptyListMessage = (props: { loading: boolean }) => (
         to={LINKS.USER_PATS_GENERATE.build()}
         color="primary"
       >
-        <T keyName="pats-empty-action">Create new token</T>
+        <T keyName="pats-empty-action" defaultValue="Create new token" />
       </Button>
     }
   >
-    <T keyName="pats-empty-message">No Personal Access Tokens added yet.</T>
+    <T
+      keyName="pats-empty-message"
+      defaultValue="No Personal Access Tokens added yet."
+    />
   </EmptyListMessage>
 );

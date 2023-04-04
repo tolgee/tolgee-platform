@@ -14,6 +14,7 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
 
@@ -41,7 +42,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
           security.loginErrorCode &&
           !authLoading && (
             <Alert severity="error">
-              <T>{security.loginErrorCode}</T>
+              <TranslatedError code={security.loginErrorCode} />
             </Alert>
           )
         }
@@ -64,7 +65,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
                     type="submit"
                     data-cy="login-button"
                   >
-                    <T>login_login_button</T>
+                    <T keyName="login_login_button" />
                   </LoadingButton>
                 </Box>
               </Box>
@@ -73,7 +74,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
           >
             <TextField
               name="otp"
-              label={<T>account-security-mfa-otp-code</T>}
+              label={<T keyName="account-security-mfa-otp-code" />}
               variant="standard"
             />
           </StandardForm>
@@ -82,7 +83,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
           <Box display="flex" justifyContent="flex-end">
             <MuiLink onClick={() => props.onMfaCancel()} component={'button'}>
               <Typography variant="caption">
-                <T>global_cancel_button</T>
+                <T keyName="global_cancel_button" />
               </Typography>
             </MuiLink>
           </Box>

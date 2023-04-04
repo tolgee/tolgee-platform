@@ -4,7 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
+import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -45,10 +45,7 @@ export const ProjectMembersView: FunctionComponent = () => {
     },
   });
 
-  const basePermissionText = translatedPermissionType(
-    project.organizationOwnerBasePermissions!,
-    true
-  );
+  const translatePermission = usePermissionTranslation();
 
   useGlobalLoading(invitationsLoadable.isFetching);
 
@@ -72,11 +69,11 @@ export const ProjectMembersView: FunctionComponent = () => {
       {project.organizationOwnerSlug && (
         <Box mb={2}>
           <Typography component={Box} alignItems={'center'} variant={'body1'}>
-            <T>project_permission_information_text_base_permission_before</T>{' '}
-            {basePermissionText}
+            <T keyName="project_permission_information_text_base_permission_before" />{' '}
+            {translatePermission(project.organizationOwnerBasePermissions!)}
           </Typography>
 
-          <T>project_permission_information_text_base_permission_after</T>
+          <T keyName="project_permission_information_text_base_permission_after" />
         </Box>
       )}
       <ProjectLanguagesProvider>

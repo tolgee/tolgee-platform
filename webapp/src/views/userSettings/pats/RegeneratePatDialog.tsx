@@ -69,7 +69,7 @@ export const RegeneratePatDialog: FunctionComponent<{
       data-cy="api-keys-create-edit-dialog"
     >
       <DialogTitle data-cy="regenerate-pat-dialog-title">
-        <T>regenerate_pat_title</T>
+        <T keyName="regenerate_pat_title" />
       </DialogTitle>
       <DialogContent data-cy="regenerate-pat-dialog-content">
         <StandardForm

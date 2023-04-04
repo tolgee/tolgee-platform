@@ -118,7 +118,7 @@ export function SimplePaginatedHateoasList<
       )}
       {helper.error && (
         <Alert severity="error">
-          <T>simple_paginated_list_error_message</T>
+          <T keyName="simple_paginated_list_error_message" />
         </Alert>
       )}
       {!helper.error &&

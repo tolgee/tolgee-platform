@@ -8,12 +8,11 @@ import {
   Tooltip,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { T, useTranslate } from '@tolgee/react';
 
 import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
+import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
 
 type PermissionType = NonNullable<
   components['schemas']['ProjectModel']['computedPermissions']['type']
@@ -34,7 +33,6 @@ export const PermissionsMenu: FunctionComponent<{
   minPermissions?: PermissionType;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { t } = useTranslate();
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -45,6 +43,8 @@ export const PermissionsMenu: FunctionComponent<{
   };
 
   let types = Object.keys(ProjectPermissionType);
+
+  const translatePermission = usePermissionTranslation();
 
   if (props.minPermissions) {
     types = types.filter((k) =>
@@ -57,10 +57,8 @@ export const PermissionsMenu: FunctionComponent<{
   return (
     <>
       <Tooltip
-        title={
-          props.title ||
-          t(`permission_type_${projectPermissionTypes[props.selected]}_hint`)
-        }
+        title={props.title || translatePermission(props.selected, true)}
+        disableInteractive
       >
         <span>
           <Button
@@ -71,7 +69,7 @@ export const PermissionsMenu: FunctionComponent<{
             aria-haspopup="true"
             onClick={handleClick}
           >
-            <T>{`permission_type_${props.selected.toLowerCase()}`}</T>{' '}
+            {translatePermission(props.selected)}{' '}
             <ArrowDropDown fontSize="small" />
           </Button>
         </span>
@@ -103,8 +101,8 @@ export const PermissionsMenu: FunctionComponent<{
             selected={k === props.selected}
           >
             <StyledListItemText
-              primary={<T>{`permission_type_${k.toLowerCase()}`}</T>}
-              secondary={<T>{`permission_type_${k.toLowerCase()}_hint`}</T>}
+              primary={translatePermission(k)}
+              secondary={translatePermission(k, true)}
               secondaryTypographyProps={{ className: 'textSecondary' }}
             />
           </MenuItem>

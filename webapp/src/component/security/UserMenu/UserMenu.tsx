@@ -194,12 +194,12 @@ export const UserMenu: React.FC = () => {
             to={LINKS.ADMINISTRATION_ORGANIZATIONS.build()}
             data-cy="user-menu-server-administration"
           >
-            <T>user_menu_server_administration</T>
+            <T keyName="user_menu_server_administration" />
           </MenuItem>
         )}
 
         <MenuItem onClick={logout} data-cy="user-menu-logout">
-          <T>user_menu_logout</T>
+          <T keyName="user_menu_logout" />
         </MenuItem>
       </StyledPopover>
     </div>

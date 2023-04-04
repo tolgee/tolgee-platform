@@ -22,7 +22,7 @@ export const GoToDocsButton = (props: ButtonProps & { href: string }) => {
         data-cy="integrate-go-to-docs-button"
         {...props}
       >
-        <T>integrate_guides_go_to_docs</T>
+        <T keyName="integrate_guides_go_to_docs" />
       </StyledButton>
     </>
   );

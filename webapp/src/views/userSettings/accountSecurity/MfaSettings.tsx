@@ -20,7 +20,7 @@ export const MfaSettings: FunctionComponent = () => {
   return (
     <Box>
       <Typography variant="h6">
-        <T>account-security-mfa</T>
+        <T keyName="account-security-mfa" />
       </Typography>
       <Box
         display="flex"
@@ -31,13 +31,15 @@ export const MfaSettings: FunctionComponent = () => {
         <Box>
           <Typography>
             {user.mfaEnabled ? (
-              <T params={{ b: <StyledEnabled /> }}>
-                account-security-mfa-status-enabled
-              </T>
+              <T
+                keyName="account-security-mfa-status-enabled"
+                params={{ b: <StyledEnabled /> }}
+              />
             ) : (
-              <T params={{ b: <StyledDisabled /> }}>
-                account-security-mfa-status-disabled
-              </T>
+              <T
+                keyName="account-security-mfa-status-disabled"
+                params={{ b: <StyledDisabled /> }}
+              />
             )}
           </Typography>
         </Box>
@@ -51,7 +53,7 @@ export const MfaSettings: FunctionComponent = () => {
                 component={Link}
                 to={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.build()}
               >
-                <T>account-security-mfa-view-recovery</T>
+                <T keyName="account-security-mfa-view-recovery" />
               </Button>
               <Button
                 variant="outlined"
@@ -60,7 +62,7 @@ export const MfaSettings: FunctionComponent = () => {
                 component={Link}
                 to={LINKS.USER_ACCOUNT_SECURITY_MFA_DISABLE.build()}
               >
-                <T>account-security-mfa-disable-mfa-button</T>
+                <T keyName="account-security-mfa-disable-mfa-button" />
               </Button>
             </>
           ) : (
@@ -71,7 +73,7 @@ export const MfaSettings: FunctionComponent = () => {
               component={Link}
               to={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.build()}
             >
-              <T>account-security-mfa-enable-mfa-button</T>
+              <T keyName="account-security-mfa-enable-mfa-button" />
             </Button>
           )}
         </Box>

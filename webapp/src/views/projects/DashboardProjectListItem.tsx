@@ -150,9 +150,10 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
       </StyledTitle>
       <StyledKeyCount>
         <Typography variant="body1">
-          <T params={{ keysCount: p.stats.keyCount.toString() }}>
-            project_list_keys_count
-          </T>
+          <T
+            keyName="project_list_keys_count"
+            params={{ keysCount: p.stats.keyCount.toString() }}
+          />
         </Typography>
       </StyledKeyCount>
       <StyledStats>

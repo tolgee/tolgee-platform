@@ -9,6 +9,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useOrgRoleTranslation } from 'tg.translationTools/useOrgRoleTranslation';
 
 const messaging = container.resolve(MessageService);
 
@@ -57,6 +58,7 @@ type Props = {
 
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { t } = useTranslate();
+  const translateRole = useOrgRoleTranslation();
 
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
@@ -93,10 +95,8 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
       </StyledItemText>
       <StyledItemActions>
-        <Tooltip title={t(`organization_role_type_${invitation.type}_hint`)}>
-          <StyledPermission>
-            <T keyName={`organization_role_type_${invitation.type}`} />
-          </StyledPermission>
+        <Tooltip title={translateRole(invitation.type, true)}>
+          <StyledPermission>{translateRole(invitation.type)}</StyledPermission>
         </Tooltip>
 
         <Tooltip title={t('invite_user_invitation_copy_button')}>

@@ -1,10 +1,12 @@
-import { T, TFnType } from '@tolgee/react';
+import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { OrganizationService } from '../service/OrganizationService';
 import { SignUpService } from '../service/SignUpService';
+
+type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -15,21 +17,25 @@ Yup.setLocale({
     default: 'field_invalid',
     // eslint-disable-next-line react/display-name
     required: () => {
-      return <T>{'Validation - required field'}</T>;
+      return <T keyName="Validation - required field" />;
     },
   },
   string: {
     // eslint-disable-next-line react/display-name
-    email: () => <T>validation_email_is_not_valid</T>,
+    email: () => <T keyName="validation_email_is_not_valid" />,
     // eslint-disable-next-line react/display-name
     min: ({ min }) => (
-      <T params={{ min: min.toString() }}>Field should have at least n chars</T>
+      <T
+        keyName="Field should have at least n chars"
+        params={{ min: min.toString() }}
+      />
     ),
     // eslint-disable-next-line react/display-name
     max: ({ max }) => (
-      <T params={{ max: max.toString() }}>
-        Field should have maximum of n chars
-      </T>
+      <T
+        keyName="Field should have maximum of n chars"
+        params={{ max: max.toString() }}
+      />
     ),
   },
 });
@@ -64,21 +70,16 @@ export class Validation {
       }
     }, container.resolve(SignUpService).validateEmail);
 
-  static readonly SIGN_UP = (
-    t: (key: string) => string,
-    orgRequired: boolean
-  ) =>
+  static readonly SIGN_UP = (t: TFunType, orgRequired: boolean) =>
     Yup.object().shape({
       ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
       name: Yup.string().required(),
-      email: Yup.string()
-        .email()
-        .required()
-        .test(
-          'checkEmailUnique',
-          t('validation_email_not_unique'),
-          Validation.createEmailValidation()
-        ),
+      email: Yup.string().email().required().test(
+        'checkEmailUnique',
+        // @tolgee-key validation_email_not_unique
+        t('validation_email_not_unique'),
+        Validation.createEmailValidation()
+      ),
       organizationName: orgRequired
         ? Yup.string().min(3).max(50).required()
         : Yup.string(),
@@ -157,17 +158,18 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = (t: TFnType) =>
+  static readonly LANGUAGE_TAG = (t: TFunType) =>
     Yup.string()
       .required()
       .max(20)
       .matches(/^[^,]*$/, {
+        // @tolgee-key validation_cannot_contain_coma
         message: t('validation_cannot_contain_coma'),
       });
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = (t: TFnType) =>
+  static readonly LANGUAGE = (t: TFunType) =>
     Yup.object().shape({
       name: Validation.LANGUAGE_NAME,
       originalName: Validation.LANGUAGE_ORIGINAL_NAME,
@@ -194,10 +196,12 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       languages: Yup.array()
         .required()
+        // @tolgee-key project_creation_add_at_least_one_language
         .min(1, t('project_creation_add_at_least_one_language'))
         .of(Validation.LANGUAGE(t).nullable())
         .test(
           'language-repeated',
+          // @tolgee-key create_project_validation_language_repeated
           t('create_project_validation_language_repeated'),
           (values) =>
             new Set(values?.map((i) => i?.name)).size ==
@@ -213,7 +217,7 @@ export class Validation {
   });
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
-    t: (key: string) => string,
+    t: TFunType,
     slugInitialValue?: string
   ) => {
     const slugSyncValidation = Yup.string()
@@ -222,7 +226,7 @@ export class Validation {
       .max(60)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
-          <T>slug_validation_can_contain_just_lowercase_numbers_hyphens</T>
+          <T keyName="slug_validation_can_contain_just_lowercase_numbers_hyphens" />
         ),
       });
 
@@ -246,6 +250,7 @@ export class Validation {
       name: Yup.string().required().min(3).max(50),
       slug: slugSyncValidation.test(
         'slugUnique',
+        // @tolgee-key validation_slug_not_unique
         t('validation_slug_not_unique'),
         slugUniqueDebouncedAsyncValidation
       ),
@@ -253,7 +258,7 @@ export class Validation {
     });
   };
 
-  static readonly INVITE_DIALOG_PROJECT = (t: (key: string) => string) =>
+  static readonly INVITE_DIALOG_PROJECT = (t: TFunType) =>
     Yup.object({
       permission: Yup.string(),
       permissionLanguages: Yup.array(Yup.string()),
@@ -261,22 +266,28 @@ export class Validation {
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
+              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
+              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : // @tolgee-key Validation - required field
+            Yup.string().required(t('Validation - required field'))
       ),
     });
 
-  static readonly INVITE_DIALOG_ORGANIZATION = (t: (key: string) => string) =>
+  static readonly INVITE_DIALOG_ORGANIZATION = (t: TFunType) =>
     Yup.object({
       permission: Yup.string(),
       type: Yup.string(),
       text: Yup.string().when('type', (val: string) =>
         val === 'email'
           ? Yup.string()
+              // @tolgee-key validation_email_is_not_valid
               .email(t('validation_email_is_not_valid'))
+              // @tolgee-key Validation - required field
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : // @tolgee-key Validation - required field
+            Yup.string().required(t('Validation - required field'))
       ),
     });
 

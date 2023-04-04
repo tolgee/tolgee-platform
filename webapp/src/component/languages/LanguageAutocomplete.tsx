@@ -29,7 +29,7 @@ const getOptions = (input: string): AutocompleteOption[] => {
         <Box mr={1}>
           <Add />
         </Box>
-        <T>language_field_autocomplete_label_new_language</T>
+        <T keyName="language_field_autocomplete_label_new_language" />
         &nbsp;🏳️
       </Box>
     ),
@@ -72,7 +72,7 @@ export const LanguageAutocomplete: FC<{
           onChange={(e) => {
             setTimeout(() => setOptions(getOptions(e.target.value)));
           }}
-          label={<T>language_create_autocomplete_label</T>}
+          label={<T keyName="language_create_autocomplete_label" />}
           margin="normal"
           variant="standard"
           required={true}

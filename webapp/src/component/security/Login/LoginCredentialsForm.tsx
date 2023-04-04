@@ -17,6 +17,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -56,7 +57,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
           security.loginErrorCode &&
           !authLoading && (
             <Alert severity="error">
-              <T>{security.loginErrorCode}</T>
+              <TranslatedError code={security.loginErrorCode} />
             </Alert>
           )
         }
@@ -73,7 +74,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     type="submit"
                     data-cy="login-button"
                   >
-                    <T>login_login_button</T>
+                    <T keyName="login_login_button" />
                   </LoadingButton>
 
                   {oAuthServices.length > 0 && (
@@ -94,7 +95,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                         variant="outlined"
                         style={{ marginBottom: '0.5rem' }}
                       >
-                        <T>{provider.loginButtonTitle}</T>
+                        {provider.loginButtonTitle}
                       </Button>
                     </React.Fragment>
                   ))}
@@ -109,13 +110,13 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
           >
             <TextField
               name="username"
-              label={<T>login_email_label</T>}
+              label={<T keyName="login_email_label" />}
               variant="standard"
             />
             <TextField
               name="password"
               type="password"
-              label={<T>login_password_label</T>}
+              label={<T keyName="login_password_label" />}
               variant="standard"
             />
           </StandardForm>
@@ -126,7 +127,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               {registrationsAllowed && (
                 <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                   <Typography variant="caption">
-                    <T>login_sign_up</T>
+                    <T keyName="login_sign_up" />
                   </Typography>
                 </MuiLink>
               )}
@@ -137,7 +138,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 component={Link}
               >
                 <Typography variant="caption">
-                  <T>login_reset_password_button</T>
+                  <T keyName="login_reset_password_button" />
                 </Typography>
               </MuiLink>
             )}

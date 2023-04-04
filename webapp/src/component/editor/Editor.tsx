@@ -1,5 +1,4 @@
 import { useMemo, useRef } from 'react';
-import { useTranslate, TFnType } from '@tolgee/react';
 import CodeMirror from 'codemirror';
 import {
   Controlled as CodeMirrorReact,
@@ -15,6 +14,7 @@ import 'codemirror/addon/lint/lint.css';
 import icuMode from './icuMode';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { Direction } from 'tg.fixtures/getLanguageDirection';
+import { useParserErrorTranslation } from 'tg.translationTools/useParserErrorTranslation';
 
 const StyledWrapper = styled('div')<{
   minheight: string | number;
@@ -105,7 +105,9 @@ const StyledWrapper = styled('div')<{
 
 function linter(text: string, data: any) {
   const errors = data.errors;
-  const t = data.t as TFnType;
+  const translateParserError = data.translateParserError as ReturnType<
+    typeof useParserErrorTranslation
+  >;
   return errors?.map((error) => {
     const location = error.location;
     const start = location?.start;
@@ -115,7 +117,7 @@ function linter(text: string, data: any) {
     const endColumn =
       start?.column === start?.column ? end?.column : end?.column - 1;
     const hint = {
-      message: t(`parser_${error.message?.toLowerCase()}`, { noWrap: true }),
+      message: translateParserError(error.message?.toLowerCase()),
       severity: 'error',
       type: 'validation',
       from: CodeMirror.Pos(start.line - 1, startColumn),
@@ -164,7 +166,7 @@ export const Editor: React.FC<Props> = ({
   onKeyDown,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslate();
+  const translateParserError = useParserErrorTranslation();
 
   const handleChange = (val: string) => {
     onChange?.(val);
@@ -197,7 +199,7 @@ export const Editor: React.FC<Props> = ({
     lint: {
       // @ts-ignore
       errors: error ? [error] : [],
-      t,
+      translateParserError,
     },
     inputStyle: 'contenteditable',
     spellcheck: !plaintext,

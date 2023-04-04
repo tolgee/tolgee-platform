@@ -18,7 +18,7 @@ export const DeleteUserButton = (props: {
     invalidatePrefix: '/v2/administration',
     options: {
       onSuccess() {
-        message.success(<T>administration_user_deleted_message</T>);
+        message.success(<T keyName="administration_user_deleted_message" />);
       },
     },
   });
@@ -34,9 +34,10 @@ export const DeleteUserButton = (props: {
       onClick={() => {
         confirmation({
           message: (
-            <T params={{ name: props.user.name || props.user.username }}>
-              delete-user-confirmation-message
-            </T>
+            <T
+              keyName="delete-user-confirmation-message"
+              params={{ name: props.user.name || props.user.username }}
+            />
           ),
           onConfirm() {
             deleteUser.mutate({ path: { userId: props.user.id } });
@@ -44,7 +45,7 @@ export const DeleteUserButton = (props: {
         });
       }}
     >
-      <T>administration_delete_user_button</T>
+      <T keyName="administration_delete_user_button" />
     </Button>
   );
 };

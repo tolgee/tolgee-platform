@@ -26,6 +26,7 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -145,8 +146,8 @@ export const KeyEditForm: React.FC = () => {
 
   const handleRemoveKey = () => {
     confirmation({
-      title: <T>translation_single_delete_title</T>,
-      message: <T>translation_single_delete_text</T>,
+      title: <T keyName="translation_single_delete_title" />,
+      message: <T keyName="translation_single_delete_text" />,
       onConfirm() {
         deleteKeys.mutate(
           {
@@ -154,7 +155,9 @@ export const KeyEditForm: React.FC = () => {
           },
           {
             onSuccess() {
-              messaging.success(<T>translation_single_delete_success</T>);
+              messaging.success(
+                <T keyName="translation_single_delete_success" />
+              );
               history.push(
                 LINKS.PROJECT_TRANSLATIONS.build({
                   [PARAMS.PROJECT_ID]: project.id,
@@ -164,7 +167,9 @@ export const KeyEditForm: React.FC = () => {
             },
             onError(e) {
               const parsed = parseErrorResponse(e);
-              parsed.forEach((error) => messaging.error(<T>{error}</T>));
+              parsed.forEach((error) =>
+                messaging.error(<TranslatedError code={error} />)
+              );
             },
           }
         );
@@ -176,7 +181,7 @@ export const KeyEditForm: React.FC = () => {
     <StyledContainer>
       <div>
         <FieldLabel>
-          <T>translation_single_label_key</T>
+          <T keyName="translation_single_label_key" />
         </FieldLabel>
         <StyledField data-cy="translation-edit-key-field">
           <CellKey
@@ -191,7 +196,7 @@ export const KeyEditForm: React.FC = () => {
 
       <div>
         <FieldLabel>
-          <T>translation_single_label_namespace</T>
+          <T keyName="translation_single_label_namespace" />
         </FieldLabel>
         <NamespaceSelector
           value={translation.keyNamespace}
@@ -201,7 +206,7 @@ export const KeyEditForm: React.FC = () => {
 
       <div>
         <FieldLabel>
-          <T>translation_single_label_tags</T>
+          <T keyName="translation_single_label_tags" />
         </FieldLabel>
         <StyledTags>
           {translation.keyTags.map((tag) => {
@@ -226,7 +231,7 @@ export const KeyEditForm: React.FC = () => {
 
       <div>
         <FieldLabel>
-          <T>translation_single_translations_title</T>
+          <T keyName="translation_single_translations_title" />
         </FieldLabel>
         {selectedLanguages?.map((lang) => {
           const language = languages?.find((l) => l.tag === lang);
@@ -249,7 +254,7 @@ export const KeyEditForm: React.FC = () => {
 
       <div>
         <FieldLabel>
-          <T>translation_single_label_screenshots</T>
+          <T keyName="translation_single_label_screenshots" />
         </FieldLabel>
         <StyledGalleryField>
           <ScreenshotGallery keyId={translation!.keyId} />
@@ -264,7 +269,7 @@ export const KeyEditForm: React.FC = () => {
             onClick={handleRemoveKey}
             data-cy="translation-edit-delete-button"
           >
-            <T>translation_single_label_delete</T>
+            <T keyName="translation_single_label_delete" />
           </Button>
         )}
       </StyledActions>

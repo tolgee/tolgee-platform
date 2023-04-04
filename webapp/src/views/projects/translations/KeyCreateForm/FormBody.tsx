@@ -119,7 +119,7 @@ export const FormBody: React.FC<Props> = ({
               return (
                 <div>
                   <FieldLabel>
-                    <T>translation_single_label_key</T>
+                    <T keyName="translation_single_label_key" />
                   </FieldLabel>
                   <EditorWrapper>
                     <StyledEdtorWrapper data-cy="translation-create-key-input">
@@ -149,7 +149,7 @@ export const FormBody: React.FC<Props> = ({
               return (
                 <div>
                   <FieldLabel>
-                    <T>translation_single_label_namespace</T>
+                    <T keyName="translation_single_label_namespace" />
                   </FieldLabel>
                   <StyledEdtorWrapper data-cy="translation-create-namespace-input">
                     <NamespaceSelector
@@ -173,7 +173,7 @@ export const FormBody: React.FC<Props> = ({
                 return (
                   <div>
                     <FieldLabel>
-                      <T>translation_single_label_tags</T>
+                      <T keyName="translation_single_label_tags" />
                     </FieldLabel>
                     <StyledTags>
                       {field.value.map((tag, index) => {
@@ -229,7 +229,7 @@ export const FormBody: React.FC<Props> = ({
       <Box display="flex" alignItems="flex-end" justifySelf="flex-end">
         {onCancel && (
           <Button data-cy="global-form-cancel-button" onClick={onCancel}>
-            <T>global_cancel_button</T>
+            <T keyName="global_cancel_button" />
           </Button>
         )}
         <Box ml={1}>
@@ -242,7 +242,7 @@ export const FormBody: React.FC<Props> = ({
             type="submit"
             onClick={() => form.handleSubmit()}
           >
-            <T>global_form_save</T>
+            <T keyName="global_form_save" />
           </LoadingButton>
         </Box>
       </Box>

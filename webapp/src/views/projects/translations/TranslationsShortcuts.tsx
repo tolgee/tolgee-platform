@@ -210,17 +210,12 @@ export const TranslationsShortcuts = () => {
         const nextState =
           focusedCell &&
           getCellNextState(focusedCell.keyId, focusedCell.language);
-        return (
-          nextState &&
-          translationStates[nextState] && (
-            <T>{translationStates[nextState].translationKey}</T>
-          )
-        );
+        return nextState && translationStates[nextState]?.translation;
       }
       case 'MOVE':
-        return <T>translations_shortcuts_move</T>;
+        return <T keyName="translations_shortcuts_move" />;
       case 'EDIT':
-        return <T>translations_cell_edit</T>;
+        return <T keyName="translations_cell_edit" />;
     }
   };
 
@@ -229,22 +224,22 @@ export const TranslationsShortcuts = () => {
 
   const getEditorShortcuts = () => [
     {
-      name: <T>translations_cell_save</T>,
+      name: <T keyName="translations_cell_save" />,
       formula: formatShortcut('Enter'),
     },
     {
-      name: <T>translations_cell_save_and_continue</T>,
+      name: <T keyName="translations_cell_save_and_continue" />,
       formula: formatShortcut(`${getMetaName()} + Enter`),
     },
     {
-      name: cursorKeyIdNextState && translationStates[cursorKeyIdNextState] && (
-        <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
-      ),
+      name:
+        cursorKeyIdNextState &&
+        translationStates[cursorKeyIdNextState]?.translation,
       formula: formatShortcut(`${getMetaName()} + E`),
     },
     {
       name: cursorLanguage != baseLanguage && (
-        <T>translations_cell_insert_base</T>
+        <T keyName="translations_cell_insert_base" />
       ),
       formula: IS_MAC
         ? formatShortcut(`${getMetaName()} + Shift + S`)
@@ -258,14 +253,14 @@ export const TranslationsShortcuts = () => {
     document.activeElement?.className === 'CodeMirror-code';
 
   const items = (
-    editorIsActive
+    (editorIsActive
       ? getEditorShortcuts()
       : availableActions.map(([action, keys]) => ({
           name: getActionTranslation(action as any),
           formula: keys.map((f, i) => (
             <React.Fragment key={i}>{formatShortcut(f)}</React.Fragment>
           )),
-        }))
+        }))) as any[]
   ).filter((i) => i.name);
 
   return (

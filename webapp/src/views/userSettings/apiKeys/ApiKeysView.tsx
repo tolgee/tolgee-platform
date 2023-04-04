@@ -51,9 +51,10 @@ export const ApiKeysView: FunctionComponent = () => {
         addLinkTo={LINKS.USER_API_KEYS_GENERATE.build()}
       >
         <Box sx={{ my: 2 }}>
-          <T params={{ link: <StyledLink to={LINKS.USER_PATS.build()} /> }}>
-            api-keys-description
-          </T>
+          <T
+            keyName="api-keys-description"
+            params={{ link: <StyledLink to={LINKS.USER_PATS.build()} /> }}
+          />
         </Box>
         <PaginatedHateoasList
           wrapperComponentProps={{ className: 'listWrapper' }}

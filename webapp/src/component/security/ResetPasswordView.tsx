@@ -64,7 +64,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
         content={
           loadable.loaded ? (
             <Alert severity="success">
-              <T>reset_password_success_message</T>
+              <T keyName="reset_password_success_message" />
             </Alert>
           ) : (
             <StandardForm
@@ -81,7 +81,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
                         variant="contained"
                         loading={loadable.loading}
                       >
-                        <T>reset_password_send_request_button</T>
+                        <T keyName="reset_password_send_request_button" />
                       </LoadingButton>
                     </Box>
                   </Box>
@@ -95,7 +95,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = () => {
             >
               <TextField
                 name="email"
-                label={<T>reset_password_email_field</T>}
+                label={<T keyName="reset_password_email_field" />}
                 variant="standard"
               />
             </StandardForm>

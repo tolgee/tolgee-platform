@@ -29,7 +29,7 @@ export const ImportAlertError: FunctionComponent<{
   let params = [] as string[];
 
   if (props.error?.code === 'cannot_parse_file') {
-    text = <T>import_error_cannot_parse_file</T>;
+    text = <T keyName="import_error_cannot_parse_file" />;
     params = props.error.params as any as string[];
   }
 
@@ -58,9 +58,9 @@ export const ImportAlertError: FunctionComponent<{
                   data-cy="import-file-error-more-less-button"
                 >
                   {moreOpen ? (
-                    <T>import_error_less_button</T>
+                    <T keyName="import_error_less_button" />
                   ) : (
-                    <T>import_error_more_button</T>
+                    <T keyName="import_error_more_button" />
                   )}
                 </Button>
               </Box>
@@ -81,12 +81,11 @@ export const ImportAlertError: FunctionComponent<{
           <AlertTitle>{text}</AlertTitle>
           {params[0] && (
             <T
+              keyName="import_cannot_parse_file_message"
               params={{
                 name: params[0],
               }}
-            >
-              import_cannot_parse_file_message
-            </T>
+            />
           )}
           <Box pt={2}>{moreOpen && params[1]}</Box>
         </Alert>

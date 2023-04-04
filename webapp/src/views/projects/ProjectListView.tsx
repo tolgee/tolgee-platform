@@ -90,12 +90,12 @@ export const ProjectListView = () => {
                       to={LINKS.PROJECT_ADD.build()}
                       color="primary"
                     >
-                      <T>projects_empty_action</T>
+                      <T keyName="projects_empty_action" />
                     </Button>
                   ) : undefined
                 }
               >
-                <T>projects_empty</T>
+                <T keyName="projects_empty" />
               </EmptyListMessage>
             }
           />

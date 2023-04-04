@@ -121,7 +121,7 @@ export const useAvailableFilters = (selectedLanguages?: string[]) => {
                 .filter(([key]) => key !== 'MACHINE_TRANSLATED')
                 .map(([key, value]) => {
                   return {
-                    label: t(value.translationKey),
+                    label: value.translation,
                     value: encodeFilter({
                       filter: 'filterState',
                       value: `${l},${key}`,

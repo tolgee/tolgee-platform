@@ -18,6 +18,6 @@ export const BaseViewAddButton = (props: {
     aria-label="add"
     onClick={props.onClick}
   >
-    <T>global_add_button</T>
+    <T keyName="global_add_button" />
   </Button>
 );

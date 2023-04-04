@@ -58,7 +58,7 @@ export const DisableMfaDialog: FunctionComponent = () => {
       data-cy="mfa-disable-dialog"
     >
       <DialogTitle data-cy="mfa-disable-dialog-title">
-        <T>account-security-mfa-disable-mfa</T>
+        <T keyName="account-security-mfa-disable-mfa" />
       </DialogTitle>
       <DialogContent data-cy="mfa-disable-dialog-content">
         <StandardForm
