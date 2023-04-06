@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.keyBigMeta.BigMeta
+import io.tolgee.model.keyBigMeta.SurroundingKey
 import io.tolgee.model.views.BigMetaView
 import io.tolgee.repository.BigMetaRepository
 import io.tolgee.service.key.KeyService
@@ -32,7 +33,7 @@ class BigMetaService(
       executeInNewTransaction(transactionManager) {
         data.items.map { item ->
           val bigMeta = findOrCreate(item, project).apply {
-            contextData = item.contextData
+            contextData = item.contextData?.map { SurroundingKey(it.name, getSafeNamespace(it.namespace)) }
           }
           getView(save(bigMeta))
         }
@@ -43,7 +44,7 @@ class BigMetaService(
   fun findOrCreate(data: BigMetaItemDto, project: Project): BigMeta {
     return this.find(
       keyName = data.keyName,
-      namespace = data.namespace,
+      namespace = getSafeNamespace(data.namespace),
       location = data.location,
       project = project
     ) ?: BigMeta().apply {
