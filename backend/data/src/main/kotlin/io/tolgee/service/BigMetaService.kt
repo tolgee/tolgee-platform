@@ -10,6 +10,7 @@ import io.tolgee.model.views.BigMetaView
 import io.tolgee.repository.BigMetaRepository
 import io.tolgee.service.key.KeyService
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -47,7 +48,7 @@ class BigMetaService(
       project = project
     ) ?: BigMeta().apply {
       keyName = data.keyName
-      namespace = data.namespace
+      namespace = getSafeNamespace(data.namespace)
       location = data.location
       this.project = project
     }

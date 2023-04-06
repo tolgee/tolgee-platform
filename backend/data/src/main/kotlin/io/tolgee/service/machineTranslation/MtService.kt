@@ -230,16 +230,21 @@ class MtService(
 
     return keys.mapNotNull { key ->
       val sourceTranslation = translations[sourceLanguage.id]?.get(key.namespace to key.name)
+      val sourceTranslationText = sourceTranslation?.text
+
+      if (sourceTranslationText.isNullOrBlank()) {
+        return@mapNotNull null
+      }
 
       // ignore self
-      if (sourceTranslation?.key?.id == keyId) {
+      if (sourceTranslation.key.id == keyId) {
         return@mapNotNull null
       }
 
       ExampleItem(
         key = key.name,
         namespace = key.namespace,
-        source = sourceTranslation?.text ?: "",
+        source = sourceTranslationText,
         target = translations[targetLanguage.id]?.get(key.namespace to key.name)?.text ?: "",
       )
     }

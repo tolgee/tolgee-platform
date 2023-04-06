@@ -29,6 +29,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.util.equalNullable
+import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.query
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -375,7 +376,7 @@ class TranslationService(
       val keyPredicates = keys.map {
         cb.and(
           cb.equal(key.get(Key_.name), it.name),
-          cb.equalNullable(namespace.get(Namespace_.name), it.namespace)
+          cb.equalNullable(namespace.get(Namespace_.name), getSafeNamespace(it.namespace))
         )
       }
 
