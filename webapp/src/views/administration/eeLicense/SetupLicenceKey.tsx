@@ -1,17 +1,24 @@
 import { Box } from '@mui/material';
+
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { T, useTranslate } from '@tolgee/react';
 import { confirmation } from 'tg.hooks/confirmation';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export const SetupLicenceKey = () => {
   const { t } = useTranslate();
+
+  const { refetchInitialData } = useGlobalActions();
 
   const setKeyMutation = useApiMutation({
     url: '/v2/ee-license/set-license-key',
     method: 'put',
     invalidatePrefix: '/v2/ee-license',
+    options: {
+      onSuccess: refetchInitialData,
+    },
   });
 
   const prepareKeyMutation = useApiMutation({
