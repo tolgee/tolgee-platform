@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @RestController
@@ -32,13 +30,11 @@ class TimeMachineController(
     @Schema(description = "Current unix timestamp (milliseconds), or in yyyy-MM-dd HH:mm:ss z")
     dateTimeString: String
   ) {
-    val timestamp = try {
-      dateTimeString.toLong()
-    } catch (e: Exception) {
-      val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
-      ZonedDateTime.parse(dateTimeString, formatter).toInstant().toEpochMilli()
+    try {
+      currentDateProvider.forcedDate = Date(dateTimeString.toLong())
+    } catch (e: NumberFormatException) {
+      currentDateProvider.forceDateString(dateTimeString)
     }
-    currentDateProvider.forcedDate = Date(timestamp)
   }
 
   @DeleteMapping(value = [""])

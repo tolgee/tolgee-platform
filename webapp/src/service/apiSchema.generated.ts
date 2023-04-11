@@ -560,18 +560,18 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -936,10 +936,10 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1034,12 +1034,12 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      userFullName?: string;
+      projectName: string;
+      lastUsedAt?: number;
       username?: string;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
       description: string;
     };
@@ -1413,13 +1413,13 @@ export interface components {
       )[];
       name: string;
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
       slug: string;
       description?: string;
@@ -1501,17 +1501,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1846,10 +1846,10 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1881,6 +1881,8 @@ export interface components {
       extraCreditBalance: number;
       /** How many translations can be stored within your organization. */
       translationLimit: number;
+      /** How many translations can organization use without additional costs. */
+      planTranslations: number;
       /** How many translations are currently stored within your organization. */
       currentTranslations: number;
     };
@@ -1914,12 +1916,12 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      userFullName?: string;
+      projectName: string;
+      lastUsedAt?: number;
       username?: string;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
       description: string;
     };

@@ -199,6 +199,7 @@ class InterceptedEventsManager(
           revision.authorId = userAccount?.id
           try {
             revision.projectId = projectHolder.project.id
+            activityHolder.organizationId = projectHolder.project.organizationOwnerId
           } catch (e: UninitializedPropertyAccessException) {
             logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
           }

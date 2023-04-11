@@ -5,5 +5,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class BaseTranslationsLimitProvider : TranslationsLimitProvider {
-  override fun get(organization: Organization?): Long = -1
+  override fun getLimit(organization: Organization?): Long = -1
+  override fun getPlanTranslations(organization: Organization?): Long = -1
 }

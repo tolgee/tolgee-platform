@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.data.auditing.AuditingHandler
 import org.springframework.data.auditing.DateTimeProvider
 import org.springframework.stereotype.Component
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
 import java.util.*
 
@@ -27,6 +29,12 @@ class CurrentDateProvider(
       field = value
       applicationEventPublisher.publishEvent(OnDateForced(this, value))
     }
+
+  fun forceDateString(dateString: String, pattern: String = "yyyy-MM-dd HH:mm:ss z") {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
+    val parsed = ZonedDateTime.parse(dateString, formatter).toInstant().toEpochMilli()
+    forcedDate = Date(parsed)
+  }
 
   val date: Date
     get() {
