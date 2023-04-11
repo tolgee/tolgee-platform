@@ -1,11 +1,12 @@
 import { useTranslate } from '@tolgee/react';
-import { BaseView } from 'tg.component/layout/BaseView';
+import { styled } from '@mui/material';
+
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { styled } from '@mui/material';
-import { AdministrationNav } from '../AdministrationNav';
-import { SetupLicenceKey } from './SetupLicenceKey';
-import { ActiveEeLicense } from './ActiveEeLicense';
+import { SetupLicenceKey } from './eeLicense/SetupLicenceKey';
+import { ActiveEeLicense } from './eeLicense/ActiveEeLicense';
+import { BaseAdministrationView } from './components/BaseAdministrationView';
+import { LINKS } from 'tg.constants/links';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -30,16 +31,21 @@ export const AdministrationEeLicense = () => {
   return (
     <StyledWrapper>
       <DashboardPage>
-        <BaseView
+        <BaseAdministrationView
           windowTitle={t('administration_ee_license')}
+          navigation={[
+            [
+              t('administration_ee_license'),
+              LINKS.ADMINISTRATION_EE_LICENSE.build(),
+            ],
+          ]}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={infoLoadable.isFetching}
         >
-          <AdministrationNav />
           {info ? <ActiveEeLicense info={info} /> : <SetupLicenceKey />}
-        </BaseView>
+        </BaseAdministrationView>
       </DashboardPage>
     </StyledWrapper>
   );

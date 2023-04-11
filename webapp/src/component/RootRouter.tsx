@@ -7,7 +7,7 @@ import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter'
 import React, { FC } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import { Administration } from 'tg.views/administration/Administration';
+import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { OrganizationRedirectHandler } from './security/OrganizationRedirectHandler';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 
@@ -79,7 +79,7 @@ export const RootRouter = () => (
       <UserSettingsRouter />
     </PrivateRoute>
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
-      <Administration />
+      <AdministrationView />
     </PrivateRoute>
     <RequirePreferredOrganization>
       <Switch>

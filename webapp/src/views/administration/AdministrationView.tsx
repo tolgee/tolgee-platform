@@ -1,12 +1,13 @@
+import { useState } from 'react';
+import { Switch } from 'react-router-dom';
+
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
-import { Switch } from 'react-router-dom';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
-import { useState } from 'react';
-import { AdministrationEeLicense } from './eeLicense/AdministrationEeLicense';
+import { AdministrationEeLicense } from './AdministrationEeLicense';
 
-export const Administration = () => {
+export const AdministrationView = () => {
   const [search, setSearch] = useState('');
 
   return (

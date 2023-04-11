@@ -1,16 +1,22 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
+import {
+  Box,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  styled,
+} from '@mui/material';
+
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { Box, ListItem, ListItemSecondaryAction, styled } from '@mui/material';
-import ListItemText from '@mui/material/ListItemText';
-import { AdministrationNav } from './AdministrationNav';
-import { DebugCustomerAccountButton } from './DebugCustomerAccountButton';
-import { RoleSelector } from './RoleSelector';
-import { DeleteUserButton } from './DeleteUserButton';
-import { ToggleUserButton } from './ToggleUserButton';
+import { LINKS } from 'tg.constants/links';
+import { DebugCustomerAccountButton } from './components/DebugCustomerAccountButton';
+import { RoleSelector } from './components/RoleSelector';
+import { DeleteUserButton } from './components/DeleteUserButton';
+import { ToggleUserButton } from './components/ToggleUserButton';
+import { BaseAdministrationView } from './components/BaseAdministrationView';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -50,17 +56,19 @@ export const AdministrationUsers = ({
   return (
     <StyledWrapper>
       <DashboardPage>
-        <BaseView
+        <BaseAdministrationView
           windowTitle={t('administration_users')}
-          onSearch={setSearch}
+          navigation={[
+            [t('administration_users'), LINKS.ADMINISTRATION_USERS.build()],
+          ]}
           initialSearch={search}
           containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
         >
-          <AdministrationNav />
           <PaginatedHateoasList
+            onSearchChange={setSearch}
             onPageChange={setPage}
             loadable={listPermitted}
             renderItem={(u) => (
@@ -84,7 +92,7 @@ export const AdministrationUsers = ({
               </ListItem>
             )}
           />
-        </BaseView>
+        </BaseAdministrationView>
       </DashboardPage>
     </StyledWrapper>
   );
