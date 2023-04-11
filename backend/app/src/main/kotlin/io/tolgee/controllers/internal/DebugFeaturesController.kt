@@ -2,8 +2,8 @@ package io.tolgee.controllers.internal
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.component.PublicEnabledFeaturesProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.component.enabledFeaturesProvider.PublicEnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.InternalController

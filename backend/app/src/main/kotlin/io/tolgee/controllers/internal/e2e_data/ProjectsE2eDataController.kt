@@ -127,7 +127,7 @@ class ProjectsE2eDataController(
     }
 
     users.forEach {
-      userAccountService.find(username = it.email)?.let {
+      userAccountService.findActive(username = it.email)?.let {
         userAccountRepository.delete(it)
       }
     }

@@ -12,11 +12,12 @@ const StyledText = styled('div')`
   padding-top: ${({ theme }) => theme.spacing(4)};
 `;
 
-type Props = {
+export type SadEmotionMessageProps = {
   hint?: React.ReactNode;
+  height?: string;
 };
 
-export const SadEmotionMessage: React.FC<Props> = (props) => {
+export const SadEmotionMessage: React.FC<SadEmotionMessageProps> = (props) => {
   return (
     <Box
       display="flex"
@@ -32,8 +33,7 @@ export const SadEmotionMessage: React.FC<Props> = (props) => {
       <StyledImage
         src="/images/sleepingMouse.svg"
         draggable="false"
-        width="397px"
-        height="300px"
+        height={props.height || '300px'}
       />
       {props.hint && <Box py={4}>{props.hint}</Box>}
     </Box>

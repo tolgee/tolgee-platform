@@ -61,53 +61,9 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
     }) { data, getLang ->
       Assertions.assertThat(data.computedPermissions.translateLanguageIds).contains(getLang("en"))
       Assertions.assertThat(data.computedPermissions.translateLanguageIds).contains(getLang("de"))
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds).containsExactlyInAnyOrder(
-        getLang("en"),
-        getLang("de")
-      )
+      // can view all languages
+      Assertions.assertThat(data.computedPermissions.viewLanguageIds).isEmpty()
       Assertions.assertThat(data.computedPermissions.stateChangeLanguageIds).isEmpty()
-    }
-  }
-
-  @Test
-  fun `sets user's permissions with translateLanguages and review `() {
-    permissionTestUtil.checkSetPermissionsWithLanguages("REVIEW", { getLang ->
-      "translateLanguages=${getLang("en")}&" +
-        "translateLanguages=${getLang("de")}&" +
-        "viewLanguages=${getLang("de")}&" +
-        "stateChangeLanguages=${getLang("en")}"
-    }) { data, getLangId ->
-      Assertions.assertThat(data.computedPermissions.scopes).containsAll(
-        ProjectPermissionType.TRANSLATE.availableScopes.toList()
-      )
-      Assertions.assertThat(data.computedPermissions.translateLanguageIds)
-        .containsExactlyInAnyOrder(getLangId("en"), getLangId("de"))
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
-        .containsExactlyInAnyOrder(getLangId("de"), getLangId("en"))
-      Assertions.assertThat(data.computedPermissions.stateChangeLanguageIds)
-        .containsExactlyInAnyOrder(getLangId("en"))
-    }
-  }
-
-  @Test
-  fun `sets user's permissions with translateLanguages and view only`() {
-    permissionTestUtil.checkSetPermissionsWithLanguages("TRANSLATE", { getLang ->
-      "translateLanguages=${getLang("de")}&" +
-        "viewLanguages=${getLang("en")}&"
-    }) { data, getLangId ->
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
-        .containsExactlyInAnyOrder(getLangId("de"), getLangId("en"))
-    }
-  }
-
-  @Test
-  fun `view contains at least the scopes from translate and state change`() {
-    permissionTestUtil.checkSetPermissionsWithLanguages("REVIEW", { getLang ->
-      "translateLanguages=${getLang("en")}&" +
-        "stateChangeLanguages=${getLang("de")}"
-    }) { data, getLangId ->
-      Assertions.assertThat(data.computedPermissions.viewLanguageIds)
-        .containsExactlyInAnyOrder(getLangId("en"), getLangId("de"))
     }
   }
 

@@ -1,5 +1,6 @@
 package io.tolgee.service.security
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -9,6 +10,7 @@ import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.AuthenticationException
@@ -51,7 +53,8 @@ class UserAccountService(
   @Lazy
   private val organizationService: OrganizationService,
   private val transactionManager: PlatformTransactionManager,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -62,25 +65,25 @@ class UserAccountService(
 
   private val emailValidator = EmailValidator()
 
-  fun find(username: String): UserAccount? {
-    return userAccountRepository.findNotDeleted(username)
+  fun findActive(username: String): UserAccount? {
+    return userAccountRepository.findActive(username)
   }
 
   operator fun get(username: String): UserAccount {
-    return this.find(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    return this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
-  fun find(id: Long): UserAccount? {
-    return userAccountRepository.findNotDeleted(id)
+  fun findActive(id: Long): UserAccount? {
+    return userAccountRepository.findActive(id)
   }
 
   fun get(id: Long): UserAccount {
-    return this.find(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    return this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
   fun findDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findNotDeleted(id)?.let {
+    return userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }
@@ -89,9 +92,11 @@ class UserAccountService(
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
     return userAccount
   }
 
+  @Transactional
   fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
     dtoToEntity(request).let {
       it.role = role
@@ -105,6 +110,7 @@ class UserAccountService(
   fun delete(id: Long) {
     val user = this.get(id)
     delete(user)
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
@@ -135,6 +141,7 @@ class UserAccountService(
       entityManager.remove(it)
     }
     userAccountRepository.softDeleteUser(userAccount)
+    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
@@ -147,7 +154,7 @@ class UserAccountService(
     get() {
       val username = "___implicit_user"
       return executeInNewTransaction(transactionManager) {
-        userAccountRepository.findByUsername(username).orElseGet {
+        userAccountRepository.findActive(username) ?: let {
           val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
           this.createUser(account)
           this.organizationService.create(OrganizationDto(name = account.name), account)
@@ -308,6 +315,7 @@ class UserAccountService(
     return userAccountRepository.save(userAccount)
   }
 
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
     if (userAccount.accountType == UserAccount.AccountType.LDAP) {
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
@@ -331,7 +339,7 @@ class UserAccountService(
         throw ValidationException(Message.VALIDATION_EMAIL_IS_NOT_VALID)
       }
 
-      this.find(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+      this.findActive(dto.email)?.let { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
       } else {
@@ -365,8 +373,34 @@ class UserAccountService(
     return userAccountRepository.getAllByIdsIncludingDeleted(ids)
   }
 
-  fun findAllPaged(pageable: Pageable, search: String?): Page<UserAccount> {
-    return userAccountRepository.findAllPaged(search, pageable)
+  fun findAllWithDisabledPaged(pageable: Pageable, search: String?): Page<UserAccount> {
+    return userAccountRepository.findAllWithDisabledPaged(search, pageable)
+  }
+
+  fun countAll(): Long {
+    return userAccountRepository.count()
+  }
+
+  fun countAllEnabled(): Long {
+    return userAccountRepository.countAllEnabled()
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
+  fun disable(userId: Long) {
+    val user = this.get(userId)
+    user.disabledAt = currentDateProvider.date
+    this.save(user)
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
+  fun enable(userId: Long) {
+    val user = this.userAccountRepository.findDisabled(userId)
+    user.disabledAt = null
+    this.save(user)
+    this.applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
   val isAnyUserAccount: Boolean

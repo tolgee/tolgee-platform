@@ -26,6 +26,8 @@ open class ActivityHolder(
 
   open var transactionRollbackOnly = false
 
+  open var organizationId: Long? = null
+
   @PreDestroy
   open fun preDestroy() {
     try {

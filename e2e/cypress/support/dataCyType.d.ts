@@ -12,10 +12,13 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-tabs-ee-license" |
         "administration-tabs-organizations" |
         "administration-tabs-users" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
+        "administration-user-disable-user" |
+        "administration-user-enable-user" |
         "administration-user-role-select" |
         "administration-users-list-item" |
         "api-key-expiry-info" |
@@ -38,13 +41,14 @@ declare namespace DataCy {
         "billing-actual-period" |
         "billing-actual-period-end" |
         "billing-extra-credits-buy" |
-        "billing-invoice-number" |
         "billing-limit-exceeded-popover" |
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |
         "billing-plan-subtitle" |
         "billing-plan-title" |
+        "billing-subscriptions-cloud-button" |
+        "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
         "comment" |
         "comment-menu" |

@@ -305,7 +305,8 @@ class OrganizationController(
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentTranslations = currentTranslations,
-      translationLimit = translationsLimitProvider.get(organization)
+      planTranslations = translationsLimitProvider.getPlanTranslations(organization),
+      translationLimit = translationsLimitProvider.getLimit(organization)
     )
   }
 

@@ -23,6 +23,13 @@ export const AdministrationNav = () => {
           label={<T>administration_users</T>}
           value={LINKS.ADMINISTRATION_USERS.build()}
         />
+        <Tab
+          data-cy="administration-tabs-ee-license"
+          component={Link}
+          to={LINKS.ADMINISTRATION_EE_LICENSE.build()}
+          label={<T>administration_ee_license</T>}
+          value={LINKS.ADMINISTRATION_EE_LICENSE.build()}
+        />
       </Tabs>
     </Box>
   );

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
@@ -7,9 +7,9 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import {
   StyledBillingSection,
-  StyledBillingSectionTitle,
   StyledBillingSectionSubtitle,
   StyledBillingSectionSubtitleSmall,
+  StyledBillingSectionTitle,
 } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
@@ -42,6 +42,14 @@ type Props = {
 export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+
+  let availableTranslations =
+    usage.planTranslations - usage.currentTranslations;
+
+  if (availableTranslations < 0) {
+    availableTranslations = 0;
+  }
+
   return (
     <StyledBillingSection gridArea="usage">
       <StyledHeader>
@@ -65,8 +73,8 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
       <StyledMetrics>
         <PlanMetric
           name={t('billing_actual_available_translations')}
-          currentAmount={usage.translationLimit - usage.currentTranslations}
-          totalAmount={usage.translationLimit}
+          availableQuantity={availableTranslations}
+          totalQuantity={usage.planTranslations}
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
@@ -76,8 +84,8 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
               params={{ hint: <MtHint /> }}
             />
           }
-          currentAmount={Math.round(usage.creditBalance / 100)}
-          totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
+          availableQuantity={Math.round(usage.creditBalance / 100)}
+          totalQuantity={Math.round((usage.includedMtCredits || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
         />
         <Box gridColumn="1">{t('billing_credits_refill')}</Box>
@@ -92,7 +100,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
               params={{ hint: <MtHint /> }}
             />
           }
-          currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
+          availableQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (
           <>

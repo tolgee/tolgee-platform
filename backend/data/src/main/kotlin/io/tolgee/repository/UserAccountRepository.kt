@@ -15,17 +15,18 @@ import java.util.*
 interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findByUsername(username: String?): Optional<UserAccount>
 
-  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null")
-  fun findNotDeleted(username: String): UserAccount?
+  @Query("from UserAccount ua where ua.username = :username and ua.deletedAt is null and ua.disabledAt is null")
+  fun findActive(username: String): UserAccount?
 
-  @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null")
-  fun findNotDeleted(id: Long): UserAccount?
+  @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
+  fun findActive(id: Long): UserAccount?
 
   @Modifying
   @Query(
     """update UserAccount ua 
     set 
      ua.deletedAt = now(), 
+     ua.tokensValidNotBefore = now(),
      ua.password = null, 
      ua.totpKey = null, 
      ua.mfaRecoveryCodes = null,
@@ -45,6 +46,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       where ua.thirdPartyAuthId = :thirdPartyAuthId 
         and ua.thirdPartyAuthType = :thirdPartyAuthType
         and ua.deletedAt is null
+        and ua.disabledAt is null
   """
   )
   fun findThirdByThirdParty(
@@ -63,6 +65,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         where (pp is not null or mr is not null) and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%')) 
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+        and ua.deletedAt is null
         group by ua.id, mr.type
         """
   )
@@ -84,6 +87,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+        and ua.deletedAt is null
     """
   )
   fun getAllInProject(
@@ -124,7 +128,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       and userAccount.deletedAt is null
   """
   )
-  fun findAllPaged(search: String?, pageable: Pageable): Page<UserAccount>
+  fun findAllWithDisabledPaged(search: String?, pageable: Pageable): Page<UserAccount>
 
   @Query(
     value = """
@@ -132,4 +136,18 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """
   )
   fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount>
+
+  @Query(
+    value = """
+    select count(ua) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null
+  """
+  )
+  fun countAllEnabled(): Long
+
+  @Query(
+    value = """
+    select ua from UserAccount ua where ua.id = :id and ua.disabledAt is not null
+  """
+  )
+  fun findDisabled(id: Long): UserAccount
 }

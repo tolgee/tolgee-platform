@@ -73,10 +73,16 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     });
     if (config.billing.enabled) {
       menuItems.push({
-        link: LINKS.ORGANIZATION_BILLING.build({
+        link: LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
           [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
         }),
-        label: t('organization_menu_billing'),
+        label: t('organization_menu_subscriptions'),
+      });
+      menuItems.push({
+        link: LINKS.ORGANIZATION_INVOICES.build({
+          [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+        }),
+        label: t('organization_menu_invoices'),
       });
     }
   }

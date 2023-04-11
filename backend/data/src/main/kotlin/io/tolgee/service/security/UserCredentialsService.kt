@@ -26,7 +26,7 @@ class UserCredentialsService @Autowired constructor(
   fun checkUserCredentials(username: String, password: String): UserAccount {
     if (configuration.authentication.ldap.enabled) {
       val details = checkLdapUserCredentials(username, password)
-      val account = userAccountService.find(details.username) ?: let {
+      val account = userAccountService.findActive(details.username) ?: let {
         val userAccount = UserAccount(
           username = details.username,
           accountType = UserAccount.AccountType.LDAP
@@ -41,7 +41,7 @@ class UserCredentialsService @Autowired constructor(
       return account
     }
 
-    val userAccount = userAccountService.find(username)
+    val userAccount = userAccountService.findActive(username)
       ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
     if (userAccount.accountType == UserAccount.AccountType.LDAP)

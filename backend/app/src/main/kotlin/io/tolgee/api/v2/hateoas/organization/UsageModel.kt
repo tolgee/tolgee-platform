@@ -36,6 +36,11 @@ open class UsageModel(
   val translationLimit: Long,
 
   @Schema(
+    description = """How many translations can organization use without additional costs."""
+  )
+  val planTranslations: Long,
+
+  @Schema(
     description = """How many translations are currently stored within your organization."""
   )
   val currentTranslations: Long,

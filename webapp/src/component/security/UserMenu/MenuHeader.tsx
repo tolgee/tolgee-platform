@@ -2,7 +2,9 @@ import { Box, styled } from '@mui/material';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 
-type UserAccountModel = components['schemas']['UserAccountModel'];
+type UserAccountModel =
+  | components['schemas']['UserAccountModel']
+  | components['schemas']['PrivateUserAccountModel'];
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
 const StyledContainer = styled('div')`
@@ -23,7 +25,7 @@ const StyledTitle = styled(Box)`
 `;
 
 type Props = {
-  entity: Omit<UserAccountModel, 'deleted'> | OrganizationModel;
+  entity: UserAccountModel | OrganizationModel;
   type: 'USER' | 'ORG';
   title?: string;
   subtitle?: string;

@@ -1,0 +1,109 @@
+package io.tolgee.ee
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.constants.Feature
+import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
+import io.tolgee.ee.api.v2.hateoas.SelfHostedEePlanModel
+import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
+import io.tolgee.ee.api.v2.hateoas.uasge.MeteredUsageModel
+import io.tolgee.ee.api.v2.hateoas.uasge.UsageItemModel
+import io.tolgee.ee.data.SubscriptionStatus
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
+import org.springframework.web.client.RestTemplate
+
+@Component
+class EeLicensingMockRequestUtil {
+  @MockBean
+  @Autowired
+  lateinit var restTemplate: RestTemplate
+
+  fun mock(mock: Mocker.() -> Unit) {
+    val mocker = Mocker(restTemplate)
+    mock(mocker)
+  }
+
+  final val mockedPlan = SelfHostedEePlanModel(
+    id = 19919,
+    name = "Tolgee",
+    public = true,
+    enabledFeatures = arrayOf(Feature.PREMIUM_SUPPORT),
+    pricePerSeat = 20.toBigDecimal(),
+    subscriptionPrice = 200.toBigDecimal(),
+  )
+
+  final val mockedSubscriptionResponse = SelfHostedEeSubscriptionModel(
+    id = 19919,
+    currentPeriodEnd = 1624313600000,
+    createdAt = 1624313600000,
+    plan = mockedPlan,
+    status = SubscriptionStatus.ACTIVE,
+    licenseKey = "mocked_license_key",
+    estimatedCosts = 200.toBigDecimal(),
+  )
+
+  final val mockedPrepareResponse = PrepareSetEeLicenceKeyModel().apply {
+    plan = mockedPlan
+    usage = MeteredUsageModel(
+      subscriptionPrice = 200.toBigDecimal(),
+      total = 250.toBigDecimal(),
+      periods = listOf(
+        UsageItemModel(
+          from = 1624313600000,
+          to = 1624313600000,
+          total = 250.toBigDecimal(),
+          usedQuantity = 2,
+          unusedQuantity = 10,
+          usedQuantityOverPlan = 0
+        )
+      ),
+    )
+  }
+
+  class Mocker(private val restTemplate: RestTemplate) {
+    data class VerifyTools(
+      val captor: KArgumentCaptor<HttpEntity<*>> = argumentCaptor()
+    )
+
+    data class Definition(
+      var url: (String) -> Boolean = { true },
+      var method: (HttpMethod) -> Boolean = { true },
+    )
+
+    private lateinit var answer: () -> ResponseEntity<String>
+
+    private val verifyTools: VerifyTools = VerifyTools()
+
+    fun whenReq(fn: Definition.() -> Unit) {
+      val definition = Definition().apply(fn)
+      whenever(
+        restTemplate.exchange(
+          argThat<String> { definition.url(this) },
+          argThat { definition.method(this) },
+          verifyTools.captor.capture(),
+          eq(String::class.java)
+        )
+      ).thenAnswer { answer() }
+    }
+
+    fun thenAnswer(response: () -> Any) {
+      answer = {
+        ResponseEntity(jacksonObjectMapper().writeValueAsString(response()), HttpStatus.OK)
+      }
+    }
+
+    fun verify(fn: VerifyTools.() -> Unit) {
+      verifyTools.fn()
+    }
+  }
+}

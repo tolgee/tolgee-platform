@@ -27,7 +27,7 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
-            library('stripe', 'com.stripe', 'stripe-java').version('20.88.0')
+            library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
             library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
             library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4')
             library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
@@ -76,5 +76,8 @@ project(':testing').projectDir = new File('backend/testing')
 include ':misc'
 project(':misc').projectDir = new File('backend/misc')
 
-include ':ee'
-project(':ee').projectDir = new File('ee/backend')
+include ':ee-app'
+project(':ee-app').projectDir = new File('ee/backend/app')
+
+include ':ee-test'
+project(':ee-test').projectDir = new File('ee/backend/tests')

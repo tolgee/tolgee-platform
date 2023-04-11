@@ -157,7 +157,7 @@ class OrganizationRoleService(
   }
 
   fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
-    val user = userAccountService.find(userId) ?: throw NotFoundException()
+    val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)

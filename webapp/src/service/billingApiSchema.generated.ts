@@ -7,6 +7,9 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/update-subscription": {
     put: operations["updateSubscription"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/refresh-subscriptions": {
+    put: operations["refreshSelfHostedEeSubscriptions"];
+  };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
   };
@@ -19,6 +22,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions": {
+    get: operations["getSelfHostedEeSubscriptions"];
+    post: operations["setupEeSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
@@ -28,8 +35,17 @@ export interface paths {
   "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/expected-usage": {
+    get: operations["getExpectedUsage"];
+  };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/plans": {
+    get: operations["getSelfHostedPlans"];
+  };
   "/v2/organizations/{organizationId}/billing/plans": {
-    get: operations["getPlans_1"];
+    get: operations["getCloudPlans"];
+  };
+  "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage": {
+    get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
@@ -48,12 +64,48 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/active-plan": {
     get: operations["getActivePlan"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}": {
+    delete: operations["cancelEeSubscription"];
+  };
 }
 
 export interface components {
   schemas: {
     UpdateSubscriptionRequest: {
       token: string;
+    };
+    CollectionModelSelfHostedEeSubscriptionModel: {
+      _embedded?: {
+        subscriptions?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+      };
+    };
+    SelfHostedEePlanModel: {
+      id: number;
+      name: string;
+      public: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
+      includedSeats: number;
+      pricePerSeat: number;
+      subscriptionPrice: number;
+    };
+    SelfHostedEeSubscriptionModel: {
+      id: number;
+      currentPeriodEnd?: number;
+      createdAt: number;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
+      licenseKey?: string;
+      estimatedCosts?: number;
     };
     ActivePlanModel: {
       id: number;
@@ -62,6 +114,17 @@ export interface components {
       includedMtCredits?: number;
       monthlyPrice: number;
       yearlyPrice: number;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
@@ -93,6 +156,10 @@ export interface components {
     SubscribeModel: {
       url: string;
     };
+    SetupEeRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+    };
     BuyMoreCreditsRequest: {
       priceId: number;
       amount: number;
@@ -113,6 +180,17 @@ export interface components {
       monthlyPrice: number;
       yearlyPrice: number;
       free: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+      )[];
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -124,6 +202,25 @@ export interface components {
       price: number;
       amount: number;
     };
+    MeteredUsageModel: {
+      subscriptionPrice: number;
+      periods: components["schemas"]["UsageItemModel"][];
+      total: number;
+    };
+    UsageItemModel: {
+      from: number;
+      to: number;
+      milliseconds: number;
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    CollectionModelSelfHostedEePlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["SelfHostedEePlanModel"][];
+      };
+    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -131,8 +228,10 @@ export interface components {
       createdAt: number;
       /** The Total amount with tax */
       total: number;
+      taxRatePercentage?: number;
       /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
       pdfReady: boolean;
+      hasUsage: boolean;
     };
     PageMetadata: {
       size?: number;
@@ -190,6 +289,33 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+      };
+    };
+  };
+  refreshSelfHostedEeSubscriptions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -307,6 +433,65 @@ export interface operations {
       };
     };
   };
+  getSelfHostedEeSubscriptions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setupEeSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SubscribeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetupEeRequest"];
+      };
+    };
+  };
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
       path: {
@@ -383,7 +568,62 @@ export interface operations {
       };
     };
   };
-  getPlans_1: {
+  getExpectedUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["MeteredUsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSelfHostedPlans: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelSelfHostedEePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getCloudPlans: {
     parameters: {
       path: {
         organizationId: number;
@@ -394,6 +634,34 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+        invoiceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["MeteredUsageModel"];
         };
       };
       /** Bad Request */
@@ -542,6 +810,30 @@ export interface operations {
           "*/*": components["schemas"]["ActivePlanModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  cancelEeSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

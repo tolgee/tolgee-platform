@@ -31,7 +31,7 @@ class SignUpService(
       invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
     }
 
-    userAccountService.find(dto.email)?.let {
+    userAccountService.findActive(dto.email)?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
