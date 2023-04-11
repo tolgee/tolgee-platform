@@ -1,7 +1,15 @@
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, styled } from '@mui/material';
+import { Box, Typography, styled } from '@mui/material';
+import { PlanFeature } from './PlanFeature';
+
+const StyledListWrapper = styled(Box)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+  margin-top: 8px;
+  gap: 16px;
+`;
 
 export const IncludedFeatures: FC<{
   features: components['schemas']['SelfHostedEePlanModel']['enabledFeatures'];
@@ -10,7 +18,7 @@ export const IncludedFeatures: FC<{
 
   const featuresMap: Record<
     components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][0],
-    ReactNode
+    string
   > = {
     GRANULAR_PERMISSIONS: t(
       'billing_subscriptions_granular_permissions_feature'
@@ -31,28 +39,19 @@ export const IncludedFeatures: FC<{
 
   return (
     <Box>
-      <Box mt={1} sx={{ fontSize: '12px', fontStyle: 'italic' }}>
+      <Typography
+        mt={1}
+        mb={2}
+        sx={{ fontSize: '12px', fontStyle: 'italic' }}
+        color="primary"
+      >
         <T keyName="billing_subscriptions_plan_includes_title" />
-      </Box>
+      </Typography>
       <StyledListWrapper>
         {features.map((feature) => (
-          <StyledListItem key={feature}>{featuresMap[feature]}</StyledListItem>
+          <PlanFeature key={feature} name={featuresMap[feature]} />
         ))}
       </StyledListWrapper>
     </Box>
   );
 };
-
-const StyledListWrapper = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
-  margin-top: 8px;
-  gap: 16px;
-`;
-
-const StyledListItem = styled(Box)`
-  :before {
-    content: '✓';
-    padding-right: 4px;
-  }
-`;

@@ -39,7 +39,7 @@ export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
           </Box>
           <ClipboardCopyInput
             value={licenseKey}
-            inputProps={{ style: { width: 380 } }}
+            inputProps={{ style: { width: 420 } }}
           />
         </DialogContent>
         <DialogActions>
