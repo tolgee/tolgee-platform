@@ -12,9 +12,6 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
-        "administration-tabs-ee-license" |
-        "administration-tabs-organizations" |
-        "administration-tabs-users" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
         "administration-user-disable-user" |

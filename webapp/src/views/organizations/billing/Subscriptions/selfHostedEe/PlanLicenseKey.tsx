@@ -1,7 +1,9 @@
 import { FC, useState } from 'react';
 import {
   Box,
+  Button,
   Dialog,
+  DialogActions,
   DialogContent,
   IconButton,
   Tooltip,
@@ -35,8 +37,16 @@ export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
               <T keyName="active-plan-license-key-caption" />
             </Typography>
           </Box>
-          <ClipboardCopyInput value={licenseKey} />
+          <ClipboardCopyInput
+            value={licenseKey}
+            inputProps={{ style: { width: 380 } }}
+          />
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>
+            <T keyName="global_close_button" />
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );
