@@ -104,9 +104,11 @@ class EeSubscriptionService(
       String::class.java
     )
 
-    return jacksonObjectMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .readValue(stringResponse.body, T::class.java)
+    return stringResponse.body?.let { body ->
+      jacksonObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .readValue(body, T::class.java)
+    }
   }
 
   @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
