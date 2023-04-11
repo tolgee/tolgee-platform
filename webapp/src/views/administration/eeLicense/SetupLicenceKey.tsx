@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -72,11 +72,8 @@ export const SetupLicenceKey = () => {
       <StandardForm
         initialValues={{ licenseKey: '' }}
         onSubmit={onsSubmit()}
-        submitButtons={
-          <Button variant="contained" color="primary" type="submit">
-            {t('ee_licence_key_apply')}
-          </Button>
-        }
+        submitButtonInner={t('ee_licence_key_apply')}
+        hideCancel
       >
         <TextField label={t('ee_licence_key_input_label')} name="licenseKey" />
       </StandardForm>

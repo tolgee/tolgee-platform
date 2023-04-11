@@ -45,7 +45,7 @@ export const IncludedFeatures: FC<{
 
 const StyledListWrapper = styled(Box)`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
   margin-top: 8px;
   gap: 16px;
 `;
