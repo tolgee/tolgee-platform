@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 
 export const Plan = styled('div')`
+  display: grid;
   position: relative;
   background: ${({ theme }) => theme.palette.billingPlan.main};
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};

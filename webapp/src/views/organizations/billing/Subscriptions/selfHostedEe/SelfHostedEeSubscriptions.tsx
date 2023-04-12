@@ -13,7 +13,7 @@ import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription
 
 const StyledShopping = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
   gap: 16px;
   margin: 16px 0px;
   @media (max-width: 600px) {
@@ -24,7 +24,7 @@ const StyledShopping = styled('div')`
 const StyledActive = styled('div')`
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(550px, 100%), 1fr));
 `;
 
 export const SelfHostedEeSubscriptions = () => {

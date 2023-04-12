@@ -4,13 +4,13 @@ import {
   Plan,
   PlanContent,
 } from '../../organizations/billing/Subscriptions/common/Plan';
-import { StyledActionArea } from '../../organizations/billing/Subscriptions/cloud/Plans/PlanActionButton';
 import { ActivePlanTitle } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/ActivePlanTitle';
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
 import { PlanInfoArea } from '../../organizations/billing/Subscriptions/common/PlanInfo';
 import { IncludedFeatures } from '../../organizations/billing/Subscriptions/selfHostedEe/IncludedFeatures';
 import { useTranslate } from '@tolgee/react';
+import { Box } from '@mui/material';
 
 export const ActiveEeLicense: FC<{
   info: components['schemas']['EeSubscriptionModel'];
@@ -34,10 +34,15 @@ export const ActiveEeLicense: FC<{
             t('billing_subscriptions_ee_license_inactive')
           )}
         </PlanInfoArea>
-        <StyledActionArea>
+        <Box
+          display="flex"
+          gap={1}
+          gridArea="price / price / span 1 / span 2"
+          justifyContent="end"
+        >
           <RefreshButton />
           <ReleaseKeyButton />
-        </StyledActionArea>
+        </Box>
       </PlanContent>
     </Plan>
   );
