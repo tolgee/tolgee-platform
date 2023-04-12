@@ -28,6 +28,8 @@ export const ReleaseKeyButton = () => {
       onClick={onClick}
       loading={releaseKey.isLoading}
       variant="outlined"
+      size="small"
+      color="error"
     >
       <T keyName="ee-license-release-key-button" />
     </LoadingButton>

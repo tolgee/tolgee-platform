@@ -16,6 +16,7 @@ declare namespace DataCy {
         "administration-user-delete-user" |
         "administration-user-disable-user" |
         "administration-user-enable-user" |
+        "administration-user-menu" |
         "administration-user-role-select" |
         "administration-users-list-item" |
         "api-key-expiry-info" |
