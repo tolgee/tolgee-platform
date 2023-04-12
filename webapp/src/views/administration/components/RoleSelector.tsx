@@ -51,6 +51,7 @@ export const RoleSelector: FC<{
       size="small"
       value={user.globalServerRole}
       onChange={(e) => setRole(user.id, e.target.value as any)}
+      inputProps={{ style: { padding: 0 } }}
     >
       <MenuItem value={'USER'}>
         <T>administration_user_role_user</T>

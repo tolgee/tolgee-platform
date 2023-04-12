@@ -1,7 +1,5 @@
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { Refresh } from '@mui/icons-material';
-import { Tooltip } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 
@@ -21,7 +19,7 @@ export const RefreshButton = () => {
       {},
       {
         onSuccess: () =>
-          successMessage(t('ee-license-refresh-success-message')),
+          successMessage(<T keyName="ee-license-refresh-success-message" />),
       }
     );
   }
@@ -31,10 +29,9 @@ export const RefreshButton = () => {
       onClick={onClick}
       loading={refreshMutation.isLoading}
       variant="outlined"
+      size="small"
     >
-      <Tooltip title={t('ee-license-refresh-tooltip')}>
-        <Refresh />
-      </Tooltip>
+      {t('ee-license-refresh-tooltip')}
     </LoadingButton>
   );
 };
