@@ -6,9 +6,9 @@ import { Credits } from './Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrganization } from '../../../useOrganization';
-import { useState } from 'react';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -20,7 +20,9 @@ const StyledShopping = styled('div')`
 export const CloudSubscriptions = () => {
   const organization = useOrganization();
 
-  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
+  const [period, setPeriod] = useUrlSearchState('plan', {
+    defaultVal: 'YEARLY',
+  });
   const creditBalance = useOrganizationCreditBalance();
 
   const usage = useApiQuery({
@@ -78,7 +80,7 @@ export const CloudSubscriptions = () => {
                 plans={plansLoadable.data._embedded.plans}
                 activePlan={activePlan.data}
                 onPeriodChange={(period) => setPeriod(period)}
-                period={period}
+                period={period as BillingPeriodType}
               />
               <Credits />
             </StyledShopping>
