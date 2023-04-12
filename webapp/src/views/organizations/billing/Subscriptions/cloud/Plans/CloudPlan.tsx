@@ -67,7 +67,7 @@ export const CloudPlan: FC<Props> = ({
         <CloudPlanInfo plan={plan} />
 
         <Box minHeight="19px" gridArea="period-switch">
-          {!plan.free && (
+          {Boolean(plan.monthlyPrice || plan.yearlyPrice) && (
             <PeriodSwitch value={period} onChange={onPeriodChange} />
           )}
         </Box>
