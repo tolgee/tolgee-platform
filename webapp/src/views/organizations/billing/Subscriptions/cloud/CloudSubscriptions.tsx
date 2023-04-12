@@ -8,7 +8,7 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrganization } from '../../../useOrganization';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { useState } from 'react';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -20,9 +20,7 @@ const StyledShopping = styled('div')`
 export const CloudSubscriptions = () => {
   const organization = useOrganization();
 
-  const [period, setPeriod] = useUrlSearchState('plan', {
-    defaultVal: 'YEARLY',
-  });
+  const [period, setPeriod] = useState<BillingPeriodType>();
   const creditBalance = useOrganizationCreditBalance();
 
   const usage = useApiQuery({
@@ -49,9 +47,12 @@ export const CloudSubscriptions = () => {
     },
     options: {
       onSuccess(data) {
-        if (data.currentBillingPeriod) {
-          setPeriod(data.currentBillingPeriod);
-        }
+        if (!period)
+          if (data.currentBillingPeriod) {
+            setPeriod(data.currentBillingPeriod);
+          } else {
+            setPeriod('YEARLY');
+          }
       },
     },
   });
@@ -63,7 +64,8 @@ export const CloudSubscriptions = () => {
       {plansLoadable.data?._embedded?.plans &&
         activePlan.data &&
         usage.data &&
-        creditBalance.data && (
+        creditBalance.data &&
+        period && (
           <>
             <Box mb={2}>
               <CurrentUsage
@@ -80,7 +82,7 @@ export const CloudSubscriptions = () => {
                 plans={plansLoadable.data._embedded.plans}
                 activePlan={activePlan.data}
                 onPeriodChange={(period) => setPeriod(period)}
-                period={period as BillingPeriodType}
+                period={period}
               />
               <Credits />
             </StyledShopping>

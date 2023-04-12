@@ -9,7 +9,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const history = useHistory();
 
   useEffect(() => {
-    history.push(
+    history.replace(
       LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }) + search
