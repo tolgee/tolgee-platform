@@ -1,5 +1,4 @@
 import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
-import { CustomerPortal } from '../../CustomerPortal/CustomerPortal';
 import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { BillingPlans } from './Plans/BillingPlans';
@@ -10,7 +9,6 @@ import { useOrganization } from '../../../useOrganization';
 import { useState } from 'react';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { StyledBillingSectionTitle } from '../../BillingSection';
 
 const StyledShopping = styled('div')`
   display: grid;
