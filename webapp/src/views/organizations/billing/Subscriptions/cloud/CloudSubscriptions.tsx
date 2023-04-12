@@ -1,6 +1,6 @@
 import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
 import { CustomerPortal } from '../../CustomerPortal/CustomerPortal';
-import { styled, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { BillingPlans } from './Plans/BillingPlans';
 import { Credits } from './Plans/Credits/Credits';
@@ -10,32 +10,13 @@ import { useOrganization } from '../../../useOrganization';
 import { useState } from 'react';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-
-const StyledCurrent = styled('div')`
-  display: grid;
-  grid-template-areas: 'usage customerPortal';
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  justify-content: space-between;
-  gap: 32px 24px;
-  margin-bottom: 32px;
-  @media (max-width: 1400px) {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'usage'
-      'customerPortal'
-      'invoices';
-  }
-`;
+import { StyledBillingSectionTitle } from '../../BillingSection';
 
 const StyledShopping = styled('div')`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
   gap: 16px;
   margin: 16px 0px;
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 export const CloudSubscriptions = () => {
@@ -84,15 +65,14 @@ export const CloudSubscriptions = () => {
         usage.data &&
         creditBalance.data && (
           <>
-            <StyledCurrent>
+            <Box mb={2}>
               <CurrentUsage
                 activePlan={activePlan.data}
                 usage={usage.data}
                 balance={creditBalance.data}
               />
-              <CustomerPortal />
-            </StyledCurrent>
-            <Typography variant="h6">
+            </Box>
+            <Typography variant="h6" mt={2}>
               <T>organization_pricing_plans_title</T>
             </Typography>
             <StyledShopping>

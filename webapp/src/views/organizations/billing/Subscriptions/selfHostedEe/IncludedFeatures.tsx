@@ -6,7 +6,7 @@ import { PlanFeature } from './PlanFeature';
 
 const StyledListWrapper = styled(Box)`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   margin-top: 8px;
   gap: 16px;
 `;

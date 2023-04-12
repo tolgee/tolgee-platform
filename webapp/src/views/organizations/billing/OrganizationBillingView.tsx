@@ -14,7 +14,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }) + search
     );
-  });
+  }, []);
 
   return null;
 };
