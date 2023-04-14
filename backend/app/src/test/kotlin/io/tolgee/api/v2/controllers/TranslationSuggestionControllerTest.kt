@@ -20,7 +20,7 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.apache.commons.lang3.time.DateUtils
+import io.tolgee.util.addMonths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -298,10 +298,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 1) }
+    mockCurrentDate { Date().addMonths(1) }
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 2) }
+    mockCurrentDate { Date().addMonths(2) }
     testMtCreditConsumption()
   }
 
