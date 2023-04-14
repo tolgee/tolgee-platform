@@ -9,8 +9,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.addMonths
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
-import org.apache.commons.lang3.time.DateUtils
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
@@ -106,7 +106,7 @@ class MtCreditBucketService(
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
-    return DateUtils.addMonths(this.refilled, 1)
+    return this.refilled.addMonths(1)
   }
 
   fun refillBucket(bucket: MtCreditBucket) {
