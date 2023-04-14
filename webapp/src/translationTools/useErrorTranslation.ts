@@ -61,6 +61,10 @@ export function useErrorTranslation() {
         return t('feature_not_enabled');
       case 'license_key_not_found':
         return t('license_key_not_found');
+      case 'plan_translation_limit_exceeded':
+        return t('plan_translation_limit_exceeded');
+      case 'organization_already_subscribed':
+        return t('organization_already_subscribed');
       default:
         return code;
     }
