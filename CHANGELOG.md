@@ -1,3 +1,10 @@
+## [3.11.7](https://github.com/tolgee/tolgee-platform/compare/v3.11.6...v3.11.7) (2023-04-14)
+
+
+### Bug Fixes
+
+* Fix billing error messages ([#1657](https://github.com/tolgee/tolgee-platform/issues/1657)) ([758d71a](https://github.com/tolgee/tolgee-platform/commit/758d71a320e33d9ba55cfd622b058d68649bb80c))
+
 ## [3.11.6](https://github.com/tolgee/tolgee-platform/compare/v3.11.5...v3.11.6) (2023-04-04)
 
 

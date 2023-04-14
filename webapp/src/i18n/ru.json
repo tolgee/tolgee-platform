@@ -72,6 +72,7 @@
   "administration_organization_projects" : "Проекты",
   "administration_organizations" : "Организации",
   "administration_organizations_settings" : "Настройки",
+  "administration_title" : "Администрирование сервера",
   "administration_user_debug" : "Отладка аккаунта",
   "administration_user_deleted_message" : "Пользователь удален",
   "administration_user_disabled_message" : "Пользователь отключен",
