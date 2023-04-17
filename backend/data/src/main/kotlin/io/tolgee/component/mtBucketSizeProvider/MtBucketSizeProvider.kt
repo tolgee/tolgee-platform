@@ -4,4 +4,6 @@ import io.tolgee.model.Organization
 
 interface MtBucketSizeProvider {
   fun getSize(organization: Organization?): Long
+
+  fun getPayAsYouGoMaxCredits(organization: Organization?): Long
 }

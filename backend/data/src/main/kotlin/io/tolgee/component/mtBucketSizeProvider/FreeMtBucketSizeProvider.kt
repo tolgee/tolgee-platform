@@ -9,4 +9,5 @@ class FreeMtBucketSizeProvider(
   private val machineTranslationProperties: MachineTranslationProperties
 ) : MtBucketSizeProvider {
   override fun getSize(organization: Organization?): Long = machineTranslationProperties.freeCreditsAmount
+  override fun getPayAsYouGoMaxCredits(organization: Organization?): Long = 0
 }

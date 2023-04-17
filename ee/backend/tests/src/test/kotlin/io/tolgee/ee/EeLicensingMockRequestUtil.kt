@@ -6,7 +6,7 @@ import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEePlanModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
 import io.tolgee.ee.api.v2.hateoas.uasge.MeteredUsageModel
-import io.tolgee.ee.api.v2.hateoas.uasge.UsageItemModel
+import io.tolgee.ee.api.v2.hateoas.uasge.ProportionalUsageItemModel
 import io.tolgee.ee.data.SubscriptionStatus
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argThat
@@ -56,9 +56,8 @@ class EeLicensingMockRequestUtil {
     plan = mockedPlan
     usage = MeteredUsageModel(
       subscriptionPrice = 200.toBigDecimal(),
-      total = 250.toBigDecimal(),
-      periods = listOf(
-        UsageItemModel(
+      seatsPeriods = listOf(
+        ProportionalUsageItemModel(
           from = 1624313600000,
           to = 1624313600000,
           total = 250.toBigDecimal(),
@@ -67,6 +66,9 @@ class EeLicensingMockRequestUtil {
           usedQuantityOverPlan = 0
         )
       ),
+      total = 250.toBigDecimal(),
+      translationsPeriods = listOf(),
+      credits = null
     )
   }
 

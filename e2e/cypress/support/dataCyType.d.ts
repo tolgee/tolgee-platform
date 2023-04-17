@@ -380,4 +380,6 @@ declare namespace DataCy {
         "user-menu-server-administration" |
         "user-menu-user-settings" |
         "user-profile"
+}er-menu-user-settings" |
+        "user-profile"
 }
