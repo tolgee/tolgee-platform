@@ -38,7 +38,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun editLanguage() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
-    val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+    val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
     val languageDTO = LanguageDto(
       name = "newEnglish", tag = "newEn", originalName = "newOriginalEnglish",
       flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
@@ -72,7 +72,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     executeInNewTransaction {
       val base = dbPopulator.createBase(generateUniqueString())
       val project = base.project
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performDelete(project.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
     }
@@ -85,7 +85,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       val base = dbPopulator.createBase(generateUniqueString())
       this.userAccount = base.userAccount
       this.projectSupplier = { base.project }
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performProjectAuthDelete("languages/${deutsch.id}", null)
         .andExpect(MockMvcResultMatchers.status().isOk)
       Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
@@ -99,7 +99,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       val base = dbPopulator.createBase(generateUniqueString())
       this.userAccount = base.userAccount
       this.projectSupplier = { base.project }
-      val deutsch = project.getLanguage("de").orElseThrow { NotFoundException() }
+      val deutsch = project.findLanguageOptional("de").orElseThrow { NotFoundException() }
       performProjectAuthDelete("languages/${deutsch.id}", null).andIsForbidden
     }
   }
@@ -109,7 +109,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase(generateUniqueString())
     executeInNewTransaction {
       val project = projectService.get(base.project.id)
-      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
       project.baseLanguage = en
       projectService.save(project)
 
@@ -124,7 +124,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase(generateUniqueString())
     executeInNewTransaction {
       val project = projectService.get(base.project.id)
-      val en = project.getLanguage("en").orElseThrow { NotFoundException() }
+      val en = project.findLanguageOptional("en").orElseThrow { NotFoundException() }
       project.baseLanguage = null
       projectService.save(project)
       performDelete(project.id, en.id).andIsBadRequest.andAssertThatJson {

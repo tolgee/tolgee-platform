@@ -6,19 +6,16 @@ import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
-import io.tolgee.util.executeInNewTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
 @Service
 class ActivityService(
   private val entityManager: EntityManager,
-  private val transactionManager: PlatformTransactionManager,
   private val applicationContext: ApplicationContext,
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
 ) {
@@ -27,14 +24,12 @@ class ActivityService(
     val activityRevision = activityHolder.activityRevision ?: return
     activityRevision.modifiedEntities = activityHolder.modifiedEntities.values.flatMap { it.values }.toMutableList()
 
-    executeInNewTransaction(transactionManager) {
-      entityManager.persist(activityRevision)
-      activityRevision.describingRelations.forEach {
-        entityManager.persist(it)
-      }
-      activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
-        entityManager.persist(activityModifiedEntity)
-      }
+    entityManager.persist(activityRevision)
+    activityRevision.describingRelations.forEach {
+      entityManager.persist(it)
+    }
+    activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
+      entityManager.persist(activityModifiedEntity)
     }
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }

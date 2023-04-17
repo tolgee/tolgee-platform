@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import java.util.*
@@ -93,8 +94,16 @@ class Project(
       this.organizationOwner = organizationOwner
     }
 
-  fun getLanguage(tag: String): Optional<Language> {
+  fun findLanguageOptional(tag: String): Optional<Language> {
     return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()
+  }
+
+  fun findLanguage(tag: String): Language? {
+    return findLanguageOptional(tag).orElse(null)
+  }
+
+  fun getLanguage(tag: String): Language {
+    return findLanguage(tag) ?: throw NotFoundException()
   }
 
   companion object {

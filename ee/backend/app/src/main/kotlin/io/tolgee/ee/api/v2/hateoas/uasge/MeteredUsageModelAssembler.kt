@@ -1,5 +1,7 @@
 package io.tolgee.ee.api.v2.hateoas.uasge
 
+import io.tolgee.ee.data.ProportionalUsagePeriod
+import io.tolgee.ee.data.SumUsageItem
 import io.tolgee.ee.data.UsageData
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
@@ -9,18 +11,34 @@ class MeteredUsageModelAssembler : RepresentationModelAssembler<UsageData, Meter
   override fun toModel(data: UsageData): MeteredUsageModel {
     return MeteredUsageModel(
       subscriptionPrice = data.subscriptionPrice,
-      periods = data.usage.map {
-        UsageItemModel(
-          from = it.from,
-          to = it.to,
-          milliseconds = it.milliseconds,
-          total = it.total,
-          unusedQuantity = it.unusedQuantity,
-          usedQuantity = it.usedQuantity,
-          usedQuantityOverPlan = it.usedQuantityOverPlan,
-        )
-      },
-      total = data.usage.sumOf { it.total } + data.subscriptionPrice
+      seatsPeriods = data.seatsUsage.map(this::periodToModel),
+      translationsPeriods = data.translationsUsage.map(this::periodToModel),
+      credits = data.creditsUsage?.let { sumToModel(it) },
+      total = data.seatsUsage.sumOf { it.total } + data.translationsUsage.sumOf { it.total } + (
+        data.subscriptionPrice
+          ?: 0.toBigDecimal()
+        ),
+    )
+  }
+
+  fun sumToModel(sum: SumUsageItem): SumUsageItemModel {
+    return SumUsageItemModel(
+      total = sum.total,
+      unusedQuantity = sum.unusedQuantity,
+      usedQuantity = sum.usedQuantity,
+      usedQuantityOverPlan = sum.usedQuantityOverPlan,
+    )
+  }
+
+  fun periodToModel(period: ProportionalUsagePeriod): ProportionalUsageItemModel {
+    return ProportionalUsageItemModel(
+      from = period.from,
+      to = period.to,
+      milliseconds = period.milliseconds,
+      total = period.total,
+      unusedQuantity = period.unusedQuantity,
+      usedQuantity = period.usedQuantity,
+      usedQuantityOverPlan = period.usedQuantityOverPlan,
     )
   }
 }
