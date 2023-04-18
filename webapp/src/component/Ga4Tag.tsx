@@ -28,7 +28,6 @@ export const loadScript = (tagId: string) => {
   /* START - COPIED FROM ANALYTICS INSTRUCTIONS */
   // @ts-ignore
   window.dataLayer = window.dataLayer || [];
-  // eslint-disable-next-line no-inner-declarations
   function gtag(...args): void {
     // @ts-ignore
     dataLayer.push(args);
