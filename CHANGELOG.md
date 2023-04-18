@@ -1,3 +1,10 @@
+## [3.12.1](https://github.com/tolgee/tolgee-platform/compare/v3.12.0...v3.12.1) (2023-04-18)
+
+
+### Bug Fixes
+
+* translation tools prevent long urls ([#1665](https://github.com/tolgee/tolgee-platform/issues/1665)) ([531f2d2](https://github.com/tolgee/tolgee-platform/commit/531f2d290595cdb133c63b5d2cc49471b2d3697b))
+
 # [3.12.0](https://github.com/tolgee/tolgee-platform/compare/v3.11.7...v3.12.0) (2023-04-18)
 
 
