@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { stringHash } from 'tg.fixtures/stringHash';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -38,7 +39,7 @@ export const useTranslationTools = ({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
     // @ts-ignore add all dependencies to properly update query
-    query: dependencies,
+    query: { hash: stringHash(JSON.stringify(dependencies)) },
     path: { projectId },
     content: {
       'application/json': data,
@@ -53,7 +54,7 @@ export const useTranslationTools = ({
     method: 'post',
     path: { projectId },
     // @ts-ignore add all dependencies to properly update query
-    query: dependencies,
+    query: { hash: stringHash(JSON.stringify(dependencies)) },
     content: {
       'application/json': data,
     },
