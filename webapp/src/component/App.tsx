@@ -20,6 +20,7 @@ import { PlanLimitPopover } from './billing/PlanLimitPopover';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
+import { Ga4Tag } from './Ga4Tag';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -117,6 +118,7 @@ export class App extends React.Component {
         <Head />
         <Redirection />
         <Chatwoot />
+        <Ga4Tag />
         <SensitiveOperationAuthDialog />
         <MandatoryDataProvider>
           <RootRouter />
