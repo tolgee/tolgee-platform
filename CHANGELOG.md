@@ -1,3 +1,10 @@
+## [3.12.2](https://github.com/tolgee/tolgee-platform/compare/v3.12.1...v3.12.2) (2023-04-18)
+
+
+### Bug Fixes
+
+* export states translations ([#1668](https://github.com/tolgee/tolgee-platform/issues/1668)) ([9bc4747](https://github.com/tolgee/tolgee-platform/commit/9bc4747983d53693478b39cbc2578327f1125eff))
+
 ## [3.12.1](https://github.com/tolgee/tolgee-platform/compare/v3.12.0...v3.12.1) (2023-04-18)
 
 
