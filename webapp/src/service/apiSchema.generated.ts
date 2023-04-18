@@ -1191,6 +1191,7 @@ export interface components {
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
       chatwootToken?: string;
+      ga4Tag?: string;
       capterraTracker?: string;
     };
     PagedModelProjectModel: {

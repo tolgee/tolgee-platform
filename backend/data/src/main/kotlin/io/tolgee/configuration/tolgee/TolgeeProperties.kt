@@ -17,6 +17,7 @@ open class TolgeeProperties(
   var chatwootToken: String? = null,
   var openReplayApiKey: String? = null,
   var capterraTracker: String? = null,
+  var ga4Tag: String? = null,
   var internal: InternalProperties = InternalProperties(),
   var fileStorageUrl: String = "",
   var maxUploadFileSize: Int = 51200,

@@ -32,6 +32,7 @@ class PublicConfigurationDTO(
   val openReplayApiKey = properties.openReplayApiKey
   val chatwootToken = properties.chatwootToken
   val capterraTracker = properties.capterraTracker
+  val ga4Tag = properties.ga4Tag
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
