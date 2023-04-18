@@ -1,3 +1,10 @@
+# [3.12.0](https://github.com/tolgee/tolgee-platform/compare/v3.11.7...v3.12.0) (2023-04-18)
+
+
+### Features
+
+* support google analytics ([#1667](https://github.com/tolgee/tolgee-platform/issues/1667)) ([eb3dfe6](https://github.com/tolgee/tolgee-platform/commit/eb3dfe6d2efefcdaf62a01485fc30a7a0bae3dbc))
+
 ## [3.11.7](https://github.com/tolgee/tolgee-platform/compare/v3.11.6...v3.11.7) (2023-04-14)
 
 
