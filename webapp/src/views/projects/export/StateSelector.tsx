@@ -10,8 +10,9 @@ import {
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateType } from 'tg.constants/translationStates';
 import { exportableStates } from './ExportForm';
+import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 
 type Props = {
   className: string;
@@ -19,6 +20,7 @@ type Props = {
 
 export const StateSelector: React.FC<Props> = ({ className }) => {
   const { t } = useTranslate();
+  const translateState = useStateTranslation();
 
   return (
     <Field name="states">
@@ -35,9 +37,7 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
               variant="standard"
               data-cy="export-state-selector"
               renderValue={(values: StateType[]) =>
-                values
-                  .map((val) => translationStates[val]?.translation)
-                  .join(', ')
+                values.map((val) => translateState(val)).join(', ')
               }
               multiple
             >
@@ -48,9 +48,7 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
                   data-cy="export-state-selector-item"
                 >
                   <Checkbox checked={field.value.includes(state)} />
-                  <ListItemText
-                    primary={translationStates[state].translation}
-                  />
+                  <ListItemText primary={translateState(state as StateType)} />
                 </MenuItem>
               ))}
             </Select>
