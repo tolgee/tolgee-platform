@@ -55,6 +55,9 @@ export interface paths {
     /** Returns organization invoices */
     get: operations["getInvoices"];
   };
+  "/v2/organizations/{organizationId}/billing/expected-usage": {
+    get: operations["getExpectedUsage_1"];
+  };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
   };
@@ -100,6 +103,7 @@ export interface components {
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
+      currentPeriodStart?: number;
       currentPeriodEnd?: number;
       createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
@@ -107,7 +111,7 @@ export interface components {
       licenseKey?: string;
       estimatedCosts?: number;
     };
-    ActivePlanModel: {
+    ActiveCloudPlanModel: {
       id: number;
       name: string;
       translationLimit?: number;
@@ -125,9 +129,11 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
       )[];
+      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      estimatedCosts?: number;
       free: boolean;
     };
     UpdateSubscriptionPrepareRequest: {
@@ -167,12 +173,7 @@ export interface components {
     BuyMoreCreditsModel: {
       url: string;
     };
-    CollectionModelPlanModel: {
-      _embedded?: {
-        plans?: components["schemas"]["PlanModel"][];
-      };
-    };
-    PlanModel: {
+    CloudPlanModel: {
       id: number;
       name: string;
       translationLimit?: number;
@@ -191,6 +192,12 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
       )[];
+      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+    };
+    CollectionModelCloudPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["CloudPlanModel"][];
+      };
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -203,14 +210,22 @@ export interface components {
       amount: number;
     };
     MeteredUsageModel: {
-      subscriptionPrice: number;
-      periods: components["schemas"]["UsageItemModel"][];
+      subscriptionPrice?: number;
+      seatsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
+      translationsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
+      credits?: components["schemas"]["SumUsageItemModel"];
       total: number;
     };
-    UsageItemModel: {
+    ProportionalUsageItemModel: {
       from: number;
       to: number;
       milliseconds: number;
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    SumUsageItemModel: {
       total: number;
       unusedQuantity: number;
       usedQuantity: number;
@@ -329,7 +344,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
+          "*/*": components["schemas"]["ActiveCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -529,7 +544,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
+          "*/*": components["schemas"]["CollectionModelCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -633,7 +648,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
+          "*/*": components["schemas"]["CollectionModelCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -743,6 +758,33 @@ export interface operations {
       };
     };
   };
+  getExpectedUsage_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["MeteredUsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   goToCustomerPortal: {
     parameters: {
       path: {
@@ -807,7 +849,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
+          "*/*": components["schemas"]["ActiveCloudPlanModel"];
         };
       };
       /** Bad Request */

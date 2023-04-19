@@ -14,10 +14,7 @@ class MeteredUsageModelAssembler : RepresentationModelAssembler<UsageData, Meter
       seatsPeriods = data.seatsUsage.map(this::periodToModel),
       translationsPeriods = data.translationsUsage.map(this::periodToModel),
       credits = data.creditsUsage?.let { sumToModel(it) },
-      total = data.seatsUsage.sumOf { it.total } + data.translationsUsage.sumOf { it.total } + (
-        data.subscriptionPrice
-          ?: 0.toBigDecimal()
-        ),
+      total = data.total
     )
   }
 

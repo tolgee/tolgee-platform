@@ -13,8 +13,11 @@ import {
 } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
+import { EstimatedCosts } from '../common/usage/EstimatedCosts';
+import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { useOrganization } from '../../useOrganization';
 
-type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
+type ActivePlanModel = billingComponents['schemas']['ActiveCloudPlanModel'];
 type UsageModel = components['schemas']['UsageModel'];
 type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
 
@@ -69,6 +72,10 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
             </StyledBillingSectionSubtitleSmall>
           )}
         </StyledBillingSectionSubtitle>
+        {activePlan.type === 'PAY_AS_YOU_GO' &&
+          activePlan.estimatedCosts !== undefined && (
+            <CloudEstimatedCosts estimatedCosts={activePlan.estimatedCosts} />
+          )}
       </StyledHeader>
       <StyledMetrics>
         <PlanMetric
@@ -129,4 +136,22 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
       </StyledMetrics>
     </StyledBillingSection>
   );
+};
+
+const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
+  const organization = useOrganization();
+
+  const getUsage = (enabled: boolean) =>
+    useBillingApiQuery({
+      url: '/v2/organizations/{organizationId}/billing/expected-usage',
+      method: 'get',
+      path: {
+        organizationId: organization!.id,
+      },
+      options: {
+        enabled,
+      },
+    });
+
+  return <EstimatedCosts {...props} loadableProvider={getUsage} />;
 };
