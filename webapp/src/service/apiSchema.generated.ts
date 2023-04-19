@@ -560,18 +560,6 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -594,6 +582,18 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -938,8 +938,8 @@ export interface components {
       id: number;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1034,13 +1034,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      userFullName?: string;
-      projectName: string;
-      lastUsedAt?: number;
+      scopes: string[];
       username?: string;
       projectId: number;
       expiresAt?: number;
-      scopes: string[];
+      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
       description: string;
     };
     SuperTokenRequest: {
@@ -1097,18 +1097,26 @@ export interface components {
       licenseKey: string;
     };
     MeteredUsageModel: {
-      subscriptionPrice: number;
-      periods: components["schemas"]["UsageItemModel"][];
+      subscriptionPrice?: number;
+      seatsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
+      translationsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
+      credits?: components["schemas"]["SumUsageItemModel"];
       total: number;
     };
     PrepareSetEeLicenceKeyModel: {
       plan: components["schemas"]["SelfHostedEePlanModel"];
       usage: components["schemas"]["MeteredUsageModel"];
     };
-    UsageItemModel: {
+    ProportionalUsageItemModel: {
       from: number;
       to: number;
       milliseconds: number;
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    SumUsageItemModel: {
       total: number;
       unusedQuantity: number;
       usedQuantity: number;
@@ -1413,14 +1421,14 @@ export interface components {
       )[];
       name: string;
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       slug: string;
       description?: string;
     };
@@ -1501,17 +1509,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      baseTranslation?: string;
       translation?: string;
       namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      baseTranslation?: string;
       translation?: string;
       namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1848,8 +1856,8 @@ export interface components {
       id: number;
       createdAt: number;
       updatedAt: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1916,13 +1924,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      userFullName?: string;
-      projectName: string;
-      lastUsedAt?: number;
+      scopes: string[];
       username?: string;
       projectId: number;
       expiresAt?: number;
-      scopes: string[];
+      lastUsedAt?: number;
+      userFullName?: string;
+      projectName: string;
       description: string;
     };
     PagedModelUserAccountModel: {

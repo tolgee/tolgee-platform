@@ -50,6 +50,7 @@ class EeLicensingMockRequestUtil {
     status = SubscriptionStatus.ACTIVE,
     licenseKey = "mocked_license_key",
     estimatedCosts = 200.toBigDecimal(),
+    currentPeriodStart = 1622313600000,
   )
 
   final val mockedPrepareResponse = PrepareSetEeLicenceKeyModel().apply {
