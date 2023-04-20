@@ -44,6 +44,6 @@ open class UsageModel(
     description = """How many translations are currently stored within your organization."""
   )
   val currentTranslationSlots: Long,
-  currentTranslations: Long,
-  translationsLimit: Long,
+  val currentTranslations: Long,
+  val translationsLimit: Long,
 ) : RepresentationModel<UsageModel>(), Serializable
