@@ -39,7 +39,7 @@ class EeLicensingMockRequestUtil {
     public = true,
     enabledFeatures = arrayOf(Feature.PREMIUM_SUPPORT),
     pricePerSeat = 20.toBigDecimal(),
-    subscriptionPrice = 200.toBigDecimal(),
+    monthlyPrice = 200.toBigDecimal(),
   )
 
   final val mockedSubscriptionResponse = SelfHostedEeSubscriptionModel(
