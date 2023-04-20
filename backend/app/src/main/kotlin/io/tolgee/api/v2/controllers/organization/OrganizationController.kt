@@ -296,7 +296,8 @@ class OrganizationController(
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
-    val currentTranslations = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
+    val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
+    val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return UsageModel(
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance,
@@ -305,8 +306,10 @@ class OrganizationController(
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentTranslations = currentTranslations,
+      currentTranslationSlots = currentTranslationSlots,
       planTranslations = translationsLimitProvider.getPlanTranslations(organization),
-      translationLimit = translationsLimitProvider.getTranslationSlotsLimit(organization)
+      translationSlotsLimit = translationsLimitProvider.getTranslationSlotsLimit(organization),
+      translationsLimit = translationsLimitProvider.getTranslationLimit(organization)
     )
   }
 

@@ -33,7 +33,7 @@ open class UsageModel(
   @Schema(
     description = """How many translations can be stored within your organization."""
   )
-  val translationLimit: Long,
+  val translationSlotsLimit: Long,
 
   @Schema(
     description = """How many translations can organization use without additional costs."""
@@ -43,5 +43,7 @@ open class UsageModel(
   @Schema(
     description = """How many translations are currently stored within your organization."""
   )
-  val currentTranslations: Long,
+  val currentTranslationSlots: Long,
+  currentTranslations: Long,
+  translationsLimit: Long,
 ) : RepresentationModel<UsageModel>(), Serializable
