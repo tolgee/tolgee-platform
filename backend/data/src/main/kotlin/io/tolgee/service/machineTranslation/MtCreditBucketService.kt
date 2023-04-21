@@ -35,8 +35,8 @@ class MtCreditBucketService(
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
     val balances = getCreditBalances(bucket)
-    val payAsYouGoMaxCredits = mtCreditBucketSizeProvider.getPayAsYouGoMaxCredits(bucket.organization)
-    val totalBalance = balances.creditBalance + balances.extraCreditBalance + payAsYouGoMaxCredits
+    val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
+    val totalBalance = balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
 
     if (totalBalance - amount < 0) {
       throw OutOfCreditsException()

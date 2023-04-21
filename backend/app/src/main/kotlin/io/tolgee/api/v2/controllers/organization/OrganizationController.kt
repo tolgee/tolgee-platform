@@ -13,6 +13,7 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
+import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -92,7 +93,8 @@ class OrganizationController(
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
+  private val mtBucketSizeProvider: MtBucketSizeProvider
 ) {
   @PostMapping
   @Transactional
@@ -297,6 +299,8 @@ class OrganizationController(
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
     val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
+    val currentPayAsYouGoMtCredits = mtBucketSizeProvider.getUsedPayAsYouGoCredits(organization)
+    val availablePayAsYouGoMtCredits = mtBucketSizeProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return UsageModel(
       organizationId = organizationId,
@@ -305,9 +309,11 @@ class OrganizationController(
       extraCreditBalance = creditBalances.extraCreditBalance,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
+      currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,
+      availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
       currentTranslations = currentTranslations,
       currentTranslationSlots = currentTranslationSlots,
-      planTranslations = translationsLimitProvider.getPlanTranslations(organization),
+      includedTranslations = translationsLimitProvider.getPlanTranslations(organization),
       translationSlotsLimit = translationsLimitProvider.getTranslationSlotsLimit(organization),
       translationsLimit = translationsLimitProvider.getTranslationLimit(organization)
     )
