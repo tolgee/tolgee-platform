@@ -4,8 +4,8 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { BillingPeriodType } from './PeriodSwitch';
 import { CloudPlan } from './CloudPlan';
 
-type PlanModel = components['schemas']['PlanModel'];
-type ActivePlanModel = components['schemas']['ActivePlanModel'];
+type PlanModel = components['schemas']['CloudPlanModel'];
+type ActivePlanModel = components['schemas']['ActiveCloudPlanModel'];
 
 const StyledPlanWrapper = styled('div')`
   display: grid;

@@ -20,7 +20,7 @@ type Props = {
 export const PeriodSwitch: React.FC<Props> = ({ value, onChange }) => {
   return (
     <Box
-      gridArea="switch"
+      gridArea="period-switch"
       display="flex"
       justifyContent="center"
       data-cy="billing-period-switch"

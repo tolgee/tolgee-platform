@@ -560,12 +560,18 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, changing state of all language values is permitted. */
       stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages view is permitted. */
       viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -588,12 +594,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -936,8 +936,8 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
@@ -1034,14 +1034,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      username?: string;
-      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      scopes: string[];
-      userFullName?: string;
-      projectName: string;
+      lastUsedAt?: number;
+      username?: string;
       description: string;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1430,10 +1430,10 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
       slug: string;
-      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1858,8 +1858,8 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      lastUsedAt?: number;
       expiresAt?: number;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
@@ -1936,14 +1936,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      username?: string;
-      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      scopes: string[];
-      userFullName?: string;
-      projectName: string;
+      lastUsedAt?: number;
+      username?: string;
       description: string;
+      projectName: string;
+      userFullName?: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {

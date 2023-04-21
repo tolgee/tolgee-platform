@@ -1,15 +1,17 @@
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
+
 import { useOrganization } from '../../../useOrganization';
-import { useLocation } from 'react-router-dom';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { useEffect } from 'react';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
+import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -29,6 +31,8 @@ const StyledActive = styled('div')`
 
 export const SelfHostedEeSubscriptions = () => {
   const { t } = useTranslate();
+
+  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
 
   const organization = useOrganization();
 
@@ -106,7 +110,12 @@ export const SelfHostedEeSubscriptions = () => {
       </Typography>
       <StyledShopping>
         {plansLoadable.data?._embedded?.plans?.map((plan) => (
-          <SelfHostedEePlan key={plan.id} plan={plan} />
+          <SelfHostedEePlan
+            key={plan.id}
+            plan={plan}
+            period={period}
+            onChange={setPeriod}
+          />
         ))}
       </StyledShopping>
     </>
