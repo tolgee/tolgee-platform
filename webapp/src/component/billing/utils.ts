@@ -3,33 +3,44 @@ import { components } from 'tg.service/apiSchema.generated';
 type UsageModel = components['schemas']['UsageModel'];
 
 export type ProgressData = {
-  translationsAvailable: number;
+  usesSlots: boolean;
+  translationsUsed: number;
   translationsMax: number;
   translationsProgress: number;
-  creditAvailable: number;
+  isPayAsYouGo: boolean;
+  // translationsLimit: number;
+  creditUsed: number;
   creditMax: number;
   creditProgress: number;
-  smallerProgress: number;
+  biggerProgress: number;
 };
 
 export const getProgressData = (usage: UsageModel): ProgressData => {
-  const translationsAvailable =
-    usage.translationLimit - usage.currentTranslations;
-  const translationsMax = usage.translationLimit;
+  const usesSlots = usage.translationSlotsLimit !== -1;
+  const translationsUsed = usesSlots
+    ? usage.currentTranslationSlots
+    : usage.currentTranslations;
 
-  const creditAvailable = usage.creditBalance + usage.extraCreditBalance;
-  const translationsProgress =
-    (translationsAvailable / usage.translationLimit) * 100;
+  const translationsMax = usage.includedTranslations;
+
+  const translationsLimit = usage.translationsLimit;
+  const translationsProgress = (translationsUsed / translationsMax) * 100;
+  const isPayAsYouGo = translationsLimit > translationsMax;
+
   const creditMax = usage.includedMtCredits;
-  const creditProgress = (creditAvailable / creditMax) * 100;
+  const creditUsed = creditMax - usage.creditBalance;
+  const creditProgress = (creditUsed / creditMax) * 100;
 
   return {
-    translationsAvailable,
+    usesSlots,
+    translationsUsed,
     translationsMax,
     translationsProgress,
-    creditAvailable,
+    isPayAsYouGo,
+    // translationsLimit,
+    creditUsed,
     creditMax,
     creditProgress,
-    smallerProgress: Math.min(translationsProgress, creditProgress),
+    biggerProgress: Math.max(translationsProgress, creditProgress),
   };
 };

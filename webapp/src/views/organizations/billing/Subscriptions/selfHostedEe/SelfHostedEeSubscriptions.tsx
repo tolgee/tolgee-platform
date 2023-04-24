@@ -1,15 +1,18 @@
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
+
 import { useOrganization } from '../../../useOrganization';
-import { useLocation } from 'react-router-dom';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { useEffect } from 'react';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
+import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -29,6 +32,8 @@ const StyledActive = styled('div')`
 
 export const SelfHostedEeSubscriptions = () => {
   const { t } = useTranslate();
+
+  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
 
   const organization = useOrganization();
 
@@ -77,22 +82,34 @@ export const SelfHostedEeSubscriptions = () => {
   const activeSubscriptions =
     activeSubscriptionsLoadable.data?._embedded?.subscriptions;
 
+  const loading =
+    plansLoadable.isLoading ||
+    activeSubscriptionsLoadable.isLoading ||
+    refreshSubscriptions.isLoading;
+
+  useGlobalLoading(loading);
+
+  if (loading) {
+    return null;
+  }
+
   return (
     <>
       <Box mb={4}>
         <Typography variant="h6" mb={2}>
           {t('organization-billing-self-hosted-active-subscriptions')}
         </Typography>
-        {activeSubscriptions ? (
+        {activeSubscriptions?.length && (
           <StyledActive>
-            {activeSubscriptions.map((subscription) => (
+            {activeSubscriptions?.map((subscription) => (
               <SelfHostedEeActiveSubscription
                 key={subscription.id}
                 subscription={subscription}
               />
             ))}
           </StyledActive>
-        ) : (
+        )}
+        {activeSubscriptions?.length === 0 && (
           <EmptyListMessage
             height="200px"
             wrapperProps={{ py: 2 }}
@@ -106,7 +123,12 @@ export const SelfHostedEeSubscriptions = () => {
       </Typography>
       <StyledShopping>
         {plansLoadable.data?._embedded?.plans?.map((plan) => (
-          <SelfHostedEePlan key={plan.id} plan={plan} />
+          <SelfHostedEePlan
+            key={plan.id}
+            plan={plan}
+            period={period}
+            onChange={setPeriod}
+          />
         ))}
       </StyledShopping>
     </>

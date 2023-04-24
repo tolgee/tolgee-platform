@@ -14,13 +14,12 @@ import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
 import { confirmation } from 'tg.hooks/confirmation';
 
-type PlanModel = components['schemas']['PlanModel'];
-type Period = components['schemas']['SubscribeRequest']['period'];
+type PlanModel = components['schemas']['CloudPlanModel'];
 
 type Props = {
   plan: PlanModel;
   isOrganizationSubscribed: boolean;
-  period: Period;
+  period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
   isActive: boolean;
   isEnded: boolean;

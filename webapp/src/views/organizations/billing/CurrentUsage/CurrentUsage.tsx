@@ -16,6 +16,7 @@ import { MtHint } from 'tg.component/billing/MtHint';
 import { EstimatedCosts } from '../common/usage/EstimatedCosts';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../useOrganization';
+import { getProgressData } from 'tg.component/billing/utils';
 
 type ActivePlanModel = billingComponents['schemas']['ActiveCloudPlanModel'];
 type UsageModel = components['schemas']['UsageModel'];
@@ -46,15 +47,16 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
-  let availableTranslations =
-    usage.planTranslations - usage.currentTranslations;
-
-  if (availableTranslations < 0) {
-    availableTranslations = 0;
-  }
+  const {
+    translationsUsed,
+    translationsMax,
+    creditMax,
+    creditUsed,
+    isPayAsYouGo,
+  } = getProgressData(usage);
 
   return (
-    <StyledBillingSection gridArea="usage">
+    <StyledBillingSection gridArea="usage" maxWidth={650}>
       <StyledHeader>
         <StyledBillingSectionTitle>
           {t('billing_actual_title')}
@@ -72,28 +74,32 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
             </StyledBillingSectionSubtitleSmall>
           )}
         </StyledBillingSectionSubtitle>
-        {activePlan.type === 'PAY_AS_YOU_GO' &&
-          activePlan.estimatedCosts !== undefined && (
-            <CloudEstimatedCosts estimatedCosts={activePlan.estimatedCosts} />
-          )}
+        <Box flexGrow={1}>
+          {activePlan.type === 'PAY_AS_YOU_GO' &&
+            activePlan.estimatedCosts !== undefined && (
+              <CloudEstimatedCosts estimatedCosts={activePlan.estimatedCosts} />
+            )}
+        </Box>
       </StyledHeader>
       <StyledMetrics>
         <PlanMetric
-          name={t('billing_actual_available_translations')}
-          availableQuantity={availableTranslations}
-          totalQuantity={usage.planTranslations}
+          name={t('billing_actual_used_translations')}
+          currentQuantity={translationsUsed}
+          totalQuantity={translationsMax}
           periodEnd={activePlan.currentPeriodEnd}
+          isPayAsYouGo={isPayAsYouGo}
         />
         <PlanMetric
           name={
             <T
-              keyName="billing_actual_monthly_credits"
+              keyName="billing_actual_used_monthly_credits"
               params={{ hint: <MtHint /> }}
             />
           }
-          availableQuantity={Math.round(usage.creditBalance / 100)}
-          totalQuantity={Math.round((usage.includedMtCredits || 0) / 100)}
+          currentQuantity={Math.round(creditUsed / 100)}
+          totalQuantity={Math.round((creditMax || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
+          isPayAsYouGo={isPayAsYouGo}
         />
         <Box gridColumn="1">{t('billing_credits_refill')}</Box>
         <Box gridColumn="2 / -1" data-cy="billing-actual-period">
@@ -107,7 +113,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
               params={{ hint: <MtHint /> }}
             />
           }
-          availableQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
+          currentQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (
           <>
@@ -141,7 +147,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
 const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
   const organization = useOrganization();
 
-  const getUsage = (enabled: boolean) =>
+  const useUsage = (enabled: boolean) =>
     useBillingApiQuery({
       url: '/v2/organizations/{organizationId}/billing/expected-usage',
       method: 'get',
@@ -153,5 +159,5 @@ const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
       },
     });
 
-  return <EstimatedCosts {...props} loadableProvider={getUsage} />;
+  return <EstimatedCosts {...props} useUsage={useUsage} />;
 };

@@ -1,38 +1,58 @@
-import { FC } from 'react';
+import { T } from '@tolgee/react';
+import { Box, Tooltip, Typography } from '@mui/material';
+
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { PlanTitleArea, PlanTitleText } from '../common/PlanTitle';
-import { Box, Tooltip, Typography } from '@mui/material';
 import { SubscriptionStatus } from '../../common/SubscriptionStatus';
-import { PlanLicenseKey } from './PlanLicenseKey';
-import { T } from '@tolgee/react';
 
-export const ActivePlanTitle: FC<{
+type Status = components['schemas']['SelfHostedEeSubscriptionModel']['status'];
+
+type Props = {
   name: string;
-  status: components['schemas']['SelfHostedEeSubscriptionModel']['status'];
-  licenseKey?: string;
+  status: Status;
   createdAt?: number;
-}> = (props) => {
+  periodStart?: number;
+  periodEnd?: number;
+};
+
+export const ActivePlanTitle = ({
+  name,
+  status,
+  createdAt,
+  periodStart,
+  periodEnd,
+}: Props) => {
   const formatDate = useDateFormatter();
+
+  const title = Boolean(periodStart && periodEnd) && (
+    <span>
+      <T
+        keyName="active-plan-current-period"
+        params={{ start: periodStart, end: periodEnd }}
+      />
+    </span>
+  );
 
   return (
     <PlanTitleArea sx={{ mb: 2 }}>
       <Box>
         <Box sx={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <PlanTitleText>{props.name}</PlanTitleText>
-          <Box>
-            <SubscriptionStatus status={props.status} />
-          </Box>
-          <PlanLicenseKey licenseKey={props.licenseKey} />
+          <PlanTitleText>{name}</PlanTitleText>
+          <Tooltip title={title}>
+            <Box>
+              <SubscriptionStatus status={status} />
+            </Box>
+          </Tooltip>
         </Box>
       </Box>
-      {props.createdAt && (
-        <Tooltip title={<T keyName="active-plan-subscribed-at-tooltip" />}>
-          <Typography variant="caption">
-            {formatDate(props.createdAt)}
-          </Typography>
-        </Tooltip>
-      )}
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        {createdAt && (
+          <Tooltip title={<T keyName="active-plan-subscribed-at-tooltip" />}>
+            <Typography variant="caption">{formatDate(createdAt)}</Typography>
+          </Tooltip>
+        )}
+      </Box>
     </PlanTitleArea>
   );
 };

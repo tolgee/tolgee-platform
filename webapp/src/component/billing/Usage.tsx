@@ -84,8 +84,8 @@ export const Usage: FC = () => {
 
   const showStats =
     planLimitErrors ||
-    Number(progressData?.creditProgress) < BILLING_CRITICAL_PERCENT ||
-    Number(progressData?.translationsProgress) < BILLING_CRITICAL_PERCENT;
+    Number(progressData?.creditProgress) > BILLING_CRITICAL_PERCENT ||
+    Number(progressData?.translationsProgress) > BILLING_CRITICAL_PERCENT;
 
   previousShown.current = Boolean(showStats);
 
@@ -118,10 +118,8 @@ export const Usage: FC = () => {
           >
             <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
               <CircularBillingProgress
-                percent={Math.min(
-                  progressData.translationsProgress,
-                  progressData.creditProgress
-                )}
+                canGoOver={progressData.isPayAsYouGo}
+                percent={progressData.biggerProgress}
               />
             </StyledContent>
           </Tooltip>

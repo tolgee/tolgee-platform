@@ -99,12 +99,14 @@ export interface components {
       )[];
       includedSeats: number;
       pricePerSeat: number;
-      subscriptionPrice: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
       currentPeriodStart?: number;
       currentPeriodEnd?: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
       createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
       status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
@@ -154,7 +156,7 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
-    SubscribeRequest: {
+    CloudSubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
       period: "MONTHLY" | "YEARLY";
@@ -162,9 +164,10 @@ export interface components {
     SubscribeModel: {
       url: string;
     };
-    SetupEeRequest: {
+    SelfHostedEeSubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     BuyMoreCreditsRequest: {
       priceId: number;
@@ -444,7 +447,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SubscribeRequest"];
+        "application/json": components["schemas"]["CloudSubscribeRequest"];
       };
     };
   };
@@ -503,7 +506,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetupEeRequest"];
+        "application/json": components["schemas"]["SelfHostedEeSubscribeRequest"];
       };
     };
   };

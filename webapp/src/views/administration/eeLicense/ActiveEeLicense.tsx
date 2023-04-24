@@ -11,6 +11,7 @@ import { PlanInfoArea } from '../../organizations/billing/Subscriptions/common/P
 import { IncludedFeatures } from '../../organizations/billing/Subscriptions/selfHostedEe/IncludedFeatures';
 import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
+import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/PlanLicenseKey';
 
 export const ActiveEeLicense: FC<{
   info: components['schemas']['EeSubscriptionModel'];
@@ -20,16 +21,10 @@ export const ActiveEeLicense: FC<{
   return (
     <Plan>
       <PlanContent>
-        <ActivePlanTitle
-          name={info.name}
-          status={info.status}
-          licenseKey={info.licenseKey}
-        />
+        <ActivePlanTitle name={info.name} status={info.status} />
         <PlanInfoArea>
           {info.status === 'ACTIVE' ? (
-            <IncludedFeatures
-              features={info.enabledFeatures}
-            ></IncludedFeatures>
+            <IncludedFeatures features={info.enabledFeatures} />
           ) : (
             t('billing_subscriptions_ee_license_inactive')
           )}
@@ -41,6 +36,7 @@ export const ActiveEeLicense: FC<{
           justifyContent="end"
         >
           <RefreshButton />
+          <PlanLicenseKey licenseKey={info.licenseKey} />
           <ReleaseKeyButton />
         </Box>
       </PlanContent>

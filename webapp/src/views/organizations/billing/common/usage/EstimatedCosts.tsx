@@ -7,20 +7,23 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import { UsageDialogButton } from './UsageDialogButton';
 
 export type EstimatedCostsProps = {
-  loadableProvider: (
+  useUsage: (
     enabled: boolean
   ) => UseQueryResult<components['schemas']['MeteredUsageModel']>;
   estimatedCosts?: number;
 };
 
-export const EstimatedCosts: FC<EstimatedCostsProps> = (props) => {
+export const EstimatedCosts: FC<EstimatedCostsProps> = ({
+  useUsage,
+  estimatedCosts,
+}) => {
   const formatMoney = useMoneyFormatter();
 
   const { t } = useTranslate();
 
   const [open, setOpen] = useState(false);
 
-  const usage = props.loadableProvider(open);
+  const usage = useUsage(open);
 
   return (
     <Box display="flex" justifyContent="right">
@@ -31,7 +34,7 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = (props) => {
           </Typography>
         </Tooltip>
         <Box textAlign="right" display="flex" alignItems="center">
-          {formatMoney(props.estimatedCosts || 0)}
+          {formatMoney(estimatedCosts || 0)}
           <UsageDialogButton
             usageData={usage.data}
             loading={usage.isLoading}

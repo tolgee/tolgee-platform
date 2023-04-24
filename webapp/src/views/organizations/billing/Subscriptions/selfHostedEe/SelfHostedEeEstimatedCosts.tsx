@@ -9,7 +9,7 @@ export const SelfHostedEeEstimatedCosts: FC<{
 }> = ({ subscription }) => {
   const organization = useOrganization();
 
-  const getUsage = (enabled: boolean) =>
+  const useUsage = (enabled: boolean) =>
     useBillingApiQuery({
       url: '/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/expected-usage',
       method: 'get',
@@ -24,7 +24,7 @@ export const SelfHostedEeEstimatedCosts: FC<{
 
   return (
     <PlanUsageEstimatedCosts
-      loadableProvider={getUsage}
+      useUsage={useUsage}
       estimatedCosts={subscription.estimatedCosts}
     />
   );

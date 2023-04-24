@@ -7,7 +7,7 @@ import { MtHint } from 'tg.component/billing/MtHint';
 import { PlanInfo } from '../../common/PlanInfo';
 import React from 'react';
 
-type PlanModel = components['schemas']['PlanModel'];
+type PlanModel = components['schemas']['CloudPlanModel'];
 
 const StyledItem = styled('div')`
   display: grid;
@@ -34,13 +34,18 @@ type Props = {
 };
 
 export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
+  const isPayAsYouGo = plan.type === 'PAY_AS_YOU_GO';
   const formatNumber = useNumberFormatter();
   return (
     <PlanInfo>
       <StyledItem>
         <StyledNumber>{formatNumber(plan.translationLimit!)}</StyledNumber>
         <StyledName>
-          <T keyName="billing_plan_translation_limit" />
+          {isPayAsYouGo ? (
+            <T keyName="billing_plan_translation_included" />
+          ) : (
+            <T keyName="billing_plan_translation_limit" />
+          )}
         </StyledName>
       </StyledItem>
       <StyledSpacer />

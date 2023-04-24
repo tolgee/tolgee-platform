@@ -1,1 +1,1 @@
-export const BILLING_CRITICAL_PERCENT = 15;
+export const BILLING_CRITICAL_PERCENT = 75;

@@ -1,15 +1,13 @@
 import { T } from '@tolgee/react';
 
-import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-
-type Period = components['schemas']['SubscribeRequest']['period'];
+import { BillingPeriodType } from './PeriodSwitch';
 
 type Props = {
   planId: number;
-  period: Period;
+  period: BillingPeriodType;
 };
 
 export const usePlan = ({ planId, period }: Props) => {

@@ -1,11 +1,19 @@
 import { T, useTranslate } from '@tolgee/react';
+
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
-import { useOrganization } from '../useOrganization';
 import { confirmation } from 'tg.hooks/confirmation';
-import { PlanActionButton } from './Subscriptions/cloud/Plans/PlanActionButton';
+import { useOrganization } from '../useOrganization';
+import { StyledActionArea } from './BillingSection';
+import { LoadingButton } from '@mui/lab';
+import { PlanLicenseKey } from './Subscriptions/selfHostedEe/PlanLicenseKey';
 
-export const CancelSelfHostedEeSubscriptionButton = (props: { id: number }) => {
+type Props = {
+  id: number;
+  licenceKey: string | undefined;
+};
+
+export const SelfHostedEeSubscriptionActions = ({ id, licenceKey }: Props) => {
   const { t } = useTranslate();
 
   const successMessage = useSuccessMessage();
@@ -32,19 +40,24 @@ export const CancelSelfHostedEeSubscriptionButton = (props: { id: number }) => {
       ),
       onConfirm: () => {
         cancelMutation.mutate({
-          path: { subscriptionId: props.id, organizationId: organization!.id },
+          path: { subscriptionId: id, organizationId: organization!.id },
         });
       },
     });
   }
 
   return (
-    <PlanActionButton
-      onClick={onClick}
-      variant="outlined"
-      loading={cancelMutation.isLoading}
-    >
-      {t('organization-billing-self-hosted-cancel-subscription-button')}
-    </PlanActionButton>
+    <StyledActionArea>
+      <PlanLicenseKey licenseKey={licenceKey} />
+      <LoadingButton
+        onClick={onClick}
+        variant="outlined"
+        loading={cancelMutation.isLoading}
+        size="small"
+        color="primary"
+      >
+        {t('organization-billing-self-hosted-cancel-subscription-button')}
+      </LoadingButton>
+    </StyledActionArea>
   );
 };

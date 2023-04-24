@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 export type BillingPeriodType =
-  components['schemas']['SubscribeRequest']['period'];
+  components['schemas']['CloudSubscribeRequest']['period'];
 
 const StyledSwitchButton = styled(Box)`
   text-decoration: underline;
@@ -20,7 +20,7 @@ type Props = {
 export const PeriodSwitch: React.FC<Props> = ({ value, onChange }) => {
   return (
     <Box
-      gridArea="switch"
+      gridArea="period-switch"
       display="flex"
       justifyContent="center"
       data-cy="billing-period-switch"

@@ -5,12 +5,9 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  IconButton,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { T } from '@tolgee/react';
-import { Key } from '@mui/icons-material';
 import { ClipboardCopyInput } from 'tg.component/common/ClipboardCopyInput';
 
 export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
@@ -22,14 +19,9 @@ export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
 
   return (
     <>
-      <Tooltip title={<T keyName="active-plan-license-key-tooltip" />}>
-        <IconButton
-          onClick={() => setOpen(true)}
-          sx={{ marginTop: '-8px', marginBottom: '-8px' }}
-        >
-          <Key />
-        </IconButton>
-      </Tooltip>
+      <Button onClick={() => setOpen(true)} size="small">
+        <T keyName="active-plan-license-key-tooltip" />
+      </Button>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
         <DialogContent>
           <Box mb={2}>

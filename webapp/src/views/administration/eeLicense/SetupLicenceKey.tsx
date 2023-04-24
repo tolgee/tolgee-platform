@@ -54,7 +54,7 @@ export const SetupLicenceKey = () => {
                       keyName="ee-license-key-confirmation-message-estimate"
                       params={{
                         additional:
-                          data.usage.total - data.usage.subscriptionPrice,
+                          data.usage.total - data.usage.subscriptionPrice!,
                       }}
                     />
                   </Box>
