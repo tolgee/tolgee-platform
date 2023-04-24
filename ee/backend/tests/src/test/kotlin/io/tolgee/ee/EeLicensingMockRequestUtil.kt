@@ -2,6 +2,7 @@ package io.tolgee.ee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Feature
+import io.tolgee.ee.api.v2.hateoas.PlanPricesModel
 import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEePlanModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
@@ -38,8 +39,10 @@ class EeLicensingMockRequestUtil {
     name = "Tolgee",
     public = true,
     enabledFeatures = arrayOf(Feature.PREMIUM_SUPPORT),
-    pricePerSeat = 20.toBigDecimal(),
-    monthlyPrice = 200.toBigDecimal(),
+    prices = PlanPricesModel(
+      perSeat = 20.toBigDecimal(),
+      subscriptionMonthly = 200.toBigDecimal(),
+    ),
   )
 
   final val mockedSubscriptionResponse = SelfHostedEeSubscriptionModel(

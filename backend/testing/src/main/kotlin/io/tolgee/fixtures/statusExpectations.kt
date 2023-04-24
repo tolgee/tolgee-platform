@@ -87,8 +87,9 @@ val ResultActions.andPrettyPrint: ResultActions
     return this
   }
 
-fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit) {
+fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit): JsonAssert {
   rfn(node(node))
+  return this
 }
 
 val JsonAssert.isValidId: BigDecimalAssert
