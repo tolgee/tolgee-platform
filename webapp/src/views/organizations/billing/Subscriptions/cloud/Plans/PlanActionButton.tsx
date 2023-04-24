@@ -1,16 +1,5 @@
-import { styled } from '@mui/material';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-
-export const ActionArea = styled('div')`
-  grid-area: action;
-`;
-
-export const StyledActionArea = styled(ActionArea)`
-  justify-self: end;
-  align-self: end;
-  gap: 8px;
-  display: flex;
-`;
+import { StyledActionArea } from 'tg.views/organizations/billing/BillingSection';
 
 type Props = React.ComponentProps<typeof LoadingButton>;
 

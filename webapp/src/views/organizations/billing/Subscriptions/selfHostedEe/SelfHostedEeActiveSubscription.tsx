@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { CancelSelfHostedEeSubscriptionButton } from '../../CancelSelfHostedEeSubscriptionButton';
+import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
 import { IncludedFeatures } from './IncludedFeatures';
 import { Plan, PlanContent } from '../common/Plan';
 import { PlanPrice } from '../cloud/Plans/PlanPrice';
@@ -42,7 +42,8 @@ export const SelfHostedEeActiveSubscription: FC<{
           name={subscription.plan.name}
           status={subscription.status}
           createdAt={subscription.createdAt}
-          licenseKey={subscription.licenseKey}
+          periodStart={subscription.currentPeriodStart}
+          periodEnd={subscription.currentPeriodEnd}
         />
 
         <SelfHostedEeEstimatedCosts subscription={subscription} />
@@ -57,7 +58,11 @@ export const SelfHostedEeActiveSubscription: FC<{
           subscriptionPrice={price}
           period={period}
         />
-        <CancelSelfHostedEeSubscriptionButton id={subscription.id} />
+
+        <SelfHostedEeSubscriptionActions
+          id={subscription.id}
+          licenceKey={subscription.licenseKey}
+        />
       </PlanContent>
     </Plan>
   );

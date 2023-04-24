@@ -12,6 +12,7 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -81,22 +82,34 @@ export const SelfHostedEeSubscriptions = () => {
   const activeSubscriptions =
     activeSubscriptionsLoadable.data?._embedded?.subscriptions;
 
+  const loading =
+    plansLoadable.isLoading ||
+    activeSubscriptionsLoadable.isLoading ||
+    refreshSubscriptions.isLoading;
+
+  useGlobalLoading(loading);
+
+  if (loading) {
+    return null;
+  }
+
   return (
     <>
       <Box mb={4}>
         <Typography variant="h6" mb={2}>
           {t('organization-billing-self-hosted-active-subscriptions')}
         </Typography>
-        {activeSubscriptions ? (
+        {activeSubscriptions?.length && (
           <StyledActive>
-            {activeSubscriptions.map((subscription) => (
+            {activeSubscriptions?.map((subscription) => (
               <SelfHostedEeActiveSubscription
                 key={subscription.id}
                 subscription={subscription}
               />
             ))}
           </StyledActive>
-        ) : (
+        )}
+        {activeSubscriptions?.length === 0 && (
           <EmptyListMessage
             height="200px"
             wrapperProps={{ py: 2 }}
