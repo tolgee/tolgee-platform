@@ -7,7 +7,7 @@ import { MtHint } from 'tg.component/billing/MtHint';
 import { PlanInfo } from '../../common/PlanInfo';
 import React from 'react';
 
-type PlanModel = components['schemas']['PlanModel'];
+type PlanModel = components['schemas']['CloudPlanModel'];
 
 const StyledItem = styled('div')`
   display: grid;

@@ -21,7 +21,7 @@ export const SubscriptionRow = (props: {
       <TableCell align="right">
         {t('invoice_usage_dialog_table_no_value')}
       </TableCell>
-      <TableCell align="right">{formatMoney(props.price)}</TableCell>
+      <TableCell align="right">{formatMoney(props.price!)}</TableCell>
     </TableRow>
   );
 };

@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 export type BillingPeriodType =
-  components['schemas']['SubscribeRequest']['period'];
+  components['schemas']['CloudSubscribeRequest']['period'];
 
 const StyledSwitchButton = styled(Box)`
   text-decoration: underline;

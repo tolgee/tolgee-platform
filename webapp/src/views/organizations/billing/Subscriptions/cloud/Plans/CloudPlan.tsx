@@ -15,12 +15,11 @@ import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
 import { confirmation } from 'tg.hooks/confirmation';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
-type Period = components['schemas']['SubscribeRequest']['period'];
 
 type Props = {
   plan: PlanModel;
   isOrganizationSubscribed: boolean;
-  period: Period;
+  period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
   isActive: boolean;
   isEnded: boolean;

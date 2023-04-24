@@ -4,46 +4,51 @@ import { T } from '@tolgee/react';
 import { BillingProgress } from './BillingProgress';
 
 type Props = {
-  translationsAvailable: number;
+  translationsUsed: number;
   translationsMax: number;
-  creditAvailable: number;
+  creditUsed: number;
   creditMax: number;
+  isPayAsYouGo: boolean;
 };
 
 export const UsageDetailed: React.FC<Props> = ({
-  translationsAvailable,
+  translationsUsed,
   translationsMax,
-  creditAvailable,
+  creditUsed,
   creditMax,
+  isPayAsYouGo,
 }) => {
-  const translationsProgress = (translationsAvailable / translationsMax) * 100;
-  const creditsProgress = (creditAvailable / creditMax) * 100;
+  const translationsProgress = (translationsUsed / translationsMax) * 100;
+  const creditsProgress = (creditUsed / creditMax) * 100;
 
   return (
     <Box display="grid" gap={1}>
       <Box>
         <Typography variant="caption">
           <T
-            keyName="dashboard_billing_translations"
+            keyName="dashboard_billing_used_translations"
             params={{
-              available: Math.round(translationsAvailable),
+              available: Math.round(translationsUsed),
               max: Math.round(translationsMax),
             }}
           />
         </Typography>
-        <BillingProgress percent={translationsProgress} />
+        <BillingProgress
+          percent={translationsProgress}
+          canGoOver={isPayAsYouGo}
+        />
       </Box>
       <Box>
         <Typography variant="caption">
           <T
-            keyName="dashboard_billing_credit"
+            keyName="dashboard_billing_used_credit"
             params={{
-              available: Math.round(creditAvailable / 100),
+              available: Math.round(creditUsed / 100),
               max: Math.round(creditMax / 100),
             }}
           />
         </Typography>
-        <BillingProgress percent={creditsProgress} />
+        <BillingProgress percent={creditsProgress} canGoOver={isPayAsYouGo} />
       </Box>
     </Box>
   );

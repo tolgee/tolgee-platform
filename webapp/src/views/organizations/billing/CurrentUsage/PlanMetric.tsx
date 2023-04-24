@@ -27,6 +27,9 @@ const StyledValue = styled('span')`
   &.low {
     color: ${({ theme }) => theme.palette.error.main};
   }
+  &.over {
+    color: ${({ theme }) => theme.palette.warning.main};
+  }
   &.sufficient {
     color: ${({ theme }) => theme.palette.success.main};
   }
@@ -34,35 +37,47 @@ const StyledValue = styled('span')`
 
 type Props = {
   name: string | React.ReactNode;
-  availableQuantity: number;
+  currentQuantity: number;
   totalQuantity?: number;
   periodEnd?: number;
+  isPayAsYouGo?: boolean;
   'data-cy'?: string;
 };
 
 export const PlanMetric: React.FC<Props> = ({
   name,
-  availableQuantity,
+  currentQuantity,
   totalQuantity,
+  isPayAsYouGo,
   ...props
 }) => {
   const formatNumber = useNumberFormatter();
   const showProgress = totalQuantity !== undefined;
-  const progress = (availableQuantity / totalQuantity!) * 100;
-  const valueClass = progress < BILLING_CRITICAL_PERCENT ? 'low' : 'sufficient';
+  const progress = (currentQuantity / totalQuantity!) * 100;
+  const valueClass = isPayAsYouGo
+    ? totalQuantity && currentQuantity > totalQuantity
+      ? 'over'
+      : 'sufficient'
+    : progress > BILLING_CRITICAL_PERCENT
+    ? 'low'
+    : 'sufficient';
 
   return (
     <>
       <StyledName>{name}</StyledName>
       <Box data-cy={props['data-cy']}>
         <StyledValue className={clsx({ [valueClass]: showProgress })}>
-          {formatNumber(availableQuantity)}
+          {formatNumber(currentQuantity)}
         </StyledValue>
         <span>{showProgress ? ` / ${formatNumber(totalQuantity!)}` : ''}</span>
       </Box>
       {showProgress && (
         <StyledProgress>
-          <BillingProgress percent={progress} height={8} />
+          <BillingProgress
+            percent={progress}
+            height={8}
+            canGoOver={isPayAsYouGo}
+          />
         </StyledProgress>
       )}
     </>

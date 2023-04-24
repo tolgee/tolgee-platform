@@ -33,6 +33,8 @@ export type BillingProgress = {
   background: string;
   low: string;
   sufficient: string;
+  over: string;
+  separator: string;
 };
 
 export type Marker = {
@@ -70,6 +72,8 @@ export const colors = {
       background: '#C4C4C4',
       low: '#E80000',
       sufficient: '#17AD18',
+      over: '#ffce00',
+      separator: '#656565',
     } as BillingProgress,
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
@@ -126,6 +130,8 @@ export const colors = {
       background: '#565656',
       low: '#ca0000',
       sufficient: '#1e991e',
+      over: '#ffce00',
+      separator: '#656565',
     } as BillingProgress,
     billingPlan: '#233043',
     globalLoading: '#ff6995',
