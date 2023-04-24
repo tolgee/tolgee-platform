@@ -4,23 +4,23 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { BillingPeriodType } from './PeriodSwitch';
 import { CloudPlan } from './CloudPlan';
 
-type PlanModel = components['schemas']['CloudPlanModel'];
-type ActivePlanModel = components['schemas']['ActiveCloudPlanModel'];
+type CloudPlanModel = components['schemas']['CloudPlanModel'];
+type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
 const StyledPlanWrapper = styled('div')`
   display: grid;
 `;
 
 type BillingPlansProps = {
-  plans: PlanModel[];
-  activePlan: ActivePlanModel;
+  plans: CloudPlanModel[];
+  activeSubscription: CloudSubscriptionModel;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
 };
 
 export const BillingPlans: React.FC<BillingPlansProps> = ({
   plans,
-  activePlan,
+  activeSubscription,
   period,
   onPeriodChange,
 }) => {
@@ -29,19 +29,19 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
       {plans.map((plan) => {
         const planPeriod = plan.free ? undefined : period;
         const isActive =
-          activePlan.id === plan.id &&
-          (activePlan.currentBillingPeriod === planPeriod ||
+          activeSubscription.plan.id === plan.id &&
+          (activeSubscription.currentBillingPeriod === planPeriod ||
             planPeriod === undefined);
-        const isEnded = isActive && activePlan.cancelAtPeriodEnd;
+        const isEnded = isActive && activeSubscription.cancelAtPeriodEnd;
 
         return (
           <StyledPlanWrapper key={plan.id}>
-            {activePlan && (
+            {activeSubscription && (
               <CloudPlan
                 plan={plan}
                 isActive={isActive}
                 isEnded={isEnded}
-                isOrganizationSubscribed={!activePlan.free}
+                isOrganizationSubscribed={!activeSubscription.plan.free}
                 onPeriodChange={onPeriodChange}
                 period={period}
               />

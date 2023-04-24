@@ -17,19 +17,20 @@ export const SelfHostedEeActiveSubscription: FC<{
   const { t } = useTranslate();
 
   const hasFixedPrice = Boolean(
-    subscription.plan.monthlyPrice || subscription.plan.yearlyPrice
+    subscription.plan.prices.subscriptionMonthly ||
+      subscription.plan.prices.subscriptionYearly
   );
 
   const description = !hasFixedPrice
     ? t('billing_subscriptions_pay_for_what_you_use')
     : t('billing_subscriptions_pay_fixed_price', {
-        includedSeats: subscription.plan.includedSeats,
+        includedSeats: subscription.plan.includedUsage.seats,
       });
 
   const price =
     period === 'MONTHLY'
-      ? subscription.plan.monthlyPrice
-      : subscription.plan.yearlyPrice;
+      ? subscription.plan.prices.subscriptionMonthly
+      : subscription.plan.prices.subscriptionYearly;
 
   return (
     <Plan
@@ -54,7 +55,7 @@ export const SelfHostedEeActiveSubscription: FC<{
         </PlanInfoArea>
 
         <PlanPrice
-          pricePerSeat={subscription.plan.pricePerSeat}
+          pricePerSeat={subscription.plan.prices.perSeat}
           subscriptionPrice={price}
           period={period}
         />

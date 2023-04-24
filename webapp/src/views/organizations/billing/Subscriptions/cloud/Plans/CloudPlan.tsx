@@ -66,13 +66,15 @@ export const CloudPlan: FC<Props> = ({
         <CloudPlanInfo plan={plan} />
 
         <Box minHeight="19px" gridArea="period-switch">
-          {Boolean(plan.monthlyPrice || plan.yearlyPrice) && (
-            <PeriodSwitch value={period} onChange={onPeriodChange} />
-          )}
+          {Boolean(
+            plan.prices.subscriptionMonthly || plan.prices.subscriptionMonthly
+          ) && <PeriodSwitch value={period} onChange={onPeriodChange} />}
         </Box>
         <PeriodPlanPrice
           price={
-            period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
+            period === 'MONTHLY'
+              ? plan.prices.subscriptionMonthly
+              : plan.prices.subscriptionMonthly / 12
           }
           period={period}
         />

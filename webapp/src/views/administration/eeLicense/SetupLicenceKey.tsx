@@ -43,8 +43,8 @@ export const SetupLicenceKey = () => {
                     <T
                       keyName="ee-license-key-confirmation-message"
                       params={{
-                        price: data.plan.pricePerSeat,
-                        includedSeats: data.plan.includedSeats,
+                        price: data.plan.prices.perSeat,
+                        includedSeats: data.plan.includedUsage.seats,
                       }}
                     />
                   </Box>

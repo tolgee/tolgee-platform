@@ -19,19 +19,20 @@ export const SelfHostedEePlan = (props: {
   const { t } = useTranslate();
 
   const hasFixedPrice = Boolean(
-    props.plan.monthlyPrice || props.plan.yearlyPrice
+    props.plan.prices.subscriptionMonthly ||
+      props.plan.prices.subscriptionYearly
   );
   const organization = useOrganization();
 
   const price =
     props.period === 'MONTHLY'
-      ? props.plan.monthlyPrice
-      : props.plan.yearlyPrice;
+      ? props.plan.prices.subscriptionMonthly
+      : props.plan.prices.subscriptionYearly;
 
   const description = !hasFixedPrice
     ? t('billing_subscriptions_pay_for_what_you_use')
     : t('billing_subscriptions_pay_fixed_price', {
-        includedSeats: props.plan.includedSeats,
+        includedSeats: props.plan.includedUsage.seats,
       });
 
   const subscribeMutation = useBillingApiMutation({
@@ -60,7 +61,7 @@ export const SelfHostedEePlan = (props: {
           )}
 
           <PlanPrice
-            pricePerSeat={props.plan.pricePerSeat}
+            pricePerSeat={props.plan.prices.perSeat}
             subscriptionPrice={price}
             period={props.period}
           />

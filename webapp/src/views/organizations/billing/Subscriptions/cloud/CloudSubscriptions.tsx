@@ -39,8 +39,8 @@ export const CloudSubscriptions = () => {
     },
   });
 
-  const activePlan = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/active-plan',
+  const activeSubscription = useBillingApiQuery({
+    url: '/v2/organizations/{organizationId}/billing/subscription',
     method: 'get',
     path: {
       organizationId: organization!.id,
@@ -57,19 +57,19 @@ export const CloudSubscriptions = () => {
     },
   });
 
-  useGlobalLoading(activePlan.isLoading || plansLoadable.isLoading);
+  useGlobalLoading(activeSubscription.isLoading || plansLoadable.isLoading);
 
   return (
     <>
       {plansLoadable.data?._embedded?.plans &&
-        activePlan.data &&
+        activeSubscription.data &&
         usage.data &&
         creditBalance.data &&
         period && (
           <>
             <Box mb={2}>
               <CurrentUsage
-                activePlan={activePlan.data}
+                activeSubscription={activeSubscription.data}
                 usage={usage.data}
                 balance={creditBalance.data}
               />
@@ -80,7 +80,7 @@ export const CloudSubscriptions = () => {
             <StyledShopping>
               <BillingPlans
                 plans={plansLoadable.data._embedded.plans}
-                activePlan={activePlan.data}
+                activeSubscription={activeSubscription.data}
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />

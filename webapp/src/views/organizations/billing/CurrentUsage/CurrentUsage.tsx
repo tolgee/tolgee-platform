@@ -18,7 +18,8 @@ import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../../useOrganization';
 import { getProgressData } from 'tg.component/billing/utils';
 
-type ActivePlanModel = billingComponents['schemas']['ActiveCloudPlanModel'];
+type CloudSubscriptionModel =
+  billingComponents['schemas']['CloudSubscriptionModel'];
 type UsageModel = components['schemas']['UsageModel'];
 type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
 
@@ -38,12 +39,16 @@ const StyledHeader = styled('div')`
 `;
 
 type Props = {
-  activePlan: ActivePlanModel;
+  activeSubscription: CloudSubscriptionModel;
   usage: UsageModel;
   balance: CreditBalanceModel;
 };
 
-export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
+export const CurrentUsage: FC<Props> = ({
+  activeSubscription,
+  usage,
+  balance,
+}) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
@@ -62,7 +67,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           {t('billing_actual_title')}
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>
-          {activePlan.name}
+          {activeSubscription.plan.name}
           {Boolean(usage.extraCreditBalance) && (
             <StyledBillingSectionSubtitleSmall>
               {' '}
@@ -75,9 +80,11 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           )}
         </StyledBillingSectionSubtitle>
         <Box flexGrow={1}>
-          {activePlan.type === 'PAY_AS_YOU_GO' &&
-            activePlan.estimatedCosts !== undefined && (
-              <CloudEstimatedCosts estimatedCosts={activePlan.estimatedCosts} />
+          {activeSubscription.plan.type === 'PAY_AS_YOU_GO' &&
+            activeSubscription.estimatedCosts !== undefined && (
+              <CloudEstimatedCosts
+                estimatedCosts={activeSubscription.estimatedCosts}
+              />
             )}
         </Box>
       </StyledHeader>
@@ -86,7 +93,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           name={t('billing_actual_used_translations')}
           currentQuantity={translationsUsed}
           totalQuantity={translationsMax}
-          periodEnd={activePlan.currentPeriodEnd}
+          periodEnd={activeSubscription.currentPeriodEnd}
           isPayAsYouGo={isPayAsYouGo}
         />
         <PlanMetric
@@ -98,7 +105,7 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           }
           currentQuantity={Math.round(creditUsed / 100)}
           totalQuantity={Math.round((creditMax || 0) / 100)}
-          periodEnd={activePlan.currentPeriodEnd}
+          periodEnd={activeSubscription.currentPeriodEnd}
           isPayAsYouGo={isPayAsYouGo}
         />
         <Box gridColumn="1">{t('billing_credits_refill')}</Box>
@@ -115,18 +122,18 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
           }
           currentQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
-        {!activePlan.free && (
+        {!activeSubscription.plan.free && (
           <>
             <Box gridColumn="1">{t('billing_actual_period')}</Box>
             <Box gridColumn="2 / -1" data-cy="billing-actual-period">
-              {activePlan.currentBillingPeriod === 'MONTHLY'
+              {activeSubscription.currentBillingPeriod === 'MONTHLY'
                 ? t('billing_monthly')
                 : t('billing_annual')}
             </Box>
             <Box gridColumn="1">{t('billing_actual_period_end')}</Box>
             <Box gridColumn="2 / -1" data-cy="billing-actual-period-end">
-              {formatDate(activePlan.currentPeriodEnd)} (
-              {!activePlan.cancelAtPeriodEnd ? (
+              {formatDate(activeSubscription.currentPeriodEnd)} (
+              {!activeSubscription.cancelAtPeriodEnd ? (
                 <StyledPositive>
                   {t('billing_actual_period_renewal')}
                 </StyledPositive>
