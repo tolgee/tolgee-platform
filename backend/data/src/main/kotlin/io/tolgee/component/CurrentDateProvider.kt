@@ -41,12 +41,12 @@ class CurrentDateProvider(
 
   private fun updateEntity(forcedDate: Date?) {
     executeInNewTransaction(transactionManager) {
-      getServerTimeEntity()?.let {
+      getServerTimeEntity()?.let { entity ->
         forcedDate?.let { date ->
-          it.time = date
-          entityManager.persist(it)
-        } ?: let {
-          entityManager.remove(it)
+          entity.time = date
+          entityManager.persist(entity)
+        } ?: let { _ ->
+          entityManager.remove(entity)
         }
       } ?: let {
         entityManager.persist(
