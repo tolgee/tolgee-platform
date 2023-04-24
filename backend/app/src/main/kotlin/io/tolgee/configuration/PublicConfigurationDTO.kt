@@ -27,6 +27,7 @@ class PublicConfigurationDTO(
   val appName = properties.appName
   val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
+  val internalControllerEnabled: Boolean = properties.internal.controllerEnabled
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val openReplayApiKey = properties.openReplayApiKey

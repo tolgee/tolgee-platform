@@ -20,7 +20,7 @@ import java.util.*
 @RequestMapping(value = ["internal/time"])
 @Transactional
 @InternalController
-class TimeMachineController(
+class TestClockController(
   val currentDateProvider: CurrentDateProvider
 ) {
   @PutMapping(value = ["/{dateTimeString}"])

@@ -2463,4 +2463,12 @@
             <column name="disabled_at" type="timestamp"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1682325130880-1">
+        <createTable tableName="forced_server_date_time">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="forced_server_date_timePK"/>
+            </column>
+            <column name="time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

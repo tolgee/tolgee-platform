@@ -560,6 +560,12 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -582,12 +588,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
@@ -936,10 +936,10 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1034,11 +1034,11 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      scopes: string[];
       username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      scopes: string[];
       userFullName?: string;
       projectName: string;
       description: string;
@@ -1073,11 +1073,14 @@ export interface components {
       )[];
       includedSeats: number;
       pricePerSeat: number;
-      subscriptionPrice: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
+      currentPeriodStart?: number;
       currentPeriodEnd?: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
       createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
       status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" | "ERROR";
@@ -1421,7 +1424,6 @@ export interface components {
       )[];
       name: string;
       id: number;
-      avatar?: components["schemas"]["Avatar"];
       /**
        * The role of currently authorized user.
        *
@@ -1429,6 +1431,7 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       slug: string;
       description?: string;
     };
@@ -1450,6 +1453,7 @@ export interface components {
       appName: string;
       version: string;
       showVersion: boolean;
+      internalControllerEnabled: boolean;
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
@@ -1509,16 +1513,16 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      translation?: string;
       namespace?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      translation?: string;
       namespace?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -1854,10 +1858,10 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
+      lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1877,22 +1881,30 @@ export interface components {
     };
     UsageModel: {
       organizationId: number;
-      /** Current balance of standard credits. Standard credits are refilled every month. */
+      /** Current balance of standard credits. Standard credits are refilled every month */
       creditBalance: number;
-      /** How many credits are included in your current plan. */
+      /** How many credits are included in your current plan */
       includedMtCredits: number;
-      /** Date when credits were refilled. (In epoch format.) */
+      /** Date when credits were refilled. (In epoch format) */
       creditBalanceRefilledAt: number;
-      /** Date when credits will be refilled. (In epoch format.) */
+      /** Date when credits will be refilled. (In epoch format) */
       creditBalanceNextRefillAt: number;
-      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
+      /** Currently used credits over credits included in plan and extra credits */
+      currentPayAsYouGoMtCredits: number;
+      /** The maximum amount organization can spend on MT credit usage before they reach the spending limit */
+      availablePayAsYouGoMtCredits: number;
+      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits */
       extraCreditBalance: number;
-      /** How many translations can be stored within your organization. */
-      translationLimit: number;
-      /** How many translations can organization use without additional costs. */
-      planTranslations: number;
-      /** How many translations are currently stored within your organization. */
+      /** How many translations can be stored within your organization */
+      translationSlotsLimit: number;
+      /** How many translations are included in current subscription plan. How many translations can organization use without additional costs */
+      includedTranslations: number;
+      /** How many translations slots are currently used by organization */
+      currentTranslationSlots: number;
+      /** How many non-empty translations are currently stored by organization */
       currentTranslations: number;
+      /** How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit) */
+      translationsLimit: number;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
@@ -1924,11 +1936,11 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      scopes: string[];
       username?: string;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      scopes: string[];
       userFullName?: string;
       projectName: string;
       description: string;

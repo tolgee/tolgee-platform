@@ -15,6 +15,7 @@ import { useOrganization } from './useOrganization';
 import { OrganizationBillingView } from './billing/OrganizationBillingView';
 import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
 import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
+import { OrganizationBillingTestClockHelperView } from './billing/Subscriptions/OrganizationBillingTestClockHelperView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -50,6 +51,13 @@ const SpecificOrganizationRouter = () => {
               <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
                 <OrganizationBillingView />
               </PrivateRoute>
+              {config.internalControllerEnabled && (
+                <PrivateRoute
+                  path={LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.template}
+                >
+                  <OrganizationBillingTestClockHelperView />
+                </PrivateRoute>
+              )}
             </>
           )}
         </>

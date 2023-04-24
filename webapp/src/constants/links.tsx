@@ -209,6 +209,11 @@ export class LINKS {
 
   static ORGANIZATION_INVOICES = Link.ofParent(LINKS.ORGANIZATION, 'invoices');
 
+  static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'billing-test-clock-helper'
+  );
+
   static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(
     LINKS.ORGANIZATION_SUBSCRIPTIONS,
     'self-hosted-ee'

@@ -84,6 +84,14 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
         }),
         label: t('organization_menu_invoices'),
       });
+      if (config.internalControllerEnabled) {
+        menuItems.push({
+          link: LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.build({
+            [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+          }),
+          label: t('organization-menu-billing-test-clock'),
+        });
+      }
     }
   }
 
