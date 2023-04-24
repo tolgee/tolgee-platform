@@ -12,7 +12,7 @@ export type ProgressData = {
   creditUsed: number;
   creditMax: number;
   creditProgress: number;
-  smallerProgress: number;
+  biggerProgress: number;
 };
 
 export const getProgressData = (usage: UsageModel): ProgressData => {
@@ -41,6 +41,6 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
     creditUsed,
     creditMax,
     creditProgress,
-    smallerProgress: Math.min(translationsProgress, creditProgress),
+    biggerProgress: Math.max(translationsProgress, creditProgress),
   };
 };

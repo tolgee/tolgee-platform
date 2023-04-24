@@ -119,10 +119,7 @@ export const Usage: FC = () => {
             <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
               <CircularBillingProgress
                 canGoOver={progressData.isPayAsYouGo}
-                percent={Math.max(
-                  progressData.translationsProgress,
-                  progressData.creditProgress
-                )}
+                percent={progressData.biggerProgress}
               />
             </StyledContent>
           </Tooltip>
