@@ -60,11 +60,7 @@ export const SelfHostedEePlan = (props: {
             <PeriodSwitch value={props.period} onChange={props.onChange} />
           )}
 
-          <PlanPrice
-            pricePerSeat={props.plan.prices.perSeat}
-            subscriptionPrice={price}
-            period={props.period}
-          />
+          <PlanPrice prices={props.plan.prices} period={props.period} />
 
           <PlanActionButton
             loading={subscribeMutation.isLoading}

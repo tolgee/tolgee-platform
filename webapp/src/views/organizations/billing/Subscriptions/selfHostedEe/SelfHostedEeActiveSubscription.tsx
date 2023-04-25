@@ -54,11 +54,7 @@ export const SelfHostedEeActiveSubscription: FC<{
           <IncludedFeatures features={subscription.plan.enabledFeatures} />
         </PlanInfoArea>
 
-        <PlanPrice
-          pricePerSeat={subscription.plan.prices.perSeat}
-          subscriptionPrice={price}
-          period={period}
-        />
+        <PlanPrice prices={subscription.plan.prices} period={period} />
 
         <SelfHostedEeSubscriptionActions
           id={subscription.id}
