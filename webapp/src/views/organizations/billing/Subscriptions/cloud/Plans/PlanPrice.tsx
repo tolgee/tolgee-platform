@@ -20,7 +20,7 @@ const StyledPrimaryPrice = styled(Box)`
 `;
 
 const StyledSecondaryPrice = styled(Box)`
-  font-size: 15px;
+  font-size: 13px;
 `;
 
 const StyledPeriod = styled(Box)`
