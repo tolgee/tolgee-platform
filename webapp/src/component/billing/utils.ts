@@ -24,12 +24,12 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
   const translationsMax = usage.includedTranslations;
 
   const translationsLimit = usage.translationsLimit;
-  const translationsProgress = (translationsUsed / translationsMax) * 100;
+  const translationsProgress = translationsUsed / translationsMax;
   const isPayAsYouGo = translationsLimit > translationsMax;
 
   const creditMax = usage.includedMtCredits;
   const creditUsed = creditMax - usage.creditBalance;
-  const creditProgress = (creditUsed / creditMax) * 100;
+  const creditProgress = creditUsed / creditMax;
 
   return {
     usesSlots,

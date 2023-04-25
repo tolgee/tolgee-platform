@@ -95,7 +95,8 @@ export class LINKS {
     'accept_invitation/' + p(PARAMS.INVITATION_CODE)
   );
 
-  static GO_TO_ORGANIZATION = Link.ofRoot('billing');
+  static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');
+  static GO_TO_SELF_HOSTED_BILLING = Link.ofRoot('billing-self-hosted');
 
   /**
    * Authenticated user stuff

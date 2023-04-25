@@ -8,11 +8,11 @@ import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
 import { PlanTitle } from '../../common/PlanTitle';
-import { PeriodPlanPrice } from './PeriodPlanPrice';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
 import { confirmation } from 'tg.hooks/confirmation';
+import { PlanPrice } from './PlanPrice';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
 
@@ -66,16 +66,11 @@ export const CloudPlan: FC<Props> = ({
         <CloudPlanInfo plan={plan} />
 
         <Box minHeight="19px" gridArea="period-switch">
-          {Boolean(plan.monthlyPrice || plan.yearlyPrice) && (
-            <PeriodSwitch value={period} onChange={onPeriodChange} />
-          )}
+          {Boolean(
+            plan.prices.subscriptionMonthly || plan.prices.subscriptionMonthly
+          ) && <PeriodSwitch value={period} onChange={onPeriodChange} />}
         </Box>
-        <PeriodPlanPrice
-          price={
-            period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
-          }
-          period={period}
-        />
+        <PlanPrice prices={plan.prices} period={period} />
 
         {!plan.free &&
           (isActive && !isEnded ? (

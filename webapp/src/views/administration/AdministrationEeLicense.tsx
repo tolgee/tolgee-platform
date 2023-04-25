@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
@@ -7,6 +7,7 @@ import { SetupLicenceKey } from './eeLicense/SetupLicenceKey';
 import { ActiveEeLicense } from './eeLicense/ActiveEeLicense';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
 import { LINKS } from 'tg.constants/links';
+import { EeLicenseHint } from './eeLicense/EeLicenseHint';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -44,7 +45,10 @@ export const AdministrationEeLicense = () => {
           hideChildrenOnLoading={false}
           loading={infoLoadable.isFetching}
         >
-          {info ? <ActiveEeLicense info={info} /> : <SetupLicenceKey />}
+          <Box display="grid" gap={2}>
+            {info ? <ActiveEeLicense info={info} /> : <SetupLicenceKey />}
+            <EeLicenseHint />
+          </Box>
         </BaseAdministrationView>
       </DashboardPage>
     </StyledWrapper>

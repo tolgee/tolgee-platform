@@ -45,6 +45,7 @@ declare namespace DataCy {
         "billing-plan-action-button" |
         "billing-plan-subtitle" |
         "billing-plan-title" |
+        "billing-progress-label-item" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |

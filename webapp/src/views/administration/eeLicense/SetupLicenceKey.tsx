@@ -6,6 +6,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { T, useTranslate } from '@tolgee/react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 export const SetupLicenceKey = () => {
   const { t } = useTranslate();
@@ -26,7 +27,7 @@ export const SetupLicenceKey = () => {
     method: 'post',
   });
 
-  function onsSubmit() {
+  function onSubmit() {
     return (values) => {
       prepareKeyMutation.mutate(
         {
@@ -43,8 +44,8 @@ export const SetupLicenceKey = () => {
                     <T
                       keyName="ee-license-key-confirmation-message"
                       params={{
-                        price: data.plan.pricePerSeat,
-                        includedSeats: data.plan.includedSeats,
+                        price: data.plan.prices.perSeat,
+                        includedSeats: data.plan.includedUsage.seats,
                       }}
                     />
                   </Box>
@@ -75,15 +76,18 @@ export const SetupLicenceKey = () => {
   }
 
   return (
-    <>
-      <StandardForm
-        initialValues={{ licenseKey: '' }}
-        onSubmit={onsSubmit()}
-        submitButtonInner={t('ee_licence_key_apply')}
-        hideCancel
-      >
-        <TextField label={t('ee_licence_key_input_label')} name="licenseKey" />
-      </StandardForm>
-    </>
+    <StandardForm
+      initialValues={{ licenseKey: '' }}
+      onSubmit={onSubmit()}
+      submitButtonInner={t('ee_licence_key_apply')}
+      validationSchema={Validation.EE_LICENSE_FORM}
+      hideCancel
+    >
+      <TextField
+        size="small"
+        label={t('ee_licence_key_input_label')}
+        name="licenseKey"
+      />
+    </StandardForm>
   );
 };

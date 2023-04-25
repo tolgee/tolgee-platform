@@ -35,8 +35,8 @@ export const ActiveEeLicense: FC<{
           gridArea="price / price / span 1 / span 2"
           justifyContent="end"
         >
-          <RefreshButton />
           <PlanLicenseKey licenseKey={info.licenseKey} />
+          <RefreshButton />
           <ReleaseKeyButton />
         </Box>
       </PlanContent>

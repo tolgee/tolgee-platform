@@ -936,11 +936,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1036,11 +1036,11 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      description: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -1055,6 +1055,19 @@ export interface components {
     };
     GetMySubscriptionDto: {
       licenseKey: string;
+    };
+    PlanIncludedUsageModel: {
+      seats: number;
+      translationSlots: number;
+      translations: number;
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations: number;
+      perThousandMtCredits: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
     };
     SelfHostedEePlanModel: {
       id: number;
@@ -1071,10 +1084,8 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
       )[];
-      includedSeats: number;
-      pricePerSeat: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -1425,13 +1436,13 @@ export interface components {
       name: string;
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      description?: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      description?: string;
       avatar?: components["schemas"]["Avatar"];
       slug: string;
     };
@@ -1514,16 +1525,16 @@ export interface components {
       name: string;
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1858,11 +1869,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1938,11 +1949,11 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      description: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {

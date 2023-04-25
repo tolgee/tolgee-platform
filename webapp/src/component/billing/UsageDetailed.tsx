@@ -18,9 +18,6 @@ export const UsageDetailed: React.FC<Props> = ({
   creditMax,
   isPayAsYouGo,
 }) => {
-  const translationsProgress = (translationsUsed / translationsMax) * 100;
-  const creditsProgress = (creditUsed / creditMax) * 100;
-
   return (
     <Box display="grid" gap={1}>
       <Box>
@@ -34,7 +31,8 @@ export const UsageDetailed: React.FC<Props> = ({
           />
         </Typography>
         <BillingProgress
-          percent={translationsProgress}
+          value={translationsUsed}
+          maxValue={translationsMax}
           canGoOver={isPayAsYouGo}
         />
       </Box>
@@ -48,7 +46,11 @@ export const UsageDetailed: React.FC<Props> = ({
             }}
           />
         </Typography>
-        <BillingProgress percent={creditsProgress} canGoOver={isPayAsYouGo} />
+        <BillingProgress
+          value={creditUsed}
+          maxValue={creditMax}
+          canGoOver={isPayAsYouGo}
+        />
       </Box>
     </Box>
   );

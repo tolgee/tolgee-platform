@@ -35,6 +35,9 @@ export interface paths {
   "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
+  "/v2/organizations/{organizationId}/billing/subscription": {
+    get: operations["getSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/expected-usage": {
     get: operations["getExpectedUsage"];
   };
@@ -64,9 +67,6 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/billing-info": {
     get: operations["getBillingInfo"];
   };
-  "/v2/organizations/{organizationId}/billing/active-plan": {
-    get: operations["getActivePlan"];
-  };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}": {
     delete: operations["cancelEeSubscription"];
   };
@@ -81,6 +81,19 @@ export interface components {
       _embedded?: {
         subscriptions?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
       };
+    };
+    PlanIncludedUsageModel: {
+      seats: number;
+      translationSlots: number;
+      translations: number;
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations: number;
+      perThousandMtCredits: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
     };
     SelfHostedEePlanModel: {
       id: number;
@@ -97,10 +110,8 @@ export interface components {
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
       )[];
-      includedSeats: number;
-      pricePerSeat: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -113,13 +124,10 @@ export interface components {
       licenseKey?: string;
       estimatedCosts?: number;
     };
-    ActiveCloudPlanModel: {
+    CloudPlanModel: {
       id: number;
       name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
+      free: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -132,11 +140,18 @@ export interface components {
         | "ACCOUNT_MANAGER"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+    };
+    CloudSubscriptionModel: {
+      organizationId: number;
+      plan: components["schemas"]["CloudPlanModel"];
+      currentPeriodStart?: number;
       currentPeriodEnd?: number;
-      cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      cancelAtPeriodEnd: boolean;
       estimatedCosts?: number;
-      free: boolean;
+      createdAt: number;
     };
     UpdateSubscriptionPrepareRequest: {
       /** Id of the subscription plan */
@@ -175,27 +190,6 @@ export interface components {
     };
     BuyMoreCreditsModel: {
       url: string;
-    };
-    CloudPlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      free: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-      )[];
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
     };
     CollectionModelCloudPlanModel: {
       _embedded?: {
@@ -347,7 +341,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ActiveCloudPlanModel"];
+          "*/*": components["schemas"]["CloudSubscriptionModel"];
         };
       };
       /** Bad Request */
@@ -570,6 +564,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CloudSubscriptionModel"];
         };
       };
       /** Bad Request */
@@ -826,33 +847,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["BillingInfoModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getActivePlan: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ActiveCloudPlanModel"];
         };
       };
       /** Bad Request */

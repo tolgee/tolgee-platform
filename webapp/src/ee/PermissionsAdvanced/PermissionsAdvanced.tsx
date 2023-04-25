@@ -5,8 +5,8 @@ import {
 } from 'tg.component/PermissionsSettings/types';
 import { Hierarchy } from './Hierarchy';
 import { useTranslate } from '@tolgee/react';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { PaidFeatureBanner } from './PaidFeatureBanner';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { PaidFeatureBanner } from '../common/PaidFeatureBanner';
 
 type Props = {
   dependencies: HierarchyItem;
@@ -22,11 +22,9 @@ export const PermissionsAdvanced: React.FC<Props> = ({
   allLangs,
 }) => {
   const { t } = useTranslate();
-  const { preferredOrganization } = usePreferredOrganization();
+  const { isEnabled } = useEnabledFeatures();
 
-  if (
-    !preferredOrganization.enabledFeatures?.includes('GRANULAR_PERMISSIONS')
-  ) {
+  if (!isEnabled('GRANULAR_PERMISSIONS')) {
     return <PaidFeatureBanner />;
   }
 
