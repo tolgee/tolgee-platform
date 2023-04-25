@@ -8,7 +8,7 @@ const StyledListWrapper = styled(Box)`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   margin-top: 8px;
-  gap: 16px;
+  gap: 4px 8px;
 `;
 
 export const IncludedFeatures: FC<{

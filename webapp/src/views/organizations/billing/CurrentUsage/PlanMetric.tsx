@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 import clsx from 'clsx';
 import { BillingProgress } from 'tg.component/billing/BillingProgress';
-import { BILLING_CRITICAL_PERCENT } from 'tg.component/billing/constants';
+import { BILLING_CRITICAL_FRACTION } from 'tg.component/billing/constants';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 
 export const StyledMetrics = styled('div')`
@@ -28,7 +28,7 @@ const StyledValue = styled('span')`
     color: ${({ theme }) => theme.palette.error.main};
   }
   &.over {
-    color: ${({ theme }) => theme.palette.warning.main};
+    color: ${({ theme }) => theme.palette.error.main};
   }
   &.sufficient {
     color: ${({ theme }) => theme.palette.success.main};
@@ -53,12 +53,12 @@ export const PlanMetric: React.FC<Props> = ({
 }) => {
   const formatNumber = useNumberFormatter();
   const showProgress = totalQuantity !== undefined;
-  const progress = (currentQuantity / totalQuantity!) * 100;
+  const progress = currentQuantity / totalQuantity!;
   const valueClass = isPayAsYouGo
     ? totalQuantity && currentQuantity > totalQuantity
       ? 'over'
       : 'sufficient'
-    : progress > BILLING_CRITICAL_PERCENT
+    : progress > BILLING_CRITICAL_FRACTION
     ? 'low'
     : 'sufficient';
 
@@ -74,9 +74,11 @@ export const PlanMetric: React.FC<Props> = ({
       {showProgress && (
         <StyledProgress>
           <BillingProgress
-            percent={progress}
+            value={currentQuantity}
+            maxValue={totalQuantity}
             height={8}
             canGoOver={isPayAsYouGo}
+            showLabels
           />
         </StyledProgress>
       )}
