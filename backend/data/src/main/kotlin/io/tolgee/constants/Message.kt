@@ -135,7 +135,8 @@ enum class Message {
   CANNOT_DISABLE_YOUR_OWN_ACCOUNT,
   SUBSCRIPTION_NOT_FOUND,
   INVOICE_DOES_NOT_HAVE_USAGE,
-  CUSTOMER_NOT_FOUND;
+  CUSTOMER_NOT_FOUND,
+  SUBSCRIPTION_NOT_ACTIVE;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
