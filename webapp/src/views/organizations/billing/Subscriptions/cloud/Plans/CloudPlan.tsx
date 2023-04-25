@@ -8,7 +8,6 @@ import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
 import { PlanTitle } from '../../common/PlanTitle';
-import { PeriodPlanPrice } from './PeriodPlanPrice';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';

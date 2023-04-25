@@ -24,11 +24,6 @@ export const SelfHostedEePlan = (props: {
   );
   const organization = useOrganization();
 
-  const price =
-    props.period === 'MONTHLY'
-      ? props.plan.prices.subscriptionMonthly
-      : props.plan.prices.subscriptionYearly;
-
   const description = !hasFixedPrice
     ? t('billing_subscriptions_pay_for_what_you_use')
     : t('billing_subscriptions_pay_fixed_price', {

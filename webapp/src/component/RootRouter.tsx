@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-import { OrganizationRedirectHandler } from './security/OrganizationRedirectHandler';
+import { OrganizationBillingRedirect } from './security/OrganizationRedirectHandler';
 import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 
 const LoginRouter = React.lazy(
@@ -72,8 +72,11 @@ export const RootRouter = () => (
     <Route path={LINKS.ACCEPT_INVITATION.template}>
       <AcceptInvitationHandler />
     </Route>
-    <PrivateRoute path={LINKS.GO_TO_ORGANIZATION.template}>
-      <OrganizationRedirectHandler />
+    <PrivateRoute path={LINKS.GO_TO_CLOUD_BILLING.template}>
+      <OrganizationBillingRedirect selfHosted={false} />
+    </PrivateRoute>
+    <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
+      <OrganizationBillingRedirect selfHosted={true} />
     </PrivateRoute>
     <PrivateRoute path={LINKS.USER_SETTINGS.template}>
       <UserSettingsRouter />

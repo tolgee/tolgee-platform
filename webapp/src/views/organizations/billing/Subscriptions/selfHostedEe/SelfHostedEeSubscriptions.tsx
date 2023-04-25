@@ -109,7 +109,7 @@ export const SelfHostedEeSubscriptions = () => {
             ))}
           </StyledActive>
         )}
-        {activeSubscriptions?.length === 0 && (
+        {!activeSubscriptions && activeSubscriptionsLoadable.isSuccess && (
           <EmptyListMessage
             height="200px"
             wrapperProps={{ py: 2 }}

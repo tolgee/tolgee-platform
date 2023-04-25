@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Alert, Box } from '@mui/material';
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -6,6 +6,10 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { T, useTranslate } from '@tolgee/react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS } from 'tg.constants/links';
+
+const TOLGEE_APP = 'https://app.tolgee.io';
 
 export const SetupLicenceKey = () => {
   const { t } = useTranslate();
@@ -26,7 +30,7 @@ export const SetupLicenceKey = () => {
     method: 'post',
   });
 
-  function onsSubmit() {
+  function onSubmit() {
     return (values) => {
       prepareKeyMutation.mutate(
         {
@@ -78,12 +82,30 @@ export const SetupLicenceKey = () => {
     <>
       <StandardForm
         initialValues={{ licenseKey: '' }}
-        onSubmit={onsSubmit()}
+        onSubmit={onSubmit()}
         submitButtonInner={t('ee_licence_key_apply')}
+        validationSchema={Validation.EE_LICENSE_FORM}
         hideCancel
       >
-        <TextField label={t('ee_licence_key_input_label')} name="licenseKey" />
+        <TextField
+          size="small"
+          label={t('ee_licence_key_input_label')}
+          name="licenseKey"
+        />
       </StandardForm>
+
+      <Alert severity="info" icon={<></>}>
+        <T
+          keyName="ee_licence_key_hint"
+          params={{
+            a: (
+              <a
+                href={`${TOLGEE_APP}${LINKS.GO_TO_SELF_HOSTED_BILLING.build()}`}
+              />
+            ),
+          }}
+        />
+      </Alert>
     </>
   );
 };

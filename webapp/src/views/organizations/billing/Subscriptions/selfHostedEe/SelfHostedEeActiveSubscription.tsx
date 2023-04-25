@@ -27,11 +27,6 @@ export const SelfHostedEeActiveSubscription: FC<{
         includedSeats: subscription.plan.includedUsage.seats,
       });
 
-  const price =
-    period === 'MONTHLY'
-      ? subscription.plan.prices.subscriptionMonthly
-      : subscription.plan.prices.subscriptionYearly;
-
   return (
     <Plan
       sx={(theme) => ({
