@@ -4,10 +4,15 @@ import { T } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { MtHint } from 'tg.component/billing/MtHint';
-import { PlanInfo } from '../../common/PlanInfo';
 import React from 'react';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
+
+const StyledContainer = styled('div')`
+  display: grid;
+  grid-template-columns: 1fr 16px 1fr;
+  padding-bottom: 8px;
+`;
 
 const StyledItem = styled('div')`
   display: grid;
@@ -38,7 +43,7 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
   const usesSlots = plan.type === 'SLOTS_FIXED';
   const formatNumber = useNumberFormatter();
   return (
-    <PlanInfo>
+    <StyledContainer>
       <StyledItem>
         <StyledNumber>
           {formatNumber(
@@ -67,6 +72,6 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
           />
         </StyledName>
       </StyledItem>
-    </PlanInfo>
+    </StyledContainer>
   );
 };

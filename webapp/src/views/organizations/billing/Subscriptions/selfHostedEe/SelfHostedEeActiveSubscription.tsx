@@ -1,14 +1,16 @@
 import { FC } from 'react';
-import { components } from 'tg.service/billingApiSchema.generated';
-import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
-import { IncludedFeatures } from './IncludedFeatures';
-import { Plan, PlanContent } from '../common/Plan';
-import { PlanPrice } from '../cloud/Plans/PlanPrice';
-import { PlanInfoArea } from '../common/PlanInfo';
-import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
-import { ActivePlanTitle } from './ActivePlanTitle';
 import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
+
+import { components } from 'tg.service/billingApiSchema.generated';
+import { PlanInfoArea } from 'tg.component/billing/PlanInfo';
+import { Plan, PlanContent } from 'tg.component/billing/Plan';
+import { PlanPrice } from 'tg.component/billing/PlanPrice';
+
+import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
+import { IncludedFeatures } from './IncludedFeatures';
+import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
+import { ActivePlanTitle } from './ActivePlanTitle';
 
 export const SelfHostedEeActiveSubscription: FC<{
   subscription: components['schemas']['SelfHostedEeSubscriptionModel'];

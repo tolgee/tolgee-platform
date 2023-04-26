@@ -4,15 +4,17 @@ import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
+import { PlanTitle } from 'tg.component/billing/PlanTitle';
+import { Plan, PlanContent, PlanSubtitle } from 'tg.component/billing/Plan';
+import { PlanInfo } from 'tg.component/billing/PlanInfo';
+import { confirmation } from 'tg.hooks/confirmation';
+
 import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
-import { PlanTitle } from '../../common/PlanTitle';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
-import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
-import { confirmation } from 'tg.hooks/confirmation';
-import { PlanPrice } from './PlanPrice';
+import { PlanPrice } from '../../../../../../component/billing/PlanPrice';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
 
@@ -63,7 +65,9 @@ export const CloudPlan: FC<Props> = ({
       <PlanContent>
         <PlanTitle title={plan.name} />
 
-        <CloudPlanInfo plan={plan} />
+        <PlanInfo>
+          <CloudPlanInfo plan={plan} />
+        </PlanInfo>
 
         <Box minHeight="19px" gridArea="period-switch">
           {Boolean(

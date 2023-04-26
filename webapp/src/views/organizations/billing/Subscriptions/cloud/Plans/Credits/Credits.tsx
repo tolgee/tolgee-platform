@@ -6,12 +6,13 @@ import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../../../../../useOrganization';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
-import { getPossibleValues } from './creditsUtil';
-import { Plan, PlanContent } from '../../../common/Plan';
-import { PlanTitle } from '../../../common/PlanTitle';
+import { Plan, PlanContent } from 'tg.component/billing/Plan';
+import { PlanTitle } from 'tg.component/billing/PlanTitle';
 import { MtHint } from 'tg.component/billing/MtHint';
+
+import { useOrganization } from '../../../../../useOrganization';
+import { getPossibleValues } from './creditsUtil';
 import { PlanActionButton } from '../PlanActionButton';
 
 const StyledSliderWrapper = styled('div')`

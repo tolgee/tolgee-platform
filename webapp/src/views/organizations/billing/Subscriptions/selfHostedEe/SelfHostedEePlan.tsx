@@ -2,12 +2,13 @@ import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { useOrganization } from '../../../useOrganization';
-import { Plan, PlanContent } from '../common/Plan';
-import { PlanTitle } from '../common/PlanTitle';
-import { PlanActionButton } from '../cloud/Plans/PlanActionButton';
-import { PlanPrice } from '../cloud/Plans/PlanPrice';
+import { Plan, PlanContent } from 'tg.component/billing/Plan';
+import { PlanTitle } from 'tg.component/billing/PlanTitle';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+
+import { PlanActionButton } from '../cloud/Plans/PlanActionButton';
+import { PlanPrice } from '../../../../../component/billing/PlanPrice';
 import { IncludedFeatures } from './IncludedFeatures';
 import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
 
