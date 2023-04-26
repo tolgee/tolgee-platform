@@ -29,7 +29,6 @@ class PublicConfigurationDTO(
   val showVersion: Boolean = properties.internal.showVersion
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
-  val openReplayApiKey = properties.openReplayApiKey
   val chatwootToken = properties.chatwootToken
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
