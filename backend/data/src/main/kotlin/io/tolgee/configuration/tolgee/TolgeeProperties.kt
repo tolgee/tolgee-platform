@@ -15,7 +15,6 @@ open class TolgeeProperties(
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
   var chatwootToken: String? = null,
-  var openReplayApiKey: String? = null,
   var capterraTracker: String? = null,
   var ga4Tag: String? = null,
   var internal: InternalProperties = InternalProperties(),
