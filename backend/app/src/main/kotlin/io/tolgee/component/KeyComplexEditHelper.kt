@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
@@ -197,12 +196,10 @@ class KeyComplexEditHelper(
 
   private fun Project.checkScreenshotsDeletePermission() {
     securityService.checkProjectPermission(this.id, Scope.SCREENSHOTS_DELETE)
-
   }
 
   private fun Project.checkKeysEditPermission() {
     securityService.checkProjectPermission(this.id, Scope.KEYS_EDIT)
-
   }
 
   private fun Project.checkTranslationsEditPermission() {
