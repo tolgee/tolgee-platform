@@ -10,8 +10,7 @@ import { PlanPrice } from 'tg.component/billing/plan/PlanPrice';
 import { IncludedFeatures } from 'tg.component/billing/plan/IncludedFeatures';
 import { PeriodSwitch } from 'tg.component/billing/plan/PeriodSwitch';
 import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
-
-import { PlanActionButton } from '../cloud/Plans/PlanActionButton';
+import { PlanActionButton } from 'tg.component/billing/plan/PlanActionButton';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];

@@ -3,12 +3,12 @@ import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
+import { Plan, PlanContent } from 'tg.component/billing/plan/Plan';
+import { PlanInfoArea } from 'tg.component/billing/plan/PlanInfo';
+import { PlanPrice } from 'tg.component/billing/plan/PlanPrice';
+import { IncludedFeatures } from 'tg.component/billing/plan/IncludedFeatures';
 
-import { Plan, PlanContent } from '../../../../../component/billing/plan/Plan';
-import { PlanInfoArea } from '../../../../../component/billing/plan/PlanInfo';
-import { PlanPrice } from '../../../../../component/billing/plan/PlanPrice';
 import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
-import { IncludedFeatures } from '../../../../../component/billing/plan/IncludedFeatures';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
 import { ActivePlanTitle } from './ActivePlanTitle';
 

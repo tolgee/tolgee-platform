@@ -1,14 +1,16 @@
-import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
+import { useState } from 'react';
 import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
-import { BillingPlans } from './Plans/BillingPlans';
-import { Credits } from './Plans/Credits/Credits';
+
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
+
+import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
+import { BillingPlans } from './Plans/BillingPlans';
+import { Credits } from './Plans/Credits/Credits';
 import { useOrganization } from '../../../useOrganization';
-import { BillingPeriodType } from '../../../../../component/billing/plan/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { useState } from 'react';
 
 const StyledShopping = styled('div')`
   display: grid;

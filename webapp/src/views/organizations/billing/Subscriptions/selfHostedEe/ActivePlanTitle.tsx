@@ -6,7 +6,7 @@ import { useDateFormatter } from 'tg.hooks/useLocale';
 import {
   PlanTitleArea,
   PlanTitleText,
-} from '../../../../../component/billing/plan/PlanTitle';
+} from 'tg.component/billing/plan/PlanTitle';
 
 import { SubscriptionStatus } from '../../common/SubscriptionStatus';
 

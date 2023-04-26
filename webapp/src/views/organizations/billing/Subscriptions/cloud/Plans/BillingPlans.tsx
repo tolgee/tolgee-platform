@@ -1,7 +1,7 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { BillingPeriodType } from '../../../../../../component/billing/plan/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 import { CloudPlan } from './CloudPlan';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];

@@ -13,7 +13,7 @@ import { MtHint } from 'tg.component/billing/MtHint';
 
 import { useOrganization } from '../../../../../useOrganization';
 import { getPossibleValues } from './creditsUtil';
-import { PlanActionButton } from '../PlanActionButton';
+import { PlanActionButton } from '../../../../../../../component/billing/plan/PlanActionButton';
 
 const StyledSliderWrapper = styled('div')`
   display: grid;

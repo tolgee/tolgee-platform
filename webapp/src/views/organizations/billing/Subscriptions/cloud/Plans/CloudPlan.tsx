@@ -18,7 +18,7 @@ import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 
 import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
-import { PlanActionButton } from './PlanActionButton';
+import { PlanActionButton } from '../../../../../../component/billing/plan/PlanActionButton';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
