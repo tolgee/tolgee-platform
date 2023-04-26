@@ -9,6 +9,9 @@ declare namespace DataCy {
         "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
         "administration-frame" |
+        "administration-menu-ee-license" |
+        "administration-menu-organizations" |
+        "administration-menu-users" |
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |

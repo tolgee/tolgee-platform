@@ -29,8 +29,8 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
     return new Promise<void>((resolve, reject) =>
       confirmation({
         message: (
-        <T keyName="really_want_to_change_base_permission_confirmation" />
-      ),
+          <T keyName="really_want_to_change_base_permission_confirmation" />
+        ),
         hardModeText: organization.name?.toUpperCase(),
         onConfirm: () => {
           resolve();
@@ -48,8 +48,8 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
     try {
       await updatePermissions(data);
       messageService.success(
-                <T keyName="organization_member_privileges_set" />
-              );
+        <T keyName="organization_member_privileges_set" />
+      );
     } catch (e) {
       parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
     }

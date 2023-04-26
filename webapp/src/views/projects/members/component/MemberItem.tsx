@@ -1,6 +1,5 @@
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Chip, styled } from '@mui/material';
-import { T } from '@tolgee/react';
 
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
@@ -16,7 +15,6 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];

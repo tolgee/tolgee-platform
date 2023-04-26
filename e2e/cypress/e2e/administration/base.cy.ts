@@ -32,7 +32,7 @@ describe('Administration', () => {
     visit();
     gcy('global-user-menu-button').click();
     gcy('user-menu-server-administration').click();
-    gcy('administration-tabs-organizations').should('be.visible');
+    gcy('administration-menu-organizations').should('be.visible');
   });
 
   it('there is no administration button for standard user', () => {
@@ -62,7 +62,7 @@ describe('Administration', () => {
 
   it('can change user permission', () => {
     visitAdministration();
-    gcy('administration-tabs-users').click();
+    gcy('administration-menu-users').click();
     changeUserRole('John User', 'Admin');
     changeUserRole('John User', 'User');
     getUserRoleSelect('Peter Administrator')
@@ -72,7 +72,7 @@ describe('Administration', () => {
 
   it('can delete user', () => {
     visitAdministration();
-    gcy('administration-tabs-users').click();
+    gcy('administration-menu-users').click();
     getUserListItem('John User')
       .findDcy('administration-user-delete-user')
       .click();
