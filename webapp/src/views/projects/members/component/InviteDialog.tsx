@@ -7,9 +7,9 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  Typography,
   styled,
   TextField,
+  Typography,
 } from '@mui/material';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
@@ -84,7 +84,9 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
       }
       onClose();
     } catch (e) {
-      parseErrorResponse(e).forEach((e_1) => messaging.error(<TranslatedError code={e_1} />));
+      parseErrorResponse(e).forEach((e_1) =>
+        messaging.error(<TranslatedError code={e_1} />)
+      );
     }
   }
 
