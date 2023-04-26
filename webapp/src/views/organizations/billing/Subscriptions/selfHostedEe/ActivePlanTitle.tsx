@@ -3,7 +3,10 @@ import { Box, Tooltip, Typography } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { PlanTitleArea, PlanTitleText } from 'tg.component/billing/PlanTitle';
+import {
+  PlanTitleArea,
+  PlanTitleText,
+} from '../../../../../component/billing/plan/PlanTitle';
 
 import { SubscriptionStatus } from '../../common/SubscriptionStatus';
 

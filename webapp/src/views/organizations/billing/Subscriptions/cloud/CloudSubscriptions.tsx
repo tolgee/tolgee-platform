@@ -6,7 +6,7 @@ import { Credits } from './Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrganization } from '../../../useOrganization';
-import { BillingPeriodType } from './Plans/PeriodSwitch';
+import { BillingPeriodType } from '../../../../../component/billing/plan/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
 import { useState } from 'react';
 

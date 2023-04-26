@@ -3,16 +3,17 @@ import { useLocation } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 import { Box, styled, Typography } from '@mui/material';
 
-import { useOrganization } from '../../../useOrganization';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
+
+import { useOrganization } from '../../../useOrganization';
 import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
-import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const StyledShopping = styled('div')`
   display: grid;

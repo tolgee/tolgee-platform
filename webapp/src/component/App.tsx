@@ -16,7 +16,7 @@ import { RedirectionActions } from '../store/global/RedirectionActions';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
-import { PlanLimitPopover } from './billing/PlanLimitPopover';
+import { LimitPopover } from './billing/LimitPopover';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
@@ -91,7 +91,7 @@ const GlobalLimitPopover = () => {
   const { preferredOrganization } = usePreferredOrganization();
 
   return preferredOrganization ? (
-    <PlanLimitPopover open={popoverOpen} onClose={handleClose} />
+    <LimitPopover open={popoverOpen} onClose={handleClose} />
   ) : null;
 };
 

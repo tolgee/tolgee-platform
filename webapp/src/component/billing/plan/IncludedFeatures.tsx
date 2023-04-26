@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Typography, styled } from '@mui/material';
-import { PlanFeature } from './PlanFeature';
+import { PlanFeature } from '../../../views/organizations/billing/Subscriptions/selfHostedEe/PlanFeature';
 
 const StyledListWrapper = styled(Box)`
   display: grid;

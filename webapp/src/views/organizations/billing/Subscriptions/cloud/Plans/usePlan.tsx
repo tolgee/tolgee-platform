@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { BillingPeriodType } from './PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 
 type Props = {
   planId: number;

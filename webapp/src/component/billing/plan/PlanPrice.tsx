@@ -1,6 +1,6 @@
 import { Box, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { BillingPeriodType } from '../../views/organizations/billing/Subscriptions/cloud/Plans/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 import { components } from 'tg.service/apiSchema.generated';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
 

@@ -2,15 +2,16 @@ import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { Plan, PlanContent } from 'tg.component/billing/Plan';
-import { PlanTitle } from 'tg.component/billing/PlanTitle';
+import { Plan, PlanContent } from 'tg.component/billing/plan/Plan';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { PlanTitle } from 'tg.component/billing/plan/PlanTitle';
+import { PlanPrice } from 'tg.component/billing/plan/PlanPrice';
+import { IncludedFeatures } from 'tg.component/billing/plan/IncludedFeatures';
+import { PeriodSwitch } from 'tg.component/billing/plan/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 
 import { PlanActionButton } from '../cloud/Plans/PlanActionButton';
-import { PlanPrice } from '../../../../../component/billing/PlanPrice';
-import { IncludedFeatures } from './IncludedFeatures';
-import { BillingPeriodType, PeriodSwitch } from '../cloud/Plans/PeriodSwitch';
 
 export const SelfHostedEePlan = (props: {
   plan: components['schemas']['SelfHostedEePlanModel'];

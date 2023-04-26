@@ -30,7 +30,7 @@ type Props = {
   open: boolean;
 };
 
-export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
+export const LimitPopover: React.FC<Props> = ({ open, onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
   const { usage } = useOrganizationUsage();
   const isOwner = preferredOrganization.currentUserRole === 'OWNER';

@@ -7,8 +7,8 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
-import { Plan, PlanContent } from 'tg.component/billing/Plan';
-import { PlanTitle } from 'tg.component/billing/PlanTitle';
+import { Plan, PlanContent } from 'tg.component/billing/plan/Plan';
+import { PlanTitle } from 'tg.component/billing/plan/PlanTitle';
 import { MtHint } from 'tg.component/billing/MtHint';
 
 import { useOrganization } from '../../../../../useOrganization';

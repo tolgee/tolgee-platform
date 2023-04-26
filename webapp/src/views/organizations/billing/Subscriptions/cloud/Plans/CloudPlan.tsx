@@ -4,17 +4,22 @@ import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { PlanTitle } from 'tg.component/billing/PlanTitle';
-import { Plan, PlanContent, PlanSubtitle } from 'tg.component/billing/Plan';
-import { PlanInfo } from 'tg.component/billing/PlanInfo';
+import { PlanTitle } from 'tg.component/billing/plan/PlanTitle';
+import {
+  Plan,
+  PlanContent,
+  PlanSubtitle,
+} from 'tg.component/billing/plan/Plan';
+import { PlanInfo } from 'tg.component/billing/plan/PlanInfo';
 import { confirmation } from 'tg.hooks/confirmation';
+import { PlanPrice } from 'tg.component/billing/plan/PlanPrice';
+import { PeriodSwitch } from 'tg.component/billing/plan/PeriodSwitch';
+import { BillingPeriodType } from 'tg.component/billing/plan/PeriodSwitch';
 
 import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
-import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
-import { PlanPrice } from '../../../../../../component/billing/PlanPrice';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
 

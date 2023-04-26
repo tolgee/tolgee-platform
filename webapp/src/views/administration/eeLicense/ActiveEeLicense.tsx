@@ -1,11 +1,11 @@
 import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { Plan, PlanContent } from 'tg.component/billing/Plan';
+import { Plan, PlanContent } from 'tg.component/billing/plan/Plan';
 import { ActivePlanTitle } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/ActivePlanTitle';
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
-import { PlanInfoArea } from 'tg.component/billing/PlanInfo';
-import { IncludedFeatures } from '../../organizations/billing/Subscriptions/selfHostedEe/IncludedFeatures';
+import { PlanInfoArea } from 'tg.component/billing/plan/PlanInfo';
+import { IncludedFeatures } from '../../../component/billing/plan/IncludedFeatures';
 import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/PlanLicenseKey';
