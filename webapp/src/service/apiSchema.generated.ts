@@ -560,12 +560,6 @@ export interface components {
       origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
@@ -594,6 +588,12 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -679,9 +679,9 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -699,9 +699,9 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
     };
     TagKeyDto: {
       name: string;
@@ -802,7 +802,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
     };
     EditKeyDto: {
       name: string;
@@ -936,10 +936,10 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1040,13 +1040,13 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      username?: string;
       userFullName?: string;
       projectName: string;
       scopes: string[];
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     SuperTokenRequest: {
@@ -1425,7 +1425,7 @@ export interface components {
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     OAuthPublicConfigDTO: {
@@ -1453,15 +1453,15 @@ export interface components {
       )[];
       name: string;
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
       description?: string;
     };
     PublicBillingConfigurationDTO: {
@@ -1485,10 +1485,9 @@ export interface components {
       internalControllerEnabled: boolean;
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
-      openReplayApiKey?: string;
       chatwootToken?: string;
-      ga4Tag?: string;
       capterraTracker?: string;
+      ga4Tag?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1543,17 +1542,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1781,7 +1780,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1888,10 +1887,10 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1966,13 +1965,13 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
-      username?: string;
       userFullName?: string;
       projectName: string;
       scopes: string[];
+      username?: string;
+      projectId: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
       description: string;
     };
     PagedModelUserAccountModel: {
