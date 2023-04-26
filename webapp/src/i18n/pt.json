@@ -564,7 +564,7 @@
   "project_languages_primary_provider" : "Principal",
   "project_languages_primary_provider_hint" : "O provedor principal é usado para tradução automática de novas chaves e é exibido em primeiro no painel de tradução.",
   "project_leave_button" : "Sair do projeto",
-  "project_list_keys_count" : "{keysCount, plural, \n  =1 {1 chave}\n  other {# chaves}\n}",
+  "project_list_keys_count" : "{keysCount, plural, \n  one {1 chave}\n  other {# chaves}\n}",
   "project_list_more_button" : "Mais",
   "project_list_translations_button" : "Traduções",
   "project_members_dialog_close_button" : "Fechar",

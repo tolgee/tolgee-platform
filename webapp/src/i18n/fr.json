@@ -575,7 +575,7 @@
   "project_languages_primary_provider" : "Primaire",
   "project_languages_primary_provider_hint" : "Fournisseur primaire est utilisé pour la traduction automatique des clés nouvelles et il est affiché premier dans l'offre des traductions. ",
   "project_leave_button" : "Abandonner le projet",
-  "project_list_keys_count" : "{keysCount, plural, \n=1 {1 clé}\nother {# clés}\n}",
+  "project_list_keys_count" : "{keysCount, plural, \none {1 clé}\nother {# clés}\n}",
   "project_list_more_button" : "Plus",
   "project_list_translations_button" : "Traductions",
   "project_members_dialog_close_button" : "Fermer",

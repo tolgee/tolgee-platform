@@ -301,7 +301,7 @@
   "project_languages_primary_none" : "Ingen",
   "project_languages_primary_provider" : "Hoved",
   "project_leave_button" : "Forlat prosjektet",
-  "project_list_keys_count" : "{keysCount, plural, \n  =1 {1 nøkkel}\n  other {# nøkler}\n}",
+  "project_list_keys_count" : "{keysCount, plural, \n  one {1 nøkkel}\n  other {# nøkler}\n}",
   "project_list_more_button" : "Mer",
   "project_list_translations_button" : "Oversettelser",
   "project_members_dialog_close_button" : "Lukk",

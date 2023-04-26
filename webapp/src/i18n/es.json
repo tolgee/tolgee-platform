@@ -544,7 +544,7 @@
   "project_languages_primary_provider" : "Principal",
   "project_languages_primary_provider_hint" : "El proveedor principal se utiliza para traducir automáticamente nuevas claves y se muestra primero en el menú de traducción.",
   "project_leave_button" : "Salir del proyecto",
-  "project_list_keys_count" : "{keysCount, plural, \n=1 {1 llave}\nother {# llaves}\n}",
+  "project_list_keys_count" : "{keysCount, plural, \none {1 llave}\nother {# llaves}\n}",
   "project_list_more_button" : "Más",
   "project_list_translations_button" : "Traducciones",
   "project_members_dialog_close_button" : "Cerrar",

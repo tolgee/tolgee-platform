@@ -532,7 +532,7 @@
   "project_languages_primary_provider" : "Primäre",
   "project_languages_primary_provider_hint" : "Der primäre Anbieter wird für die maschinelle Übersetzung neuer Schlüssel verwendet und wird im Übersetzungspanel als erster angezeigt.",
   "project_leave_button" : "Projekt verlassen",
-  "project_list_keys_count" : "{keysCount, plural, \n  =1 {1 Schlüssel}\n  other {# Schlüssel}\n}",
+  "project_list_keys_count" : "{keysCount, plural, \n  one {1 Schlüssel}\n  other {# Schlüssel}\n}",
   "project_list_more_button" : "Mehr",
   "project_list_translations_button" : "Übersetzungen",
   "project_members_dialog_close_button" : "Schließen",

@@ -1,3 +1,10 @@
+## [3.12.3](https://github.com/tolgee/tolgee-platform/compare/v3.12.2...v3.12.3) (2023-04-26)
+
+
+### Bug Fixes
+
+* Switch from open-replay to Sentry ([f127451](https://github.com/tolgee/tolgee-platform/commit/f1274517c3a6d69ebbc812828aeef9497feee065))
+
 ## [3.12.2](https://github.com/tolgee/tolgee-platform/compare/v3.12.1...v3.12.2) (2023-04-18)
 
 
