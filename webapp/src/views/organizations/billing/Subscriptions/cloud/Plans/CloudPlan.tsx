@@ -4,6 +4,8 @@ import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/billingApiSchema.generated';
+import { confirmation } from 'tg.hooks/confirmation';
+
 import { CloudPlanInfo } from './CloudPlanInfo';
 import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
@@ -11,8 +13,9 @@ import { PlanTitle } from '../../common/PlanTitle';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
-import { confirmation } from 'tg.hooks/confirmation';
 import { PlanPrice } from './PlanPrice';
+import { PlanInfo } from '../../common/PlanInfo';
+import { IncludedFeatures } from '../../selfHostedEe/IncludedFeatures';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
 
@@ -63,7 +66,12 @@ export const CloudPlan: FC<Props> = ({
       <PlanContent>
         <PlanTitle title={plan.name} />
 
-        <CloudPlanInfo plan={plan} />
+        <PlanInfo>
+          <CloudPlanInfo plan={plan} />
+          {Boolean(plan.enabledFeatures.length) && (
+            <IncludedFeatures features={plan.enabledFeatures} />
+          )}
+        </PlanInfo>
 
         <Box minHeight="19px" gridArea="period-switch">
           {Boolean(
