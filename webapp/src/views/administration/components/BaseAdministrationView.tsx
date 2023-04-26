@@ -21,14 +21,17 @@ export const BaseAdministrationView: React.FC<Props> = ({
     {
       link: LINKS.ADMINISTRATION_ORGANIZATIONS.build(),
       label: t('administration_organizations'),
+      dataCy: 'administration-menu-organizations',
     },
     {
       link: LINKS.ADMINISTRATION_USERS.build(),
       label: t('administration_users'),
+      dataCy: 'administration-menu-users',
     },
     {
       link: LINKS.ADMINISTRATION_EE_LICENSE.build(),
       label: t('administration_ee_license'),
+      dataCy: 'administration-menu-ee-license',
     },
   ];
 

@@ -27,7 +27,10 @@ open class UsageModel(
   @Schema(description = "Currently used credits over credits included in plan and extra credits")
   val currentPayAsYouGoMtCredits: Long,
 
-  @Schema(description = "The maximum amount organization can spend on MT credit usage before they reach the spending limit")
+  @Schema(
+    description = "The maximum amount organization can spend" +
+      " on MT credit usage before they reach the spending limit"
+  )
   val availablePayAsYouGoMtCredits: Long,
 
   @Schema(
