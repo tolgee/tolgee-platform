@@ -4,7 +4,6 @@ import { IconButton, styled, Tooltip } from '@mui/material';
 import { Clear, Link } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -15,7 +14,6 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
-import { useCallback } from 'react';
 
 const messaging = container.resolve(MessageService);
 
@@ -71,14 +69,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const isAdmin = satisfiesPermission('admin');
 
   const translatePermission = usePermissionTranslation();
-
-  const findLanguage = useCallback(
-    (languageId: number) => {
-      const result = languages.find((language) => language.id === languageId);
-      return result!;
-    },
-    [languages]
-  );
 
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',

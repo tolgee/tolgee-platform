@@ -83,7 +83,7 @@ class DataCyPlugin {
       }
       const content = (await readFile(file)).toString();
       const matches = content.matchAll(
-        /["']?data-cy["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
+        /["']?data-?[c|C]y["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
       );
       this.fileItems[file] = [];
       for (let match of matches) {
