@@ -1,6 +1,10 @@
 package io.tolgee.misc.dockerRunner
 
 import io.tolgee.fixtures.waitFor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.BufferedReader
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -31,12 +35,19 @@ class DockerContainerRunner(
   private val env: Map<String, String>? = null,
   private val command: String = "",
   private val timeout: Long = 10000,
-  private val debug: (String) -> Unit = {}
+  private val logDebug: (String) -> Unit = {},
+  private val logStdOut: ((String) -> Unit)? = null,
+  private val logErrOut: ((String) -> Unit)? = null,
 ) {
   fun run() {
     if (stopBeforeStart) {
       stop()
     }
+    startNewOrExistingContainer()
+    startOutputLogging()
+  }
+
+  private fun startNewOrExistingContainer() {
     if (!this.rm) {
       startExistingOrNewContainer()
       return
@@ -53,10 +64,41 @@ class DockerContainerRunner(
     }
   }
 
+  private fun startOutputLogging() {
+    if (logStdOut == null && logErrOut == null) {
+      return
+    }
+
+    val process = "docker logs $name -f".startProcess()
+    val stdoutBufferedReader = process.inputStream.bufferedReader()
+    val errorBufferedReader = process.errorStream.bufferedReader()
+
+    @Suppress("OPT_IN_USAGE")
+    val job = GlobalScope.launch(Dispatchers.IO) {
+      while (process.isAlive) {
+        logOutputs(stdoutBufferedReader, errorBufferedReader)
+      }
+    }
+
+    job.invokeOnCompletion {
+      logOutputs(stdoutBufferedReader, errorBufferedReader)
+    }
+  }
+
+  private fun logOutputs(std: BufferedReader, err: BufferedReader) {
+    logStdOut?.let { out ->
+      std.forEachLine { out(it) }
+    }
+
+    logErrOut?.let { out ->
+      std.forEachLine { out(it) }
+    }
+  }
+
   private fun startNewContainer() {
     val startTime = System.currentTimeMillis()
     val command = "docker run $rmString -d $exposeString$envString --name $containerName $image $command"
-    debug("Running new container using command: $command")
+    logDebug("Running new container using command: $command")
     command.runCommand()
     waitForContainerLoggedOutput(startTime, waitForLogTimesForNewContainer)
   }
@@ -65,7 +107,7 @@ class DockerContainerRunner(
     val startTime = System.currentTimeMillis()
     if (!isContainerRunning()) {
       val command = "docker start $containerName"
-      debug("Starting existing container using command: $command")
+      logDebug("Starting existing container using command: $command")
       command.runCommand()
       waitForContainerLoggedOutput(startTime, waitForLogTimesForExistingContainer)
     }
@@ -78,17 +120,17 @@ class DockerContainerRunner(
       val since = System.currentTimeMillis() - startTime
       val sinceString = String.format(Locale.US, "%.03f", since.toFloat() / 1000)
       val command = "docker logs --since=${sinceString}s $containerName"
-      debug("Waiting for container to log output using command: $command")
+      logDebug("Waiting for container to log output using command: $command")
       val output = command.runCommand()
 
-      debug("Waiting for string: $waitForLog in container output:\n $output")
+      logDebug("Waiting for string: $waitForLog in container output:\n $output")
 
       val result = output.containsTimes(waitForLog) >= times
 
       if (!result) {
-        debug("String not found in container output, waiting...")
+        logDebug("String not found in container output, waiting...")
       } else {
-        debug("String found in container output, continuing...")
+        logDebug("String found in container output, continuing...")
       }
 
       result
@@ -98,13 +140,13 @@ class DockerContainerRunner(
   fun stop() {
     if (rm) {
       val command = "docker rm --force $containerName"
-      debug("Removing container using command: $command")
+      logDebug("Removing container using command: $command")
       command.runCommand()
       return
     }
     if (isContainerRunning()) {
       val command = "docker stop $containerName"
-      debug("Removing container using command: $command")
+      logDebug("Removing container using command: $command")
       command.runCommand()
     }
   }
@@ -130,23 +172,27 @@ class DockerContainerRunner(
     timeoutAmount: Long = 120,
     timeoutUnit: TimeUnit = TimeUnit.SECONDS
   ): String {
-    val process = startProcess(workingDir, timeoutAmount, timeoutUnit)
+    val process = startProcessAndWait(workingDir, timeoutAmount, timeoutUnit)
+    val errorOut = process.errorStream.bufferedReader().readText()
+    val stdOut = process.inputStream.bufferedReader().use { it.readText() }
 
     if (process.exitValue() != 0) {
-      throw CommandRunFailedException(process.errorStream.bufferedReader().readText())
+      throw CommandRunFailedException(errorOut, stdout = stdOut)
     }
 
-    return process.inputStream.bufferedReader().use { it.readText() } +
-      process.errorStream.bufferedReader().readText()
+    return stdOut + errorOut
   }
 
-  private fun String.startProcess(workingDir: File, timeoutAmount: Long, timeoutUnit: TimeUnit): Process {
-    return ProcessBuilder("\\s+".toRegex().split(this.trim()))
+  private fun String.startProcessAndWait(workingDir: File, timeoutAmount: Long, timeoutUnit: TimeUnit): Process {
+    return this.startProcess(workingDir).also { it.waitFor(timeoutAmount, timeoutUnit) }
+  }
+
+  private fun String.startProcess(workingDir: File = File(".")): Process =
+    ProcessBuilder("\\s+".toRegex().split(this.trim()))
       .directory(workingDir)
       .redirectOutput(ProcessBuilder.Redirect.PIPE)
       .redirectError(ProcessBuilder.Redirect.PIPE)
-      .start().also { it.waitFor(timeoutAmount, timeoutUnit) }
-  }
+      .start()
 
   private fun String?.containsTimes(string2: String): Int {
     return this?.windowed(string2.length) {
@@ -154,6 +200,6 @@ class DockerContainerRunner(
     }?.sum() ?: 0
   }
 
-  class CommandRunFailedException(val output: String) :
-    RuntimeException("Command execution failed\n\nOutput:\n$output")
+  class CommandRunFailedException(val errorout: String, val stdout: String = "") :
+    RuntimeException("Command execution failed\n\nError Output:\n$errorout\n\nStandard Output:\n$stdout")
 }
