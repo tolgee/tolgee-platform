@@ -5,8 +5,5 @@ export const visitAdministration = () => {
 };
 
 export function getUserListItem(userName = 'John User') {
-  return cy
-    .contains(userName)
-    .closestDcy('administration-users-list-item')
-    .parent();
+  return cy.contains(userName).closestDcy('administration-users-list-item');
 }
