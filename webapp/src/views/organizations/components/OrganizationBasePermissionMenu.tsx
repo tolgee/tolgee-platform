@@ -10,6 +10,7 @@ import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types'
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -51,7 +52,9 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
         <T keyName="organization_member_privileges_set" />
       );
     } catch (e) {
-      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+      parseErrorResponse(e).forEach((err) =>
+        messages.error(<TranslatedError code={err} />)
+      );
     }
   }
 
