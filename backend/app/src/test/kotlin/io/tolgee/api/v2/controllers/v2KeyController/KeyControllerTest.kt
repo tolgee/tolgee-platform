@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -275,6 +277,49 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
                 mapOf("en" to "hello"),
             ),
           )
+      )
+    ).andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `imports keys with same tags`() {
+    saveTestDataAndPrepare()
+
+    projectSupplier = { testData.project }
+    performProjectAuthPost(
+      "keys/import",
+      jacksonObjectMapper().readValue(
+        """
+        {
+        	"keys": [
+        		{
+        			"name": "FavoriteMapTooltip",
+        			"namespace": "QuickActions",
+        			"translations":
+        			{
+        				"en": "Path: {0}"
+        			},
+        			"tags": [
+        				"OriginalText:Path: {0}",
+        				"OriginalHash:3103973689"
+        			]
+        		},
+        		{
+        			"name": "RecentMapTooltip",
+        			"namespace": "QuickActions",
+        			"translations":
+        			{
+        				"en": "Path: {0}"
+        			},
+        			"tags": [
+        				"OriginalText:Path: {0}",
+        				"OriginalHash:3103973689"
+        			]
+        		}
+        	]
+        }
+        """.trimIndent()
       )
     ).andIsOk
   }
