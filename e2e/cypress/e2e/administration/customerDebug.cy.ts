@@ -50,6 +50,6 @@ function assertDebugFrameNotVisible() {
 
 function debugUserAccount() {
   visitAdministration();
-  gcy('administration-menu-users').click();
+  gcy('settings-menu-item').contains('Users').click();
   getUserListItem().findDcy('administration-user-debug-account').click();
 }
