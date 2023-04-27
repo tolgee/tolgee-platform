@@ -75,7 +75,7 @@ export const CloudSubscriptions = () => {
               />
             </Box>
             <Typography variant="h6" mt={2}>
-              <T>organization_pricing_plans_title</T>
+              <T keyName="organization_pricing_plans_title" />
             </Typography>
             <StyledShopping>
               <BillingPlans

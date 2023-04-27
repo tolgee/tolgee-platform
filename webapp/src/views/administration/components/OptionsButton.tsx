@@ -70,9 +70,10 @@ export function OptionsButton({ user }: Props) {
   function handleDisableUser() {
     confirmation({
       message: (
-        <T params={{ name: user.name || user.username }}>
-          disable-user-confirmation-message
-        </T>
+        <T
+          keyName="disable-user-confirmation-message"
+          params={{ name: user.name || user.username }}
+        />
       ),
       onConfirm() {
         disableUser.mutate({ path: { userId: user.id } });
