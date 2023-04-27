@@ -55,7 +55,8 @@ class TagService(
     val keysWithTags = keyService.getKeysWithTags(map.keys).associateBy { it.id }
     val projectId = getSingleProjectId(keysWithTags)
 
-    val existingTags = this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }
+    val existingTags =
+      this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
 
     map.forEach { (key, tagsToAdd) ->
       tagsToAdd.forEach { tagToAdd ->
@@ -69,10 +70,11 @@ class TagService(
           it
         } ?: let {
           Tag().apply {
-            project = key.project!!
+            project = key.project
             keyMetas.add(keyMeta)
             name = tagToAdd
             keyMeta.tags.add(this)
+            existingTags[tagToAdd] = this
           }
         }
         tagRepository.save(tag)
