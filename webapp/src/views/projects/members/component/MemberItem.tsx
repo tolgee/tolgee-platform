@@ -77,7 +77,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   async function handleSubmit(data: PermissionSettingsState) {
     try {
       await updatePermissions(data);
-      messages.success(<T>permissions_set_message</T>);
+      messages.success(<T keyName="permissions_set_message" />);
     } catch (e) {
       parseErrorResponse(e).forEach((err) =>
         messages.error(<TranslatedError code={err} />)
