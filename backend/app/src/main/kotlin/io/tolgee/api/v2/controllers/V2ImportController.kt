@@ -5,7 +5,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -118,8 +118,9 @@ class V2ImportController(
   @Operation(description = "Imports the data prepared in previous step", summary = "Apply")
   @RequestActivity(ActivityType.IMPORT)
   fun applyImport(
-    @Schema(description = "Whether override or keep all translations with unresolved conflicts")
-    @RequestParam("forceMode", defaultValue = "NO_FORCE") forceMode: ForceMode,
+    @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
+    @RequestParam(defaultValue = "NO_FORCE")
+    forceMode: ForceMode,
   ) {
     val projectId = projectHolder.project.id
     this.importService.import(projectId, authenticationFacade.userAccount.id, forceMode)
@@ -157,17 +158,17 @@ class V2ImportController(
   fun getImportTranslations(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("languageId") languageId: Long,
-    @Schema(
+    @Parameter(
       description = "Whether only translations, which are in conflict " +
         "with existing translations should be returned"
     )
     @RequestParam("onlyConflicts", defaultValue = "false") onlyConflicts: Boolean = false,
-    @Schema(
+    @Parameter(
       description = "Whether only translations with unresolved conflicts" +
         "with existing translations should be returned"
     )
     @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
-    @Schema(description = "String to search in translation text or key")
+    @Parameter(description = "String to search in translation text or key")
     @RequestParam("search") search: String? = null,
     @ParameterObject @SortDefault("keyName") pageable: Pageable
   ): PagedModel<ImportTranslationModel> {
