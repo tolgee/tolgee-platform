@@ -521,6 +521,7 @@ export interface components {
       large: string;
       thumbnail: string;
     };
+    Links: { [key: string]: components["schemas"]["Link"] };
     PrivateUserAccountModel: {
       id: number;
       username: string;
@@ -566,6 +567,12 @@ export interface components {
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        */
       permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -588,12 +595,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -936,11 +937,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      description: string;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1040,14 +1041,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      description: string;
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       userFullName?: string;
       projectName: string;
+      username?: string;
+      lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       scopes: string[];
+      description: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1123,6 +1124,10 @@ export interface components {
     ReportErrorDto: {
       stackTrace: string;
       licenseKey: string;
+    };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      seats: number;
     };
     MeteredUsageModel: {
       subscriptionPrice?: number;
@@ -1449,16 +1454,16 @@ export interface components {
       )[];
       name: string;
       id: number;
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
       slug: string;
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1546,9 +1551,9 @@ export interface components {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
+      baseTranslation?: string;
       namespace?: string;
       translation?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1660,7 +1665,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1672,6 +1676,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1883,11 +1888,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      description: string;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
-      lastUsedAt?: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1961,14 +1966,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      description: string;
-      username?: string;
-      projectId: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       userFullName?: string;
       projectName: string;
+      username?: string;
+      lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       scopes: string[];
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1982,6 +1987,16 @@ export interface components {
     DeleteKeysDto: {
       /** IDs of keys to delete */
       ids: number[];
+    };
+    Link: {
+      href?: string;
+      hreflang?: string;
+      title?: string;
+      type?: string;
+      deprecation?: string;
+      profile?: string;
+      name?: string;
+      templated?: boolean;
     };
   };
 }
@@ -2375,6 +2390,7 @@ export interface operations {
         projectId: number;
       };
       query: {
+        /** Granted scopes */
         scopes?: string[];
         languages?: number[];
         translateLanguages?: number[];
@@ -2953,6 +2969,7 @@ export interface operations {
   applyImport: {
     parameters: {
       query: {
+        /** Whether override or keep all translations with unresolved conflicts */
         forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
       };
       path: {
@@ -3703,6 +3720,7 @@ export interface operations {
         organizationId: number;
       };
       query: {
+        /** Granted scopes to all projects for all organization users without direct project permissions set */
         scopes: string[];
       };
     };
@@ -4379,7 +4397,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
       };
     };
   };
@@ -5973,8 +5991,11 @@ export interface operations {
         languageId: number;
       };
       query: {
+        /** Whether only translations, which are in conflict with existing translations should be returned */
         onlyConflicts?: boolean;
+        /** Whether only translations with unresolved conflictswith existing translations should be returned */
         onlyUnresolved?: boolean;
+        /** String to search in translation text or key */
         search?: string;
         /** Zero-based page index (0..N) */
         page?: number;
