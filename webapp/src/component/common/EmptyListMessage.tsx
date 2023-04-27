@@ -33,7 +33,6 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
   wrapperProps = {
     ...wrapperProps,
     py: wrapperProps?.py || 8,
-    'data-cy': wrapperProps?.['data-cy'] || 'empty-list-message',
   } as any;
 
   return (
