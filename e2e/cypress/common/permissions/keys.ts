@@ -13,23 +13,19 @@ export function testKeys(info: ProjectInfo) {
 
   // test if user can select only from viewable languages
   cy.gcy('translations-language-select-form-control').click();
-  getLanguages().forEach(([tag, name]) => {
-    if (
-      satisfiesLanguageAccess(
-        project.computedPermission,
-        'translations.view',
-        getLanguageId(info.languages, tag)
-      )
-    ) {
-      cy.gcy('translations-language-select-item')
-        .contains(name)
-        .should('be.visible');
-    } else {
-      cy.gcy('translations-language-select-item')
-        .contains(name)
-        .should('not.exist');
-    }
+  const visibleLanguages = getLanguages().filter(([tag, name]) => {
+    return satisfiesLanguageAccess(
+      project.computedPermission,
+      'translations.view',
+      getLanguageId(info.languages, tag)
+    );
   });
+
+  cy.gcy('translations-language-select-item').should(
+    'have.length',
+    visibleLanguages.length
+  );
+
   cy.get('body').click(0, 0);
 
   if (scopes.includes('keys.edit')) {
