@@ -21,7 +21,6 @@ import {
   checkPermissions,
   loginAndGetInfo,
   RUN,
-  SKIP,
   visitProjectWithPermissions,
 } from '../../common/permissions/main';
 import { ProjectInfo } from '../../common/permissions/shared';
@@ -203,10 +202,10 @@ describe('Project members', () => {
       loginAndGetInfo('me@me.me', info.project.id).then((info) => {
         visitProjectDashboard(info.project.id);
         checkPermissions(info, {
-          'project-menu-item-dashboard': SKIP,
+          'project-menu-item-dashboard': RUN,
           'project-menu-item-translations': RUN,
-          'project-menu-item-settings': SKIP,
-          'project-menu-item-integrate': SKIP,
+          'project-menu-item-settings': RUN,
+          'project-menu-item-integrate': RUN,
         });
       });
     });
