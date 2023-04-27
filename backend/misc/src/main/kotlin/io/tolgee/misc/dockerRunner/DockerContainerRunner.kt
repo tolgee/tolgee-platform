@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -82,12 +83,20 @@ class DockerContainerRunner(
   }
 
   private fun logOutputs(std: BufferedReader, err: BufferedReader) {
-    logStdOut?.let { out ->
-      std.forEachLine { out(it) }
+    try {
+      logStdOut?.let { out ->
+        std.forEachLine { out(it) }
+      }
+    } catch (e: IOException) {
+      logDebug("Stdout stream closed")
     }
 
-    logErrOut?.let { out ->
-      std.forEachLine { out(it) }
+    try {
+      logErrOut?.let { out ->
+        err.forEachLine { out(it) }
+      }
+    } catch (e: IOException) {
+      logDebug("Stdout stream closed")
     }
   }
 
