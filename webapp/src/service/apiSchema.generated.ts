@@ -936,11 +936,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1040,14 +1040,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
+      description: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1123,10 +1123,6 @@ export interface components {
     ReportErrorDto: {
       stackTrace: string;
       licenseKey: string;
-    };
-    PrepareSetLicenseKeyDto: {
-      licenseKey: string;
-      seats: number;
     };
     MeteredUsageModel: {
       subscriptionPrice?: number;
@@ -1453,16 +1449,16 @@ export interface components {
       )[];
       name: string;
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
+      description?: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1550,9 +1546,9 @@ export interface components {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      baseTranslation?: string;
       namespace?: string;
       translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1664,6 +1660,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1675,7 +1672,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1887,11 +1883,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
+      description: string;
       createdAt: number;
       updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1965,14 +1961,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
+      description: string;
       username?: string;
       projectId: number;
       expiresAt?: number;
       lastUsedAt?: number;
-      description: string;
+      userFullName?: string;
+      projectName: string;
+      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -4383,7 +4379,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
       };
     };
   };
