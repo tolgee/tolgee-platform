@@ -74,14 +74,10 @@ class DockerContainerRunner(
     val errorBufferedReader = process.errorStream.bufferedReader()
 
     @Suppress("OPT_IN_USAGE")
-    val job = GlobalScope.launch(Dispatchers.IO) {
+    GlobalScope.launch(Dispatchers.IO) {
       while (process.isAlive) {
         logOutputs(stdoutBufferedReader, errorBufferedReader)
       }
-    }
-
-    job.invokeOnCompletion {
-      logOutputs(stdoutBufferedReader, errorBufferedReader)
     }
   }
 
