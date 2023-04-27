@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
@@ -37,9 +37,9 @@ class AdvancedPermissionController(
   @NeedsSuperJwtToken
   fun setUsersPermissions(
     @PathVariable("userId") userId: Long,
-    @Schema(
+    @Parameter(
       description = "Granted scopes",
-      example = """["translations.view", "translations.edit"]"""
+      example = """["translations.view", "translations.edit"]""",
     )
     @RequestParam scopes: List<String>?,
     @ParameterObject params: SetPermissionLanguageParams
@@ -62,7 +62,7 @@ class AdvancedPermissionController(
   @Operation(summary = "Sets organization base permission")
   fun setBasePermissions(
     @PathVariable organizationId: Long,
-    @Schema(
+    @Parameter(
       description = "Granted scopes to all projects for all organization users without direct project permissions set",
       example = """["translations.view", "translations.edit"]"""
     )
