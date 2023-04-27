@@ -15,6 +15,7 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -78,7 +79,9 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
       await updatePermissions(data);
       messages.success(<T>permissions_set_message</T>);
     } catch (e) {
-      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+      parseErrorResponse(e).forEach((err) =>
+        messages.error(<TranslatedError code={err} />)
+      );
     }
   }
 
@@ -88,9 +91,11 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   async function handleResetToOrganization() {
     try {
       await setByOrganization();
-      messages.success(<T>permissions_reset_message</T>);
+      messages.success(<T keyName="permissions_reset_message" />);
     } catch (e) {
-      parseErrorResponse(e).forEach((err) => messages.error(<T>{err}</T>));
+      parseErrorResponse(e).forEach((err) =>
+        messages.error(<TranslatedError code={err} />)
+      );
     }
   }
 
