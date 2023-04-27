@@ -27,7 +27,7 @@ kotlin {
 }
 
 dependencies {
-
+    implementation libs.kotlinCoroutines
 }
 
 sourceSets {
