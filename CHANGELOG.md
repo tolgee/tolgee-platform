@@ -1,3 +1,10 @@
+## [3.12.5](https://github.com/tolgee/tolgee-platform/compare/v3.12.4...v3.12.5) (2023-04-28)
+
+
+### Bug Fixes
+
+* **ui:** case insensitive autocomplete ([#1670](https://github.com/tolgee/tolgee-platform/issues/1670)) ([#1688](https://github.com/tolgee/tolgee-platform/issues/1688)) ([1973906](https://github.com/tolgee/tolgee-platform/commit/1973906be54573d7664b430834f9a5f37da9daaf))
+
 ## [3.12.4](https://github.com/tolgee/tolgee-platform/compare/v3.12.3...v3.12.4) (2023-04-28)
 
 
