@@ -294,7 +294,7 @@ jobs:
         working-directory: ./webapp
         if: ${{ env.TOLGEE_API_KEY != '' }}
         env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEA}}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
   e2e-code-checks:
     name: E2E Static Check 🪲
