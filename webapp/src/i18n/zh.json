@@ -28,6 +28,8 @@
   "active-plan-license-key-caption" : "在您的本地 Tolgee 实例中使用此许可证密钥",
   "active-plan-license-key-tooltip" : "显示许可证密钥",
   "active-plan-subscribed-at-tooltip" : "订阅于",
+  "activity_complex_edit" : "编辑了词条",
+  "activity_create_key" : "创建了词条",
   "activity_create_language" : "创建了语言",
   "activity_create_project" : "创建了项目",
   "activity_date_today" : "今天",
@@ -36,13 +38,11 @@
   "activity_edit_language" : "更新了语言",
   "activity_edit_namespace" : "编辑了命名空间",
   "activity_edit_project" : "编辑了项目",
-  "activity_entity_key_meta" : {
-    "tags" : "标签"
-  },
-  "activity_entity_key" : {
-    "name" : "名称",
-    "namespace" : "命名空间"
-  },
+  "activity_entity_key" : "词条",
+  "activity_entity_key_meta" : "词条属性",
+  "activity_entity_key_meta.tags" : "标签",
+  "activity_entity_key.name" : "名称",
+  "activity_entity_key.namespace" : "命名空间",
   "activity_entity_language" : "语言",
   "activity_entity_namespace" : "命名空间",
   "activity_entity_namespace.name" : "名称",
@@ -55,7 +55,9 @@
   "activity_entity_translation.flag_emoji" : "发表评论",
   "activity_entity_translation.name" : "名称",
   "activity_entity_translation.tag" : "标签",
+  "activity_key_delete" : "删除了 {KeyCount, plural, one {1 个词条} other {# 个词条}}。",
   "activity_key_name_edit" : "编辑过的键名",
+  "activity_key_tags_edit" : "更新了词条标签",
   "activity_screenshot_add" : "添加了屏幕截图",
   "activity_screenshot_delete" : "删除了屏幕截图",
   "activity_set_outdated_flag" : "最新状态",
@@ -368,6 +370,7 @@
   "login_reset_password_button" : "重置密码",
   "login_sign_up" : "注册",
   "login_title" : "登录",
+  "machine_translation_new_keys_title" : "自动翻译新词条",
   "machine_translation_title" : "机器翻译",
   "managed-account-field-hint" : "这由您的团队管理。",
   "managed-account-notice" : "您的账户由您的团队管理。",
@@ -464,6 +467,7 @@
   "permission_dialog_reset_to_organization" : "重置",
   "permission_dialog_save" : "保存",
   "permissions_item_import" : "导入",
+  "permissions_item_keys" : "词条",
   "permissions_item_keys_create" : "创建",
   "permissions_item_keys_delete" : "删除",
   "permissions_item_keys_edit" : "编辑",
@@ -595,6 +599,7 @@
   "transfer_project_dialog_title" : "转移项目",
   "translation_add" : "添加",
   "translation_cell_comments" : "评论",
+  "translation_grid_key_text" : "词条",
   "translation_grid_source_text" : "源文本",
   "Translation grid - Successfully deleted!" : "译文已删除!",
   "translations_cell_cancel" : "取消",
@@ -641,6 +646,7 @@
   "translations_nothing_found_action" : "清除筛选条件",
   "translations_no_translations_action" : "添加新的翻译",
   "translations_no_translations_integrate" : "集成指南",
+  "translations_results_count" : "{KeyCount, plural, one {1 个词条} other {# 个词条}}",
   "translations" : {
     "screenshots" : {
       "delete_tooltip" : "删除"

@@ -1,3 +1,10 @@
+## [3.12.4](https://github.com/tolgee/tolgee-platform/compare/v3.12.3...v3.12.4) (2023-04-28)
+
+
+### Bug Fixes
+
+* Fix keys import with same tags ([39ba6f1](https://github.com/tolgee/tolgee-platform/commit/39ba6f196387132e800c2770a3de207c163d6716))
+
 ## [3.12.3](https://github.com/tolgee/tolgee-platform/compare/v3.12.2...v3.12.3) (2023-04-26)
 
 
