@@ -79,7 +79,9 @@ export const SearchSelectMulti: React.FC<Props> = ({
         <Autocomplete
           open
           filterOptions={(options, state) => {
-            return options.filter((o) => o.name.startsWith(state.inputValue));
+            return options.filter((o) =>
+              o.name.toLowerCase().startsWith(state.inputValue.toLowerCase())
+            );
           }}
           options={items || []}
           inputValue={inputValue}

@@ -104,7 +104,9 @@ export const TagInput: React.FC<Props> = ({
         PopperComponent={CustomPopper}
         options={options}
         filterOptions={(options) => {
-          const filtered = options.filter((o) => o.value.startsWith(search));
+          const filtered = options.filter((o) =>
+            o.value.toLowerCase().startsWith(search.toLowerCase())
+          );
           if (search !== '' && !options.find((item) => item.value === search)) {
             filtered.push({
               value: search,
