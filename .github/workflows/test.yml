@@ -285,12 +285,16 @@ jobs:
       - name: Load newest translations
         run: npm run load-translations
         working-directory: ./webapp
+        if: ${{ env.TOLGEE_API_KEY != '' }}
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check missing translation keys
         run: npm run tsc:prod
         working-directory: ./webapp
+        if: ${{ env.TOLGEE_API_KEY != '' }}
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
   e2e-code-checks:
     name: E2E Static Check 🪲
