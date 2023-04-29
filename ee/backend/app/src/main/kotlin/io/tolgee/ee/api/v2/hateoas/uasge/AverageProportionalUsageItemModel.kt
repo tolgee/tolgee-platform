@@ -7,10 +7,9 @@ import java.math.BigDecimal
 
 @Suppress("unused")
 @Relation(collectionRelation = "invoices", itemRelation = "invoice")
-open class MeteredUsageModel(
-  val subscriptionPrice: BigDecimal? = 0.toBigDecimal(),
-  val seatsPeriods: List<ProportionalUsageItemModel> = emptyList(),
-  val translationsPeriods: List<ProportionalUsageItemModel> = emptyList(),
-  val credits: SumUsageItemModel?,
+open class AverageProportionalUsageItemModel(
   val total: BigDecimal = 0.toBigDecimal(),
-) : RepresentationModel<MeteredUsageModel>(), Serializable
+  val unusedQuantity: BigDecimal = 0.toBigDecimal(),
+  val usedQuantity: BigDecimal = 0.toBigDecimal(),
+  val usedQuantityOverPlan: BigDecimal = 0.toBigDecimal(),
+) : RepresentationModel<AverageProportionalUsageItemModel>(), Serializable

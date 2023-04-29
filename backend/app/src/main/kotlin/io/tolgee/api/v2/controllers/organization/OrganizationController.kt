@@ -10,7 +10,7 @@ import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
-import io.tolgee.api.v2.hateoas.organization.UsageModel
+import io.tolgee.api.v2.hateoas.organization.PublicUsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
@@ -294,7 +294,7 @@ class OrganizationController(
   @Operation(description = "Returns current organization usage")
   fun getUsage(
     @PathVariable organizationId: Long
-  ): UsageModel {
+  ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
@@ -302,7 +302,7 @@ class OrganizationController(
     val currentPayAsYouGoMtCredits = mtBucketSizeProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = mtBucketSizeProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
-    return UsageModel(
+    return PublicUsageModel(
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance,
       includedMtCredits = creditBalances.bucketSize,

@@ -9,8 +9,9 @@ import { SumUsageItemRow } from './SumUsageItemRow';
 import { TotalRow } from './TotalRow';
 
 export const UsageTable: FC<{
-  usageData: components['schemas']['MeteredUsageModel'];
-}> = ({ usageData }) => {
+  usageData: components['schemas']['UsageModel'];
+  invoiceId: number;
+}> = ({ usageData, invoiceId }) => {
   const { t } = useTranslate();
 
   return (
@@ -18,25 +19,26 @@ export const UsageTable: FC<{
       <UsageTableHead />
       <TableBody>
         <SubscriptionRow price={usageData?.subscriptionPrice} />
-        {(usageData?.seatsPeriods || []).map((period) => (
+
+        {usageData?.seats.total.valueOf() > 0 && (
           <ProportionalUsageItemRow
             label={t('invoice_usage_dialog_table_seats_item')}
-            key={period.from}
-            item={period}
+            invoiceId={invoiceId}
+            item={usageData.seats}
           />
-        ))}
+        )}
 
-        {(usageData?.translationsPeriods || []).map((period) => (
+        {usageData?.translations.total.valueOf() > 0 && (
           <ProportionalUsageItemRow
             label={t('invoice_usage_dialog_table_translations_item')}
-            key={period.from}
-            item={period}
+            invoiceId={invoiceId}
+            item={usageData.translations}
           />
-        ))}
+        )}
 
-        {usageData?.credits && (
+        {(usageData?.credits?.total?.valueOf() || 0) > 0 && (
           <SumUsageItemRow
-            item={usageData?.credits}
+            item={usageData!.credits!}
             label={t('invoice_usage_dialog_table_mt_credits_item')}
           />
         )}

@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { TableCell, TableRow } from '@mui/material';
 
 export const SubscriptionRow = (props: {
-  price: components['schemas']['MeteredUsageModel']['subscriptionPrice'];
+  price: components['schemas']['UsageModel']['subscriptionPrice'];
 }) => {
   const formatMoney = useMoneyFormatter();
 
@@ -13,8 +13,6 @@ export const SubscriptionRow = (props: {
   return (
     <TableRow>
       <TableCell>{t('invoice_usage_dialog_table_subscription_item')}</TableCell>
-      <TableCell>{t('invoice_usage_dialog_table_no_value')}</TableCell>
-      <TableCell>{t('invoice_usage_dialog_table_no_value')}</TableCell>
       <TableCell align="right">
         {t('invoice_usage_dialog_table_no_value')}
       </TableCell>

@@ -11,7 +11,7 @@ export const TotalRow: FC<{ total: number }> = ({ total }) => {
   return (
     <TableRow>
       <TableCell
-        colSpan={5}
+        colSpan={3}
         sx={{
           borderBottom: 'none',
         }}

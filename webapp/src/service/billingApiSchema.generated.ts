@@ -47,16 +47,19 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/plans": {
     get: operations["getCloudPlans"];
   };
+  "/v2/organizations/{organizationId}/billing/invoices": {
+    /** Returns organization invoices */
+    get: operations["getInvoices"];
+  };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage": {
     get: operations["getUsage"];
+  };
+  "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage/{type}.csv": {
+    get: operations["getUsageDetail"];
   };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
     get: operations["getInvoicePdf"];
-  };
-  "/v2/organizations/{organizationId}/billing/invoices/": {
-    /** Returns organization invoices */
-    get: operations["getInvoices"];
   };
   "/v2/organizations/{organizationId}/billing/expected-usage": {
     get: operations["getExpectedUsage_1"];
@@ -82,6 +85,7 @@ export interface components {
         subscriptions?: components["schemas"]["SelfHostedEeSubscriptionModel"][];
       };
     };
+    Links: { [key: string]: components["schemas"]["Link"] };
     PlanIncludedUsageModel: {
       seats: number;
       translationSlots: number;
@@ -212,17 +216,7 @@ export interface components {
       price: number;
       amount: number;
     };
-    MeteredUsageModel: {
-      subscriptionPrice?: number;
-      seatsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
-      translationsPeriods: components["schemas"]["ProportionalUsageItemModel"][];
-      credits?: components["schemas"]["SumUsageItemModel"];
-      total: number;
-    };
-    ProportionalUsageItemModel: {
-      from: number;
-      to: number;
-      milliseconds: number;
+    AverageProportionalUsageItemModel: {
       total: number;
       unusedQuantity: number;
       usedQuantity: number;
@@ -233,6 +227,13 @@ export interface components {
       unusedQuantity: number;
       usedQuantity: number;
       usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      credits?: components["schemas"]["SumUsageItemModel"];
+      total: number;
     };
     CollectionModelSelfHostedEePlanModel: {
       _embedded?: {
@@ -277,6 +278,16 @@ export interface components {
       registrationNo?: string;
       vatNo?: string;
       email?: string;
+    };
+    Link: {
+      href?: string;
+      hreflang?: string;
+      title?: string;
+      type?: string;
+      deprecation?: string;
+      profile?: string;
+      name?: string;
+      templated?: boolean;
     };
   };
 }
@@ -624,7 +635,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["MeteredUsageModel"];
+          "*/*": components["schemas"]["UsageModel"];
         };
       };
       /** Bad Request */
@@ -695,6 +706,42 @@ export interface operations {
       };
     };
   };
+  /** Returns organization invoices */
+  getInvoices: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelInvoiceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getUsage: {
     parameters: {
       path: {
@@ -706,7 +753,36 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["MeteredUsageModel"];
+          "*/*": components["schemas"]["UsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getUsageDetail: {
+    parameters: {
+      path: {
+        organizationId: number;
+        invoiceId: number;
+        type: "SEATS" | "TRANSLATIONS";
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "text/csv": string;
         };
       };
       /** Bad Request */
@@ -752,42 +828,6 @@ export interface operations {
       };
     };
   };
-  /** Returns organization invoices */
-  getInvoices: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PagedModelInvoiceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   getExpectedUsage_1: {
     parameters: {
       path: {
@@ -798,7 +838,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["MeteredUsageModel"];
+          "*/*": components["schemas"]["UsageModel"];
         };
       };
       /** Bad Request */
