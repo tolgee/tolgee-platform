@@ -9,8 +9,6 @@ export const UsageTableHead: FC = () => {
     <TableHead>
       <TableRow>
         <TableCell>{t('invoice_usage_dialog_table_item')}</TableCell>
-        <TableCell>{t('invoice_usage_dialog_table_from')}</TableCell>
-        <TableCell>{t('invoice_usage_dialog_table_to')}</TableCell>
         <TableCell align="right">
           {t('invoice_usage_dialog_table_count')}
         </TableCell>

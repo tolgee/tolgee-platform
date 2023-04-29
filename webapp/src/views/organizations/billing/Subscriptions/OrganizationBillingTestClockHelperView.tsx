@@ -1,4 +1,9 @@
-import { default as React, FunctionComponent, useState } from 'react';
+import {
+  default as React,
+  FunctionComponent,
+  useEffect,
+  useState,
+} from 'react';
 import { useTranslate } from '@tolgee/react';
 
 import { BaseOrganizationSettingsView } from '../../components/BaseOrganizationSettingsView';
@@ -35,7 +40,7 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
     method: 'get',
     options: {
       onSuccess: (data) => {
-        setValue(data.currentTimestamp);
+        setStringValue(timeToString(data.currentTimestamp));
       },
     },
   }) as UseQueryResult<InfoType>;
@@ -48,7 +53,28 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
 
   const info = infoLoadable.data;
 
+  const timeToString = (value) => new Date(value).toISOString();
+
   const [value, setValue] = useState<number>(new Date().getTime());
+  const [stringValue, setStringValue] = useState<string>(timeToString(value));
+
+  function parseStringValue() {
+    try {
+      const parsed = Date.parse(stringValue);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const parsed = parseStringValue();
+    if (parsed) {
+      setValue(parsed);
+    }
+  }, [stringValue]);
 
   const formatter = useDateFormatter();
 
@@ -68,7 +94,7 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
         {...props}
         variant={'outlined'}
         onClick={() => {
-          setValue(timestamp);
+          setStringValue(timeToString(timestamp));
         }}
       >
         {formatDateTime(timestamp)}
@@ -124,11 +150,12 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
           <br />
           <br />
           <MuiTextField
-            onChange={(e) => setValue(Date.parse(e.target.value))}
-            value={new Date(value).toISOString()}
+            onChange={(e) => setStringValue(e.target.value)}
+            value={stringValue}
           />
           <br />
           <LoadingButton
+            disabled={value !== parseStringValue()}
             loading={moveMutation.isLoading}
             onClick={moveClock}
             color="primary"

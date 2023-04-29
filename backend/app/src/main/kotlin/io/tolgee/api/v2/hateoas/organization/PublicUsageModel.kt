@@ -7,7 +7,7 @@ import java.io.Serializable
 
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
-open class UsageModel(
+open class PublicUsageModel(
   val organizationId: Long,
 
   @Schema(description = "Current balance of standard credits. Standard credits are refilled every month")
@@ -65,4 +65,4 @@ open class UsageModel(
       "(For pay us you go, the top limit is the spending limit)"
   )
   val translationsLimit: Long,
-) : RepresentationModel<UsageModel>(), Serializable
+) : RepresentationModel<PublicUsageModel>(), Serializable

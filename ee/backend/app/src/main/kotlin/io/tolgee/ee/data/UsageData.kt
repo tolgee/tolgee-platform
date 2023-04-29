@@ -8,6 +8,7 @@ data class UsageData(
   val creditsUsage: SumUsageItem?,
   val subscriptionPrice: BigDecimal?,
 ) {
+
   val total: BigDecimal
     get() = seatsUsage.sumOf { it.total } + translationsUsage.sumOf { it.total } + (
       subscriptionPrice
