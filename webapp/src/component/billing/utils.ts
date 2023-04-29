@@ -1,6 +1,6 @@
 import { components } from 'tg.service/apiSchema.generated';
 
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 export type ProgressData = {
   usesSlots: boolean;

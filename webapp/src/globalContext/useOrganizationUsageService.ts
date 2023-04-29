@@ -3,7 +3,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 type Props = {
   organization?: OrganizationModel;

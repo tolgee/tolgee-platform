@@ -9,7 +9,7 @@ import { UsageDialogButton } from './UsageDialogButton';
 export type EstimatedCostsProps = {
   useUsage: (
     enabled: boolean
-  ) => UseQueryResult<components['schemas']['MeteredUsageModel']>;
+  ) => UseQueryResult<components['schemas']['UsageModel']>;
   estimatedCosts?: number;
 };
 

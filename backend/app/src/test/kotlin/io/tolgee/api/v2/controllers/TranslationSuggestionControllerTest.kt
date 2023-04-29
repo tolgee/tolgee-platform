@@ -32,6 +32,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -42,7 +43,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
