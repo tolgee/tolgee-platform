@@ -4,7 +4,7 @@ import { globalContext } from './globalActions';
 import { createProviderNew } from 'tg.fixtures/createProviderNew';
 import { components } from 'tg.service/apiSchema.generated';
 
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
   createProviderNew(() => {

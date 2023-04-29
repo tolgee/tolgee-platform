@@ -6,8 +6,8 @@ import io.tolgee.ee.api.v2.hateoas.PlanPricesModel
 import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEePlanModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
-import io.tolgee.ee.api.v2.hateoas.uasge.MeteredUsageModel
-import io.tolgee.ee.api.v2.hateoas.uasge.ProportionalUsageItemModel
+import io.tolgee.ee.api.v2.hateoas.uasge.AverageProportionalUsageItemModel
+import io.tolgee.ee.api.v2.hateoas.uasge.UsageModel
 import io.tolgee.ee.data.SubscriptionStatus
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argThat
@@ -58,20 +58,22 @@ class EeLicensingMockRequestUtil {
 
   final val mockedPrepareResponse = PrepareSetEeLicenceKeyModel().apply {
     plan = mockedPlan
-    usage = MeteredUsageModel(
+    usage = UsageModel(
       subscriptionPrice = 200.toBigDecimal(),
-      seatsPeriods = listOf(
-        ProportionalUsageItemModel(
-          from = 1624313600000,
-          to = 1624313600000,
-          total = 250.toBigDecimal(),
-          usedQuantity = 2,
-          unusedQuantity = 10,
-          usedQuantityOverPlan = 0
-        )
+      seats =
+      AverageProportionalUsageItemModel(
+        total = 250.toBigDecimal(),
+        usedQuantity = 2.toBigDecimal(),
+        unusedQuantity = 10.toBigDecimal(),
+        usedQuantityOverPlan = 0.toBigDecimal()
       ),
       total = 250.toBigDecimal(),
-      translationsPeriods = listOf(),
+      translations = AverageProportionalUsageItemModel(
+        total = 0.toBigDecimal(),
+        unusedQuantity = 0.toBigDecimal(),
+        usedQuantity = 0.toBigDecimal(),
+        usedQuantityOverPlan = 0.toBigDecimal()
+      ),
       credits = null
     )
   }

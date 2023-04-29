@@ -20,7 +20,7 @@ import { getProgressData } from 'tg.component/billing/utils';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
 
 const StyledPositive = styled('span')`

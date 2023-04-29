@@ -44,7 +44,7 @@ export const Invoices: FC = () => {
   const [page, setPage] = useState(0);
 
   const invoicesLoadable = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/invoices/',
+    url: '/v2/organizations/{organizationId}/billing/invoices',
     method: 'get',
     query: {
       page: page,

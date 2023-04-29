@@ -8,7 +8,7 @@ import { UsageTable } from './UsageTable';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 export const UsageDialogButton: FC<{
-  usageData?: components['schemas']['MeteredUsageModel'];
+  usageData?: components['schemas']['UsageModel'];
   loading: boolean;
   onOpen: () => void;
   onClose: () => void;
