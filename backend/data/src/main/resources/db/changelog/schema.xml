@@ -2482,4 +2482,7 @@
             <column name="time" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1683039181425-1">
+        <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false" tableName="translation"/>
+    </changeSet>
 </databaseChangeLog>

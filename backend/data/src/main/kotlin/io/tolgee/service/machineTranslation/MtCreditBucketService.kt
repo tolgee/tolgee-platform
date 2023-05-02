@@ -63,6 +63,7 @@ class MtCreditBucketService(
     val amountToConsumeFromPayAsYouGo = amount - this.credits - this.extraCredits
     this.credits = 0
     this.extraCredits = 0
+
     eventPublisher.publishEvent(
       OnConsumePayAsYouGoMtCredits(
         this@MtCreditBucketService,

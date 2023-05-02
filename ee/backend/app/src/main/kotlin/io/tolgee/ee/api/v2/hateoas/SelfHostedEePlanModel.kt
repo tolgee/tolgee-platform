@@ -13,4 +13,5 @@ class SelfHostedEePlanModel(
   val enabledFeatures: Array<Feature> = arrayOf(),
   val prices: PlanPricesModel,
   val includedUsage: PlanIncludedUsageModel = PlanIncludedUsageModel(),
+  val hasYearlyPrice: Boolean = false
 ) : RepresentationModel<SelfHostedEePlanModel>()
