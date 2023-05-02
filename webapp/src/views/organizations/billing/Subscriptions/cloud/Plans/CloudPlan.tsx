@@ -14,7 +14,7 @@ import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
 import { PlanPrice } from './PlanPrice';
-import { PlanInfo } from '../../common/PlanInfo';
+import { PlanInfo, PlanInfoArea } from '../../common/PlanInfo';
 import { IncludedFeatures } from '../../selfHostedEe/IncludedFeatures';
 
 type PlanModel = components['schemas']['CloudPlanModel'];
@@ -66,12 +66,12 @@ export const CloudPlan: FC<Props> = ({
       <PlanContent>
         <PlanTitle title={plan.name} />
 
-        <PlanInfo>
+        <PlanInfoArea>
           <CloudPlanInfo plan={plan} />
           {Boolean(plan.enabledFeatures.length) && (
             <IncludedFeatures features={plan.enabledFeatures} />
           )}
-        </PlanInfo>
+        </PlanInfoArea>
 
         <Box minHeight="19px" gridArea="period-switch">
           {Boolean(
