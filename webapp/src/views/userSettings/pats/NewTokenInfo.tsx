@@ -14,7 +14,7 @@ export const NewTokenInfo = (props: {
         <T keyName="pat-regenerated-token-message" />
       )}
     </Alert>
-    <Box data-cy="pat-list-item-new-token-input" data-openreplay-masked="">
+    <Box data-cy="pat-list-item-new-token-input" data-sentry-mask="">
       <ClipboardCopyInput value={props.newTokenValue!} />
     </Box>
   </Box>
