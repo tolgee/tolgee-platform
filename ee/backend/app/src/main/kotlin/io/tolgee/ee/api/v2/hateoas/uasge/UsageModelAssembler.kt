@@ -16,7 +16,8 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       seats = this.periodToModel(data.seatsUsage),
       translations = this.periodToModel(data.translationsUsage),
       credits = data.creditsUsage?.let { sumToModel(it) },
-      total = data.total
+      total = data.total,
+      appliedStripeCredits = data.appliedStripeCredits,
     )
   }
 
@@ -31,7 +32,6 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
 
   fun periodToModel(periods: List<ProportionalUsagePeriod>): AverageProportionalUsageItemModel {
     val total = periods.sumOf { it.total }
-    val sumMs = periods.sumOf { it.milliseconds }
 
     return AverageProportionalUsageItemModel(
       total = total,

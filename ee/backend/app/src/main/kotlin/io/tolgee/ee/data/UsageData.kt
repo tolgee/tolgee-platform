@@ -7,6 +7,7 @@ data class UsageData(
   val translationsUsage: List<ProportionalUsagePeriod>,
   val creditsUsage: SumUsageItem?,
   val subscriptionPrice: BigDecimal?,
+  val appliedStripeCredits: BigDecimal?,
 ) {
 
   val total: BigDecimal
