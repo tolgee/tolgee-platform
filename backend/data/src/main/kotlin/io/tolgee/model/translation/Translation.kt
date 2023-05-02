@@ -76,7 +76,7 @@ class Translation(
   var characterCount: Int? = null
 
   @ActivityLoggedProp
-  @ColumnDefault("false")
+  @field:ColumnDefault("false")
   var outdated: Boolean = false
 
   constructor(text: String? = null, key: Key, language: Language) : this(text) {

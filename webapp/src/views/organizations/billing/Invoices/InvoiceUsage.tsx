@@ -57,7 +57,11 @@ export const InvoiceUsage: FC<{
             <DialogContent>
               {usage.data ? (
                 <>
-                  <UsageTable usageData={usage.data}></UsageTable>
+                  <UsageTable
+                    usageData={usage.data}
+                    invoiceId={invoice.id}
+                    invoiceNumber={invoice.number}
+                  ></UsageTable>
                   <TotalTable
                     invoice={invoice}
                     totalWithoutVat={usage.data.total}
