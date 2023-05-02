@@ -1,3 +1,10 @@
+## [3.12.6](https://github.com/tolgee/tolgee-platform/compare/v3.12.5...v3.12.6) (2023-05-02)
+
+
+### Bug Fixes
+
+* Fix Sentry initialization error & proper masking ([06e97a1](https://github.com/tolgee/tolgee-platform/commit/06e97a198e123295260ce5019a4bab78b7cd6697))
+
 ## [3.12.5](https://github.com/tolgee/tolgee-platform/compare/v3.12.4...v3.12.5) (2023-04-28)
 
 
