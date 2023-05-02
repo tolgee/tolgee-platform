@@ -104,7 +104,7 @@ export const MdxProvider: FC<{
                           .map(modifyValue);
                         tokenProps.children = insertBetweenAll(
                           splitByApiKey,
-                          <span data-openreplay-masked="">
+                          <span data-sentry-mask="">
                             {modifyValue(API_KEY_PLACEHOLDER)}
                           </span>
                         ).map((it, idx) => (

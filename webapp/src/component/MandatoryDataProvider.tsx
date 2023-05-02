@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
 import { getCurrentHub } from '@sentry/browser';
 
+const SENTRY_INITIALIZED_WINDOW_PROPERTY = 'sentryInitialized';
 export const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
@@ -25,12 +26,26 @@ export const MandatoryDataProvider = (props: any) => {
 
   async function initReplay() {
     const { Replay } = await import('@sentry/browser');
-    getCurrentHub().getClient()?.addIntegration?.(new Replay());
-    Sentry.setUser({ email: userData!.username, id: userData!.id.toString() });
+    if (!window[SENTRY_INITIALIZED_WINDOW_PROPERTY]) {
+      getCurrentHub()
+        .getClient()
+        ?.addIntegration?.(
+          new Replay({
+            maskAllText: false,
+            maskAllInputs: false,
+          })
+        );
+      window[SENTRY_INITIALIZED_WINDOW_PROPERTY] = true;
+      Sentry.setUser({
+        email: userData!.username,
+        id: userData!.id.toString(),
+      });
+    }
   }
 
   useEffect(() => {
     if (userData?.id && config?.clientSentryDsn) {
+      // noinspection JSIgnoredPromiseFromCall
       initReplay();
     }
   }, [userData?.id, config?.clientSentryDsn]);

@@ -16,7 +16,7 @@ export const NewApiKeyInfo = (props: {
         <T keyName="api-key-regenerated-token-message" />
       )}
     </Alert>
-    <Box data-cy="api-key-list-item-new-token-input" data-openreplay-masked="">
+    <Box data-cy="api-key-list-item-new-token-input" data-sentry-mask="">
       <ClipboardCopyInput value={props.newTokenValue!} />
     </Box>
   </Box>
