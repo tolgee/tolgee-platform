@@ -10,8 +10,9 @@ import { TotalRow } from './TotalRow';
 
 export const UsageTable: FC<{
   usageData: components['schemas']['UsageModel'];
-  invoiceId: number;
-}> = ({ usageData, invoiceId }) => {
+  invoiceId?: number;
+  invoiceNumber?: string;
+}> = ({ usageData, invoiceId, invoiceNumber }) => {
   const { t } = useTranslate();
 
   return (
@@ -22,16 +23,18 @@ export const UsageTable: FC<{
 
         {usageData?.seats.total.valueOf() > 0 && (
           <ProportionalUsageItemRow
-            label={t('invoice_usage_dialog_table_seats_item')}
+            type="SEATS"
             invoiceId={invoiceId}
+            invoiceNumber={invoiceNumber}
             item={usageData.seats}
           />
         )}
 
         {usageData?.translations.total.valueOf() > 0 && (
           <ProportionalUsageItemRow
-            label={t('invoice_usage_dialog_table_translations_item')}
+            type="TRANSLATIONS"
             invoiceId={invoiceId}
+            invoiceNumber={invoiceNumber}
             item={usageData.translations}
           />
         )}
