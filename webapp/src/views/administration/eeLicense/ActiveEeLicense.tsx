@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   Plan,
@@ -13,9 +12,13 @@ import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 import { PlanLicenseKey } from 'tg.views/organizations/billing/Subscriptions/selfHostedEe/PlanLicenseKey';
 
-export const ActiveEeLicense: FC<{
-  info: components['schemas']['EeSubscriptionModel'];
-}> = ({ info }) => {
+type EeSubscriptionModel = components['schemas']['EeSubscriptionModel'];
+
+type Props = {
+  info: EeSubscriptionModel;
+};
+
+export const ActiveEeLicense = ({ info }: Props) => {
   const { t } = useTranslate();
 
   return (
@@ -35,7 +38,7 @@ export const ActiveEeLicense: FC<{
           gridArea="price / price / span 1 / span 2"
           justifyContent="end"
         >
-          <PlanLicenseKey licenseKey={info.licenseKey} />
+          <PlanLicenseKey licenseKey={info.licenseKey} defaultOpen={false} />
           <RefreshButton />
           <ReleaseKeyButton />
         </Box>

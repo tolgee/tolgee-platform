@@ -1,16 +1,26 @@
-import { FC, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  Typography,
+  DialogTitle,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import { ClipboardCopyInput } from 'tg.component/common/ClipboardCopyInput';
 
-export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
+type Props = {
+  licenseKey?: string;
+  defaultOpen: boolean;
+};
+
+export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
+
   const [open, setOpen] = useState(false);
 
   if (!licenseKey) {
@@ -19,16 +29,14 @@ export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} size="small">
-        <T keyName="active-plan-license-key-tooltip" />
+      <Button onClick={() => setOpen(true)} size="small" color="primary">
+        <T keyName="active-plan-license-key-button" />
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
+        <DialogTitle>
+          <T keyName="active-plan-license-key-caption" />
+        </DialogTitle>
         <DialogContent>
-          <Box mb={2}>
-            <Typography variant="body2">
-              <T keyName="active-plan-license-key-caption" />
-            </Typography>
-          </Box>
           <ClipboardCopyInput
             value={licenseKey}
             inputProps={{ style: { width: 420 } }}

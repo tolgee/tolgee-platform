@@ -13,7 +13,7 @@ import { PlanTitle } from '../../common/PlanTitle';
 import { PrepareUpgradeDialog } from '../../../PrepareUpgradeDialog';
 import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { Plan, PlanContent, PlanSubtitle } from '../../common/Plan';
-import { PlanPrice } from './PlanPrice';
+import { PlanPrice, planIsPeriodDependant } from './PlanPrice';
 import { PlanInfoArea } from '../../common/PlanInfo';
 import { IncludedFeatures } from '../../selfHostedEe/IncludedFeatures';
 
@@ -46,6 +46,7 @@ export const CloudPlan: FC<Props> = ({
     cancelMutation,
   } = usePlan({ planId: plan.id, period: period });
 
+  const needsPeriodSwitch = planIsPeriodDependant(plan.prices);
   const handleCancel = () => {
     confirmation({
       title: <T keyName="billing_cancel_dialog_title" />,
@@ -74,9 +75,9 @@ export const CloudPlan: FC<Props> = ({
         </PlanInfoArea>
 
         <Box minHeight="19px" gridArea="period-switch">
-          {Boolean(
-            plan.prices.subscriptionMonthly || plan.prices.subscriptionMonthly
-          ) && <PeriodSwitch value={period} onChange={onPeriodChange} />}
+          {needsPeriodSwitch && (
+            <PeriodSwitch value={period} onChange={onPeriodChange} />
+          )}
         </Box>
         <PlanPrice prices={plan.prices} period={period} />
 

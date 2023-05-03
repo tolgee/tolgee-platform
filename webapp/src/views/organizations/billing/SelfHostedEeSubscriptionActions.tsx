@@ -11,9 +11,14 @@ import { PlanLicenseKey } from './Subscriptions/selfHostedEe/PlanLicenseKey';
 type Props = {
   id: number;
   licenceKey: string | undefined;
+  isNew: boolean;
 };
 
-export const SelfHostedEeSubscriptionActions = ({ id, licenceKey }: Props) => {
+export const SelfHostedEeSubscriptionActions = ({
+  id,
+  licenceKey,
+  isNew,
+}: Props) => {
   const { t } = useTranslate();
 
   const successMessage = useSuccessMessage();
@@ -48,7 +53,7 @@ export const SelfHostedEeSubscriptionActions = ({ id, licenceKey }: Props) => {
 
   return (
     <StyledActionArea>
-      <PlanLicenseKey licenseKey={licenceKey} />
+      <PlanLicenseKey licenseKey={licenceKey} defaultOpen={isNew} />
       <LoadingButton
         onClick={onClick}
         variant="outlined"
