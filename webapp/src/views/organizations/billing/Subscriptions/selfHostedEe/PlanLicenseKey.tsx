@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -10,7 +10,18 @@ import {
 import { T } from '@tolgee/react';
 import { ClipboardCopyInput } from 'tg.component/common/ClipboardCopyInput';
 
-export const PlanLicenseKey: FC<{ licenseKey?: string }> = ({ licenseKey }) => {
+type Props = {
+  licenseKey?: string;
+  defaultOpen: boolean;
+};
+
+export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
+
   const [open, setOpen] = useState(false);
 
   if (!licenseKey) {
