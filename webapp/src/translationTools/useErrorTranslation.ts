@@ -65,6 +65,10 @@ export function useErrorTranslation() {
         return t('plan_translation_limit_exceeded');
       case 'organization_already_subscribed':
         return t('organization_already_subscribed');
+
+      // from 'ApiHttpService.tsx'
+      case 'authentication_cancelled':
+        return t('authentication_cancelled');
       default:
         return code;
     }
