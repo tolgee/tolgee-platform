@@ -26,6 +26,7 @@ export const UsageTable: FC<{
             type="SEATS"
             invoiceId={invoiceId}
             invoiceNumber={invoiceNumber}
+            label={t('invoice_usage_dialog_table_seats_item')}
             item={usageData.seats}
           />
         )}
@@ -35,6 +36,7 @@ export const UsageTable: FC<{
             type="TRANSLATIONS"
             invoiceId={invoiceId}
             invoiceNumber={invoiceNumber}
+            label={t('invoice_usage_dialog_table_translations_item')}
             item={usageData.translations}
           />
         )}
