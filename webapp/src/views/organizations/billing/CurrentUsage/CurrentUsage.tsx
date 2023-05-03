@@ -90,7 +90,7 @@ export const CurrentUsage: FC<Props> = ({
       </StyledHeader>
       <StyledMetrics>
         <PlanMetric
-          name={t('billing_actual_used_translations')}
+          name={t('billing_actual_used_strings')}
           currentQuantity={translationsUsed}
           totalQuantity={translationsMax}
           periodEnd={activeSubscription.currentPeriodEnd}
