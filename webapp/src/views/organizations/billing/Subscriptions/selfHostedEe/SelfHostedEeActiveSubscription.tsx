@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { SelfHostedEeSubscriptionActions } from '../../SelfHostedEeSubscriptionActions';
 import { IncludedFeatures } from './IncludedFeatures';
-import { Plan, PlanContent } from '../common/Plan';
+import { Plan, PlanContent, PlanSubtitle } from '../common/Plan';
 import { PlanPrice } from '../cloud/Plans/PlanPrice';
 import { PlanInfoArea } from '../common/PlanInfo';
 import { SelfHostedEeEstimatedCosts } from './SelfHostedEeEstimatedCosts';
@@ -10,9 +10,18 @@ import { ActivePlanTitle } from './ActivePlanTitle';
 import { useTranslate } from '@tolgee/react';
 import { Box } from '@mui/material';
 
-export const SelfHostedEeActiveSubscription: FC<{
-  subscription: components['schemas']['SelfHostedEeSubscriptionModel'];
-}> = ({ subscription }) => {
+type SelfHostedEeSubscriptionModel =
+  components['schemas']['SelfHostedEeSubscriptionModel'];
+
+type Props = {
+  subscription: SelfHostedEeSubscriptionModel;
+  isNew: boolean;
+};
+
+export const SelfHostedEeActiveSubscription: FC<Props> = ({
+  subscription,
+  isNew,
+}) => {
   const period = subscription.currentBillingPeriod;
   const { t } = useTranslate();
 
@@ -34,6 +43,7 @@ export const SelfHostedEeActiveSubscription: FC<{
       })}
     >
       <PlanContent>
+        {isNew && <PlanSubtitle>{t('billing_subscription_new')}</PlanSubtitle>}
         <ActivePlanTitle
           name={subscription.plan.name}
           status={subscription.status}
@@ -54,6 +64,7 @@ export const SelfHostedEeActiveSubscription: FC<{
         <SelfHostedEeSubscriptionActions
           id={subscription.id}
           licenceKey={subscription.licenseKey}
+          isNew={isNew}
         />
       </PlanContent>
     </Plan>

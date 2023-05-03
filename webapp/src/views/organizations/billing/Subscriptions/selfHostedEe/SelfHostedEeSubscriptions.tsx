@@ -13,6 +13,10 @@ import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { components } from 'tg.service/apiSchema.generated';
+
+type SelfHostedEeSubscriptionModel =
+  components['schemas']['SelfHostedEeSubscriptionModel'];
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -34,6 +38,8 @@ export const SelfHostedEeSubscriptions = () => {
   const { t } = useTranslate();
 
   const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
+  const [newSubscription, setNewSubscription] =
+    useState<SelfHostedEeSubscriptionModel>();
 
   const organization = useOrganization();
 
@@ -71,8 +77,18 @@ export const SelfHostedEeSubscriptions = () => {
           path: { organizationId: organization!.id },
         },
         {
-          onSuccess: () => {
-            activeSubscriptionsLoadable.refetch();
+          onSuccess: async () => {
+            const result = await activeSubscriptionsLoadable.refetch();
+            const subscriptions = result.data?._embedded?.subscriptions;
+            if (subscriptions) {
+              const newestSubscription = subscriptions.reduce((prev, curr) => {
+                if (prev && prev.createdAt > curr.createdAt) {
+                  return prev;
+                }
+                return curr;
+              });
+              setNewSubscription(newestSubscription);
+            }
           },
         }
       );
@@ -105,6 +121,7 @@ export const SelfHostedEeSubscriptions = () => {
               <SelfHostedEeActiveSubscription
                 key={subscription.id}
                 subscription={subscription}
+                isNew={subscription === newSubscription}
               />
             ))}
           </StyledActive>
