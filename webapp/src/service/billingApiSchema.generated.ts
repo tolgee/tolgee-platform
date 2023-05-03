@@ -116,6 +116,7 @@ export interface components {
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -152,6 +153,7 @@ export interface components {
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
     };
     CloudSubscriptionModel: {
       organizationId: number;
@@ -230,6 +232,8 @@ export interface components {
     };
     UsageModel: {
       subscriptionPrice?: number;
+      /** Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       translations: components["schemas"]["AverageProportionalUsageItemModel"];
       credits?: components["schemas"]["SumUsageItemModel"];

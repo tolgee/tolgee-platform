@@ -7,6 +7,7 @@ import { SubscriptionRow } from './SubscriptionRow';
 import { ProportionalUsageItemRow } from './ProportionalUsageItemRow';
 import { SumUsageItemRow } from './SumUsageItemRow';
 import { TotalRow } from './TotalRow';
+import { AppliedStripeCreditsRow } from './AppliedStripeCreditsRow';
 
 export const UsageTable: FC<{
   usageData: components['schemas']['UsageModel'];
@@ -47,7 +48,14 @@ export const UsageTable: FC<{
             label={t('invoice_usage_dialog_table_mt_credits_item')}
           />
         )}
-        <TotalRow total={usageData.total} />
+        {(usageData?.appliedStripeCredits || 0) > 0 && (
+          <AppliedStripeCreditsRow value={usageData.appliedStripeCredits!} />
+        )}
+
+        <TotalRow
+          total={usageData.total}
+          appliedStripeCredits={usageData.appliedStripeCredits || 0}
+        />
       </TableBody>
     </Table>
   );
