@@ -11,6 +11,7 @@ export const ProportionalUsageItemRow = (props: {
   invoiceId?: number;
   invoiceNumber?: string;
   type: ProportionalUsageType;
+  label: string;
 }) => {
   const downloadReport = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage/{type}.csv',
