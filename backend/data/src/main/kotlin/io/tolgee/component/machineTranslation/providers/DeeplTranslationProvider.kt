@@ -38,6 +38,7 @@ class DeeplTranslationProvider(
     "fr",
     "hu",
     "it",
+    "id",
     "ja",
     "ko",
     "lt",
