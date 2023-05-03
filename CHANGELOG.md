@@ -1,3 +1,10 @@
+## [3.12.7](https://github.com/tolgee/tolgee-platform/compare/v3.12.6...v3.12.7) (2023-05-03)
+
+
+### Bug Fixes
+
+* missing translation ([#1694](https://github.com/tolgee/tolgee-platform/issues/1694)) ([3cd887f](https://github.com/tolgee/tolgee-platform/commit/3cd887f50261c865688735761c44bd01df9669ad))
+
 ## [3.12.6](https://github.com/tolgee/tolgee-platform/compare/v3.12.5...v3.12.6) (2023-05-02)
 
 
