@@ -73,7 +73,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
       {Boolean(perThousandTranslations) && (
         <StyledSecondaryPrice>
           <T
-            keyName="billing-plan-price-per-thousand-translations-extra"
+            keyName="billing-plan-price-per-thousand-strings-extra"
             params={{ price: perThousandTranslations }}
           />
         </StyledSecondaryPrice>

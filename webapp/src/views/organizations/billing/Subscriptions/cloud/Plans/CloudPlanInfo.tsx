@@ -49,9 +49,9 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
         </StyledNumber>
         <StyledName>
           {isPayAsYouGo ? (
-            <T keyName="billing_plan_translation_included" />
+            <T keyName="billing_plan_strings_included" />
           ) : (
-            <T keyName="billing_plan_translation_limit" />
+            <T keyName="billing_plan_strings_limit" />
           )}
         </StyledName>
       </StyledItem>
