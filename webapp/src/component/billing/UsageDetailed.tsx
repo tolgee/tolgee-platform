@@ -23,7 +23,7 @@ export const UsageDetailed: React.FC<Props> = ({
       <Box>
         <Typography variant="caption">
           <T
-            keyName="dashboard_billing_used_translations"
+            keyName="dashboard_billing_used_strings"
             params={{
               available: Math.round(translationsUsed),
               max: Math.round(translationsMax),
