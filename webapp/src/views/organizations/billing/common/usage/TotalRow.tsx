@@ -3,7 +3,10 @@ import { useTranslate } from '@tolgee/react';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
 import { TableCell, TableRow } from '@mui/material';
 
-export const TotalRow: FC<{ total: number }> = ({ total }) => {
+export const TotalRow: FC<{ total: number; appliedStripeCredits: number }> = ({
+  total,
+  appliedStripeCredits,
+}) => {
   const { t } = useTranslate();
 
   const formatMoney = useMoneyFormatter();
@@ -24,7 +27,7 @@ export const TotalRow: FC<{ total: number }> = ({ total }) => {
           borderBottom: 'none',
         }}
       >
-        {formatMoney(total)}
+        {formatMoney(total - appliedStripeCredits)}
       </TableCell>
     </TableRow>
   );

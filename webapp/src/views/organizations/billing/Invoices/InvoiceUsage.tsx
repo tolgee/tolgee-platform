@@ -65,6 +65,7 @@ export const InvoiceUsage: FC<{
                   <TotalTable
                     invoice={invoice}
                     totalWithoutVat={usage.data.total}
+                    appliedStripeCredits={usage.data.appliedStripeCredits}
                   />
                 </>
               ) : (
