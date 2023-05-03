@@ -23,7 +23,9 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
 
   const translationsMax = usage.includedTranslations;
 
-  const translationsLimit = usage.translationsLimit;
+  const translationsLimit = usesSlots
+    ? usage.translationSlotsLimit
+    : usage.translationsLimit;
   const translationsProgress = translationsUsed / translationsMax;
   const isPayAsYouGo = translationsLimit > translationsMax;
 

@@ -33,6 +33,12 @@ type Props = {
   period: BillingPeriodType;
 };
 
+export function planIsPeriodDependant(prices: PlanPricesModel) {
+  const { subscriptionMonthly, subscriptionYearly } = prices;
+
+  return Boolean(subscriptionYearly || subscriptionMonthly);
+}
+
 export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
   const {
     subscriptionMonthly,
@@ -43,9 +49,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
   } = prices;
   const formatMoney = useMoneyFormatter();
 
-  const differentPricesAnnualy = Boolean(
-    subscriptionYearly || subscriptionMonthly
-  );
+  const differentPricesAnnualy = planIsPeriodDependant(prices);
 
   const subscriptionPrice =
     period === 'MONTHLY' ? subscriptionMonthly : subscriptionYearly / 12;

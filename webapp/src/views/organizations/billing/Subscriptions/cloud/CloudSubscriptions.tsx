@@ -9,6 +9,7 @@ import { useOrganization } from '../../../useOrganization';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
 import { useState } from 'react';
+import { planIsPeriodDependant } from './Plans/PlanPrice';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -48,7 +49,7 @@ export const CloudSubscriptions = () => {
     options: {
       onSuccess(data) {
         if (!period)
-          if (data.currentBillingPeriod) {
+          if (data.plan && planIsPeriodDependant(data.plan.prices)) {
             setPeriod(data.currentBillingPeriod);
           } else {
             setPeriod('YEARLY');
