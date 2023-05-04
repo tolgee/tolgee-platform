@@ -163,6 +163,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   permissions={initialPermissions}
                   onChange={setSettingsState}
                   allLangs={langauges}
+                  hideNone
                 />
               </DialogContent>
               <DialogActions>
