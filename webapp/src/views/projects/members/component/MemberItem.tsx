@@ -75,28 +75,16 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   });
 
   async function handleSubmit(data: PermissionSettingsState) {
-    try {
-      await updatePermissions(data);
-      messages.success(<T keyName="permissions_set_message" />);
-    } catch (e) {
-      parseErrorResponse(e).forEach((err) =>
-        messages.error(<TranslatedError code={err} />)
-      );
-    }
+    await updatePermissions(data);
+    messages.success(<T keyName="permissions_set_message" />);
   }
 
   const isOrganzationMember = Boolean(user.organizationRole);
   const hasDirectPermissions = Boolean(user.directPermission);
 
   async function handleResetToOrganization() {
-    try {
-      await setByOrganization();
-      messages.success(<T keyName="permissions_reset_message" />);
-    } catch (e) {
-      parseErrorResponse(e).forEach((err) =>
-        messages.error(<TranslatedError code={err} />)
-      );
-    }
+    await setByOrganization();
+    messages.success(<T keyName="permissions_reset_message" />);
   }
 
   return (

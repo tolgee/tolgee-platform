@@ -4,7 +4,7 @@ export const usePermissionTranslation = () => {
   const { t } = useTranslate();
 
   return (permission: string, hint?: boolean) => {
-    const type = permission.toUpperCase();
+    const type = permission?.toUpperCase();
     if (hint) {
       switch (type) {
         case 'MANAGE':
