@@ -9,13 +9,11 @@ import RevokePermissionsButton from './RevokePermissionsButton';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUpdatePermissions } from './useUpdatePermissions';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
