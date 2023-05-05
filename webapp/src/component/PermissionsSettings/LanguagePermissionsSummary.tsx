@@ -43,10 +43,6 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
     );
   }, [viewLanguageIds, translateLanguageIds, stateChangeLanguageIds]);
 
-  if (languagesUnion.length === 0) {
-    return null;
-  }
-
   return (
     <Tooltip
       title={

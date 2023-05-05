@@ -24,6 +24,7 @@ type Props = {
   onChange: (state: PermissionSettingsState) => void;
   height?: number;
   allLangs?: LanguageModel[];
+  hideNone?: boolean;
 };
 
 export const PermissionsSettings: React.FC<Props> = ({
@@ -31,6 +32,7 @@ export const PermissionsSettings: React.FC<Props> = ({
   permissions,
   onChange,
   allLangs,
+  hideNone,
 }) => {
   const [tab, setTab] = useState<TabsType>(
     permissions.type ? 'basic' : 'advanced'
@@ -127,6 +129,7 @@ export const PermissionsSettings: React.FC<Props> = ({
             onChange={setBasicState}
             roles={rolesLoadable.data as RolesMap}
             allLangs={allLangs}
+            hideNone={hideNone}
           />
         )}
         {tab === 'advanced' && (
