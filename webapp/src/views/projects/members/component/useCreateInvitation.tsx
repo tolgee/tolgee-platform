@@ -1,9 +1,12 @@
+import { T } from '@tolgee/react';
+
 import {
   LanguageModel,
   LanguagePermissions,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
 import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 type Props = {
@@ -24,9 +27,16 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
     invalidatePrefix: '/v2/projects/{projectId}/invitations',
   });
 
+  const messages = useMessage();
+
   return {
     async createInvitation({ permissions, email, name }: CreateInvitationData) {
       if (permissions.tab === 'advanced' && permissions.advancedState.scopes) {
+        if (permissions.advancedState.scopes.length === 0) {
+          messages.error(<T keyName="scopes_at_least_one_scope_error" />);
+          throw new Error('Incorrect data');
+        }
+
         const languagePermissions: LanguagePermissions = {};
 
         permissions.advancedState.scopes

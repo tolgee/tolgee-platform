@@ -53,6 +53,7 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
         />
       }
       disableInteractive
+      open={languagesUnion.length ? undefined : false}
     >
       <Box display="flex" alignItems="center">
         <LanguagesPermittedList
