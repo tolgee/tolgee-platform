@@ -103,7 +103,7 @@ class PermissionsTestData {
     return me.self
   }
 
-  fun getLanguagesByTags(tags: List<String>?) = tags?.map { tag ->
+  private fun getLanguagesByTags(tags: List<String>?) = tags?.map { tag ->
     projectBuilder.data.languages.find { it.self.tag == tag }?.self ?: throw NotFoundException(
       Message.LANGUAGE_NOT_FOUND
     )
