@@ -240,9 +240,7 @@ class PermissionService(
   ): Permission {
     val data = this.getProjectPermissionData(projectId, userId)
 
-    if (data.computedPermissions.scopes.isEmpty()) {
-      throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
-    }
+    checkUserIsInProject(data)
 
     data.organizationRole?.let {
       if (data.organizationRole == OrganizationRoleType.OWNER) {
@@ -256,6 +254,15 @@ class PermissionService(
       Permission(user = userAccount, project = project)
     }
     return permission
+  }
+
+  private fun checkUserIsInProject(data: ProjectPermissionData) {
+    val hasOrganizationRole = data.organizationRole != null
+    val hasDirectPermissions = data.directPermissions != null
+
+    if (!hasDirectPermissions && !hasOrganizationRole) {
+      throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    }
   }
 
   private fun Set<Language>?.standardize(): MutableSet<Language> {
