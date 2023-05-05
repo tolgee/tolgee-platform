@@ -195,13 +195,6 @@ class ProjectService constructor(
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
   }
 
-  fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<ProjectWithLanguagesView> {
-    val withoutPermittedLanguages = this.projectRepository.findAllPermittedInOrganization(
-      authenticationFacade.userAccount.id, organizationId, pageable, search
-    )
-    return addPermittedLanguagesToProjects(withoutPermittedLanguages)
-  }
-
   fun addPermittedLanguagesToProjects(projectsPage: Page<ProjectView>): Page<ProjectWithLanguagesView> {
     val projectLanguageMap = permissionService.getPermittedTranslateLanguagesForProjectIds(
       projectsPage.content.map { it.id },
@@ -292,7 +285,7 @@ class ProjectService constructor(
     }
   }
 
-  fun findPermittedPaged(
+  fun findPermittedInOrganizationPaged(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null
