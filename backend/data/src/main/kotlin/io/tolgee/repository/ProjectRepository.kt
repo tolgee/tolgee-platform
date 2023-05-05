@@ -40,7 +40,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Query(
     """$BASE_VIEW_QUERY        
         left join UserAccount ua on ua.id = :userAccountId
-        where (p is not null or role is not null or (ua.role = 'ADMIN' and :organizationId is not null))
+        left join o.basePermission
+        where (
+            (p is not null and p.type <> 'NONE') or 
+            (role is not null and o.basePermission.type <> 'NONE' and p is null) or
+            (ua.role = 'ADMIN' and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
@@ -56,24 +60,6 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
-
-  @Query(
-    """
-      $BASE_VIEW_QUERY 
-      left join UserAccount ua on ua.id = :userAccountId
-      where (p is not null or role is not null or ua.role = 'ADMIN')
-      and o.id = :organizationOwnerId and o is not null
-      and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
-      or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-      or cast(:search as text) is null)
-        """
-  )
-  fun findAllPermittedInOrganization(
-    userAccountId: Long,
-    organizationOwnerId: Long,
-    pageable: Pageable,
-    search: String?
-  ): Page<ProjectView>
 
   fun countAllBySlug(slug: String): Long
 

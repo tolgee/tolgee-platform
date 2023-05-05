@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
@@ -29,6 +31,31 @@ class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/proje
       permissionService.getProjectPermissionScopes(project.id, user)
         .let { Assertions.assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `changes from none to other`() {
+    val testData = PermissionsTestData()
+    val user = testData.addUserWithPermissions(type = ProjectPermissionType.NONE)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin.self
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthPut("users/${user.id}/set-permissions/EDIT").andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot set permission to user outside of project or organization`() {
+    val testData = PermissionsTestData()
+    val user = testData.root.addUserAccount {
+      username = "pepa@seznam.cz"
+    }.self
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin.self
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthPut("users/${user.id}/set-permissions/EDIT")
+      .andIsBadRequest.andHasErrorMessage(Message.USER_HAS_NO_PROJECT_ACCESS)
   }
 
   @Test

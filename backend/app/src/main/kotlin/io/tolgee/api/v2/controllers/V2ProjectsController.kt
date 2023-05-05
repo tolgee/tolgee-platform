@@ -102,7 +102,7 @@ V2ProjectsController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
-    val projects = projectService.findPermittedPaged(pageable, search)
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 
@@ -112,7 +112,7 @@ V2ProjectsController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<ProjectWithStatsModel> {
-    val projects = projectService.findPermittedPaged(pageable, search)
+    val projects = projectService.findPermittedInOrganizationPaged(pageable, search)
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 

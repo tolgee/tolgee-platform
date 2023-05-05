@@ -9,6 +9,7 @@ import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.api.v2.hateoas.SelfHostedEeSubscriptionModel
 import io.tolgee.ee.data.GetMySubscriptionDto
 import io.tolgee.ee.data.PrepareSetLicenseKeyDto
+import io.tolgee.ee.data.ReleaseKeyDto
 import io.tolgee.ee.data.ReportErrorDto
 import io.tolgee.ee.data.ReportUsageDto
 import io.tolgee.ee.data.SetLicenseKeyLicensingDto
@@ -42,6 +43,7 @@ class EeSubscriptionService(
     const val prepareSetKeyPath: String = "/v2/public/licensing/prepare-set-key"
     const val subscriptionInfoPath: String = "/v2/public/licensing/subscription"
     const val reportUsagePath: String = "/v2/public/licensing/report-usage"
+    const val releaseKeyPath: String = "/v2/public/licensing/release-key"
     const val reportErrorPath: String = "/v2/public/licensing/report-error"
   }
 
@@ -201,14 +203,21 @@ class EeSubscriptionService(
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
       val seats = userAccountService.countAllEnabled()
-      reportUsage(subscription, seats)
+      reportUsageRemote(subscription, seats)
     }
   }
 
-  private fun reportUsage(subscription: EeSubscription, seats: Long) {
+  private fun reportUsageRemote(subscription: EeSubscription, seats: Long) {
     postRequest<Any>(
       reportUsagePath,
       ReportUsageDto(subscription.licenseKey, seats)
+    )
+  }
+
+  private fun releaseKeyRemote(subscription: EeSubscription) {
+    postRequest<Any>(
+      releaseKeyPath,
+      ReleaseKeyDto(subscription.licenseKey)
     )
   }
 
@@ -217,7 +226,7 @@ class EeSubscriptionService(
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
       try {
-        reportUsage(subscription, 0)
+        releaseKeyRemote(subscription)
       } catch (e: HttpClientErrorException.NotFound) {
         val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
         if (!licenceKeyNotFound) {

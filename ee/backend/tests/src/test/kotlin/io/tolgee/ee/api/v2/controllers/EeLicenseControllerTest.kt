@@ -159,7 +159,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
-        this.url = { it.contains("/v2/public/licensing/report-usage") }
+        this.url = { it.contains("/v2/public/licensing/release-key") }
       }
 
       thenAnswer {
@@ -174,7 +174,6 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         val body = captor.allValues.single().body as String
         val data = jacksonObjectMapper().readValue(body, Map::class.java)
         data["licenseKey"].assert.isEqualTo("mock")
-        data["seats"].assert.isEqualTo(0)
       }
     }
   }
