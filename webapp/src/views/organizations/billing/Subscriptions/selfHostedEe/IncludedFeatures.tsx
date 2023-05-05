@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { Box, Typography, styled } from '@mui/material';
 import { PlanFeature } from './PlanFeature';
 import { useFeatureTranslation } from 'tg.translationTools/useFeatureTranslation';

@@ -18,10 +18,8 @@ import copy from 'copy-to-clipboard';
 import { useProject } from 'tg.hooks/useProject';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
 import {
   PermissionModel,
