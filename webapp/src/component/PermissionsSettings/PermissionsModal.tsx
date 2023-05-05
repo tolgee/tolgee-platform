@@ -17,6 +17,7 @@ import {
 } from 'tg.component/PermissionsSettings/types';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 const StyledBanner = styled('div')`
   background: ${({ theme }) => theme.palette.warning.light};
@@ -43,6 +44,7 @@ export const PermissionsModal: React.FC<PermissionModalProps> = ({
   isInheritedFromOrganization,
   onResetToOrganization,
 }) => {
+  const messages = useMessage();
   const [saveLoading, setSaveLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const { t } = useTranslate();
@@ -53,6 +55,13 @@ export const PermissionsModal: React.FC<PermissionModalProps> = ({
 
   const handleUpdatePermissions = async () => {
     if (settingsState) {
+      if (
+        settingsState.tab === 'advanced' &&
+        settingsState.advancedState.scopes.length === 0
+      ) {
+        messages.error(<T keyName="scopes_at_least_one_scope_error" />);
+        return;
+      }
       setSaveLoading(true);
       onSubmit(settingsState)
         .then(() => {

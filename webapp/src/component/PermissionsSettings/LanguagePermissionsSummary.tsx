@@ -43,24 +43,36 @@ export function LanguagePermissionSummary({ permissions, allLangs }: Props) {
     );
   }, [viewLanguageIds, translateLanguageIds, stateChangeLanguageIds]);
 
-  return (
-    <Tooltip
-      title={
-        <LanguagesHint
-          categories={categories}
-          permissions={permissions}
-          allLangs={allLangs}
-        />
-      }
-      disableInteractive
-    >
-      <Box display="flex" alignItems="center">
-        <LanguagesPermittedList
-          languages={languagesUnion?.map(
-            (langId) => allLangs.find((l) => l.id === langId)!
-          )}
-        />
-      </Box>
-    </Tooltip>
+  const hintNeeded = Boolean(languagesUnion.length);
+
+  function wrapWithTooltip(children: React.ReactElement) {
+    if (hintNeeded) {
+      return (
+        <Tooltip
+          title={
+            <LanguagesHint
+              categories={categories}
+              permissions={permissions}
+              allLangs={allLangs}
+            />
+          }
+          disableInteractive
+        >
+          {children}
+        </Tooltip>
+      );
+    } else {
+      return children;
+    }
+  }
+
+  return wrapWithTooltip(
+    <Box display="flex" alignItems="center">
+      <LanguagesPermittedList
+        languages={languagesUnion?.map(
+          (langId) => allLangs.find((l) => l.id === langId)!
+        )}
+      />
+    </Box>
   );
 }
