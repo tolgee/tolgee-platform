@@ -9,13 +9,11 @@ import RevokePermissionsButton from './RevokePermissionsButton';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUpdatePermissions } from './useUpdatePermissions';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -75,28 +73,16 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   });
 
   async function handleSubmit(data: PermissionSettingsState) {
-    try {
-      await updatePermissions(data);
-      messages.success(<T keyName="permissions_set_message" />);
-    } catch (e) {
-      parseErrorResponse(e).forEach((err) =>
-        messages.error(<TranslatedError code={err} />)
-      );
-    }
+    await updatePermissions(data);
+    messages.success(<T keyName="permissions_set_message" />);
   }
 
   const isOrganzationMember = Boolean(user.organizationRole);
   const hasDirectPermissions = Boolean(user.directPermission);
 
   async function handleResetToOrganization() {
-    try {
-      await setByOrganization();
-      messages.success(<T keyName="permissions_reset_message" />);
-    } catch (e) {
-      parseErrorResponse(e).forEach((err) =>
-        messages.error(<TranslatedError code={err} />)
-      );
-    }
+    await setByOrganization();
+    messages.success(<T keyName="permissions_reset_message" />);
   }
 
   return (

@@ -18,10 +18,8 @@ import copy from 'copy-to-clipboard';
 import { useProject } from 'tg.hooks/useProject';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { PermissionsSettings } from 'tg.component/PermissionsSettings/PermissionsSettings';
 import {
   PermissionModel,
@@ -70,24 +68,18 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
   const yupSchema = useMemo(() => Validation.INVITE_DIALOG_PROJECT(t), [t]);
 
   async function handleCreateInvitation(data: CreateInvitationData) {
-    try {
-      const result = await createInvitation(data);
-      if (!result.invitedUserEmail) {
-        copy(
-          LINKS.ACCEPT_INVITATION.buildWithOrigin({
-            [PARAMS.INVITATION_CODE]: result.code,
-          })
-        );
-        messaging.success(<T keyName="invite_user_invitation_copy_success" />);
-      } else {
-        messaging.success(<T keyName="invite_user_invitation_email_success" />);
-      }
-      onClose();
-    } catch (e) {
-      parseErrorResponse(e).forEach((e_1) =>
-        messaging.error(<TranslatedError code={e_1} />)
+    const result = await createInvitation(data);
+    if (!result.invitedUserEmail) {
+      copy(
+        LINKS.ACCEPT_INVITATION.buildWithOrigin({
+          [PARAMS.INVITATION_CODE]: result.code,
+        })
       );
+      messaging.success(<T keyName="invite_user_invitation_copy_success" />);
+    } else {
+      messaging.success(<T keyName="invite_user_invitation_email_success" />);
     }
+    onClose();
   }
 
   return (
