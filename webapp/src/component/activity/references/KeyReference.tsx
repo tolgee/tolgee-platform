@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
-import { Link as MuiLink } from '@mui/material';
+import { Link as MuiLink, Tooltip } from '@mui/material';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -22,6 +22,7 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
       }) +
       queryEncode({
         id: data.id,
+        languages: data.languages?.map((l) => l.tag),
       })
     : undefined;
 
@@ -36,7 +37,11 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
       </span>
       {data.languages?.map((l, i) => (
         <React.Fragment key={i}>
-          <CircledLanguageIcon size={14} flag={l.flagEmoji} />
+          <Tooltip title={`${l.name} (${l.tag})`}>
+            <span>
+              <CircledLanguageIcon size={14} flag={l.flagEmoji} />
+            </span>
+          </Tooltip>
           {i + 1 < data.languages!.length && ' '}
         </React.Fragment>
       )) || []}
