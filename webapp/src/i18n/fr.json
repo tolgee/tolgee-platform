@@ -775,7 +775,7 @@
   "translation_tools_base_empty" : "La traduction de base est vide",
   "translation_tools_machine_translation" : "Traduction automatique",
   "translation_tools_no_credits" : "Limite mensuelle dépassée, contactez le support",
-  "translation_tools_no_credits_billing_link" : "Pas assez de <hint>Crédit TA</hint>, vous pouvez le recharger dans la <link>section de facturation</link>.",
+  "translation_tools_no_credits_billing_link" : "Pas assez de <hint>crédit TA</hint>, vous pouvez le recharger dans la <link>section de facturation</link>.",
   "translation_tools_no_credits_message" : "Pas assez de <hint>crédit TA</hint>, contactez le propriétaire du projet",
   "translation_tools_nothing_found" : "Rien trouvé",
   "translation_tools_translation_memory" : "Mémoire de traduction",

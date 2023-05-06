@@ -1,3 +1,10 @@
+# [3.13.0](https://github.com/tolgee/tolgee-platform/compare/v3.12.7...v3.13.0) (2023-05-06)
+
+
+### Features
+
+* activity language distinction ([c6a5642](https://github.com/tolgee/tolgee-platform/commit/c6a5642e4f5e5129f8f13d25dbe5c9aa78e7117d))
+
 ## [3.12.7](https://github.com/tolgee/tolgee-platform/compare/v3.12.6...v3.12.7) (2023-05-03)
 
 

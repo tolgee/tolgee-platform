@@ -723,7 +723,7 @@
   "translation_tools_base_empty" : "Die Basisübersetzung ist leer",
   "translation_tools_machine_translation" : "Maschinelle Übersetzung",
   "translation_tools_no_credits" : "Monatliches Limit überschritten, Support kontaktieren",
-  "translation_tools_no_credits_billing_link" : "Nicht genug <hint> MT Guthaben </hint>, Sie können es aufstocken in der <link>Abrechnungs-Sektion</link>",
+  "translation_tools_no_credits_billing_link" : "Nicht genug <hint>MT Guthaben</hint>, Sie können es aufstocken in der <link>Abrechnungs-Sektion</link>",
   "translation_tools_no_credits_message" : "Nicht genug <hint>MT Guthaben</hint>, kontaktieren Sie den Projekteigentümer",
   "translation_tools_nothing_found" : "Nichts gefunden",
   "translation_tools_translation_memory" : "Übersetzungsspeicher",
