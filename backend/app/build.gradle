@@ -114,7 +114,8 @@ dependencies {
     implementation libs.commonsCodec
     implementation libs.amazonS3
     implementation libs.icu4j
-    implementation("org.redisson:redisson-spring-boot-starter:3.17.5")
+    implementation("org.redisson:redisson-spring-boot-starter:3.21.0")
+    implementation 'org.redisson:redisson-spring-data-27:3.21.0'
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
     implementation libs.jacksonModuleKotlin
 
@@ -218,4 +219,8 @@ project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SE
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
