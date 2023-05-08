@@ -200,3 +200,7 @@ sourceSets {
 
 tasks.findByName("jar").enabled(true)
 tasks.findByName("bootJar").enabled(false)
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
