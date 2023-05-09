@@ -5,5 +5,5 @@ export const expectGlobalLoading = () => {
 
 export const waitForGlobalLoading = (waitTime = 100, timeout = 4000) => {
   cy.wait(waitTime);
-  return cy.gcy('global-loading').should('not.exist', { timeout });
+  return cy.gcy('global-loading', { timeout }).should('not.exist');
 };
