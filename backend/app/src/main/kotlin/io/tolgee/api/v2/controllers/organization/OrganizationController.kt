@@ -314,6 +314,7 @@ class OrganizationController(
       currentTranslations = currentTranslations,
       currentTranslationSlots = currentTranslationSlots,
       includedTranslations = translationsLimitProvider.getPlanTranslations(organization),
+      includedTranslationSlots = translationsLimitProvider.getPlanTranslationSlots(organization),
       translationSlotsLimit = translationsLimitProvider.getTranslationSlotsLimit(organization),
       translationsLimit = translationsLimitProvider.getTranslationLimit(organization)
     )

@@ -16,4 +16,5 @@ interface TranslationsLimitProvider {
   fun getTranslationLimit(organization: Organization?): Long
 
   fun getPlanTranslations(organization: Organization?): Long
+  fun getPlanTranslationSlots(organization: Organization?): Long
 }
