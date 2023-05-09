@@ -1,3 +1,10 @@
+## [3.13.1](https://github.com/tolgee/tolgee-platform/compare/v3.13.0...v3.13.1) (2023-05-09)
+
+
+### Bug Fixes
+
+* Fix "None of slaves were synced" error by updating Redisson ([de2be5c](https://github.com/tolgee/tolgee-platform/commit/de2be5c27ef1297e82b8f587f29aca5d94ea2dfc))
+
 # [3.13.0](https://github.com/tolgee/tolgee-platform/compare/v3.12.7...v3.13.0) (2023-05-06)
 
 
