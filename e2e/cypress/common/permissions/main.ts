@@ -1,4 +1,3 @@
-import Bluebird from 'cypress/types/bluebird';
 import { login } from '../apiCalls/common';
 import {
   generatePermissionsData,
@@ -74,7 +73,7 @@ export function loginAndGetInfo(user: UserMail, projectId: number) {
 export function visitProjectWithPermissions(
   options: Partial<PermissionsOptions>,
   user: UserMail = 'me@me.me'
-): Bluebird<ProjectInfo> {
+): Promise<ProjectInfo> {
   return new Cypress.Promise<ProjectInfo>((resolve) => {
     generatePermissionsData
       .clean()
