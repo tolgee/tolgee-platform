@@ -48,7 +48,7 @@ describe('Permissions project', () => {
     );
   });
 
-  it.only('members.edit', () => {
+  it('members.edit', () => {
     visitProjectWithPermissions({ scopes: ['members.edit'] }).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
