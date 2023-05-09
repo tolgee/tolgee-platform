@@ -42,8 +42,8 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         left join UserAccount ua on ua.id = :userAccountId
         left join o.basePermission
         where (
-            (p is not null and p.type <> 'NONE') or 
-            (role is not null and o.basePermission.type <> 'NONE' and p is null) or
+            (p is not null and (p.type <> 'NONE' or p.type is null)) or 
+            (role is not null and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
             (ua.role = 'ADMIN' and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))

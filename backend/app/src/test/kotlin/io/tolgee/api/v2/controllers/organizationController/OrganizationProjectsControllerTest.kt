@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -111,6 +112,18 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats")
       .andAssertThatJson {
         node("_embedded").isAbsent()
+      }
+  }
+
+  @Test
+  fun `user with scopes can see the project`() {
+    val testData = PermissionsTestData()
+    val user = testData.addUserWithPermissions(scopes = listOf(Scope.ADMIN))
+    testDataService.saveTestData(testData.root)
+    userAccount = user
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats").andPrettyPrint
+      .andAssertThatJson {
+        node("_embedded.projects").isArray.hasSize(1)
       }
   }
 }
