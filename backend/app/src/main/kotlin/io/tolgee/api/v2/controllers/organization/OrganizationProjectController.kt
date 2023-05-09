@@ -47,9 +47,10 @@ class OrganizationProjectController(
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let { organization ->
-      projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id).let { projects ->
-        pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
-      }
+      projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
+        .let { projects ->
+          pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
+        }
     } ?: throw NotFoundException()
   }
 
@@ -65,7 +66,10 @@ class OrganizationProjectController(
     } ?: throw NotFoundException()
   }
 
-  @Operation(summary = "Returns all projects (including statistics) where current user has any permission (except none)")
+  @Operation(
+    summary = "Returns all projects (including statistics)" +
+      " where current user has any permission (except none)"
+  )
   @GetMapping("/{organizationId:[0-9]+}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
@@ -76,7 +80,10 @@ class OrganizationProjectController(
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
-  @Operation(summary = "Returns all projects (including statistics) where current user has any permission (except none)")
+  @Operation(
+    summary = "Returns all projects (including statistics) " +
+      "where current user has any permission (except none)"
+  )
   @GetMapping("/{slug:.*[a-z].*}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getAllWithStatistics(
     @ParameterObject @SortDefault("id") pageable: Pageable,
