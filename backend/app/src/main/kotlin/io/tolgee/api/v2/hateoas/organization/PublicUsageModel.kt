@@ -45,6 +45,12 @@ open class PublicUsageModel(
   val translationSlotsLimit: Long,
 
   @Schema(
+    description = "How many translation slots are included in current subscription plan. " +
+      "How many translation slots can organization use without additional costs"
+  )
+  val includedTranslationSlots: Long,
+
+  @Schema(
     description = "How many translations are included in current subscription plan. " +
       "How many translations can organization use without additional costs"
   )

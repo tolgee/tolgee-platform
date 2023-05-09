@@ -8,4 +8,5 @@ class BaseTranslationsLimitProvider : TranslationsLimitProvider {
   override fun getTranslationSlotsLimit(organization: Organization?): Long = -1
   override fun getTranslationLimit(organization: Organization?): Long = -1
   override fun getPlanTranslations(organization: Organization?): Long = -1
+  override fun getPlanTranslationSlots(organization: Organization?): Long = -1
 }
