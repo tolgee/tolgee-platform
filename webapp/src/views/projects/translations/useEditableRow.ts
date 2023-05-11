@@ -5,6 +5,7 @@ import {
   useTranslationsActions,
 } from './context/TranslationsContext';
 import { AfterCommand, EditMode } from './context/types';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type Props = {
   keyId: number;
@@ -35,6 +36,11 @@ export const useEditableRow = ({
   const cursor = useTranslationsSelector((v) => {
     return v.cursor?.keyId === keyId ? v.cursor : undefined;
   });
+
+  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const baseLanguage = useTranslationsSelector((c) =>
+    c.languages?.find((l) => l.base)
+  );
 
   const isEditingRow = Boolean(cursor?.keyId === keyId);
   const isEditing = Boolean(isEditingRow && cursor?.language === language);
@@ -76,7 +82,7 @@ export const useEditableRow = ({
   const handleInsertBase = async (baseText: string | undefined) => {
     if (baseText) {
       setValue(baseText);
-    } else {
+    } else if (satisfiesLanguageAccess('translations.view', baseLanguage?.id)) {
       setValue(await getBaseText(keyId));
     }
   };

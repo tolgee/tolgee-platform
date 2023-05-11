@@ -256,7 +256,7 @@ export const useTranslationsService = (props: Props) => {
     });
 
     const baseText =
-      baseTextResponse._embedded?.keys![0].translations[baseLanguage].text ||
+      baseTextResponse._embedded?.keys![0].translations[baseLanguage]?.text ||
       '';
     return baseText;
   };

@@ -9,6 +9,7 @@ import { StateType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { useTranslationsSelector } from '../context/TranslationsContext';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
@@ -65,7 +66,13 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayTransitionButtons = state && stateChangeEnabled;
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
-  const displayInsertBase = !isBaseLanguage;
+  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const baseLanguage = useTranslationsSelector((c) =>
+    c.languages?.find((l) => l.base)
+  );
+  const displayInsertBase =
+    !isBaseLanguage &&
+    satisfiesLanguageAccess('translations.view', baseLanguage?.id);
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
 
