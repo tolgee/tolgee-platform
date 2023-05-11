@@ -1,5 +1,6 @@
 package io.tolgee.facade
 
+import io.sentry.Sentry
 import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
 import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.dtos.query_results.ProjectStatistics
@@ -78,6 +79,11 @@ class ProjectWithStatsFacade(
     if (this == null || this.isNaN()) {
       return BigDecimal(0)
     }
-    return this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
+    return try {
+      this.toBigDecimal().setScale(3, RoundingMode.HALF_UP)
+    } catch (e: NumberFormatException) {
+      Sentry.captureException(e, "Failed to convert $this to BigDecimal")
+      BigDecimal(0)
+    }
   }
 }
