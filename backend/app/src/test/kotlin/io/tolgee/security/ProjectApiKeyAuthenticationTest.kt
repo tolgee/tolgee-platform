@@ -82,7 +82,8 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
       node("description").isNotNull
     }
 
-    apiKeyService.get(testData.frantasKey.id).lastUsedAt!!.time.assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+    apiKeyService.get(testData.frantasKey.id).lastUsedAt!!.time
+      .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
   }
 
   @Test
