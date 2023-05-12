@@ -28,8 +28,8 @@ Cypress.Commands.add('closestDcy', { prevSubject: true }, (subject, dataCy) => {
   return subject.closest('[data-cy="' + dataCy + '"]');
 });
 
-Cypress.Commands.add('gcy', (dataCy) => {
-  return cy.get('[data-cy="' + dataCy + '"]');
+Cypress.Commands.add('gcy', (dataCy, options) => {
+  return cy.get('[data-cy="' + dataCy + '"]', options);
 });
 
 Cypress.Commands.add('findDcy', { prevSubject: true }, (subject, dataCy) => {
