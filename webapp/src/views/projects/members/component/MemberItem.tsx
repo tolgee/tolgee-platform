@@ -59,7 +59,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const currentUser = useUser();
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
-  const isAdmin = satisfiesPermission('admin');
+  const canEditMembers = satisfiesPermission('members.edit');
   const allLangs = useProjectLanguages();
 
   const isCurrentUser = currentUser?.id === user.id;
@@ -112,7 +112,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           }
           buttonProps={{
             size: 'small',
-            disabled: !isAdmin || isCurrentUser || isOwner,
+            disabled: !canEditMembers || isCurrentUser || isOwner,
           }}
           modalProps={{
             allLangs,
