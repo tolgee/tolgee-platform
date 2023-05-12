@@ -162,6 +162,12 @@ dependencies {
      * EE MODULE
      */
     implementation(project(':ee-app'))
+
+
+    /**
+     * Dev module
+     */
+    implementation(project(':development'))
 }
 
 test {

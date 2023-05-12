@@ -95,6 +95,7 @@ export const CurrentUsage: FC<Props> = ({
           totalQuantity={translationsMax}
           periodEnd={activeSubscription.currentPeriodEnd}
           isPayAsYouGo={isPayAsYouGo}
+          data-cy="billing-actual-used-strings"
         />
         <PlanMetric
           name={
@@ -107,6 +108,7 @@ export const CurrentUsage: FC<Props> = ({
           totalQuantity={Math.round((creditMax || 0) / 100)}
           periodEnd={activeSubscription.currentPeriodEnd}
           isPayAsYouGo={isPayAsYouGo}
+          data-cy="billing-actual-used-monthly-credits"
         />
         <Box gridColumn="1">{t('billing_credits_refill')}</Box>
         <Box gridColumn="2 / -1" data-cy="billing-actual-period">

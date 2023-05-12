@@ -1,8 +1,8 @@
 package io.tolgee.ee.api.v2.controllers
 
-import io.tolgee.component.PublicEnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk

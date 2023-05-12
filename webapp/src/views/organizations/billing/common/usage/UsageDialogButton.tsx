@@ -21,7 +21,11 @@ export const UsageDialogButton: FC<{
       <Tooltip
         title={t('active-plan-estimated-costs-show-usage-button-tooltip')}
       >
-        <IconButton size="small" onClick={onOpen}>
+        <IconButton
+          size="small"
+          onClick={onOpen}
+          data-cy="billing-estimated-costs-open-button"
+        >
           <DataUsage />
         </IconButton>
       </Tooltip>

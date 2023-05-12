@@ -392,3 +392,11 @@ export const setRecaptchaSiteKey = (siteKey: string) => {
 export const setRecaptchaSecretKey = (secretKey: string) => {
   setProperty('recaptcha.secretKey', secretKey);
 };
+
+export const forceDate = (timestamp: number) => {
+  internalFetch(`time/${timestamp}`, { method: 'PUT' });
+};
+
+export const releaseForcedDate = () => {
+  internalFetch(`time`, { method: 'DELETE' });
+};

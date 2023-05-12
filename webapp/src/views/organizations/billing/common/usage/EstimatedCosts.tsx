@@ -26,7 +26,11 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = ({
   const usage = useUsage(open);
 
   return (
-    <Box display="flex" justifyContent="right">
+    <Box
+      display="flex"
+      justifyContent="right"
+      data-cy="billing-estimated-costs"
+    >
       <Box>
         <Tooltip title={t('active-plan-estimated-costs-description')}>
           <Typography variant="caption">
