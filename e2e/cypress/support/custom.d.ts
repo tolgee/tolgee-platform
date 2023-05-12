@@ -5,7 +5,10 @@ declare namespace Cypress {
   interface Chainable<Subject = any> {
     closestDcy(dataCy: Value): Chainable;
 
-    gcy(dataCy: Value): Chainable;
+    gcy(
+      dataCy: Value,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    ): Chainable;
 
     findDcy(dataCy: Value): Chainable;
 
