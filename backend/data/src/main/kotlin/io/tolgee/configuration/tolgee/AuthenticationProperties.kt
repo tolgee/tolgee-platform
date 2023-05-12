@@ -4,6 +4,7 @@
 
 package io.tolgee.configuration.tolgee
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -12,6 +13,11 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
 class AuthenticationProperties(
   @E2eRuntimeMutable
+  @Schema(
+    description = "Whether authentication is enabled. If not, Tolgee will create implicit user on first startup and will automatically log\n" +
+      "you in. No login page shows, no permissions are managed. This is very useful, when you want to use Tolgee on your local\n" +
+      "machine, or you just want to test it."
+  )
   var enabled: Boolean = true,
   var jwtSecret: String? = null,
   var jwtExpiration: Int = 604800000,
