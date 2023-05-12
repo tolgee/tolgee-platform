@@ -23,6 +23,7 @@
     "date-fns": "2.29.2",
     "diff": "^5.0.0",
     "formik": "^2.2.9",
+    "ga-gtag": "^1.1.7",
     "intl-messageformat": "^9.8.1",
     "notistack": "^2.0.4",
     "prism-react-renderer": "1.2.1",
