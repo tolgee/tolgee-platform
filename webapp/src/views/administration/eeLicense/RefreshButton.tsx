@@ -1,7 +1,9 @@
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useTranslate, T } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
+import { Box, IconButton, Tooltip } from '@mui/material';
+import { Refresh } from '@mui/icons-material';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const RefreshButton = () => {
   const { t } = useTranslate();
@@ -24,14 +26,24 @@ export const RefreshButton = () => {
     );
   }
 
+  useGlobalLoading(refreshMutation.isLoading);
+
   return (
-    <LoadingButton
-      onClick={onClick}
-      loading={refreshMutation.isLoading}
-      variant="outlined"
-      size="small"
+    <Box
+      gridArea="estimated-costs"
+      display="grid"
+      justifyContent="flex-end"
+      alignItems="flex-start"
     >
-      {t('ee-license-refresh-tooltip')}
-    </LoadingButton>
+      <Tooltip title={t('ee-license-refresh-tooltip')}>
+        <IconButton
+          onClick={onClick}
+          disabled={refreshMutation.isLoading}
+          size="small"
+        >
+          <Refresh />
+        </IconButton>
+      </Tooltip>
+    </Box>
   );
 };
