@@ -48,7 +48,7 @@ export const ProjectMembersView: FunctionComponent = () => {
 
   const { satisfiesPermission } = useProjectPermissions();
 
-  const isAdmin = satisfiesPermission('admin');
+  const canEditMembers = satisfiesPermission('members.edit');
 
   const translatePermission = usePermissionTranslation();
 
@@ -91,7 +91,7 @@ export const ProjectMembersView: FunctionComponent = () => {
           alignItems="center"
         >
           <Typography variant="h6">{t('invitations_title')}</Typography>
-          {isAdmin && (
+          {canEditMembers && (
             <Button
               color="primary"
               variant="contained"

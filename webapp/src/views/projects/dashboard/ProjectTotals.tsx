@@ -189,16 +189,15 @@ export const ProjectTotals: React.FC<{
 
   const { satisfiesPermission } = useProjectPermissions();
 
-  const isAdmin = satisfiesPermission('admin');
   const canViewMembers = satisfiesPermission('members.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewKeys = satisfiesPermission('keys.view');
+  const canEditMembers = satisfiesPermission('members.edit');
 
   const tagsPresent = Boolean(stats.tagCount);
   const tagsClickable = tagsPresent && canViewKeys;
 
   const membersAccessible = config.authentication && canViewMembers;
-  const membersEditable = membersAccessible && isAdmin;
 
   return (
     <>
@@ -303,7 +302,7 @@ export const ProjectTotals: React.FC<{
               {t('project_dashboard_member_count', 'Members')}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {membersEditable && (
+          {canEditMembers && (
             <StyledTileEdit>
               <Edit fontSize="small" />
             </StyledTileEdit>

@@ -23,7 +23,7 @@ const RevokePermissionsButton = (props: {
   const project = useProject();
   const currentUser = useUser();
   const { satisfiesPermission } = useProjectPermissions();
-  const isAdmin = satisfiesPermission('admin');
+  const canEditMembers = satisfiesPermission('members.edit');
 
   const { leave, isLeaving } = useLeaveProject();
 
@@ -76,7 +76,7 @@ const RevokePermissionsButton = (props: {
     isDisabled = true;
   } else if (currentUser!.id === props.user.id) {
     tooltip = <T keyName="project_leave_button" />;
-  } else if (!isAdmin) {
+  } else if (!canEditMembers) {
     tooltip = <T keyName="operation_not_permitted_error" />;
     isDisabled = true;
   }
