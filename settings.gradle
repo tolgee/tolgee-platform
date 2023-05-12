@@ -81,3 +81,6 @@ project(':ee-app').projectDir = new File('ee/backend/app')
 
 include ':ee-test'
 project(':ee-test').projectDir = new File('ee/backend/tests')
+
+include ':development'
+project(':development').projectDir = new File('backend/development')

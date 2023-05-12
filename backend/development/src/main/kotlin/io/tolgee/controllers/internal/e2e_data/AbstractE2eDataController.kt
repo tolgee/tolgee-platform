@@ -48,6 +48,9 @@ abstract class AbstractE2eDataController {
       },
       users = data.data.userAccounts.map {
         StandardTestDataResult.UserModel(name = it.self.name, username = it.self.username, id = it.self.id)
+      },
+      organizations = data.data.organizations.map {
+        StandardTestDataResult.OrganizationModel(id = it.self.id, name = it.self.name, slug = it.self.slug)
       }
     )
   }
@@ -72,7 +75,8 @@ abstract class AbstractE2eDataController {
 
   data class StandardTestDataResult(
     val projects: List<ProjectModel>,
-    val users: List<UserModel>
+    val users: List<UserModel>,
+    val organizations: List<OrganizationModel>
   ) {
     data class UserModel(
       val name: String,
@@ -83,6 +87,12 @@ abstract class AbstractE2eDataController {
     data class ProjectModel(
       val name: String,
       val id: Long
+    )
+
+    data class OrganizationModel(
+      val id: Long,
+      val slug: String,
+      val name: String
     )
   }
 }
