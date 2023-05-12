@@ -66,7 +66,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
   const { satisfiesPermission } = useProjectPermissions();
-  const isAdmin = satisfiesPermission('admin');
+  const canEditMembers = satisfiesPermission('members.edit');
 
   const translatePermission = usePermissionTranslation();
 
@@ -126,7 +126,11 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           </IconButton>
         </Tooltip>
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
-          <IconButton size="small" onClick={handleCancel} disabled={!isAdmin}>
+          <IconButton
+            size="small"
+            onClick={handleCancel}
+            disabled={!canEditMembers}
+          >
             <Clear />
           </IconButton>
         </Tooltip>
