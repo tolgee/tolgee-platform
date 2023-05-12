@@ -17,7 +17,7 @@ export const UsageTable: FC<{
   const { t } = useTranslate();
 
   return (
-    <Table>
+    <Table data-cy="billing-usage-table">
       <UsageTableHead />
       <TableBody>
         <SubscriptionRow price={usageData?.subscriptionPrice} />

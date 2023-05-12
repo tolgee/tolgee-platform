@@ -38,6 +38,10 @@ declare namespace DataCy {
         "billing-actual-extra-credits" |
         "billing-actual-period" |
         "billing-actual-period-end" |
+        "billing-actual-used-monthly-credits" |
+        "billing-actual-used-strings" |
+        "billing-estimated-costs" |
+        "billing-estimated-costs-open-button" |
         "billing-extra-credits-buy" |
         "billing-limit-exceeded-popover" |
         "billing-period-switch" |
@@ -49,6 +53,7 @@ declare namespace DataCy {
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
+        "billing-usage-table" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |

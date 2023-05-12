@@ -1,4 +1,4 @@
-package io.tolgee.component
+package io.tolgee.ee.component
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature

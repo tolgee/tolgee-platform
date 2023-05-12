@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2020. Tolgee
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+    id "kotlin-jpa"
+    id "org.jetbrains.kotlin.kapt"
+    id "kotlin-allopen"
+}
+
+group = 'io.tolgee'
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    ktlint
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: "org.jetbrains.kotlin.plugin.jpa"
+apply plugin: "kotlin-allopen"
+apply plugin: "kotlin-kapt"
+
+repositories {
+    mavenCentral()
+}
+
+kotlin {
+    jvmToolchain(11)
+}
+
+idea {
+    module {
+        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+    }
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
+    annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
+}
+
+dependencies {
+    /**
+     * SPRING
+     */
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api "org.springframework.boot:spring-boot-configuration-processor"
+    api project(":data")
+    api project(":ee-app")
+    api libs.springDocOpenApiDataRest
+    api libs.springDocOpenApiWebMvcCore
+    implementation libs.kotlinReflect
+}
+
+
+project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+
+sourceSets {
+    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+tasks.findByName("jar").enabled(true)
+tasks.findByName("bootJar").enabled(false)
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
