@@ -29,7 +29,12 @@ export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} size="small" color="primary">
+      <Button
+        onClick={() => setOpen(true)}
+        size="small"
+        color="primary"
+        variant="contained"
+      >
         <T keyName="active-plan-license-key-button" />
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
