@@ -1,3 +1,12 @@
+## [3.13.2](https://github.com/tolgee/tolgee-platform/compare/v3.13.1...v3.13.2) (2023-05-12)
+
+
+### Bug Fixes
+
+* "Character I is neither a decimal digit number" (Closes [#1690](https://github.com/tolgee/tolgee-platform/issues/1690)) ([#1710](https://github.com/tolgee/tolgee-platform/issues/1710)) ([bd9fe87](https://github.com/tolgee/tolgee-platform/commit/bd9fe877ce18f1d5a6b9a0a1c7afb47077b2bb00))
+* Google gtag ([ad653eb](https://github.com/tolgee/tolgee-platform/commit/ad653eb51bca6ef0b73278321f1f1716a369560f))
+* Google gtag ([82a6bda](https://github.com/tolgee/tolgee-platform/commit/82a6bda4dba71cea4e0274c845d8067392e651b3))
+
 ## [3.13.1](https://github.com/tolgee/tolgee-platform/compare/v3.13.0...v3.13.1) (2023-05-09)
 
 
