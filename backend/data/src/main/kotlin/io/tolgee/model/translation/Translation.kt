@@ -34,7 +34,7 @@ import javax.validation.constraints.NotNull
   ]
 )
 @ActivityLoggedEntity
-@EntityListeners(Translation.Companion.UpdateStatsListener::class)
+@EntityListeners(Translation.Companion.UpdateStatsListener::class, Translation.Companion.StateListener::class)
 @ActivityEntityDescribingPaths(paths = ["key", "language"])
 class Translation(
   @Column(columnDefinition = "text")
@@ -93,9 +93,19 @@ class Translation(
     class UpdateStatsListener {
       @PrePersist
       @PreUpdate
-      fun preRemove(translation: Translation) {
+      fun preSave(translation: Translation) {
         translation.characterCount = TranslationStatsUtil.getCharacterCount(translation.text)
         translation.wordCount = TranslationStatsUtil.getWordCount(translation.text, translation.language.tag)
+      }
+    }
+
+    class StateListener {
+      @PrePersist
+      @PreUpdate
+      fun preSave(translation: Translation) {
+        if (!translation.text.isNullOrEmpty() && translation.state == TranslationState.UNTRANSLATED) {
+          translation.state = TranslationState.TRANSLATED
+        }
       }
     }
   }
