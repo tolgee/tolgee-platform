@@ -27,8 +27,8 @@ export const ReleaseKeyButton = () => {
     <LoadingButton
       onClick={onClick}
       loading={releaseKey.isLoading}
-      variant="outlined"
       size="small"
+      variant="outlined"
       color="error"
     >
       <T keyName="ee-license-release-key-button" />
