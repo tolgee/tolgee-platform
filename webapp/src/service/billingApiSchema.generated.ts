@@ -113,6 +113,7 @@ export interface components {
         | "BACKUP_CONFIGURATION"
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -149,6 +150,7 @@ export interface components {
         | "BACKUP_CONFIGURATION"
         | "TEAM_TRAINING"
         | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
