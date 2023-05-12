@@ -21,7 +21,9 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
     ? usage.currentTranslationSlots
     : usage.currentTranslations;
 
-  const translationsMax = usage.includedTranslations;
+  const translationsMax = usesSlots
+    ? usage.includedTranslationSlots
+    : usage.includedTranslations;
 
   const translationsLimit = usesSlots
     ? usage.translationSlotsLimit
