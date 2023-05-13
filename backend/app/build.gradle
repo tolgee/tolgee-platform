@@ -234,3 +234,7 @@ sourceSets {
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
+
+bootJar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
