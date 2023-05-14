@@ -62,7 +62,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         left join ua.permissions pp
         left join pp.project p
         left join p.organizationOwner o on o.id = :organizationId
-        where (p is not null or mr is not null) and ((lower(ua.name)
+        where (o is not null or mr is not null) and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%')) 
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
