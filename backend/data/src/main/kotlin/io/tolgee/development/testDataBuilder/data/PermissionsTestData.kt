@@ -103,6 +103,24 @@ class PermissionsTestData {
     return me.self
   }
 
+  fun addUnrelatedUsers() {
+    val user = root.addUserAccount {
+      username = "unrelated@ur.com"
+    }
+
+    root.addUserAccount { username = "another@an.com" }
+
+    root.addProject {
+      name = "unrelated"
+      organizationOwner = user.defaultOrganizationBuilder.self
+    }.build {
+      addPermission {
+        this.user = user.self
+        type = ProjectPermissionType.VIEW
+      }
+    }
+  }
+
   private fun getLanguagesByTags(tags: List<String>?) = tags?.map { tag ->
     projectBuilder.data.languages.find { it.self.tag == tag }?.self ?: throw NotFoundException(
       Message.LANGUAGE_NOT_FOUND
