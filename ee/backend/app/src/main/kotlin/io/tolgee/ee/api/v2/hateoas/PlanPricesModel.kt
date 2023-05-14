@@ -9,8 +9,8 @@ import java.math.BigDecimal
 @Relation(collectionRelation = "prices", itemRelation = "prices")
 open class PlanPricesModel(
   val perSeat: BigDecimal = BigDecimal.ZERO,
-  var perThousandTranslations: BigDecimal = BigDecimal.ZERO,
-  val perThousandMtCredits: BigDecimal = BigDecimal.ZERO,
+  var perThousandTranslations: BigDecimal? = BigDecimal.ZERO,
+  val perThousandMtCredits: BigDecimal? = BigDecimal.ZERO,
   val subscriptionMonthly: BigDecimal = BigDecimal.ZERO,
   val subscriptionYearly: BigDecimal = BigDecimal.ZERO,
 ) : RepresentationModel<PlanPricesModel>(), Serializable
