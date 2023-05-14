@@ -45,6 +45,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   fun `it returns also users with direct permissions on some project`() {
     val testData = PermissionsTestData()
     testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
+    testData.addUnrelatedUsers()
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
 

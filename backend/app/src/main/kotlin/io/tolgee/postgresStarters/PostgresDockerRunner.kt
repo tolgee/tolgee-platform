@@ -33,7 +33,6 @@ class PostgresDockerRunner(
       ),
       command = "postgres -c max_connections=10000",
       timeout = 300000,
-      logStdOut = LoggerFactory.getLogger(DockerContainerRunner::class.java)::info
     ).also {
       logger.info("Starting Postgres Docker container")
       it.run()
