@@ -64,8 +64,9 @@ tolgee:
       secretKey: aaa
   billing:
     enabled: false
-#logging:
-#  level:
+logging:
+  level:
+    io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE
