@@ -44,7 +44,10 @@ export const PlanLicenseKey = ({ licenseKey, defaultOpen }: Props) => {
         <DialogContent>
           <ClipboardCopyInput
             value={licenseKey}
-            inputProps={{ style: { width: 420 } }}
+            inputProps={{
+              style: { width: 420 },
+              'data-cy': 'active-plan-license-key-input',
+            }}
           />
         </DialogContent>
         <DialogActions>

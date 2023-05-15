@@ -42,7 +42,7 @@ export const SelfHostedEePlan = (props: {
 
   return (
     <>
-      <Plan>
+      <Plan data-cy="billing-self-hosted-ee-plan">
         <PlanContent>
           <PlanTitle title={props.plan.name}></PlanTitle>
 
@@ -58,6 +58,7 @@ export const SelfHostedEePlan = (props: {
           <PlanPrice prices={props.plan.prices} period={props.period} />
 
           <PlanActionButton
+            data-cy="billing-self-hosted-ee-plan-subscribe-button"
             loading={subscribeMutation.isLoading}
             onClick={() =>
               subscribeMutation.mutate({

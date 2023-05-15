@@ -89,7 +89,8 @@ export const UserMenu: React.FC = () => {
 
   const showBilling =
     config.billing.enabled &&
-    preferredOrganization?.currentUserRole === 'OWNER';
+    (preferredOrganization?.currentUserRole === 'OWNER' ||
+      user.globalServerRole === 'ADMIN');
 
   const getOrganizationMenuItems = () =>
     [

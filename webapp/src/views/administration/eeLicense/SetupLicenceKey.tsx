@@ -87,6 +87,7 @@ export const SetupLicenceKey = () => {
         size="small"
         label={t('ee_licence_key_input_label')}
         name="licenseKey"
+        inputProps={{ 'data-cy': 'administration-ee-license-key-input' }}
       />
     </StandardForm>
   );
