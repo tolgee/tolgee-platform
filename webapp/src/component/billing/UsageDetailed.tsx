@@ -2,14 +2,9 @@ import { Box, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { BillingProgress } from './BillingProgress';
+import { ProgressData } from './utils';
 
-type Props = {
-  translationsUsed: number;
-  translationsMax: number;
-  creditUsed: number;
-  creditMax: number;
-  isPayAsYouGo: boolean;
-};
+type Props = ProgressData;
 
 export const UsageDetailed: React.FC<Props> = ({
   translationsUsed,
@@ -17,18 +12,29 @@ export const UsageDetailed: React.FC<Props> = ({
   creditUsed,
   creditMax,
   isPayAsYouGo,
+  usesSlots,
 }) => {
   return (
     <Box display="grid" gap={1}>
       <Box>
         <Typography variant="caption">
-          <T
-            keyName="dashboard_billing_used_strings"
-            params={{
-              available: Math.round(translationsUsed),
-              max: Math.round(translationsMax),
-            }}
-          />
+          {usesSlots ? (
+            <T
+              keyName="dashboard_billing_used_translations"
+              params={{
+                available: Math.round(translationsUsed),
+                max: Math.round(translationsMax),
+              }}
+            />
+          ) : (
+            <T
+              keyName="dashboard_billing_used_strings"
+              params={{
+                available: Math.round(translationsUsed),
+                max: Math.round(translationsMax),
+              }}
+            />
+          )}
         </Typography>
         <BillingProgress
           value={translationsUsed}

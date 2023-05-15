@@ -34,7 +34,6 @@ type Props = {
 };
 
 export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
-  const isPayAsYouGo = plan.type === 'PAY_AS_YOU_GO';
   const usesSlots = plan.type === 'SLOTS_FIXED';
   const formatNumber = useNumberFormatter();
   return (
@@ -48,8 +47,10 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
           )}
         </StyledNumber>
         <StyledName>
-          {isPayAsYouGo ? (
+          {plan.type === 'PAY_AS_YOU_GO' ? (
             <T keyName="billing_plan_strings_included" />
+          ) : plan.type === 'SLOTS_FIXED' ? (
+            <T keyName="billing_plan_translation_limit" />
           ) : (
             <T keyName="billing_plan_strings_limit" />
           )}
