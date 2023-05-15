@@ -67,7 +67,7 @@ export const Invoices: FC = () => {
           <span>{t('billing_customer_invoices_title')}</span>
         </StyledBillingSectionHeader>
       </StyledBillingSectionTitle>
-      <StyledContainer>
+      <StyledContainer data-cy="billing-invoices-list">
         <PaginatedHateoasList
           onPageChange={(p) => setPage(p)}
           listComponent={StyledGrid}
@@ -79,7 +79,9 @@ export const Invoices: FC = () => {
           }
           renderItem={(item) => (
             <>
-              <StyledItem>{item.number}</StyledItem>
+              <StyledItem data-cy="billing-invoice-item-number">
+                {item.number}
+              </StyledItem>
               <StyledItem>{formatDate(item.createdAt)}</StyledItem>
               <StyledItem>{formatPrice(item.total)}</StyledItem>
               <StyledItem>

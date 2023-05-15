@@ -19,7 +19,7 @@ const StyledWrapper = styled('div')`
   }
 `;
 
-export const AdministrationEeLicense = () => {
+export const AdministrationEeLicenseView = () => {
   const infoLoadable = useApiQuery({
     url: '/v2/ee-license/info',
     method: 'get',
