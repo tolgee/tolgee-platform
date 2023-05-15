@@ -45,6 +45,7 @@ export const InvoiceUsage: FC<{
             <IconButton
               size="small"
               onClick={() => setOpen(true)}
+              data-cy="billing-invoice-usage-button"
               aria-label={t('billing_invoices_show_usage_button')}
             >
               <Tooltip title={t('billing_invoices_show_usage_button')}>
