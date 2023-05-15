@@ -58,6 +58,7 @@ export const CurrentUsage: FC<Props> = ({
     creditMax,
     creditUsed,
     isPayAsYouGo,
+    usesSlots,
   } = getProgressData(usage);
 
   return (
@@ -90,7 +91,11 @@ export const CurrentUsage: FC<Props> = ({
       </StyledHeader>
       <StyledMetrics>
         <PlanMetric
-          name={t('billing_actual_used_strings')}
+          name={
+            usesSlots
+              ? t('billing_actual_used_translations')
+              : t('billing_actual_used_strings')
+          }
           currentQuantity={translationsUsed}
           totalQuantity={translationsMax}
           periodEnd={activeSubscription.currentPeriodEnd}
