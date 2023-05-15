@@ -49,13 +49,13 @@ class CurrentDateProvider(
           entityManager.remove(entity)
         }
       } ?: let {
-        entityManager.persist(
-          ForcedServerDateTime().apply {
-            forcedDate?.let { date ->
+        forcedDate?.let { date ->
+          entityManager.persist(
+            ForcedServerDateTime().apply {
               time = date
             }
-          }
-        )
+          )
+        }
       }
     }
   }
