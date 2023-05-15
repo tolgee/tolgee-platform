@@ -22,7 +22,7 @@ export const ActiveEeLicense = ({ info }: Props) => {
   const { t } = useTranslate();
 
   return (
-    <Plan>
+    <Plan data-cy="self-hosted-ee-active-plan">
       <PlanContent>
         <ActivePlanTitle name={info.name} status={info.status} />
         <RefreshButton />

@@ -30,6 +30,7 @@ export const ReleaseKeyButton = () => {
       size="small"
       variant="outlined"
       color="error"
+      data-cy="administration-ee-license-release-key-button"
     >
       <T keyName="ee-license-release-key-button" />
     </LoadingButton>

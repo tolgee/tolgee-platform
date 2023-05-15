@@ -32,6 +32,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -65,7 +66,7 @@ class TestDataService(
   private val userPreferencesService: UserPreferencesService,
   private val languageStatsService: LanguageStatsService,
   private val patService: PatService,
-  private val namespaceService: NamespaceService
+  private val namespaceService: NamespaceService,
 ) : Logging {
 
   @Transactional
@@ -114,7 +115,14 @@ class TestDataService(
     builder.data.organizations.forEach { organizationBuilder ->
       organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
     }
-    additionalTestDataSavers.forEach { it.clean(builder) }
+
+    additionalTestDataSavers.forEach {
+      tryUntilItDoesntBreakConstraint {
+        executeInNewTransaction(transactionManager) {
+          it.clean(builder)
+        }
+      }
+    }
   }
 
   private fun updateLanguageStats(builder: TestDataBuilder) {

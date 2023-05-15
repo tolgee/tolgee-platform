@@ -5,7 +5,7 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
-import { AdministrationEeLicense } from './AdministrationEeLicense';
+import { AdministrationEeLicenseView } from './AdministrationEeLicenseView';
 
 export const AdministrationView = () => {
   const [search, setSearch] = useState('');
@@ -20,7 +20,7 @@ export const AdministrationView = () => {
           <AdministrationUsers search={search} setSearch={setSearch} />
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.build()}>
-          <AdministrationEeLicense />
+          <AdministrationEeLicenseView />
         </PrivateRoute>
       </Switch>
     </>

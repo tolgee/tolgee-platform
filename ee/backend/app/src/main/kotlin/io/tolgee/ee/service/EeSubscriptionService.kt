@@ -203,7 +203,16 @@ class EeSubscriptionService(
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
       val seats = userAccountService.countAllEnabled()
-      reportUsageRemote(subscription, seats)
+      try {
+        reportUsageRemote(subscription, seats)
+      } catch (e: HttpClientErrorException.NotFound) {
+        val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
+        if (!licenceKeyNotFound) {
+          throw e
+        }
+        subscription.status = SubscriptionStatus.ERROR
+        eeSubscriptionRepository.save(subscription)
+      }
     }
   }
 

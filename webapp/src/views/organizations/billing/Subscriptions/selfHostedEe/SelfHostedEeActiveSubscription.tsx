@@ -41,6 +41,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
       sx={(theme) => ({
         border: `1px solid #c39dae`,
       })}
+      data-cy="self-hosted-ee-active-plan"
     >
       <PlanContent>
         {isNew && <PlanSubtitle>{t('billing_subscription_new')}</PlanSubtitle>}
