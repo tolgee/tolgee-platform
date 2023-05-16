@@ -83,13 +83,6 @@ export const Credits: FC = () => {
     return getPossibleValues(prices);
   }, [pricesLoadable?.data?._embedded?.prices]);
 
-  const formatValue = (value) =>
-    t({
-      key: 'billing_buy_more_mt_slider_value',
-      defaultValue: '{amount} Credits',
-      params: { amount: value },
-    });
-
   const formatPrice = useMoneyFormatter();
   const formatNumber = useNumberFormatter();
 
@@ -122,7 +115,7 @@ export const Credits: FC = () => {
               step={1}
               max={sliderPossibleValues.length - 1}
               scale={(value) => sliderPossibleValues[value].totalAmount}
-              getAriaValueText={formatValue}
+              getAriaValueText={(value) => formatPrice(value)}
               onChange={(_, value) => setSliderValue(value as number)}
               aria-labelledby="non-linear-slider"
             />
