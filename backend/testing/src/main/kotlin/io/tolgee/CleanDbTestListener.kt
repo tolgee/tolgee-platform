@@ -1,5 +1,8 @@
 package io.tolgee
 
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
@@ -29,12 +32,21 @@ class CleanDbTestListener : TestExecutionListener {
       var i = 0
       while (true) {
         try {
-          doClean(testContext)
-          break
-        } catch (e: PSQLException) {
-          if (i > 2) {
-            throw e
+          runBlocking {
+            withTimeout(3000) {
+              doClean(testContext)
+            }
           }
+          break
+        } catch (e: Exception) {
+          when (e) {
+            is PSQLException, is TimeoutCancellationException -> {
+              if (i > 5) {
+                throw e
+              }
+            }
+          }
+
           i++
         }
       }
