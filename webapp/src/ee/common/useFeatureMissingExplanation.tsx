@@ -59,7 +59,7 @@ export function useFeatureMissingExplanation() {
   if (billingEnabled) {
     return {
       message: t('feature-explanation-plan-not-sufficient'),
-      actionTitle: ifOrgOwner(t('feature-explanation-check-billing')),
+      actionTitle: ifOrgOwner(t('feature-explanation-upgrade-subscription')),
       link: ifOrgOwner(LINKS.GO_TO_CLOUD_BILLING.build()),
     };
   }
