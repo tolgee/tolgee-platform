@@ -14,6 +14,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UploadedImage
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace
@@ -23,6 +24,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
 import org.springframework.context.ApplicationContext
@@ -43,6 +45,7 @@ class ResolvingKeyImporter(
   private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
   private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
+  private val securityService = applicationContext.getBean(SecurityService::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
   private var importedKeys: List<Key> = emptyList()
@@ -55,6 +58,8 @@ class ResolvingKeyImporter(
   }
 
   private fun tryImport(): List<Key> {
+    checkLanguagePermissions(keysToImport)
+
     return keysToImport.map keys@{ keyToImport ->
       val key = getOrCreateKey(keyToImport)
 
@@ -93,7 +98,7 @@ class ResolvingKeyImporter(
     }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkPermissions(images)
+    checkImageUploadermissions(images)
 
     val createdScreenshots = images.associate {
       it.id to screenshotService.saveScreenshot(it)
@@ -140,12 +145,23 @@ class ResolvingKeyImporter(
       }.toMap()
   }
 
-  private fun checkPermissions(images: List<UploadedImage>) {
+  private fun checkImageUploadermissions(images: List<UploadedImage>) {
+    if (images.isNotEmpty()) {
+      securityService.checkScreenshotsUploadPermission(projectEntity.id)
+    }
     images.forEach { image ->
       if (authenticationFacade.userAccount.id != image.userAccount.id) {
         throw PermissionException()
       }
     }
+  }
+
+  private fun checkLanguagePermissions(keys: List<ImportKeysResolvableItemDto>) {
+    val languageTags = keys.flatMap { it.translations.keys }
+    if (languageTags.isEmpty()) {
+      return
+    }
+    securityService.checkLanguageTranslatePermissionByTag(projectEntity.id, languageTags)
   }
 
   private fun checkErrors() {
@@ -190,6 +206,7 @@ class ResolvingKeyImporter(
 
   private fun getOrCreateKey(keyToImport: ImportKeysResolvableItemDto) =
     existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
+      securityService.checkProjectPermission(projectEntity.id, Scope.KEYS_CREATE)
       keyService.createWithoutExistenceCheck(
         name = keyToImport.name,
         namespace = keyToImport.namespace,

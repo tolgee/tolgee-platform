@@ -156,8 +156,9 @@ class KeyController(
   }
 
   @PostMapping("/import")
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @AccessWithApiKey
+  // language translate permissions are handled in service
+  @AccessWithProjectPermission(Scope.KEYS_CREATE)
   @Operation(
     summary = "Imports new keys with translations. If key already exists, its translations and tags" +
       " are not updated."
@@ -174,9 +175,10 @@ class KeyController(
 
   @PostMapping("/import-resolvable")
   @AccessWithApiKey
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
   @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
   @RequestActivity(ActivityType.IMPORT)
+  // permissions are handled in service
+  @AccessWithAnyProjectPermission
   fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
     val uploadedImageToScreenshotMap =
       keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
@@ -207,13 +209,20 @@ class KeyController(
     languageTag: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
+    languageTag?.let {
+      securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(languageTag))
+    }
+    projectHolder.projectEntity.baseLanguage?.let {
+      securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
+    }
     val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
   @PostMapping("/info")
   @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.KEYS_VIEW)
+  // it's checked manually in the code
+  @AccessWithAnyProjectPermission
   @Operation(
     summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
       "If key is not found, it's not included in the response."
@@ -223,6 +232,9 @@ class KeyController(
     @Valid
     dto: GetKeysRequestDto,
   ): CollectionModel<KeyWithDataModel> {
+    arrayOf(Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW).forEach {
+      securityService.checkProjectPermission(projectHolder.project.id, it)
+    }
     val result = keyService.getKeysInfo(dto, projectHolder.project.id)
     return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }

@@ -12,18 +12,12 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
-import io.tolgee.model.key.KeyMeta_
-import io.tolgee.model.key.Key_
-import io.tolgee.model.key.Namespace
-import io.tolgee.model.key.Namespace_
 import io.tolgee.repository.KeyRepository
-import io.tolgee.service.LanguageService
+import io.tolgee.service.key.utils.KeyInfoProvider
+import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.util.equalNullable
-import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.setSimilarityLimit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -34,9 +28,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.persistence.EntityManager
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
 
 @Service
 class KeyService(
@@ -45,7 +36,6 @@ class KeyService(
   private val keyMetaService: KeyMetaService,
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
-  private val languageService: LanguageService,
   private val applicationContext: ApplicationContext,
   private val entityManager: EntityManager
 ) {
@@ -221,48 +211,7 @@ class KeyService(
 
   @Transactional
   fun importKeys(keys: List<ImportKeysItemDto>, project: Project) {
-    val existing = this.getAll(project.id)
-      .associateBy { ((it.namespace?.name to it.name)) }
-      .toMutableMap()
-    val namespaces = mutableMapOf<String, Namespace>()
-    namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
-    val languageTags = keys.flatMap { it.translations.keys }.toSet()
-    val languages = languageService.findByTags(languageTags, project.id).map { it.tag to it }.toMap()
-
-    val toTag = mutableMapOf<Key, List<String>>()
-
-    keys.forEach { keyDto ->
-      val safeNamespace = getSafeNamespace(keyDto.namespace)
-      if (!existing.containsKey(safeNamespace to keyDto.name)) {
-        val key = Key(
-          name = keyDto.name,
-          project = project
-        ).apply {
-          if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
-            val ns = namespaceService.create(safeNamespace, project.id)
-            if (ns != null) {
-              namespaces[safeNamespace] = ns
-            }
-          }
-          this.namespace = namespaces[safeNamespace]
-        }
-        save(key)
-        keyDto.translations.entries.forEach { (languageTag, value) ->
-          languages[languageTag]?.let { language ->
-            translationService.setTranslation(key, language, value)
-          }
-        }
-        existing[safeNamespace to keyDto.name] = key
-
-        if (!keyDto.tags.isNullOrEmpty()) {
-          existing[safeNamespace to keyDto.name]?.let { key ->
-            toTag[key] = keyDto.tags
-          }
-        }
-      }
-    }
-
-    tagService.tagKeys(toTag)
+    KeysImporter(applicationContext, keys, project).import()
   }
 
   @Transactional
@@ -288,37 +237,7 @@ class KeyService(
 
   @Suppress("UNCHECKED_CAST")
   fun getKeysInfo(dto: GetKeysRequestDto, projectId: Long): List<Pair<Key, List<Screenshot>>> {
-    val cb: CriteriaBuilder = entityManager.criteriaBuilder
-    val query = cb.createQuery(Key::class.java)
-    val root = query.from(Key::class.java)
-    val project = root.join(Key_.project)
-    project.on(cb.equal(project.get(Project_.id), projectId))
-    val namespace = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
-    val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
-    keyMeta.fetch(KeyMeta_.tags, JoinType.LEFT)
-    val predicates = dto.keys.map { key ->
-      cb.and(
-        cb.equal(root.get(Key_.name), key.name),
-        cb.equalNullable(namespace.get(Namespace_.name), key.namespace)
-      )
-    }
-
-    val keyPredicates = cb.or(*predicates.toTypedArray())
-
-    query.where(keyPredicates)
-    query.orderBy(cb.asc(namespace.get(Namespace_.name)), cb.asc(root.get(Key_.name)))
-
-    val result = entityManager.createQuery(query).resultList
-    val screenshots = screenshotService.getScreenshotsForKeys(result.map { it.id })
-
-    val translations = translationService.getForKeys(result.map { it.id }, dto.languageTags)
-      .groupBy { it.key.id }
-
-    result.map {
-      it.translations = translations[it.id]?.toMutableList() ?: mutableListOf()
-    }
-
-    return result.map { it to (screenshots[it.id] ?: listOf()) }.toList()
+    return KeyInfoProvider(applicationContext, projectId, dto).get()
   }
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
