@@ -1,11 +1,17 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Screenshot
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 
 class ResolvableImportTestData : BaseTestData() {
 
   lateinit var key1and2Screenshot: Screenshot
   lateinit var key2Screenshot: Screenshot
+  lateinit var enOnlyUser: UserAccount
+  lateinit var viewOnlyUser: UserAccount
+  lateinit var keyCreateOnlyUser: UserAccount
+  lateinit var translateOnlyUser: UserAccount
 
   init {
     projectBuilder.apply {
@@ -29,6 +35,52 @@ class ResolvableImportTestData : BaseTestData() {
       addKey("test") {
         addTranslation("en", "existing translation")
       }
+    }
+
+    root.addUserAccount {
+      username = "franta"
+      enOnlyUser = this
+    }
+
+    projectBuilder.addPermission {
+      user = enOnlyUser
+      scopes = arrayOf(Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT)
+      translateLanguages = mutableSetOf(englishLanguage)
+      type = null
+    }
+
+    root.addUserAccount {
+      username = "pavel"
+      viewOnlyUser = this
+    }
+
+    projectBuilder.addPermission {
+      user = viewOnlyUser
+      type = null
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+    }
+
+    root.addUserAccount {
+      username = "kvetos"
+      keyCreateOnlyUser = this
+    }
+
+    projectBuilder.addPermission {
+      user = keyCreateOnlyUser
+      type = null
+      scopes = arrayOf(Scope.KEYS_CREATE)
+    }
+
+    root.addUserAccount {
+      username = "jenik"
+      translateOnlyUser = this
+    }
+
+    projectBuilder.addPermission {
+      user = translateOnlyUser
+      type = null
+      scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
+      translateLanguages = mutableSetOf(englishLanguage)
     }
   }
 }
