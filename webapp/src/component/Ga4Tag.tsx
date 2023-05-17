@@ -1,29 +1,19 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { gtag, install } from 'ga-gtag';
+import TagManager from 'react-gtm-module';
 
 import { useConfig } from 'tg.globalContext/helpers';
-import { AppState } from 'tg.store/index';
-
-export const initGtag = (tagId: string) => {
-  install(tagId);
-  gtag('js', new Date());
-  gtag('config', tagId);
-};
 
 export const Ga4Tag = () => {
   const config = useConfig();
   const tag = config?.ga4Tag;
 
-  const allowPrivate = useSelector(
-    (state: AppState) => state.global.security.allowPrivate
-  );
-
   useEffect(() => {
-    if (tag && allowPrivate) {
-      initGtag(tag!);
+    if (tag) {
+      TagManager.initialize({
+        gtmId: tag,
+      });
     }
-  }, [tag, allowPrivate]);
+  }, [tag]);
 
   return null;
 };
