@@ -22,7 +22,7 @@ export const BillingItem: React.FC<Props> = ({
   return (
     <MenuItem
       component={Link}
-      to={LINKS.ORGANIZATION_BILLING.build({
+      to={LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       })}
       onClick={onClose}
@@ -34,7 +34,7 @@ export const BillingItem: React.FC<Props> = ({
         flexGrow="1"
         alignItems="center"
       >
-        <div>{t('organization_menu_billing')}</div>
+        <div>{t('organization_menu_subscriptions')}</div>
         {progressData && (
           <CircularBillingProgress
             size={22}
