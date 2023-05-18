@@ -72,7 +72,7 @@ class AutoTranslationService(
           }
         }
     } catch (e: OutOfCreditsException) {
-      logger.error(e.toString())
+      logger.debug("Out of credits for primary MT service")
     }
   }
 
