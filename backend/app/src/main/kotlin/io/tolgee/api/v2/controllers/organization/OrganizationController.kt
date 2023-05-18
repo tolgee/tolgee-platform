@@ -304,9 +304,9 @@ class OrganizationController(
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return PublicUsageModel(
       organizationId = organizationId,
-      creditBalance = creditBalances.creditBalance,
-      includedMtCredits = creditBalances.bucketSize,
-      extraCreditBalance = creditBalances.extraCreditBalance,
+      creditBalance = creditBalances.creditBalance / 100,
+      includedMtCredits = creditBalances.bucketSize / 100,
+      extraCreditBalance = creditBalances.extraCreditBalance / 100,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,

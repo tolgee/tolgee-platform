@@ -38,7 +38,7 @@ class MtCreditBucketService(
     val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
     val totalBalance = balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
 
-    if (totalBalance - amount < 0) {
+    if (totalBalance <= 0) {
       throw OutOfCreditsException()
     }
 

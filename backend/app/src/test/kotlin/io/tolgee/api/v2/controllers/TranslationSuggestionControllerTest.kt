@@ -327,9 +327,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     performMtRequestAndExpectAfterBalance(100, 1000)
     performMtRequestAndExpectAfterBalance(0, 200)
+    performMtRequestAndExpectAfterBalance(0, 0)
     performMtRequestAndExpectBadRequest().andAssertThatJson {
       node("params[0]").isEqualTo("0")
-      node("params[1]").isEqualTo("200")
+      node("params[1]").isEqualTo("0")
     }
   }
 
@@ -345,6 +346,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun testMtCreditConsumption() {
     performMtRequestAndExpectAfterBalance(100)
+    performMtRequestAndExpectAfterBalance(0)
     performMtRequestAndExpectBadRequest()
   }
 
