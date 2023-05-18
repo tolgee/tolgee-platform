@@ -80,6 +80,11 @@ class TranslationSuggestionController(
         translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance,
       )
     } catch (e: OutOfCreditsException) {
+      if (e.reason == OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED) {
+        throw BadRequestException(
+          Message.CREDIT_SPENDING_LIMIT_EXCEEDED,
+        )
+      }
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
         listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance)
