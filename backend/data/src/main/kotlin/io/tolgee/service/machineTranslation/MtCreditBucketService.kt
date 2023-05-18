@@ -39,7 +39,10 @@ class MtCreditBucketService(
     val totalBalance = balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
 
     if (totalBalance <= 0) {
-      throw OutOfCreditsException()
+      if (mtCreditBucketSizeProvider.isPayAsYouGo(bucket.organization)) {
+        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
+      }
+      throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS)
     }
 
     bucket.consumeSufficientCredits(amount, bucket.organization!!.id)
@@ -71,12 +74,6 @@ class MtCreditBucketService(
         amountToConsumeFromPayAsYouGo
       )
     )
-  }
-
-  @Transactional
-  fun addCredits(project: Project, amount: Int) {
-    val bucket = findOrCreateBucket(project)
-    addCredits(bucket, amount)
   }
 
   @Transactional
