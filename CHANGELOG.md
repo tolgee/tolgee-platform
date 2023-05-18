@@ -1,3 +1,10 @@
+## [3.13.3](https://github.com/tolgee/tolgee-platform/compare/v3.13.2...v3.13.3) (2023-05-18)
+
+
+### Bug Fixes
+
+* ga4-tag ([d6d7fe5](https://github.com/tolgee/tolgee-platform/commit/d6d7fe5f3f4eb7fb9badf6715a0a59dc12845470))
+
 ## [3.13.2](https://github.com/tolgee/tolgee-platform/compare/v3.13.1...v3.13.2) (2023-05-12)
 
 
