@@ -15,12 +15,7 @@ class OnAfterMachineTranslationEvent(
   project: Project,
 
   /**
-   * The total price of translation in credits, which was expected
-   */
-  expectedSumPrice: Int,
-
-  /**
    * The actual total price of translation actually consumed
    */
   val actualSumPrice: Int
-) : MachineTranslationEvent(source, textToTranslate, project, expectedSumPrice)
+) : MachineTranslationEvent(source, textToTranslate, project)

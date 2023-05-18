@@ -13,8 +13,4 @@ open class MachineTranslationEvent(
    * The project containing translation
    */
   val project: Project,
-  /**
-   * The total price of translation in credits, which was expected
-   */
-  val expectedSumPrice: Int
 ) : ApplicationEvent(source)
