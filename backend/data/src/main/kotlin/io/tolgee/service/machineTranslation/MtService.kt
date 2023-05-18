@@ -2,9 +2,11 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.TranslateResult
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.events.OnAfterMachineTranslationEvent
-import io.tolgee.events.OnBeforeMachineTranslationEvent
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -20,7 +22,8 @@ class MtService(
   private val machineTranslationManager: MtServiceManager,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val projectService: ProjectService,
-  private val mtServiceConfigService: MtServiceConfigService
+  private val mtServiceConfigService: MtServiceConfigService,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   fun getMachineTranslations(key: Key, targetLanguage: Language):
     Map<MtServiceType, String?>? {
@@ -57,6 +60,7 @@ class MtService(
     baseLanguage: Language,
     targetLanguages: List<Language>
   ): List<TranslateResult?> {
+    checkTextLength(baseTranslationText)
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id }, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
@@ -64,9 +68,6 @@ class MtService(
       .asSequence()
       .mapIndexed { idx, lang -> idx to lang }
       .groupBy { primaryServices[it.second.id] }
-
-    val price = calculatePrice(baseLanguage.tag, serviceIndexedLanguagesMap, prepared)
-    publishOnBeforeEvent(prepared, project, price)
 
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
       service?.let {
@@ -90,28 +91,10 @@ class MtService(
 
     val actualPrice = translationResults.sumOf { it?.actualPrice ?: 0 }
 
-    publishOnAfterEvent(prepared, project, price, actualPrice)
+    publishOnAfterEvent(prepared, project, actualPrice)
 
     return translationResults
   }
-
-  private fun calculatePrice(
-    sourceLanguageTag: String,
-    targetServiceLanguagesMap: Map<MtServiceType?, List<Pair<Int, Language>>>,
-    prepared: TextHelper.ReplaceIcuResult,
-  ) =
-    targetServiceLanguagesMap.entries.sumOf { (service, languageIdxPairs) ->
-      service?.let { serviceNotNull ->
-        languageIdxPairs.sumOf {
-          machineTranslationManager.calculatePrice(
-            text = prepared.text,
-            serviceNotNull,
-            sourceLanguageTag,
-            it.second.tag
-          )
-        }
-      } ?: 0
-    }
 
   fun getMachineTranslations(
     project: Project,
@@ -119,44 +102,36 @@ class MtService(
     baseLanguage: Language,
     targetLanguage: Language
   ): Map<MtServiceType, String?>? {
+    checkTextLength(baseTranslationText)
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
-    val expectedPrice = machineTranslationManager.calculatePriceAll(
-      text = prepared.text,
-      services = enabledServices,
-      sourceLanguageTag = baseLanguage.tag,
-      targetLanguageTag = targetLanguage.tag
-    )
-
-    publishOnBeforeEvent(prepared, project, expectedPrice)
 
     val results = machineTranslationManager
       .translateUsingAll(prepared.text, baseLanguage.tag, targetLanguage.tag, enabledServices)
 
     val actualPrice = results.entries.sumOf { it.value.actualPrice }
 
-    publishOnAfterEvent(prepared, project, expectedPrice, actualPrice)
+    publishOnAfterEvent(prepared, project, actualPrice)
 
     return results.map { (serviceName, translated) ->
       serviceName to translated.translatedText?.replaceParams(prepared.params)
     }.toMap()
   }
 
-  private fun publishOnBeforeEvent(prepared: TextHelper.ReplaceIcuResult, project: Project, price: Int) {
-    applicationEventPublisher.publishEvent(
-      OnBeforeMachineTranslationEvent(this, prepared.text, project, price)
-    )
-  }
-
   private fun publishOnAfterEvent(
     prepared: TextHelper.ReplaceIcuResult,
     project: Project,
-    expectedPrice: Int,
     actualPrice: Int
   ) {
     applicationEventPublisher.publishEvent(
-      OnAfterMachineTranslationEvent(this, prepared.text, project, expectedPrice, actualPrice)
+      OnAfterMachineTranslationEvent(this, prepared.text, project, actualPrice)
     )
+  }
+
+  private fun checkTextLength(text: String) {
+    if (text.length > tolgeeProperties.maxTranslationTextLength) {
+      throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG)
+    }
   }
 
   private fun String.replaceParams(params: Map<String, String>): String {
