@@ -15,7 +15,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class EeLicensingMockRequestUtil {
-  @MockBean
+  @SpyBean
   @Autowired
   lateinit var restTemplate: RestTemplate
 
