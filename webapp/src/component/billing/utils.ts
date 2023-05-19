@@ -32,7 +32,8 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
   const isPayAsYouGo = translationsLimit > translationsMax;
 
   const creditMax = usage.includedMtCredits;
-  const creditUsed = creditMax - usage.creditBalance;
+  const creditUsed =
+    creditMax - usage.creditBalance + usage.currentPayAsYouGoMtCredits;
   const creditProgress = creditUsed / creditMax;
 
   return {

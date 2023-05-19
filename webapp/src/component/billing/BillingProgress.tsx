@@ -34,7 +34,7 @@ const StyledExtra = styled(Box)`
   right: 0px;
   top: 0px;
   bottom: 0px;
-  background: ${({ theme }) => theme.palette.billingProgress.low};
+  background: ${({ theme }) => theme.palette.billingProgress.over};
 `;
 
 const StyledLabelContainer = styled('div')`

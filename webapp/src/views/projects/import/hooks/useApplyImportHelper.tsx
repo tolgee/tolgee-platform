@@ -16,6 +16,9 @@ export const useApplyImportHelper = (
   const importApplyLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/import/apply',
     method: 'put',
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
   });
 
   const project = useProject();

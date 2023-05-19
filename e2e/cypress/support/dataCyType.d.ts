@@ -327,6 +327,7 @@ declare namespace DataCy {
         "sensitive-protection-dialog" |
         "settings-menu-item" |
         "sign-up-submit-button" |
+        "spending-limit-exceeded-popover" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "transfer-project-apply-button" |

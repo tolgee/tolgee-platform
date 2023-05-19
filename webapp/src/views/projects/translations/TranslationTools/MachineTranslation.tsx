@@ -61,10 +61,7 @@ export const MachineTranslation: React.FC<Props> = ({
   return (
     <StyledContainer>
       {baseIsEmpty ? (
-        <TabMessage
-          type="placeholder"
-          message={t('translation_tools_base_empty')}
-        />
+        <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         items?.map(([provider, translation]) => {
           const providerImg = getProviderImg(provider);

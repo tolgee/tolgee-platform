@@ -31,6 +31,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       incrementPlanLimitErrors: () => {
         return organizationUsage.incrementPlanLimitErrors();
       },
+      incrementSpendingLimitErrors: () => {
+        return organizationUsage.incrementSpendingLimitErrors();
+      },
     };
 
     globalContext.actions = actions;

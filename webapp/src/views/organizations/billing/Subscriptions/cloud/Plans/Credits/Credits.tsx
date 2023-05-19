@@ -113,9 +113,7 @@ export const Credits: FC = () => {
         />
         <Box gridArea="info">
           <StyledSliderWrapper>
-            <StyledCreditAmount>
-              {formatNumber(Math.round(totalAmount / 100))}
-            </StyledCreditAmount>
+            <StyledCreditAmount>{formatNumber(totalAmount)}</StyledCreditAmount>
             <Slider
               value={sliderValue}
               min={0}
