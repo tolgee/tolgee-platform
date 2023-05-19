@@ -55,13 +55,15 @@ class EeSubscriptionService(
     val seats = userAccountService.countAll()
     val instanceId = findSubscriptionEntity()?.instanceId ?: UUID.randomUUID().toString()
 
-    val responseBody = try {
-      postRequest<SelfHostedEeSubscriptionModel>(
-        setPath,
-        SetLicenseKeyLicensingDto(licenseKey, seats, instanceId)
-      )
-    } catch (e: HttpClientErrorException.NotFound) {
-      throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+    val responseBody = catchingSeatsSpendingLimit {
+      try {
+        postRequest<SelfHostedEeSubscriptionModel>(
+          setPath,
+          SetLicenseKeyLicensingDto(licenseKey, seats, instanceId)
+        )
+      } catch (e: HttpClientErrorException.NotFound) {
+        throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+      }
     }
 
     if (responseBody != null) {
@@ -81,14 +83,15 @@ class EeSubscriptionService(
 
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAll()
-
-    val responseBody = try {
-      postRequest<PrepareSetEeLicenceKeyModel>(
-        prepareSetKeyPath,
-        PrepareSetLicenseKeyDto(licenseKey, seats),
-      )
-    } catch (e: HttpClientErrorException.NotFound) {
-      throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+    val responseBody = catchingSeatsSpendingLimit {
+      try {
+        postRequest<PrepareSetEeLicenceKeyModel>(
+          prepareSetKeyPath,
+          PrepareSetLicenseKeyDto(licenseKey, seats),
+        )
+      } catch (e: HttpClientErrorException.NotFound) {
+        throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
+      }
     }
 
     if (responseBody != null) {
@@ -96,6 +99,18 @@ class EeSubscriptionService(
     }
 
     throw IllegalStateException("Licence not obtained")
+  }
+
+  fun <T> catchingSeatsSpendingLimit(fn: () -> T): T {
+    return try {
+      fn()
+    } catch (e: HttpClientErrorException.BadRequest) {
+      val body = e.parseBody()
+      if (body.code == Message.SEATS_SPENDING_LIMIT_EXCEEDED.code) {
+        throw BadRequestException(body.code, body.params)
+      }
+      throw e
+    }
   }
 
   private inline fun <reified T> postRequest(url: String, body: Any): T? {
@@ -111,7 +126,7 @@ class EeSubscriptionService(
       String::class.java
     )
 
-    return stringResponse.body?.let { stringResponseBody ->
+    return stringResponse?.body?.let { stringResponseBody ->
       jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .readValue(stringResponseBody, T::class.java)
@@ -204,7 +219,9 @@ class EeSubscriptionService(
     if (subscription != null) {
       val seats = userAccountService.countAllEnabled()
       try {
-        reportUsageRemote(subscription, seats)
+        catchingSeatsSpendingLimit {
+          reportUsageRemote(subscription, seats)
+        }
       } catch (e: HttpClientErrorException.NotFound) {
         val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
         if (!licenceKeyNotFound) {

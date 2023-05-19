@@ -15,7 +15,7 @@ abstract class ErrorException : RuntimeException {
 
   constructor(message: Message) : this(message, null)
 
-  constructor(code: String, params: List<Serializable>? = null) : super(code + params.toString()) {
+  constructor(code: String, params: List<Serializable?>? = null) : super(code + params.toString()) {
     this.code = code
     this.params = params
   }
