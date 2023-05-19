@@ -1,7 +1,6 @@
 package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.security.InternalController
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["internal/e2e-data/websocket-translations"])
 @Transactional
 @InternalController
-class WebsocketTranslationsE2eDataController(val testDataService: TestDataService) : AbstractE2eDataController() {
+class WebsocketTranslationsE2eDataController() : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateKeys(): Map<String, Long> {

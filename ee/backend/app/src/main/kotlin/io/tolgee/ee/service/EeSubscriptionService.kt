@@ -52,7 +52,7 @@ class EeSubscriptionService(
   }
 
   fun setLicenceKey(licenseKey: String): EeSubscription {
-    val seats = userAccountService.countAll()
+    val seats = userAccountService.countAllEnabled()
     val instanceId = findSubscriptionEntity()?.instanceId ?: UUID.randomUUID().toString()
 
     val responseBody = catchingSeatsSpendingLimit {
@@ -82,7 +82,7 @@ class EeSubscriptionService(
   }
 
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
-    val seats = userAccountService.countAll()
+    val seats = userAccountService.countAllEnabled()
     val responseBody = catchingSeatsSpendingLimit {
       try {
         postRequest<PrepareSetEeLicenceKeyModel>(

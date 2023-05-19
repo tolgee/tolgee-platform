@@ -32,6 +32,7 @@ interface FormProps<T> {
   children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
   rootSx?: SxProps;
   hideCancel?: boolean;
+  showResourceError?: boolean;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
@@ -40,6 +41,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   disabled,
   rootSx = { mb: 2 },
   hideCancel,
+  showResourceError = true,
   ...props
 }) => {
   const history = useHistory();
@@ -49,9 +51,11 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
 
   return (
     <>
-      {props.saveActionLoadable && props.saveActionLoadable.error && (
-        <ResourceErrorComponent error={props.saveActionLoadable.error} />
-      )}
+      {showResourceError &&
+        props.saveActionLoadable &&
+        props.saveActionLoadable.error && (
+          <ResourceErrorComponent error={props.saveActionLoadable.error} />
+        )}
 
       <Formik
         initialValues={initialValues}

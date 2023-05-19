@@ -1,7 +1,6 @@
 package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.security.InternalController
@@ -21,7 +20,6 @@ import java.util.*
 @Transactional
 @InternalController
 class SensitiveOperationProtectionE2eDataController(
-  private val testDataService: TestDataService,
   private val mfaService: MfaService,
   private val jwtTokenProvider: JwtTokenProvider
 ) : AbstractE2eDataController() {

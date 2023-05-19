@@ -1,7 +1,6 @@
 package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.model.enums.ProjectPermissionType
@@ -22,7 +21,7 @@ import org.springframework.web.context.annotation.RequestScope
 @Transactional
 @InternalController
 @RequestScope
-class PermissionsE2eDataController(val testDataService: TestDataService) : AbstractE2eDataController() {
+class PermissionsE2eDataController() : AbstractE2eDataController() {
 
   @GetMapping(value = ["/generate-with-user"])
   @Transactional
