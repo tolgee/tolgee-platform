@@ -1,12 +1,12 @@
-import { styled } from '@mui/material';
 import {
   Button,
   DialogActions,
   DialogContent,
-  DialogTitle,
   DialogContentText,
-  Popover,
+  DialogTitle,
   Link,
+  Popover,
+  styled,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -57,18 +57,7 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
       </DialogTitle>
       <StyledDialogContent>
         <DialogContentText id="alert-dialog-description">
-          <T
-            keyName="spending_limit_dialog_description"
-            params={{
-              email: (
-                <Link
-                  href="mailto:billing@tolgee.io"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                />
-              ),
-            }}
-          />
+          <SpendingLimitExceededDescription />
         </DialogContentText>
       </StyledDialogContent>
 
@@ -85,3 +74,18 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
     </Popover>
   ) : null;
 };
+
+export const SpendingLimitExceededDescription = () => (
+  <T
+    keyName="spending_limit_dialog_description"
+    params={{
+      email: (
+        <Link
+          href="mailto:billing@tolgee.io"
+          target="_blank"
+          rel="noreferrer noopener"
+        />
+      ),
+    }}
+  />
+);

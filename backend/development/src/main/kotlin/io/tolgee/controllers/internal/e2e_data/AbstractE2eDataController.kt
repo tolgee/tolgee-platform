@@ -8,6 +8,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
@@ -32,16 +33,23 @@ abstract class AbstractE2eDataController {
   private lateinit var entityManager: EntityManager
 
   @Autowired
-  private lateinit var testDataService: TestDataService
+  lateinit var testDataService: TestDataService
 
   @Autowired
   private lateinit var transactionManager: PlatformTransactionManager
+
+  @Autowired
+  private lateinit var applicationContext: ApplicationContext
 
   @GetMapping(value = ["/generate-standard"])
   @Transactional
   open fun generate(): StandardTestDataResult {
     val data = this.testData
     testDataService.saveTestData(data)
+    return getStandardResult(data)
+  }
+
+  fun getStandardResult(data: TestDataBuilder): StandardTestDataResult {
     return StandardTestDataResult(
       projects = data.data.projects.map {
         StandardTestDataResult.ProjectModel(name = it.self.name, id = it.self.id)

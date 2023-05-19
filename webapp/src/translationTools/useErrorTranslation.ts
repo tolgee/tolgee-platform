@@ -69,7 +69,8 @@ export function useErrorTranslation() {
         return t('user_has_no_project_access');
       case 'translation_spending_limit_exceeded':
         return t('translation_spending_limit_exceeded');
-
+      case 'seats_spending_limit_exceeded':
+        return t('seats_spending_limit_exceeded');
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':
         return t('authentication_cancelled');

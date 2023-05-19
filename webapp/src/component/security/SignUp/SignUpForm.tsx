@@ -11,6 +11,10 @@ import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { SetPasswordFields } from '../SetPasswordFields';
 import { useConfig } from 'tg.globalContext/helpers';
+import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
+import { default as React, FC } from 'react';
+import { Alert } from '../../common/Alert';
+import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
 
 export type SignUpType = {
   name: string;
@@ -26,6 +30,27 @@ type Props = {
   loadable: LoadableType;
 };
 
+const Error: FC<{ loadable: LoadableType }> = ({ loadable }) => {
+  if (loadable.error?.code === 'seats_spending_limit_exceeded') {
+    return (
+      <Alert severity="error">
+        <Typography variant="h5" sx={{ mb: 1 }}>
+          <T keyName="spending_limit_dialog_title" />
+        </Typography>
+        <SpendingLimitExceededDescription />
+      </Alert>
+    );
+  }
+
+  return (
+    <>
+      {loadable && loadable.error && (
+        <ResourceErrorComponent error={loadable.error} />
+      )}
+    </>
+  );
+};
+
 export const SignUpForm = (props: Props) => {
   const config = useConfig();
   const orgRequired =
@@ -36,6 +61,7 @@ export const SignUpForm = (props: Props) => {
     <StandardForm
       rootSx={{ mb: 1 }}
       saveActionLoadable={props.loadable}
+      showResourceError={false}
       initialValues={
         {
           password: '',
@@ -61,6 +87,7 @@ export const SignUpForm = (props: Props) => {
       }
       onSubmit={props.onSubmit}
     >
+      <Error loadable={props.loadable} />
       <TextField
         name="name"
         label={<T keyName="sign_up_form_full_name" />}

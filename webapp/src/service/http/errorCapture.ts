@@ -8,5 +8,8 @@ export const errorCapture = (code: string) => {
     case 'translation_spending_limit_exceeded':
       globalContext.actions?.incrementSpendingLimitErrors();
       break;
+    case 'seats_spending_limit_exceeded':
+      globalContext.actions?.incrementSpendingLimitErrors();
+      break;
   }
 };
