@@ -29,7 +29,7 @@ const StyledCircleContent = styled('circle')`
 
 const StyledCircleContentOver = styled(StyledCircleContent)`
   stroke-width: 17px;
-  stroke: ${({ theme }) => theme.palette.billingProgress.low};
+  stroke: ${({ theme }) => theme.palette.billingProgress.over};
   stroke-linecap: unset;
   stroke-linecap: round;
 `;

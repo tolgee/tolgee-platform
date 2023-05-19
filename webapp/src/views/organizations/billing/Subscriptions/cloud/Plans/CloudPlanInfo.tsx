@@ -59,7 +59,7 @@ export const CloudPlanInfo: React.FC<Props> = ({ plan }) => {
       <StyledSpacer />
       <StyledItem>
         <StyledNumber>
-          {formatNumber((plan.includedUsage.mtCredits || 0) / 100)}
+          {formatNumber(plan.includedUsage.mtCredits || 0)}
         </StyledNumber>
         <StyledName>
           <T

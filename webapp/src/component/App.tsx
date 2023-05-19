@@ -21,6 +21,7 @@ import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
 import { Ga4Tag } from './Ga4Tag';
+import { SpendingLimitExceededPopover } from './billing/SpendingLimitExceeded';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -79,20 +80,35 @@ const GlobalConfirmation = () => {
 };
 
 const GlobalLimitPopover = () => {
-  const { planLimitErrors } = useOrganizationUsage();
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const handleClose = () => setPopoverOpen(false);
+  const { planLimitErrors, spendingLimitErrors } = useOrganizationUsage();
+  const [planLimitErrOpen, setPlanLimitErrOpen] = useState(false);
+  const [spendingLimitErrOpen, setSpendingLimitErrOpen] = useState(false);
 
   useEffect(() => {
     if (planLimitErrors === 1) {
-      setPopoverOpen(true);
+      setPlanLimitErrOpen(true);
     }
   }, [planLimitErrors]);
+
+  useEffect(() => {
+    if (spendingLimitErrors > 0) {
+      setSpendingLimitErrOpen(true);
+    }
+  }, [spendingLimitErrors]);
 
   const { preferredOrganization } = usePreferredOrganization();
 
   return preferredOrganization ? (
-    <PlanLimitPopover open={popoverOpen} onClose={handleClose} />
+    <>
+      <PlanLimitPopover
+        open={planLimitErrOpen}
+        onClose={() => setPlanLimitErrOpen(false)}
+      />
+      <SpendingLimitExceededPopover
+        open={spendingLimitErrOpen}
+        onClose={() => setSpendingLimitErrOpen(false)}
+      />
+    </>
   ) : null;
 };
 

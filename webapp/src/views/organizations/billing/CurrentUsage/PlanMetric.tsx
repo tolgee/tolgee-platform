@@ -28,7 +28,7 @@ const StyledValue = styled('span')`
     color: ${({ theme }) => theme.palette.error.main};
   }
   &.over {
-    color: ${({ theme }) => theme.palette.error.main};
+    color: ${({ theme }) => theme.palette.warning.main};
   }
   &.sufficient {
     color: ${({ theme }) => theme.palette.success.main};

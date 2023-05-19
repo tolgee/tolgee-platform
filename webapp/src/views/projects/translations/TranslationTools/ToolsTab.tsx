@@ -1,13 +1,8 @@
 import React from 'react';
-import { styled, Typography, Link as MuiLink } from '@mui/material';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
-
+import { styled, Typography } from '@mui/material';
 import { TabMessage } from './TabMessage';
 import { UseQueryResult } from 'react-query';
-import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { MtHint } from 'tg.component/billing/MtHint';
+import { NoCreditsHint } from 'tg.component/NoCreditsHint';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -65,48 +60,8 @@ export const ToolsTab: React.FC<Props> = ({
   children,
   data,
 }) => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const config = useConfig();
-
-  const getCreditHint = (code: string) => {
-    if (code === 'out_of_credits') {
-      if (
-        preferredOrganization.currentUserRole === 'OWNER' &&
-        config.billing.enabled
-      ) {
-        return (
-          <T
-            keyName="translation_tools_no_credits_billing_link"
-            params={{
-              link: (
-                <MuiLink
-                  component={Link}
-                  to={LINKS.ORGANIZATION_BILLING.build({
-                    [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-                  })}
-                />
-              ),
-              hint: <MtHint />,
-            }}
-          />
-        );
-      } else {
-        return (
-          <T
-            keyName="translation_tools_no_credits_message"
-            params={{
-              hint: <MtHint />,
-            }}
-          />
-        );
-      }
-    }
-  };
-
   const error = data?.error;
-  const errorCode = error?.message || error?.code || error || 'Unknown error';
-
-  const creditHint = getCreditHint(errorCode);
+  const errorCode = error?.message || error?.code || error;
 
   return (
     <StyledContainer>
@@ -117,10 +72,9 @@ export const ToolsTab: React.FC<Props> = ({
       </StyledTab>
 
       {data?.isError ? (
-        <TabMessage
-          type={creditHint ? 'placeholder' : 'error'}
-          message={creditHint || errorCode}
-        />
+        <TabMessage>
+          <NoCreditsHint code={errorCode} />
+        </TabMessage>
       ) : (
         children
       )}

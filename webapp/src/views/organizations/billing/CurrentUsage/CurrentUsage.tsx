@@ -109,8 +109,8 @@ export const CurrentUsage: FC<Props> = ({
               params={{ hint: <MtHint /> }}
             />
           }
-          currentQuantity={Math.round(creditUsed / 100)}
-          totalQuantity={Math.round((creditMax || 0) / 100)}
+          currentQuantity={creditUsed}
+          totalQuantity={creditMax || 0}
           periodEnd={activeSubscription.currentPeriodEnd}
           isPayAsYouGo={isPayAsYouGo}
           data-cy="billing-actual-used-monthly-credits"
@@ -127,7 +127,7 @@ export const CurrentUsage: FC<Props> = ({
               params={{ hint: <MtHint /> }}
             />
           }
-          currentQuantity={Math.round((usage.extraCreditBalance || 0) / 100)}
+          currentQuantity={usage.extraCreditBalance || 0}
         />
         {!activeSubscription.plan.free && (
           <>
