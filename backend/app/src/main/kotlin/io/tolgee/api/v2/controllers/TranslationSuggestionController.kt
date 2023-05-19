@@ -74,10 +74,10 @@ class TranslationSuggestionController(
 
       return SuggestResultModel(
         machineTranslations = resultMap,
-        translationCreditsBalanceBefore = balanceBefore.creditBalance,
-        translationCreditsBalanceAfter = balanceAfter.creditBalance,
-        translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance,
-        translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance,
+        translationCreditsBalanceBefore = balanceBefore.creditBalance / 100,
+        translationCreditsBalanceAfter = balanceAfter.creditBalance / 100,
+        translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance / 100,
+        translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance / 100,
       )
     } catch (e: OutOfCreditsException) {
       if (e.reason == OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED) {
