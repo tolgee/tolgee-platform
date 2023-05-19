@@ -84,15 +84,24 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `sets translation state`() {
     saveTestData()
     val id = testData.aKeyGermanTranslation.id
-    performProjectAuthPut("/translations/$id/set-state/UNTRANSLATED", null).andIsOk
+    performProjectAuthPut("/translations/$id/set-state/TRANSLATED", null).andIsOk
       .andAssertThatJson {
-        node("state").isEqualTo("UNTRANSLATED")
+        node("state").isEqualTo("TRANSLATED")
         node("id").isValidId.satisfies { id ->
           id.toLong().let {
-            assertThat(translationService.find(it)?.state).isEqualTo(TranslationState.UNTRANSLATED)
+            assertThat(translationService.find(it)?.state).isEqualTo(TranslationState.TRANSLATED)
           }
         }
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot set UNTRANSLATED when contains value`() {
+    saveTestData()
+    val id = testData.aKeyGermanTranslation.id
+    performProjectAuthPut("/translations/$id/set-state/UNTRANSLATED", null)
+      .andIsBadRequest
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])

@@ -34,7 +34,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.ApiScope
-import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -217,11 +217,14 @@ When null, resulting file will be a flat key-value object.
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
-  fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
+  fun setTranslationState(
+    @PathVariable translationId: Long,
+    @PathVariable state: AssignableTranslationState
+  ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkLanguageTranslatePermission(translation)
-    return translationModelAssembler.toModel(translationService.setState(translation, state))
+    return translationModelAssembler.toModel(translationService.setState(translation, state.translationState))
   }
 
   @InitBinder("translationFilters")
