@@ -32,6 +32,7 @@ export type Activity = {
 export type BillingProgress = {
   background: string;
   low: string;
+  over: string;
   sufficient: string;
   separator: string;
 };
@@ -70,6 +71,7 @@ export const colors = {
     billingProgress: {
       background: '#C4C4C4',
       low: '#E80000',
+      over: '#ffce00',
       sufficient: '#17AD18',
       separator: '#656565',
     } as BillingProgress,
@@ -127,6 +129,7 @@ export const colors = {
     billingProgress: {
       background: '#565656',
       low: '#ca0000',
+      over: '#ffce00',
       sufficient: '#1e991e',
       separator: '#656565',
     } as BillingProgress,

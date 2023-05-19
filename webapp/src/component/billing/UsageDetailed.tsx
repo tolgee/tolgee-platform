@@ -47,8 +47,8 @@ export const UsageDetailed: React.FC<Props> = ({
           <T
             keyName="dashboard_billing_used_credit"
             params={{
-              available: Math.round(creditUsed / 100),
-              max: Math.round(creditMax / 100),
+              available: Math.round(creditUsed),
+              max: Math.round(creditMax),
             }}
           />
         </Typography>
