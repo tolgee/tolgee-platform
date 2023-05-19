@@ -1,3 +1,10 @@
+## [3.13.4](https://github.com/tolgee/tolgee-platform/compare/v3.13.3...v3.13.4) (2023-05-19)
+
+
+### Bug Fixes
+
+* Translation can get into untranslated state when it has value ([#1714](https://github.com/tolgee/tolgee-platform/issues/1714)) ([a701505](https://github.com/tolgee/tolgee-platform/commit/a701505d161e9cc99e6fc5cb248668571c4c14d8))
+
 ## [3.13.3](https://github.com/tolgee/tolgee-platform/compare/v3.13.2...v3.13.3) (2023-05-18)
 
 
