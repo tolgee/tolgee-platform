@@ -32,8 +32,8 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
-import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.AssignableTranslationState
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeyWithTranslationsView
