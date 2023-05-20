@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import {
-  ViewListRounded,
-  AppsRounded,
   Add,
-  Search,
-  FilterList,
+  AppsRounded,
   Clear,
+  FilterList,
+  Search,
+  ViewListRounded,
 } from '@mui/icons-material';
 import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import LanguageIcon from '@mui/icons-material/Language';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 
 import TranslationsSearchField from './TranslationsSearchField';
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
 import { useActiveFilters } from '../Filters/useActiveFilters';
@@ -197,9 +196,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 </StyledToggleButton>
               </ButtonGroup>
 
-              {projectPermissions.satisfiesPermission(
-                ProjectPermissionType.EDIT
-              ) && (
+              {projectPermissions.satisfiesPermission('keys.edit') && (
                 <StyledIconButton
                   color="primary"
                   size="small"

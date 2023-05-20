@@ -105,6 +105,7 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation libs.jacksonModuleKotlin
+    implementation libs.kotlinCoroutines
 
     /**
      * DATA MODULE

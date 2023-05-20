@@ -23,11 +23,11 @@ describe('Import Resolving', () => {
         .findDcy('import-result-resolve-button')
         .click();
       gcy('import-resolution-dialog-resolved-count').should('have.text', '0');
-      gcy('import-resolution-dialog-conflict-count').should('have.text', '4');
+      gcy('import-resolution-dialog-conflict-count').should('have.text', '3');
       gcy('import-resolution-dialog-show-resolved-switch')
         .find('input')
         .should('be.checked');
-      gcy('import-resolution-dialog-data-row').should('have.length', 4);
+      gcy('import-resolution-dialog-data-row').should('have.length', 3);
       gcy('import-resolution-dialog-data-row').should(
         'contain.text',
         'What a text'
@@ -64,11 +64,11 @@ describe('Import Resolving', () => {
         .findDcy('import-result-resolve-button')
         .click();
       gcy('import-resolution-dialog-accept-imported-button').click();
-      cy.xpath('//*[@data-cy-selected]').should('have.length', 4);
+      cy.xpath('//*[@data-cy-selected]').should('have.length', 3);
       gcy('import-resolution-dialog-new-translation').each(($el) => {
         cy.wrap($el).should('have.attr', 'data-cy-selected');
       });
-      gcy('import-resolution-dialog-resolved-count').should('have.text', '4');
+      gcy('import-resolution-dialog-resolved-count').should('have.text', '3');
     });
 
     it('accept all old', () => {
@@ -76,11 +76,11 @@ describe('Import Resolving', () => {
         .findDcy('import-result-resolve-button')
         .click();
       gcy('import-resolution-dialog-accept-old-button').click();
-      cy.xpath('//*[@data-cy-selected]').should('have.length', 4);
+      cy.xpath('//*[@data-cy-selected]').should('have.length', 3);
       gcy('import-resolution-dialog-existing-translation').each(($el) => {
         cy.wrap($el).should('have.attr', 'data-cy-selected');
       });
-      gcy('import-resolution-dialog-resolved-count').should('have.text', '4');
+      gcy('import-resolution-dialog-resolved-count').should('have.text', '3');
     });
   });
 
@@ -109,11 +109,11 @@ describe('Import Resolving', () => {
 
       const assertBothCollapsed = () => {
         cy.contains('Hello, I am old translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 500);
+          cy.wrap($text!.width()).should('be.lessThan', 520);
           cy.wrap($text!.height()).should('be.lessThan', 35);
         });
         cy.contains('Hello, I am translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 500);
+          cy.wrap($text!.width()).should('be.lessThan', 520);
           cy.wrap($text!.height()).should('be.lessThan', 35);
         });
       };

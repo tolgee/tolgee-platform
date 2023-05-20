@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.model.enums.ApiScope
 
 @Parameter(
   `in` = ParameterIn.QUERY,
@@ -26,4 +25,4 @@ import io.tolgee.model.enums.ApiScope
   example = "tgpak_gm2dcxzynjvdqm3fozwwgmdjmvwdgojqonvxamldnu4hi5lp",
   description = "API key provided via header. Safer since headers are not stored in server logs."
 )
-annotation class AccessWithApiKey(val scopes: Array<ApiScope> = [])
+annotation class AccessWithApiKey()

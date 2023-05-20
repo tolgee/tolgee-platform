@@ -204,9 +204,7 @@ export const MachineTranslation = () => {
             <Box my={1} display="flex" flexDirection="column">
               <Typography variant="body1">
                 {t('project_languages_credit_balance', {
-                  balance: String(
-                    Math.round(creditBalance.data.creditBalance / 100)
-                  ),
+                  balance: String(creditBalance.data.creditBalance),
                 })}
               </Typography>
               <StyledHint variant="caption">

@@ -3,32 +3,24 @@ package io.tolgee.security
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
-import javax.mail.internet.MimeMessage
 
-class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+class EmailVerificationTest : AbstractControllerTest() {
 
   @Autowired
-  @MockBean
-  override lateinit var javaMailSender: JavaMailSender
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
@@ -37,6 +29,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   fun setup() {
     resetProperties()
     tolgeeProperties.authentication.needsEmailVerification = true
+    emailTestUtil.initMocks()
   }
 
   @AfterEach
@@ -84,7 +77,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
       .andExpect(status().isOk).andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-    assertThat(userAccountService.find(createUser.username)!!.username).isEqualTo("this.is@new.email")
+    assertThat(userAccountService.findActive(createUser.username)!!.username).isEqualTo("this.is@new.email")
   }
 
   @Test
@@ -123,30 +116,30 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
   @Test
   fun signUpSavesVerification() {
     perform()
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
+    emailTestUtil.verifyEmailSent()
 
-    assertThat(messageArgumentCaptor.value.subject).isEqualTo("Tolgee e-mail verification")
+    assertThat(emailTestUtil.messageArgumentCaptor.firstValue.subject).isEqualTo("Tolgee e-mail verification")
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService.find(user.id)).isNotNull
+    assertThat(userAccountService.findActive(user.id)).isNotNull
   }
 
   @Test
   fun `uses frontend url over provided callback url`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
     perform()
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService.find(user.id)).isNotNull
+    assertThat(userAccountService.findActive(user.id)).isNotNull
   }
 
   private fun getMessageContent(): String {
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
-    return messageArgumentCaptor.value.tolgeeStandardMessageContent
+    emailTestUtil.verifyEmailSent()
+    return emailTestUtil.messageContents.single()
   }
 
   @Test
@@ -160,7 +153,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     tolgeeProperties.frontEndUrl = null
     perform()
 
-    val user = userAccountService.find(signUpDto.email) ?: throw NotFoundException()
+    val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
     assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
   }

@@ -1,5 +1,4 @@
 import { HOST } from '../../common/constants';
-import { getInput } from '../../common/xPath';
 import {
   createProject,
   deleteAllEmails,
@@ -18,8 +17,13 @@ import {
   setRecaptchaSiteKey,
   v2apiFetch,
 } from '../../common/apiCalls/common';
-import { assertMessage, gcy } from '../../common/shared';
-import { loginWithFakeGithub } from '../../common/login';
+import { assertMessage } from '../../common/shared';
+import {
+  fillAndSubmitSignUpForm,
+  loginWithFakeGithub,
+  signUpAfter,
+  visitSignUp,
+} from '../../common/login';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from '../../common/loading';
 
@@ -58,7 +62,7 @@ context('Sign up', () => {
   beforeEach(() => {
     getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
     logout();
-    visit();
+    visitSignUp();
     deleteUserSql(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
@@ -66,8 +70,7 @@ context('Sign up', () => {
   });
 
   afterEach(() => {
-    enableEmailVerification();
-    enableRegistration();
+    signUpAfter(TEST_USERNAME);
   });
 
   describe('without recaptcha', () => {
@@ -76,11 +79,11 @@ context('Sign up', () => {
     });
 
     it('Signs up without recaptcha', () => {
-      visit();
+      visitSignUp();
       cy.intercept('/**/sign_up', (req) => {
         expect(req.body.recaptchaToken).be.undefined;
       }).as('signUp');
-      fillAndSubmitForm();
+      fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.wait(['@signUp']);
       cy.contains(
         'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
@@ -94,7 +97,7 @@ context('Sign up', () => {
     cy.intercept('/**/sign_up', (req) => {
       expect(req.body.recaptchaToken).have.length.greaterThan(10);
     }).as('signUp');
-    fillAndSubmitForm();
+    fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
     setRecaptchaSecretKey('dummy_secret_key');
     cy.contains('You are robot').should('be.visible');
@@ -104,7 +107,7 @@ context('Sign up', () => {
     cy.intercept('/**/sign_up', (req) => {
       expect(req.body.recaptchaToken).have.length.greaterThan(10);
     }).as('signUp');
-    fillAndSubmitForm();
+    fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.wait(['@signUp']);
     cy.contains(
       'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
@@ -123,7 +126,7 @@ context('Sign up', () => {
 
   it('Signs up without email verification', () => {
     disableEmailVerification();
-    fillAndSubmitForm();
+    fillAndSubmitSignUpForm(TEST_USERNAME);
     assertMessage('Thank you for signing up!');
     cy.contains('Projects');
   });
@@ -134,7 +137,7 @@ context('Sign up', () => {
       logout();
       cy.log(window.localStorage.getItem('jwtToken'));
       cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm();
+      fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.contains('Projects').should('be.visible');
       cy.visit(invitationLink);
       assertMessage('Invitation successfully accepted');
@@ -147,7 +150,7 @@ context('Sign up', () => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm(false);
+      fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
     });
@@ -160,7 +163,7 @@ context('Sign up', () => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
       cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm(false);
+      fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
     });
@@ -195,17 +198,3 @@ context('Sign up', () => {
     });
   });
 });
-
-const fillAndSubmitForm = (withOrganization = true) => {
-  cy.waitForDom();
-  cy.xpath(getInput('name')).should('be.visible').type('Test user');
-  cy.xpath(getInput('email')).type(TEST_USERNAME);
-  if (withOrganization) {
-    cy.xpath(getInput('organizationName')).type('organization');
-  }
-  cy.xpath(getInput('password')).type('password');
-  cy.xpath(getInput('passwordRepeat')).type('password');
-  gcy('sign-up-submit-button').click();
-};
-
-const visit = () => cy.visit(HOST + '/sign_up');

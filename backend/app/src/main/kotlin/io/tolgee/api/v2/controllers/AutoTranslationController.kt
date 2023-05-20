@@ -6,8 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -39,8 +38,8 @@ class AutoTranslationController(
   private val securityService: SecurityService
 ) {
   @PutMapping("")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
-  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @AccessWithApiKey()
   @Operation(
     summary = "Auto translates keys",
     description = """Uses enabled auto-translation methods.
@@ -60,7 +59,11 @@ When no languages provided, it translates only untranslated languages."""
     @RequestParam useTranslationMemory: Boolean?
   ) {
     val key = keyService.get(keyId)
-    val languagesToTranslate = languages ?: getAllLanguagesToTranslate()
+    val languagesToTranslate = securityService.filterViewPermissionByTag(
+      projectHolder.project.id,
+      languages ?: getAllLanguagesToTranslate()
+    )
+
     checkPermissions(key, languagesToTranslate)
     validateServices(useMachineTranslation, useTranslationMemory)
 

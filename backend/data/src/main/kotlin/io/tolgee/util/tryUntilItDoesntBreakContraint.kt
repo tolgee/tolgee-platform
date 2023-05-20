@@ -1,15 +1,18 @@
 package io.tolgee.util
 
 import org.springframework.dao.DataIntegrityViolationException
+import javax.persistence.PersistenceException
 
 fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
-  var exception: DataIntegrityViolationException? = null
+  var exception: Exception? = null
   var repeats = 0
-  for (it in 0..100) {
+  for (it in 1..100) {
     try {
       return fn()
     } catch (e: DataIntegrityViolationException) {
-      Thread.sleep(10)
+      repeats++
+      exception = e
+    } catch (e: PersistenceException) {
       repeats++
       exception = e
     }

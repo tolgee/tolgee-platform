@@ -1,11 +1,11 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.ResultActions
 import java.time.ZonedDateTime
@@ -27,7 +27,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
   lateinit var testData: TranslationsTestData
 
-  @MockBean
+  @SpyBean
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
@@ -37,7 +37,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
     this.projectSupplier = { testData.project }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
   fun `returns all with last modified`() {
     val now = Date()
@@ -49,7 +49,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `returns 304 when not modified`() {
     val now = Date()
     whenever(currentDateProvider.date).then { now }
@@ -60,7 +60,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `works when data change`() {
     val now = Date()
     whenever(currentDateProvider.date).then { now }
@@ -81,7 +81,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
   fun performWithIsModifiedSince(lastModified: String?): ResultActions {
     val headers = HttpHeaders()
-    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(ApiScope.TRANSLATIONS_VIEW), project).key
+    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
     headers["If-Modified-Since"] = lastModified
     return performGet("/v2/projects/translations/en,de", headers)
   }

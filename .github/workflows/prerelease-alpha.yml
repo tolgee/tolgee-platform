@@ -12,9 +12,9 @@ jobs:
         with:
           token: '${{ secrets.TOLGEE_MACHINE_PAT }}'
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: 17
           distribution: adopt
 
       - name: Setup node
@@ -37,7 +37,7 @@ jobs:
 
       - name: Set version property
         id: version
-        run: echo ::set-output name=VERSION::$(test -e .VERSION && echo v$(cat .VERSION))
+        run: echo "VERSION=$(test -e .VERSION && echo v$(cat .VERSION))" >> $GITHUB_OUTPUT
 
       - name: BootJar with version
         if: ${{ steps.version.outputs.VERSION != '' }}
@@ -90,7 +90,7 @@ jobs:
         env:
           KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: test

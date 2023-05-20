@@ -8,6 +8,7 @@ const MenuList = styled('nav')`
 export type SettingsMenuItem = {
   link: string;
   label: string;
+  'data-cy'?: string;
 };
 
 type Props = {

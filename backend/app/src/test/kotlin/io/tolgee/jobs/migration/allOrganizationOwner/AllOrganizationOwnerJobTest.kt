@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.AllOrganizationOwnerMigrationT
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.UserAccountRepository
@@ -51,7 +52,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
       Permission(
         user = user,
         project = project1,
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       )
     )
 
@@ -60,7 +61,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
       Permission(
         user = user,
         project = project2,
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       )
     )
 
@@ -122,7 +123,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
       val user2 = userAccountRepository.findByUsername("user2").get()
-      assertThat(user2.permissions!!.single().project.name).isEqualTo("Project 2")
+      assertThat(user2.permissions.single().project?.name).isEqualTo("Project 2")
     }
   }
 

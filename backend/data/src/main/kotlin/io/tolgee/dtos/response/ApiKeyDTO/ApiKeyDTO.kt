@@ -2,7 +2,7 @@ package io.tolgee.dtos.response.ApiKeyDTO
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.ApiKey
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import java.util.stream.Collectors
 
@@ -29,7 +29,7 @@ class ApiKeyDTO(
         userName = apiKey.userAccount.name,
         projectId = apiKey.project.id,
         projectName = apiKey.project.name,
-        scopes = apiKey.scopesEnum.stream().map(ApiScope::value).collect(Collectors.toSet())
+        scopes = apiKey.scopesEnum.stream().map(Scope::value).collect(Collectors.toSet())
       )
     }
   }

@@ -1,11 +1,12 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -25,6 +26,7 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
 
   lateinit var testData: ResolvableImportTestData
   var uploadedImageId by Delegates.notNull<Long>()
+  var uploadedImageId2 by Delegates.notNull<Long>()
 
   @Value("classpath:keyImportRequest.json")
   lateinit var realData: Resource
@@ -38,6 +40,11 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     uploadedImageId = imageUploadService.store(
       generateImage(),
       userAccount!!,
+      ImageUploadInfoDto(location = "My cool frame")
+    ).id
+    uploadedImageId2 = imageUploadService.store(
+      generateImage(),
+      testData.viewOnlyUser,
       ImageUploadInfoDto(location = "My cool frame")
     ).id
   }
@@ -178,6 +185,121 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     performProjectAuthPost(
       "keys/import-resolvable",
       data
+    ).andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `requires language translate permissions`() {
+    userAccount = testData.enOnlyUser
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-1",
+            "translations" to mapOf(
+              "de" to mapOf(
+                "text" to "changed",
+              ),
+            ),
+          ),
+        )
+      )
+    ).andIsForbidden
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot add without key create permission`() {
+    userAccount = testData.viewOnlyUser
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-10",
+          ),
+        )
+      )
+    ).andIsForbidden
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot upload screenshot without the permission`() {
+    userAccount = testData.enOnlyUser
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-1",
+            "screenshots" to listOf(
+              mapOf(
+                "text" to "Oh oh Oh",
+                "uploadedImageId" to uploadedImageId,
+                "positions" to listOf(
+                  mapOf(
+                    "x" to 100,
+                    "y" to 150,
+                    "width" to 80,
+                    "height" to 100
+                  ),
+                  mapOf(
+                    "x" to 500,
+                    "y" to 200,
+                    "width" to 30,
+                    "height" to 20
+                  )
+                )
+              )
+            )
+          ),
+        )
+      )
+    ).andIsForbidden
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `can create with create permission`() {
+    userAccount = testData.keyCreateOnlyUser
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-8",
+          )
+        ),
+      )
+    ).andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `can translate with translate permission`() {
+    userAccount = testData.translateOnlyUser
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to listOf(
+          mapOf(
+            "name" to "key-1",
+            "namespace" to "namespace-1",
+            "translations" to mapOf(
+              "en" to mapOf(
+                "text" to "changed",
+              ),
+            ),
+          )
+        ),
+      )
     ).andIsOk
   }
 

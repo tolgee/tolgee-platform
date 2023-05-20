@@ -1,0 +1,92 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.liquibase.gradle'
+    id 'org.springframework.boot'
+    id "java"
+    id "kotlin-allopen"
+}
+
+apply plugin: "kotlin-allopen"
+apply plugin: "org.jetbrains.kotlin.plugin.spring"
+apply plugin: 'org.hibernate.orm'
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
+    annotation("org.springframework.boot.test.context.SpringBootTest")
+}
+
+repositories {
+    mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = "2048m"
+}
+
+apply from: "$rootDir/gradle/liquibase.gradle"
+configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resources/db/changelog/ee-schema.xml')
+
+diff.dependsOn compileKotlin
+diffChangeLog.dependsOn compileKotlin
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation(project(":data"))
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation "org.springframework.boot:spring-boot-starter-batch"
+
+    /**
+     * SPRING DOC
+     */
+    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocOpenApiUi
+    implementation libs.springDocOpenApiKotlin
+    implementation libs.springDocOpenApiDataRest
+    implementation libs.springDocOpenApiHateoas
+
+    implementation libs.hibernateTypes
+
+    /**
+     * Liquibase
+     */
+    implementation libs.liquibaseCore
+    liquibaseRuntime libs.liquibaseCore
+    liquibaseRuntime 'org.postgresql:postgresql'
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
+    liquibaseRuntime libs.liquibaseHibernate
+    liquibaseRuntime libs.kotlinReflect
+    liquibaseRuntime(project(":data"))
+
+    liquibaseRuntime sourceSets.main.output
+    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+}
+
+kotlin {
+    jvmToolchain(11)
+}
+
+tasks.findByName("jar").enabled(true)
+tasks.findByName("bootJar").enabled(false)
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}

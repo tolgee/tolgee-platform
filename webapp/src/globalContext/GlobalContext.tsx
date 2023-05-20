@@ -4,8 +4,7 @@ import { globalContext } from './globalActions';
 import { createProviderNew } from 'tg.fixtures/createProviderNew';
 import { components } from 'tg.service/apiSchema.generated';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
   createProviderNew(() => {
@@ -17,10 +16,8 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     });
 
     const actions = {
-      updatePreferredOrganization: (
-        organization: number | OrganizationModel
-      ) => {
-        return initialData.updatePreferredOrganization(organization);
+      updatePreferredOrganization: (organizationId: number) => {
+        return initialData.updatePreferredOrganization(organizationId);
       },
       refetchInitialData: () => {
         return initialData.refetchInitialData();
@@ -33,6 +30,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       },
       incrementPlanLimitErrors: () => {
         return organizationUsage.incrementPlanLimitErrors();
+      },
+      incrementSpendingLimitErrors: () => {
+        return organizationUsage.incrementSpendingLimitErrors();
       },
     };
 

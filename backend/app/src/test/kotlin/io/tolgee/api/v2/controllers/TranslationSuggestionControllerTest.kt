@@ -4,13 +4,13 @@ import com.amazonaws.services.translate.AmazonTranslate
 import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.fixtures.andAssertThatJson
@@ -21,7 +21,7 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.apache.commons.lang3.time.DateUtils
+import io.tolgee.util.addMonths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -32,6 +32,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -42,7 +43,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
@@ -208,8 +209,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      node("translationCreditsBalanceBefore").isEqualTo(1000)
-      node("translationCreditsBalanceAfter").isEqualTo(1000 - "Beautiful".length * 100)
+      node("translationCreditsBalanceBefore").isEqualTo(10)
+      node("translationCreditsBalanceAfter").isEqualTo(10 - "Beautiful".length)
     }
   }
 
@@ -259,7 +260,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("AZURE").isEqualTo("Translated with Azure Cognitive")
         node("BAIDU").isEqualTo("Translated with Baidu")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(500)
+      node("translationCreditsBalanceAfter").isEqualTo(5)
     }
   }
 
@@ -312,10 +313,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 1) }
+    mockCurrentDate { Date().addMonths(1) }
     testMtCreditConsumption()
 
-    mockCurrentDate { DateUtils.addMonths(Date(), 2) }
+    mockCurrentDate { Date().addMonths(2) }
     testMtCreditConsumption()
   }
 
@@ -324,11 +325,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   fun `it consumes extra credits`() {
     testData.addBucketWithExtraCredits()
     saveTestData()
-    performMtRequestAndExpectAfterBalance(100, 1000)
-    performMtRequestAndExpectAfterBalance(0, 200)
+    performMtRequestAndExpectAfterBalance(1, 10)
+    performMtRequestAndExpectAfterBalance(0, 2)
+    performMtRequestAndExpectAfterBalance(0, 0)
     performMtRequestAndExpectBadRequest().andAssertThatJson {
       node("params[0]").isEqualTo("0")
-      node("params[1]").isEqualTo("200")
+      node("params[1]").isEqualTo("0")
     }
   }
 
@@ -339,11 +341,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     val valueWrapperMock = mock<Cache.ValueWrapper>()
     whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
     whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
-    performMtRequestAndExpectAfterBalance(1000)
+    performMtRequestAndExpectAfterBalance(10)
   }
 
   private fun testMtCreditConsumption() {
-    performMtRequestAndExpectAfterBalance(100)
+    performMtRequestAndExpectAfterBalance(1)
+    performMtRequestAndExpectAfterBalance(0)
     performMtRequestAndExpectBadRequest()
   }
 

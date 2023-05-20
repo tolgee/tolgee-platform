@@ -14,6 +14,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { Scopes } from 'tg.fixtures/permissions';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
@@ -37,6 +38,10 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     method: 'get',
     path: {
       keyId: id,
+    },
+    options: {
+      cacheTime: 0,
+      staleTime: 0,
     },
   });
 
@@ -64,14 +69,6 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
 
   const { t } = useTranslate();
 
-  const getAvailableScopes = (): Set<string> => {
-    const userPermissionType = projectLoadable?.data?.computedPermissions?.type;
-    if (!userPermissionType || !availableScopesLoadable?.data) {
-      return new Set();
-    }
-    return new Set(availableScopesLoadable.data[userPermissionType]);
-  };
-
   const handleEdit = (value) =>
     editMutation.mutateAsync(
       {
@@ -93,10 +90,13 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       }
     );
 
-  const getInitialValues = () => {
-    const availableScopes = getAvailableScopes();
+  const availableScopes = new Set(
+    projectLoadable.data?.computedPermission?.scopes ?? []
+  );
 
-    const currentScopes = apiKeyLoadable.data?.scopes.filter((currentScope) =>
+  const getInitialValues = () => {
+    const scopes = apiKeyLoadable.data?.scopes as Scopes;
+    const currentScopes = scopes?.filter((currentScope) =>
       availableScopes.has(currentScope)
     );
 
@@ -155,7 +155,7 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
                     <CheckBoxGroupMultiSelect
                       label="Scopes"
                       name="scopes"
-                      options={getAvailableScopes()}
+                      options={availableScopes}
                     />
                   </Box>
                 </>

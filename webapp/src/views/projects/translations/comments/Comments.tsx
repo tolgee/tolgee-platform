@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { TextField, IconButton, styled } from '@mui/material';
+import { IconButton, styled, TextField } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -8,7 +8,6 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useUser } from 'tg.globalContext/helpers';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { Comment } from './Comment';
 import { useComments } from './useComments';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
@@ -97,9 +96,15 @@ export const Comments: React.FC<Props> = ({
   onCancel,
   editEnabled,
 }) => {
-  const permissions = useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
   const user = useUser();
   const counter = useDateCounter();
+
+  const canAddComment = satisfiesPermission('translation-comments.add');
+  const canEditComment = satisfiesPermission('translation-comments.edit');
+  const canSetCommentState = satisfiesPermission(
+    'translation-comments.set-state'
+  );
 
   const {
     commentsList,
@@ -138,12 +143,7 @@ export const Comments: React.FC<Props> = ({
           )}
 
           {commentsList?.map((comment) => {
-            const canDelete =
-              user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
-            const canChangeState =
-              user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
+            const canDelete = user?.id === comment.author.id || canEditComment;
             const date = new Date(comment.createdAt);
             return (
               <React.Fragment key={comment.id}>
@@ -151,7 +151,7 @@ export const Comments: React.FC<Props> = ({
                 <Comment
                   data={comment}
                   onDelete={canDelete ? handleDelete : undefined}
-                  onChangeState={canChangeState ? changeState : undefined}
+                  onChangeState={canSetCommentState ? changeState : undefined}
                 />
               </React.Fragment>
             );
@@ -163,7 +163,7 @@ export const Comments: React.FC<Props> = ({
         <StyledSmoothProgress loading={isLoading} />
       </StyledProgressWrapper>
 
-      {editEnabled && (
+      {canAddComment && (
         <StyledBottomPanel>
           <StyledTextField
             multiline

@@ -1,33 +1,24 @@
 package io.tolgee.api.v2.hateoas.organization
 
-import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.v2.hateoas.permission.PermissionModel
 import io.tolgee.dtos.Avatar
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "organizations", itemRelation = "organization")
 open class OrganizationModel(
-  val id: Long,
+  override val id: Long,
 
-  @Schema(example = "Beautiful organization")
-  val name: String,
+  override val name: String,
 
-  @Schema(example = "btforg")
-  val slug: String,
+  override val slug: String,
 
-  @Schema(example = "This is a beautiful organization full of beautiful and clever people")
-  val description: String?,
-  val basePermissions: Permission.ProjectPermissionType,
+  override val description: String?,
 
-  @Schema(
-    description = """The role of currently authorized user. 
-    
-Can be null when user has direct access to one of the projects owned by the organization."""
-  )
-  val currentUserRole: OrganizationRoleType?,
+  override val basePermissions: PermissionModel,
 
-  @Schema(example = "Links to avatar images")
-  var avatar: Avatar?
-) : RepresentationModel<OrganizationModel>()
+  override val currentUserRole: OrganizationRoleType?,
+
+  override var avatar: Avatar?,
+) : RepresentationModel<OrganizationModel>(), IOrganizationModel

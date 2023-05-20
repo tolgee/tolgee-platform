@@ -1,72 +1,70 @@
 import { FunctionComponent } from 'react';
-import { T } from '@tolgee/react';
-import { useRouteMatch } from 'react-router-dom';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
-import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
-import { PARAMS } from 'tg.constants/links';
-import { confirmation } from 'tg.hooks/confirmation';
+import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useUpdateBasePermissions } from './useUpdateBasePermissions';
+import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { confirmation } from 'tg.hooks/confirmation';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
-type Permission = components['schemas']['OrganizationDto']['basePermissions'];
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type OrganizationDto = components['schemas']['OrganizationDto'];
 
 const messageService = container.resolve(MessageService);
 
 export const OrganizationBasePermissionMenu: FunctionComponent<{
   organization: OrganizationModel;
-}> = (props) => {
-  const match = useRouteMatch();
-  const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
+}> = ({ organization }) => {
+  const messages = useMessage();
+  const { t } = useTranslate();
 
-  const organization = useApiQuery({
-    url: '/v2/organizations/{slug}',
-    method: 'get',
-    path: { slug: organizationSlug },
-  });
-  const editOrganization = useApiMutation({
-    url: '/v2/organizations/{id}',
-    method: 'put',
+  const { updatePermissions } = useUpdateBasePermissions({
+    organizationId: organization.id,
   });
 
-  const handleSet = (type: Permission) => {
-    confirmation({
-      message: (
-        <T keyName="really_want_to_change_base_permission_confirmation" />
-      ),
-      hardModeText: organization.data?.name?.toUpperCase(),
-      onConfirm: () => {
-        const dto: OrganizationDto = {
-          name: organization.data!.name,
-          slug: organization.data?.slug,
-          basePermissions: type,
-          description: organization.data?.description,
-        };
-        editOrganization.mutate(
-          {
-            path: { id: organization.data!.id },
-            content: { 'application/json': dto },
-          },
-          {
-            onSuccess: () => {
-              messageService.success(
-                <T keyName="organization_member_privileges_set" />
-              );
-              organization.refetch();
-            },
-          }
-        );
-      },
-    });
+  const confirm = () => {
+    return new Promise<void>((resolve, reject) =>
+      confirmation({
+        message: (
+          <T keyName="really_want_to_change_base_permission_confirmation" />
+        ),
+        hardModeText: organization.name?.toUpperCase(),
+        onConfirm: () => {
+          resolve();
+        },
+        onCancel: () => {
+          reject();
+        },
+      })
+    );
   };
+
+  async function handleSubmit(data: PermissionSettingsState) {
+    await confirm();
+
+    try {
+      await updatePermissions(data);
+      messageService.success(
+        <T keyName="organization_member_privileges_set" />
+      );
+    } catch (e) {
+      parseErrorResponse(e).forEach((err) =>
+        messages.error(<TranslatedError code={err} />)
+      );
+    }
+  }
 
   return (
     <PermissionsMenu
-      onSelect={handleSet}
-      selected={organization.data!.basePermissions}
+      modalProps={{
+        onSubmit: handleSubmit,
+        title: t('organization_member_privileges_title'),
+        permissions: organization.basePermissions,
+      }}
     />
   );
 };

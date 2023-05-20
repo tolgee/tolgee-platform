@@ -31,6 +31,8 @@ interface FormProps<T> {
   disabled?: boolean;
   children: ReactNode | ((formikProps: FormikProps<T>) => ReactNode);
   rootSx?: SxProps;
+  hideCancel?: boolean;
+  showResourceError?: boolean;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
@@ -38,6 +40,8 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   validationSchema,
   disabled,
   rootSx = { mb: 2 },
+  hideCancel,
+  showResourceError = true,
   ...props
 }) => {
   const history = useHistory();
@@ -47,9 +51,11 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
 
   return (
     <>
-      {props.saveActionLoadable && props.saveActionLoadable.error && (
-        <ResourceErrorComponent error={props.saveActionLoadable.error} />
-      )}
+      {showResourceError &&
+        props.saveActionLoadable &&
+        props.saveActionLoadable.error && (
+          <ResourceErrorComponent error={props.saveActionLoadable.error} />
+        )}
 
       <Formik
         initialValues={initialValues}
@@ -76,12 +82,14 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                       <Box flexGrow={1}>{props.customActions}</Box>
                     )}
                     <Box display="flex" alignItems="flex-end">
-                      <Button
-                        data-cy="global-form-cancel-button"
-                        onClick={onCancel}
-                      >
-                        <T keyName="global_form_cancel" />
-                      </Button>
+                      {!hideCancel && (
+                        <Button
+                          data-cy="global-form-cancel-button"
+                          onClick={onCancel}
+                        >
+                          <T keyName="global_form_cancel" />
+                        </Button>
+                      )}
                       <Box ml={1}>
                         <LoadingButton
                           data-cy="global-form-save-button"

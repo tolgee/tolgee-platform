@@ -62,6 +62,7 @@ export const SubmenuMulti: React.FC<Props> = React.forwardRef(
               onClose={() => setMenuOpen(null)}
               onSelect={(value) => handleToggle(value)()}
               displaySearch={item.submenu.length > 10}
+              minWidth={150}
               items={item.submenu.map((i) => ({
                 value: i.value!,
                 name: i.label,

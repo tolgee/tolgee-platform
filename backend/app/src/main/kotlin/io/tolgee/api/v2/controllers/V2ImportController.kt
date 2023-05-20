@@ -5,7 +5,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
@@ -22,17 +22,15 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
-import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
@@ -86,9 +84,9 @@ class V2ImportController(
 
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun addFiles(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams
@@ -115,21 +113,22 @@ class V2ImportController(
   }
 
   @PutMapping("/apply")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Imports the data prepared in previous step", summary = "Apply")
   @RequestActivity(ActivityType.IMPORT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun applyImport(
-    @Schema(description = "Whether override or keep all translations with unresolved conflicts")
-    @RequestParam("forceMode", defaultValue = "NO_FORCE") forceMode: ForceMode,
+    @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
+    @RequestParam(defaultValue = "NO_FORCE")
+    forceMode: ForceMode,
   ) {
     val projectId = projectHolder.project.id
     this.importService.import(projectId, authenticationFacade.userAccount.id, forceMode)
   }
 
   @GetMapping("/result")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Returns the result of preparation.", summary = "Get result")
   fun getImportResult(
     @ParameterObject pageable: Pageable
@@ -141,8 +140,8 @@ class V2ImportController(
   }
 
   @GetMapping("/result/languages/{languageId}")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Returns language prepared to import.", summary = "Get import language")
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
@@ -153,23 +152,23 @@ class V2ImportController(
   }
 
   @GetMapping("/result/languages/{languageId}/translations")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Returns translations prepared to import.", summary = "Get translations")
   fun getImportTranslations(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("languageId") languageId: Long,
-    @Schema(
+    @Parameter(
       description = "Whether only translations, which are in conflict " +
         "with existing translations should be returned"
     )
     @RequestParam("onlyConflicts", defaultValue = "false") onlyConflicts: Boolean = false,
-    @Schema(
+    @Parameter(
       description = "Whether only translations with unresolved conflicts" +
         "with existing translations should be returned"
     )
     @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
-    @Schema(description = "String to search in translation text or key")
+    @Parameter(description = "String to search in translation text or key")
     @RequestParam("search") search: String? = null,
     @ParameterObject @SortDefault("keyName") pageable: Pageable
   ): PagedModel<ImportTranslationModel> {
@@ -179,16 +178,16 @@ class V2ImportController(
   }
 
   @DeleteMapping("")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Deletes prepared import data.", summary = "Delete")
   fun cancelImport() {
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.userAccount.id)
   }
 
   @DeleteMapping("/result/languages/{languageId}")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(description = "Deletes language prepared to import.", summary = "Delete language")
   fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
     val language = checkImportLanguageInProject(languageId)
@@ -196,8 +195,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Resolves translation conflict. The old translation will be overridden.",
     summary = "Resolve conflict (override)"
@@ -210,8 +209,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Resolves translation conflict. The old translation will be kept.",
     summary = "Resolve conflict (keep existing)"
@@ -224,8 +223,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Resolves all translation conflicts for provided language. The old translations will be overridden.",
     summary = "Resolve all translation conflicts (override)"
@@ -237,8 +236,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Resolves all translation conflicts for provided language. The old translations will be kept.",
     summary = "Resolve all translation conflicts (keep existing)"
@@ -250,8 +249,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/files/{fileId}/select-namespace")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Sets namespace for file to import.",
     summary = "Select namespace"
@@ -266,8 +265,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Sets existing language to pair with language to import. " +
       "Data will be imported to selected existing language when applied.",
@@ -283,8 +282,8 @@ class V2ImportController(
   }
 
   @PutMapping("/result/languages/{importLanguageId}/reset-existing")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Resets existing language paired with language to import.",
     summary = "Reset existing language pairing"
@@ -297,8 +296,8 @@ class V2ImportController(
   }
 
   @GetMapping("/result/files/{importFileId}/issues")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Returns issues for uploaded file.",
     summary = "Get file issues"
@@ -313,8 +312,8 @@ class V2ImportController(
   }
 
   @GetMapping("/all-namespaces")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
+  @AccessWithAnyProjectPermission()
+  @AccessWithApiKey()
   @Operation(
     description = "Returns all existing and imported namespaces",
     summary = "Get namespaces"

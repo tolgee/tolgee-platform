@@ -1,5 +1,12 @@
 import { HOST, PASSWORD, USERNAME } from '../common/constants';
 import { waitForGlobalLoading } from './loading';
+import { getInput } from './xPath';
+import { gcy } from './shared';
+import {
+  deleteUserSql,
+  enableEmailVerification,
+  enableRegistration,
+} from './apiCalls/common';
 
 export const loginWithFakeGithub = () => {
   cy.intercept('https://github.com/login/oauth/**', {
@@ -46,4 +53,27 @@ export const loginViaForm = (username = USERNAME, password = PASSWORD) => {
     .should('have.value', password);
   cy.gcy('login-button').click();
   waitForGlobalLoading();
+};
+
+export const visitSignUp = () => cy.visit(HOST + '/sign_up');
+
+export const fillAndSubmitSignUpForm = (
+  username: string,
+  withOrganization = true
+) => {
+  cy.waitForDom();
+  cy.xpath(getInput('name')).should('be.visible').type('Test user');
+  cy.xpath(getInput('email')).type(username);
+  if (withOrganization) {
+    cy.xpath(getInput('organizationName')).type('organization');
+  }
+  cy.xpath(getInput('password')).type('password');
+  cy.xpath(getInput('passwordRepeat')).type('password');
+  gcy('sign-up-submit-button').click();
+};
+
+export const signUpAfter = (username: string) => {
+  enableEmailVerification();
+  enableRegistration();
+  deleteUserSql(username);
 };

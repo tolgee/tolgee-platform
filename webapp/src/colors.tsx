@@ -32,7 +32,9 @@ export type Activity = {
 export type BillingProgress = {
   background: string;
   low: string;
+  over: string;
   sufficient: string;
+  separator: string;
 };
 
 export type Marker = {
@@ -69,13 +71,19 @@ export const colors = {
     billingProgress: {
       background: '#C4C4C4',
       low: '#E80000',
+      over: '#ffce00',
       sufficient: '#17AD18',
+      separator: '#656565',
     } as BillingProgress,
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
       secondary: '#ffc0cb',
+    },
+    tooltip: {
+      background: '#ffffff',
+      text: '#111111',
     },
   },
   dark: {
@@ -121,7 +129,9 @@ export const colors = {
     billingProgress: {
       background: '#565656',
       low: '#ca0000',
+      over: '#ffce00',
       sufficient: '#1e991e',
+      separator: '#656565',
     } as BillingProgress,
     billingPlan: '#233043',
     globalLoading: '#ff6995',
@@ -129,5 +139,9 @@ export const colors = {
       primary: '#ff0000',
       secondary: '#ffc0cb',
     } as Marker,
+    tooltip: {
+      background: '#394556',
+      text: '#efefef',
+    },
   },
 } as const;

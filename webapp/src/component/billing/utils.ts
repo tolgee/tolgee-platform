@@ -1,35 +1,51 @@
 import { components } from 'tg.service/apiSchema.generated';
 
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 export type ProgressData = {
-  translationsAvailable: number;
+  usesSlots: boolean;
+  translationsUsed: number;
   translationsMax: number;
   translationsProgress: number;
-  creditAvailable: number;
+  isPayAsYouGo: boolean;
+  // translationsLimit: number;
+  creditUsed: number;
   creditMax: number;
   creditProgress: number;
-  smallerProgress: number;
+  biggerProgress: number;
 };
 
 export const getProgressData = (usage: UsageModel): ProgressData => {
-  const translationsAvailable =
-    usage.translationLimit - usage.currentTranslations;
-  const translationsMax = usage.translationLimit;
+  const usesSlots = usage.translationSlotsLimit !== -1;
+  const translationsUsed = usesSlots
+    ? usage.currentTranslationSlots
+    : usage.currentTranslations;
 
-  const creditAvailable = usage.creditBalance + usage.extraCreditBalance;
-  const translationsProgress =
-    (translationsAvailable / usage.translationLimit) * 100;
+  const translationsMax = usesSlots
+    ? usage.includedTranslationSlots
+    : usage.includedTranslations;
+
+  const translationsLimit = usesSlots
+    ? usage.translationSlotsLimit
+    : usage.translationsLimit;
+  const translationsProgress = translationsUsed / translationsMax;
+  const isPayAsYouGo = translationsLimit > translationsMax;
+
   const creditMax = usage.includedMtCredits;
-  const creditProgress = (creditAvailable / creditMax) * 100;
+  const creditUsed =
+    creditMax - usage.creditBalance + usage.currentPayAsYouGoMtCredits;
+  const creditProgress = creditUsed / creditMax;
 
   return {
-    translationsAvailable,
+    usesSlots,
+    translationsUsed,
     translationsMax,
     translationsProgress,
-    creditAvailable,
+    isPayAsYouGo,
+    // translationsLimit,
+    creditUsed,
     creditMax,
     creditProgress,
-    smallerProgress: Math.min(translationsProgress, creditProgress),
+    biggerProgress: Math.max(translationsProgress, creditProgress),
   };
 };

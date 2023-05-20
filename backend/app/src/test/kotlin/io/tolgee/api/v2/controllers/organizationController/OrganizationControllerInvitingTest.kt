@@ -6,32 +6,26 @@ import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.fixtures.JavaMailSenderMocked
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.mail.javamail.JavaMailSender
-import javax.mail.internet.MimeMessage
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailSenderMocked {
+class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
 
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"
@@ -42,10 +36,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
   lateinit var dummyDto: OrganizationDto
 
   @Autowired
-  @MockBean
-  override lateinit var javaMailSender: JavaMailSender
-
-  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @BeforeEach
   fun setup() {
@@ -53,9 +44,9 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
       "Test org",
       "This is description",
       "test-org",
-      Permission.ProjectPermissionType.VIEW
     )
     tolgeeProperties.frontEndUrl = null
+    emailTestUtil.initMocks()
   }
 
   @Test
@@ -173,12 +164,12 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest(), JavaMailS
     val organization = prepareTestOrganization()
 
     val code = inviteWithUserWithNameAndEmail(organization.id)
-    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    emailTestUtil.verifyEmailSent()
 
-    val messageContent = messageArgumentCaptor.value.tolgeeStandardMessageContent
+    val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
     assertThat(messageContent).contains("http://localhost/")
-    assertEmailTo().isEqualTo(INVITED_EMAIL)
+    emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
   @Test

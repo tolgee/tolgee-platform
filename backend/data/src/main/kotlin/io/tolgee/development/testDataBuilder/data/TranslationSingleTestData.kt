@@ -3,9 +3,9 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -47,22 +47,22 @@ class TranslationSingleTestData {
     }.build {
       addPermission {
         user = this@TranslationSingleTestData.user
-        type = Permission.ProjectPermissionType.MANAGE
+        type = ProjectPermissionType.MANAGE
       }
 
       addPermission {
         user = this@TranslationSingleTestData.pepa
-        type = Permission.ProjectPermissionType.EDIT
+        type = ProjectPermissionType.EDIT
       }
 
       addPermission {
         user = jindra.self
-        type = Permission.ProjectPermissionType.TRANSLATE
+        type = ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
         user = vojta.self
-        type = Permission.ProjectPermissionType.VIEW
+        type = ProjectPermissionType.VIEW
       }
 
       englishLanguage = addLanguage {

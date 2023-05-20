@@ -32,7 +32,7 @@ class OrganizationStatsService(
       .singleResult as Long
   }
 
-  fun getCurrentTranslationCount(organizationId: Long): Long {
+  fun getCurrentTranslationSlotCount(organizationId: Long): Long {
     val result = entityManager.createNativeQuery(
       """
       select 
@@ -50,5 +50,15 @@ class OrganizationStatsService(
       """.trimIndent()
     ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
     return result.toLong()
+  }
+
+  fun getCurrentTranslationCount(organizationId: Long): Long {
+    return entityManager.createQuery(
+      """
+      select count(t) from Translation t where 
+        t.key.project.organizationOwner.id = :organizationId and 
+        t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED
+      """.trimIndent()
+    ).setParameter("organizationId", organizationId).singleResult as Long? ?: 0
   }
 }

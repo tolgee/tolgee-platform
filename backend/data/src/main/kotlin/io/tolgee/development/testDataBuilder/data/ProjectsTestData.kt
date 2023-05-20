@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Language
-import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
 
 class ProjectsTestData : BaseTestData() {
@@ -30,7 +30,7 @@ class ProjectsTestData : BaseTestData() {
 
         addPermission {
           user = this@ProjectsTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
+          type = ProjectPermissionType.MANAGE
         }
 
         project2English = addLanguage {
@@ -47,8 +47,8 @@ class ProjectsTestData : BaseTestData() {
         addPermission {
           user = userWithTranslatePermission
           project = project2
-          type = Permission.ProjectPermissionType.TRANSLATE
-          languages = mutableSetOf(project2Deutsch, project2English)
+          type = ProjectPermissionType.TRANSLATE
+          translateLanguages = mutableSetOf(project2Deutsch, project2English)
         }
 
         addKey {

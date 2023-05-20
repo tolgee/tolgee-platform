@@ -3,10 +3,9 @@ import { Box, Select, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
-import { SearchSelectMulti } from './SearchSelectMulti';
 
-export type SelectItem = {
-  value: string;
+export type SelectItem<T> = {
+  value: T;
   name: string;
 };
 
@@ -19,24 +18,23 @@ const StyledInputContent = styled('div')`
   height: 23px;
 `;
 
-type Props = {
-  onChange?: (value: string | string[]) => void;
-  onSelect?: (value: string) => void;
+type Props<T> = {
+  onChange?: (value: T) => void;
+  onSelect?: (value: T) => void;
   anchorEl?: HTMLElement;
-  items: SelectItem[];
-  value: string | string[] | undefined;
+  items: SelectItem<T>[];
+  value: T | undefined;
   onAddNew?: (searchValue: string) => void;
   searchPlaceholder?: string;
   title?: string;
   addNewTooltip?: string;
   displaySearch?: boolean;
   popperMinWidth?: string | number;
-  multiple?: boolean;
-  renderValue?: (value: string | string[] | undefined) => React.ReactNode;
+  renderValue?: (value: T | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
 };
 
-export const SearchSelect: React.FC<Props> = ({
+export function SearchSelect<T extends React.Key>({
   onChange,
   onSelect,
   items,
@@ -47,10 +45,9 @@ export const SearchSelect: React.FC<Props> = ({
   addNewTooltip,
   displaySearch = true,
   popperMinWidth,
-  multiple,
   renderValue,
   SelectProps,
-}) => {
+}: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -62,16 +59,9 @@ export const SearchSelect: React.FC<Props> = ({
     setIsOpen(true);
   };
 
-  const handleSelect = (newValue: string) => {
+  const handleSelect = (newValue: T) => {
     onSelect?.(newValue);
-    if (multiple && Array.isArray(value)) {
-      const newValues = value.includes(newValue)
-        ? value.filter((i) => i !== newValue)
-        : [...value, newValue];
-      onChange?.(newValues);
-    } else {
-      onChange?.(newValue);
-    }
+    onChange?.(newValue);
   };
 
   const myRenderValue = () => (
@@ -109,38 +99,21 @@ export const SearchSelect: React.FC<Props> = ({
         onClose={handleClose}
         anchorEl={anchorEl.current!}
       >
-        {multiple ? (
-          <SearchSelectMulti
-            open={isOpen}
-            onClose={handleClose}
-            value={value as string[]}
-            onSelect={handleSelect}
-            anchorEl={anchorEl.current!}
-            items={items}
-            onAddNew={handleOnAddNew}
-            displaySearch={displaySearch}
-            searchPlaceholder={searchPlaceholder}
-            title={title}
-            addNewTooltip={addNewTooltip}
-            minWidth={popperMinWidth}
-          />
-        ) : (
-          <SearchSelectContent
-            open={isOpen}
-            onClose={handleClose}
-            selected={value as string | undefined}
-            onSelect={handleSelect}
-            anchorEl={anchorEl.current!}
-            items={items}
-            onAddNew={handleOnAddNew}
-            displaySearch={displaySearch}
-            searchPlaceholder={searchPlaceholder}
-            title={title}
-            addNewTooltip={addNewTooltip}
-            minWidth={popperMinWidth}
-          />
-        )}
+        <SearchSelectContent
+          open={isOpen}
+          onClose={handleClose}
+          selected={value as string | undefined}
+          onSelect={handleSelect}
+          anchorEl={anchorEl.current!}
+          items={items}
+          onAddNew={handleOnAddNew}
+          displaySearch={displaySearch}
+          searchPlaceholder={searchPlaceholder}
+          title={title}
+          addNewTooltip={addNewTooltip}
+          minWidth={popperMinWidth}
+        />
       </SearchSelectPopover>
     </Box>
   );
-};
+}

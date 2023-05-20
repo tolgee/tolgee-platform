@@ -1,9 +1,11 @@
 package io.tolgee.controllers
 
+import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language
-import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
@@ -56,9 +58,23 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   }
 
   @Test
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
   fun exportZipJsonApiKeyPermissionFail() {
     performProjectAuthGet("export/jsonZip").andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  fun `exports only permitted langs`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.viewEnOnlyUser
+    projectSupplier = { testData.project }
+    val result = performProjectAuthGet("export/jsonZip")
+      .andDo { obj: MvcResult -> obj.asyncResult }
+      .andReturn()
+    val fileSizes = parseZip(result.response.contentAsByteArray)
+    Assertions.assertThat(fileSizes).containsOnlyKeys("en.json")
   }
 
   private fun parseZip(responseContent: ByteArray): Map<String, Long> {

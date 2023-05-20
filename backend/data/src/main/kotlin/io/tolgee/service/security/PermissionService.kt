@@ -5,34 +5,45 @@ package io.tolgee.service.security
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.ProjectPermissionData
+import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.cacheable.PermissionDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.misc.CreateProjectInvitationParams
+import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
-import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
+import io.tolgee.service.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class PermissionService(
   private val permissionRepository: PermissionRepository,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   @Lazy
+  private val languageService: LanguageService,
+  @Lazy
   private val userPreferencesService: UserPreferencesService,
+  @Lazy
+  private val applicationContext: ApplicationContext
 ) {
   @set:Autowired
   @set:Lazy
@@ -51,37 +62,34 @@ class PermissionService(
   }
 
   fun findById(id: Long): Permission? {
-    return cachedPermissionService.findById(id)
+    return cachedPermissionService.find(id)
   }
 
-  fun getProjectPermissionType(projectId: Long, userAccount: UserAccount) =
-    getProjectPermissionType(projectId, userAccount.id)
+  fun getProjectPermissionScopes(projectId: Long, userAccount: UserAccount) =
+    getProjectPermissionScopes(projectId, userAccount.id)
 
-  fun getProjectPermissionType(projectId: Long, userAccountId: Long): ProjectPermissionType? {
-    return getProjectPermissionData(projectId, userAccountId).computedPermissions.type
+  fun getProjectPermissionScopes(projectId: Long, userAccountId: Long): Array<Scope>? {
+    return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
   }
 
   fun getProjectPermissionData(project: ProjectDto, userAccountId: Long): ProjectPermissionData {
-    val projectPermission = findOneDtoByProjectIdAndUserId(project.id, userAccountId)
+    val projectPermission = find(projectId = project.id, userId = userAccountId)
 
     val organizationRole = project.organizationOwnerId
       ?.let { organizationRoleService.findType(userAccountId, it) }
 
-    val organizationBasePermissionType = project.organizationOwnerId?.let {
-      organizationService.find(it)?.basePermissions ?: throw NotFoundException()
-    }
+    val organizationBasePermission = find(organizationId = project.organizationOwnerId)
+      ?: throw IllegalStateException("Organization has no base permission")
 
-    val computed = computeProjectPermissionType(
+    val computed = computeProjectPermission(
       organizationRole = organizationRole,
-      organizationBasePermissionType = organizationBasePermissionType,
-      projectPermissionType = projectPermission?.type,
-      projectPermission?.languageIds
+      organizationBasePermission = organizationBasePermission,
+      directPermission = projectPermission
     )
 
     return ProjectPermissionData(
-      project = project,
       organizationRole = organizationRole,
-      organizationBasePermissions = organizationBasePermissionType,
+      organizationBasePermissions = organizationBasePermission,
       computedPermissions = computed,
       directPermissions = projectPermission
     )
@@ -127,6 +135,15 @@ class PermissionService(
     }
   }
 
+  fun delete(permissionId: Long) {
+    val permission = get(permissionId)
+    delete(permission)
+  }
+
+  fun get(permissionId: Long): Permission {
+    return this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
+  }
+
   /**
    * Deletes all permissions in project
    * No need to evict cache, since this is only used when project is deleted
@@ -146,55 +163,53 @@ class PermissionService(
     create(permission)
   }
 
-  fun computeProjectPermissionType(
+  fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
-    organizationBasePermissionType: ProjectPermissionType?,
-    projectPermissionType: ProjectPermissionType?,
-    projectPermissionLanguages: Set<Long>?
+    organizationBasePermission: IPermission,
+    directPermission: IPermission?
   ): ComputedPermissionDto {
-    if (organizationRole == null) {
-      return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
+    if (organizationRole == OrganizationRoleType.OWNER) {
+      return ComputedPermissionDto.ADMIN
     }
 
-    if (organizationRole == OrganizationRoleType.OWNER) {
-      return ComputedPermissionDto(ProjectPermissionType.MANAGE, null)
+    if (directPermission != null) {
+      return ComputedPermissionDto(directPermission)
     }
 
     if (organizationRole == OrganizationRoleType.MEMBER) {
-      if (projectPermissionType == null) {
-        return ComputedPermissionDto(organizationBasePermissionType, null)
-      }
-      if (organizationBasePermissionType == null) {
-        return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
-      }
-
-      if (projectPermissionType.power > organizationBasePermissionType.power) {
-        return ComputedPermissionDto(projectPermissionType, projectPermissionLanguages)
-      }
+      return ComputedPermissionDto(organizationBasePermission)
     }
-    return ComputedPermissionDto(organizationBasePermissionType, null)
+
+    return ComputedPermissionDto.NONE
   }
 
   fun createForInvitation(
     invitation: Invitation,
-    project: Project,
-    type: ProjectPermissionType,
-    languages: Collection<Language>?
+    params: CreateProjectInvitationParams
   ): Permission {
-    return cachedPermissionService.createForInvitation(invitation, project, type, languages)
+    val type = params.type ?: throw IllegalStateException("Permission type cannot be null")
+
+    validateLanguagePermissions(params.languagePermissions, type)
+
+    val permission = Permission(
+      invitation = invitation,
+      project = params.project,
+      type = type
+    )
+
+    setPermissionLanguages(permission, params.languagePermissions, params.project.id)
+
+    return this.save(permission)
   }
 
-  fun findOneByProjectIdAndUserId(projectId: Long, userId: Long): Permission? {
-    return cachedPermissionService.findOneByProjectIdAndUserId(projectId, userId)
-  }
-
-  fun findOneDtoByProjectIdAndUserId(projectId: Long, userId: Long): PermissionDto? {
-    return cachedPermissionService.findOneDtoByProjectIdAndUserId(projectId, userId)
+  @Transactional
+  fun find(projectId: Long? = null, userId: Long? = null, organizationId: Long? = null): PermissionDto? {
+    return cachedPermissionService.find(projectId = projectId, userId = userId, organizationId = organizationId)
   }
 
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
     // switch user to the organization when accepted invitation
-    userPreferencesService.setPreferredOrganization(permission.project.organizationOwner, userAccount)
+    userPreferencesService.setPreferredOrganization(permission.project!!.organizationOwner, userAccount)
     return cachedPermissionService.acceptInvitation(permission, userAccount)
   }
 
@@ -202,53 +217,117 @@ class PermissionService(
     projectId: Long,
     userId: Long,
     newPermissionType: ProjectPermissionType,
-    languages: Set<Language>? = null
+    languages: LanguagePermissions
   ): Permission? {
-    validateLanguagePermissions(languages, newPermissionType)
+    validateLanguagePermissions(
+      languagePermissions = languages,
+      newPermissionType = newPermissionType
+    )
 
+    val permission = getOrCreateDirectPermission(projectId, userId)
+
+    permission.scopes = emptyArray()
+    permission.type = newPermissionType
+
+    setPermissionLanguages(permission, languages, projectId)
+
+    return this.save(permission)
+  }
+
+  fun getOrCreateDirectPermission(
+    projectId: Long,
+    userId: Long
+  ): Permission {
     val data = this.getProjectPermissionData(projectId, userId)
 
-    data.computedPermissions.type ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    checkUserIsInProject(data)
 
     data.organizationRole?.let {
       if (data.organizationRole == OrganizationRoleType.OWNER) {
         throw BadRequestException(Message.USER_IS_ORGANIZATION_OWNER)
       }
-
-      if (data.organizationBasePermissions!!.power > newPermissionType.power) {
-        throw BadRequestException(Message.CANNOT_SET_LOWER_THAN_ORGANIZATION_BASE_PERMISSIONS)
-      }
-
-      if (data.organizationBasePermissions == newPermissionType && data.directPermissions != null) {
-        findById(data.directPermissions.id)?.let {
-          delete(it)
-        }
-        return null
-      }
     }
 
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
       val userAccount = userAccountService.get(userId)
-      val project = projectService.get(data.project.id)
-      Permission(user = userAccount, project = project, type = newPermissionType)
+      val project = projectService.get(projectId)
+      Permission(user = userAccount, project = project)
     }
+    return permission
+  }
 
-    permission.type = newPermissionType
-    permission.languages = languages?.toMutableSet() ?: mutableSetOf()
-    return cachedPermissionService.save(permission)
+  private fun checkUserIsInProject(data: ProjectPermissionData) {
+    val hasOrganizationRole = data.organizationRole != null
+    val hasDirectPermissions = data.directPermissions != null
+
+    if (!hasDirectPermissions && !hasOrganizationRole) {
+      throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+    }
+  }
+
+  private fun Set<Language>?.standardize(): MutableSet<Language> {
+    if (this === null) {
+      return mutableSetOf()
+    }
+    return toMutableSet()
+  }
+
+  @Transactional
+  fun setPermissionLanguages(
+    permission: Permission,
+    languagePermissions: LanguagePermissions,
+    projectId: Long
+  ) {
+    permission.translateLanguages = languagePermissions.translate.standardize()
+    permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
+    permission.viewLanguages = languagePermissions.view.standardize()
+
+    if (permission.viewLanguages.isNotEmpty()) {
+      permission.viewLanguages.addAll(permission.translateLanguages)
+      permission.viewLanguages.addAll(permission.stateChangeLanguages)
+    }
   }
 
   private fun validateLanguagePermissions(
-    languages: Set<Language>?,
+    languagePermissions: LanguagePermissions,
     newPermissionType: ProjectPermissionType
   ) {
-    if (!languages.isNullOrEmpty() && newPermissionType != ProjectPermissionType.TRANSLATE) {
-      throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
+    val isTranslate = newPermissionType == ProjectPermissionType.TRANSLATE
+    val isReview = newPermissionType == ProjectPermissionType.REVIEW
+
+    val hasTranslateLanguages = !languagePermissions.translate.isNullOrEmpty()
+    val hasViewLanguages = !languagePermissions.view.isNullOrEmpty()
+    val hasStateChangeLanguages = !languagePermissions.stateChange.isNullOrEmpty()
+
+    if (hasViewLanguages) {
+      throw BadRequestException(Message.CANNOT_SET_VIEW_LANGUAGES_WITHOUT_FOR_LEVEL_BASED_PERMISSIONS)
+    }
+
+    if (hasStateChangeLanguages && (!isReview)) {
+      throw BadRequestException(Message.ONLY_REVIEW_PERMISSION_ACCEPTS_STATE_CHANGE_LANGUAGES)
+    }
+
+    if (hasTranslateLanguages && (!isTranslate && !isReview)) {
+      throw BadRequestException(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    }
+
+    if (isReview && (hasTranslateLanguages || hasStateChangeLanguages)) {
+      val equal = languagePermissions.stateChange?.size == languagePermissions.translate?.size &&
+        languagePermissions.stateChange?.containsAll(languagePermissions.translate ?: emptyList()) ?: false
+      if (!equal) {
+        throw BadRequestException(
+          Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS
+        )
+      }
     }
   }
 
   fun saveAll(permissions: Iterable<Permission>) {
-    cachedPermissionService.saveAll(permissions)
+    permissions.forEach { this.save(it) }
+  }
+
+  fun save(permission: Permission): Permission {
+    return cachedPermissionService.save(permission)
   }
 
   fun revoke(projectId: Long, userId: Long) {
@@ -266,21 +345,10 @@ class PermissionService(
     userPreferencesService.refreshPreferredOrganization(userId)
   }
 
-  fun onLanguageDeleted(language: Language) {
+  fun removeLanguageFromPermissions(language: Language) {
     val permissions = permissionRepository.findAllByPermittedLanguage(language)
     permissions.forEach { permission ->
-      val hasAccessOnlyToDeletedLanguage = permission.languages.size == 1 &&
-        permission.languages.first().id == language.id
-
-      if (hasAccessOnlyToDeletedLanguage) {
-        permission.languages = mutableSetOf()
-        permission.type = ProjectPermissionType.VIEW
-        cachedPermissionService.save(permission)
-        return@forEach
-      }
-
-      permission.languages.removeIf { it.id == language.id }
-      cachedPermissionService.save(permission)
+      LanguageDeletedPermissionUpdater(applicationContext = applicationContext, permission, language).invoke()
     }
   }
 
@@ -298,5 +366,37 @@ class PermissionService(
       ?: throw NotFoundException()
 
     this.delete(permissionEntity)
+  }
+
+  fun getPermittedViewLanguages(projectId: Long, userId: Long): Collection<Language> {
+    val permissionData = this.getProjectPermissionData(projectId, userId)
+
+    val allLanguages = languageService.findAll(projectId)
+    val viewLanguageIds = permissionData.computedPermissions.viewLanguageIds
+
+    val permittedLanguages = if (viewLanguageIds.isNullOrEmpty())
+      allLanguages
+    else
+      allLanguages.filter {
+        viewLanguageIds.contains(
+          it.id
+        )
+      }
+
+    return permittedLanguages
+  }
+
+  @Transactional
+  fun setOrganizationBasePermissions(projectId: Long, userId: Long) {
+    val project = projectService.get(projectId)
+    organizationRoleService.checkUserIsMemberOrOwner(userId, project.organizationOwner.id)
+    val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
+    delete(permission.id)
+  }
+
+  fun removeAllProjectInOrganization(organizationId: Long, userId: Long): List<Permission> {
+    val permissions = permissionRepository.findAllByOrganizationAndUserId(organizationId, userId)
+    permissions.forEach { delete(it) }
+    return permissions
   }
 }

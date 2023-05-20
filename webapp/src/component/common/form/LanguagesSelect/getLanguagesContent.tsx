@@ -12,11 +12,17 @@ type Props = {
   onChange: (value: string[]) => void;
   languages: LanguageModel[];
   value: string[];
+  disabledLanguages: number[] | undefined;
 };
 
 const messaging = container.resolve(MessageService);
 
-export const getLanguagesContent = ({ languages, value, onChange }: Props) => {
+export const getLanguagesContent = ({
+  languages,
+  value,
+  onChange,
+  disabledLanguages,
+}: Props) => {
   const handleLanguageChange = (lang: string) => () => {
     const baseLang = languages.find((l) => l.base)?.tag;
     const result = value.includes(lang)
@@ -36,6 +42,7 @@ export const getLanguagesContent = ({ languages, value, onChange }: Props) => {
       value={lang.tag}
       data-cy="translations-language-select-item"
       onClick={handleLanguageChange(lang.tag)}
+      disabled={disabledLanguages?.includes(lang.id)}
     >
       <Checkbox checked={value?.includes(lang.tag)} size="small" />
       <ListItemText primary={lang.name} />

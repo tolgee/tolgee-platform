@@ -3,7 +3,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type UsageModel = components['schemas']['UsageModel'];
+type UsageModel = components['schemas']['PublicUsageModel'];
 
 type Props = {
   organization?: OrganizationModel;
@@ -19,6 +19,7 @@ export const useOrganizationUsageService = ({
     UsageModel | undefined
   >(undefined);
   const [planLimitErrors, setPlanLimitErrors] = useState(0);
+  const [spendingLimitErrors, setSpendingLimitErrors] = useState(0);
 
   const usageEnabled =
     organization?.id !== undefined && enabled && isOrganizationMember;
@@ -53,6 +54,10 @@ export const useOrganizationUsageService = ({
     setPlanLimitErrors((v) => v + 1);
   };
 
+  const incrementSpendingLimitErrors = () => {
+    setSpendingLimitErrors((v) => v + 1);
+  };
+
   const refetch = () => {
     if (usageEnabled) {
       usageLoadable.refetch();
@@ -60,18 +65,20 @@ export const useOrganizationUsageService = ({
   };
 
   useEffect(() => {
-    if (planLimitErrors) {
+    if (planLimitErrors || spendingLimitErrors) {
       refetch();
     }
-  }, [planLimitErrors]);
+  }, [planLimitErrors, spendingLimitErrors]);
 
   return {
     data: {
       usage: organizationUsage,
       planLimitErrors,
+      spendingLimitErrors,
     },
     refetch,
     updateData,
     incrementPlanLimitErrors,
+    incrementSpendingLimitErrors,
   };
 };

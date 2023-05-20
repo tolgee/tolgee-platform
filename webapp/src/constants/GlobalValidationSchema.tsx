@@ -298,6 +298,10 @@ export class Validation {
   static readonly NAMESPACE_FORM = Yup.object({
     namespace: Yup.string().required().max(100),
   });
+
+  static readonly EE_LICENSE_FORM = Yup.object({
+    licenseKey: Yup.string().required().max(100),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

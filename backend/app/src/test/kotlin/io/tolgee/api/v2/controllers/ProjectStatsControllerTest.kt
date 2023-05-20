@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
@@ -24,7 +24,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private var activityCounter = 0
 
-  @MockBean
+  @SpyBean
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
@@ -105,7 +105,6 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       isEqualTo(
         """
       {
-        "2022-03-20" : 1,
         "2022-04-01" : 1,
         "2022-04-05" : 5,
         "2022-04-20" : 2

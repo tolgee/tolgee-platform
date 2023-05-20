@@ -7,14 +7,17 @@ import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
+import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,7 +41,8 @@ class OrganizationService(
   private val avatarService: AvatarService,
   @Lazy
   private val userPreferencesService: UserPreferencesService,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
+  private val permissionService: PermissionService
 ) {
 
   @set:Autowired
@@ -63,16 +67,24 @@ class OrganizationService(
     val slug = createDto.slug
       ?: generateSlug(createDto.name)
 
-    Organization(
+    val basePermission = Permission(
+      type = ProjectPermissionType.VIEW,
+    )
+
+    val organization = Organization(
       name = createDto.name,
       description = createDto.description,
       slug = slug,
-      basePermissions = createDto.basePermissions
-    ).let {
-      organizationRepository.save(it)
-      organizationRoleService.grantOwnerRoleToUser(userAccount, it)
-      return it
-    }
+    )
+
+    organization.basePermission = basePermission
+
+    basePermission.organization = organization
+    permissionService.create(basePermission)
+
+    organizationRepository.save(organization)
+    organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
+    return organization
   }
 
   fun createPreferred(userAccount: UserAccount, name: String = userAccount.name): Organization {
@@ -85,7 +97,6 @@ class OrganizationService(
 
   private fun generateSlug(name: String) =
     slugGenerator.generate(name, 3, 60) {
-      @Suppress("BlockingMethodInNonBlockingContext") // this is bug in IDEA
       this.validateSlugUniqueness(it)
     }
 
@@ -171,7 +182,7 @@ class OrganizationService(
     organization.name = editDto.name
     organization.description = editDto.description
     organization.slug = newSlug
-    organization.basePermissions = editDto.basePermissions
+
     organizationRepository.save(organization)
     return OrganizationView.of(organization, OrganizationRoleType.OWNER)
   }
@@ -188,7 +199,7 @@ class OrganizationService(
       invitationService.delete(invitation)
     }
 
-    organization.prefereredBy
+    organization.preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
         it.preferredOrganization = findOrCreatePreferred(
@@ -258,5 +269,17 @@ class OrganizationService(
 
   fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
     return organizationRepository.findAllViews(pageable, search, userId)
+  }
+
+  fun getProjectOwner(projectId: Long): Organization {
+    return organizationRepository.getProjectOwner(projectId)
+  }
+
+  fun setBasePermission(organizationId: Long, permissionType: ProjectPermissionType) {
+    val organization = get(organizationId)
+    val basePermission = organization.basePermission
+    basePermission.type = permissionType
+    basePermission.scopes = arrayOf()
+    permissionService.save(basePermission)
   }
 }

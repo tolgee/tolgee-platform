@@ -68,8 +68,6 @@ export const useTranslationsService = (props: Props) => {
     [filters]
   );
 
-  // wait for initialLangs to not be null
-  const [enabled, setEnabled] = useState(props.initialLangs !== null);
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
 
   const [urlSearch, _setUrlSearch] = useUrlSearchState('search', {
@@ -79,14 +77,16 @@ export const useTranslationsService = (props: Props) => {
   const messaging = useMessage();
 
   const [search, _setSearch] = useState(urlSearch);
-  const [languages, _setLanguages] = useState<string[] | undefined>(undefined);
+  const [languages, _setLanguages] = useState<string[] | undefined>(
+    props.initialLangs || undefined
+  );
 
   const [manuallyInserted, setManuallyInserted] = useState(0);
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
     sort: ['keyNamespace', 'keyName'],
-    languages: undefined,
+    languages: props.initialLangs || [],
   });
 
   useEffect(() => {
@@ -97,18 +97,6 @@ export const useTranslationsService = (props: Props) => {
     }, 500);
     return () => clearTimeout(timer);
   }, [languages]);
-
-  useEffect(() => {
-    if (props.initialLangs !== null) {
-      const languages = props.initialLangs?.slice(0, MAX_LANGUAGES);
-      setEnabled(true);
-      setQuery({
-        ...query,
-        languages: languages,
-      });
-      _setLanguages(languages);
-    }
-  }, [props.initialLangs]);
 
   const [fixedTranslations, setFixedTranslations] = useState<
     DeletableKeyWithTranslationsModelType[] | undefined
@@ -140,9 +128,6 @@ export const useTranslationsService = (props: Props) => {
     query: requestQuery,
     options: {
       cacheTime: 0,
-      // fetch after languages are loaded,
-      // so we dont't try to fetch nonexistant languages
-      enabled: enabled,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (
@@ -160,6 +145,17 @@ export const useTranslationsService = (props: Props) => {
       },
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
+
+        const selectedLanguages = data.pages[0].selectedLanguages.map(
+          (l) => l.tag
+        );
+        if (query.languages?.toString() !== selectedLanguages?.toString()) {
+          // update language selection to the fetched one
+          // if there are some languages which are not permitted or were deleted
+          _setLanguages(selectedLanguages);
+          projectPreferences.setForProject(props.projectId, selectedLanguages);
+        }
+
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
           setFixedTranslations(flatKeys);
@@ -260,7 +256,7 @@ export const useTranslationsService = (props: Props) => {
     });
 
     const baseText =
-      baseTextResponse._embedded?.keys![0].translations[baseLanguage].text ||
+      baseTextResponse._embedded?.keys![0].translations[baseLanguage]?.text ||
       '';
     return baseText;
   };

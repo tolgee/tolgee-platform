@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 import clsx from 'clsx';
 import { BillingProgress } from 'tg.component/billing/BillingProgress';
-import { BILLING_CRITICAL_PERCENT } from 'tg.component/billing/constants';
+import { BILLING_CRITICAL_FRACTION } from 'tg.component/billing/constants';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 
 export const StyledMetrics = styled('div')`
@@ -27,6 +27,9 @@ const StyledValue = styled('span')`
   &.low {
     color: ${({ theme }) => theme.palette.error.main};
   }
+  &.over {
+    color: ${({ theme }) => theme.palette.warning.main};
+  }
   &.sufficient {
     color: ${({ theme }) => theme.palette.success.main};
   }
@@ -34,35 +37,49 @@ const StyledValue = styled('span')`
 
 type Props = {
   name: string | React.ReactNode;
-  currentAmount: number;
-  totalAmount?: number;
+  currentQuantity: number;
+  totalQuantity?: number;
   periodEnd?: number;
+  isPayAsYouGo?: boolean;
   'data-cy'?: string;
 };
 
 export const PlanMetric: React.FC<Props> = ({
   name,
-  currentAmount,
-  totalAmount,
+  currentQuantity,
+  totalQuantity,
+  isPayAsYouGo,
   ...props
 }) => {
   const formatNumber = useNumberFormatter();
-  const showProgress = totalAmount !== undefined;
-  const progress = (currentAmount / totalAmount!) * 100;
-  const valueClass = progress < BILLING_CRITICAL_PERCENT ? 'low' : 'sufficient';
+  const showProgress = totalQuantity !== undefined;
+  const progress = currentQuantity / totalQuantity!;
+  const valueClass = isPayAsYouGo
+    ? totalQuantity && currentQuantity > totalQuantity
+      ? 'over'
+      : 'sufficient'
+    : progress > BILLING_CRITICAL_FRACTION
+    ? 'low'
+    : 'sufficient';
 
   return (
     <>
       <StyledName>{name}</StyledName>
       <Box data-cy={props['data-cy']}>
         <StyledValue className={clsx({ [valueClass]: showProgress })}>
-          {formatNumber(currentAmount)}
+          {formatNumber(currentQuantity)}
         </StyledValue>
-        <span>{showProgress ? ` / ${formatNumber(totalAmount!)}` : ''}</span>
+        <span>{showProgress ? ` / ${formatNumber(totalQuantity!)}` : ''}</span>
       </Box>
       {showProgress && (
         <StyledProgress>
-          <BillingProgress percent={progress} height={8} />
+          <BillingProgress
+            value={currentQuantity}
+            maxValue={totalQuantity}
+            height={8}
+            canGoOver={isPayAsYouGo}
+            showLabels
+          />
         </StyledProgress>
       )}
     </>

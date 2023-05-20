@@ -19,6 +19,7 @@ import { useTranslationsSelector } from './context/TranslationsContext';
 import { getMetaName, IS_MAC } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -167,7 +168,7 @@ export const TranslationsShortcuts = () => {
   const translations = useTranslationsSelector((c) => c.translations);
   const baseLanguage = useTranslationsSelector((c) =>
     c.languages?.find((l) => l.base)
-  )?.tag;
+  );
 
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
 
@@ -175,6 +176,7 @@ export const TranslationsShortcuts = () => {
     ShortcutsArrayType[]
   >([]);
   const { getAvailableActions } = useTranslationsShortcuts();
+  const { satisfiesLanguageAccess } = useProjectPermissions();
 
   const onFocusChange = useDebouncedCallback(
     () => {
@@ -238,9 +240,10 @@ export const TranslationsShortcuts = () => {
       formula: formatShortcut(`${getMetaName()} + E`),
     },
     {
-      name: cursorLanguage != baseLanguage && (
-        <T keyName="translations_cell_insert_base" />
-      ),
+      name: cursorLanguage != baseLanguage?.tag &&
+        satisfiesLanguageAccess('translations.view', baseLanguage?.id) && (
+          <T keyName="translations_cell_insert_base" />
+        ),
       formula: IS_MAC
         ? formatShortcut(`${getMetaName()} + Shift + S`)
         : formatShortcut(`${getMetaName()} + Insert`),

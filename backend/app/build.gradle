@@ -157,6 +157,17 @@ dependencies {
      * MISC MODULE
      */
     implementation(project(':misc'))
+
+    /**
+     * EE MODULE
+     */
+    implementation(project(':ee-app'))
+
+
+    /**
+     * Dev module
+     */
+    implementation(project(':development'))
 }
 
 test {
@@ -222,5 +233,9 @@ sourceSets {
 }
 
 jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+bootJar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

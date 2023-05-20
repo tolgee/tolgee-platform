@@ -35,8 +35,14 @@ export interface paths {
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+  "/v2/projects/{projectId}/users/{userId}/set-permissions": {
     put: operations["setUsersPermissions"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions_1"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
+    put: operations["setOrganizationBase"];
   };
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
@@ -153,6 +159,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
+  "/v2/organizations/{organizationId}/set-base-permissions": {
+    put: operations["setBasePermissions"];
+  };
+  "/v2/organizations/{organizationId}/set-base-permissions/{permissionType}": {
+    put: operations["setBasePermissions_1"];
+  };
   "/v2/organizations/{id}": {
     get: operations["get_9"];
     put: operations["update_5"];
@@ -168,12 +180,27 @@ export interface paths {
     put: operations["uploadAvatar_2"];
     delete: operations["removeAvatar_2"];
   };
+  "/v2/ee-license/set-license-key": {
+    put: operations["setLicenseKey"];
+  };
+  "/v2/ee-license/release-license-key": {
+    put: operations["release"];
+  };
+  "/v2/ee-license/refresh": {
+    put: operations["refreshSubscription"];
+  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_6"];
     delete: operations["delete_10"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
+  };
+  "/v2/administration/users/{userId}/enable": {
+    put: operations["enableUser"];
+  };
+  "/v2/administration/users/{userId}/disable": {
+    put: operations["disableUser"];
   };
   "/v2/administration/users/{userId}/set-role/{role}": {
     put: operations["setRole"];
@@ -186,6 +213,24 @@ export interface paths {
   };
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
+  };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
+  };
+  "/v2/public/licensing/release-key": {
+    post: operations["releaseKey"];
+  };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -250,6 +295,9 @@ export interface paths {
   "/v2/image-upload": {
     post: operations["upload"];
   };
+  "/v2/ee-license/prepare-set-license-key": {
+    post: operations["prepareSetLicenseKey_1"];
+  };
   "/v2/api-keys": {
     get: operations["allByUser"];
     post: operations["create_10"];
@@ -280,6 +328,12 @@ export interface paths {
   };
   "/v2/slug/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug"];
+  };
+  "/v2/public/scope-info/roles": {
+    get: operations["getRoles"];
+  };
+  "/v2/public/scope-info/hierarchy": {
+    get: operations["getHierarchy"];
   };
   "/v2/public/initial-data": {
     /** Returns initial data always required by frontend */
@@ -398,6 +452,9 @@ export interface paths {
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
+  "/v2/ee-license/info": {
+    get: operations["getInfo_3"];
+  };
   "/v2/api-keys/{keyId}": {
     get: operations["get_10"];
   };
@@ -467,6 +524,7 @@ export interface components {
       large: string;
       thumbnail: string;
     };
+    Links: { [key: string]: components["schemas"]["Link"] };
     PrivateUserAccountModel: {
       id: number;
       username: string;
@@ -501,6 +559,46 @@ export interface components {
       baseLanguageId?: number;
       description?: string;
     };
+    ComputedPermissionModel: {
+      permissionModel?: components["schemas"]["PermissionModel"];
+      origin: "ORGANIZATION_BASE" | "DIRECT" | "ADMIN" | "NONE";
+      /** The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+      )[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+    };
     LanguageModel: {
       id: number;
       /** Language name in english */
@@ -514,6 +612,45 @@ export interface components {
       /** Whether is base language of project */
       base: boolean;
     };
+    /** Current user's direct permission */
+    PermissionModel: {
+      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+      )[];
+      /** The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+    };
     ProjectModel: {
       id: number;
       name: string;
@@ -522,34 +659,17 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     SimpleOrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
-    };
-    UserPermissionModel: {
-      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
-      permittedLanguageIds?: number[];
-      /** The type of permission. */
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     UpdateNamespaceDto: {
       name: string;
@@ -563,9 +683,9 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -583,9 +703,9 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
     };
     TagKeyDto: {
       name: string;
@@ -686,7 +806,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
     };
     EditKeyDto: {
       name: string;
@@ -702,13 +822,17 @@ export interface components {
       namespace?: string;
     };
     ProjectInviteUserDto: {
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /**
-       * IDs of languages to allow user to translate to with TRANSLATE permission.
-       *
-       * Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
-       */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** Granted scopes for the invited user */
+      scopes?: string[];
+      /** Deprecated -> use translate languages */
       languages?: number[];
+      /** Languages user can translate to */
+      translateLanguages?: number[];
+      /** Languages user can view */
+      viewLanguages?: number[];
+      /** Languages user can change translation state (review) */
+      stateChangeLanguages?: number[];
       /** Email to send invitation to */
       email?: string;
       /** Name of invited user */
@@ -717,11 +841,12 @@ export interface components {
     ProjectInvitationModel: {
       id: number;
       code: string;
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       permittedLanguageIds?: number[];
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
+      permission: components["schemas"]["PermissionModel"];
     };
     AutoTranslationSettingsDto: {
       /** If true, new keys will be automatically translated using translation memory when 100% match is found */
@@ -754,6 +879,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       globalServerRole: "USER" | "ADMIN";
       deleted: boolean;
+      disabled: boolean;
     };
     TranslationCommentDto: {
       text: string;
@@ -813,12 +939,12 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      expiresAt?: number;
+      id: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
-      id: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -827,14 +953,13 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -857,6 +982,36 @@ export interface components {
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
+    };
+    SetLicenseKeyDto: {
+      licenseKey: string;
+    };
+    EeSubscriptionModel: {
+      name: string;
+      licenseKey: string;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+      )[];
+      currentPeriodEnd?: number;
+      cancelAtPeriodEnd: boolean;
+      currentUserCount: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      lastValidCheck?: string;
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -889,15 +1044,15 @@ export interface components {
     RevealedApiKeyModel: {
       /** Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
+      id: number;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      scopes: string[];
       description: string;
-      id: number;
+      username?: string;
+      scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -908,6 +1063,105 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    GetMySubscriptionDto: {
+      licenseKey: string;
+      instanceId: string;
+    };
+    PlanIncludedUsageModel: {
+      seats: number;
+      translationSlots: number;
+      translations: number;
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations: number;
+      perThousandMtCredits: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    SelfHostedEePlanModel: {
+      id: number;
+      name: string;
+      public: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+      )[];
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
+    };
+    SelfHostedEeSubscriptionModel: {
+      id: number;
+      currentPeriodStart?: number;
+      currentPeriodEnd?: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      createdAt: number;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      licenseKey?: string;
+      estimatedCosts?: number;
+    };
+    SetLicenseKeyLicensingDto: {
+      licenseKey: string;
+      seats: number;
+      instanceId: string;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      seats: number;
+    };
+    ReportErrorDto: {
+      stackTrace: string;
+      licenseKey: string;
+    };
+    ReleaseKeyDto: {
+      licenseKey: string;
+    };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      seats: number;
+    };
+    AverageProportionalUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    SumUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      /** Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      credits?: components["schemas"]["SumUsageItemModel"];
+      total: number;
     };
     CreateProjectDTO: {
       name: string;
@@ -1140,6 +1394,29 @@ export interface components {
       language?: string;
       preferredOrganizationId?: number;
     };
+    HierarchyItem: {
+      scope:
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create";
+      requires: components["schemas"]["HierarchyItem"][];
+    };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1148,15 +1425,16 @@ export interface components {
     InitialDataModel: {
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
-      preferredOrganization?: components["schemas"]["OrganizationModel"];
+      preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       languageTag?: string;
+      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
     };
     MtServiceDTO: {
       enabled: boolean;
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     OAuthPublicConfigDTO: {
@@ -1168,6 +1446,33 @@ export interface components {
       authorizationUrl?: string;
       scopes?: string[];
       enabled: boolean;
+    };
+    PrivateOrganizationModel: {
+      organizationModel?: components["schemas"]["OrganizationModel"];
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+      )[];
+      name: string;
+      id: number;
+      /**
+       * The role of currently authorized user.
+       *
+       * Can be null when user has direct access to one of the projects owned by the organization.
+       */
+      currentUserRole?: "MEMBER" | "OWNER";
+      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1187,12 +1492,12 @@ export interface components {
       appName: string;
       version: string;
       showVersion: boolean;
+      internalControllerEnabled: boolean;
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
-      openReplayApiKey?: string;
       chatwootToken?: string;
-      ga4Tag?: string;
       capterraTracker?: string;
+      ga4Tag?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1210,10 +1515,11 @@ export interface components {
       id: number;
       username: string;
       name?: string;
+      avatar?: components["schemas"]["Avatar"];
       organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      organizationBasePermission: components["schemas"]["PermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     CollectionModelUsedNamespaceModel: {
       _embedded?: {
@@ -1244,19 +1550,19 @@ export interface components {
       extraCreditBalance: number;
     };
     KeySearchResultView: {
-      baseTranslation?: string;
-      namespace?: string;
-      translation?: string;
       name: string;
       id: number;
+      translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      baseTranslation?: string;
-      namespace?: string;
-      translation?: string;
       name: string;
       id: number;
+      translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1484,7 +1790,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1571,20 +1877,9 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
-      /** Use organizationOwner field */
-      organizationOwnerName?: string;
-      /** Use organizationOwner field */
-      organizationOwnerSlug?: string;
-      /** Use organizationOwner field */
-      organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
       organizationRole?: "MEMBER" | "OWNER";
-      /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      computedPermissions: components["schemas"]["UserPermissionModel"];
+      directPermission?: components["schemas"]["PermissionModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };
@@ -1601,12 +1896,12 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      expiresAt?: number;
+      id: number;
       lastUsedAt?: number;
+      expiresAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
-      id: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -1623,22 +1918,34 @@ export interface components {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
     };
-    UsageModel: {
+    PublicUsageModel: {
       organizationId: number;
-      /** Current balance of standard credits. Standard credits are refilled every month. */
+      /** Current balance of standard credits. Standard credits are refilled every month */
       creditBalance: number;
-      /** How many credits are included in your current plan. */
+      /** How many credits are included in your current plan */
       includedMtCredits: number;
-      /** Date when credits were refilled. (In epoch format.) */
+      /** Date when credits were refilled. (In epoch format) */
       creditBalanceRefilledAt: number;
-      /** Date when credits will be refilled. (In epoch format.) */
+      /** Date when credits will be refilled. (In epoch format) */
       creditBalanceNextRefillAt: number;
-      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
+      /** Currently used credits over credits included in plan and extra credits */
+      currentPayAsYouGoMtCredits: number;
+      /** The maximum amount organization can spend on MT credit usage before they reach the spending limit */
+      availablePayAsYouGoMtCredits: number;
+      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits */
       extraCreditBalance: number;
-      /** How many translations can be stored within your organization. */
-      translationLimit: number;
-      /** How many translations are currently stored within your organization. */
+      /** How many translations can be stored within your organization */
+      translationSlotsLimit: number;
+      /** How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs */
+      includedTranslationSlots: number;
+      /** How many translations are included in current subscription plan. How many translations can organization use without additional costs */
+      includedTranslations: number;
+      /** How many translations slots are currently used by organization */
+      currentTranslationSlots: number;
+      /** How many non-empty translations are currently stored by organization */
       currentTranslations: number;
+      /** How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit) */
+      translationsLimit: number;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
@@ -1646,11 +1953,21 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    SimpleProjectModel: {
+      id: number;
+      name: string;
+      description?: string;
+      slug?: string;
+      avatar?: components["schemas"]["Avatar"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+    };
     UserAccountWithOrganizationRoleModel: {
       id: number;
       name: string;
       username: string;
-      organizationRole: "MEMBER" | "OWNER";
+      organizationRole?: "MEMBER" | "OWNER";
+      projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
+      avatar?: components["schemas"]["Avatar"];
     };
     ApiKeyWithLanguagesModel: {
       /**
@@ -1659,15 +1976,15 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
-      username?: string;
+      id: number;
+      lastUsedAt?: number;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      scopes: string[];
       description: string;
-      id: number;
+      username?: string;
+      scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -1681,6 +1998,16 @@ export interface components {
     DeleteKeysDto: {
       /** IDs of keys to delete */
       ids: number[];
+    };
+    Link: {
+      href?: string;
+      hreflang?: string;
+      title?: string;
+      type?: string;
+      deprecation?: string;
+      profile?: string;
+      name?: string;
+      templated?: boolean;
     };
   };
 }
@@ -2070,12 +2397,77 @@ export interface operations {
   setUsersPermissions: {
     parameters: {
       path: {
-        projectId: number;
         userId: number;
-        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+        projectId: number;
+      };
+      query: {
+        /** Granted scopes */
+        scopes?: string[];
+        languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setUsersPermissions_1: {
+    parameters: {
+      path: {
+        userId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
+        projectId: number;
       };
       query: {
         languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setOrganizationBase: {
+    parameters: {
+      path: {
+        userId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2588,6 +2980,7 @@ export interface operations {
   applyImport: {
     parameters: {
       query: {
+        /** Whether override or keep all translations with unresolved conflicts */
         forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
       };
       path: {
@@ -3332,6 +3725,63 @@ export interface operations {
       };
     };
   };
+  setBasePermissions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Granted scopes to all projects for all organization users without direct project permissions set */
+        scopes: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setBasePermissions_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get_9: {
     parameters: {
       path: {
@@ -3530,6 +3980,73 @@ export interface operations {
       };
     };
   };
+  setLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  release: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  refreshSubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   update_6: {
     parameters: {
       path: {
@@ -3614,6 +4131,52 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["RegenerateApiKeyDto"];
+      };
+    };
+  };
+  enableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  disableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -3719,6 +4282,156 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
+      };
+    };
+  };
+  releaseKey: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReleaseKeyDto"];
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
       };
     };
   };
@@ -4613,6 +5326,33 @@ export interface operations {
       };
     };
   };
+  prepareSetLicenseKey_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
   allByUser: {
     parameters: {
       query: {
@@ -4877,6 +5617,77 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getRoles: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": {
+            [key: string]: (
+              | "translations.view"
+              | "translations.edit"
+              | "keys.edit"
+              | "screenshots.upload"
+              | "screenshots.delete"
+              | "screenshots.view"
+              | "activity.view"
+              | "languages.edit"
+              | "admin"
+              | "project.edit"
+              | "members.view"
+              | "members.edit"
+              | "translation-comments.add"
+              | "translation-comments.edit"
+              | "translation-comments.set-state"
+              | "translations.state-edit"
+              | "keys.view"
+              | "keys.delete"
+              | "keys.create"
+            )[];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getHierarchy: {
+    parameters: {
+      query: {
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["HierarchyItem"];
         };
       };
       /** Bad Request */
@@ -5214,8 +6025,11 @@ export interface operations {
         languageId: number;
       };
       query: {
+        /** Whether only translations, which are in conflict with existing translations should be returned */
         onlyConflicts?: boolean;
+        /** Whether only translations with unresolved conflictswith existing translations should be returned */
         onlyUnresolved?: boolean;
+        /** String to search in translation text or key */
         search?: string;
         /** Zero-based page index (0..N) */
         page?: number;
@@ -5730,7 +6544,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "*/*": components["schemas"]["PrivateOrganizationModel"];
         };
       };
       /** Bad Request */
@@ -5933,7 +6747,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UsageModel"];
+          "*/*": components["schemas"]["PublicUsageModel"];
         };
       };
       /** Bad Request */
@@ -6067,6 +6881,28 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getInfo_3: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

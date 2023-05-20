@@ -1,17 +1,18 @@
-import { useCallback } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { IconButton, styled, Tooltip } from '@mui/material';
-import { Link, Clear } from '@mui/icons-material';
+import { Clear, Link } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
+import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
 
 const messaging = container.resolve(MessageService);
@@ -22,9 +23,11 @@ type UserAccountInProjectModel =
 const StyledListItem = styled('div')`
   display: flex;
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
+
   &:last-child {
     border-bottom: 0;
   }
+
   position: relative;
   padding: ${({ theme }) => theme.spacing(1)};
   flex-wrap: wrap;
@@ -62,16 +65,10 @@ type Props = {
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
+  const { satisfiesPermission } = useProjectPermissions();
+  const canEditMembers = satisfiesPermission('members.edit');
 
   const translatePermission = usePermissionTranslation();
-
-  const findLanguage = useCallback(
-    (languageId: number) => {
-      const result = languages.find((language) => language.id === languageId);
-      return result!;
-    },
-    [languages]
-  );
 
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
@@ -100,8 +97,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
     messaging.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
-  const permission = invitation.type;
-
   useGlobalLoading(deleteInvitation.isLoading);
 
   return (
@@ -110,28 +105,18 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
       </StyledItemText>
       <StyledItemActions>
-        {permission === 'TRANSLATE' && (
-          <Tooltip
-            title={t('permission_languages_hint', {
-              subject: invitation.permittedLanguageIds?.length
-                ? invitation.permittedLanguageIds
-                    .map((l) => findLanguage(l).name)
-                    .join(', ')
-                : t('languages_permitted_list_all'),
-            })}
-          >
-            <span>
-              <LanguagesPermittedList
-                languages={invitation.permittedLanguageIds?.map(
-                  (permittedLanguageId) => findLanguage(permittedLanguageId)
-                )}
-              />
-            </span>
-          </Tooltip>
-        )}
-        <Tooltip title={translatePermission(invitation.type, true)}>
+        <ScopesInfo scopes={invitation.permission.scopes} />
+
+        <LanguagePermissionSummary
+          permissions={invitation.permission}
+          allLangs={languages}
+        />
+
+        <Tooltip
+          title={translatePermission(invitation.type || 'granular', true)}
+        >
           <StyledPermissions>
-            {translatePermission(invitation.type)}
+            {translatePermission(invitation.type || 'granular')}
           </StyledPermissions>
         </Tooltip>
 
@@ -140,9 +125,12 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             <Link />
           </IconButton>
         </Tooltip>
-
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
-          <IconButton size="small" onClick={handleCancel}>
+          <IconButton
+            size="small"
+            onClick={handleCancel}
+            disabled={!canEditMembers}
+          >
             <Clear />
           </IconButton>
         </Tooltip>

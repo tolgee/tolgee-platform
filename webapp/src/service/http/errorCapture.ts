@@ -5,5 +5,11 @@ export const errorCapture = (code: string) => {
     case 'plan_translation_limit_exceeded':
       globalContext.actions?.incrementPlanLimitErrors();
       break;
+    case 'translation_spending_limit_exceeded':
+      globalContext.actions?.incrementSpendingLimitErrors();
+      break;
+    case 'seats_spending_limit_exceeded':
+      globalContext.actions?.incrementSpendingLimitErrors();
+      break;
   }
 };

@@ -77,6 +77,9 @@ export const SignUpView: FunctionComponent = () => {
   const signUpMutation = useApiMutation({
     url: `/api/public/sign_up`,
     method: 'post',
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
   });
 
   const onSubmit = async (data: SignUpType) => {

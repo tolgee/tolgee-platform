@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 
 class DockerContainerRunner(
   private val image: String,
-  private val expose: Map<String, String>,
+  private val expose: Map<String, String> = mapOf(),
   private val waitForLog: String,
 
   /**

@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.ProjectLeavingTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -25,9 +25,9 @@ class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/
     userAccount = testData.project1nonOwner
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("/leave", null).andIsOk
-    assertThat(permissionService.findOneByProjectIdAndUserId(testData.projectBuilder.self.id, userAccount!!.id))
+    assertThat(permissionService.find(projectId = testData.projectBuilder.self.id, userId = userAccount!!.id))
       .isNull()
-    assertThat(permissionService.findOneByProjectIdAndUserId(testData.projectBuilder.self.id, testData.user.id))
+    assertThat(permissionService.find(projectId = testData.projectBuilder.self.id, userId = testData.user.id))
       .isNotNull
   }
 

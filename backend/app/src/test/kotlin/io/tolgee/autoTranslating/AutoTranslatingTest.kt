@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -165,7 +166,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `doesn't consume credits when not enough for all`() {
+  fun `consumes last positive credits`() {
     testData.generateLanguagesWithDifferentPrimaryServices()
     saveTestData()
     initMachineTranslationProperties(700)
@@ -175,10 +176,14 @@ class AutoTranslatingTest : MachineTranslationTest() {
         keyService
           .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
-          .find { it.language == testData.spanishLanguage }
-      )
-        .isNull()
+          .find {
+            it.language == testData.spanishLanguage
+          }
+      ).isNotNull
     }
+
+    val balance = mtCreditBucketService.getCreditBalances(testData.project)
+    balance.creditBalance.assert.isEqualTo(0)
   }
 
   @ProjectJWTAuthTestMethod

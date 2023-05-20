@@ -65,11 +65,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       name = "Account"
       id = 10
     }
-    whenever(userAccountRepository.findNotDeleted(user.id)).then { user }
+    whenever(userAccountRepository.findActive(user.id)).then { user }
     userAccountService.findDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findActive(user.id)
     userAccountService.findDto(user.id)
-    Mockito.verify(userAccountRepository, times(1)).findNotDeleted(user.id)
+    Mockito.verify(userAccountRepository, times(1)).findActive(user.id)
   }
 
   @Test
@@ -84,13 +84,37 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `caches permission`() {
+  fun `caches permission by project and user`() {
     val permission = Permission(id = 1)
-    whenever(permissionRepository.findOneByProjectIdAndUserId(1, 1)).then { permission }
-    permissionService.findOneDtoByProjectIdAndUserId(1, 1)
-    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserId(1, 1)
-    permissionService.findOneDtoByProjectIdAndUserId(1, 1)
-    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserId(1, 1)
+    whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1)).then { permission }
+    permissionService.find(1, 1)
+    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
+    permissionService.find(1, 1)
+    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
+  }
+
+  @Test
+  fun `caches permission by organization`() {
+    val permission = Permission(id = 1)
+    whenever(
+      permissionRepository
+        .findOneByProjectIdAndUserIdAndOrganizationId(null, null, organizationId = 1)
+    ).then { permission }
+
+    permissionService.find(organizationId = 1)
+    Mockito.verify(permissionRepository, times(1))
+      .findOneByProjectIdAndUserIdAndOrganizationId(
+        null,
+        null,
+        organizationId = 1
+      )
+    permissionService.find(organizationId = 1)
+    Mockito.verify(permissionRepository, times(1))
+      .findOneByProjectIdAndUserIdAndOrganizationId(
+        null,
+        null,
+        1
+      )
   }
 
   @Test

@@ -1,7 +1,6 @@
 package io.tolgee.security.project_auth
 
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
@@ -51,11 +50,11 @@ class ProjectPermissionFilter(
         projectHolder.project = projectService.findDto(projectId) ?: throw NotFoundException()
 
         if (specificPermissionAnnotation != null) {
-          securityService.checkProjectPermission(projectId, specificPermissionAnnotation.permission)
+          securityService.checkProjectPermission(projectId, specificPermissionAnnotation.scope)
         }
 
         if (anyPermissionAnnotation != null) {
-          securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.VIEW)
+          securityService.checkAnyProjectPermission(projectId)
         }
       } catch (e: Exception) {
         resolver.resolveException(request, response, null, e)

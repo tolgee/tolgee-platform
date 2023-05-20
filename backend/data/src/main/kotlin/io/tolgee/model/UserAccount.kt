@@ -82,6 +82,9 @@ data class UserAccount(
   @Column(name = "deleted_at")
   var deletedAt: Date? = null
 
+  @Column(name = "disabled_at")
+  var disabledAt: Date? = null
+
   val isDeletable: Boolean
     get() = this.accountType != AccountType.LDAP
 

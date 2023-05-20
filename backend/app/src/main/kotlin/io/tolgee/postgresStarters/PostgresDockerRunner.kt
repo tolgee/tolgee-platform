@@ -20,21 +20,21 @@ class PostgresDockerRunner(
     instance = DockerContainerRunner(
       image = "postgres:13",
       expose = mapOf(postgresAutostartProperties.port to "5432"),
-      name = postgresAutostartProperties.containerName,
       waitForLog = "database system is ready to accept connections",
       waitForLogTimesForNewContainer = 2,
       waitForLogTimesForExistingContainer = 1,
-      timeout = 300000,
       rm = false,
+      name = postgresAutostartProperties.containerName,
+      stopBeforeStart = false,
       env = mapOf(
         "POSTGRES_PASSWORD" to postgresAutostartProperties.password,
         "POSTGRES_USER" to postgresAutostartProperties.user,
         "POSTGRES_DB" to postgresAutostartProperties.databaseName,
       ),
       command = "postgres -c max_connections=10000",
-      stopBeforeStart = false
+      timeout = 300000,
     ).also {
-      logger.info("Running Postgres Docker container. This may take some time...")
+      logger.info("Starting Postgres Docker container")
       it.run()
     }
   }

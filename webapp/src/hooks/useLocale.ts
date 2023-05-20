@@ -2,13 +2,18 @@ import { useCurrentLanguage } from './useCurrentLanguage';
 
 export const useMoneyFormatter = () => {
   const language = useCurrentLanguage();
-  return (number: number, options?: Intl.NumberFormatOptions) =>
-    new Intl.NumberFormat(language, {
+  return (number: number, options?: Intl.NumberFormatOptions) => {
+    const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
+    const rounded = Number(number.toFixed(maximumFractionDigits)) || 0;
+
+    return new Intl.NumberFormat(language, {
       style: 'currency',
       currency: 'EUR',
-      maximumFractionDigits: 0,
+      maximumFractionDigits,
+      minimumFractionDigits: 2,
       ...options,
-    }).format(number);
+    }).format(rounded);
+  };
 };
 
 export const useDateFormatter = () => {

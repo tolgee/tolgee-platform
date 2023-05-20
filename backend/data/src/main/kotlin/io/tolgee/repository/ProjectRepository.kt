@@ -16,7 +16,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
         bl as baseLanguage, o as organizationOwner,
-        role.type as organizationRole, p.type as directPermissions
+        role.type as organizationRole, p as directPermission
         from Project r
         left join r.baseLanguage bl
         left join Permission p on p.project = r and p.user.id = :userAccountId
@@ -40,7 +40,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Query(
     """$BASE_VIEW_QUERY        
         left join UserAccount ua on ua.id = :userAccountId
-        where (p is not null or role is not null or (ua.role = 'ADMIN' and :organizationId is not null))
+        left join o.basePermission
+        where (
+            (p is not null and (p.type <> 'NONE' or p.type is null)) or 
+            (role is not null and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
+            (ua.role = 'ADMIN' and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
@@ -56,24 +60,6 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
-
-  @Query(
-    """
-      $BASE_VIEW_QUERY 
-      left join UserAccount ua on ua.id = :userAccountId
-      where (p is not null or role is not null or ua.role = 'ADMIN')
-      and o.id = :organizationOwnerId and o is not null
-      and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
-      or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-      or cast(:search as text) is null)
-        """
-  )
-  fun findAllPermittedInOrganization(
-    userAccountId: Long,
-    organizationOwnerId: Long,
-    pageable: Pageable,
-    search: String?
-  ): Page<ProjectView>
 
   fun countAllBySlug(slug: String): Long
 
@@ -113,4 +99,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """
   )
   fun findAllWithUserOwnerIds(): List<Long>
+
+  @Query(
+    """
+    select pp.user.id, p 
+    from Project p
+    join p.permissions pp on pp.user.id in :userIds
+    join fetch p.baseLanguage
+    where p.organizationOwner.id = :organizationId
+  """
+  )
+  fun getProjectsWithDirectPermissions(organizationId: Long, userIds: List<Long>): List<Array<Any>>
 }
