@@ -17,10 +17,16 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
+import org.springframework.web.client.RestTemplate
 import java.util.*
 
 class EeLicenseControllerTest : AuthorizedControllerTest() {
+
+  @Autowired
+  @MockBean
+  lateinit var restTemplate: RestTemplate
 
   @BeforeEach
   fun setup() {
@@ -44,19 +50,16 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
-  @Autowired
-  private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
-
   @Test
   fun `it set's license key`() {
-    eeLicenseMockRequestUtil.mock {
+    eeLicensingMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
         this.url = { it.contains("/v2/public/licensing/set-key") }
       }
 
       thenAnswer {
-        eeLicenseMockRequestUtil.mockedSubscriptionResponse
+        eeLicensingMockRequestUtil.mockedSubscriptionResponse
       }
 
       verify {
@@ -79,7 +82,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `set license key operation is not sensitive for non-breaking API change`() {
-    eeLicenseMockRequestUtil.mock {
+    eeLicensingMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
         this.url = { it.contains("/v2/public/licensing/set-key") }
@@ -96,7 +99,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `prepare operation works fine`() {
-    eeLicenseMockRequestUtil.mock {
+    eeLicensingMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
         this.url = { it.contains("/v2/public/licensing/prepare-set-key") }
@@ -123,14 +126,14 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   fun `refreshes subscription`() {
     prepareSubscription()
 
-    eeLicenseMockRequestUtil.mock {
+    eeLicensingMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
         this.url = { it.contains("/v2/public/licensing/subscription") }
       }
 
       thenAnswer {
-        eeLicenseMockRequestUtil.mockedSubscriptionResponse
+        eeLicensingMockRequestUtil.mockedSubscriptionResponse
       }
 
       verify {
@@ -156,7 +159,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   fun `releases license key info`() {
     prepareSubscription()
 
-    eeLicenseMockRequestUtil.mock {
+    eeLicensingMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
         this.url = { it.contains("/v2/public/licensing/release-key") }
@@ -194,7 +197,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
   private fun getPrepareRequestMapWithAdditionalUnrecognizedFields(): MutableMap<String, Any?> {
     // converting the requestBody to map and adding some unrecognized fields
-    val requestMap = eeLicenseMockRequestUtil.mockedPrepareResponse.toJsonMap()
+    val requestMap = eeLicensingMockRequestUtil.mockedPrepareResponse.toJsonMap()
     requestMap["undefinedField"] = "undefined"
     requestMap["undefinedField2"] = 20
     requestMap["undefinedField3"] = false
@@ -203,7 +206,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
   private fun getSetKeyRequestMapWithAdditionalUnrecognizedFields(): MutableMap<String, Any?> {
     // converting the requestBody to map and adding some unrecognized fields
-    val requestMap = eeLicenseMockRequestUtil.mockedSubscriptionResponse.toJsonMap()
+    val requestMap = eeLicensingMockRequestUtil.mockedSubscriptionResponse.toJsonMap()
     requestMap["undefinedField"] = "undefined"
     requestMap["undefinedField2"] = 20
     requestMap["undefinedField3"] = false

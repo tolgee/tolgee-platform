@@ -87,7 +87,7 @@ describe('Screenshots', () => {
       });
   });
 
-  it.only(
+  it(
     'uploads multiple',
     {
       retries: {
