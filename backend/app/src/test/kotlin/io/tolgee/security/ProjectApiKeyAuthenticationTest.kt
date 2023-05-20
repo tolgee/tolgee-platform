@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
@@ -82,8 +83,10 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
       node("description").isNotNull
     }
 
-    apiKeyService.get(testData.frantasKey.id).lastUsedAt!!.time
-      .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+    waitForNotThrowing(throwableClass = AssertionError::class, timeout = 5000) {
+      apiKeyService.get(testData.frantasKey.id).lastUsedAt?.time
+        .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+    }
   }
 
   @Test
