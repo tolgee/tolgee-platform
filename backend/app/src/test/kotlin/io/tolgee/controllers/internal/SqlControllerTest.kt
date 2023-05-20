@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,8 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @SpringBootTest(properties = ["tolgee.internal.controllerEnabled=true"])
-class SqlControllerTest : AbstractControllerTest() {
-
+class SqlControllerTest : AbstractControllerTest(), Logging {
   @Suppress("RedundantModalityModifier")
   final inline fun <reified T> MvcResult.parseResponseTo(): T {
     return jacksonObjectMapper().readValue(this.response.contentAsString)
@@ -24,6 +25,7 @@ class SqlControllerTest : AbstractControllerTest() {
 
   @Test
   fun getList() {
+    logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
     dbPopulator.createBase("Test")
     val parseResponseTo: List<Any> = mvc.perform(
       post("/internal/sql/list")
@@ -36,6 +38,7 @@ class SqlControllerTest : AbstractControllerTest() {
 
   @Test
   fun delete() {
+    logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
     val project = dbPopulator.createBase("Test").project
     mvc.perform(
       post("/internal/sql/execute")
