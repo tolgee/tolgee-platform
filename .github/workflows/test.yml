@@ -42,6 +42,9 @@ jobs:
       - name: Tar Testing build
         run: tar -czf ~/backend-testing.tgz ./backend/testing/build
 
+      - name: Tar Deployment build
+        run: tar -czf ~/backend-development.tgz ./backend/development/build
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -50,6 +53,7 @@ jobs:
             ~/backend-app.tgz
             ~/backend-data.tgz
             ~/backend-testing.tgz
+            ~/backend-development.tgz
 
   backend-test:
     name: Backend testing ‍🔎
@@ -97,6 +101,8 @@ jobs:
           tar -xzf ~/backend-app.tgz ./backend/app/build
           tar -xzf ~/backend-data.tgz ./backend/data/build
           tar -xzf ~/backend-testing.tgz ./backend/testing/build
+          tar -xzf ~/backend-development.tgz ./backend/development/build
+
 
       - name: Run backend tests
         run: ./gradlew ${{ matrix.command }}
