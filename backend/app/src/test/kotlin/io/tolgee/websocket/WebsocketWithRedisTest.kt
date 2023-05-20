@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.DisabledIf
 
 @ContextRecreatingTest
 @SpringBootTest(
@@ -18,8 +19,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @ContextConfiguration(initializers = [WebsocketWithRedisTest.Companion.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-// @Disabled("Test if it works when disabled")
+@DisabledIf("${'$'}{tolgee.test.disableWebsocketTests:false}")
 class WebsocketWithRedisTest : AbstractWebsocketTest() {
   companion object {
     val redisRunner = RedisRunner()

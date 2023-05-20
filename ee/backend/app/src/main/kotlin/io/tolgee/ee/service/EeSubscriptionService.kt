@@ -53,13 +53,20 @@ class EeSubscriptionService(
 
   fun setLicenceKey(licenseKey: String): EeSubscription {
     val seats = userAccountService.countAllEnabled()
-    val instanceId = findSubscriptionEntity()?.instanceId ?: UUID.randomUUID().toString()
+    findSubscriptionEntity()?.let {
+      throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
+    }
+
+    val entity = EeSubscription().apply {
+      this.licenseKey = licenseKey
+      this.lastValidCheck = currentDateProvider.date
+    }
 
     val responseBody = catchingSeatsSpendingLimit {
       try {
         postRequest<SelfHostedEeSubscriptionModel>(
           setPath,
-          SetLicenseKeyLicensingDto(licenseKey, seats, instanceId)
+          SetLicenseKeyLicensingDto(licenseKey, seats, entity.instanceId)
         )
       } catch (e: HttpClientErrorException.NotFound) {
         throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
@@ -67,14 +74,9 @@ class EeSubscriptionService(
     }
 
     if (responseBody != null) {
-      val entity = EeSubscription().apply {
-        this.licenseKey = licenseKey
-        this.name = responseBody.plan.name
-        this.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
-        this.enabledFeatures = responseBody.plan.enabledFeatures
-        this.lastValidCheck = currentDateProvider.date
-        this.instanceId = instanceId
-      }
+      entity.name = responseBody.plan.name
+      entity.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
+      entity.enabledFeatures = responseBody.plan.enabledFeatures
       return eeSubscriptionRepository.save(entity)
     }
 

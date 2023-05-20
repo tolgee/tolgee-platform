@@ -52,7 +52,7 @@ class EeSubscription : AuditModel() {
       return if (status != SubscriptionStatus.ERROR && status != SubscriptionStatus.CANCELED) field else arrayOf()
     }
 
-  lateinit var instanceId: String
+  var instanceId: String = UUID.randomUUID().toString()
 
   @Enumerated(EnumType.STRING)
   @ColumnDefault("ACTIVE")
