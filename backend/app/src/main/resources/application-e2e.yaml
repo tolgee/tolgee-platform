@@ -2,6 +2,8 @@ spring:
   jpa:
     show-sql: true
 tolgee:
+  billing:
+    enabled: false
   frontend-url: http://localhost:8081
   authentication:
     enabled: true
