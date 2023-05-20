@@ -783,6 +783,7 @@
   "scopes_at_least_one_scope_error" : "Select at least one permission",
   "screenshot_delete_message" : "Do you really want to delete the screenshot?",
   "screenshot_delete_title" : "Delete screenshot",
+  "seats_spending_limit_exceeded" : "Seats spending limit exceeded",
   "sensitive-authentication-dialog-title" : "Authentication",
   "sensitive-authentication-message" : "To proceed with this operation, please authenticate again. ",
   "sensitive-auth-submit-button" : "OK",

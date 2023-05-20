@@ -1,3 +1,10 @@
+# [3.14.0](https://github.com/tolgee/tolgee-platform/compare/v3.13.4...v3.14.0) (2023-05-20)
+
+
+### Features
+
+* Granular permissions, new pricing, self-hosted EE licensing ([#1726](https://github.com/tolgee/tolgee-platform/issues/1726)) ([7321f7e](https://github.com/tolgee/tolgee-platform/commit/7321f7e64433f5b859fe102e8564210e7c3e15df))
+
 ## [3.13.4](https://github.com/tolgee/tolgee-platform/compare/v3.13.3...v3.13.4) (2023-05-19)
 
 
