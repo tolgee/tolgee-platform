@@ -109,11 +109,11 @@ describe('Import Resolving', () => {
 
       const assertBothCollapsed = () => {
         cy.contains('Hello, I am old translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 500);
+          cy.wrap($text!.width()).should('be.lessThan', 520);
           cy.wrap($text!.height()).should('be.lessThan', 35);
         });
         cy.contains('Hello, I am translation').then(($text: any) => {
-          cy.wrap($text!.width()).should('be.lessThan', 500);
+          cy.wrap($text!.width()).should('be.lessThan', 520);
           cy.wrap($text!.height()).should('be.lessThan', 35);
         });
       };

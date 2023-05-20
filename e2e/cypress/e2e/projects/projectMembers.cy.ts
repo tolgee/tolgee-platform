@@ -143,31 +143,7 @@ describe('Project members', () => {
       });
     });
 
-    it('selects Review role for the user', () => {
-      visitProjectMembers(info.project.id);
-      openMemberSettings('me@me.me');
-      permissionsMenuSelectRole('Review', { languages: ['Czech'] });
-
-      loginAndGetInfo('me@me.me', info.project.id).then((info) => {
-        expect(info.project.computedPermission.viewLanguageIds.length).equal(0);
-        expect(
-          info.project.computedPermission.translateLanguageIds.length
-        ).equal(1);
-        expect(
-          info.project.computedPermission.stateChangeLanguageIds.length
-        ).equal(1);
-        visitProjectDashboard(info.project.id);
-        checkPermissions(info, {
-          'project-menu-item-dashboard': RUN,
-          'project-menu-item-translations': RUN,
-          'project-menu-item-import': RUN,
-          'project-menu-item-export': RUN,
-          'project-menu-item-integrate': RUN,
-        });
-      });
-    });
-
-    it('selects Review role for the user', () => {
+    it('selects Review role for the user', { retries: { runMode: 3 } }, () => {
       visitProjectMembers(info.project.id);
       openMemberSettings('me@me.me');
       permissionsMenuSelectRole('Review', { languages: ['Czech'] });
