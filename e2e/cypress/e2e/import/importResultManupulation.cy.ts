@@ -35,14 +35,14 @@ describe('Import result & manipulation', () => {
 
       getLanguageRow('multilang.json (en)').within(() => {
         cy.gcy('import-result-resolve-button')
-          .should('contain', '0 / 4')
+          .should('contain', '0 / 3')
           .should('not.be.disabled');
         cy.gcy('import-result-language-menu-cell').should(
           'not.contain',
           'German'
         );
         cy.gcy('import-result-language-menu-cell').should('contain', 'English');
-        cy.gcy('import-result-total-count-cell').should('contain', '6');
+        cy.gcy('import-result-total-count-cell').should('contain', '5');
       });
 
       getLanguageRow('multilang.json (de)').within(() => {

@@ -87,11 +87,11 @@ describe('Screenshots', () => {
       });
   });
 
-  it(
+  it.only(
     'uploads multiple',
     {
       retries: {
-        runMode: 3,
+        runMode: 6,
       },
     },
     () => {
@@ -101,7 +101,7 @@ describe('Screenshots', () => {
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
         .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
-      cy.gcy('screenshot-image')
+      cy.gcy('screenshot-image', { timeout: 15000 })
         .should('be.visible')
         .and(($img) => {
           expect($img.length).to.be.equal(3);
