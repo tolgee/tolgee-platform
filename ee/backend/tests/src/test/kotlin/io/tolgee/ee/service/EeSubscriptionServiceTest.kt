@@ -49,7 +49,6 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-        instanceId = "isntance_id"
       }
     )
 
@@ -82,7 +81,6 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
         cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
-        instanceId = UUID.randomUUID().toString()
       }
     )
 
