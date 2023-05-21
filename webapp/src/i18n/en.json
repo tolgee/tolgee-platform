@@ -165,7 +165,7 @@
   "billing_plan_credits_included" : "Monthly <hint>MT credit</hint>",
   "billing-plan-monthly-price" : "{price, number, ::precision-integer currency/EUR}/mo",
   "billing-plan-price-per-seat-extra" : "+ {price, number, ::precision-integer currency/EUR}/mo per extra seat",
-  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::precision-integer currency/EUR} per extra 1000 MT credit",
+  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::.00 currency/EUR} per extra 1000 MT credit",
   "billing-plan-price-per-thousand-strings-extra" : "+ {price, number, ::precision-integer currency/EUR}/mo per extra 1000 strings",
   "billing-plan-price-per-thousand-translations-extra" : "+ {price, number, ::precision-integer currency/EUR}/mo per extra 1000 translations",
   "billing_plan_resubscribe" : "Restore subscription",

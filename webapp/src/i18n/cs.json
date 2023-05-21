@@ -165,7 +165,7 @@
   "billing_plan_credits_included" : "Měsíční <hint>MT kredit</hint>",
   "billing-plan-monthly-price" : "{price, number, ::precision-integer currency/EUR}/měs",
   "billing-plan-price-per-seat-extra" : "+ {price, number, ::precision-integer currency/EUR}/měsíc za další uživatele",
-  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::precision-integer currency/EUR} za dalších 1000 MT kreditů",
+  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::.00 currency/EUR} za dalších 1000 MT kreditů",
   "billing-plan-price-per-thousand-strings-extra" : "+ {price, number, ::precision-integer currency/EUR}/měs za dalších 1000 řetězců",
   "billing-plan-price-per-thousand-translations-extra" : "+ {price, number, ::precision-integer currency/EUR}/měs za dalších 1000 překladů",
   "billing_plan_resubscribe" : "Obnovit předplatné",

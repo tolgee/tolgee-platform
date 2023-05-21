@@ -165,7 +165,7 @@
   "billing_plan_credits_included" : "Mensuel <hint>crédit TA</hint>",
   "billing-plan-monthly-price" : "{price, number, ::precision-integer currency/EUR}/mois",
   "billing-plan-price-per-seat-extra" : "+ {price, number, ::precision-integer currency/EUR}/mois par siège supplémentaire",
-  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::precision-integer currency/EUR} par crédit supplémentaire de 1000 TA",
+  "billing-plan-price-per-thousand-mt-credits-extra" : "+ {price, number, ::.00 currency/EUR} par crédit supplémentaire de 1000 TA",
   "billing-plan-price-per-thousand-strings-extra" : "+ {price, number, ::precision-integer currency/EUR}/mois par 1000 chaînes supplémentaires",
   "billing-plan-price-per-thousand-translations-extra" : "+ {price, number, ::precision-integer currency/EUR}/mois par 1000 traductions supplémentaires",
   "billing_plan_resubscribe" : "Renouveler l'abonnement",
