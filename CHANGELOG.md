@@ -1,3 +1,10 @@
+## [3.14.1](https://github.com/tolgee/tolgee-platform/compare/v3.14.0...v3.14.1) (2023-05-21)
+
+
+### Bug Fixes
+
+* Correct price formatting in billing section ([06e5cb9](https://github.com/tolgee/tolgee-platform/commit/06e5cb91c5873da47d887a2abb80a0303567b68e))
+
 # [3.14.0](https://github.com/tolgee/tolgee-platform/compare/v3.13.4...v3.14.0) (2023-05-20)
 
 
