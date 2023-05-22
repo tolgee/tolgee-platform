@@ -101,6 +101,14 @@ class ProjectBuilder(
     }
   }
 
+  fun addFrench(): LanguageBuilder {
+    return addLanguage {
+      name = "French"
+      originalName = "Français"
+      tag = "fr"
+    }
+  }
+
   fun addKey(namespace: String? = null, keyName: String, ft: KeyBuilder.() -> Unit): KeyBuilder {
     return addKey(keyName, ft).build { setNamespace(namespace) }
   }

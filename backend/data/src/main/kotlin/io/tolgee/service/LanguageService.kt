@@ -11,6 +11,7 @@ import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -27,6 +28,8 @@ class LanguageService(
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
   private val permissionService: PermissionService,
+  @Lazy
+  private val securityService: SecurityService
 ) {
   @set:Autowired
   @set:Lazy
@@ -108,6 +111,16 @@ class LanguageService(
       tags.indexOfFirst { tag -> language.tag == tag }
     }
     return sortedByTagsParam.toSet()
+  }
+
+  @Transactional
+  fun getLanguagesForExport(languages: Set<String>?, projectId: Long, userId: Long): Set<Language> {
+    if (languages == null) {
+      return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
+    } else {
+      securityService.checkLanguageViewPermissionByTag(projectId, languages)
+      return findByTags(languages, projectId)
+    }
   }
 
   @Transactional
