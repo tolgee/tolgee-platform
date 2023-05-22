@@ -49,7 +49,7 @@ class V2ExportController(
     @ParameterObject params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
     params.languages = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
+      .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
       .toList()
       .map { language -> language.tag }
       .toSet()

@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
@@ -181,6 +182,45 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val parsed = performExport()
     val files = parsed.keys
     files.assert.containsExactly("en.json")
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports all languages by default`() {
+    val testData = TestDataBuilder()
+    val user = testData.addUserAccount {
+      username = "user"
+    }
+    val projectBuilder = testData.addProject {
+      name = "Oh my project"
+      organizationOwner = user.defaultOrganizationBuilder.self
+    }
+
+    val langs = arrayOf(
+      projectBuilder.addEnglish(),
+      projectBuilder.addCzech(),
+      projectBuilder.addGerman(),
+      projectBuilder.addFrench()
+    )
+
+    val key = projectBuilder.addKey { name = "key" }.self
+    langs.forEach { lang ->
+      projectBuilder.addTranslation {
+        this.language = lang.self
+        this.key = key
+        this.text = "yey"
+      }
+    }
+
+    testDataService.saveTestData(testData)
+
+    projectSupplier = { projectBuilder.self }
+    userAccount = user.self
+
+    val parsed = performExport()
+    val files = parsed.keys
+    files.assert.containsExactlyInAnyOrder(*langs.map { "${it.self.tag}.json" }.toTypedArray())
   }
 
   private fun initBaseData() {
