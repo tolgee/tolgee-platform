@@ -2,6 +2,7 @@
 
 package io.tolgee.service.security
 
+import io.tolgee.constants.ComputedPermissionOrigin
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.ProjectPermissionData
@@ -43,7 +44,7 @@ class PermissionService(
   @Lazy
   private val userPreferencesService: UserPreferencesService,
   @Lazy
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
 ) {
   @set:Autowired
   @set:Lazy
@@ -84,7 +85,8 @@ class PermissionService(
     val computed = computeProjectPermission(
       organizationRole = organizationRole,
       organizationBasePermission = organizationBasePermission,
-      directPermission = projectPermission
+      directPermission = projectPermission,
+      userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found")
     )
 
     return ProjectPermissionData(
@@ -166,18 +168,22 @@ class PermissionService(
   fun computeProjectPermission(
     organizationRole: OrganizationRoleType?,
     organizationBasePermission: IPermission,
-    directPermission: IPermission?
+    directPermission: IPermission?,
+    userRole: UserAccount.Role
   ): ComputedPermissionDto {
+    if (userRole == UserAccount.Role.ADMIN) {
+      return ComputedPermissionDto.SERVER_ADMIN
+    }
     if (organizationRole == OrganizationRoleType.OWNER) {
-      return ComputedPermissionDto.ADMIN
+      return ComputedPermissionDto.ORGANIZATION_OWNER
     }
 
     if (directPermission != null) {
-      return ComputedPermissionDto(directPermission)
+      return ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
     }
 
     if (organizationRole == OrganizationRoleType.MEMBER) {
-      return ComputedPermissionDto(organizationBasePermission)
+      return ComputedPermissionDto(organizationBasePermission, ComputedPermissionOrigin.ORGANIZATION_BASE)
     }
 
     return ComputedPermissionDto.NONE

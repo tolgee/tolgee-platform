@@ -83,13 +83,21 @@ class ComputedPermissionDto(
 
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
-    val ADMIN
+    val ORGANIZATION_OWNER
       get() = ComputedPermissionDto(
         getEmptyPermission(
           scopes = arrayOf(Scope.ADMIN),
           type = ProjectPermissionType.MANAGE
         ),
-        origin = ComputedPermissionOrigin.ADMIN
+        origin = ComputedPermissionOrigin.ORGANIZATION_OWNER
+      )
+    val SERVER_ADMIN
+      get() = ComputedPermissionDto(
+        getEmptyPermission(
+          scopes = arrayOf(Scope.ADMIN),
+          type = ProjectPermissionType.MANAGE
+        ),
+        origin = ComputedPermissionOrigin.SERVER_ADMIN
       )
   }
 }

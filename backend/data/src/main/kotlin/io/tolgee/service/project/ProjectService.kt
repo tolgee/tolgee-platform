@@ -182,11 +182,8 @@ class ProjectService constructor(
           organizationRole?.type,
           organization.basePermission,
           permission,
+          userAccount.role ?: UserAccount.Role.USER
         ).scopes
-          ?: throw IllegalStateException(
-            "Project project should not" +
-              " return project with no permission for provided user"
-          )
         fromEntityAndPermission(project, scopes)
       }.toList()
   }
