@@ -1,3 +1,10 @@
+## [3.14.2](https://github.com/tolgee/tolgee-platform/compare/v3.14.1...v3.14.2) (2023-05-22)
+
+
+### Bug Fixes
+
+* All languages should be exported by default ([#1728](https://github.com/tolgee/tolgee-platform/issues/1728)) ([25f21e5](https://github.com/tolgee/tolgee-platform/commit/25f21e5fdb624e8d6bb30395ca96d203e80e60c3))
+
 ## [3.14.1](https://github.com/tolgee/tolgee-platform/compare/v3.14.0...v3.14.1) (2023-05-21)
 
 
