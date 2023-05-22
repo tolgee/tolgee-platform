@@ -7,24 +7,19 @@ import {
 import { components } from 'tg.service/apiSchema.generated';
 
 type PermissionModel = components['schemas']['PermissionModel'];
-type PrivateUserAccountModel = components['schemas']['PrivateUserAccountModel'];
 
-export const getPermissionTools = (
-  permissions: PermissionModel,
-  userInfo: PrivateUserAccountModel | undefined
-) => {
+export const getPermissionTools = (permissions: PermissionModel) => {
   const scopes = permissions.scopes;
-  const isAdmin = userInfo?.globalServerRole === 'ADMIN';
 
   return {
     satisfiesPermission(scope: Scope) {
-      return satisfiesPermission(scopes, scope) || isAdmin;
+      return satisfiesPermission(scopes, scope);
     },
     satisfiesLanguageAccess(
       scope: ScopeWithLanguage,
       languageId: number | undefined
     ) {
-      return satisfiesLanguageAccess(permissions, scope, languageId) || isAdmin;
+      return satisfiesLanguageAccess(permissions, scope, languageId);
     },
   };
 };
