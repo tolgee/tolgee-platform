@@ -55,15 +55,11 @@ class ProjectModelAssembler(
   }
 
   private fun getComputedPermissions(view: ProjectWithLanguagesView): ComputedPermissionDto {
-    if (authenticationFacade.userAccountOrNull?.role == UserAccount.Role.ADMIN) {
-      return ComputedPermissionDto.SERVER_ADMIN
-    }
-
     return permissionService.computeProjectPermission(
       view.organizationRole,
       view.organizationOwner.basePermission,
       view.directPermission,
       UserAccount.Role.USER
-    )
+    ).getAdminPermissions(authenticationFacade.userAccountOrNull?.role)
   }
 }

@@ -3,6 +3,7 @@ package io.tolgee.dtos
 import io.tolgee.constants.ComputedPermissionOrigin
 import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.exceptions.LanguageNotPermittedException
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 
@@ -49,6 +50,17 @@ class ComputedPermissionDto(
     if (permittedLanguageIds?.containsAll(languageIds) != true) {
       throw LanguageNotPermittedException(languageIds = languageIds - permittedLanguageIds.orEmpty().toSet())
     }
+  }
+
+  val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.values().toList())
+
+  fun getAdminPermissions(
+    userRole: UserAccount.Role?,
+  ): ComputedPermissionDto {
+    if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
+      return SERVER_ADMIN
+    }
+    return this
   }
 
   constructor(permission: IPermission) : this(

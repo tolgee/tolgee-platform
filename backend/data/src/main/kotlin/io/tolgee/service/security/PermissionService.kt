@@ -169,24 +169,22 @@ class PermissionService(
     organizationRole: OrganizationRoleType?,
     organizationBasePermission: IPermission,
     directPermission: IPermission?,
-    userRole: UserAccount.Role
+    userRole: UserAccount.Role? = null
   ): ComputedPermissionDto {
-    if (userRole == UserAccount.Role.ADMIN) {
-      return ComputedPermissionDto.SERVER_ADMIN
-    }
-    if (organizationRole == OrganizationRoleType.OWNER) {
-      return ComputedPermissionDto.ORGANIZATION_OWNER
+    val computed = when {
+      organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
+      directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
+      organizationRole == OrganizationRoleType.MEMBER -> ComputedPermissionDto(
+        organizationBasePermission,
+        ComputedPermissionOrigin.ORGANIZATION_BASE
+      )
+
+      else -> ComputedPermissionDto.NONE
     }
 
-    if (directPermission != null) {
-      return ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-    }
-
-    if (organizationRole == OrganizationRoleType.MEMBER) {
-      return ComputedPermissionDto(organizationBasePermission, ComputedPermissionOrigin.ORGANIZATION_BASE)
-    }
-
-    return ComputedPermissionDto.NONE
+    return userRole?.let {
+      computed.getAdminPermissions(userRole)
+    } ?: computed
   }
 
   fun createForInvitation(

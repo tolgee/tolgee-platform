@@ -6,9 +6,7 @@ import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.api.v2.hateoas.permission.PermissionModelAssembler
-import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -36,7 +34,12 @@ class ProjectWithStatsModelAssembler(
     val baseLanguage = view.baseLanguage ?: let {
       projectService.getOrCreateBaseLanguage(view.id)
     }
-    val computedPermissions = getComputedPermissions(view)
+    val computedPermissions = permissionService.computeProjectPermission(
+      view.organizationRole,
+      view.organizationOwner.basePermission,
+      view.directPermission,
+      UserAccount.Role.USER
+    ).getAdminPermissions(userRole = authenticationFacade.userAccountOrNull?.role)
 
     return ProjectWithStatsModel(
       id = view.id,
@@ -56,18 +59,5 @@ class ProjectWithStatsModelAssembler(
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
       }
     }
-  }
-
-  private fun getComputedPermissions(view: ProjectWithLanguagesView): ComputedPermissionDto {
-    if (authenticationFacade.userAccountOrNull?.role == UserAccount.Role.ADMIN) {
-      return ComputedPermissionDto.SERVER_ADMIN
-    }
-
-    return permissionService.computeProjectPermission(
-      view.organizationRole,
-      view.organizationOwner.basePermission,
-      view.directPermission,
-      UserAccount.Role.USER
-    )
   }
 }
