@@ -25,8 +25,9 @@ export const ProjectPage: FunctionComponent<Props> = ({
   children,
 }) => {
   const project = useProject();
+  const isAdmin = useIsAdmin();
 
-  const isAdminAccess = !project.computedPermission.scopes && useIsAdmin();
+  const isAdminAccess = project.computedPermission.type === 'NONE' && isAdmin;
 
   return (
     <DashboardPage

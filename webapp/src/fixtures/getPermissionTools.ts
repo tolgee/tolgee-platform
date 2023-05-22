@@ -2,37 +2,29 @@ import {
   satisfiesLanguageAccess,
   satisfiesPermission,
   ScopeWithLanguage,
-  SCOPE_TO_LANG_PROPERTY_MAP,
   Scope,
 } from 'tg.fixtures/permissions';
 import { components } from 'tg.service/apiSchema.generated';
 
 type PermissionModel = components['schemas']['PermissionModel'];
+type PrivateUserAccountModel = components['schemas']['PrivateUserAccountModel'];
 
-export const getPermissionTools = (permissions: PermissionModel) => {
+export const getPermissionTools = (
+  permissions: PermissionModel,
+  userInfo: PrivateUserAccountModel | undefined
+) => {
   const scopes = permissions.scopes;
-
-  function allowedLanguages(scope: ScopeWithLanguage): boolean {
-    if (!satisfiesPermission(scopes, scope)) {
-      return false;
-    }
-
-    const allowedLanguages = permissions[SCOPE_TO_LANG_PROPERTY_MAP[scope]];
-
-    return allowedLanguages || [];
-  }
+  const isAdmin = userInfo?.globalServerRole === 'ADMIN';
 
   return {
-    scopes,
     satisfiesPermission(scope: Scope) {
-      return satisfiesPermission(scopes, scope);
+      return satisfiesPermission(scopes, scope) || isAdmin;
     },
     satisfiesLanguageAccess(
       scope: ScopeWithLanguage,
       languageId: number | undefined
     ) {
-      return satisfiesLanguageAccess(permissions, scope, languageId);
+      return satisfiesLanguageAccess(permissions, scope, languageId) || isAdmin;
     },
-    allowedLanguages,
   };
 };
