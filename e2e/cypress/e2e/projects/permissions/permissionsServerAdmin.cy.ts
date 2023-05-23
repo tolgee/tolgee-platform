@@ -5,16 +5,25 @@ import {
   RUN,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
-import { visitProjectDashboard } from '../../../common/shared';
+import {
+  switchToOrganization,
+  visitProjectDashboard,
+} from '../../../common/shared';
 
 describe('Permissions admin', () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
       login('admin', 'admin');
-      visitProjectDashboard(projectInfo.project.id);
 
-      // check if warning banner is present
+      // check that admin has no warning banner on his home project
+      switchToOrganization('admin');
+      cy.gcy('administration-access-message').should('not.exist');
+      cy.gcy('dashboard-projects-list-item').contains('examples').click();
+      cy.gcy('administration-access-message').should('not.exist');
+
+      // check that he has admin banner on project which is not his
+      visitProjectDashboard(projectInfo.project.id);
       cy.gcy('administration-access-message', { timeout: 30_000 }).should(
         'be.visible'
       );
@@ -23,7 +32,7 @@ describe('Permissions admin', () => {
       cy.visit(`${HOST}/organizations/admin-admin-com/profile`);
       cy.gcy('administration-access-message').should('be.visible');
 
-      // check if user have correct access to everything
+      // check that admin has correct access to everything
       visitProjectDashboard(projectInfo.project.id);
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
