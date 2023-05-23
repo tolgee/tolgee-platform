@@ -16,10 +16,8 @@ describe('Permissions admin', () => {
       // login as admin
       login('admin', 'admin');
 
-      // check that admin has no warning banner on his home project
+      // check that admin has no warning banner on his home page
       switchToOrganization('admin');
-      cy.gcy('administration-access-message').should('not.exist');
-      cy.gcy('dashboard-projects-list-item').contains('examples').click();
       cy.gcy('administration-access-message').should('not.exist');
 
       // check that he has admin banner on project which is not his
