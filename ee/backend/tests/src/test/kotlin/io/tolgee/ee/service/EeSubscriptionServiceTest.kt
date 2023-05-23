@@ -9,6 +9,7 @@ import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -107,12 +108,13 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
       )
 
       verify {
-        Thread.sleep(1020) // initialDelay + checkPeriod
-        captor.allValues.assert.hasSizeGreaterThan(0)
-        eeSubscriptionRepository.findAll().single()
-          .status
-          .assert
-          .isEqualTo(SubscriptionStatus.KEY_USED_BY_ANOTHER_INSTANCE)
+        waitForNotThrowing(pollTime = 50) {
+          captor.allValues.assert.hasSizeGreaterThan(0)
+          eeSubscriptionRepository.findAll().single()
+            .status
+            .assert
+            .isEqualTo(SubscriptionStatus.KEY_USED_BY_ANOTHER_INSTANCE)
+        }
       }
     }
   }

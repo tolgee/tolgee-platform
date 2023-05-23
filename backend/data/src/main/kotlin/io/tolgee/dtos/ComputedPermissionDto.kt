@@ -3,6 +3,7 @@ package io.tolgee.dtos
 import io.tolgee.constants.ComputedPermissionOrigin
 import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.exceptions.LanguageNotPermittedException
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 
@@ -51,6 +52,17 @@ class ComputedPermissionDto(
     }
   }
 
+  val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.values().toList())
+
+  fun getAdminPermissions(
+    userRole: UserAccount.Role?,
+  ): ComputedPermissionDto {
+    if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
+      return SERVER_ADMIN
+    }
+    return this
+  }
+
   constructor(permission: IPermission) : this(
     permission,
     origin = if (permission.organizationId != null)
@@ -83,13 +95,21 @@ class ComputedPermissionDto(
 
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
-    val ADMIN
+    val ORGANIZATION_OWNER
       get() = ComputedPermissionDto(
         getEmptyPermission(
           scopes = arrayOf(Scope.ADMIN),
           type = ProjectPermissionType.MANAGE
         ),
-        origin = ComputedPermissionOrigin.ADMIN
+        origin = ComputedPermissionOrigin.ORGANIZATION_OWNER
+      )
+    val SERVER_ADMIN
+      get() = ComputedPermissionDto(
+        getEmptyPermission(
+          scopes = arrayOf(Scope.ADMIN),
+          type = ProjectPermissionType.MANAGE
+        ),
+        origin = ComputedPermissionOrigin.SERVER_ADMIN
       )
   }
 }

@@ -6,7 +6,10 @@ import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.api.v2.hateoas.permission.PermissionModelAssembler
+import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithLanguagesView
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -22,7 +25,8 @@ class ProjectModelAssembler(
   private val avatarService: AvatarService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val permissionModelAssembler: PermissionModelAssembler,
-  private val computedPermissionModelAssembler: ComputedPermissionModelAssembler
+  private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
+  private val authenticationFacade: AuthenticationFacade
 ) : RepresentationModelAssemblerSupport<ProjectWithLanguagesView, ProjectModel>(
   V2ProjectsController::class.java, ProjectModel::class.java
 ) {
@@ -32,11 +36,7 @@ class ProjectModelAssembler(
       projectService.getOrCreateBaseLanguage(view.id)
     }
 
-    val computedPermissions = permissionService.computeProjectPermission(
-      view.organizationRole,
-      view.organizationOwner.basePermission,
-      view.directPermission
-    )
+    val computedPermissions = getComputedPermissions(view)
 
     return ProjectModel(
       id = view.id,
@@ -50,9 +50,16 @@ class ProjectModelAssembler(
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
     ).add(link).also { model ->
-      view.organizationOwner?.slug?.let {
-        model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
-      }
+      model.add(linkTo<OrganizationController> { get(view.organizationOwner.slug) }.withRel("organizationOwner"))
     }
+  }
+
+  private fun getComputedPermissions(view: ProjectWithLanguagesView): ComputedPermissionDto {
+    return permissionService.computeProjectPermission(
+      view.organizationRole,
+      view.organizationOwner.basePermission,
+      view.directPermission,
+      UserAccount.Role.USER
+    ).getAdminPermissions(authenticationFacade.userAccountOrNull?.role)
   }
 }
