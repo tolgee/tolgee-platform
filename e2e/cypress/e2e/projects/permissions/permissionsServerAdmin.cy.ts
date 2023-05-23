@@ -1,4 +1,5 @@
 import { login } from '../../../common/apiCalls/common';
+import { HOST } from '../../../common/constants';
 import {
   checkPermissions,
   RUN,
@@ -13,6 +14,15 @@ describe('Permissions admin', () => {
       login('admin', 'admin');
       visitProjectDashboard(projectInfo.project.id);
 
+      // check if warning banner is present
+      cy.gcy('administration-access-message').should('be.visible');
+      cy.visit(HOST);
+      cy.gcy('administration-access-message').should('be.visible');
+      cy.visit(`${HOST}/organizations/admin-admin-com/profile`);
+      cy.gcy('administration-access-message').should('be.visible');
+
+      // check if user have correct access to everything
+      visitProjectDashboard(projectInfo.project.id);
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
