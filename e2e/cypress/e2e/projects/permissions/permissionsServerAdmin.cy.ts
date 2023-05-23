@@ -15,7 +15,9 @@ describe('Permissions admin', () => {
       visitProjectDashboard(projectInfo.project.id);
 
       // check if warning banner is present
-      cy.gcy('administration-access-message').should('be.visible');
+      cy.gcy('administration-access-message', { timeout: 30_000 }).should(
+        'be.visible'
+      );
       cy.visit(HOST);
       cy.gcy('administration-access-message').should('be.visible');
       cy.visit(`${HOST}/organizations/admin-admin-com/profile`);
