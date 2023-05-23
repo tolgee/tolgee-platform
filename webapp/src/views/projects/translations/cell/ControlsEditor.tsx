@@ -5,7 +5,7 @@ import { CameraAlt, ContentCopy } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
+import { StateInType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { useTranslationsSelector } from '../context/TranslationsContext';
@@ -45,7 +45,7 @@ type ControlsProps = {
   onCancel?: () => void;
   onInsertBase?: () => void;
   onScreenshots?: () => void;
-  onStateChange?: (state: StateType) => void;
+  onStateChange?: (state: StateInType) => void;
   screenshotRef?: React.Ref<any>;
   screenshotsPresent?: boolean;
 };

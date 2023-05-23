@@ -1,5 +1,5 @@
 import { components, operations } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
+import { StateInType } from 'tg.constants/translationStates';
 
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type KeyWithTranslationsModel =
@@ -67,7 +67,7 @@ export type SetTranslationState = {
   keyId: number;
   translationId: number;
   language: string;
-  state: StateType;
+  state: StateInType;
 };
 
 export type ChangeScreenshotNum = {

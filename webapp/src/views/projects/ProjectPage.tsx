@@ -25,7 +25,8 @@ export const ProjectPage: FunctionComponent<Props> = ({
 }) => {
   const project = useProject();
 
-  const isAdminAccess = project.computedPermission.origin === 'ADMIN';
+  const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
+
   return (
     <DashboardPage
       topBarAutoHide={topBarAutoHide}

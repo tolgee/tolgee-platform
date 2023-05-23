@@ -1,10 +1,15 @@
 import { T } from '@tolgee/react';
 
 export type StateType = 'UNTRANSLATED' | 'TRANSLATED' | 'REVIEWED';
+export type StateInType = Exclude<StateType, 'UNTRANSLATED'>;
 
 type StateStruct = Record<
   StateType,
-  { translation: React.ReactElement; color: string; next: StateType | null }
+  {
+    translation: React.ReactElement;
+    color: string;
+    next: StateInType | null;
+  }
 >;
 
 export const translationStates: StateStruct = {
