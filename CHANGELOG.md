@@ -1,3 +1,15 @@
+# [3.15.0](https://github.com/tolgee/tolgee-platform/compare/v3.14.3...v3.15.0) (2023-05-24)
+
+
+### Bug Fixes
+
+* improve billing critical indicator ([#1732](https://github.com/tolgee/tolgee-platform/issues/1732)) ([590a0a2](https://github.com/tolgee/tolgee-platform/commit/590a0a209ef9708b858743b1447789936a9f2340))
+
+
+### Features
+
+* new key discard confirmation ([#1731](https://github.com/tolgee/tolgee-platform/issues/1731)) ([5becb5d](https://github.com/tolgee/tolgee-platform/commit/5becb5d1a0d79f52b3895f90a72a8f88da2c1e24))
+
 ## [3.14.3](https://github.com/tolgee/tolgee-platform/compare/v3.14.2...v3.14.3) (2023-05-24)
 
 
