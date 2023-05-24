@@ -1,4 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
+import { BILLING_CRITICAL_FRACTION } from './constants';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
@@ -12,7 +13,8 @@ export type ProgressData = {
   creditUsed: number;
   creditMax: number;
   creditProgress: number;
-  biggerProgress: number;
+  moreCriticalProgress: number;
+  isCritical: boolean;
 };
 
 export const getProgressData = (usage: UsageModel): ProgressData => {
@@ -34,7 +36,26 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
   const creditMax = usage.includedMtCredits;
   const creditUsed =
     creditMax - usage.creditBalance + usage.currentPayAsYouGoMtCredits;
+
   const creditProgress = creditUsed / creditMax;
+
+  const creditProgressWithExtraUnnormalized =
+    (creditUsed - usage.extraCreditBalance) / creditMax;
+
+  const creditProgressExtra =
+    creditProgressWithExtraUnnormalized <= 0
+      ? 0
+      : creditProgressWithExtraUnnormalized;
+
+  // const biggerProgress = Math.max(translationsProgress, creditProgress);
+
+  const moreCriticalProgress = Math.max(
+    translationsProgress,
+    creditProgressExtra
+  );
+  const limit = isPayAsYouGo ? 1 : BILLING_CRITICAL_FRACTION;
+
+  const isCritical = Number(moreCriticalProgress) > limit;
 
   return {
     usesSlots,
@@ -42,10 +63,10 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
     translationsMax,
     translationsProgress,
     isPayAsYouGo,
-    // translationsLimit,
     creditUsed,
     creditMax,
     creditProgress,
-    biggerProgress: Math.max(translationsProgress, creditProgress),
+    moreCriticalProgress,
+    isCritical,
   };
 };
