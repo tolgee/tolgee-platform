@@ -1,3 +1,10 @@
+## [3.14.3](https://github.com/tolgee/tolgee-platform/compare/v3.14.2...v3.14.3) (2023-05-24)
+
+
+### Bug Fixes
+
+* admin view ([#1727](https://github.com/tolgee/tolgee-platform/issues/1727)) ([8f47b02](https://github.com/tolgee/tolgee-platform/commit/8f47b02219807b56a4b73012f17d9407a5ceb6ff))
+
 ## [3.14.2](https://github.com/tolgee/tolgee-platform/compare/v3.14.1...v3.14.2) (2023-05-22)
 
 
