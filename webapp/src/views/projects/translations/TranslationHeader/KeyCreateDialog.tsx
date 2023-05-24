@@ -29,9 +29,13 @@ const StyledContent = styled('div')`
 
 type Props = {
   onClose: () => void;
+  onDirtyChange: (dirty: boolean) => void;
 };
 
-export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
+export const KeyCreateDialog: React.FC<Props> = ({
+  onClose,
+  onDirtyChange,
+}) => {
   const { insertTranslation } = useTranslationsActions();
 
   const languages = useTranslationsSelector((c) => c.languages);
@@ -106,6 +110,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
           languages={selectedLanguagesMapped!}
           onSuccess={handleOnSuccess}
           onCancel={onClose}
+          onDirtyChange={onDirtyChange}
           autofocus
         />
       </StyledContent>
