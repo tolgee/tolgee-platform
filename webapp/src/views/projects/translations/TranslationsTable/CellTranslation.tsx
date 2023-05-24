@@ -16,7 +16,7 @@ import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
 import { TranslationFlags } from '../cell/TranslationFlags';
-import { StateType } from 'tg.constants/translationStates';
+import { StateInType } from 'tg.constants/translationStates';
 import { styled } from '@mui/material';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -106,7 +106,7 @@ export const CellTranslation: React.FC<Props> = ({
 
   const { setTranslationState } = useTranslationsActions();
 
-  const handleStateChange = (state: StateType) => {
+  const handleStateChange = (state: StateInType) => {
     setTranslationState({
       keyId: data.keyId,
       translationId: translation?.id as number,

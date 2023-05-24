@@ -4,7 +4,7 @@ import { Badge, styled } from '@mui/material';
 import { Check, Comment, Edit } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
-import { StateType } from 'tg.constants/translationStates';
+import { StateInType } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
@@ -61,7 +61,7 @@ type ControlsProps = {
   editEnabled?: boolean;
   stateChangeEnabled?: boolean;
   onEdit?: () => void;
-  onStateChange?: (state: StateType) => void;
+  onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
   unresolvedCommentCount: number | undefined;

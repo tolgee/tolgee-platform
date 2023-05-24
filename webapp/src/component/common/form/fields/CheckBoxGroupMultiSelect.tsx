@@ -32,7 +32,7 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
   };
 
   return (
-    <FormGroup>
+    <FormGroup data-cy="checkbox-group-multiselect">
       <FormLabel error={!!meta.error} component="legend">
         {props.label}
       </FormLabel>
@@ -45,6 +45,7 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
               mt: 0.5,
               mb: 0.5,
             }}
+            data-cy="checkbox-group-multiselect-item"
           >
             <FormControlLabel
               label={option}

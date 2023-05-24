@@ -24,7 +24,6 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
-import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
 import { ProjectModel } from 'tg.fixtures/permissions';
 
 interface Value {
@@ -144,12 +143,8 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
                 {(formikProps: FormikProps<Value>) => {
                   const project = getProject()!;
 
-                  const projectPermissions = getPermissionTools(
-                    project.computedPermission
-                  );
-
                   const availableScopes = new Set(
-                    projectPermissions.scopes ?? []
+                    project.computedPermission.scopes ?? []
                   );
 
                   useEffect(() => {

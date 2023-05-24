@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import {
   CELL_CLICKABLE,
@@ -20,6 +19,7 @@ import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
 import { TranslationFlags } from '../cell/TranslationFlags';
+import { StateInType } from 'tg.constants/translationStates';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -131,7 +131,7 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef: cellRef,
   });
 
-  const handleStateChange = (state: StateType) => {
+  const handleStateChange = (state: StateInType) => {
     setTranslationState({
       keyId: data.keyId,
       language: language.tag,

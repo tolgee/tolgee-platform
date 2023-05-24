@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 import { ControlsEditor } from './cell/ControlsEditor';
 import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateInType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { getMeta, IS_MAC } from 'tg.fixtures/isMac';
 import {
@@ -88,7 +88,7 @@ type Props = {
   onInsertBase: (val: string | undefined) => void;
   onCmdSave: () => void;
   onCancel: (force: boolean) => void;
-  onStateChange: (state: StateType) => void;
+  onStateChange: (state: StateInType) => void;
   state: State;
   autofocus: boolean;
   className?: string;

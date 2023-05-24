@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.user_account
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.api.v2.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.api.v2.hateoas.permission.PermissionModelAssembler
+import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.service.AvatarService
 import io.tolgee.service.security.PermissionService
@@ -23,6 +24,7 @@ class UserAccountInProjectModelAssembler(
       view.organizationRole,
       view.organizationBasePermission,
       view.directPermission,
+      UserAccount.Role.USER
     )
     val avatar = avatarService.getAvatarLinks(view.avatarHash)
     return UserAccountInProjectModel(

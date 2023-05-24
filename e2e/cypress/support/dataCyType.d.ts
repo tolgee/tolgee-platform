@@ -62,6 +62,8 @@ declare namespace DataCy {
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
+        "checkbox-group-multiselect" |
+        "checkbox-group-multiselect-item" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
