@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Link as MuiLink, styled, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import { Formik, FormikProps } from 'formik';
-import { useTranslate, T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import { T, useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
@@ -12,8 +11,6 @@ import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useMachineTranslationSettings } from './useMachineTranslationSettings';
 import { SettingsForm } from './SettingsForm';
 import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { MtHint } from 'tg.component/billing/MtHint';
 
 type MachineTranslationLanguagePropsDto =
   components['schemas']['MachineTranslationLanguagePropsDto'];
@@ -30,6 +27,7 @@ const StyledToggle = styled('div')`
   cursor: pointer;
   background-color: ${({ theme }) => theme.palette.emphasis[100]};
   transition: background-color 0.1s ease-in-out;
+
   &:active,
   &:hover {
     background: ${({ theme }) => theme.palette.emphasis[200]};
@@ -152,18 +150,6 @@ export const MachineTranslation = () => {
 
   const languagesCount = languages.data?._embedded?.languages?.length || 0;
 
-  const params = {
-    link: (
-      <MuiLink
-        component={Link}
-        to={LINKS.ORGANIZATION_BILLING.build({
-          [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-        })}
-      />
-    ),
-    hint: <MtHint />,
-  };
-
   return (
     <>
       {settings.data && languages.data && creditBalance.data && (
@@ -200,35 +186,20 @@ export const MachineTranslation = () => {
               <SmoothProgress loading={isUpdating} />
             </StyledLoadingWrapper>
           </StyledLanguageTable>
-          {creditBalance.data.creditBalance !== -1 && (
-            <Box my={1} display="flex" flexDirection="column">
-              <Typography variant="body1">
-                {t('project_languages_credit_balance', {
-                  balance: String(creditBalance.data.creditBalance),
-                })}
-              </Typography>
-              <StyledHint variant="caption">
-                {t('project_languages_credit_balance_help')}{' '}
-                {config.billing.enabled ? (
-                  preferredOrganization.currentUserRole === 'OWNER' ? (
-                    <T
-                      keyName="project_languages_credit_balance_help_owner"
-                      params={params}
-                    />
-                  ) : (
-                    <T
-                      keyName="project_languages_credit_balance_help_member"
-                      params={params}
-                    />
-                  )
-                ) : (
-                  <T
-                    keyName="project_languages_credit_balance_help_no_billing"
-                    params={params}
-                  />
-                )}
-              </StyledHint>
-            </Box>
+          {creditBalance.data.creditBalance !== -1 && !config.billing.enabled && (
+            <>
+              <Box my={1} display="flex" flexDirection="column">
+                <Typography variant="body1">
+                  {t('project_languages_credit_balance', {
+                    balance: String(creditBalance.data.creditBalance),
+                  })}
+                </Typography>
+                <StyledHint variant="caption">
+                  {t('project_languages_credit_balance_help')}{' '}
+                  <T keyName="project_languages_credit_balance_help_no_billing" />
+                </StyledHint>
+              </Box>
+            </>
           )}
         </StyledContainer>
       )}
