@@ -8,6 +8,8 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { KeyCreateDialog } from './KeyCreateDialog';
 import { TranslationControls } from './TranslationControls';
 import { TranslationControlsCompact } from './TranslationControlsCompact';
+import { useState } from 'react';
+import { confirmation } from 'tg.hooks/confirmation';
 
 const StyledResultCount = styled('div')`
   margin-left: 1px;
@@ -23,6 +25,7 @@ export const TranslationsHeader = () => {
     defaultVal: 'false',
   });
   const { height: bottomPanelHeight } = useBottomPanel();
+  const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
     setNewDialog('true');
@@ -33,6 +36,18 @@ export const TranslationsHeader = () => {
   const translationsTotal = useTranslationsSelector((c) => c.translationsTotal);
 
   const dataReady = useTranslationsSelector((c) => c.dataReady);
+
+  function closeGracefully() {
+    if (dirty) {
+      confirmation({
+        message: <T keyName="translations_new_key_discard_message" />,
+        confirmButtonText: <T keyName="translations_new_key_discard_button" />,
+        onConfirm: () => setNewDialog('false'),
+      });
+    } else {
+      setNewDialog('false');
+    }
+  }
 
   return (
     <>
@@ -58,13 +73,16 @@ export const TranslationsHeader = () => {
       {dataReady && newDialog === 'true' && (
         <StyledDialog
           open={true}
-          onClose={() => setNewDialog('false')}
+          onClose={closeGracefully}
           fullWidth
           maxWidth="md"
           keepMounted={false}
           style={{ marginBottom: bottomPanelHeight }}
         >
-          <KeyCreateDialog onClose={() => setNewDialog('false')} />
+          <KeyCreateDialog
+            onClose={() => setNewDialog('false')}
+            onDirtyChange={setDirty}
+          />
         </StyledDialog>
       )}
     </>

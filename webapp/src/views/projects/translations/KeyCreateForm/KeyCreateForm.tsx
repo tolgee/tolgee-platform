@@ -33,6 +33,7 @@ type Props = {
   languages: LanguageModel[];
   onSuccess?: (data: KeyWithDataModel) => void;
   onCancel?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
   autofocus?: boolean;
 };
 
@@ -40,6 +41,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   languages,
   onSuccess,
   onCancel,
+  onDirtyChange,
   autofocus,
 }) => {
   const project = useProject();
@@ -101,11 +103,18 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: Yup.string().required(),
       })}
     >
-      <FormBody
-        languages={languages}
-        onCancel={onCancel}
-        autofocus={autofocus}
-      />
+      {(formik) => {
+        useEffect(() => {
+          onDirtyChange?.(formik.dirty);
+        }, [formik.dirty]);
+        return (
+          <FormBody
+            languages={languages}
+            onCancel={onCancel}
+            autofocus={autofocus}
+          />
+        );
+      }}
     </Formik>
   ) : null;
 };
