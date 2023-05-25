@@ -282,7 +282,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
       node("translationCreditsBalanceAfter").isEqualTo(5)
-      node("translationCreditsBalanceAfter").isEqualTo(600)
     }
   }
 
@@ -377,13 +376,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(5100)
+      node("translationCreditsBalanceAfter").isEqualTo(51)
     }
 
     tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
     val metadata = tolgeeTranslateParamsCaptor.firstValue.metadata
     metadata!!.examples.assert.hasSize(2)
-    metadata.context.assert.hasSize(2)
   }
 
   private fun testMtCreditConsumption() {

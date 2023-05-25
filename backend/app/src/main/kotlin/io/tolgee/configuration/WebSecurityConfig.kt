@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.activity.ActivityFilter
+import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
@@ -31,7 +32,8 @@ class WebSecurityConfig @Autowired constructor(
   private val activityFilter: ActivityFilter,
   private val disabledAuthenticationFilter: DisabledAuthenticationFilter,
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
-  private val patAuthFilter: PatAuthFilter
+  private val patAuthFilter: PatAuthFilter,
+  private val versionFilter: VersionFilter,
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
@@ -41,6 +43,7 @@ class WebSecurityConfig @Autowired constructor(
       .and()
       .headers()
       .frameOptions().sameOrigin().and()
+      .addFilterBefore(versionFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
       // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth

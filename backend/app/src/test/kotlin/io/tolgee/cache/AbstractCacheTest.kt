@@ -53,6 +53,17 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
+  private final val paramsEnGoogle = mtServiceManager.getParams(
+    text = "Hello",
+    textRaw = "raw-text",
+    keyName = "key-name",
+    sourceLanguageTag = "en",
+    targetLanguageTag = "de",
+    serviceType = MtServiceType.GOOGLE
+  )
+
+  val paramsEnAws = paramsEnGoogle.copy(serviceType = MtServiceType.AWS)
+
   @BeforeEach
   fun setup() {
     cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)!!.clear()
@@ -88,9 +99,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     val permission = Permission(id = 1)
     whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1)).then { permission }
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
+    Mockito.verify(permissionRepository, times(1))
+      .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1)).findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
+    Mockito.verify(permissionRepository, times(1))
+      .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
   }
 
   @Test
@@ -126,45 +139,45 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @Test
   fun `is caching machine translations`() {
     whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different service)`() {
     whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.AWS)
+    mtServiceManager.translate(paramsEnAws)
     verify(awsTranslationProvider, times(1)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different targetLang)`() {
     whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate("Hello", "en", "en", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle.copy(targetLanguageTag = "de"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different sourceLang)`() {
     whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate("Hello", "de", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle.copy(sourceLanguageTag = "de"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different input)`() {
     whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
-    mtServiceManager.translate("Hello", "en", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate("Hello", "de", "de", MtServiceType.GOOGLE)
+    mtServiceManager.translate(paramsEnGoogle.copy(text = "Hello!"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 }

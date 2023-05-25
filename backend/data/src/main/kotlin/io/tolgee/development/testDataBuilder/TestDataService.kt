@@ -69,7 +69,6 @@ class TestDataService(
   private val patService: PatService,
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService
-  private val namespaceService: NamespaceService,
 ) : Logging {
 
   @Transactional

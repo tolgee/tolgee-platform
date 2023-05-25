@@ -7,7 +7,6 @@ import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
-import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
@@ -30,7 +29,6 @@ class MtService(
   private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService,
   private val tolgeeProperties: TolgeeProperties,
-  private val mtServiceConfigService: MtServiceConfigService,
   private val bigMetaService: BigMetaService,
   private val keyService: KeyService
 ) {
@@ -137,8 +135,6 @@ class MtService(
       getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata, project)
 
     val keyName = keyId?.let { keyService.get(it) }?.name
-
-    publishOnBeforeEvent(prepared, project, expectedPrice)
 
     val results = machineTranslationManager
       .translateUsingAll(
