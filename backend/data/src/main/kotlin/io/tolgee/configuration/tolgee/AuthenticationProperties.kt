@@ -4,22 +4,43 @@
 
 package io.tolgee.configuration.tolgee
 
-import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.configuration.annotations.AdditionalDocsProperties
+import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
+@AdditionalDocsProperties(
+  properties = [
+    DocProperty(
+      name = "user-can-create-projects",
+      description = "Whether regular users are allowed to create projects. When disabled, only administrators can create projects",
+      removedIn = "2.33.0",
+      defaultValue = "true"
+    )
+  ],
+)
 class AuthenticationProperties(
   @E2eRuntimeMutable
-  @Schema(
-    description = "Whether authentication is enabled. If not, Tolgee will create implicit user on first startup and will automatically log\n" +
-      "you in. No login page shows, no permissions are managed. This is very useful, when you want to use Tolgee on your local\n" +
+  @DocProperty(
+    description = "Whether authentication is enabled. If not, Tolgee will create implicit user on first startup and will automatically log " +
+      "you in. No login page shows, no permissions are managed. This is very useful, when you want to use Tolgee on your local " +
       "machine, or you just want to test it."
   )
   var enabled: Boolean = true,
+  @DocProperty(
+    description = "Secret used to sign JWT authentication tokens with. It will be generated" +
+      " automatically, if not provided. You will be fine with 64 characters long random string.",
+    defaultExplanation = "Generated automatically, if not provided. If running multiple replicas, it's required to" +
+      " set it or otherwise you will be constantly logged out."
+  )
   var jwtSecret: String? = null,
+  @DocProperty(
+    description = "Expiration time of generated JWT tokens in milliseconds.",
+    defaultExplanation = "= 7 days"
+  )
   var jwtExpiration: Int = 604800000,
   var jwtSuperExpiration: Int = 60 * 60 * 1000, // one hour,
   var nativeEnabled: Boolean = true,
