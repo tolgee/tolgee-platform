@@ -29,7 +29,7 @@ const StyledAlerts = styled('div')`
 const StyledPaper = styled(Paper)`
   display: flex;
   align-items: stretch;
-  padding: ${({ theme }) => theme.spacing(4, 0)};
+  padding: ${({ theme }) => theme.spacing(4, 0, 6, 0)};
   margin-top: ${({ theme }) => theme.spacing(2)};
   position: relative;
   overflow: hidden;
