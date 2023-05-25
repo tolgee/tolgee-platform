@@ -4,39 +4,75 @@
 
 package io.tolgee.configuration.tolgee
 
-import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.configuration.annotations.AdditionalDocsProperties
+import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
-@ConfigurationProperties(prefix = "tolgee")
 @ConstructorBinding
-@Schema(description = "Configuration specific to Tolgee")
+@AdditionalDocsProperties(
+  [
+    DocProperty(name = "server.port", description = "Port on which Tolgee exposes itself", defaultValue = "8080"),
+    DocProperty(
+      name = "Data source settings",
+      description = "Since Tolgee is built on Spring framework, to configure its database " +
+        "connection you have to edit following configuration props. These properties can be omitted when using postgres-autostart, which is enabled by default.",
+      children = [
+        DocProperty(
+          name = "spring.datasource.url",
+          description = "The url of the datasource in format jdbc:postgresql://<host>:<port>/<dbname>.",
+          defaultValue = ""
+        ),
+        DocProperty(
+          name = "spring.datasource.username",
+          description = "Database username. e.g. postgres",
+          defaultValue = ""
+        ),
+        DocProperty(
+          name = "spring.datasource.password",
+          description = "Database password. e.g. postgres",
+          defaultValue = ""
+        ),
+      ]
+    )
+  ],
+  global = true
+)
+@ConfigurationProperties(prefix = "tolgee")
+@DocProperty(description = "Configuration specific to Tolgee")
 open class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  @DocProperty(hidden = true)
   var chatwootToken: String? = null,
+  @DocProperty(hidden = true)
   var capterraTracker: String? = null,
+  @DocProperty(hidden = true)
   var ga4Tag: String? = null,
   var internal: InternalProperties = InternalProperties(),
-  @Schema(description = "Public base path where files are accessible. Used by the user interface. (default: same origin, at the root).")
+  @DocProperty(
+    description = "Public base path where files are accessible. Used by the user interface.",
+    defaultExplanation = "The root of the same origin."
+  )
   var fileStorageUrl: String = "",
-  @Schema(description = "Maximum size of uploaded files (in kilobytes).", defaultValue = "`2048` ≈ 2MB")
+  @DocProperty(description = "Maximum size of uploaded files (in kilobytes).", defaultExplanation = "≈ 50MB")
   var maxUploadFileSize: Int = 51200,
-  @Schema(description = "Maximum amount of screenshots which can be uploaded per API key.")
+  @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
   val maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
-  @Schema(description = "Public URL where Tolgee is accessible. Used to generate links to Tolgee (e.g. email confirmation link).")
+  @DocProperty(description = "Public URL where Tolgee is accessible. Used to generate links to Tolgee (e.g. email confirmation link).")
   var frontEndUrl: String? = null,
   var websocket: WebsocketProperties = WebsocketProperties(),
   var appName: String = "Tolgee",
-  @Schema(description = "Maximum length of translations.")
+  @DocProperty(description = "Maximum length of translations.")
   open var maxTranslationTextLength: Long = 10000,
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
+  @DocProperty(hidden = true)
   var sendInBlueProperties: SendInBlueProperties = SendInBlueProperties(),
   open var import: ImportProperties = ImportProperties(),
   var rateLimitProperties: RateLimitProperties = RateLimitProperties()

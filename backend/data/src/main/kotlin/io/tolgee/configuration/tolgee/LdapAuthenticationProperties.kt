@@ -1,8 +1,10 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.configuration.annotations.DocProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.authentication.ldap")
+@DocProperty(description = "LDAP authentication settings")
 class LdapAuthenticationProperties {
   var enabled: Boolean = false
 
