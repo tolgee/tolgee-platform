@@ -8,12 +8,27 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
+import { CompactFooter } from './CompactFooter';
 
 const StyledContainer = styled('div')`
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  align-items: space-between;
+  justify-items: stretch;
+  grid-template-rows: 1fr auto;
+`;
+
+const StyledInner = styled('div')`
   flex-direction: column;
   flex-grow: 1;
-  align-items: center;
-  margin: ${({ theme }) => theme.spacing(1)} auto;
+  align-items: stretch;
+  justify-self: center;
+  margin: ${({ theme }) => theme.spacing(1, 0, 6, 0)};
+  padding: ${({ theme }) => theme.spacing(0, 4, 0, 4)};
+  @media (max-width: 800px) {
+    padding: 0;
+  }
 `;
 
 const StyledAlerts = styled('div')`
@@ -48,17 +63,12 @@ const StyledContent = styled('div')`
   flex-grow: 1;
 `;
 
-const StyledFooter = styled('div')`
-  padding: ${({ theme }) => theme.spacing(1, 7)};
-`;
-
 type Props = {
   windowTitle: string;
   backLink?: string;
   alerts?: React.ReactNode;
   title: React.ReactNode;
   content: React.ReactNode;
-  footer?: React.ReactNode;
   maxWidth?: number;
 };
 
@@ -66,7 +76,6 @@ export const CompactView: React.FC<Props> = ({
   windowTitle,
   content,
   title,
-  footer,
   alerts,
   backLink,
   maxWidth = 430,
@@ -74,7 +83,7 @@ export const CompactView: React.FC<Props> = ({
   useWindowTitle(windowTitle);
 
   return (
-    <>
+    <StyledContainer>
       <GlobalStyles
         styles={(theme) => ({
           body: {
@@ -82,7 +91,7 @@ export const CompactView: React.FC<Props> = ({
           },
         })}
       />
-      <StyledContainer style={{ maxWidth }}>
+      <StyledInner style={{ width: `min(${maxWidth}px, 100%)` }}>
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper>
           <StyledVerticalSpace>
@@ -100,8 +109,8 @@ export const CompactView: React.FC<Props> = ({
           </StyledContent>
           <StyledVerticalSpace />
         </StyledPaper>
-        <StyledFooter>{footer}</StyledFooter>
-      </StyledContainer>
-    </>
+      </StyledInner>
+      <CompactFooter />
+    </StyledContainer>
   );
 };

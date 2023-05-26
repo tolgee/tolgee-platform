@@ -67,6 +67,17 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
                   >
                     <T keyName="login_login_button" />
                   </LoadingButton>
+
+                  <Box display="flex" justifyContent="flex-end" mt={1}>
+                    <MuiLink
+                      onClick={() => props.onMfaCancel()}
+                      component={'button'}
+                    >
+                      <Typography variant="caption">
+                        <T keyName="global_cancel_button" />
+                      </Typography>
+                    </MuiLink>
+                  </Box>
                 </Box>
               </Box>
             }
@@ -78,15 +89,6 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
               variant="standard"
             />
           </StandardForm>
-        }
-        footer={
-          <Box display="flex" justifyContent="flex-end">
-            <MuiLink onClick={() => props.onMfaCancel()} component={'button'}>
-              <Typography variant="caption">
-                <T keyName="global_cancel_button" />
-              </Typography>
-            </MuiLink>
-          </Box>
         }
       />
     </DashboardPage>

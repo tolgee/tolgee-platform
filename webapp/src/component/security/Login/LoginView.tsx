@@ -61,7 +61,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   return (
     <DashboardPage>
       <CompactView
-        maxWidth={isSmall ? 430 : 900}
+        maxWidth={isSmall ? 430 : 964}
         windowTitle={t('login_title')}
         title={t('login_title')}
         alerts={
