@@ -10,7 +10,7 @@ import { ReactComponent as DiscussionsLogo } from 'tg.svgs/social/discussions.sv
 const StyledContainer = styled('div')`
   display: grid;
   border-top: 1px solid ${({ theme }) => theme.palette.divider};
-  padding: ${({ theme }) => theme.spacing(2, 4)};
+  padding: ${({ theme }) => theme.spacing(3, 4)};
   justify-items: center;
   position: relative;
 `;
@@ -22,7 +22,7 @@ const StyledContent = styled('div')`
 `;
 
 const StyledSocial = styled(Box)`
-  padding: ${({ theme }) => theme.spacing(1, 3)};
+  padding: ${({ theme }) => theme.spacing(0.5, 3)};
 `;
 
 const StyledLink = styled(Link)`
