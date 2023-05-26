@@ -1,7 +1,9 @@
-import { Box, Button, styled } from '@mui/material';
-import { ReactComponent as ComeIn } from 'tg.svgs/signup/comeIn.svg';
+import { Button, styled, useMediaQuery } from '@mui/material';
 
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import { MouseIllustration } from '../MouseIllustration';
+import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
+import { TolgeeMore } from '../TolgeeMore';
 
 const StyledProviders = styled('div')`
   display: flex;
@@ -10,22 +12,9 @@ const StyledProviders = styled('div')`
   justify-content: flex-start;
 `;
 
-const StyledComeIn = styled(ComeIn)`
-  color: ${({ theme }) => theme.palette.text.secondary};
-  margin-top: 30px;
-  margin-bottom: 70px;
-`;
-
-const StyledMouse = styled('img')`
-  position: absolute;
-  bottom: 50px;
-  right: -75px;
-  user-select: none;
-  pointer-events: none;
-`;
-
 export const SignUpProviders = () => {
   const oAuthServices = useOAuthServices();
+  const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
   return (
     <StyledProviders>
@@ -42,10 +31,8 @@ export const SignUpProviders = () => {
           {provider.signUpButtonTitle}
         </Button>
       ))}
-      <Box display="flex" flexGrow="1" alignItems="end" justifyContent="center">
-        <StyledComeIn />
-      </Box>
-      <StyledMouse src="/images/standardMouse.svg" />
+      {!isSmall && <MouseIllustration />}
+      <TolgeeMore />
     </StyledProviders>
   );
 };
