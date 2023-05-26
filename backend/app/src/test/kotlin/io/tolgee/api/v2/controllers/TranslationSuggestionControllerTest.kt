@@ -4,6 +4,7 @@ import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
@@ -156,7 +157,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       tolgeeTranslateApiService.translate(
         tolgeeTranslateParamsCaptor.capture(),
       )
-    ).thenReturn("Translated with Tolgee Translator")
+    ).thenAnswer {
+      MtValueProvider.MtResult(
+        "Translated with Tolgee Translator",
+        (it.arguments[0] as TolgeeTranslateApiService.Companion.TolgeeTranslateParams).text.length * 100
+      )
+    }
   }
 
   private fun initTestData() {

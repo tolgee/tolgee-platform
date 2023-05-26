@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import kotlin.collections.HashMap
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -20,11 +20,12 @@ class TolgeeTranslateApiService(
   private val restTemplate: RestTemplate
 ) {
 
-  fun translate(params: TolgeeTranslateParams): String? {
+  fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.add("Something", null)
 
-    val closeItems = params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
+    val closeItems =
+      params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
     val examples = params.metadata?.examples?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
 
     val requestBody = TolgeeTranslateRequest(
@@ -43,8 +44,15 @@ class TolgeeTranslateApiService(
       request
     )
 
-    return response.body?.output
-      ?: throw RuntimeException(response.toString())
+    val costString = response.headers.get("Mt-Credits-Cost")?.singleOrNull()
+      ?: throw IllegalStateException("No valid Credits-Cost header in response")
+    val cost = costString.toInt()
+
+    return MtValueProvider.MtResult(
+      response.body?.output
+        ?: throw RuntimeException(response.toString()),
+      cost
+    )
   }
 
   /**

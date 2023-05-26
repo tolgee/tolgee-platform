@@ -36,6 +36,4 @@ class BigMeta : StandardAuditModel() {
 
   @Type(type = "jsonb")
   var contextData: Any? = null
-
-  var type: BigMetaType = BigMetaType.SCRAPE
 }

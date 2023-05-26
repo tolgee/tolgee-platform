@@ -1,6 +1,5 @@
 package io.tolgee.dtos
 
-import io.tolgee.model.keyBigMeta.BigMetaType
 import javax.validation.constraints.NotEmpty
 
 class BigMetaItemDto {
@@ -11,8 +10,6 @@ class BigMetaItemDto {
 
   @field:NotEmpty
   var location: String = ""
-
-  var type: BigMetaType = BigMetaType.SCRAPE
 
   var contextData: Any? = null
 }

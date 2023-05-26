@@ -31,7 +31,6 @@ class BigMetaService(
       executeInNewTransaction(transactionManager) {
         data.items.map { item ->
           val bigMeta = findOrCreate(item, project).apply {
-            type = item.type
             contextData = item.contextData
           }
           getView(save(bigMeta))

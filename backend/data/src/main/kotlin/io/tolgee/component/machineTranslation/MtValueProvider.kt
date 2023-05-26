@@ -8,10 +8,10 @@ interface MtValueProvider {
   /**
    * Translates the text using the service
    */
-  fun translate(params: ProviderTranslateParams): String?
+  fun translate(params: ProviderTranslateParams): MtResult
 
-  /**
-   * Calculates credit price of the provider
-   */
-  fun calculatePrice(params: ProviderTranslateParams): Int
+  data class MtResult(
+    var translated: String?,
+    val price: Int,
+  )
 }

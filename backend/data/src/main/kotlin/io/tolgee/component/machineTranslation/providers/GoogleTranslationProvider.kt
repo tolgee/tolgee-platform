@@ -1,6 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import com.google.cloud.translate.Translate
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -15,17 +16,17 @@ class GoogleTranslationProvider(
   override val isEnabled: Boolean
     get() = !googleMachineTranslationProperties.apiKey.isNullOrEmpty()
 
-  override fun translateViaProvider(params: ProviderTranslateParams): String? {
-    return translateService.translate(
+  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
+    val result = translateService.translate(
       params.text,
       Translate.TranslateOption.sourceLanguage(params.sourceLanguageTag),
       Translate.TranslateOption.targetLanguage(params.targetLanguageTag),
       Translate.TranslateOption.format("text")
     ).translatedText
-  }
-
-  override fun calculateProviderPrice(text: String): Int {
-    return text.length * 100
+    return MtValueProvider.MtResult(
+      result,
+      params.text.length * 100
+    )
   }
 
   private val translateService by lazy {

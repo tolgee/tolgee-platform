@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -16,7 +17,7 @@ class TolgeeTranslationProvider(
   override val isEnabled: Boolean
     get() = !tolgeeMachineTranslationProperties.url.isNullOrBlank()
 
-  override fun translateViaProvider(params: ProviderTranslateParams): String? {
+  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     return tolgeeTranslateApiService.translate(
       TolgeeTranslateApiService.Companion.TolgeeTranslateParams(
         params.textRaw,
@@ -33,10 +34,6 @@ class TolgeeTranslationProvider(
       throw IllegalArgumentException("Metadata must be set for Tolgee translation")
     }
     return metadata
-  }
-
-  override fun calculateProviderPrice(text: String): Int {
-    return text.length * 100
   }
 
   override val supportedLanguages = null

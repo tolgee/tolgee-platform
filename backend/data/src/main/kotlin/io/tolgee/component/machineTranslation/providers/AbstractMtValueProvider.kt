@@ -14,16 +14,22 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       return LanguageTagConvertor.findSuitableTag(supportedLanguages!!, this)
     }
 
-  override fun translate(params: ProviderTranslateParams): String? {
+  override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val suitableSourceTag = params.sourceLanguageTag.toSuitableTag
     val suitableTargetTag = params.targetLanguageTag.toSuitableTag
 
     if (suitableSourceTag.isNullOrEmpty() || suitableTargetTag.isNullOrEmpty()) {
-      return null
+      return MtValueProvider.MtResult(
+        null,
+        0
+      )
     }
 
     if (suitableSourceTag == suitableTargetTag) {
-      return params.text
+      return MtValueProvider.MtResult(
+        params.text,
+        0
+      )
     }
 
     return translateViaProvider(
@@ -34,29 +40,9 @@ abstract class AbstractMtValueProvider : MtValueProvider {
     )
   }
 
-  override fun calculatePrice(params: ProviderTranslateParams): Int {
-    val suitableSourceTag = params.sourceLanguageTag.toSuitableTag
-    val suitableTargetTag = params.targetLanguageTag.toSuitableTag
-
-    if (suitableSourceTag.isNullOrEmpty() ||
-      suitableTargetTag.isNullOrEmpty() ||
-      suitableSourceTag == suitableTargetTag
-    ) {
-      return 0
-    }
-
-    return calculateProviderPrice(params.text)
-  }
-
   /**
    * Translates the text via provider.
    * All inputs are already checked.
    */
-  protected abstract fun translateViaProvider(params: ProviderTranslateParams): String?
-
-  /**
-   * Calculates provider's credit price.
-   * All inputs are already checked.
-   */
-  protected abstract fun calculateProviderPrice(text: String): Int
+  protected abstract fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult
 }

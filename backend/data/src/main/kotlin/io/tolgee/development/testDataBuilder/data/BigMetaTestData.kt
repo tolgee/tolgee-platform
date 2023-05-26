@@ -5,7 +5,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.keyBigMeta.BigMeta
-import io.tolgee.model.keyBigMeta.BigMetaType
 
 class BigMetaTestData {
   lateinit var project: Project
@@ -30,7 +29,6 @@ class BigMetaTestData {
         namespace = null
         keyName = "key"
         location = "home"
-        type = BigMetaType.SCRAPE
         contextData = mapOf("random data a" to "haha")
       }.self
 
@@ -38,21 +36,18 @@ class BigMetaTestData {
         namespace = "yep"
         keyName = "key"
         location = "home"
-        type = BigMetaType.SCRAPE
         contextData = mapOf("random data" to "haha")
       }
       addBigMeta {
         namespace = "yep"
         keyName = "hups"
         location = "home"
-        type = BigMetaType.SCRAPE
         contextData = listOf("random data")
       }
       addBigMeta {
         namespace = "yep"
         keyName = "hups"
         location = "not-home"
-        type = BigMetaType.SCRAPE
         contextData = listOf("random data")
       }
     }

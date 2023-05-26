@@ -73,9 +73,8 @@ class MtServiceManager(
       return foundInCache
     }
 
-    var translated: String? = null
-    try {
-      translated = params.serviceType.getProvider()
+    val translated = try {
+      params.serviceType.getProvider()
         .translate(
           ProviderTranslateParams(
             params.text,
@@ -96,21 +95,12 @@ class MtServiceManager(
       )
       logger.error(e.stackTraceToString())
       Sentry.captureException(e)
+      null
     }
 
-    val price = translated?.let {
-      calculatePrice(
-        params.text,
-        params.serviceType,
-        params.sourceLanguageTag,
-        params.targetLanguageTag,
-        params.metadata
-      )
-    } ?: 0
-
     val result = TranslateResult(
-      translated,
-      price,
+      translated?.translated,
+      translated?.price ?: 0,
       params.serviceType
     )
 
@@ -141,16 +131,10 @@ class MtServiceManager(
     params: TranslationParams
   ): TranslateResult {
     return TranslateResult(
-      "${params.text} translated with ${params.serviceType.name} " +
+      translatedText = "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
-      calculatePrice(
-        params.text,
-        params.serviceType,
-        params.sourceLanguageTag,
-        params.targetLanguageTag,
-        params.metadata
-      ),
-      params.serviceType
+      actualPrice = params.text.length * 100,
+      usedService = params.serviceType
     )
   }
 
@@ -231,20 +215,6 @@ class MtServiceManager(
         }
       }.awaitAll()
     }
-  }
-
-  /**
-   * Returns sum price of all translations
-   */
-  fun calculatePrice(
-    text: String,
-    service: MtServiceType,
-    sourceLanguageTag: String,
-    targetLanguageTag: String,
-    metadata: Metadata?
-  ): Int {
-    return service.getProvider()
-      .calculatePrice(ProviderTranslateParams(text, text, null, sourceLanguageTag, targetLanguageTag, metadata))
   }
 
   fun MtServiceType.getProvider(): MtValueProvider {
