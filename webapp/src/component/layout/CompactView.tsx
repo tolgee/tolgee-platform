@@ -65,7 +65,7 @@ const StyledContent = styled('div')`
 
 type Props = {
   windowTitle: string;
-  backLink?: string;
+  backLink?: string | (() => void);
   alerts?: React.ReactNode;
   title: React.ReactNode;
   content: React.ReactNode;
@@ -82,6 +82,11 @@ export const CompactView: React.FC<Props> = ({
 }) => {
   useWindowTitle(windowTitle);
 
+  const buttonProps =
+    typeof backLink === 'function'
+      ? { onClick: backLink }
+      : { to: backLink || '', component: Link };
+
   return (
     <StyledContainer>
       <GlobalStyles
@@ -96,7 +101,7 @@ export const CompactView: React.FC<Props> = ({
         <StyledPaper>
           <StyledVerticalSpace>
             {backLink && (
-              <IconButton to={backLink} component={Link} size="medium">
+              <IconButton {...buttonProps} size="medium">
                 <ArrowBack />
               </IconButton>
             )}

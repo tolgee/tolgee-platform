@@ -1,5 +1,5 @@
-import React, { RefObject } from 'react';
-import { Alert, Link as MuiLink, Typography } from '@mui/material';
+import { RefObject } from 'react';
+import { Alert } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
@@ -38,6 +38,7 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
       <CompactView
         windowTitle={t('account-security-mfa')}
         title={t('account-security-mfa')}
+        backLink={() => props.onMfaCancel()}
         alerts={
           security.loginErrorCode &&
           !authLoading && (
@@ -67,17 +68,6 @@ export function LoginTotpForm(props: LoginViewTotpProps) {
                   >
                     <T keyName="login_login_button" />
                   </LoadingButton>
-
-                  <Box display="flex" justifyContent="flex-end" mt={1}>
-                    <MuiLink
-                      onClick={() => props.onMfaCancel()}
-                      component={'button'}
-                    >
-                      <Typography variant="caption">
-                        <T keyName="global_cancel_button" />
-                      </Typography>
-                    </MuiLink>
-                  </Box>
                 </Box>
               </Box>
             }
