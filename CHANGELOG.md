@@ -1,3 +1,16 @@
+# [3.16.0](https://github.com/tolgee/tolgee-platform/compare/v3.15.0...v3.16.0) (2023-05-29)
+
+
+### Bug Fixes
+
+* billing progress over color ([#1736](https://github.com/tolgee/tolgee-platform/issues/1736)) ([eb1d03b](https://github.com/tolgee/tolgee-platform/commit/eb1d03b2aa73137ea78786116f4f4deae34b2ba9))
+* Performance of query with namespace filter on Postgres 15 with C… ([#1737](https://github.com/tolgee/tolgee-platform/issues/1737)) ([cb776f7](https://github.com/tolgee/tolgee-platform/commit/cb776f7f435d597b26e3f2ee9504153ac3be2acb))
+
+
+### Features
+
+* login view as split screen ([#1735](https://github.com/tolgee/tolgee-platform/issues/1735)) ([ed162f6](https://github.com/tolgee/tolgee-platform/commit/ed162f677ea314ae8b4b563b5910cfec9119e16e))
+
 # [3.15.0](https://github.com/tolgee/tolgee-platform/compare/v3.14.3...v3.15.0) (2023-05-24)
 
 
