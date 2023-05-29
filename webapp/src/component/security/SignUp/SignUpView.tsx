@@ -20,36 +20,7 @@ import { container } from 'tsyringe';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useRecaptcha } from './useRecaptcha';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-
-const BREAK_POINT = '(max-width: 800px)';
-
-const StyledGrid = styled('div')`
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  gap: 32px 48px;
-
-  @media ${BREAK_POINT} {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1px auto;
-  }
-`;
-
-const StyledProviders = styled('div')`
-  display: grid;
-  margin-top: 63px;
-
-  @media ${BREAK_POINT} {
-    margin-top: 0px;
-  }
-`;
-
-const StyledSpacer = styled('div')`
-  display: grid;
-  background: lightgrey;
-  @media ${BREAK_POINT} {
-    margin: 0px -8px;
-  }
-`;
+import { SplitContent, SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
 
 export type SignUpType = {
   name: string;
@@ -63,13 +34,22 @@ export type SignUpType = {
 const tokenService = container.resolve(TokenService);
 const globalActions = container.resolve(GlobalActions);
 
+const StyledRightPart = styled('div')`
+  display: grid;
+  margin-top: 63px;
+
+  @media ${SPLIT_CONTENT_BREAK_POINT} {
+    margin-top: 0px;
+  }
+`;
+
 export const SignUpView: FunctionComponent = () => {
   const security = useSelector((state: AppState) => state.global.security);
   const config = useConfig();
   const remoteConfig = useConfig();
   const { t } = useTranslate();
 
-  const isSmall = useMediaQuery(BREAK_POINT);
+  const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
   const message = useMessage();
   const getRecaptchaToken = useRecaptcha();
@@ -125,7 +105,7 @@ export const SignUpView: FunctionComponent = () => {
   return (
     <DashboardPage>
       <CompactView
-        maxWidth={isSmall ? 430 : 900}
+        maxWidth={isSmall ? 430 : 964}
         windowTitle={t('sign_up_title')}
         title={t('sign_up_title')}
         backLink={LINKS.LOGIN.build()}
@@ -135,17 +115,16 @@ export const SignUpView: FunctionComponent = () => {
               <T keyName="sign_up_success_needs_verification_message" />
             </Alert>
           ) : (
-            <StyledGrid>
-              <div>
+            <SplitContent
+              left={
                 <SignUpForm onSubmit={onSubmit} loadable={signUpMutation} />
-              </div>
-
-              <StyledSpacer />
-
-              <StyledProviders>
-                <SignUpProviders />
-              </StyledProviders>
-            </StyledGrid>
+              }
+              right={
+                <StyledRightPart>
+                  <SignUpProviders />
+                </StyledRightPart>
+              }
+            />
           )
         }
       />

@@ -8,12 +8,27 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
+import { CompactFooter } from './CompactFooter';
 
 const StyledContainer = styled('div')`
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  align-items: space-between;
+  justify-items: stretch;
+  grid-template-rows: 1fr auto;
+`;
+
+const StyledInner = styled('div')`
   flex-direction: column;
   flex-grow: 1;
-  align-items: center;
-  margin: ${({ theme }) => theme.spacing(1)} auto;
+  align-items: stretch;
+  justify-self: center;
+  margin: ${({ theme }) => theme.spacing(1, 0, 6, 0)};
+  padding: ${({ theme }) => theme.spacing(0, 4, 0, 4)};
+  @media (max-width: 800px) {
+    padding: 0;
+  }
 `;
 
 const StyledAlerts = styled('div')`
@@ -29,7 +44,7 @@ const StyledAlerts = styled('div')`
 const StyledPaper = styled(Paper)`
   display: flex;
   align-items: stretch;
-  padding: ${({ theme }) => theme.spacing(4, 0)};
+  padding: ${({ theme }) => theme.spacing(4, 0, 6, 0)};
   margin-top: ${({ theme }) => theme.spacing(2)};
   position: relative;
   overflow: hidden;
@@ -48,17 +63,12 @@ const StyledContent = styled('div')`
   flex-grow: 1;
 `;
 
-const StyledFooter = styled('div')`
-  padding: ${({ theme }) => theme.spacing(1, 7)};
-`;
-
 type Props = {
   windowTitle: string;
-  backLink?: string;
+  backLink?: string | (() => void);
   alerts?: React.ReactNode;
   title: React.ReactNode;
   content: React.ReactNode;
-  footer?: React.ReactNode;
   maxWidth?: number;
 };
 
@@ -66,15 +76,19 @@ export const CompactView: React.FC<Props> = ({
   windowTitle,
   content,
   title,
-  footer,
   alerts,
   backLink,
   maxWidth = 430,
 }) => {
   useWindowTitle(windowTitle);
 
+  const buttonProps =
+    typeof backLink === 'function'
+      ? { onClick: backLink }
+      : { to: backLink || '', component: Link };
+
   return (
-    <>
+    <StyledContainer>
       <GlobalStyles
         styles={(theme) => ({
           body: {
@@ -82,12 +96,12 @@ export const CompactView: React.FC<Props> = ({
           },
         })}
       />
-      <StyledContainer style={{ maxWidth }}>
+      <StyledInner style={{ width: `min(${maxWidth}px, 100%)` }}>
         <StyledAlerts>{alerts}</StyledAlerts>
         <StyledPaper>
           <StyledVerticalSpace>
             {backLink && (
-              <IconButton to={backLink} component={Link} size="medium">
+              <IconButton {...buttonProps} size="medium">
                 <ArrowBack />
               </IconButton>
             )}
@@ -100,8 +114,8 @@ export const CompactView: React.FC<Props> = ({
           </StyledContent>
           <StyledVerticalSpace />
         </StyledPaper>
-        <StyledFooter>{footer}</StyledFooter>
-      </StyledContainer>
-    </>
+      </StyledInner>
+      <CompactFooter />
+    </StyledContainer>
   );
 };
