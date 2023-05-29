@@ -120,7 +120,7 @@ export const BillingProgress: React.FC<Props> = ({
       label: (
         <T keyName="billing-progress-label-over" params={{ value: extra }} />
       ),
-      color: theme.palette.billingProgress.low,
+      color: theme.palette.billingProgress.over,
     });
   }
 
