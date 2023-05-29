@@ -2485,4 +2485,14 @@
     <changeSet author="jenik (generated)" id="1683039181425-1">
         <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false" tableName="translation"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1685370826729-1">
+        <createIndex indexName="IDXeq2y9mghytirkcofquanv5frf" tableName="namespace">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1685370826729-2">
+        <createIndex indexName="IDXqgeu78wbhbl45en908ekh5mxd" tableName="translation_comment">
+            <column name="state"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
