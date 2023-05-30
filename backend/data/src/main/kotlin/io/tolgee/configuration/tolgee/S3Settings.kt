@@ -23,7 +23,10 @@ class S3Settings(
   @DocProperty(description = "Secret key for the access key.")
   var secretKey: String? = null,
 
-  @DocProperty(description = "Has to be set to a service endpoint: https://docs.aws.amazon.com/general/latest/gr/s3.html")
+  @DocProperty(
+    description = "Has to be set to a service endpoint: " +
+      "https://docs.aws.amazon.com/general/latest/gr/s3.html"
+  )
   var endpoint: String? = null,
 
   @DocProperty(description = "Has to be set to a signing region: https://docs.aws.amazon.com/general/latest/gr/s3.html")

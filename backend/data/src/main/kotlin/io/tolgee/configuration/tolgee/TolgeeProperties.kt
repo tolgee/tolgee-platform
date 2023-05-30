@@ -28,13 +28,14 @@ import org.springframework.boot.context.properties.ConstructorBinding
     DocProperty(
       name = "Data source settings",
       listDisplayName = false,
-      description = "Since Tolgee is built on Spring framework, to configure its database connection you have to edit following\n" +
-        "configuration props. These properties can be omitted when using\n" +
+      description = "Since Tolgee is built on Spring framework, you have to edit following configuration props\n" +
+        "to configure its database connection. These properties can be omitted when using\n" +
         "[`postgres-autostart`](/self_hosting/configuration.mdx#postgres-autostart), which is enabled by default.",
       children = [
         DocProperty(
           name = "spring.datasource.url",
-          description = "The url of the datasource in format `jdbc:postgresql://<host>:<port>/<dbname>`. e.g. `jdbc:postgresql://db:5432/postgres`",
+          description = "The url of the datasource in format `jdbc:postgresql://<host>:<port>/<dbname>`. " +
+            "e.g. `jdbc:postgresql://db:5432/postgres`",
           defaultValue = ""
         ),
         DocProperty(
@@ -53,7 +54,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
   global = true
 )
 @ConfigurationProperties(prefix = "tolgee")
-@DocProperty(description = "Configuration specific to Tolgee.", displayName = "Tolgee" )
+@DocProperty(description = "Configuration specific to Tolgee.", displayName = "Tolgee")
 open class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
@@ -85,7 +86,10 @@ open class TolgeeProperties(
 
   var fileStorage: FileStorageProperties = FileStorageProperties(),
 
-  @DocProperty(description = "Public URL where Tolgee is accessible. Used to generate links to Tolgee (e.g. email confirmation link).")
+  @DocProperty(
+    description = "Public URL where Tolgee is accessible. " +
+      "Used to generate links to Tolgee (e.g. email confirmation link)."
+  )
   var frontEndUrl: String? = null,
 
   var websocket: WebsocketProperties = WebsocketProperties(),

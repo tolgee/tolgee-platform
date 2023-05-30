@@ -44,7 +44,7 @@ class ConfigurationDocumentationProvider {
       "(.*)\\.(.+?)\$".toRegex(),
       "$1"
     )?.nullIfEmpty
-    ?: throw RuntimeException("No name for $obj with parent $parent")
+      ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
       nameWithDashes = if (objDef?.listDisplayName == true) name.camelCaseToKebabCase else null,
@@ -114,7 +114,8 @@ class ConfigurationDocumentationProvider {
 
   private val String.nullIfEmpty: String? get() = this.ifEmpty { null }
 
-  private val String.camelCaseToKebabCase: String get() = this.replace("([A-Z])".toRegex()) { match -> "-${match.value.lowercase()}" }
+  private val String.camelCaseToKebabCase: String get() =
+    this.replace("([A-Z])".toRegex()) { match -> "-${match.value.lowercase()}" }
 
   private fun getPropertyTree(docProperty: DocProperty): DocItem {
     if (docProperty.children.isNotEmpty()) {
