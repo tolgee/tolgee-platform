@@ -40,12 +40,15 @@ class ConfigurationDocumentationProvider {
       handleProperty(it, obj)
     }.filterNotNull().sortedBy { it.name }
 
+    val name = objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
+      "(.*)\\.(.+?)\$".toRegex(),
+      "$1"
+    )?.nullIfEmpty
+    ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
-      name = objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
-        "(.*)\\.(.+?)\$".toRegex(),
-        "$1"
-      )?.nullIfEmpty
-        ?: throw RuntimeException("No name for $obj with parent $parent"),
+      name = name,
+      nameWithDashes = if (objDef?.listDisplayName == true) name.camelCaseToKebabCase else null,
+      displayName = objDef?.displayName?.nullIfEmpty,
       description = objDef?.description?.nullIfEmpty,
       children = props,
       prefix = confPropsDef?.prefix?.nullIfEmpty ?: throw NullPointerException("No prefix for ${obj::class.simpleName}")
@@ -54,6 +57,7 @@ class ConfigurationDocumentationProvider {
 
   private fun handleProperty(it: KProperty1<out Any, *>, obj: Any): DocItem? {
     val annotation = it.javaField?.getAnnotation(DocProperty::class.java)
+      ?: it.findAnnotations<DocProperty>().singleOrNull()
     if (annotation?.hidden == true) {
       return null
     }
@@ -67,8 +71,11 @@ class ConfigurationDocumentationProvider {
         typeOf<List<*>?>(),
         typeOf<Boolean?>(),
       ) || (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
+        val name = getPropertyName(annotation, it)
         return Property(
-          name = getPropertyName(annotation, it),
+          name = name,
+          nameWithDashes = if (annotation?.listDisplayName == true) name.camelCaseToKebabCase else null,
+          displayName = annotation?.displayName?.nullIfEmpty,
           description = annotation?.description?.nullIfEmpty,
           defaultValue = getDefaultValue(annotation, obj, it).nullIfEmpty,
           defaultExplanation = annotation?.defaultExplanation?.nullIfEmpty,
@@ -107,10 +114,14 @@ class ConfigurationDocumentationProvider {
 
   private val String.nullIfEmpty: String? get() = this.ifEmpty { null }
 
+  private val String.camelCaseToKebabCase: String get() = this.replace("([A-Z])".toRegex()) { match -> "-${match.value.lowercase()}" }
+
   private fun getPropertyTree(docProperty: DocProperty): DocItem {
     if (docProperty.children.isNotEmpty()) {
       return Group(
         name = docProperty.name,
+        nameWithDashes = if (docProperty.listDisplayName) docProperty.name.camelCaseToKebabCase else null,
+        displayName = docProperty.displayName,
         description = docProperty.description,
         children = docProperty.children.map { getPropertyTree(it) },
         prefix = null
@@ -118,6 +129,8 @@ class ConfigurationDocumentationProvider {
     }
     return Property(
       name = docProperty.name,
+      nameWithDashes = if (docProperty.listDisplayName) docProperty.name.camelCaseToKebabCase else null,
+      displayName = docProperty.displayName.nullIfEmpty,
       description = docProperty.description.nullIfEmpty,
       defaultValue = docProperty.defaultValue.nullIfEmpty,
       defaultExplanation = docProperty.defaultExplanation.nullIfEmpty,
