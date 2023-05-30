@@ -98,8 +98,15 @@ class QueryBase<T>(
     this.querySelection[language to TranslationView::commentCount] = commentsExpression
 
     val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
-    unresolvedCommentsJoin.on(
-      cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
+
+    whereConditions.add(
+      cb.or(
+        cb.equal(
+          unresolvedCommentsJoin.get(TranslationComment_.state),
+          TranslationCommentState.NEEDS_RESOLUTION
+        ),
+        unresolvedCommentsJoin.isNull
+      )
     )
 
     val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
