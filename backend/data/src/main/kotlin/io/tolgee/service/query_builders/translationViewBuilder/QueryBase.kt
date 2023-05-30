@@ -100,9 +100,12 @@ class QueryBase<T>(
     val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
 
     whereConditions.add(
-      cb.equal(
-        unresolvedCommentsJoin.get(TranslationComment_.state),
-        TranslationCommentState.NEEDS_RESOLUTION
+      cb.or(
+        cb.equal(
+          unresolvedCommentsJoin.get(TranslationComment_.state),
+          TranslationCommentState.NEEDS_RESOLUTION
+        ),
+        unresolvedCommentsJoin.isNull
       )
     )
 
