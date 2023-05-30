@@ -1,3 +1,10 @@
+## [3.16.1](https://github.com/tolgee/tolgee-platform/compare/v3.16.0...v3.16.1) (2023-05-30)
+
+
+### Bug Fixes
+
+* Even better performance of query with namespace filter ([#1738](https://github.com/tolgee/tolgee-platform/issues/1738)) ([01500a3](https://github.com/tolgee/tolgee-platform/commit/01500a37bfcda14f1eaa444aeda464b218734904))
+
 # [3.16.0](https://github.com/tolgee/tolgee-platform/compare/v3.15.0...v3.16.0) (2023-05-29)
 
 
