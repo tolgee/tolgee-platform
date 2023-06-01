@@ -1,3 +1,10 @@
+## [3.16.2](https://github.com/tolgee/tolgee-platform/compare/v3.16.1...v3.16.2) (2023-06-01)
+
+
+### Bug Fixes
+
+* Gracefully handle MissingServletRequestPartException ([#1740](https://github.com/tolgee/tolgee-platform/issues/1740)) ([87b7c2b](https://github.com/tolgee/tolgee-platform/commit/87b7c2b5b57bd562e5974afd724e517998003aeb))
+
 ## [3.16.1](https://github.com/tolgee/tolgee-platform/compare/v3.16.0...v3.16.1) (2023-05-30)
 
 
