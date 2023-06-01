@@ -14,4 +14,7 @@ class SentryProperties {
 
   @DocProperty(description = "Client DSN. If unset, error reporting is disabled on the server.")
   var clientDsn: String? = null
+
+  @DocProperty(description = "Sample rate for Sentry traces. If unset, traces are disabled on the server.")
+  var tracesSampleRate: Double? = null
 }

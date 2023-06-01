@@ -47,10 +47,9 @@ class ConfigurationDocumentationProvider {
       ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
-      nameWithDashes = if (objDef?.listDisplayName == true) name.camelCaseToKebabCase else null,
       displayName = objDef?.displayName?.nullIfEmpty,
       description = objDef?.description?.nullIfEmpty,
-      children = props,
+      children = props + additionalProps,
       prefix = confPropsDef?.prefix?.nullIfEmpty ?: throw NullPointerException("No prefix for ${obj::class.simpleName}")
     )
   }
@@ -74,7 +73,6 @@ class ConfigurationDocumentationProvider {
         val name = getPropertyName(annotation, it)
         return Property(
           name = name,
-          nameWithDashes = if (annotation?.listDisplayName == true) name.camelCaseToKebabCase else null,
           displayName = annotation?.displayName?.nullIfEmpty,
           description = annotation?.description?.nullIfEmpty,
           defaultValue = getDefaultValue(annotation, obj, it).nullIfEmpty,
@@ -114,14 +112,10 @@ class ConfigurationDocumentationProvider {
 
   private val String.nullIfEmpty: String? get() = this.ifEmpty { null }
 
-  private val String.camelCaseToKebabCase: String get() =
-    this.replace("([A-Z])".toRegex()) { match -> "-${match.value.lowercase()}" }
-
   private fun getPropertyTree(docProperty: DocProperty): DocItem {
     if (docProperty.children.isNotEmpty()) {
       return Group(
         name = docProperty.name,
-        nameWithDashes = if (docProperty.listDisplayName) docProperty.name.camelCaseToKebabCase else null,
         displayName = docProperty.displayName,
         description = docProperty.description,
         children = docProperty.children.map { getPropertyTree(it) },
@@ -130,7 +124,6 @@ class ConfigurationDocumentationProvider {
     }
     return Property(
       name = docProperty.name,
-      nameWithDashes = if (docProperty.listDisplayName) docProperty.name.camelCaseToKebabCase else null,
       displayName = docProperty.displayName.nullIfEmpty,
       description = docProperty.description.nullIfEmpty,
       defaultValue = docProperty.defaultValue.nullIfEmpty,

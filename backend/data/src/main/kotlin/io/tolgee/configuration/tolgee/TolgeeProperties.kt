@@ -15,7 +15,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
   [
     DocProperty(
       name = "Server settings",
-      listDisplayName = false,
       description = "These properties are used to configure Tolgee server.",
       children = [
         DocProperty(
@@ -27,10 +26,9 @@ import org.springframework.boot.context.properties.ConstructorBinding
     ),
     DocProperty(
       name = "Data source settings",
-      listDisplayName = false,
       description = "Since Tolgee is built on Spring framework, you have to edit following configuration props\n" +
         "to configure its database connection. These properties can be omitted when using\n" +
-        "[`postgres-autostart`](/self_hosting/configuration.mdx#postgres-autostart), which is enabled by default.",
+        "[Postgres autostart](/self_hosting/configuration.mdx#postgres-autostart), which is enabled by default.",
       children = [
         DocProperty(
           name = "spring.datasource.url",

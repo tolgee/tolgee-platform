@@ -12,7 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
     "2. Single IP is not allowed to request public endpoints (authentication, sign-ups) " +
     "more than 1000 times per hour\n" +
     "3. Single authenticated user cannot do more than 400 requests per minute",
-  displayName = "Rate limits"
+  displayName = "Rate limits",
+  name = "rateLimits"
 )
 class RateLimitProperties {
   @DocProperty(description = "To turn these rate limits off, set this value to `false`.")

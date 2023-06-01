@@ -15,7 +15,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @AdditionalDocsProperties(
   properties = [
     DocProperty(
-      name = "user-can-create-projects",
+      name = "userCanCreateProjects",
       description = "Whether regular users are allowed to create projects. " +
         "When disabled, only administrators can create projects",
       removedIn = "2.33.0",
@@ -113,8 +113,8 @@ class AuthenticationProperties(
   @DocProperty(
     description = "Whether regular users are allowed to create organizations. " +
       "When `false`, only administrators can create organizations.\n" +
-      "By default, when the user has no organization, one is created for them, this doesn't apply\n" +
-      "when `user-can-create-organizations = false`. " +
+      "By default, when the user has no organization, one is created for them; " +
+      "this doesn't apply when this setting is set to `false`. " +
       "In that case, the user without organization has no permissions on the server.",
   )
   var userCanCreateOrganizations: Boolean = true
