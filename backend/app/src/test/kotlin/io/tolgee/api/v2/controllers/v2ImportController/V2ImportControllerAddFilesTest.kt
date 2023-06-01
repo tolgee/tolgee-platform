@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
@@ -205,6 +206,23 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `gracefully handles missing files part`() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        null
+      ).andIsBadRequest.andAssertThatJson {
+        node("STANDARD_VALIDATION") {
+          node("files").isEqualTo("Required request part 'files' is not present")
+        }
+      }
+    }
+  }
+
+  @Test
   fun `pre-selects namespaces and languages correctly`() {
     val base = dbPopulator.createBase(generateUniqueString())
     commitTransaction()
@@ -311,13 +329,13 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   private fun performImport(
     projectId: Long,
-    files: Map<String?, Resource>,
+    files: Map<String?, Resource>?,
     params: Map<String, Any?> = mapOf()
   ): ResultActions {
     val builder = MockMvcRequestBuilders
       .multipart("/v2/projects/$projectId/import?${mapToQueryString(params)}")
 
-    files.forEach {
+    files?.forEach {
       builder.file(
         MockMultipartFile(
           "files", it.key, "application/zip",
