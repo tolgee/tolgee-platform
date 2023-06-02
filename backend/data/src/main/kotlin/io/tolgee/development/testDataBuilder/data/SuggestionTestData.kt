@@ -21,9 +21,8 @@ class SuggestionTestData : BaseTestData() {
         tag = "de"
         originalName = "Deutsch"
       }.self
-
       addKeys()
-      addBigMetas()
+      addKeyDistances()
     }
   }
 
@@ -51,7 +50,6 @@ class SuggestionTestData : BaseTestData() {
         text = "This is beautiful"
       }
       addTranslation {
-
         language = germanLanguage
         key = this@keyBuilder.self
         text = "Das ist schön"
@@ -98,7 +96,37 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  private fun ProjectBuilder.addBigMetas() {
+  private fun ProjectBuilder.addKeyDistances() {
+    this.addKeysDistance(data.keys[0].self, data.keys[1].self) {
+      distance = 10000
+    }
+    this.addKeysDistance(data.keys[0].self, data.keys[2].self) {
+      distance = 8000
+    }
+    this.addKeysDistance(data.keys[0].self, data.keys[3].self) {
+      distance = 8000
+    }
+    this.addKeysDistance(data.keys[0].self, data.keys[4].self) {
+      distance = 8000
+    }
+    this.addKeysDistance(data.keys[1].self, data.keys[2].self) {
+      distance = 2000
+    }
+    this.addKeysDistance(data.keys[1].self, data.keys[3].self) {
+      distance = 1000
+    }
+    this.addKeysDistance(data.keys[1].self, data.keys[4].self) {
+      distance = 1000
+    }
+    this.addKeysDistance(data.keys[2].self, data.keys[3].self) {
+      distance = 1000
+    }
+    this.addKeysDistance(data.keys[2].self, data.keys[4].self) {
+      distance = 1000
+    }
+    this.addKeysDistance(data.keys[3].self, data.keys[4].self) {
+      distance = 1000
+    }
   }
 
   fun enableAWS() {

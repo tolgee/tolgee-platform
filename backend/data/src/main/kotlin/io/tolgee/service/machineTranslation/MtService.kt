@@ -201,12 +201,12 @@ class MtService(
   private fun getCloseItems(
     sourceLanguage: Language,
     targetLanguage: Language,
-    keysIds: List<Long>,
+    closeKeyIds: List<Long>,
     keyId: Long?
   ): List<ExampleItem> {
 
     val translations = this.translationService.findAllByKeyIdsAndLanguageIds(
-      keysIds,
+      closeKeyIds,
       languageIds = listOf(sourceLanguage.id, targetLanguage.id)
     )
 

@@ -3,6 +3,8 @@ package io.tolgee.service.bigMeta
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.query_results.KeyIdFindResult
+import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
@@ -12,6 +14,8 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.repository.KeysDistanceRepository
 import io.tolgee.util.equalNullable
+import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -76,6 +80,7 @@ class BigMetaService(
     return findExistingKeysDistancesByIds(keyIds)
   }
 
+  @Transactional
   fun findExistingKeysDistancesByIds(keyIds: List<Long>): List<KeysDistance> {
     val directIds = mutableSetOf<Long>()
     keysDistanceRepository.findForKeyIds(keyIds).forEach {
@@ -93,11 +98,30 @@ class BigMetaService(
     return this.keysDistanceRepository.findById(id).orElse(null)
   }
 
-  fun delete(keysDistance: KeysDistance) {
-    keysDistanceRepository.delete(keysDistance)
+  fun getCloseKeyIds(keyId: Long): List<Long> {
+    return this.keysDistanceRepository.getCloseKeys(keyId)
+      .flatMap { pair ->
+        pair.toList()
+          .filter { it != keyId }
+      }
   }
 
-  fun getCloseKeyIds(keyId: Long): List<Long> {
-    return this.keysDistanceRepository.getCloseKeys(keyId).flatMap { it.toList() }
+  @EventListener(OnProjectActivityStoredEvent::class)
+  @Transactional
+  @Async
+  fun onKeyDeleted(event: OnProjectActivityEvent) {
+    val ids =
+      event.activityHolder.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }?.map { it.entityId }
+
+    if (ids.isNullOrEmpty()) {
+      return
+    }
+
+    entityManager.createQuery(
+      """
+      delete from KeysDistance kd 
+      where kd.key1Id in :ids or kd.key2Id in :ids
+      """
+    ).setParameter("ids", ids).executeUpdate()
   }
 }
