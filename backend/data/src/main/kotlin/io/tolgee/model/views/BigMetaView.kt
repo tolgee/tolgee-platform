@@ -1,9 +1,9 @@
 package io.tolgee.model.views
 
 import io.tolgee.model.key.Key
-import io.tolgee.model.keyBigMeta.BigMeta
+import io.tolgee.model.keyBigMeta.KeysDistance
 
 interface BigMetaView {
-  val bigMeta: BigMeta
+  val keysDistance: KeysDistance
   val key: Key?
 }

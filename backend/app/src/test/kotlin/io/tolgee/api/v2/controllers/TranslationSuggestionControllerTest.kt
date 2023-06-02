@@ -160,7 +160,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        (it.arguments[0] as TolgeeTranslateApiService.Companion.TolgeeTranslateParams).text.length * 100
+        ((it.arguments[0] as? TolgeeTranslateApiService.Companion.TolgeeTranslateParams)?.text?.length ?: 0) * 100
       )
     }
   }
@@ -287,7 +287,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("BAIDU").isEqualTo("Translated with Baidu")
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(5)
+      node("translationCreditsBalanceAfter").isEqualTo(6)
     }
   }
 

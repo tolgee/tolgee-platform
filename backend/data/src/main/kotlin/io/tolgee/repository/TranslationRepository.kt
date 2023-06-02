@@ -156,12 +156,5 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
 
-  @Query(
-    """
-    from Translation t
-    join fetch Key k on t.key = k
-    where k.project = :project and k.name in :keys and t.language in :languages
-    """
-  )
-  fun findAllByKey(keys: List<String>, project: Project, languages: List<Language>): List<Translation>
+  fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
 }

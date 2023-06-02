@@ -2390,37 +2390,6 @@
     <changeSet author="jenik (generated)" id="1678365585479-1">
         <addUniqueConstraint columnNames="project_id, name" constraintName="UKsyjijfmo4txo7n7qvpu5so0ej" tableName="tag"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1679489925501-1">
-        <createTable tableName="big_meta">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="big_metaPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="context_data" type="JSONB"/>
-            <column name="key_name" type="VARCHAR(255)"/>
-            <column name="location" type="VARCHAR(255)"/>
-            <column name="namespace" type="VARCHAR(255)"/>
-            <column name="type" type="INTEGER"/>
-            <column name="project_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1679489925501-2">
-        <addUniqueConstraint columnNames="key_name, namespace, location, project_id" constraintName="UKe9uxeg0ih2b1l1lyjlt6u06yh" tableName="big_meta"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1679489925501-3">
-        <createIndex indexName="IDXb5ynlon1syt94o92e6k7x5ap7" tableName="big_meta">
-            <column name="key_name"/>
-            <column name="namespace"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1679489925501-4">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="big_meta" constraintName="FK34t2uce2rplndbeea5tonfi3o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-1">
         <addColumn tableName="permission">
             <column name="organization_id" type="int8"/>
@@ -2515,6 +2484,32 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1683039181425-1">
         <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false" tableName="translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1685695895861-1">
+        <createTable tableName="keys_distance">
+            <column name="key1id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="keys_distancePK"/>
+            </column>
+            <column name="key2id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="keys_distancePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="distance" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hits" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1685695895861-2">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="keys_distance" constraintName="FK6vxvhrj75wf8eb41lqjrvb01t" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1685370826729-1">
         <createIndex indexName="IDXeq2y9mghytirkcofquanv5frf" tableName="namespace">

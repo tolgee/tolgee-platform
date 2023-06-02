@@ -2,16 +2,15 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
-import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.node
-import io.tolgee.service.BigMetaService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
@@ -23,6 +22,9 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = BigMetaTestData()
+  }
+
+  private fun saveTestDataAndPrepare() {
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.project }
     userAccount = testData.userAccount
@@ -31,71 +33,47 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it stores`() {
+    saveTestDataAndPrepare()
     performProjectAuthPost(
       "big-meta",
       mapOf(
-        "items" to listOf(
+        "relatedKeysInOrder" to listOf(
           mapOf(
-            "namespace" to "hehe",
-            "keyName" to "haha",
-            "location" to "hoho",
-            "type" to "SCRAPE",
-            "contextData" to mapOf("huhu" to "haha")
+            "keyName" to "key"
+          ),
+          mapOf(
+            "namespace" to "yep",
+            "keyName" to "key"
           ),
         )
       )
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("[0]") {
-        node("id").satisfies {
-          bigMetaService.find(it.toString().toLong()).assert.isNotNull
-        }
-      }
-    }
+    ).andIsOk
+
+    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
   }
 
+  @OptIn(ExperimentalTime::class)
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it returns by id`() {
-    performProjectAuthGet("big-meta/${testData.someBigMeta.id}").andIsOk.andAssertThatJson {
-      node("id").isEqualTo(testData.someBigMeta.id)
+  fun `it performs well`() {
+    val keys = testData.addLotOfData()
+    saveTestDataAndPrepare()
+
+    val time = measureTime {
+      performProjectAuthPost(
+        "big-meta",
+        mapOf(
+          "relatedKeysInOrder" to keys.take(100).map {
+            mapOf(
+              "namespace" to it.namespace,
+              "keyName" to it.name
+            )
+          }
+        )
+      ).andIsOk
     }
-  }
 
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it lists for key`() {
-    performProjectAuthGet("keys/${testData.yepKey.id}/big-meta").andIsOk.andPrettyPrint.andAssertThatJson {
-      node("_embedded.bigMeta") {
-        isArray.hasSize(3)
-        node("[0]") {
-          node("id").isEqualTo(testData.someBigMeta.id)
-          node("contextData").isEqualTo(
-            """
-            {
-              "random data a" : "haha"
-            }
-            """.trimIndent()
-          )
-        }
-      }
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it lists all`() {
-    performProjectAuthGet("big-meta").andIsOk.andAssertThatJson {
-      node("_embedded.bigMeta") {
-        isArray.hasSize(4)
-      }
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it deletes`() {
-    performProjectAuthDelete("big-meta/${testData.someBigMeta.id}").andIsOk
-
-    bigMetaService.find(testData.someBigMeta.id).assert.isNull()
+    time.inWholeSeconds.assert.isLessThan(10)
+    bigMetaService.findExistingKeysDistancesByIds(keys.map { it.id }).assert.hasSize(1)
   }
 }

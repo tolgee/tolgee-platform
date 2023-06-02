@@ -13,7 +13,7 @@ import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
-import io.tolgee.service.BigMetaService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
@@ -85,7 +85,6 @@ class MtService(
       baseTranslationText,
       keyId,
       true,
-      project
     )
 
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
@@ -132,7 +131,7 @@ class MtService(
     val anyNeedsMetadata = enabledServices.any { it.usesMetadata }
 
     val metadata =
-      getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata, project)
+      getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata)
 
     val keyName = keyId?.let { keyService.get(it) }?.name
 
@@ -202,22 +201,18 @@ class MtService(
   private fun getCloseItems(
     sourceLanguage: Language,
     targetLanguage: Language,
-    keys: List<MetaMapper.Companion.MetaKey>,
-    project: Project,
+    keysIds: List<Long>,
     keyId: Long?
   ): List<ExampleItem> {
-    val keyNames = keys.map { it.keyName }
-    val sourceTranslations = this.translationService.findAllByKey(
-      keyNames,
-      project,
-      listOf(sourceLanguage)
+
+    val translations = this.translationService.findAllByKeyIdsAndLanguageIds(
+      keysIds,
+      languageIds = listOf(sourceLanguage.id, targetLanguage.id)
     )
 
-    val targetTranslations = this.translationService.findAllByKey(
-      keyNames,
-      project,
-      listOf(targetLanguage)
-    )
+    val sourceTranslations = translations.filter { it.language.id == sourceLanguage.id }
+
+    val targetTranslations = translations.filter { it.language.id == targetLanguage.id }
 
     return sourceTranslations
       .filter { !it.text.isNullOrEmpty() }
@@ -238,28 +233,18 @@ class MtService(
     text: String,
     keyId: Long?,
     needsMetadata: Boolean,
-    project: Project
   ): Map<String, Metadata>? {
     if (!needsMetadata) {
       return null
     }
 
-    val bigMetaEntities = keyId?.let { bigMetaService.getAllForKey(it) } ?: emptyList()
-
-    val keys = bigMetaEntities.lastOrNull().let {
-      val meta = (it?.contextData as? HashMap<*, *>)
-      val metaJson = meta?.get("surroundingKeys")?.toString()
-      metaJson?.let {
-        val metaMapper = MetaMapper()
-        metaMapper.getMeta(metaJson)
-      } ?: listOf()
-    }
+    val closeKeyIds = keyId?.let { bigMetaService.getCloseKeyIds(it) }
 
     return targetLanguages.associate { targetLanguage ->
       targetLanguage.tag to
         Metadata(
           examples = getExamples(sourceLanguage, targetLanguage, text, keyId),
-          closeItems = getCloseItems(sourceLanguage, targetLanguage, keys, project, keyId)
+          closeItems = closeKeyIds?.let { getCloseItems(sourceLanguage, targetLanguage, it, keyId) } ?: listOf(),
         )
     }
   }
@@ -270,9 +255,8 @@ class MtService(
     text: String,
     keyId: Long?,
     needsMetadata: Boolean = true,
-    project: Project
   ): Metadata? {
-    return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata, project)?.get(
+    return getMetadata(sourceLanguage, listOf(targetLanguages), text, keyId, needsMetadata)?.get(
       targetLanguages.tag
     )
   }

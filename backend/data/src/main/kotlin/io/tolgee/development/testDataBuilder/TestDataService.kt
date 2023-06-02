@@ -8,8 +8,8 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
-import io.tolgee.service.BigMetaService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -190,12 +190,14 @@ class TestDataService(
     saveAutoTranslationConfigs(builder)
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
-    saveBigMetas(builder)
+    saveKeyDistances(builder)
   }
 
-  private fun saveBigMetas(builder: ProjectBuilder) {
-    builder.data.bigMetas.map { it.self }.forEach {
-      bigMetaService.save(it)
+  private fun saveKeyDistances(builder: ProjectBuilder) {
+    builder.data.keyDistances.forEach {
+      it.self.key1Id = it.key1.id
+      it.self.key2Id = it.key2.id
+      bigMetaService.saveKeyDistance(it.self)
     }
   }
 

@@ -2,7 +2,7 @@ package io.tolgee.model.keyBigMeta
 
 import java.io.Serializable
 
-data class BigMetaId(
-  var key1Id: Long,
-  var key2id: Long
+data class KeysDistanceId(
+  var key1Id: Long = 0,
+  var key2Id: Long = 0
 ) : Serializable
