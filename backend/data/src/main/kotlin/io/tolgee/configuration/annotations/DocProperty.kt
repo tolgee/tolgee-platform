@@ -8,6 +8,7 @@ annotation class DocProperty(
   val defaultValue: String = "",
   val defaultExplanation: String = "",
   val children: Array<DocProperty> = [],
+  val prefix: String = "",
   val removedIn: String = "",
   val hidden: Boolean = false
 )

@@ -36,9 +36,14 @@ class ConfigurationDocumentationProvider {
 
     val objDef = obj::class.findAnnotations(DocProperty::class).singleOrNull()
     val confPropsDef = obj::class.findAnnotations(ConfigurationProperties::class).singleOrNull()
-    val props = obj::class.declaredMemberProperties.map {
+    val props = obj::class.declaredMemberProperties.mapNotNull {
       handleProperty(it, obj)
-    }.filterNotNull().sortedBy { it.name }
+    }.sortedWith(
+      compareBy(
+        { it is Group },
+        { it.name },
+      )
+    )
 
     val name = objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
       "(.*)\\.(.+?)\$".toRegex(),
@@ -50,7 +55,8 @@ class ConfigurationDocumentationProvider {
       displayName = objDef?.displayName?.nullIfEmpty,
       description = objDef?.description?.nullIfEmpty,
       children = props + additionalProps,
-      prefix = confPropsDef?.prefix?.nullIfEmpty ?: throw NullPointerException("No prefix for ${obj::class.simpleName}")
+      prefix = objDef?.prefix?.nullIfEmpty ?: confPropsDef?.prefix?.nullIfEmpty
+        ?: throw NullPointerException("No prefix for ${obj::class.simpleName}")
     )
   }
 
@@ -119,7 +125,7 @@ class ConfigurationDocumentationProvider {
         displayName = docProperty.displayName,
         description = docProperty.description,
         children = docProperty.children.map { getPropertyTree(it) },
-        prefix = null
+        prefix = docProperty.prefix.nullIfEmpty
       )
     }
     return Property(
