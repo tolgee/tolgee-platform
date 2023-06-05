@@ -31,7 +31,7 @@ class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it stores`() {
+  fun `it deletes references`() {
     saveTestDataAndPrepare()
     performProjectAuthPost(
       "big-meta",
@@ -47,6 +47,8 @@ class BigMetaServiceTest : ProjectAuthControllerTest("/v2/projects/") {
         )
       )
     ).andIsOk
+
+    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
 
     executeInNewTransaction {
       keyService.delete(testData.yepKey.id)

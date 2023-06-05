@@ -4,7 +4,6 @@ import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.query_results.KeyIdFindResult
 import io.tolgee.events.OnProjectActivityEvent
-import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
@@ -106,7 +105,7 @@ class BigMetaService(
       }
   }
 
-  @EventListener(OnProjectActivityStoredEvent::class)
+  @EventListener(OnProjectActivityEvent::class)
   @Transactional
   @Async
   fun onKeyDeleted(event: OnProjectActivityEvent) {
