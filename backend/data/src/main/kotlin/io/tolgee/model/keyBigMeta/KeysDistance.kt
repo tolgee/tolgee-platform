@@ -28,7 +28,7 @@ class KeysDistance(
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
-  var distance: Long = 10000
+  var score: Long = 10000
 
   var hits: Long = 1
   override fun equals(other: Any?): Boolean {
@@ -39,14 +39,14 @@ class KeysDistance(
 
     if (key1Id != other.key1Id) return false
     if (key2Id != other.key2Id) return false
-    if (distance != other.distance) return false
+    if (score != other.score) return false
     return hits == other.hits
   }
 
   override fun hashCode(): Int {
     var result = key1Id.hashCode()
     result = 31 * result + key2Id.hashCode()
-    result = 31 * result + distance.hashCode()
+    result = 31 * result + score.hashCode()
     result = 31 * result + hits.hashCode()
     return result
   }

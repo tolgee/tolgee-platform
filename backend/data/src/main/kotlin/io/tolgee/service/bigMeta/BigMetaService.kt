@@ -27,7 +27,7 @@ class BigMetaService(
   private val entityManager: EntityManager
 ) {
   companion object {
-    const val MAX_DISTANCE = 10000L
+    const val MAX_DISTANCE_SCORE = 10000L
     const val MAX_POINTS = 2000L
     const val MAX_ORDER_DISTANCE = 20
   }

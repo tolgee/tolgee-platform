@@ -30,11 +30,11 @@ class KeysDistanceUtilTest {
       .thenReturn(
         listOf(
           KeysDistance(1, 3).also { keysDistance ->
-            keysDistance.distance = 10000
+            keysDistance.score = 10000
             keysDistance.hits = 10
           },
           KeysDistance(3, 4).also { keysDistance ->
-            keysDistance.distance = 10000
+            keysDistance.score = 10000
             keysDistance.hits = 1
           }
         )
@@ -71,14 +71,14 @@ class KeysDistanceUtilTest {
       .newDistances
 
     result.assert.hasSize(4)
-    result.singleOrNull { it.key1Id == 1L && it.key2Id == 2L }!!.distance.assert.isEqualTo(10000)
-    result.singleOrNull { it.key1Id == 2L && it.key2Id == 3L }!!.distance.assert.isEqualTo(10000)
+    result.singleOrNull { it.key1Id == 1L && it.key2Id == 2L }!!.score.assert.isEqualTo(10000)
+    result.singleOrNull { it.key1Id == 2L && it.key2Id == 3L }!!.score.assert.isEqualTo(10000)
     val key1And3Distance = result.singleOrNull { it.key1Id == 1L && it.key2Id == 3L }!!
-    key1And3Distance.distance.assert.isEqualTo(9818L)
+    key1And3Distance.score.assert.isEqualTo(9818L)
     key1And3Distance.hits.assert.isEqualTo(11)
 
     val key3And4Distance = result.singleOrNull { it.key1Id == 3L && it.key2Id == 4L }!!
-    key3And4Distance.distance.assert.isEqualTo(5000)
+    key3And4Distance.score.assert.isEqualTo(5000)
     key3And4Distance.hits.assert.isEqualTo(2)
   }
 }

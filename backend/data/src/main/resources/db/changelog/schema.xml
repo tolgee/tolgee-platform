@@ -2485,7 +2485,17 @@
     <changeSet author="jenik (generated)" id="1683039181425-1">
         <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false" tableName="translation"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1685695895861-1">
+    <changeSet author="jenik (generated)" id="1685370826729-1">
+        <createIndex indexName="IDXeq2y9mghytirkcofquanv5frf" tableName="namespace">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1685370826729-2">
+        <createIndex indexName="IDXqgeu78wbhbl45en908ekh5mxd" tableName="translation_comment">
+            <column name="state"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1685956025153-1">
         <createTable tableName="keys_distance">
             <column name="key1id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="keys_distancePK"/>
@@ -2499,26 +2509,16 @@
             <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="distance" type="BIGINT">
+            <column name="hits" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="hits" type="BIGINT">
+            <column name="score" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="project_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1685695895861-2">
+    <changeSet author="jenik (generated)" id="1685956025153-2">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="keys_distance" constraintName="FK6vxvhrj75wf8eb41lqjrvb01t" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1685370826729-1">
-        <createIndex indexName="IDXeq2y9mghytirkcofquanv5frf" tableName="namespace">
-            <column name="name"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1685370826729-2">
-        <createIndex indexName="IDXqgeu78wbhbl45en908ekh5mxd" tableName="translation_comment">
-            <column name="state"/>
-        </createIndex>
     </changeSet>
 </databaseChangeLog>

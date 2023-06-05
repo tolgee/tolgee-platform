@@ -38,7 +38,7 @@ class BigMetaTestData {
       keys.forEachIndexed forEach2@{ idx2, key2 ->
         if (idx1 >= idx2 || abs(idx1 - idx2) > (BigMetaService.MAX_ORDER_DISTANCE + 1)) return@forEach2
         projectBuilder.addKeysDistance(key1, key2) {
-          distance = 10000
+          score = 10000
           hits = 1
         }
       }

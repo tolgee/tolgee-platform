@@ -17,7 +17,7 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
     select kd.key1Id, kd.key2Id from KeysDistance kd 
     where kd.key1Id = :keyId or 
           kd.key2Id = :keyId 
-    order by kd.distance desc
+    order by kd.score desc
         """
   )
   fun getCloseKeys(keyId: Long, pageable: Pageable = PageRequest.of(0, 10)): List<Array<Long>>

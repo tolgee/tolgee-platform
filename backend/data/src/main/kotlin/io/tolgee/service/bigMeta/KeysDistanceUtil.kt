@@ -31,7 +31,7 @@ class KeysDistanceUtil(
         val distance = distances[min(key1Id, key2Id) to max(key1Id, key2Id)]
           ?: createDistance(key1Id, key2Id)
         relevant[distance.key1Id to distance.key2Id] = distance
-        distance.distance = computeDistance(distance.distance, distance.hits, relatedKeysSize, index1, index2)
+        distance.score = computeDistanceScore(distance.score, distance.hits, relatedKeysSize, index1, index2)
         distance.hits++
       }
     }
@@ -40,7 +40,7 @@ class KeysDistanceUtil(
   private fun decreaseOthers() {
     existing.forEach {
       if (relevant[it.key1Id to it.key2Id] == null) {
-        it.distance = it.distance * it.hits / (it.hits + 1)
+        it.score = it.score * it.hits / (it.hits + 1)
         it.hits++
       }
     }
@@ -79,10 +79,20 @@ class KeysDistanceUtil(
       }
   }
 
-  private fun computeDistance(oldDistance: Long, hits: Long, relatedKeysSize: Int, index1: Int, index2: Int): Long {
+  private fun computeDistanceScore(
+    oldDistance: Long,
+    hits: Long,
+    relatedKeysSize: Int,
+    index1: Int,
+    index2: Int
+  ): Long {
     val maxDistance = (relatedKeysSize - 2)
-    val points = ((maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()) * BigMetaService.MAX_POINTS
-    val baseDistance = BigMetaService.MAX_DISTANCE - BigMetaService.MAX_POINTS
+
+    val points = (
+      (maxDistance - (abs(index1 - index2) - 1)) / maxDistance.toDouble()
+      ) * BigMetaService.MAX_POINTS
+
+    val baseDistance = BigMetaService.MAX_DISTANCE_SCORE - BigMetaService.MAX_POINTS
     return (oldDistance * hits + baseDistance + points).toLong() / (hits + 1)
   }
 }
