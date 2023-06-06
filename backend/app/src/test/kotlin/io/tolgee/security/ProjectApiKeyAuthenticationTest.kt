@@ -84,8 +84,10 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
     }
 
     waitForNotThrowing(throwableClass = AssertionError::class, timeout = 5000) {
-      apiKeyService.get(testData.frantasKey.id).lastUsedAt?.time
-        .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+      executeInNewTransaction {
+        apiKeyService.get(testData.frantasKey.id).lastUsedAt?.time
+          .assert.isEqualTo(currentDateProvider.forcedDate!!.time)
+      }
     }
   }
 

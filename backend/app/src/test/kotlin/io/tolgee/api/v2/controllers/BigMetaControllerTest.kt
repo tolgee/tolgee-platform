@@ -74,6 +74,6 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
 
     time.inWholeSeconds.assert.isLessThan(10)
-    bigMetaService.findExistingKeysDistancesByIds(keys.map { it.id }).assert.hasSize(1)
+    bigMetaService.findExistingKeysDistancesByIds(keys.map { it.id }).assert.hasSize(20790)
   }
 }

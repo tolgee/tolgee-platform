@@ -1,6 +1,7 @@
 package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
 import io.tolgee.constants.Caches
@@ -53,16 +54,20 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
-  private final val paramsEnGoogle = mtServiceManager.getParams(
-    text = "Hello",
-    textRaw = "raw-text",
-    keyName = "key-name",
-    sourceLanguageTag = "en",
-    targetLanguageTag = "de",
-    serviceType = MtServiceType.GOOGLE
-  )
+  private final val paramsEnGoogle by lazy {
+    mtServiceManager.getParams(
+      text = "Hello",
+      textRaw = "raw-text",
+      keyName = "key-name",
+      sourceLanguageTag = "en",
+      targetLanguageTag = "de",
+      serviceType = MtServiceType.GOOGLE
+    )
+  }
 
-  val paramsEnAws = paramsEnGoogle.copy(serviceType = MtServiceType.AWS)
+  val paramsEnAws by lazy {
+    paramsEnGoogle.copy(serviceType = MtServiceType.AWS)
+  }
 
   @BeforeEach
   fun setup() {
@@ -97,7 +102,8 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @Test
   fun `caches permission by project and user`() {
     val permission = Permission(id = 1)
-    whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1)).then { permission }
+    whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1))
+      .then { permission }
     permissionService.find(1, 1)
     Mockito.verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
@@ -130,6 +136,8 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       )
   }
 
+  val googleResponse = MtValueProvider.MtResult("Hello", 10)
+
   @Test
   fun `is caching`() {
     cacheManager.getCache("cool cache")!!.put("test", "value")
@@ -138,7 +146,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is caching machine translations`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle)
@@ -147,7 +155,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different service)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnAws)
@@ -156,16 +164,16 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different targetLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
-    mtServiceManager.translate(paramsEnGoogle.copy(targetLanguageTag = "de"))
+    mtServiceManager.translate(paramsEnGoogle.copy(targetLanguageTag = "cs"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 
   @Test
   fun `is not caching machine translations (different sourceLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(sourceLanguageTag = "de"))
@@ -174,7 +182,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different input)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { "Hello" }
+    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(text = "Hello!"))
