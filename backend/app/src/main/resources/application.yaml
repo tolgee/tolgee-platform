@@ -29,6 +29,8 @@ tolgee:
     enabled: false
   postgres-autostart:
     enabled: true
+  rabbitmq-autostart:
+    enabled: true
   #    jwt-secret-file: /<user home>/.tolgee/jwt.secret
   #    jwt-secret: some long string
   #    jwt-expiration: 604800000

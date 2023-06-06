@@ -1,4 +1,4 @@
-package io.tolgee.postgresStarters
+package io.tolgee.postgresRunners
 
 import io.tolgee.configuration.tolgee.FileStorageProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties

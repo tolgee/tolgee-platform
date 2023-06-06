@@ -1,4 +1,4 @@
-package io.tolgee.postgresStarters
+package io.tolgee.postgresRunners
 
 interface PostgresRunner {
   fun run()

@@ -80,6 +80,7 @@ dependencies {
     implementation("org.springframework.security:spring-security-ldap")
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-amqp"
 
     /**
      * TESTING

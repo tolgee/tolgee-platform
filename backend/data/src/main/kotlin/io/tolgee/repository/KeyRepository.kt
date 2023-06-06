@@ -113,4 +113,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """
   )
   fun getWithTags(keys: Set<Key>): List<Key>
+
+  @Query(
+    """
+    select k.project.id from Key k where k.id in :keysIds
+  """
+  )
+  fun getProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
 }
