@@ -2,7 +2,6 @@ package io.tolgee.configuration
 
 import io.tolgee.activity.ActivityFilter
 import io.tolgee.component.VersionFilter
-import io.tolgee.component.VersionFilter.Companion.TOLGEE_VERSION_HEADER_NAME
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
@@ -22,8 +21,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebSecurityConfig @Autowired constructor(
@@ -74,16 +71,6 @@ class WebSecurityConfig @Autowired constructor(
       .and().sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
     return
-  }
-
-  @Bean
-  fun corsMappingConfigurer(): WebMvcConfigurer? {
-    return object : WebMvcConfigurer {
-      override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-          .exposedHeaders(TOLGEE_VERSION_HEADER_NAME)
-      }
-    }
   }
 
   override fun configure(auth: AuthenticationManagerBuilder) {
