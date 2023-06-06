@@ -1,10 +1,10 @@
 package io.tolgee.component.machineTranslation.providers
 
-import software.amazon.awssdk.services.translate.TranslateClient
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.translate.TranslateClient
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -14,6 +14,7 @@ class AwsMtValueProvider(
 ) : AbstractMtValueProvider() {
   override val isEnabled: Boolean
     get() = awsMachineTranslationProperties.enabled
+      ?: (awsMachineTranslationProperties.accessKey != null && awsMachineTranslationProperties.secretKey != null)
 
   override fun calculateProviderPrice(text: String): Int {
     return text.length * 100
