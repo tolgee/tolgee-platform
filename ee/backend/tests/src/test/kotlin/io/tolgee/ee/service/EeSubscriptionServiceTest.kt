@@ -64,9 +64,12 @@ class EeSubscriptionServiceTest : AbstractSpringTest() {
       }
 
       verify {
-        Thread.sleep(1020) // initialDelay + checkPeriod
-        captor.allValues.assert.hasSizeGreaterThan(0)
-        eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
+        waitForNotThrowing(pollTime = 1000) {
+          captor.allValues.assert.hasSizeGreaterThan(0)
+          executeInNewTransaction {
+            eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
+          }
+        }
       }
     }
   }

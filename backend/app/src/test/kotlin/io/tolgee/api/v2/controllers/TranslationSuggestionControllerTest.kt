@@ -98,7 +98,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun initMachineTranslationMocks() {
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = mock() as TranslateTextResponse
+    val awsTranslateTextResult = TranslateTextResponse
+      .builder()
+      .translatedText("Translated with Amazon")
+      .build()
 
     whenever(
       googleTranslate.translate(
@@ -111,9 +114,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     whenever(googleTranslationMock.translatedText).thenReturn("Translated with Google")
 
-    whenever(amazonTranslate.translateText(any() as TranslateTextRequest)).thenReturn(awsTranslateTextResult)
-
-    whenever(awsTranslateTextResult.translatedText()).thenReturn("Translated with Amazon")
+    whenever(amazonTranslate.translateText(any<TranslateTextRequest>())).thenReturn(awsTranslateTextResult)
 
     whenever(
       deeplApiService.translate(

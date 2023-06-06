@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.translate.TranslateClient
+import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -21,9 +22,13 @@ class AwsMtValueProvider(
   }
 
   override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    return translateService.translateText { b ->
-      b.sourceLanguageCode(sourceTag).targetLanguageCode(targetTag).text(text)
-    }.translatedText()
+    return translateService.translateText(
+      TranslateTextRequest.builder()
+        .sourceLanguageCode(sourceTag)
+        .targetLanguageCode(targetTag)
+        .text(text)
+        .build()
+    ).translatedText()
   }
 
   private val translateService by lazy {
