@@ -1,7 +1,5 @@
 package io.tolgee.api.v2.controllers
 
-import software.amazon.awssdk.services.translate.TranslateClient
-import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
@@ -36,7 +34,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
+import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
+import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
 import kotlin.system.measureTimeMillis
 

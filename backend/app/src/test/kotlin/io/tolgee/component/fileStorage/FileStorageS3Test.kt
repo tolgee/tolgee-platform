@@ -64,7 +64,12 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   fun testDeleteFile() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     fileStorage.deleteFile(testFilePath)
-    assertThatExceptionOfType(S3Exception::class.java).isThrownBy { s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) } }
+    assertThatExceptionOfType(S3Exception::class.java)
+      .isThrownBy {
+        s3.getObject { req ->
+          req.bucket(BUCKET_NAME).key(testFilePath)
+        }
+      }
   }
 
   @Test

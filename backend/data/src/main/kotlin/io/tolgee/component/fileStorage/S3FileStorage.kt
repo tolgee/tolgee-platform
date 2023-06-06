@@ -4,10 +4,10 @@
 
 package io.tolgee.component.fileStorage
 
-import software.amazon.awssdk.services.s3.S3Client
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import java.io.ByteArrayInputStream
 
@@ -38,8 +38,10 @@ class S3FileStorage(
   override fun storeFile(storageFilePath: String, bytes: ByteArray) {
     val byteArrayInputStream = ByteArrayInputStream(bytes)
     try {
-      s3.putObject({ b -> b.bucket(bucketName).key(storageFilePath) },
-        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()))
+      s3.putObject(
+        { b -> b.bucket(bucketName).key(storageFilePath) },
+        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong())
+      )
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)
     }

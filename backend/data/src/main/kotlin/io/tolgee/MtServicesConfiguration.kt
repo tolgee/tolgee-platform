@@ -6,8 +6,9 @@ import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationPr
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import software.amazon.awssdk.auth.credentials.*
-
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.translate.TranslateClient
 
@@ -33,16 +34,21 @@ class MtServicesConfiguration(
 
   @Bean
   fun getAwsTranslationService(): TranslateClient? {
-    val chain = when (awsMachineTranslationProperties.accessKey.isNullOrEmpty()
-                   || awsMachineTranslationProperties.secretKey.isNullOrEmpty()) {
+    val chain = when (
+      awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||
+        awsMachineTranslationProperties.secretKey.isNullOrEmpty()
+    ) {
       true -> DefaultCredentialsProvider.create()
-      false -> StaticCredentialsProvider.create(AwsBasicCredentials.create(
-        awsMachineTranslationProperties.accessKey, awsMachineTranslationProperties.secretKey))
+      false -> StaticCredentialsProvider.create(
+        AwsBasicCredentials.create(
+          awsMachineTranslationProperties.accessKey, awsMachineTranslationProperties.secretKey
+        )
+      )
     }
 
     return TranslateClient.builder()
-        .credentialsProvider(chain)
-        .region(Region.of(awsMachineTranslationProperties.region))
-        .build()
+      .credentialsProvider(chain)
+      .region(Region.of(awsMachineTranslationProperties.region))
+      .build()
   }
 }
