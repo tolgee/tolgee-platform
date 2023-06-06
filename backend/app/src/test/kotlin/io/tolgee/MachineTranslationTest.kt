@@ -26,7 +26,8 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   fun initMachineTranslationMocks(translateDelay: Long = 0) {
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = mock() as TranslateTextResponse
+    val awsTranslateTextResult = TranslateTextResponse
+      .builder().translatedText("Translated with Amazon").build()
 
     whenever(
       googleTranslate.translate(
@@ -42,12 +43,7 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
       return@then "Translated with Google"
     }
 
-    whenever(amazonTranslate.translateText(any() as TranslateTextRequest)).thenReturn(awsTranslateTextResult)
-
-    whenever(awsTranslateTextResult.translatedText()).then {
-      Thread.sleep(translateDelay)
-      return@then "Translated with Amazon"
-    }
+    whenever(amazonTranslate.translateText(any<TranslateTextRequest>())).thenReturn(awsTranslateTextResult)
   }
 
   fun Key.getLangTranslation(lang: Language): io.tolgee.model.translation.Translation {
