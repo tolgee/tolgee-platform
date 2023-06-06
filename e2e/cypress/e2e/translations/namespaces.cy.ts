@@ -30,7 +30,7 @@ describe('namespaces in translations', () => {
   });
 
   afterEach(() => {
-    namespaces.clean({ failOnStatusCode: false });
+    namespaces.clean({ failOnStatusCode: false, timeout: 60000 });
   });
 
   it('displays keys with namespaces correctly', () => {
