@@ -94,8 +94,7 @@ export const IntegrateView: FunctionComponent = () => {
                           '{{{apiUrl}}}',
                           process.env.REACT_APP_API_URL ||
                             window.location.origin
-                        )
-                        .replace('{{{projectId}}}', project.id.toString());
+                        );
                     }}
                   >
                     {React.createElement(selectedWeapon.guide)}
