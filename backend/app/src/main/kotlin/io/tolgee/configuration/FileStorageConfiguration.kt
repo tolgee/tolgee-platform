@@ -4,18 +4,18 @@
 
 package io.tolgee.configuration
 
-import com.amazonaws.services.s3.AmazonS3
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.LocalFileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.services.s3.S3Client
 
 @Configuration
 class FileStorageConfiguration(
   private val properties: TolgeeProperties,
-  private val amazonS3: AmazonS3?
+  private val amazonS3: S3Client?
 ) {
 
   private val s3config = properties.fileStorage.s3

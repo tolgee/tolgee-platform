@@ -1,15 +1,16 @@
 package io.tolgee
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.services.translate.AmazonTranslate
-import com.amazonaws.services.translate.AmazonTranslateClient
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.TranslateOptions
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.translate.TranslateClient
 
 @Configuration
 class MtServicesConfiguration(
@@ -32,18 +33,22 @@ class MtServicesConfiguration(
   }
 
   @Bean
-  fun getAwsTranslationService(): AmazonTranslate? {
-
-    if (awsMachineTranslationProperties.accessKey != null) {
-      return AmazonTranslateClient.builder().withCredentials(
-        AWSStaticCredentialsProvider(
-          BasicAWSCredentials(
-            awsMachineTranslationProperties.accessKey,
-            awsMachineTranslationProperties.secretKey
-          )
+  fun getAwsTranslationService(): TranslateClient? {
+    val chain = when (
+      awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||
+        awsMachineTranslationProperties.secretKey.isNullOrEmpty()
+    ) {
+      true -> DefaultCredentialsProvider.create()
+      false -> StaticCredentialsProvider.create(
+        AwsBasicCredentials.create(
+          awsMachineTranslationProperties.accessKey, awsMachineTranslationProperties.secretKey
         )
-      ).withRegion(awsMachineTranslationProperties.region).build()
+      )
     }
-    return null
+
+    return TranslateClient.builder()
+      .credentialsProvider(chain)
+      .region(Region.of(awsMachineTranslationProperties.region))
+      .build()
   }
 }

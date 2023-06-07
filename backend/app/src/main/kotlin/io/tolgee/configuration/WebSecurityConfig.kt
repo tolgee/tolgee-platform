@@ -35,7 +35,12 @@ class WebSecurityConfig @Autowired constructor(
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
-      .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
+      .csrf()
+      .disable()
+      .cors()
+      .and()
+      .headers()
+      .frameOptions().sameOrigin().and()
       .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
       // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
