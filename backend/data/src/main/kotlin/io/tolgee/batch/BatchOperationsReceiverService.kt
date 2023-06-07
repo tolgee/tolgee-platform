@@ -4,7 +4,6 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.BATCH_OPERATIONS_AFTER_WAIT_QUEUE
 import io.tolgee.configuration.BATCH_OPERATIONS_QUEUE
 import io.tolgee.configuration.BATCH_OPERATIONS_WAIT_QUEUE
-
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
