@@ -1,6 +1,7 @@
 package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.tolgee.batch.BatchJobType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
@@ -8,6 +9,7 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
+import javax.persistence.Enumerated
 import javax.persistence.ManyToOne
 
 @Entity
@@ -29,4 +31,7 @@ class BatchJob : StandardAuditModel() {
   var totalChunks: Int = 0
 
   var chunkSize: Int = 0
+
+  @Enumerated
+  var type: BatchJobType = BatchJobType.TRANSLATION
 }

@@ -242,4 +242,8 @@ class KeyService(
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
+
+  fun find(id: List<Long>): List<Key> {
+    return keyRepository.findAllByIdIn(id)
+  }
 }

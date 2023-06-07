@@ -2604,4 +2604,14 @@
     <changeSet author="jenik (generated)" id="1685977364679-8">
         <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="batch_job_chunk_execution" constraintName="FKsj13l1iwca3bnl80dx1oxrcqp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1686138357170-1">
+        <addColumn tableName="batch_job_chunk_execution">
+            <column name="exception" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1686138357170-2">
+        <addColumn tableName="batch_job">
+            <column name="type" type="int4"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -1,4 +1,4 @@
-package io.tolgee.dtos.request
+package io.tolgee.batch
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType

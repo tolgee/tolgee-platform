@@ -26,6 +26,7 @@ class RabbitMqAutoStartConfiguration(
     connectionFactory.port = rabbitmqAutostartProperties.port
     connectionFactory.username = rabbitmqAutostartProperties.defaultUser
     connectionFactory.setPassword(rabbitmqAutostartProperties.defaultPassword)
+    connectionFactory.cacheMode = CachingConnectionFactory.CacheMode.CHANNEL
     return connectionFactory
   }
 

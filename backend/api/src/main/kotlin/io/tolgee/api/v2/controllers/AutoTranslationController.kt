@@ -73,7 +73,7 @@ When no languages provided, it translates only untranslated languages."""
 
     autoTranslationService.autoTranslate(
       key = key,
-      languageTags = languages,
+      languageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
       useMachineTranslation = useMachineTranslation ?: false
     )

@@ -5,6 +5,7 @@ import io.tolgee.model.StandardAuditModel
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
@@ -22,4 +23,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   @Type(type = "jsonb")
   var successTargets: List<Long> = listOf()
+
+  @Column(columnDefinition = "text")
+  var exception: String? = null
 }

@@ -32,6 +32,11 @@ tolgee:
     enabled: true
     container-name: tolgee_backend_tests_postgres
     port: 55433
+  rabbitmq-autostart:
+    enabled: true
+    container-name: tolgee_backend_tests_rabbitmq
+    port: 55672
+    management-port: 55673
   data-path: ./build/test_data
   authentication:
     native-enabled: true
