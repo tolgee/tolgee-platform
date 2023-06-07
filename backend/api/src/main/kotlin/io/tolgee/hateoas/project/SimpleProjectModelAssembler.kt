@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class SimpleProjectModelAssembler(
-    private val languageModelAssembler: LanguageModelAssembler,
-    private val avatarService: AvatarService,
+  private val languageModelAssembler: LanguageModelAssembler,
+  private val avatarService: AvatarService,
 ) : RepresentationModelAssemblerSupport<Project, SimpleProjectModel>(
   V2ProjectsController::class.java, SimpleProjectModel::class.java
 ) {

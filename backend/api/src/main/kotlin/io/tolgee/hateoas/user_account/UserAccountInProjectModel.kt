@@ -10,14 +10,14 @@ import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountInProjectModel(
-    val id: Long,
-    val username: String,
-    var name: String?,
-    var avatar: Avatar?,
-    val organizationRole: OrganizationRoleType?,
-    val organizationBasePermission: PermissionModel,
-    val directPermission: PermissionModel?,
-    @Schema(
+  val id: Long,
+  val username: String,
+  var name: String?,
+  var avatar: Avatar?,
+  val organizationRole: OrganizationRoleType?,
+  val organizationBasePermission: PermissionModel,
+  val directPermission: PermissionModel?,
+  @Schema(
     description = "Actual user's permissions on selected project. You can not sort data by this column!",
     example = "EDIT"
   )

@@ -1,6 +1,5 @@
 package io.tolgee.security.third_party
 
-
 import io.tolgee.configuration.tolgee.OAuth2AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message

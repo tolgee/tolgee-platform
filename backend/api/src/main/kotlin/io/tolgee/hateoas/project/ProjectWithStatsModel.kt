@@ -14,21 +14,21 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "projects", itemRelation = "project")
 open class ProjectWithStatsModel(
-    val id: Long,
-    val name: String,
-    val description: String?,
-    val slug: String?,
-    val avatar: Avatar?,
-    val organizationOwner: SimpleOrganizationModel?,
-    val baseLanguage: LanguageModel?,
-    val organizationRole: OrganizationRoleType?,
-    @Schema(description = "Current user's direct permission", example = "MANAGE")
+  val id: Long,
+  val name: String,
+  val description: String?,
+  val slug: String?,
+  val avatar: Avatar?,
+  val organizationOwner: SimpleOrganizationModel?,
+  val baseLanguage: LanguageModel?,
+  val organizationRole: OrganizationRoleType?,
+  @Schema(description = "Current user's direct permission", example = "MANAGE")
   val directPermission: PermissionModel?,
-    @Schema(
+  @Schema(
     description = "Actual current user's permissions on this project. You can not sort data by this column!",
     example = "EDIT"
   )
   val computedPermission: ComputedPermissionModel,
-    val stats: ProjectStatistics,
-    val languages: List<LanguageModel>
+  val stats: ProjectStatistics,
+  val languages: List<LanguageModel>
 ) : RepresentationModel<ProjectWithStatsModel>()

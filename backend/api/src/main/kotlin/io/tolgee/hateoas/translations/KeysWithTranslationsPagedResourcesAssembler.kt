@@ -12,10 +12,10 @@ import org.springframework.web.util.UriComponents
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class KeysWithTranslationsPagedResourcesAssembler(
-    val keyWithTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
-    val languageModelAssembler: LanguageModelAssembler,
-    resolver: HateoasPageableHandlerMethodArgumentResolver? = null,
-    baseUri: UriComponents? = null,
+  val keyWithTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
+  val languageModelAssembler: LanguageModelAssembler,
+  resolver: HateoasPageableHandlerMethodArgumentResolver? = null,
+  baseUri: UriComponents? = null,
 ) : PagedResourcesAssembler<KeyWithTranslationsView>(resolver, baseUri) {
   fun toTranslationModel(
     entities: Page<KeyWithTranslationsView>,

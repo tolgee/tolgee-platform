@@ -9,28 +9,28 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "keys", itemRelation = "key")
 open class KeyWithTranslationsModel(
-    @Schema(description = "Id of key record")
+  @Schema(description = "Id of key record")
   val keyId: Long,
 
-    @Schema(description = "Name of key", example = "this_is_super_key")
+  @Schema(description = "Name of key", example = "this_is_super_key")
   val keyName: String,
 
-    @Schema(description = "The namespace id of the key", example = "100000282")
+  @Schema(description = "The namespace id of the key", example = "100000282")
   val keyNamespaceId: Long?,
 
-    @Schema(description = "The namespace of the key", example = "homepage")
+  @Schema(description = "The namespace of the key", example = "homepage")
   val keyNamespace: String?,
 
-    @Schema(description = "Tags of key")
+  @Schema(description = "Tags of key")
   val keyTags: List<TagModel>,
 
-    @Schema(description = "Count of screenshots provided for the key", example = "1")
+  @Schema(description = "Count of screenshots provided for the key", example = "1")
   val screenshotCount: Long,
 
-    @Schema(description = "Key screenshots. Not provided when API key hasn't screenshots.view scope permission.")
+  @Schema(description = "Key screenshots. Not provided when API key hasn't screenshots.view scope permission.")
   val screenshots: List<ScreenshotModel>?,
 
-    @Schema(
+  @Schema(
     description = "Translations object",
     example = """
     {

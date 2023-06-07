@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class KeyWithTranslationsModelAssembler(
-    private val translationViewModelAssembler: TranslationViewModelAssembler,
-    private val tagModelAssembler: TagModelAssembler,
-    private val screenshotModelAssembler: ScreenshotModelAssembler
+  private val translationViewModelAssembler: TranslationViewModelAssembler,
+  private val tagModelAssembler: TagModelAssembler,
+  private val screenshotModelAssembler: ScreenshotModelAssembler
 ) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, KeyWithTranslationsModel>(
   TranslationsController::class.java, KeyWithTranslationsModel::class.java
 ) {

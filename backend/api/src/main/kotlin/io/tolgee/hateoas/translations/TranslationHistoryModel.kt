@@ -10,14 +10,14 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "revisions", itemRelation = "revision")
 open class TranslationHistoryModel(
-    @Schema(description = "Modified fields")
+  @Schema(description = "Modified fields")
   val modifications: Map<String, PropertyModification>? = null,
 
-    @Schema(description = "Unix timestamp of the revision")
+  @Schema(description = "Unix timestamp of the revision")
   val timestamp: Long,
 
-    @Schema(description = "Author of the change")
+  @Schema(description = "Author of the change")
   val author: SimpleUserAccountModel?,
 
-    val revisionType: RevisionType
+  val revisionType: RevisionType
 ) : RepresentationModel<TranslationHistoryModel>()

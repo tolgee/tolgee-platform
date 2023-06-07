@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class ActivityWebsocketListener(
-    private val websocketEventPublisher: WebsocketEventPublisher,
-    private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
-    private val userAccountService: UserAccountService,
-    private val relationDescriptionExtractor: RelationDescriptionExtractor
+  private val websocketEventPublisher: WebsocketEventPublisher,
+  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
+  private val userAccountService: UserAccountService,
+  private val relationDescriptionExtractor: RelationDescriptionExtractor
 ) {
 
   @Async

@@ -89,20 +89,20 @@ import javax.validation.Valid
   ]
 )
 class TranslationsController(
-    private val projectHolder: ProjectHolder,
-    private val translationService: TranslationService,
-    private val keyService: KeyService,
-    private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
-    private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
-    private val historyModelAssembler: TranslationHistoryModelAssembler,
-    private val translationModelAssembler: TranslationModelAssembler,
-    private val languageService: LanguageService,
-    private val securityService: SecurityService,
-    private val authenticationFacade: AuthenticationFacade,
-    private val screenshotService: ScreenshotService,
-    private val activityHolder: ActivityHolder,
-    private val activityService: ActivityService,
-    private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager
+  private val projectHolder: ProjectHolder,
+  private val translationService: TranslationService,
+  private val keyService: KeyService,
+  private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
+  private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
+  private val historyModelAssembler: TranslationHistoryModelAssembler,
+  private val translationModelAssembler: TranslationModelAssembler,
+  private val languageService: LanguageService,
+  private val securityService: SecurityService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val screenshotService: ScreenshotService,
+  private val activityHolder: ActivityHolder,
+  private val activityService: ActivityService,
+  private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -333,7 +333,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   }
 
   private fun getSetTranslationsResponse(key: Key, translations: Map<String, Translation>):
-          SetTranslationsResponseModel {
+    SetTranslationsResponseModel {
     return SetTranslationsResponseModel(
       keyId = key.id,
       keyName = key.name,

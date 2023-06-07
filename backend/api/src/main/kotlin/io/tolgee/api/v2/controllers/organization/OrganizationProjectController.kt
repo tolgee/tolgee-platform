@@ -33,11 +33,11 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Organizations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationProjectController(
-    private val organizationService: OrganizationService,
-    private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
-    private val projectService: ProjectService,
-    private val projectModelAssembler: ProjectModelAssembler,
-    private val projectWithStatsFacade: ProjectWithStatsFacade
+  private val organizationService: OrganizationService,
+  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
+  private val projectService: ProjectService,
+  private val projectModelAssembler: ProjectModelAssembler,
+  private val projectWithStatsFacade: ProjectWithStatsFacade
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
   @Operation(summary = "Returns all organization projects")

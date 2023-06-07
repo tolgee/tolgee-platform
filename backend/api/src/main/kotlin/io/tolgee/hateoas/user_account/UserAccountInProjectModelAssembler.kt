@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class UserAccountInProjectModelAssembler(
-    private val permissionService: PermissionService,
-    private val permissionModelAssembler: PermissionModelAssembler,
-    private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
-    private val avatarService: AvatarService
+  private val permissionService: PermissionService,
+  private val permissionModelAssembler: PermissionModelAssembler,
+  private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
+  private val avatarService: AvatarService
 ) : RepresentationModelAssemblerSupport<ExtendedUserAccountInProject, UserAccountInProjectModel>(
   V2UserController::class.java, UserAccountInProjectModel::class.java
 ) {

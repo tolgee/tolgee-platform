@@ -64,14 +64,14 @@ import javax.validation.Valid
   ]
 )
 class TranslationCommentController(
-    private val projectHolder: ProjectHolder,
-    private val translationService: TranslationService,
-    private val translationCommentService: TranslationCommentService,
-    private val pagedResourcesAssembler: PagedResourcesAssembler<TranslationComment>,
-    private val translationCommentModelAssembler: TranslationCommentModelAssembler,
-    private val authenticationFacade: AuthenticationFacade,
-    private val securityService: SecurityService,
-    private val translationModelAssembler: TranslationModelAssembler
+  private val projectHolder: ProjectHolder,
+  private val translationService: TranslationService,
+  private val translationCommentService: TranslationCommentService,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<TranslationComment>,
+  private val translationCommentModelAssembler: TranslationCommentModelAssembler,
+  private val authenticationFacade: AuthenticationFacade,
+  private val securityService: SecurityService,
+  private val translationModelAssembler: TranslationModelAssembler
 ) {
 
   @GetMapping(value = ["{translationId}/comments"])

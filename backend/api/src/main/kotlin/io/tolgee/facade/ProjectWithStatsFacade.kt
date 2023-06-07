@@ -21,11 +21,11 @@ import java.math.RoundingMode
 @Component
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class ProjectWithStatsFacade(
-    private val projectStatsService: ProjectStatsService,
-    private val pagedWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
-    private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
-    private val projectService: ProjectService,
-    private val languageStatsService: LanguageStatsService
+  private val projectStatsService: ProjectStatsService,
+  private val pagedWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
+  private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
+  private val projectService: ProjectService,
+  private val languageStatsService: LanguageStatsService
 ) {
   fun getPagedModelWithStats(
     projects: Page<ProjectWithLanguagesView>,
