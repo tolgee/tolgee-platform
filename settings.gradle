@@ -54,6 +54,8 @@ dependencyResolutionManagement {
             library('liquibaseCore', "org.liquibase:liquibase-core:4.9.1")
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate5:4.9.1")
             library('hibernateTypes', "com.vladmihalcea:hibernate-types-55:2.14.1")
+            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.21.0")
+            library('redissonSpringData','org.redisson:redisson-spring-data-27:3.21.0')
         }
     }
 }
@@ -84,3 +86,6 @@ project(':ee-test').projectDir = new File('ee/backend/tests')
 
 include ':development'
 project(':development').projectDir = new File('backend/development')
+
+include ':api'
+project(':api').projectDir = new File('backend/api')
