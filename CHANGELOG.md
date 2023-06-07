@@ -1,3 +1,10 @@
+# [3.17.0](https://github.com/tolgee/tolgee-platform/compare/v3.16.2...v3.17.0) (2023-06-07)
+
+
+### Features
+
+* Update to AWS SDK v2 ([#1614](https://github.com/tolgee/tolgee-platform/issues/1614)) ([dccdda1](https://github.com/tolgee/tolgee-platform/commit/dccdda1e99f6f4d78fe9714f8b8a20f47f76f54c)), closes [#1271](https://github.com/tolgee/tolgee-platform/issues/1271)
+
 ## [3.16.2](https://github.com/tolgee/tolgee-platform/compare/v3.16.1...v3.16.2) (2023-06-01)
 
 
