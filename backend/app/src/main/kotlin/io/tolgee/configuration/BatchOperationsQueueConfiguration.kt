@@ -1,6 +1,5 @@
 package io.tolgee.configuration
 
-import org.springframework.amqp.core.AmqpAdmin
 import org.springframework.amqp.core.Binding
 import org.springframework.amqp.core.BindingBuilder
 import org.springframework.amqp.core.DirectExchange
@@ -8,23 +7,16 @@ import org.springframework.amqp.core.Queue
 import org.springframework.amqp.core.QueueBuilder
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitAdmin
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
+
 
 @Configuration
 class BatchOperationsQueueConfiguration {
-  companion object {
-    const val BATCH_OPERATIONS_WAIT_QUEUE = "batch-operations-wait-queue"
-    const val BATCH_OPERATIONS_AFTER_WAIT_QUEUE = "batch-operations-after-wait-queue"
-    const val BATCH_OPERATIONS_QUEUE = "batch-operations"
-    const val BATCH_OPERATIONS_FAILED_CHUNKS_QUEUE = "batch-operations-failed-chunks-queue"
-  }
-
-  init {
-    println("initted config")
-  }
-
   @Bean
+  @Lazy(false)
   fun batchOperationsQueue(): Queue {
     return QueueBuilder
       .durable(BATCH_OPERATIONS_QUEUE)
@@ -35,6 +27,7 @@ class BatchOperationsQueueConfiguration {
   }
 
   @Bean
+  @Lazy(false)
   fun failedChunksQueue(): Queue {
     return QueueBuilder
       .durable(BATCH_OPERATIONS_FAILED_CHUNKS_QUEUE)
@@ -43,6 +36,7 @@ class BatchOperationsQueueConfiguration {
   }
 
   @Bean
+  @Lazy(false)
   fun waitQueue(): Queue {
     return QueueBuilder
       .durable(BATCH_OPERATIONS_WAIT_QUEUE)
@@ -54,6 +48,7 @@ class BatchOperationsQueueConfiguration {
   }
 
   @Bean
+  @Lazy(false)
   fun afterWaitQueue(): Queue {
     return QueueBuilder
       .durable(BATCH_OPERATIONS_AFTER_WAIT_QUEUE)
@@ -62,11 +57,13 @@ class BatchOperationsQueueConfiguration {
   }
 
   @Bean
+  @Lazy(false)
   fun exchange(): DirectExchange {
     return DirectExchange("tolgee-exchange")
   }
 
   @Bean
+  @Lazy(false)
   fun binding(): Binding {
     return BindingBuilder
       .bind(batchOperationsQueue())
@@ -75,7 +72,14 @@ class BatchOperationsQueueConfiguration {
   }
 
   @Bean
-  fun amqpAdmin(connectionFactory: ConnectionFactory): AmqpAdmin {
+  @Lazy(false)
+  fun amqpAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
     return RabbitAdmin(connectionFactory)
+  }
+
+  @Bean
+  @Lazy(false)
+  fun rabbitTemplate(connectionFactory: ConnectionFactory): RabbitTemplate {
+    return RabbitTemplate(connectionFactory)
   }
 }

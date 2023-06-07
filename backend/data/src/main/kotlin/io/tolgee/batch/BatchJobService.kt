@@ -3,6 +3,7 @@ package io.tolgee.batch
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.configuration.BATCH_OPERATIONS_QUEUE
 import io.tolgee.dtos.BatchJobChunkMessageBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
@@ -38,7 +39,7 @@ class BatchJobService(
 
     chunked.forEachIndexed { index, chunk ->
       val json = convertMessage(BatchJobChunkMessageBody(job.id, index))
-      rabbitTemplate.convertAndSend("tolgee-exchange", "batch-operations", json)
+      rabbitTemplate.convertAndSend("tolgee-exchange", BATCH_OPERATIONS_QUEUE, json)
     }
 
     return job

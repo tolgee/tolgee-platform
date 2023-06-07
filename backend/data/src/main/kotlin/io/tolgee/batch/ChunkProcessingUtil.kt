@@ -9,7 +9,6 @@ import io.tolgee.util.executeInNewTransaction
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import javax.persistence.EntityManager
 import kotlin.math.pow
@@ -123,12 +122,5 @@ open class ChunkProcessingUtil(val message: Message, val applicationContext: App
       .setParameter("chunkNumber", message.chunkNumber)
       .setParameter("batchJobId", message.batchJobId)
       .resultList as List<BatchJobChunkExecution>
-  }
-
-  @Component
-  class Factory {
-    operator fun invoke(message: Message, applicationContext: ApplicationContext): ChunkProcessingUtil {
-      return ChunkProcessingUtil(message, applicationContext)
-    }
   }
 }
