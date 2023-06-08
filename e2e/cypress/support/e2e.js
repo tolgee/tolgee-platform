@@ -46,6 +46,12 @@ before(() => {
   });
 });
 
+beforeEach(() => {
+  cy.intercept('**').as('request');
+});
+
 afterEach(() => {
-  cy.wait(1000);
+  // wait for all requests to finish
+  // before going to next test
+  cy.wait('@request');
 });
