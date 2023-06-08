@@ -46,12 +46,19 @@ before(() => {
   });
 });
 
+let requestsInTest = 0;
 beforeEach(() => {
-  cy.intercept('**').as('request');
+  requestsInTest = 0;
+  cy.intercept('**', (req) => {
+    requestsInTest += 1;
+    return req;
+  }).as('request');
 });
 
 afterEach(() => {
   // wait for all requests to finish
   // before going to next test
-  cy.wait('@request');
+  if (requestsInTest > 0) {
+    const tet = cy.wait('@request');
+  }
 });
