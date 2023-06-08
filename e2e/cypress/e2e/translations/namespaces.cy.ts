@@ -31,6 +31,7 @@ describe('namespaces in translations', () => {
 
   afterEach(() => {
     namespaces.clean({ failOnStatusCode: false, timeout: 60000 });
+    cy.wait(10000);
   });
 
   it('displays keys with namespaces correctly', () => {
