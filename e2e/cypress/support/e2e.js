@@ -45,3 +45,7 @@ before(() => {
     method: 'put',
   });
 });
+
+afterEach(() => {
+  cy.wait(1000);
+});
