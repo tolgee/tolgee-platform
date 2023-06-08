@@ -46,19 +46,23 @@ before(() => {
   });
 });
 
-let requestsInTest = 0;
+// observe pending requests
+let pendingRequests = 0;
 beforeEach(() => {
-  requestsInTest = 0;
+  pendingRequests = 0;
   cy.intercept('**', (req) => {
-    requestsInTest += 1;
-    return req;
+    pendingRequests += 1;
+    return req.continue((res) => {
+      pendingRequests -= 1;
+      return res;
+    });
   }).as('request');
 });
 
 afterEach(() => {
   // wait for all requests to finish
   // before going to next test
-  if (requestsInTest > 0) {
+  if (pendingRequests > 0) {
     const tet = cy.wait('@request');
   }
 });
