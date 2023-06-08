@@ -50,11 +50,10 @@ before(() => {
 let pendingRequests = 0;
 beforeEach(() => {
   pendingRequests = 0;
-  cy.intercept('**', (req) => {
+  cy.intercept('**', { middleware: true }, (req) => {
     pendingRequests += 1;
-    return req.continue((res) => {
+    req.on('response', () => {
       pendingRequests -= 1;
-      return res;
     });
   }).as('request');
 });
