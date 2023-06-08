@@ -26,7 +26,7 @@ export function testKeys(info: ProjectInfo) {
     visibleLanguages.length
   );
 
-  cy.focused().type('{esc}');
+  cy.focused().type('{esc}', { force: true });
 
   if (scopes.includes('keys.edit')) {
     editCell('key-1', 'new-key');
