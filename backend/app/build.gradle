@@ -102,6 +102,7 @@ dependencies {
     implementation libs.sentry
     implementation libs.commonsCodec
     implementation libs.amazonS3
+    implementation libs.amazonSTS
     implementation libs.icu4j
     implementation libs.jacksonModuleKotlin
     implementation libs.redissonSpringBootStarter
