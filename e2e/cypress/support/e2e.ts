@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -30,6 +31,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   ) {
     return false;
   }
+  // @ts-ignore
   if (err.hasOwnProperty('code') && typeof err.code == 'string') {
     return false;
   }
@@ -44,24 +46,4 @@ before(() => {
   internalFetch('features/toggle?feature=GRANULAR_PERMISSIONS&enabled=true', {
     method: 'put',
   });
-});
-
-// observe pending requests
-let pendingRequests = 0;
-beforeEach(() => {
-  pendingRequests = 0;
-  cy.intercept('**', { middleware: true }, (req) => {
-    pendingRequests += 1;
-    req.on('response', () => {
-      pendingRequests -= 1;
-    });
-  }).as('request');
-});
-
-afterEach(() => {
-  // wait for all requests to finish
-  // before going to next test
-  if (pendingRequests > 0) {
-    const tet = cy.wait('@request');
-  }
 });
