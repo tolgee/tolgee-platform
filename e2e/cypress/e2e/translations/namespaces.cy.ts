@@ -35,8 +35,8 @@ describe('namespaces in translations', () => {
   });
 
   afterEach(() => {
-    awaitPendingRequests();
     namespaces.clean({ failOnStatusCode: false, timeout: 60000 });
+    awaitPendingRequests();
   });
 
   it('displays keys with namespaces correctly', () => {
