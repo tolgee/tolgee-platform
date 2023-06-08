@@ -13,7 +13,6 @@ export function testKeys(info: ProjectInfo) {
 
   // test if user can select only from viewable languages
   cy.gcy('translations-language-select-form-control').click();
-  cy.waitForDom();
   const visibleLanguages = getLanguages().filter(([tag, name]) => {
     return satisfiesLanguageAccess(
       project.computedPermission,
@@ -27,6 +26,9 @@ export function testKeys(info: ProjectInfo) {
     visibleLanguages.length
   );
 
+  cy.waitForDom();
+  cy.get('body').click(0, 0);
+  cy.gcy('translations-language-select-item').should('not.exist');
   cy.get('body').click(0, 0);
 
   if (scopes.includes('keys.edit')) {
