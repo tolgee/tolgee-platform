@@ -133,7 +133,7 @@ export const GenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
           <>
             {props.loading && <BoxLoading />}
             {(projects.data || props.project) && (
-              <StandardForm
+              <StandardForm<any>
                 onSubmit={handleGenerate}
                 saveActionLoadable={generateMutation}
                 onCancel={() => onDialogClose()}

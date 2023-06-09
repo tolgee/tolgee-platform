@@ -25,7 +25,7 @@ export const TextField: FunctionComponent<Props> = (props) => {
 
   return (
     <MUITextField
-      sx={{ mt: 2, minHeight: 70 }}
+      sx={{ mt: 2, minHeight: otherProps.size === 'small' ? 50 : 70 }}
       className={props.className}
       fullWidth={props.fullWidth ? props.fullWidth : true}
       {...field}

@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent, ReactNode } from 'react';
+import { default as React, ReactNode } from 'react';
 import { Box, Button, SxProps } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { T } from '@tolgee/react';
@@ -35,7 +35,7 @@ interface FormProps<T> {
   showResourceError?: boolean;
 }
 
-export const StandardForm: FunctionComponent<FormProps<any>> = ({
+export function StandardForm<T>({
   initialValues,
   validationSchema,
   disabled,
@@ -43,7 +43,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   hideCancel,
   showResourceError = true,
   ...props
-}) => {
+}: FormProps<T>) {
   const history = useHistory();
 
   const actionLoading =
@@ -119,4 +119,4 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
       </Formik>
     </>
   );
-};
+}

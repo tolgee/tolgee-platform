@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.service.security.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.context.SecurityContextHolder
@@ -26,7 +27,8 @@ class JwtTokenFilter @Autowired constructor(
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val securityService: SecurityService
 ) : OncePerRequestFilter() {
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(
@@ -48,6 +50,9 @@ class JwtTokenFilter @Autowired constructor(
             throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
           }
         }
+        if (this.needsToBeServerAdmin(req)) {
+          securityService.checkUserIsServerAdmin()
+        }
       }
       filterChain.doFilter(req, res)
     } catch (e: Exception) {
@@ -58,6 +63,11 @@ class JwtTokenFilter @Autowired constructor(
   private fun needsSuperToken(request: HttpServletRequest): Boolean {
     return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
       ?.method?.getAnnotation(NeedsSuperJwtToken::class.java) != null
+  }
+
+  private fun needsToBeServerAdmin(request: HttpServletRequest): Boolean {
+    return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+      ?.method?.getAnnotation(IsServerAdmin::class.java) != null
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {

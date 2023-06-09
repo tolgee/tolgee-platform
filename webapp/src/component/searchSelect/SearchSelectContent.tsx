@@ -31,6 +31,10 @@ function PaperComponent(props) {
   return <Box {...other} style={{ width: '100%' }} />;
 }
 
+const defaultCompareFunction = (prompt: string, label: string) => {
+  return label.toLowerCase().startsWith(prompt.toLocaleLowerCase());
+};
+
 type Props<T> = {
   open: boolean;
   onClose?: () => void;
@@ -44,6 +48,7 @@ type Props<T> = {
   title?: string;
   addNewTooltip?: string;
   minWidth?: number | string;
+  compareFunction?: (prompt: string, label: string) => boolean;
 };
 
 export function SearchSelectContent<T extends React.Key>({
@@ -59,6 +64,7 @@ export function SearchSelectContent<T extends React.Key>({
   title,
   addNewTooltip,
   minWidth = 250,
+  compareFunction,
 }: Props<T>) {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
@@ -78,7 +84,12 @@ export function SearchSelectContent<T extends React.Key>({
         <Autocomplete
           open
           filterOptions={(options, state) => {
-            return options.filter((o) => o.name.startsWith(state.inputValue));
+            return options.filter((o) =>
+              (compareFunction || defaultCompareFunction)(
+                state.inputValue || '',
+                o.name || ''
+              )
+            );
           }}
           options={items || []}
           inputValue={inputValue}

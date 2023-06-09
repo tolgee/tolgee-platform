@@ -2,9 +2,9 @@ import { useCurrentLanguage } from './useCurrentLanguage';
 
 export const useMoneyFormatter = () => {
   const language = useCurrentLanguage();
-  return (number: number, options?: Intl.NumberFormatOptions) => {
+  return (number: number | undefined, options?: Intl.NumberFormatOptions) => {
     const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
-    const rounded = Number(number.toFixed(maximumFractionDigits)) || 0;
+    const rounded = Number(number?.toFixed(maximumFractionDigits)) || 0;
 
     return new Intl.NumberFormat(language, {
       style: 'currency',

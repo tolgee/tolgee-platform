@@ -77,6 +77,8 @@ export function useErrorTranslation() {
       case 'authentication_cancelled':
         return t('authentication_cancelled');
 
+      case 'plan_has_subscribers':
+        return t('plan_has_subscribers');
       default:
         return code;
     }

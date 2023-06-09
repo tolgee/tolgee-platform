@@ -302,6 +302,11 @@ export class Validation {
   static readonly EE_LICENSE_FORM = Yup.object({
     licenseKey: Yup.string().required().max(100),
   });
+
+  static readonly CLOUD_PLAN_FORM = Yup.object({
+    name: Yup.string().required(),
+    stripeProductId: Yup.string().required(),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
