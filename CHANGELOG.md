@@ -1,3 +1,15 @@
+# [3.18.0](https://github.com/tolgee/tolgee-platform/compare/v3.17.0...v3.18.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* Unresolved comments filtering issues ([#1747](https://github.com/tolgee/tolgee-platform/issues/1747)) ([56c93b1](https://github.com/tolgee/tolgee-platform/commit/56c93b16b4c523b0684b844f5463ed5997cb2b8b)), closes [tolgee/tolgee-platform#1738](https://github.com/tolgee/tolgee-platform/issues/1738)
+
+
+### Features
+
+* Add STS dependency so that web identity token authentication works ([#1746](https://github.com/tolgee/tolgee-platform/issues/1746)) ([6568487](https://github.com/tolgee/tolgee-platform/commit/6568487463c513aadbaa705fa527d8c77f896197)), closes [#1614](https://github.com/tolgee/tolgee-platform/issues/1614) [#1271](https://github.com/tolgee/tolgee-platform/issues/1271)
+
 # [3.17.0](https://github.com/tolgee/tolgee-platform/compare/v3.16.2...v3.17.0) (2023-06-07)
 
 
