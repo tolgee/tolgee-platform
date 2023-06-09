@@ -307,6 +307,11 @@ export class Validation {
     name: Yup.string().required(),
     stripeProductId: Yup.string().required(),
   });
+
+  static readonly EE_PLAN_FORM = Yup.object({
+    name: Yup.string().required(),
+    stripeProductId: Yup.string().required(),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

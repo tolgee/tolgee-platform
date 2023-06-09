@@ -63,7 +63,7 @@ export function EePlanForm({ initialData, onSubmit, loading }: Props) {
       }}
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Validation.CLOUD_PLAN_FORM}
+      validationSchema={Validation.EE_PLAN_FORM}
     >
       {({ values, setFieldValue }) => (
         <Form>
