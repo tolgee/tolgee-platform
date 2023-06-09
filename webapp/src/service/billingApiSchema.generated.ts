@@ -19,10 +19,15 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     put: operations["cancelSubscription"];
   };
-  "/v2/admin/billing/cloud-plans/{planId}": {
+  "/v2/admin/billing/ee-plans/{planId}": {
     get: operations["getPlan"];
     put: operations["updatePlan"];
     delete: operations["deletePlan"];
+  };
+  "/v2/admin/billing/cloud-plans/{planId}": {
+    get: operations["getPlan_1"];
+    put: operations["updatePlan_1"];
+    delete: operations["deletePlan_1"];
   };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
@@ -34,9 +39,13 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
-  "/v2/admin/billing/cloud-plans": {
+  "/v2/admin/billing/ee-plans": {
     get: operations["getPlans_1"];
     post: operations["create"];
+  };
+  "/v2/admin/billing/cloud-plans": {
+    get: operations["getPlans_2"];
+    post: operations["create_1"];
   };
   "/v2/public/billing/plans": {
     get: operations["getPlans"];
@@ -79,10 +88,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/billing-info": {
     get: operations["getBillingInfo"];
   };
-  "/v2/admin/billing/stripe-products": {
+  "/v2/admin/billing/plans/stripe-products": {
     get: operations["getStripeProducts"];
   };
-  "/v2/admin/billing/features": {
+  "/v2/admin/billing/plans/features": {
     get: operations["getAllFeatures"];
   };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}": {
@@ -133,6 +142,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
+      stripeProductId: string;
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -201,6 +211,29 @@ export interface components {
       updateToken: string;
       prorationDate: number;
       endingBalance: number;
+    };
+    CreateSelfHostedEePlanRequest: {
+      name: string;
+      free: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+      )[];
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      public: boolean;
+      stripeProductId: string;
+      notAvailableBefore?: string;
+      availableUntil?: string;
+      usableUntil?: string;
     };
     CreateCloudPlanRequest: {
       name: string;
@@ -497,7 +530,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CloudPlanModel"];
+          "*/*": components["schemas"]["SelfHostedEePlanModel"];
         };
       };
       /** Bad Request */
@@ -515,6 +548,88 @@ export interface operations {
     };
   };
   updatePlan: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSelfHostedEePlanRequest"];
+      };
+    };
+  };
+  deletePlan: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getPlan_1: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CloudPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updatePlan_1: {
     parameters: {
       path: {
         planId: number;
@@ -546,7 +661,7 @@ export interface operations {
       };
     };
   };
-  deletePlan: {
+  deletePlan_1: {
     parameters: {
       path: {
         planId: number;
@@ -697,7 +812,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelCloudPlanModel"];
+          "*/*": components["schemas"]["CollectionModelSelfHostedEePlanModel"];
         };
       };
       /** Bad Request */
@@ -715,6 +830,55 @@ export interface operations {
     };
   };
   create: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelfHostedEePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSelfHostedEePlanRequest"];
+      };
+    };
+  };
+  getPlans_2: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelCloudPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_1: {
     responses: {
       /** OK */
       200: {

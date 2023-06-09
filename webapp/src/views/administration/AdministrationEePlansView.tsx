@@ -23,27 +23,27 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 
-type CloudPlanModel = components['schemas']['CloudPlanModel'];
+type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
 
-export const AdministrationCloudPlansView = () => {
+export const AdministrationEePlansView = () => {
   const messaging = useMessage();
   const { t } = useTranslate();
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/cloud-plans',
+    url: '/v2/admin/billing/ee-plans',
     method: 'get',
   });
 
   const deletePlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/admin/billing/ee-plans/{planId}',
     method: 'delete',
-    invalidatePrefix: '/v2/admin/billing/cloud-plans',
+    invalidatePrefix: '/v2/admin/billing/ee-plans',
   });
 
-  function deletePlan(plan: CloudPlanModel) {
+  function deletePlan(plan: SelfHostedEePlanModel) {
     confirmation({
       hardModeText: plan.name,
-      message: <T keyName="administration_cloud_plan_delete_message" />,
+      message: <T keyName="administration_ee_plan_delete_message" />,
       onConfirm: () =>
         deletePlanLoadable.mutate(
           {
@@ -52,7 +52,7 @@ export const AdministrationCloudPlansView = () => {
           {
             onSuccess() {
               messaging.success(
-                <T keyName="administration_cloud_plan_deleted_success" />
+                <T keyName="administration_ee_plan_deleted_success" />
               );
             },
           }
@@ -65,18 +65,18 @@ export const AdministrationCloudPlansView = () => {
   return (
     <DashboardPage>
       <BaseAdministrationView
-        title={t('administration_cloud_plans')}
-        windowTitle={t('administration_cloud_plans')}
+        title={t('administration_ee_plans')}
+        windowTitle={t('administration_ee_plans')}
         navigation={[
           [
-            t('administration_cloud_plans'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
+            t('administration_ee_plans'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
           ],
         ]}
         containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
-        addLinkTo={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.build()}
+        addLinkTo={LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.build()}
         onAdd={() => {}}
       >
         <Paper variant="outlined">
@@ -93,7 +93,7 @@ export const AdministrationCloudPlansView = () => {
                   {plan.public && (
                     <Chip
                       size="small"
-                      label={t('administration_cloud_plan_public_badge')}
+                      label={t('administration_ee_plan_public_badge')}
                     />
                   )}
                 </Box>
@@ -101,11 +101,11 @@ export const AdministrationCloudPlansView = () => {
                   <Button
                     size="small"
                     component={Link}
-                    to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
+                    to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
                       [PARAMS.PLAN_ID]: plan.id,
                     })}
                   >
-                    {t('administration_cloud_plan_edit_button')}
+                    {t('administration_ee_plan_edit_button')}
                   </Button>
                   <IconButton size="small" onClick={() => deletePlan(plan)}>
                     <Delete />

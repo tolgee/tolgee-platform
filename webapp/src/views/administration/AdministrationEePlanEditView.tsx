@@ -10,9 +10,9 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
-import { CloudPlanForm } from './components/CloudPlanForm';
+import { EePlanForm } from './components/EePlanForm';
 
-export const AdministrationCloudPlanEditView = () => {
+export const AdministrationEePlanEditView = () => {
   const match = useRouteMatch();
   const { t } = useTranslate();
   const messaging = useMessage();
@@ -21,15 +21,15 @@ export const AdministrationCloudPlanEditView = () => {
   const planId = match.params[PARAMS.PLAN_ID];
 
   const planLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/admin/billing/ee-plans/{planId}',
     method: 'get',
     path: { planId },
   });
 
   const planEditLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/admin/billing/ee-plans/{planId}',
     method: 'put',
-    invalidatePrefix: '/v2/admin/billing/cloud-plans',
+    invalidatePrefix: '/v2/admin/billing/ee-plans',
   });
 
   if (planLoadable.isLoading) {
@@ -45,15 +45,15 @@ export const AdministrationCloudPlanEditView = () => {
   return (
     <DashboardPage>
       <BaseAdministrationView
-        windowTitle={t('administration_cloud_plan_edit')}
+        windowTitle={t('administration_ee_plan_edit')}
         navigation={[
           [
-            t('administration_cloud_plans'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
+            t('administration_ee_plans'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
           ],
           [
-            t('administration_cloud_plan_edit'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
+            t('administration_ee_plan_edit'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
               [PARAMS.PLAN_ID]: planId,
             }),
           ],
@@ -64,10 +64,10 @@ export const AdministrationCloudPlanEditView = () => {
       >
         <Box>
           <Typography variant="h5">
-            {t('administration_cloud_plan_edit')}
+            {t('administration_ee_plan_edit')}
           </Typography>
-          <CloudPlanForm
-            loading={planEditLoadable.isLoading}
+          <EePlanForm
+            loading={false}
             initialData={planData}
             onSubmit={(values) => {
               planEditLoadable.mutate(
@@ -84,11 +84,9 @@ export const AdministrationCloudPlanEditView = () => {
                 {
                   onSuccess() {
                     messaging.success(
-                      <T keyName="administration_cloud_plan_updated_success" />
+                      <T keyName="administration_ee_plan_updated_success" />
                     );
-                    history.push(
-                      LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()
-                    );
+                    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
                   },
                 }
               );

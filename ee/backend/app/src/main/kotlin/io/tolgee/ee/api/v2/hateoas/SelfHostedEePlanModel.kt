@@ -13,5 +13,6 @@ class SelfHostedEePlanModel(
   val enabledFeatures: Array<Feature> = arrayOf(),
   val prices: PlanPricesModel,
   val includedUsage: PlanIncludedUsageModel = PlanIncludedUsageModel(),
-  val hasYearlyPrice: Boolean = false
+  val hasYearlyPrice: Boolean = false,
+  val stripeProductId: String = ""
 ) : RepresentationModel<SelfHostedEePlanModel>()

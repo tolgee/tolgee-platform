@@ -39,6 +39,11 @@ export const BaseAdministrationView: React.FC<Props> = ({
       link: LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
       label: t('administration_cloud_plans'),
     });
+
+    menuItems.push({
+      link: LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
+      label: t('administration_ee_plans'),
+    });
   }
 
   const navigationPrefix: NavigationItem[] = [

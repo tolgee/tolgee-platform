@@ -7,30 +7,30 @@ import { LINKS } from 'tg.constants/links';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
-import { CloudPlanForm } from './components/CloudPlanForm';
+import { EePlanForm } from './components/EePlanForm';
 
-export const AdministrationCloudPlanCreateView = () => {
+export const AdministrationEePlanCreateView = () => {
   const messaging = useMessage();
   const history = useHistory();
   const { t } = useTranslate();
 
   const createPlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans',
+    url: '/v2/admin/billing/ee-plans',
     method: 'post',
   });
 
   return (
     <DashboardPage>
       <BaseAdministrationView
-        windowTitle={t('administration_cloud_plan_create')}
+        windowTitle={t('administration_ee_plan_create')}
         navigation={[
           [
-            t('administration_cloud_plans'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
+            t('administration_ee_plans'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
           ],
           [
-            t('administration_cloud_plan_create'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.build(),
+            t('administration_ee_plan_create'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.build(),
           ],
         ]}
         containerMaxWidth="lg"
@@ -39,9 +39,9 @@ export const AdministrationCloudPlanCreateView = () => {
       >
         <Box>
           <Typography variant="h5">
-            {t('administration_cloud_plan_create')}
+            {t('administration_ee_plan_create')}
           </Typography>
-          <CloudPlanForm
+          <EePlanForm
             loading={createPlanLoadable.isLoading}
             onSubmit={(values) => {
               createPlanLoadable.mutate(
@@ -57,17 +57,14 @@ export const AdministrationCloudPlanCreateView = () => {
                 {
                   onSuccess() {
                     messaging.success(
-                      <T keyName="administration_cloud_plan_created_success" />
+                      <T keyName="administration_ee_plan_created_success" />
                     );
-                    history.push(
-                      LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()
-                    );
+                    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
                   },
                 }
               );
             }}
             initialData={{
-              type: 'PAY_AS_YOU_GO',
               name: '',
               stripeProductId: undefined,
               prices: {

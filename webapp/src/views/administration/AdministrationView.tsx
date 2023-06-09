@@ -9,6 +9,9 @@ import { AdministrationEeLicenseView } from './AdministrationEeLicenseView';
 import { AdministrationCloudPlansView } from './AdministrationCloudPlansView';
 import { AdministrationCloudPlanEditView } from './AdministrationCloudPlanEditView';
 import { AdministrationCloudPlanCreateView } from './AdministrationCloudPlanCreateView';
+import { AdministrationEePlansView } from './AdministrationEePlansView';
+import { AdministrationEePlanEditView } from './AdministrationEePlanEditView';
+import { AdministrationEePlanCreateView } from './AdministrationEePlanCreateView';
 
 export const AdministrationView = () => {
   const [search, setSearch] = useState('');
@@ -42,6 +45,24 @@ export const AdministrationView = () => {
           path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.template}
         >
           <AdministrationCloudPlanEditView />
+        </PrivateRoute>
+        <PrivateRoute
+          exact
+          path={LINKS.ADMINISTRATION_BILLING_EE_PLANS.template}
+        >
+          <AdministrationEePlansView />
+        </PrivateRoute>
+        <PrivateRoute
+          exact
+          path={LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.template}
+        >
+          <AdministrationEePlanCreateView />
+        </PrivateRoute>
+        <PrivateRoute
+          exact
+          path={LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.template}
+        >
+          <AdministrationEePlanEditView />
         </PrivateRoute>
       </Switch>
     </>

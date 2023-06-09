@@ -2,32 +2,29 @@ import {
   Box,
   FormControl,
   InputLabel,
-  MenuItem,
   Typography,
   Checkbox,
   FormControlLabel,
   Switch,
 } from '@mui/material';
-
 import { useTranslate } from '@tolgee/react';
 import { Field, FieldProps, Form, Formik } from 'formik';
+
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { SearchSelect } from 'tg.component/searchSelect/SearchSelect';
-import { Select } from 'tg.component/common/form/fields/Select';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
-type CloudPlanModel = components['schemas']['CloudPlanModel'];
+type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
 type EnabledFeature =
-  components['schemas']['CloudPlanModel']['enabledFeatures'][number];
+  components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
 
 type FormData = {
-  type: CloudPlanModel['type'];
   name: string;
-  prices: CloudPlanModel['prices'];
-  includedUsage: CloudPlanModel['includedUsage'];
+  prices: SelfHostedEePlanModel['prices'];
+  includedUsage: SelfHostedEePlanModel['includedUsage'];
   stripeProductId: string | undefined;
   enabledFeatures: EnabledFeature[];
   public: boolean;
@@ -39,7 +36,7 @@ type Props = {
   loading: boolean | undefined;
 };
 
-export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
+export function EePlanForm({ initialData, onSubmit, loading }: Props) {
   const { t } = useTranslate();
 
   const productsLoadable = useBillingApiQuery({
@@ -54,16 +51,9 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
 
   const products = productsLoadable.data?._embedded?.stripeProductModels;
 
-  const typeOptions = [
-    { value: 'PAY_AS_YOU_GO', label: 'Pay as you go' },
-    { value: 'FIXED', label: 'Fixed' },
-    { value: 'SLOTS_FIXED', label: 'Slots fixed' },
-  ];
-
   return (
     <Formik
       initialValues={{
-        type: initialData.type,
         name: initialData.name,
         prices: initialData.prices,
         includedUsage: initialData.includedUsage,
@@ -82,139 +72,88 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
               sx={{ mt: 2 }}
               name="name"
               size="small"
-              label={t('administration_cloud_plan_field_name')}
+              label={t('administration_ee_plan_field_name')}
               fullWidth
             />
-            <Box display="flex" gap={2} sx={{ mt: 2 }}>
-              <FormControl sx={{ flexBasis: '50%' }} variant="standard">
-                <InputLabel shrink>
-                  {t('administration_cloud_plan_field_type')}
-                </InputLabel>
-                <Select
-                  name="type"
-                  size="small"
-                  fullWidth
-                  sx={{ flexBasis: '50%' }}
-                  renderValue={(val) =>
-                    typeOptions.find((o) => o.value === val)?.label
-                  }
-                >
-                  {typeOptions.map(({ value, label }) => (
-                    <MenuItem key={value} value={value}>
-                      {label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <Box display="grid" gap={2} sx={{ mt: 2 }}>
               <Field name="stripeProductId">
                 {({ meta, field, form }: FieldProps) => (
                   <FormControl
-                    sx={{
-                      flexBasis: '50%',
-                      alignItems: 'stretch',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-around',
-                    }}
                     variant="standard"
                     error={!!meta.error && meta.touched}
+                    sx={{
+                      display: 'grid',
+                    }}
                   >
-                    <InputLabel shrink>
-                      {t('administration_cloud_plan_field_stripe_product')}
+                    <InputLabel sx={{ position: 'static' }}>
+                      {t('administration_ee_plan_field_stripe_product')}
                     </InputLabel>
-                    <SearchSelect
-                      compareFunction={(prompt, label) =>
-                        label.toLowerCase().includes(prompt.toLowerCase())
-                      }
-                      SelectProps={{
-                        size: 'small',
-                        fullWidth: true,
-                        variant: 'outlined',
-                      }}
-                      value={field.value}
-                      onChange={(val) => form.setFieldValue(field.name, val)}
-                      items={
-                        products?.map(({ id, name }) => ({
-                          value: id,
-                          name: `${id} ${name}`,
-                        })) || []
-                      }
-                    />
+                    <Box>
+                      <SearchSelect
+                        compareFunction={(prompt, label) =>
+                          label.toLowerCase().includes(prompt.toLowerCase())
+                        }
+                        SelectProps={{
+                          size: 'small',
+                          fullWidth: true,
+                          variant: 'outlined',
+                        }}
+                        value={field.value}
+                        onChange={(val) => form.setFieldValue(field.name, val)}
+                        items={
+                          products?.map(({ id, name }) => ({
+                            value: id,
+                            name: `${id} ${name}`,
+                          })) || []
+                        }
+                      />
+                    </Box>
                   </FormControl>
                 )}
               </Field>
             </Box>
             <Typography sx={{ mt: 2 }}>
-              {t('administration_cloud_plan_form_prices_title')}
+              {t('administration_ee_plan_form_prices_title')}
             </Typography>
             <Box display="flex" gap={2} sx={{ mt: 1 }}>
               <TextField
                 name="prices.subscriptionMonthly"
                 size="small"
-                label={t('administration_cloud_plan_field_price_monthly')}
+                label={t('administration_ee_plan_field_price_monthly')}
                 type="number"
                 fullWidth
               />
               <TextField
                 name="prices.subscriptionYearly"
                 size="small"
-                label={t('administration_cloud_plan_field_price_yearly')}
+                label={t('administration_ee_plan_field_price_yearly')}
                 type="number"
                 fullWidth
               />
               <TextField
-                name="prices.perThousandMtCredits"
+                name="prices.perSeat"
                 size="small"
-                label={t(
-                  'administration_cloud_plan_field_price_per_thousand_mt_credits'
-                )}
-                type="number"
-                fullWidth
-              />
-              <TextField
-                name="prices.perThousandTranslations"
-                size="small"
-                label={t(
-                  'administration_cloud_plan_field_price_per_thousand_translations'
-                )}
+                label={t('administration_ee_plan_field_price_per_seat')}
                 type="number"
                 fullWidth
               />
             </Box>
 
             <Typography sx={{ mt: 2 }}>
-              {t('administration_cloud_plan_form_limits_title')}
+              {t('administration_ee_plan_form_limits_title')}
             </Typography>
             <Box display="flex" gap={2} sx={{ mt: 1 }}>
               <TextField
-                name="includedUsage.mtCredits"
+                name="includedUsage.seats"
                 size="small"
                 type="number"
                 fullWidth
-                label={t('administration_cloud_plan_field_included_mt_credits')}
-              />
-              <TextField
-                name="includedUsage.translations"
-                size="small"
-                type="number"
-                fullWidth
-                label={t(
-                  'administration_cloud_plan_field_included_translations'
-                )}
-              />
-              <TextField
-                name="includedUsage.translationSlots"
-                size="small"
-                type="number"
-                fullWidth
-                label={t(
-                  'administration_cloud_plan_field_included_translation_slots'
-                )}
+                label={t('administration_ee_plan_field_included_seats')}
               />
             </Box>
             <Box>
               <Typography sx={{ mt: 2 }}>
-                {t('administration_cloud_plan_form_features_title')}
+                {t('administration_ee_plan_form_features_title')}
               </Typography>
               <Field name="enabledFeatures">
                 {(props: FieldProps<string[]>) =>
@@ -256,13 +195,13 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                   onChange={() => setFieldValue('public', !values.public)}
                 />
               }
-              label={t('administration_cloud_plan_field_public')}
+              label={t('administration_ee_plan_field_public')}
             />
 
             {!values.public && (
               <Box>
                 <Typography sx={{ mt: 2 }}>
-                  {t('administration_cloud_plan_form_organizations_title')}
+                  {t('administration_ee_plan_form_organizations_title')}
                 </Typography>
               </Box>
             )}
