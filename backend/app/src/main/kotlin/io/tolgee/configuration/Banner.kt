@@ -1,11 +1,11 @@
 package io.tolgee.configuration
 
-import io.tolgee.util.VersionProvider
+import io.tolgee.util.VersionProviderImpl
 import org.springframework.core.env.Environment
 import java.io.PrintStream
 import org.springframework.boot.Banner as SpringBanner
 
-class Banner : SpringBanner {
+class Banner() : SpringBanner {
   override fun printBanner(arg0: Environment, arg1: Class<*>?, arg2: PrintStream) {
     val blue = "\u001B[34m"
     val red = "\u001B[31m"
@@ -16,7 +16,7 @@ class Banner : SpringBanner {
     arg2.println("$blue / / / _ \\/ / _ `/ -_) -_) / / _ \\     ")
     arg2.println("$blue/_/  \\___/_/\\_, /\\__/\\__(_)_/\\___/     ")
     arg2.println("$blue           /___/                       ")
-    arg2.println("${red}Version: ${VersionProvider.version}$off")
+    arg2.println("${red}Version: ${VersionProviderImpl.version}$off")
     arg2.println()
   }
 }

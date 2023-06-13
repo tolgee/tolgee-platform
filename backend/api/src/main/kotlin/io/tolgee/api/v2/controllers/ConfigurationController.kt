@@ -6,6 +6,7 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PublicConfigurationDTO
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.MtServiceType
+import io.tolgee.util.VersionProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 class ConfigurationController @Autowired constructor(
   private val configuration: TolgeeProperties,
   private val applicationContext: ApplicationContext,
-  private val publicBillingConfProvider: PublicBillingConfProvider
+  private val publicBillingConfProvider: PublicBillingConfProvider,
+  private val versionProvider: VersionProvider
 ) : IController {
 
   @GetMapping(value = ["configuration"])
@@ -33,7 +35,8 @@ class ConfigurationController @Autowired constructor(
     return PublicConfigurationDTO(
       properties = configuration,
       machineTranslationServices = machineTranslationServices,
-      billing = publicBillingConfProvider()
+      billing = publicBillingConfProvider(),
+      versionProvider.version
     )
   }
 
