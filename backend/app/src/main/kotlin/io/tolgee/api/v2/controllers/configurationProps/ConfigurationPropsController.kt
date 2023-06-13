@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.configurationProps
 
 import io.swagger.v3.oas.annotations.Operation
-import io.tolgee.controllers.IController
+import io.tolgee.api.v2.controllers.IController
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
