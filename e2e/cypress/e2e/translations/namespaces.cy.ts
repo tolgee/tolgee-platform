@@ -12,9 +12,14 @@ import {
   selectInSelect,
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
+import {
+  awaitPendingRequests,
+  setupRequestAwaiter,
+} from '../../common/requestsAwaiter';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
+    setupRequestAwaiter();
     namespaces.clean({ failOnStatusCode: false });
     namespaces
       .generateStandard()
@@ -30,7 +35,8 @@ describe('namespaces in translations', () => {
   });
 
   afterEach(() => {
-    namespaces.clean({ failOnStatusCode: false });
+    namespaces.clean({ failOnStatusCode: false, timeout: 60000 });
+    awaitPendingRequests();
   });
 
   it('displays keys with namespaces correctly', () => {

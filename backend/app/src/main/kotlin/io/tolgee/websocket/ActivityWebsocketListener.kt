@@ -1,8 +1,8 @@
 package io.tolgee.websocket
 
 import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
-import io.tolgee.api.v2.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.events.OnProjectActivityStoredEvent
+import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.key.Key

@@ -99,13 +99,7 @@ class QueryBase<T>(
 
     val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
     unresolvedCommentsJoin.on(
-      cb.and(
-        cb.equal(
-          unresolvedCommentsJoin.get(TranslationComment_.translation),
-          translation
-        ),
-        cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
-      )
+      cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
     )
 
     val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)

@@ -1,3 +1,56 @@
+## [3.18.1](https://github.com/tolgee/tolgee-platform/compare/v3.18.0...v3.18.1) (2023-06-13)
+
+
+### Bug Fixes
+
+* AWS S3 endpoint configuration backward compatibility ([#1753](https://github.com/tolgee/tolgee-platform/issues/1753)) ([b5b81b5](https://github.com/tolgee/tolgee-platform/commit/b5b81b586954f0f3d8457228863bf155b861f6ae))
+
+# [3.18.0](https://github.com/tolgee/tolgee-platform/compare/v3.17.0...v3.18.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* Unresolved comments filtering issues ([#1747](https://github.com/tolgee/tolgee-platform/issues/1747)) ([56c93b1](https://github.com/tolgee/tolgee-platform/commit/56c93b16b4c523b0684b844f5463ed5997cb2b8b)), closes [tolgee/tolgee-platform#1738](https://github.com/tolgee/tolgee-platform/issues/1738)
+
+
+### Features
+
+* Add STS dependency so that web identity token authentication works ([#1746](https://github.com/tolgee/tolgee-platform/issues/1746)) ([6568487](https://github.com/tolgee/tolgee-platform/commit/6568487463c513aadbaa705fa527d8c77f896197)), closes [#1614](https://github.com/tolgee/tolgee-platform/issues/1614) [#1271](https://github.com/tolgee/tolgee-platform/issues/1271)
+
+# [3.17.0](https://github.com/tolgee/tolgee-platform/compare/v3.16.2...v3.17.0) (2023-06-07)
+
+
+### Features
+
+* Update to AWS SDK v2 ([#1614](https://github.com/tolgee/tolgee-platform/issues/1614)) ([dccdda1](https://github.com/tolgee/tolgee-platform/commit/dccdda1e99f6f4d78fe9714f8b8a20f47f76f54c)), closes [#1271](https://github.com/tolgee/tolgee-platform/issues/1271)
+
+## [3.16.2](https://github.com/tolgee/tolgee-platform/compare/v3.16.1...v3.16.2) (2023-06-01)
+
+
+### Bug Fixes
+
+* Gracefully handle MissingServletRequestPartException ([#1740](https://github.com/tolgee/tolgee-platform/issues/1740)) ([87b7c2b](https://github.com/tolgee/tolgee-platform/commit/87b7c2b5b57bd562e5974afd724e517998003aeb))
+
+## [3.16.1](https://github.com/tolgee/tolgee-platform/compare/v3.16.0...v3.16.1) (2023-05-30)
+
+
+### Bug Fixes
+
+* Even better performance of query with namespace filter ([#1738](https://github.com/tolgee/tolgee-platform/issues/1738)) ([01500a3](https://github.com/tolgee/tolgee-platform/commit/01500a37bfcda14f1eaa444aeda464b218734904))
+
+# [3.16.0](https://github.com/tolgee/tolgee-platform/compare/v3.15.0...v3.16.0) (2023-05-29)
+
+
+### Bug Fixes
+
+* billing progress over color ([#1736](https://github.com/tolgee/tolgee-platform/issues/1736)) ([eb1d03b](https://github.com/tolgee/tolgee-platform/commit/eb1d03b2aa73137ea78786116f4f4deae34b2ba9))
+* Performance of query with namespace filter on Postgres 15 with C… ([#1737](https://github.com/tolgee/tolgee-platform/issues/1737)) ([cb776f7](https://github.com/tolgee/tolgee-platform/commit/cb776f7f435d597b26e3f2ee9504153ac3be2acb))
+
+
+### Features
+
+* login view as split screen ([#1735](https://github.com/tolgee/tolgee-platform/issues/1735)) ([ed162f6](https://github.com/tolgee/tolgee-platform/commit/ed162f677ea314ae8b4b563b5910cfec9119e16e))
+
 # [3.15.0](https://github.com/tolgee/tolgee-platform/compare/v3.14.3...v3.15.0) (2023-05-24)
 
 

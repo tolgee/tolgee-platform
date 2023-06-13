@@ -1,7 +1,5 @@
 package io.tolgee
 
-import com.amazonaws.services.translate.AmazonTranslate
-import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -13,6 +11,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import software.amazon.awssdk.services.translate.TranslateClient
+import software.amazon.awssdk.services.translate.model.TranslateTextRequest
+import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 
 class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
@@ -21,11 +22,12 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   @MockBean
-  lateinit var amazonTranslate: AmazonTranslate
+  lateinit var amazonTranslate: TranslateClient
 
   fun initMachineTranslationMocks(translateDelay: Long = 0) {
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = mock() as TranslateTextResult
+    val awsTranslateTextResult = TranslateTextResponse
+      .builder().translatedText("Translated with Amazon").build()
 
     whenever(
       googleTranslate.translate(
@@ -41,12 +43,7 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
       return@then "Translated with Google"
     }
 
-    whenever(amazonTranslate.translateText(any())).thenReturn(awsTranslateTextResult)
-
-    whenever(awsTranslateTextResult.translatedText).then {
-      Thread.sleep(translateDelay)
-      return@then "Translated with Amazon"
-    }
+    whenever(amazonTranslate.translateText(any<TranslateTextRequest>())).thenReturn(awsTranslateTextResult)
   }
 
   fun Key.getLangTranslation(lang: Language): io.tolgee.model.translation.Translation {

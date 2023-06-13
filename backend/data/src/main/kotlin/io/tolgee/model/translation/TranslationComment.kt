@@ -10,12 +10,17 @@ import io.tolgee.model.enums.TranslationCommentState
 import org.hibernate.validator.constraints.Length
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.Index
 import javax.persistence.ManyToOne
+import javax.persistence.Table
 import javax.validation.constraints.NotBlank
 
 @Entity
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["translation"])
+@Table(
+  indexes = [Index(columnList = "state")]
+)
 class TranslationComment(
   @field:Length(max = 10000)
   @field:NotBlank

@@ -1,7 +1,5 @@
 package io.tolgee.api.v2.controllers
 
-import com.amazonaws.services.translate.AmazonTranslate
-import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
@@ -36,6 +34,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
+import software.amazon.awssdk.services.translate.TranslateClient
+import software.amazon.awssdk.services.translate.model.TranslateTextRequest
+import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -56,7 +57,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
-  lateinit var amazonTranslate: AmazonTranslate
+  lateinit var amazonTranslate: TranslateClient
 
   @Autowired
   @MockBean
@@ -97,7 +98,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun initMachineTranslationMocks() {
     val googleTranslationMock = mock() as Translation
-    val awsTranslateTextResult = mock() as TranslateTextResult
+    val awsTranslateTextResult = TranslateTextResponse
+      .builder()
+      .translatedText("Translated with Amazon")
+      .build()
 
     whenever(
       googleTranslate.translate(
@@ -110,9 +114,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     whenever(googleTranslationMock.translatedText).thenReturn("Translated with Google")
 
-    whenever(amazonTranslate.translateText(any())).thenReturn(awsTranslateTextResult)
-
-    whenever(awsTranslateTextResult.translatedText).thenReturn("Translated with Amazon")
+    whenever(amazonTranslate.translateText(any<TranslateTextRequest>())).thenReturn(awsTranslateTextResult)
 
     whenever(
       deeplApiService.translate(

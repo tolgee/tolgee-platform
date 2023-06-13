@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
+import org.springframework.web.multipart.support.MissingServletRequestPartException
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
@@ -78,10 +79,20 @@ class ExceptionHandlers {
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
-  fun handleCMissingServletRequestParameterException(
+  fun handleMissingServletRequestParameterException(
     ex: MissingServletRequestParameterException
   ): ResponseEntity<Map<String, Map<String, String?>>> {
     val errors = Collections.singletonMap(ex.parameterName, ex.message)
+    return ResponseEntity(
+      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(MissingServletRequestPartException::class)
+  fun handleMissingServletRequestPartException(
+    ex: MissingServletRequestPartException
+  ): ResponseEntity<Map<String, Map<String, String?>>> {
+    val errors = Collections.singletonMap(ex.requestPartName, ex.message)
     return ResponseEntity(
       Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST
     )

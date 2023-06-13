@@ -16,10 +16,17 @@ open class AwsMachineTranslationProperties(
   @DocProperty(description = "Whether to use AWS Amazon Translate as a primary translation engine.")
   override var defaultPrimary: Boolean = false,
 
-  @DocProperty(description = "AWS access key.")
+  @DocProperty(description = "If you are authenticating using a different method than " +
+      "explicit access key and secret key, which implicitly enable AWS Translate, " +
+      "you should enable AWS Translate using this option.")
+  var enabled: Boolean? = null,
+  
+  @DocProperty(description = "AWS access key. (optional if you are authenticating " +
+      "with a different method, like STS Web Identity)")
   var accessKey: String? = null,
 
-  @DocProperty(description = "AWS secret key.")
+  @DocProperty(description = "AWS secret key. (optional if you are authenticating " +
+      "with a different method, like STS Web Identity)")
   var secretKey: String? = null,
 
   @DocProperty(description = "AWS region.")

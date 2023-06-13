@@ -58,3 +58,6 @@ server.iws
 **/derby.log
 
 backend/app/src/main/resources/application-js-e2e.properties
+
+/backend/*/build
+/backend/*/out

@@ -1,0 +1,27 @@
+package io.tolgee.hateoas.project
+
+import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.Avatar
+import io.tolgee.hateoas.language.LanguageModel
+import io.tolgee.hateoas.organization.SimpleOrganizationModel
+import io.tolgee.hateoas.permission.ComputedPermissionModel
+import io.tolgee.hateoas.permission.PermissionModel
+import io.tolgee.model.enums.OrganizationRoleType
+import org.springframework.hateoas.RepresentationModel
+import org.springframework.hateoas.server.core.Relation
+
+@Suppress("unused")
+@Relation(collectionRelation = "projects", itemRelation = "project")
+open class ProjectModel(
+  val id: Long,
+  val name: String,
+  val description: String?,
+  val slug: String?,
+  val avatar: Avatar?,
+  val organizationOwner: SimpleOrganizationModel?,
+  val baseLanguage: LanguageModel?,
+  val organizationRole: OrganizationRoleType?,
+  @Schema(description = "Current user's direct permission", example = "MANAGE")
+  val directPermission: PermissionModel?,
+  val computedPermission: ComputedPermissionModel
+) : RepresentationModel<ProjectModel>()
