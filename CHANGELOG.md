@@ -1,3 +1,10 @@
+## [3.18.2](https://github.com/tolgee/tolgee-platform/compare/v3.18.1...v3.18.2) (2023-06-13)
+
+
+### Bug Fixes
+
+* Version Provider (Closes [#1750](https://github.com/tolgee/tolgee-platform/issues/1750)) ([#1755](https://github.com/tolgee/tolgee-platform/issues/1755)) ([33f972c](https://github.com/tolgee/tolgee-platform/commit/33f972c527e6c33717a37a4626c43e68acd62404))
+
 ## [3.18.1](https://github.com/tolgee/tolgee-platform/compare/v3.18.0...v3.18.1) (2023-06-13)
 
 
