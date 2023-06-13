@@ -32,26 +32,29 @@ export const ForOrganizationsList = ({ ids, setIds }: Props) => {
       onPageChange={setPage}
       onSearchChange={setSearch}
       loadable={listPermitted}
-      renderItem={(o) => (
-        <ListItem data-cy="administration-organizations-list-item">
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={ids.includes(o.id)}
-                onChange={() => {
-                  if (ids.includes(o.id)) {
-                    setIds(ids.filter((id) => id !== o.id));
-                  } else {
-                    setIds([...ids, o.id]);
-                  }
-                }}
-              />
-            }
-            label={o.name}
-          />
-        </ListItem>
-      )}
+      renderItem={(o) => {
+        const label = o.name !== o.slug ? `${o.name} (${o.slug})` : o.name;
+        return (
+          <ListItem data-cy="administration-organizations-list-item">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={ids.includes(o.id)}
+                  onChange={() => {
+                    if (ids.includes(o.id)) {
+                      setIds(ids.filter((id) => id !== o.id));
+                    } else {
+                      setIds([...ids, o.id]);
+                    }
+                  }}
+                />
+              }
+              label={label}
+            />
+          </ListItem>
+        );
+      }}
     />
   );
 };
