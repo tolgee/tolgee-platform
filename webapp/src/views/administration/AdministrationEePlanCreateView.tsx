@@ -78,6 +78,7 @@ export const AdministrationEePlanCreateView = () => {
                 translations: 0,
                 mtCredits: 0,
               },
+              forOrganizationIds: [],
               enabledFeatures: [],
               public: true,
             }}

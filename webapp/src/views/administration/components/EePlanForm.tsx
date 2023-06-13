@@ -16,6 +16,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { ForOrganizationsList } from './ForOrganizationsList';
 
 type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
 type EnabledFeature =
@@ -28,6 +29,7 @@ type FormData = {
   stripeProductId: string | undefined;
   enabledFeatures: EnabledFeature[];
   public: boolean;
+  forOrganizationIds: number[];
 };
 
 type Props = {
@@ -60,12 +62,13 @@ export function EePlanForm({ initialData, onSubmit, loading }: Props) {
         stripeProductId: initialData.stripeProductId,
         enabledFeatures: initialData.enabledFeatures,
         public: initialData.public,
+        forOrganizationIds: initialData.forOrganizationIds,
       }}
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Validation.EE_PLAN_FORM}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, errors, setFieldValue }) => (
         <Form>
           <Box mb={3}>
             <TextField
@@ -203,10 +206,20 @@ export function EePlanForm({ initialData, onSubmit, loading }: Props) {
                 <Typography sx={{ mt: 2 }}>
                   {t('administration_ee_plan_form_organizations_title')}
                 </Typography>
+
+                <ForOrganizationsList
+                  ids={values.forOrganizationIds}
+                  setIds={(ids) => setFieldValue('forOrganizationIds', ids)}
+                />
+                {errors.forOrganizationIds && (
+                  <Typography color="error">
+                    {errors.forOrganizationIds}
+                  </Typography>
+                )}
               </Box>
             )}
 
-            <Box display="flex" justifyContent="end">
+            <Box display="flex" justifyContent="end" mt={4}>
               <LoadingButton
                 loading={loading}
                 variant="contained"

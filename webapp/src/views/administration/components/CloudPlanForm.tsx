@@ -8,9 +8,9 @@ import {
   FormControlLabel,
   Switch,
 } from '@mui/material';
-
 import { useTranslate } from '@tolgee/react';
 import { Field, FieldProps, Form, Formik } from 'formik';
+
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { SearchSelect } from 'tg.component/searchSelect/SearchSelect';
 import { Select } from 'tg.component/common/form/fields/Select';
@@ -18,6 +18,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { ForOrganizationsList } from './ForOrganizationsList';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 type EnabledFeature =
@@ -30,6 +31,7 @@ type FormData = {
   includedUsage: CloudPlanModel['includedUsage'];
   stripeProductId: string | undefined;
   enabledFeatures: EnabledFeature[];
+  forOrganizationIds: number[];
   public: boolean;
 };
 
@@ -70,12 +72,13 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
         stripeProductId: initialData.stripeProductId,
         enabledFeatures: initialData.enabledFeatures,
         public: initialData.public,
+        forOrganizationIds: initialData.forOrganizationIds,
       }}
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Validation.CLOUD_PLAN_FORM}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, errors, setFieldValue }) => (
         <Form>
           <Box mb={3}>
             <TextField
@@ -264,10 +267,19 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                 <Typography sx={{ mt: 2 }}>
                   {t('administration_cloud_plan_form_organizations_title')}
                 </Typography>
+                <ForOrganizationsList
+                  ids={values.forOrganizationIds}
+                  setIds={(ids) => setFieldValue('forOrganizationIds', ids)}
+                />
+                {errors.forOrganizationIds && (
+                  <Typography color="error">
+                    {errors.forOrganizationIds}
+                  </Typography>
+                )}
               </Box>
             )}
 
-            <Box display="flex" justifyContent="end">
+            <Box display="flex" justifyContent="end" mt={4}>
               <LoadingButton
                 loading={loading}
                 variant="contained"

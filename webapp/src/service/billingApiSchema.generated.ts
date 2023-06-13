@@ -143,6 +143,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       stripeProductId: string;
+      forOrganizationIds: number[];
     };
     SelfHostedEeSubscriptionModel: {
       id: number;
@@ -183,6 +184,7 @@ export interface components {
       hasYearlyPrice: boolean;
       public: boolean;
       stripeProductId: string;
+      forOrganizationIds: number[];
     };
     CloudSubscriptionModel: {
       organizationId: number;
@@ -234,6 +236,7 @@ export interface components {
       notAvailableBefore?: string;
       availableUntil?: string;
       usableUntil?: string;
+      forOrganizationIds: number[];
     };
     CreateCloudPlanRequest: {
       name: string;
@@ -258,6 +261,7 @@ export interface components {
       notAvailableBefore?: string;
       availableUntil?: string;
       usableUntil?: string;
+      forOrganizationIds: number[];
     };
     CloudSubscribeRequest: {
       /** Id of the subscription plan */

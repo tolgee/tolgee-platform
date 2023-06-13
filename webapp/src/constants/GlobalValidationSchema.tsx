@@ -306,11 +306,19 @@ export class Validation {
   static readonly CLOUD_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
     stripeProductId: Yup.string().required(),
+    forOrganizationIds: Yup.array().when('public', {
+      is: false,
+      then: Yup.array().min(1),
+    }),
   });
 
   static readonly EE_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
     stripeProductId: Yup.string().required(),
+    forOrganizationIds: Yup.array().when('public', {
+      is: false,
+      then: Yup.array().min(1),
+    }),
   });
 }
 
