@@ -5,16 +5,15 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicBillingConfigurationDTO
-import io.tolgee.util.VersionProvider
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
   @Schema(hidden = true)
   properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
-  val billing: PublicBillingConfigurationDTO
+  val billing: PublicBillingConfigurationDTO,
+  val version: String
 ) {
-
   val authentication: Boolean = properties.authentication.enabled
   var authMethods: AuthMethodsDTO? = null
   val passwordResettable: Boolean
@@ -25,7 +24,6 @@ class PublicConfigurationDTO(
   val needsEmailVerification = properties.authentication.needsEmailVerification
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
   val appName = properties.appName
-  val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
   val internalControllerEnabled: Boolean = properties.internal.controllerEnabled
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
