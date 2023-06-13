@@ -1,3 +1,10 @@
+## [3.18.1](https://github.com/tolgee/tolgee-platform/compare/v3.18.0...v3.18.1) (2023-06-13)
+
+
+### Bug Fixes
+
+* AWS S3 endpoint configuration backward compatibility ([#1753](https://github.com/tolgee/tolgee-platform/issues/1753)) ([b5b81b5](https://github.com/tolgee/tolgee-platform/commit/b5b81b586954f0f3d8457228863bf155b861f6ae))
+
 # [3.18.0](https://github.com/tolgee/tolgee-platform/compare/v3.17.0...v3.18.0) (2023-06-09)
 
 

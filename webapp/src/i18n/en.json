@@ -121,6 +121,7 @@
   "administration_ee_plan_field_stripe_product" : "Stripe product",
   "administration_ee_plan_form_features_title" : "Included features",
   "administration_ee_plan_form_limits_title" : "Included stuff",
+  "administration_ee_plan_form_organizations_title" : "Organizations",
   "administration_ee_plan_form_prices_title" : "Prices",
   "administration_ee_plan_public_badge" : "Public",
   "administration_ee_plans" : "Self-hosted plans",
