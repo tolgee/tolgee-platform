@@ -68,14 +68,30 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
         type: initialData.type,
         name: initialData.name,
         prices: initialData.prices,
-        includedUsage: initialData.includedUsage,
+        includedUsage: {
+          ...initialData.includedUsage,
+          translations:
+            initialData.type === 'SLOTS_FIXED'
+              ? initialData.includedUsage.translationSlots
+              : initialData.includedUsage.translations,
+        },
         stripeProductId: initialData.stripeProductId,
         enabledFeatures: initialData.enabledFeatures,
         public: initialData.public,
         forOrganizationIds: initialData.forOrganizationIds,
       }}
       enableReinitialize
-      onSubmit={onSubmit}
+      onSubmit={(values) => {
+        let prices = values.prices;
+        if (values.type !== 'PAY_AS_YOU_GO') {
+          prices = {
+            perSeat: values.prices.perSeat,
+            subscriptionMonthly: values.prices.subscriptionMonthly,
+            subscriptionYearly: values.prices.subscriptionYearly,
+          };
+        }
+        onSubmit({ ...values, prices });
+      }}
       validationSchema={Validation.CLOUD_PLAN_FORM}
     >
       {({ values, errors, setFieldValue }) => (
@@ -173,6 +189,7 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                 )}
                 type="number"
                 fullWidth
+                disabled={values.type !== 'PAY_AS_YOU_GO'}
               />
               <TextField
                 name="prices.perThousandTranslations"
@@ -182,6 +199,7 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                 )}
                 type="number"
                 fullWidth
+                disabled={values.type !== 'PAY_AS_YOU_GO'}
               />
             </Box>
 
@@ -201,18 +219,13 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                 size="small"
                 type="number"
                 fullWidth
-                label={t(
-                  'administration_cloud_plan_field_included_translations'
-                )}
-              />
-              <TextField
-                name="includedUsage.translationSlots"
-                size="small"
-                type="number"
-                fullWidth
-                label={t(
-                  'administration_cloud_plan_field_included_translation_slots'
-                )}
+                label={
+                  values.type === 'SLOTS_FIXED'
+                    ? t(
+                        'administration_cloud_plan_field_included_translation_slots'
+                      )
+                    : t('administration_cloud_plan_field_included_translations')
+                }
               />
             </Box>
             <Box>
