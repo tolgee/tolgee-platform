@@ -17,12 +17,16 @@ class S3Settings(
   @DocProperty(description = "Whether S3 is enabled. If enabled, you need to set all remaining properties below.")
   var enabled: Boolean = false,
 
-  @DocProperty(description = "Access key for the S3 server. (optional if you are authenticating " +
-    "with a different method, like STS Web Identity)")
+  @DocProperty(
+    description = "Access key for the S3 server. (optional if you are authenticating " +
+      "with a different method, like STS Web Identity)"
+  )
   var accessKey: String? = null,
 
-  @DocProperty(description = "Secret key for the access key. (optional if you are authenticating " +
-    "with a different method, like STS Web Identity)")
+  @DocProperty(
+    description = "Secret key for the access key. (optional if you are authenticating " +
+      "with a different method, like STS Web Identity)"
+  )
   var secretKey: String? = null,
 
   @DocProperty(
