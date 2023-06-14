@@ -18,14 +18,14 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ForOrganizationsList } from './ForOrganizationsList';
 
-type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
+type SelfHostedEePlanRequest = components['schemas']['SelfHostedEePlanRequest'];
 type EnabledFeature =
-  components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
+  components['schemas']['SelfHostedEePlanRequest']['enabledFeatures'][number];
 
 type FormData = {
   name: string;
-  prices: SelfHostedEePlanModel['prices'];
-  includedUsage: SelfHostedEePlanModel['includedUsage'];
+  prices: SelfHostedEePlanRequest['prices'];
+  includedUsage: SelfHostedEePlanRequest['includedUsage'];
   stripeProductId: string | undefined;
   enabledFeatures: EnabledFeature[];
   public: boolean;

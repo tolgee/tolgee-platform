@@ -68,7 +68,14 @@ export const AdministrationEePlanEditView = () => {
           </Typography>
           <EePlanForm
             loading={false}
-            initialData={planData}
+            initialData={{
+              ...planData,
+              includedUsage: {
+                seats: planData.includedUsage.seats,
+                mtCredits: planData.includedUsage.mtCredits,
+                translations: planData.includedUsage.translations,
+              },
+            }}
             onSubmit={(values) => {
               planEditLoadable.mutate(
                 {

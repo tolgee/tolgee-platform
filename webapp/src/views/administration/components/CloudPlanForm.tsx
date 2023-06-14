@@ -20,9 +20,9 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ForOrganizationsList } from './ForOrganizationsList';
 
-type CloudPlanModel = components['schemas']['CloudPlanModel'];
+type CloudPlanModel = components['schemas']['CloudPlanRequest'];
 type EnabledFeature =
-  components['schemas']['CloudPlanModel']['enabledFeatures'][number];
+  components['schemas']['CloudPlanRequest']['enabledFeatures'][number];
 
 type FormData = {
   type: CloudPlanModel['type'];
@@ -68,13 +68,7 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
         type: initialData.type,
         name: initialData.name,
         prices: initialData.prices,
-        includedUsage: {
-          ...initialData.includedUsage,
-          translations:
-            initialData.type === 'SLOTS_FIXED'
-              ? initialData.includedUsage.translationSlots
-              : initialData.includedUsage.translations,
-        },
+        includedUsage: initialData.includedUsage,
         stripeProductId: initialData.stripeProductId,
         enabledFeatures: initialData.enabledFeatures,
         public: initialData.public,

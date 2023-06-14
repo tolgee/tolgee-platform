@@ -210,7 +210,19 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
-    CreateSelfHostedEePlanRequest: {
+    PlanIncludedUsageRequest: {
+      seats: number;
+      translations: number;
+      mtCredits: number;
+    };
+    PlanPricesRequest: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    SelfHostedEePlanRequest: {
       name: string;
       free: boolean;
       enabledFeatures: (
@@ -234,18 +246,6 @@ export interface components {
       usableUntil?: string;
       forOrganizationIds: number[];
     };
-    PlanIncludedUsageRequest: {
-      seats: number;
-      translations: number;
-      mtCredits: number;
-    };
-    PlanPricesRequest: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
-    };
     SelfHostedEePlanAdministrationModel: {
       id: number;
       name: string;
@@ -268,7 +268,7 @@ export interface components {
       stripeProductId: string;
       forOrganizationIds: number[];
     };
-    CreateCloudPlanRequest: {
+    CloudPlanRequest: {
       name: string;
       free: boolean;
       enabledFeatures: (
@@ -643,7 +643,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateSelfHostedEePlanRequest"];
+        "application/json": components["schemas"]["SelfHostedEePlanRequest"];
       };
     };
   };
@@ -725,7 +725,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateCloudPlanRequest"];
+        "application/json": components["schemas"]["CloudPlanRequest"];
       };
     };
   };
@@ -920,7 +920,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateSelfHostedEePlanRequest"];
+        "application/json": components["schemas"]["SelfHostedEePlanRequest"];
       };
     };
   };
@@ -969,7 +969,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateCloudPlanRequest"];
+        "application/json": components["schemas"]["CloudPlanRequest"];
       };
     };
   };

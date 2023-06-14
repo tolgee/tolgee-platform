@@ -68,7 +68,17 @@ export const AdministrationCloudPlanEditView = () => {
           </Typography>
           <CloudPlanForm
             loading={planEditLoadable.isLoading}
-            initialData={planData}
+            initialData={{
+              ...planData,
+              includedUsage: {
+                seats: planData.includedUsage.seats,
+                mtCredits: planData.includedUsage.mtCredits,
+                translations:
+                  planData.type === 'SLOTS_FIXED'
+                    ? planData.includedUsage.translationSlots
+                    : planData.includedUsage.translations,
+              },
+            }}
             onSubmit={(values) => {
               planEditLoadable.mutate(
                 {

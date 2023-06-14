@@ -80,7 +80,6 @@ export const AdministrationCloudPlanCreateView = () => {
               },
               includedUsage: {
                 seats: 0,
-                translationSlots: 0,
                 translations: 0,
                 mtCredits: 0,
               },
