@@ -236,7 +236,6 @@ export interface components {
     };
     PlanIncludedUsageRequest: {
       seats: number;
-      translationSlots: number;
       translations: number;
       mtCredits: number;
     };
