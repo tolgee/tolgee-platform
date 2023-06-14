@@ -45,12 +45,12 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
   const { t } = useTranslate();
 
   const productsLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/plans/stripe-products',
+    url: '/v2/administration/billing/stripe-products',
     method: 'get',
   });
 
   const featuresLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/plans/features',
+    url: '/v2/administration/billing/features',
     method: 'get',
   });
 

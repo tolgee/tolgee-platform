@@ -30,14 +30,14 @@ export const AdministrationEePlansView = () => {
   const { t } = useTranslate();
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/ee-plans',
+    url: '/v2/administration/billing/self-hosted-ee-plans',
     method: 'get',
   });
 
   const deletePlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/ee-plans/{planId}',
+    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
     method: 'delete',
-    invalidatePrefix: '/v2/admin/billing/ee-plans',
+    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
   });
 
   function deletePlan(plan: SelfHostedEePlanModel) {

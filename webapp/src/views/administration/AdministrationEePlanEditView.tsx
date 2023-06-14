@@ -21,15 +21,15 @@ export const AdministrationEePlanEditView = () => {
   const planId = match.params[PARAMS.PLAN_ID];
 
   const planLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/ee-plans/{planId}',
+    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
     method: 'get',
     path: { planId },
   });
 
   const planEditLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/ee-plans/{planId}',
+    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
     method: 'put',
-    invalidatePrefix: '/v2/admin/billing/ee-plans',
+    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
   });
 
   if (planLoadable.isLoading) {

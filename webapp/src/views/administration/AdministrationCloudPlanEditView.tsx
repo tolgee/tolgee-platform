@@ -21,15 +21,15 @@ export const AdministrationCloudPlanEditView = () => {
   const planId = match.params[PARAMS.PLAN_ID];
 
   const planLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/administration/billing/cloud-plans/{planId}',
     method: 'get',
     path: { planId },
   });
 
   const planEditLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/administration/billing/cloud-plans/{planId}',
     method: 'put',
-    invalidatePrefix: '/v2/admin/billing/cloud-plans',
+    invalidatePrefix: '/v2/administration/billing/cloud-plans',
   });
 
   if (planLoadable.isLoading) {

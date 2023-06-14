@@ -15,7 +15,7 @@ export const AdministrationEePlanCreateView = () => {
   const { t } = useTranslate();
 
   const createPlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/ee-plans',
+    url: '/v2/administration/billing/self-hosted-ee-plans',
     method: 'post',
   });
 

@@ -30,14 +30,14 @@ export const AdministrationCloudPlansView = () => {
   const { t } = useTranslate();
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/admin/billing/cloud-plans',
+    url: '/v2/administration/billing/cloud-plans',
     method: 'get',
   });
 
   const deletePlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans/{planId}',
+    url: '/v2/administration/billing/cloud-plans/{planId}',
     method: 'delete',
-    invalidatePrefix: '/v2/admin/billing/cloud-plans',
+    invalidatePrefix: '/v2/administration/billing/cloud-plans',
   });
 
   function deletePlan(plan: CloudPlanModel) {

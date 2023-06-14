@@ -15,7 +15,7 @@ export const AdministrationCloudPlanCreateView = () => {
   const { t } = useTranslate();
 
   const createPlanLoadable = useBillingApiMutation({
-    url: '/v2/admin/billing/cloud-plans',
+    url: '/v2/administration/billing/cloud-plans',
     method: 'post',
   });
 
