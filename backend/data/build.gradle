@@ -204,3 +204,7 @@ tasks.findByName("bootJar").enabled(false)
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
