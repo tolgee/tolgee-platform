@@ -1,3 +1,10 @@
+# [3.19.0](https://github.com/tolgee/tolgee-platform/compare/v3.18.2...v3.19.0) (2023-06-14)
+
+
+### Features
+
+* Configuration docs endpoint ([#1734](https://github.com/tolgee/tolgee-platform/issues/1734)) ([a5e8d6c](https://github.com/tolgee/tolgee-platform/commit/a5e8d6c023b59607cdf9d00c47b34ee801469c44))
+
 ## [3.18.2](https://github.com/tolgee/tolgee-platform/compare/v3.18.1...v3.18.2) (2023-06-13)
 
 
