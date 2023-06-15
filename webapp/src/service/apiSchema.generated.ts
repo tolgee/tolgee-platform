@@ -263,6 +263,9 @@ export interface paths {
     get: operations["export"];
     post: operations["exportPost"];
   };
+  "/v2/projects/{projectId}/big-meta": {
+    post: operations["store"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     get: operations["getAll_5"];
     post: operations["create_4"];
@@ -569,18 +572,12 @@ export interface components {
         | "SERVER_ADMIN";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
       /** List of languages user can translate to. If null, all languages editing is permitted. */
       translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages view is permitted. */
       viewLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -603,6 +600,12 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -688,9 +691,22 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
+      enabledServices: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE"
+      )[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -708,9 +724,22 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
+      enabledServices: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE"
+      )[];
     };
     TagKeyDto: {
       name: string;
@@ -811,7 +840,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
     };
     EditKeyDto: {
       name: string;
@@ -946,8 +975,8 @@ export interface components {
       token: string;
       id: number;
       expiresAt?: number;
-      lastUsedAt?: number;
       description: string;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
     };
@@ -1050,14 +1079,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      projectName: string;
-      userFullName?: string;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      description: string;
       username?: string;
+      description: string;
+      lastUsedAt?: number;
       scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1297,6 +1326,15 @@ export interface components {
       zip: boolean;
     };
     StreamingResponseBody: { [key: string]: unknown };
+    BigMetaDto: {
+      /** List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder: components["schemas"]["RelatedKeyDto"][];
+    };
+    /** List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+    RelatedKeyDto: {
+      namespace?: string;
+      keyName: string;
+    };
     TranslationCommentWithLangKeyDto: {
       keyId: number;
       languageId: number;
@@ -1439,7 +1477,13 @@ export interface components {
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      defaultPrimaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     OAuthPublicConfigDTO: {
@@ -1468,7 +1512,6 @@ export interface components {
       )[];
       name: string;
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * The role of currently authorized user.
        *
@@ -1478,6 +1521,7 @@ export interface components {
       description?: string;
       avatar?: components["schemas"]["Avatar"];
       slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1557,17 +1601,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1679,6 +1723,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1690,7 +1735,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1767,6 +1811,8 @@ export interface components {
       screenshotCount: number;
       /** Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
       screenshots?: components["schemas"]["ScreenshotModel"][];
+      /** There is a context available for this key */
+      contextPresent: boolean;
       /** Translations object */
       translations: {
         [key: string]: components["schemas"]["TranslationViewModel"];
@@ -1795,7 +1841,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1903,8 +1949,8 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
       expiresAt?: number;
-      lastUsedAt?: number;
       description: string;
+      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
     };
@@ -1982,14 +2028,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      projectName: string;
-      userFullName?: string;
       projectId: number;
       expiresAt?: number;
-      lastUsedAt?: number;
-      description: string;
       username?: string;
+      description: string;
+      lastUsedAt?: number;
       scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -4874,6 +4920,34 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExportParams"];
+      };
+    };
+  };
+  store: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BigMetaDto"];
       };
     };
   };

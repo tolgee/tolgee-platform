@@ -3,7 +3,10 @@ import { useTheme } from '@mui/material';
 export const useProviderImg = () => {
   const { palette } = useTheme();
 
-  return (provider: string | undefined) => {
+  return (
+    provider: string | undefined,
+    contextPresent: boolean | undefined
+  ) => {
     switch (provider) {
       case 'GOOGLE':
         return '/images/providers/google-translate.svg';
@@ -16,7 +19,9 @@ export const useProviderImg = () => {
       case 'BAIDU':
         return `/images/providers/baidu-icon.svg`;
       case 'TOLGEE':
-        return `/images/providers/tolgee-logo-${palette.mode}.svg`;
+        return contextPresent
+          ? `/images/providers/tolgee-logo-${palette.mode}-in-context.svg`
+          : `/images/providers/tolgee-logo-${palette.mode}.svg`;
       default:
         return null;
     }

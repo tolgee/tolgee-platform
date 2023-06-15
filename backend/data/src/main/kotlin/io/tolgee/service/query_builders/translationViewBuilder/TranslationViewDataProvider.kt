@@ -50,7 +50,7 @@ class TranslationViewDataProvider(
   fun getSelectAllKeys(
     projectId: Long,
     languages: Set<Language>,
-    params: TranslationFilters = TranslationFilters(),
+    params: TranslationFilters = TranslationFilters()
   ): MutableList<Long> {
     val translationsViewQueryBuilder = TranslationsViewQueryBuilder(
       cb = em.criteriaBuilder,

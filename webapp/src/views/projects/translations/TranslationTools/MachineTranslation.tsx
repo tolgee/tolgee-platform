@@ -3,9 +3,9 @@ import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { TabMessage } from './TabMessage';
-import { useProviderImg } from './useProviderImg';
 import { useTranslationTools } from './useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
+import { ProviderLogo } from './ProviderLogo';
 
 type SuggestResultModel = components['schemas']['SuggestResultModel'];
 
@@ -31,10 +31,6 @@ const StyledItem = styled('div')`
   }
 `;
 
-const StyledSource = styled('div')`
-  margin-top: 3px;
-`;
-
 const StyledValue = styled('div')`
   font-size: 15px;
   align-self: center;
@@ -44,15 +40,16 @@ type Props = {
   data: SuggestResultModel | undefined;
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
   languageTag: string;
+  contextPresent: boolean | undefined;
 };
 
 export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
   languageTag,
+  contextPresent,
 }) => {
   const { t } = useTranslate();
-  const getProviderImg = useProviderImg();
   const baseIsEmpty = data?.machineTranslations === null;
   const items = data?.machineTranslations
     ? Object.entries(data?.machineTranslations)
@@ -64,8 +61,6 @@ export const MachineTranslation: React.FC<Props> = ({
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         items?.map(([provider, translation]) => {
-          const providerImg = getProviderImg(provider);
-
           return (
             <StyledItem
               key={provider}
@@ -78,9 +73,10 @@ export const MachineTranslation: React.FC<Props> = ({
               role="button"
               data-cy="translation-tools-machine-translation-item"
             >
-              <StyledSource>
-                {providerImg && <img src={providerImg} width="16px" />}
-              </StyledSource>
+              <ProviderLogo
+                provider={provider}
+                contextPresent={contextPresent}
+              />
               <StyledValue>
                 <span dir={getLanguageDirection(languageTag)}>
                   {translation}

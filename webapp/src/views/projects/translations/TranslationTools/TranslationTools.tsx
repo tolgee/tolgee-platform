@@ -97,6 +97,7 @@ const TranslationTools = React.memo(function TranslationTools({
               languageTag={languageTag}
               data={data.machine?.data}
               operationsRef={data.operationsRef}
+              contextPresent={data.contextPresent}
             />
           </ToolsTab>
         )}

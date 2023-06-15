@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useTranslationsSelector } from '../context/TranslationsContext';
 
 type Props = {
   projectId: number;
@@ -21,6 +22,10 @@ export const useTranslationTools = ({
   enabled = true,
 }: Props) => {
   const { updateUsage } = useGlobalActions();
+
+  const contextPresent = useTranslationsSelector(
+    (c) => c.translations?.find((item) => item.keyId === keyId)?.contextPresent
+  );
 
   const dependencies = {
     keyId,
@@ -95,6 +100,7 @@ export const useTranslationTools = ({
       isFetching: memory.isFetching || machine.isFetching,
       memory: enabled ? memory : undefined,
       machine: enabled ? machine : undefined,
+      contextPresent,
     }),
     [
       memory.status,
