@@ -67,9 +67,6 @@ export const useTranslationTools = ({
       disableBadRequestHandling: true,
     },
     options: {
-      // don't refetch this when not necessary, because of credits
-      staleTime: Infinity,
-      cacheTime: Infinity,
       enabled,
       onSettled(data) {
         if (data) {

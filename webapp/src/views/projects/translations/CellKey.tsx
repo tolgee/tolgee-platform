@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Checkbox, styled, useTheme } from '@mui/material';
+import { Checkbox, styled, useTheme, Tooltip } from '@mui/material';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -29,6 +29,8 @@ import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { getMeta } from 'tg.fixtures/isMac';
 import { KeyEditModal } from './KeyEdit/KeyEditModal';
+import { Bolt } from '@mui/icons-material';
+import { useTranslate } from '@tolgee/react';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -109,6 +111,13 @@ const StyledEditor = styled('div')`
   padding: 12px 12px 0px 12px;
 `;
 
+const StyledBolt = styled(Bolt)`
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 16px;
+`;
+
 type Props = {
   data: KeyWithTranslationsModel;
   width?: string | number;
@@ -135,6 +144,7 @@ export const CellKey: React.FC<Props> = ({
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
   const { toggleSelect, addTag } = useTranslationsActions();
+  const { t } = useTranslate();
   const theme = useTheme();
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
@@ -236,6 +246,11 @@ export const CellKey: React.FC<Props> = ({
                     )
                   ))}
               </StyledTags>
+            )}
+            {data.contextPresent && (
+              <Tooltip title={t('key-context-present-hint')}>
+                <StyledBolt />
+              </Tooltip>
             )}
           </>
         ) : (

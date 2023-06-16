@@ -36,6 +36,11 @@ const StyledValue = styled('div')`
   align-self: center;
 `;
 
+const StyledDescription = styled('div')`
+  font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
 type Props = {
   data: SuggestResultModel | undefined;
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
@@ -68,7 +73,7 @@ export const MachineTranslation: React.FC<Props> = ({
                 e.preventDefault();
               }}
               onClick={() => {
-                operationsRef.current.updateTranslation(translation);
+                operationsRef.current.updateTranslation(translation.output);
               }}
               role="button"
               data-cy="translation-tools-machine-translation-item"
@@ -77,10 +82,13 @@ export const MachineTranslation: React.FC<Props> = ({
                 provider={provider}
                 contextPresent={contextPresent}
               />
-              <StyledValue>
-                <span dir={getLanguageDirection(languageTag)}>
-                  {translation}
-                </span>
+              <StyledValue dir={getLanguageDirection(languageTag)}>
+                <div>{translation.output}</div>
+                {translation.contextDescription && (
+                  <StyledDescription>
+                    {translation.contextDescription}
+                  </StyledDescription>
+                )}
               </StyledValue>
             </StyledItem>
           );

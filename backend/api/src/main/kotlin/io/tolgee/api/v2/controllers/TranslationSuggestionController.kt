@@ -3,6 +3,9 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
+import io.tolgee.api.v2.hateoas.machineTranslation.SuggestResultModel
+import io.tolgee.api.v2.hateoas.machineTranslation.TranslationItemModel
+import io.tolgee.api.v2.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
@@ -70,10 +73,14 @@ class TranslationSuggestionController(
         mtService.getMachineTranslations(key, targetLanguage)
       }
 
+      val machineTranslations = resultMap?.map { (key, value) ->
+        key to TranslationItemModel(value?.translatedText.orEmpty(), value?.contextDescription)
+      }?.toMap()
+
       val balanceAfter = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
 
       return SuggestResultModel(
-        machineTranslations = resultMap,
+        machineTranslations,
         translationCreditsBalanceBefore = balanceBefore.creditBalance / 100,
         translationCreditsBalanceAfter = balanceAfter.creditBalance / 100,
         translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance / 100,

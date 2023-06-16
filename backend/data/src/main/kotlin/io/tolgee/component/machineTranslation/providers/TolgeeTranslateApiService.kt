@@ -51,7 +51,8 @@ class TolgeeTranslateApiService(
     return MtValueProvider.MtResult(
       response.body?.output
         ?: throw RuntimeException(response.toString()),
-      cost
+      cost,
+      response.body?.contextDescription,
     )
   }
 
@@ -82,6 +83,6 @@ class TolgeeTranslateApiService(
       var target: String
     )
 
-    class TolgeeTranslateResponse(val output: String)
+    class TolgeeTranslateResponse(val output: String, val contextDescription: String?)
   }
 }

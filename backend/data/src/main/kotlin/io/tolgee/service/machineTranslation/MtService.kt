@@ -1,6 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
 import io.tolgee.component.machineTranslation.metadata.Metadata
@@ -33,7 +34,7 @@ class MtService(
   private val keyService: KeyService
 ) {
   fun getMachineTranslations(key: Key, targetLanguage: Language):
-    Map<MtServiceType, String?>? {
+    Map<MtServiceType, TranslateResult?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
 
@@ -48,7 +49,7 @@ class MtService(
     project: Project,
     baseTranslationText: String,
     targetLanguage: Language
-  ): Map<MtServiceType, String?>? {
+  ): Map<MtServiceType, TranslateResult?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
     return getMachineTranslations(project, baseTranslationText, null, baseLanguage, targetLanguage)
   }
@@ -123,7 +124,7 @@ class MtService(
     keyId: Long?,
     baseLanguage: Language,
     targetLanguage: Language
-  ): Map<MtServiceType, String?>? {
+  ): Map<MtServiceType, TranslateResult?>? {
     checkTextLength(baseTranslationText)
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
@@ -151,7 +152,8 @@ class MtService(
     publishOnAfterEvent(prepared, project, actualPrice)
 
     return results.map { (serviceName, translated) ->
-      serviceName to translated.translatedText?.replaceParams(prepared.params)
+      translated.translatedText = translated.translatedText?.replaceParams(prepared.params)
+      serviceName to translated
     }.toMap()
   }
 

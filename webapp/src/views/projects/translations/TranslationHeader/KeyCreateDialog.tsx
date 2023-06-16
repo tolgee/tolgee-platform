@@ -89,6 +89,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
       keyTags: data.tags,
       screenshotCount: 0,
       translations,
+      contextPresent: false,
     });
   };
 

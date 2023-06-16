@@ -12,15 +12,18 @@ class SuggestResultModel(
     description = "Results provided by enabled services",
     example = """
     {
-      "GOOGLE": "This was translated by Google",
-      "AWS": "This was translated by AWS",
-      "DEEPL": "This was translated by DeepL",
-      "AZURE": "This was translated by Azure Cognitive",
-      "BAIDU": "This was translated by Baidu"
+      "GOOGLE": {
+        "output": "This was translated by Google",
+        "contextDescription": null
+      },
+      "TOLGEE": {
+        "output": "This was translatied by Tolgee",
+        "contextDescription": "This is an example in swagger"
+      } 
     }
   """
   )
-  val machineTranslations: Map<MtServiceType, String?>?,
+  val machineTranslations: Map<MtServiceType, TranslationItemModel?>?,
   val translationCreditsBalanceBefore: Long,
   val translationCreditsBalanceAfter: Long,
 

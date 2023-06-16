@@ -13,5 +13,6 @@ interface MtValueProvider {
   data class MtResult(
     var translated: String?,
     val price: Int,
+    val contextDescription: String? = null
   )
 }

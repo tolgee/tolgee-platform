@@ -54,9 +54,10 @@ class MtServiceManager(
   private fun findInCache(
     params: TranslationParams
   ): TranslateResult? {
-    return params.findInCache()?.let {
+    return params.findInCacheByParams()?.let {
       TranslateResult(
-        translatedText = it,
+        translatedText = it.translatedText,
+        contextDescription = it.contextDescription,
         actualPrice = 0,
         usedService = params.serviceType
       )
@@ -82,7 +83,7 @@ class MtServiceManager(
             params.keyName,
             params.sourceLanguageTag,
             params.targetLanguageTag,
-            params.metadata,
+            params.metadata
           )
         )
     } catch (e: Exception) {
@@ -100,11 +101,12 @@ class MtServiceManager(
 
     val result = TranslateResult(
       translated?.translated,
+      translated?.contextDescription,
       translated?.price ?: 0,
       params.serviceType
     )
 
-    result.translatedText?.let { params.cacheResult(it) }
+    result?.let { params.cacheResult(it) }
 
     return result
   }
@@ -133,18 +135,19 @@ class MtServiceManager(
     return TranslateResult(
       translatedText = "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
+      contextDescription = null,
       actualPrice = params.text.length * 100,
       usedService = params.serviceType
     )
   }
 
-  private fun TranslationParams.findInCache(): String? {
+  private fun TranslationParams.findInCacheByParams(): TranslateResult? {
     return getCache()?.let { cache ->
-      cache.get(this.cacheKey)?.get() as? String
+      cache.get(this.cacheKey)?.get() as? TranslateResult
     }
   }
 
-  private fun TranslationParams.cacheResult(result: String) {
+  private fun TranslationParams.cacheResult(result: TranslateResult) {
     getCache()?.put(this.cacheKey, result)
   }
 
@@ -176,7 +179,7 @@ class MtServiceManager(
     service: MtServiceType,
     metadata: Map<String, Metadata>? = null
   ): List<TranslateResult> {
-    return if (!internalProperties.fakeMtProviders)
+    return if (!internalProperties.fakeMtProviders) {
       translateToMultipleTargets(
         serviceType = service,
         textRaw = textRaw,
@@ -186,7 +189,7 @@ class MtServiceManager(
         targetLanguageTags = targetLanguageTags,
         metadata = metadata
       )
-    else targetLanguageTags.map {
+    } else targetLanguageTags.map {
       getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null))
     }
   }

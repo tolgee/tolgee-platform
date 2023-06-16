@@ -572,12 +572,18 @@ export interface components {
         | "SERVER_ADMIN";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
       /** List of languages user can translate to. If null, all languages editing is permitted. */
       translateLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /** List of languages user can change state to. If null, changing state of all language values is permitted. */
       stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -600,12 +606,6 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -974,11 +974,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      expiresAt?: number;
       description: string;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1079,14 +1079,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      userFullName?: string;
+      projectName: string;
+      description: string;
       projectId: number;
       expiresAt?: number;
       username?: string;
-      description: string;
       lastUsedAt?: number;
       scopes: string[];
-      userFullName?: string;
-      projectName: string;
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1366,13 +1366,20 @@ export interface components {
     };
     SuggestResultModel: {
       /** Results provided by enabled services */
-      machineTranslations?: { [key: string]: string };
+      machineTranslations?: {
+        [key: string]: components["schemas"]["TranslationItemModel"];
+      };
       translationCreditsBalanceBefore: number;
       translationCreditsBalanceAfter: number;
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceBefore: number;
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
+    };
+    /** Results provided by enabled services */
+    TranslationItemModel: {
+      output: string;
+      contextDescription?: string;
     };
     ScreenshotInfoDto: {
       text?: string;
@@ -1512,16 +1519,16 @@ export interface components {
       )[];
       name: string;
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
+      description?: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      description?: string;
       avatar?: components["schemas"]["Avatar"];
       slug: string;
-      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1601,17 +1608,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
+      baseTranslation?: string;
       namespace?: string;
       translation?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
+      baseTranslation?: string;
       namespace?: string;
       translation?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1723,7 +1730,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1735,6 +1741,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1948,11 +1955,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      expiresAt?: number;
       description: string;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2028,14 +2035,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      userFullName?: string;
+      projectName: string;
+      description: string;
       projectId: number;
       expiresAt?: number;
       username?: string;
-      description: string;
       lastUsedAt?: number;
       scopes: string[];
-      userFullName?: string;
-      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
