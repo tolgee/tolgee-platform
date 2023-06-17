@@ -3,8 +3,8 @@ package io.tolgee.batch
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.batch.BatchJob
 
-interface ChunkProcessor {
+interface ChunkProcessor<RequestType> {
   fun process(job: BatchJob, chunk: List<Long>)
-  fun getTarget(data: Any): List<Long>
-  fun getParams(data: Any, job: BatchJob): EntityWithId
+  fun getTarget(data: RequestType): List<Long>
+  fun getParams(data: RequestType, job: BatchJob): EntityWithId
 }

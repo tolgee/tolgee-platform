@@ -1,7 +1,8 @@
 package io.tolgee.model.batch
 
-enum class BatchJobChunkExecutionStatus {
+enum class BatchJobStatus {
   PENDING,
+  RUNNING,
   SUCCESS,
   FAILED,
 }

@@ -12,6 +12,6 @@ class RedisPubSubReceiver(
   fun receiveMessage(message: String) {
     val data = jacksonObjectMapper().readValue(message, RedisWebsocketEventWrapper::class.java)
     template.convertAndSend(data.destination, data.message)
-    logger.info("Sending message to ${data.destination}")
+    logger.debug("Sending message to ${data.destination}")
   }
 }

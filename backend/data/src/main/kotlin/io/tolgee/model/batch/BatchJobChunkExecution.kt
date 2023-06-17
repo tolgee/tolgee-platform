@@ -5,6 +5,7 @@ import io.tolgee.model.StandardAuditModel
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -17,7 +18,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
   @ManyToOne
   lateinit var batchJob: BatchJob
 
-  var status: BatchJobChunkExecutionStatus = BatchJobChunkExecutionStatus.FAILED
+  var status: BatchJobChunkExecutionStatus = BatchJobChunkExecutionStatus.PENDING
 
   var chunkNumber: Int = 0
 
@@ -26,4 +27,6 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   @Column(columnDefinition = "text")
   var exception: String? = null
+
+  var executeAfter: Date? = null
 }

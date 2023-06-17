@@ -227,9 +227,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   fun <T> executeInNewTransaction(fn: () -> T): T {
     return io.tolgee.util.executeInNewTransaction(
-      platformTransactionManager,
-      TransactionDefinition.ISOLATION_DEFAULT,
-      fn
+      transactionManager = platformTransactionManager,
+      fn = fn,
+      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
     )
   }
 }

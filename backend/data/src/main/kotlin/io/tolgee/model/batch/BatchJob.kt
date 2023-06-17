@@ -10,6 +10,7 @@ import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 
 @Entity
@@ -17,10 +18,10 @@ import javax.persistence.ManyToOne
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
 class BatchJob : StandardAuditModel() {
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   var author: UserAccount? = null
 
   @Type(type = "jsonb")
@@ -31,6 +32,8 @@ class BatchJob : StandardAuditModel() {
   var totalChunks: Int = 0
 
   var chunkSize: Int = 0
+
+  var status: BatchJobStatus = BatchJobStatus.PENDING
 
   @Enumerated
   var type: BatchJobType = BatchJobType.TRANSLATION

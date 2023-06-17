@@ -17,7 +17,7 @@ class TranslationChunkProcessor(
   private val keyService: KeyService,
   private val languageService: LanguageService,
   private val entityManager: EntityManager
-) : ChunkProcessor {
+) : ChunkProcessor<BatchTranslateRequest> {
   override fun process(job: BatchJob, chunk: List<Long>) {
     val keys = keyService.find(chunk)
     val parameters = getParams(job)
@@ -47,18 +47,17 @@ class TranslationChunkProcessor(
       ?: throw IllegalStateException("No params found")
   }
 
-  override fun getTarget(data: Any): List<Long> {
-    return (data as BatchTranslateRequest).keyIds
+  override fun getTarget(data: BatchTranslateRequest): List<Long> {
+    return data.keyIds
   }
 
-  override fun getParams(request: Any, job: BatchJob): EntityWithId {
-    val data = (request as BatchTranslateRequest)
+  override fun getParams(request: BatchTranslateRequest, job: BatchJob): EntityWithId {
     return TranslateJobParams().apply {
       this.batchJob = job
-      this.targetLanguageIds = data.targetLanguageIds
-      this.useMachineTranslation = data.useMachineTranslation
-      this.useTranslationMemory = data.useTranslationMemory
-      this.service = data.service
+      this.targetLanguageIds = request.targetLanguageIds
+      this.useMachineTranslation = request.useMachineTranslation
+      this.useTranslationMemory = request.useTranslationMemory
+      this.service = request.service
     }
   }
 }

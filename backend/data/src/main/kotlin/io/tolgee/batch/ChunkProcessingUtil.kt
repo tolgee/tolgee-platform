@@ -2,89 +2,70 @@ package io.tolgee.batch
 
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.dtos.BatchJobChunkMessageBody
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
-import io.tolgee.util.executeInNewTransaction
-import org.springframework.amqp.core.Message
-import org.springframework.amqp.rabbit.core.RabbitTemplate
+import io.tolgee.model.batch.BatchJobStatus
+import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
+import java.util.*
 import javax.persistence.EntityManager
 import kotlin.math.pow
 
-open class ChunkProcessingUtil(val message: Message, val applicationContext: ApplicationContext) {
+open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applicationContext: ApplicationContext) {
   open fun processChunk() {
-    batchJobChunkMessage.retries++
     try {
-      batchJobService.getProcessor(job.type).process(job, toProcess)
+      batchJobService.getProcessor<Any>(job.type).process(job, toProcess)
       execution.status = BatchJobChunkExecutionStatus.SUCCESS
     } catch (e: Throwable) {
       handleException(e)
     } finally {
-      executeInNewTransaction(transactionManager) {
-        execution.successTargets = successfulTargets.toList()
-        entityManager.persist(execution)
-      }
+      execution.successTargets = successfulTargets.toList()
     }
   }
 
   private fun handleException(exception: Throwable) {
     execution.exception = exception.stackTraceToString()
+    execution.status = BatchJobChunkExecutionStatus.FAILED
+    Sentry.captureException(exception)
 
     if (exception is ChunkFailedException) {
       execution.successTargets = successfulTargets.toList()
     }
 
-    if (exception is FailedDontRequeueException) {
-      execution.status = BatchJobChunkExecutionStatus.FAILED
+    if (exception is FailedDontRequeueException || retries >= job.type.maxRetries) {
       return
     }
 
-    if (batchJobChunkMessage.retries >= job.type.maxRetries) {
-      Sentry.captureException(exception)
-      execution.status = BatchJobChunkExecutionStatus.FAILED
-      return
-    }
+    retryFailedExecution(exception)
+  }
 
-    batchJobChunkMessage.waitUntil = currentDateProvider.date.time + job.type.defaultRetryTimeoutInMs
+  private fun retryFailedExecution(exception: Throwable) {
+    retryExecution.executeAfter = Date(currentDateProvider.date.time + job.type.defaultRetryTimeoutInMs)
 
     if (exception is RequeueWithTimeoutException) {
-      if (batchJobChunkMessage.retries >= exception.maxRetries) {
+      if (retries >= exception.maxRetries) {
         Sentry.captureException(exception)
-        execution.status = BatchJobChunkExecutionStatus.FAILED
+        setJobFailed()
         return
       }
       val timeout = getTimeout(exception)
-      batchJobChunkMessage.waitUntil = timeout + currentDateProvider.date.time
+      retryExecution.executeAfter = Date(timeout + currentDateProvider.date.time)
     }
+  }
 
-    execution.status = BatchJobChunkExecutionStatus.RETRYING
-    rabbitTemplate.convertAndSend(
-      "batch-operations-wait-queue", batchJobService.convertMessage(batchJobChunkMessage)
-    )
+  private fun setJobFailed() {
+    job.status = BatchJobStatus.FAILED
+    entityManager.persist(job)
   }
 
   private fun getTimeout(exception: RequeueWithTimeoutException) =
-    exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(batchJobChunkMessage.retries.toDouble())).toLong()
+    exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toLong()
 
-  private val batchJobChunkMessage by lazy { batchJobService.parseMessage(message) }
-
-  private val job by lazy { batchJobService.getJob(batchJobChunkMessage.batchJobId) }
-
-  private val execution by lazy {
-    BatchJobChunkExecution().apply {
-      this.batchJob = job
-      this.chunkNumber = batchJobChunkMessage.chunkNumber
-    }
-  }
+  private val job by lazy { execution.batchJob }
 
   private val entityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  private val rabbitTemplate by lazy {
-    applicationContext.getBean(RabbitTemplate::class.java)
   }
 
   private val transactionManager by lazy {
@@ -103,24 +84,42 @@ open class ChunkProcessingUtil(val message: Message, val applicationContext: App
 
   private val toProcess by lazy {
     val chunked = job.target.chunked(job.chunkSize)
-    val chunk = chunked[batchJobChunkMessage.chunkNumber]
-    val previousExecutions = getPreviousChunkExecutions(batchJobChunkMessage)
+    val chunk = chunked[execution.chunkNumber]
     val previousSuccessfulTargets = previousExecutions.flatMap { it.successTargets }.toSet()
     val toProcess = chunk.toMutableSet()
     toProcess.removeAll(previousSuccessfulTargets)
     toProcess.toList()
   }
 
-  private fun getPreviousChunkExecutions(message: BatchJobChunkMessageBody): List<BatchJobChunkExecution> {
-    return entityManager.createQuery(
+  private val retryExecution: BatchJobChunkExecution by lazy {
+    BatchJobChunkExecution().apply {
+      batchJob = job
+      chunkNumber = execution.chunkNumber
+      status = BatchJobChunkExecutionStatus.PENDING
+    }
+  }
+
+  val retries: Int by lazy {
+    previousExecutions.size
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private val previousExecutions: List<BatchJobChunkExecution> by lazy {
+    entityManager.createQuery(
       """
       from BatchJobChunkExecution 
       where chunkNumber = :chunkNumber 
           and batchJob.id = :batchJobId
+          and status = :status
       """.trimIndent()
     )
-      .setParameter("chunkNumber", message.chunkNumber)
-      .setParameter("batchJobId", message.batchJobId)
+      .setParameter("chunkNumber", execution.chunkNumber)
+      .setParameter("batchJobId", execution.batchJob.id)
+      .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
+      .setHint(
+        "javax.persistence.lock.timeout",
+        LockOptions.NO_WAIT
+      )
       .resultList as List<BatchJobChunkExecution>
   }
 }

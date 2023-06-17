@@ -106,7 +106,6 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
-    implementation "org.springframework.boot:spring-boot-starter-amqp"
 
     /**
      * DB
@@ -114,6 +113,12 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     kapt "org.hibernate:hibernate-jpamodelgen"
+
+    /**
+     * Redisson
+     */
+    implementation("org.redisson:redisson-spring-boot-starter:3.21.0")
+    implementation 'org.redisson:redisson-spring-data-27:3.21.0'
 
     /**
      * Liquibase

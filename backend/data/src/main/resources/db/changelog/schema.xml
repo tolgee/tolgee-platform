@@ -2614,4 +2614,14 @@
             <column name="type" type="int4"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1686755940376-1">
+        <addColumn tableName="batch_job_chunk_execution">
+            <column name="execute_after" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1686755940376-2">
+        <addColumn tableName="batch_job">
+            <column name="status" type="int4"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

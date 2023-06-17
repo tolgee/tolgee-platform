@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 enum class BatchJobType(
   val chunkSize: Int,
   val maxRetries: Int,
-  val processor: KClass<out ChunkProcessor>,
+  val processor: KClass<out ChunkProcessor<*>>,
   val defaultRetryTimeoutInMs: Int = 10000,
 ) {
   TRANSLATION(
