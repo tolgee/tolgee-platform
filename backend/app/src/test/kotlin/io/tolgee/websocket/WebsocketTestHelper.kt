@@ -1,5 +1,6 @@
 package io.tolgee.websocket
 
+import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.lang.Nullable
@@ -71,5 +72,20 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
         throw RuntimeException(e)
       }
     }
+  }
+
+  /**
+   * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
+   */
+  fun assertNotified(
+    dispatchCallback: () -> Unit,
+    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit)
+  ) {
+    Thread.sleep(200)
+    dispatchCallback()
+    waitFor(3000) {
+      receivedMessages.isNotEmpty()
+    }
+    assertCallback(receivedMessages)
   }
 }

@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -19,7 +20,12 @@ class BatchJobService(
   private val batchJobChunkService: BatchJobActionService,
   private val transactionManager: PlatformTransactionManager
 ) {
-  fun <RequestType> startJob(request: RequestType, author: UserAccount?, type: BatchJobType): BatchJob {
+  fun <RequestType> startJob(
+    request: RequestType,
+    project: Project,
+    author: UserAccount?,
+    type: BatchJobType
+  ): BatchJob {
     var executions: List<BatchJobChunkExecution>? = null
     val job = executeInNewTransaction(transactionManager) {
       val processor = getProcessor<RequestType>(type)
@@ -27,7 +33,13 @@ class BatchJobService(
 
       val chunked = target.chunked(BatchJobType.TRANSLATION.chunkSize)
 
-      val job = createJob(author, target, chunked, BatchJobType.TRANSLATION.chunkSize)
+      val job = createJob(
+        project = project,
+        author = author,
+        target = target,
+        chunked = chunked,
+        chunkSize = BatchJobType.TRANSLATION.chunkSize
+      )
 
       val params = processor.getParams(request, job)
 
@@ -49,12 +61,14 @@ class BatchJobService(
   }
 
   private fun createJob(
+    project: Project,
     author: UserAccount?,
     target: List<Long>,
     chunked: List<List<Long>>,
-    chunkSize: Int
+    chunkSize: Int,
   ): BatchJob {
     return BatchJob().apply {
+      this.project = project
       this.author = author
       this.target = target
       this.totalChunks = chunked.size

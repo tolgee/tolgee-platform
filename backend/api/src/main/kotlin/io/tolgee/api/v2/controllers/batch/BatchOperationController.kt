@@ -21,7 +21,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/batch", "/v2/projects/batch"])
-@Tag(name = "Export")
+@Tag(name = "Batch operations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class BatchOperationController(
   private val securityService: SecurityService,
@@ -34,8 +34,13 @@ class BatchOperationController(
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
   @Operation(summary = "Translates provided keys to provided languages")
   fun translate(@Valid @RequestBody data: BatchTranslateRequest) {
-    securityService.checkLanguageViewPermission(projectHolder.project.id, data.targetLanguageIds)
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    batchJobService.startJob(data, authenticationFacade.userAccountEntity, BatchJobType.TRANSLATION)
+    batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.TRANSLATION
+    )
   }
 }

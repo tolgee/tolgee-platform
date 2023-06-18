@@ -1,9 +1,12 @@
 package io.tolgee.batch
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
+import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.PreDestroy
 import javax.persistence.EntityManager
 import javax.persistence.LockModeType
@@ -32,9 +36,11 @@ class BatchJobActionService(
   private val currentDateProvider: CurrentDateProvider,
   private val transactionManager: PlatformTransactionManager,
   private val applicationContext: ApplicationContext,
-  private val redisTemplate: StringRedisTemplate
+  private val usingRedisProvider: UsingRedisProvider,
+  private val progressManager: ProgressManager
 ) : Logging {
   companion object {
+    const val MIN_TIME_BETWEEN_OPERATIONS = 100
     const val CONCURRENCY = 10
   }
 
@@ -42,7 +48,7 @@ class BatchJobActionService(
   var run = true
 
   var queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
-  var runningJobs = 0
+  var runningJobs: AtomicInteger = AtomicInteger(0)
 
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
@@ -52,33 +58,49 @@ class BatchJobActionService(
 
     @Suppress("OPT_IN_USAGE")
     runJob = GlobalScope.launch {
-      repeatForever {
-        runBlocking(Dispatchers.IO) {
-          val jobsToLaunch = CONCURRENCY - runningJobs
+      runBlocking(Dispatchers.IO) {
+        repeatForever {
+          val jobsToLaunch = CONCURRENCY - runningJobs.get()
+          if (jobsToLaunch <= 0) {
+            return@repeatForever
+          }
+
+          logger.debug("Jobs to launch: $jobsToLaunch")
           (1..jobsToLaunch).mapNotNull { queue.poll() }
             .forEach { execution ->
-              if (execution.isTimeToExecute()) {
+              if (!execution.isTimeToExecute()) {
+                logger.debug("""Execution ${execution.chunkExecutionId} not ready to execute, adding back to queue""")
                 queue.add(execution)
                 return@forEach
               }
+              var runningJobsNow = runningJobs.incrementAndGet()
+              logger.debug("Execution ${execution.chunkExecutionId} launched. Running jobs: $runningJobsNow")
               launch {
-                runningJobs++
-                logger.debug("Running jobs: $runningJobs")
-                executeInNewTransaction(transactionManager, isolationLevel = TransactionDefinition.ISOLATION_DEFAULT) {
-                  val lockedExecution = getItemIfCanAcquireLock(execution.chunkExecutionId)
-                    ?: let {
-                      logger.debug("⚠️ Chunk ${execution.chunkExecutionId} is locked, skipping")
-                      return@executeInNewTransaction
-                    }
-                  publishRemoveFromQueue()
-                  logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
-                  ChunkProcessingUtil(lockedExecution, applicationContext).processChunk()
-                  logger.debug("Job ${lockedExecution.batchJob.id}: ✅ Processed chunk ${lockedExecution.id}")
+                try {
+                  executeInNewTransaction(
+                    transactionManager,
+                    isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
+                  ) {
+                    val lockedExecution = getItemIfCanAcquireLock(execution.chunkExecutionId)
+                      ?: let {
+                        logger.debug("⚠️ Chunk ${execution.chunkExecutionId} is locked, skipping")
+                        return@executeInNewTransaction
+                      }
+                    publishRemoveConsuming(execution)
+                    logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
+                    ChunkProcessingUtil(lockedExecution, applicationContext).processChunk()
+                    entityManager.persist(lockedExecution)
+                    progressManager.handleProgress(lockedExecution)
+                    logger.debug("Job ${lockedExecution.batchJob.id}: ✅ Processed chunk ${lockedExecution.id}")
+                  }
+                } catch (e: Throwable) {
+                  logger.error("Error processing chunk ${execution.chunkExecutionId}", e)
+                  Sentry.captureException(e)
                 }
               }.invokeOnCompletion {
-                logger.debug("Job ${execution.executeAfter}: Completed")
-                runningJobs--
-                logger.debug("Running jobs: $runningJobs")
+                logger.debug("Chunk ${execution.chunkExecutionId}: Completed")
+                runningJobsNow = runningJobs.decrementAndGet()
+                logger.debug("Running jobs: $runningJobsNow")
               }
             }
         }
@@ -86,12 +108,26 @@ class BatchJobActionService(
     }
   }
 
-  private fun publishRemoveFromQueue() {
+  fun publishRemoveConsuming(item: ExecutionQueueItem) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      val message = jacksonObjectMapper().writeValueAsString(JobQueueItemEvent(item, QueueItemType.REMOVE))
+      redisTemplate.convertAndSend(RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC, message)
+    }
   }
 
   fun ExecutionQueueItem.isTimeToExecute(): Boolean {
     val executeAfter = this.executeAfter ?: return true
     return executeAfter < currentDateProvider.date.time
+  }
+
+  val redisTemplate: StringRedisTemplate by lazy { applicationContext.getBean(StringRedisTemplate::class.java) }
+
+  @EventListener(JobQueueItemEvent::class)
+  fun onJobItemEvent(event: JobQueueItemEvent) {
+    when (event.type) {
+      QueueItemType.ADD -> queue.add(event.item)
+      QueueItemType.REMOVE -> queue.remove(event.item)
+    }
   }
 
   @PreDestroy
@@ -102,11 +138,15 @@ class BatchJobActionService(
     }
   }
 
-  @EventListener
   fun repeatForever(fn: () -> Unit) {
     while (run) {
       try {
+        val startTime = currentDateProvider.date.time
         fn()
+        val sleepTime = MIN_TIME_BETWEEN_OPERATIONS - (currentDateProvider.date.time - startTime)
+        if (sleepTime > 0) {
+          Thread.sleep(sleepTime)
+        }
       } catch (e: Throwable) {
         Sentry.captureException(e)
         logger.error("Error in batch job action service", e)
@@ -131,12 +171,24 @@ class BatchJobActionService(
         LockOptions.SKIP_LOCKED
       ).resultList
     queue.clear()
-    data.forEach { addToQueue(it) }
+    data.forEach { queue.add(it.toItem()) }
   }
 
   fun addToQueue(execution: BatchJobChunkExecution) {
-    queue.add(ExecutionQueueItem(execution.id, execution.executeAfter?.time))
+    val item = execution.toItem()
+    if (usingRedisProvider.areWeUsingRedis) {
+      val event = JobQueueItemEvent(item, QueueItemType.ADD)
+      redisTemplate.convertAndSend(
+        RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
+        jacksonObjectMapper().writeValueAsString(event)
+      )
+      return
+    }
+    queue.add(item)
   }
+
+  private fun BatchJobChunkExecution.toItem() =
+    ExecutionQueueItem(id, executeAfter?.time)
 
   fun getItemIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
     return entityManager.createQuery(

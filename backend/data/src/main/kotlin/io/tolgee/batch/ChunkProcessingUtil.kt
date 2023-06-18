@@ -16,11 +16,14 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
   open fun processChunk() {
     try {
       batchJobService.getProcessor<Any>(job.type).process(job, toProcess)
+      successfulTargets = toProcess
       execution.status = BatchJobChunkExecutionStatus.SUCCESS
     } catch (e: Throwable) {
       handleException(e)
     } finally {
-      execution.successTargets = successfulTargets.toList()
+      successfulTargets?.let {
+        execution.successTargets = it
+      }
     }
   }
 
@@ -30,11 +33,15 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     Sentry.captureException(exception)
 
     if (exception is ChunkFailedException) {
-      execution.successTargets = successfulTargets.toList()
+      successfulTargets = exception.successfulTargets
+      successfulTargets?.let { execution.successTargets = it }
     }
 
-    if (exception is FailedDontRequeueException || retries >= job.type.maxRetries) {
-      return
+    if (exception is FailedDontRequeueException) {
+      successfulTargets = exception.successfulTargets
+      if (retries >= job.type.maxRetries) {
+        return
+      }
     }
 
     retryFailedExecution(exception)
@@ -80,7 +87,7 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     applicationContext.getBean(BatchJobService::class.java)
   }
 
-  private val successfulTargets by lazy { mutableSetOf<Long>() }
+  private var successfulTargets: List<Long>? = null
 
   private val toProcess by lazy {
     val chunked = job.target.chunked(job.chunkSize)
@@ -99,7 +106,7 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     }
   }
 
-  val retries: Int by lazy {
+  private val retries: Int by lazy {
     previousExecutions.size
   }
 

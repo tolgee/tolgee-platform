@@ -5,7 +5,6 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.fixtures.waitFor
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -16,50 +15,33 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.web.server.LocalServerPort
-import java.util.concurrent.LinkedBlockingDeque
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BaseTestData
   lateinit var translation: Translation
   lateinit var key: Key
-  lateinit var receivedMessages: LinkedBlockingDeque<String>
   lateinit var notPermittedUser: UserAccount
+  lateinit var helper: WebsocketTestHelper
 
   @LocalServerPort
   private val port: Int? = null
 
-  /**
-   * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
-   */
-  fun assertNotified(
-    dispatchCallback: () -> Unit,
-    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit)
-  ) {
-    Thread.sleep(200)
-    dispatchCallback()
-    waitFor(3000) {
-      receivedMessages.isNotEmpty()
-    }
-    assertCallback(receivedMessages)
-  }
-
   @BeforeEach
   fun beforeEach() {
     prepareTestData()
-    val helper = WebsocketTestHelper(
+    helper = WebsocketTestHelper(
       port,
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
     helper.listen()
-    receivedMessages = helper.receivedMessages
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key modification`() {
-    assertNotified(
+    helper.assertNotified(
       {
         performProjectAuthPut("keys/${key.id}", mapOf("name" to "name edited"))
       }
@@ -94,7 +76,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key deletion`() {
-    assertNotified(
+    helper.assertNotified(
       {
         performProjectAuthDelete("keys/${key.id}")
       }
@@ -122,7 +104,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key creation`() {
-    assertNotified(
+    helper.assertNotified(
       {
         performProjectAuthPost("keys", mapOf("name" to "new key"))
       }
@@ -150,7 +132,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on translation modification`() {
-    assertNotified(
+    helper.assertNotified(
       {
         performProjectAuthPut(
           "translations",
@@ -217,7 +199,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
 
     // but authorized user received the message
-    receivedMessages.assert.isNotEmpty
+    helper.receivedMessages.assert.isNotEmpty
   }
 
   private fun prepareTestData() {

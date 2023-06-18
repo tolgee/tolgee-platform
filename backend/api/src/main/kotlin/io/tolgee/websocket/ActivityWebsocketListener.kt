@@ -1,6 +1,8 @@
 package io.tolgee.websocket
 
 import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
+import io.tolgee.batch.OnBatchOperationProgress
+import io.tolgee.batch.WebsocketProgressInfo
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -70,6 +72,20 @@ class ActivityWebsocketListener(
         sourceActivity = activityRevision.type,
         activityId = activityRevision.id,
         dataCollapsed = data == null
+      )
+    )
+  }
+
+  @EventListener(OnBatchOperationProgress::class)
+  fun onBatchOperationProgress(event: OnBatchOperationProgress) {
+    websocketEventPublisher(
+      "/projects/${event.job.project.id}/${Types.BATCH_OPERATION_PROGRESS.typeName}",
+      WebsocketEvent(
+        actor = getActorInfo(event.job.author?.id),
+        data = WebsocketProgressInfo(event.job.id, event.processed, event.total),
+        sourceActivity = null,
+        activityId = null,
+        dataCollapsed = false
       )
     )
   }
