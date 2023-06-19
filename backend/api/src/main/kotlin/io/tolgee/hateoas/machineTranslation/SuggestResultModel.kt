@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.machineTranslation
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.v2.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.constants.MtServiceType
 import io.tolgee.hateoas.key.KeyModel
 import org.springframework.hateoas.RepresentationModel
@@ -17,7 +18,7 @@ class SuggestResultModel(
         "contextDescription": null
       },
       "TOLGEE": {
-        "output": "This was translatied by Tolgee",
+        "output": "This was translated by Tolgee",
         "contextDescription": "This is an example in swagger"
       } 
     }

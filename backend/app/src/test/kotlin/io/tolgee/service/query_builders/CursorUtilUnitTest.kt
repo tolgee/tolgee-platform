@@ -34,7 +34,8 @@ class CursorUtilUnitTest {
           commentCount = 0,
           unresolvedCommentCount = 1
         )
-      )
+      ),
+      contextPresent = false
     )
     cursor = CursorUtil.getCursor(
       item,

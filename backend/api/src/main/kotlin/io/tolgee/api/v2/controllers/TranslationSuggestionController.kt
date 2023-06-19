@@ -3,9 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
-import io.tolgee.api.v2.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.api.v2.hateoas.machineTranslation.TranslationItemModel
-import io.tolgee.api.v2.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException

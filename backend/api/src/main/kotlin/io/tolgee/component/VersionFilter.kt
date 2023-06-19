@@ -8,13 +8,15 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class VersionFilter() : OncePerRequestFilter() {
+class VersionFilter(
+  private val versionProvider: VersionProvider
+) : OncePerRequestFilter() {
   companion object {
     const val TOLGEE_VERSION_HEADER_NAME = "X-Tolgee-Version"
   }
 
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-    response.addHeader("X-Tolgee-Version", VersionProvider.version)
+    response.addHeader("X-Tolgee-Version", versionProvider.version)
     filterChain.doFilter(request, response)
   }
 }

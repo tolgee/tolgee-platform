@@ -1,8 +1,5 @@
 package io.tolgee.component.machineTranslation.providers
 
-import com.amazonaws.services.translate.AmazonTranslate
-import com.amazonaws.services.translate.model.TranslateTextRequest
-import com.amazonaws.services.translate.model.TranslateTextResult
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -24,9 +21,9 @@ class AwsMtValueProvider(
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result = translateService.translateText(
       TranslateTextRequest.builder()
-        .sourceLanguageCode(sourceTag)
-        .targetLanguageCode(targetTag)
-        .text(text)
+        .sourceLanguageCode(params.sourceLanguageTag)
+        .targetLanguageCode(params.targetLanguageTag)
+        .text(params.text)
         .build()
     )
     return MtValueProvider.MtResult(
