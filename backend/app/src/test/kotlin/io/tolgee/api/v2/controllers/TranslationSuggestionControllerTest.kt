@@ -5,15 +5,19 @@ import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.TolgeeTranslateApiService
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.constants.Caches
+import io.tolgee.constants.Message
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -293,6 +297,35 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it suggests only using explicitly provided services`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableAll()
+    saveTestData()
+
+    performMtRequest(listOf(MtServiceType.AWS, MtServiceType.TOLGEE)).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations") {
+        node("AWS").isEqualTo("Translated with Amazon")
+        node("GOOGLE").isAbsent()
+        node("DEEPL").isAbsent()
+        node("AZURE").isAbsent()
+        node("BAIDU").isAbsent()
+        node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it throws if service is disabled`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableAWS()
+    saveTestData()
+
+    performMtRequest(listOf(MtServiceType.TOLGEE)).andIsBadRequest.andHasErrorMessage(Message.MT_SERVICE_NOT_ENABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it respects default config`() {
     machineTranslationProperties.freeCreditsAmount = 2000
     testData.addDefaultConfig()
@@ -367,7 +400,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     saveTestData()
     val valueWrapperMock = mock<Cache.ValueWrapper>()
     whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
-    whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
+    whenever(valueWrapperMock.get()).thenReturn(
+      TranslateResult(
+        translatedText = "Yeey! Cached!",
+        contextDescription = "context",
+        actualPrice = 100,
+        usedService = MtServiceType.GOOGLE
+      )
+    )
     performMtRequestAndExpectAfterBalance(10)
   }
 
@@ -412,10 +452,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     return performMtRequest().andIsBadRequest
   }
 
-  private fun performMtRequest(): ResultActions {
+  private fun performMtRequest(services: List<MtServiceType>? = null): ResultActions {
     return performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+      SuggestRequestDto(
+        keyId = testData.beautifulKey.id,
+        targetLanguageId = testData.germanLanguage.id,
+        services = services?.toSet()
+      )
     )
   }
 

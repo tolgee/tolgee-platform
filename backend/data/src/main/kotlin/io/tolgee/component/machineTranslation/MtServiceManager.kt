@@ -41,7 +41,7 @@ class MtServiceManager(
     keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTag: String,
-    services: List<MtServiceType>,
+    services: Collection<MtServiceType>,
     metadata: Metadata?
   ): Map<MtServiceType, TranslateResult> {
     return runBlocking(Dispatchers.IO) {
@@ -143,7 +143,9 @@ class MtServiceManager(
 
   private fun TranslationParams.findInCacheByParams(): TranslateResult? {
     return getCache()?.let { cache ->
-      cache.get(this.cacheKey)?.get() as? TranslateResult
+      val result = cache.get(this.cacheKey)?.get() as? TranslateResult
+      result?.actualPrice = 0
+      return result
     }
   }
 

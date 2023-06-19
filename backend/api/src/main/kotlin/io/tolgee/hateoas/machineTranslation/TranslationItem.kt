@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.hateoas.machineTranslation
+package io.tolgee.hateoas.machineTranslation
 
 @Suppress("unused")
 class TranslationItemModel(

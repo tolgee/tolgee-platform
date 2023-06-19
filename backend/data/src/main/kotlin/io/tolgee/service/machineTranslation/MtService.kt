@@ -32,7 +32,11 @@ class MtService(
   private val bigMetaService: BigMetaService,
   private val keyService: KeyService
 ) {
-  fun getMachineTranslations(key: Key, targetLanguage: Language):
+  fun getMachineTranslations(
+    key: Key,
+    targetLanguage: Language,
+    services: Set<MtServiceType>?
+  ):
     Map<MtServiceType, TranslateResult?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
@@ -41,16 +45,31 @@ class MtService(
       return null
     }
 
-    return getMachineTranslations(key.project, baseTranslationText, key.id, baseLanguage, targetLanguage)
+    return getMachineTranslations(
+      project = key.project,
+      baseTranslationText = baseTranslationText,
+      keyId = key.id,
+      baseLanguage = baseLanguage,
+      targetLanguage = targetLanguage,
+      services = services
+    )
   }
 
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
-    targetLanguage: Language
+    targetLanguage: Language,
+    services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
-    return getMachineTranslations(project, baseTranslationText, null, baseLanguage, targetLanguage)
+    return getMachineTranslations(
+      project = project,
+      baseTranslationText = baseTranslationText,
+      keyId = null,
+      baseLanguage = baseLanguage,
+      targetLanguage = targetLanguage,
+      services = services
+    )
   }
 
   fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
@@ -87,25 +106,26 @@ class MtService(
       true,
     )
 
-    val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
-      service?.let {
-        val translateResults = machineTranslationManager.translate(
-          prepared.text,
-          baseTranslationText,
-          keyName,
-          baseLanguage.tag,
-          languageIdxPairs.map { it.second.tag },
-          service,
-          metadata = metadata
-        )
+    val translationResults = serviceIndexedLanguagesMap
+      .map { (service, languageIdxPairs) ->
+        service?.let {
+          val translateResults = machineTranslationManager.translate(
+            prepared.text,
+            baseTranslationText,
+            keyName,
+            baseLanguage.tag,
+            languageIdxPairs.map { it.second.tag },
+            service,
+            metadata = metadata
+          )
 
-        val withReplacedParams = translateResults.map { translateResult ->
-          translateResult.translatedText = translateResult.translatedText?.replaceParams(prepared.params)
-          translateResult
-        }
-        languageIdxPairs.map { it.first }.zip(withReplacedParams)
-      } ?: languageIdxPairs.map { it.first to null }
-    }
+          val withReplacedParams = translateResults.map { translateResult ->
+            translateResult.translatedText = translateResult.translatedText?.replaceParams(prepared.params)
+            translateResult
+          }
+          languageIdxPairs.map { it.first }.zip(withReplacedParams)
+        } ?: languageIdxPairs.map { it.first to null }
+      }
       .flatten()
       .sortedBy { it.first }
       .map { it.second }
@@ -122,10 +142,13 @@ class MtService(
     baseTranslationText: String,
     keyId: Long?,
     baseLanguage: Language,
-    targetLanguage: Language
+    targetLanguage: Language,
+    services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult?>? {
     checkTextLength(baseTranslationText)
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
+    checkServices(desired = services, enabled = enabledServices)
+    val servicesToUse = services ?: enabledServices
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
     val anyNeedsMetadata = enabledServices.any { it.usesMetadata }
@@ -142,7 +165,7 @@ class MtService(
         keyName = keyName,
         sourceLanguageTag = baseLanguage.tag,
         targetLanguageTag = targetLanguage.tag,
-        services = enabledServices,
+        services = servicesToUse,
         metadata = metadata
       )
 
@@ -154,6 +177,12 @@ class MtService(
       translated.translatedText = translated.translatedText?.replaceParams(prepared.params)
       serviceName to translated
     }.toMap()
+  }
+
+  private fun checkServices(desired: Set<MtServiceType>?, enabled: List<MtServiceType>) {
+    if (desired != null && desired.any { !enabled.contains(it) }) {
+      throw BadRequestException(Message.MT_SERVICE_NOT_ENABLED)
+    }
   }
 
   private fun publishOnAfterEvent(

@@ -287,7 +287,8 @@ V2ProjectsController(
 
   @GetMapping("/{projectId}/machine-translation-service-settings")
   @Operation(summary = "Returns machine translation settings for project")
-  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
     val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
     return languageConfigItemModelAssembler.toCollectionModel(data)
