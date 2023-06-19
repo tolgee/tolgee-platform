@@ -21,7 +21,7 @@ export const ProviderLogo = ({ provider, contextPresent }: Props) => {
     return (
       <Tooltip title={t('translation-context-present-hint')} disableInteractive>
         <StyledSource>
-          {providerLogo && <img src={providerLogo} width="16px" />}
+          {providerLogo && <img src={providerLogo} width="20px" />}
         </StyledSource>
       </Tooltip>
     );
