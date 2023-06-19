@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -15,12 +16,17 @@ class DeeplTranslationProvider(
   override val isEnabled: Boolean
     get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    return deeplApiService.translate(text, sourceTag.uppercase(), targetTag.uppercase())
-  }
+  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
+    val result = deeplApiService.translate(
+      params.text,
+      params.sourceLanguageTag.uppercase(),
+      params.targetLanguageTag.uppercase()
+    )
 
-  override fun calculateProviderPrice(text: String): Int {
-    return text.length * 100
+    return MtValueProvider.MtResult(
+      result,
+      params.text.length * 100
+    )
   }
 
   override val supportedLanguages = arrayOf(

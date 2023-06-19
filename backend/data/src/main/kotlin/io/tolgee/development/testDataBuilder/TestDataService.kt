@@ -9,6 +9,7 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -67,6 +68,7 @@ class TestDataService(
   private val languageStatsService: LanguageStatsService,
   private val patService: PatService,
   private val namespaceService: NamespaceService,
+  private val bigMetaService: BigMetaService
 ) : Logging {
 
   @Transactional
@@ -188,6 +190,15 @@ class TestDataService(
     saveAutoTranslationConfigs(builder)
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
+    saveKeyDistances(builder)
+  }
+
+  private fun saveKeyDistances(builder: ProjectBuilder) {
+    builder.data.keyDistances.forEach {
+      it.self.key1Id = it.key1.id
+      it.self.key2Id = it.key2.id
+      bigMetaService.saveKeyDistance(it.self)
+    }
   }
 
   private fun saveScreenshotData(builder: ProjectBuilder) {

@@ -103,7 +103,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
                 disabled={disabled}
               >
                 {[...langProviders, 'none'].map((provider) => {
-                  const img = getProviderImg(provider);
+                  const img = getProviderImg(provider, false);
                   return (
                     provider && (
                       <MenuItem key={provider} value={provider}>

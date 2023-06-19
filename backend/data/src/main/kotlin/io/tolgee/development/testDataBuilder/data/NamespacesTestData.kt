@@ -24,11 +24,11 @@ class NamespacesTestData : BaseTestData() {
     }
 
     projectBuilder.apply {
-      addKey("key", null)
-      keyInNs1 = addKey("key", "ns-1")
-      singleKeyInNs2 = addKey("key", "ns-2")
-      addKey("key2", null)
-      addKey("key2", "ns-1")
+      addKeyWithTranslation("key", null)
+      keyInNs1 = addKeyWithTranslation("key", "ns-1")
+      singleKeyInNs2 = addKeyWithTranslation("key", "ns-2")
+      addKeyWithTranslation("key2", null)
+      addKeyWithTranslation("key2", "ns-1")
 
       addPermission {
         user = translator
@@ -39,8 +39,8 @@ class NamespacesTestData : BaseTestData() {
       addProject {
         name = "Project 2"
       }.build {
-        addKey("key", null)
-        addKey("key", "ns-1")
+        addKeyWithTranslation("key", null)
+        addKeyWithTranslation("key", "ns-1")
       }
     }
     root.apply {
@@ -48,7 +48,7 @@ class NamespacesTestData : BaseTestData() {
         name = "Project 3"
         defaultUnusedProject = this
       }.build {
-        addKey("key", "ns-1")
+        addKeyWithTranslation("key", "ns-1")
       }
     }
     root.apply {
@@ -56,12 +56,12 @@ class NamespacesTestData : BaseTestData() {
         name = "Project 4"
         dotProject = this
       }.build {
-        addKey("key", "ns.1")
+        addKeyWithTranslation("key", "ns.1")
       }
     }
   }
 
-  private fun ProjectBuilder.addKey(keyName: String, namespace: String?): Key {
+  private fun ProjectBuilder.addKeyWithTranslation(keyName: String, namespace: String?): Key {
     val keyBuilder = this.addKey {
       name = keyName
     }.build {

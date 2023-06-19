@@ -9,20 +9,35 @@ import java.io.Serializable
 @Suppress("unused")
 class SuggestResultModel(
   @Schema(
-    description = "Results provided by enabled services",
+    description = "String translations provided by enabled services. (deprecated, use `result` instead)",
     example = """
     {
       "GOOGLE": "This was translated by Google",
-      "AWS": "This was translated by AWS",
-      "DEEPL": "This was translated by DeepL",
-      "AZURE": "This was translated by Azure Cognitive",
-      "BAIDU": "This was translated by Baidu"
+      "TOLGEE": "This was translated by Tolgee Translator",
     }
-  """
+  """,
+    deprecated = true
   )
   val machineTranslations: Map<MtServiceType, String?>?,
   val translationCreditsBalanceBefore: Long,
   val translationCreditsBalanceAfter: Long,
+
+  @Schema(
+    description = "Results provided by enabled services.",
+    example = """
+    {
+      "GOOGLE": {
+        "output": "This was translated by Google",
+        "contextDescription": null
+      },
+      "TOLGEE": {
+        "output": "This was translated by Tolgee Translator",
+        "contextDescription": "This is an example in swagger"
+      } 
+    }
+  """
+  )
+  val result: Map<MtServiceType, TranslationItemModel?>?,
 
   @Schema(
     description = "Extra credits are neither refilled nor reset every period." +

@@ -9,6 +9,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
+import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
@@ -63,17 +64,23 @@ class TranslationSuggestionController(
     val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
     try {
       val resultMap = dto.baseText?.ifBlank { null }?.let {
-        mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage)
+        mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage, dto.services)
       } ?: let {
         val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
         key.checkInProject()
-        mtService.getMachineTranslations(key, targetLanguage)
+        mtService.getMachineTranslations(key, targetLanguage, dto.services)
       }
+
+      val resultData = resultMap
+        ?.map { (key, value) ->
+          key to TranslationItemModel(value?.translatedText.orEmpty(), value?.contextDescription)
+        }?.toMap()
 
       val balanceAfter = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
 
       return SuggestResultModel(
-        machineTranslations = resultMap,
+        machineTranslations = resultData?.map { it.key to it.value.output }?.toMap(),
+        result = resultData,
         translationCreditsBalanceBefore = balanceBefore.creditBalance / 100,
         translationCreditsBalanceAfter = balanceAfter.creditBalance / 100,
         translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance / 100,

@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -16,12 +17,16 @@ class BaiduTranslationProvider(
     get() = !baiduMachineTranslationProperties.appId.isNullOrEmpty() &&
       !baiduMachineTranslationProperties.appSecret.isNullOrEmpty()
 
-  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-    return baiduApiService.translate(text, getLanguageTag(sourceTag), getLanguageTag(targetTag))
-  }
-
-  override fun calculateProviderPrice(text: String): Int {
-    return text.length * 100
+  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
+    val result = baiduApiService.translate(
+      params.text,
+      getLanguageTag(params.sourceLanguageTag),
+      getLanguageTag(params.targetLanguageTag)
+    )
+    return MtValueProvider.MtResult(
+      result,
+      params.text.length * 100
+    )
   }
 
   fun getLanguageTag(tag: String): String {

@@ -30,6 +30,9 @@ open class KeyWithTranslationsModel(
   @Schema(description = "Key screenshots. Not provided when API key hasn't screenshots.view scope permission.")
   val screenshots: List<ScreenshotModel>?,
 
+  @Schema(description = "There is a context available for this key")
+  val contextPresent: Boolean,
+
   @Schema(
     description = "Translations object",
     example = """

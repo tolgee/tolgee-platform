@@ -65,7 +65,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
    */
   @Query(
     """
-      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
+      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, key.id as keyId, 
       similarity(baseTranslation.text, :baseTranslationText) as similarity
       from Translation baseTranslation
       join baseTranslation.key key
@@ -155,4 +155,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   """
   )
   fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
+
+  fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
 }

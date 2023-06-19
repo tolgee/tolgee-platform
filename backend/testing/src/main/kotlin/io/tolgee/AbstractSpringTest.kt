@@ -150,6 +150,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
 
   @Autowired
+  lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
+
+  @Autowired
   lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -217,6 +220,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     baiduMachineTranslationProperties.defaultEnabled = false
     baiduMachineTranslationProperties.appId = "dummy"
     baiduMachineTranslationProperties.appSecret = "dummy"
+    tolgeeMachineTranslationProperties.url = "http://localhost:8081"
+    tolgeeMachineTranslationProperties.defaultEnabled = false
     internalProperties.fakeMtProviders = false
   }
 

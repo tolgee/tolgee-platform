@@ -16,7 +16,7 @@ import java.util.*
 inline val <reified T> T.assert: ObjectAssert<T>
   get() = Assertions.assertThat(this)
 
-inline val String.assert: AbstractStringAssert<*>
+inline val String?.assert: AbstractStringAssert<*>
   get() = Assertions.assertThat(this)
 
 inline val Date?.assert: AbstractDateAssert<*> get() = Assertions.assertThat(this)

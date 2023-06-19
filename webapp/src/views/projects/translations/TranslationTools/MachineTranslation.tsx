@@ -1,13 +1,13 @@
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { TabMessage } from './TabMessage';
-import { useProviderImg } from './useProviderImg';
 import { useTranslationTools } from './useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
+import { ProviderLogo } from './ProviderLogo';
 
-type SuggestResultModel = components['schemas']['SuggestResultModel'];
+type TranslationItemModel = components['schemas']['TranslationItemModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -31,41 +31,48 @@ const StyledItem = styled('div')`
   }
 `;
 
-const StyledSource = styled('div')`
-  margin-top: 3px;
-`;
-
 const StyledValue = styled('div')`
   font-size: 15px;
   align-self: center;
 `;
 
+const StyledDescription = styled('div')`
+  font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+type ProviderData = {
+  provider: string;
+  data: TranslationItemModel | undefined;
+};
+
 type Props = {
-  data: SuggestResultModel | undefined;
+  data: ProviderData[] | undefined;
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
   languageTag: string;
+  contextPresent: boolean | undefined;
+  isFetching: boolean;
 };
 
 export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
   languageTag,
+  contextPresent,
+  isFetching,
 }) => {
   const { t } = useTranslate();
-  const getProviderImg = useProviderImg();
-  const baseIsEmpty = data?.machineTranslations === null;
-  const items = data?.machineTranslations
-    ? Object.entries(data?.machineTranslations)
-    : [];
+  const baseIsEmpty = data?.find((item) => item.data === null);
+  const nothingFetched =
+    data?.every((item) => !item.data?.output) && isFetching;
 
   return (
     <StyledContainer>
       {baseIsEmpty ? (
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
-        items?.map(([provider, translation]) => {
-          const providerImg = getProviderImg(provider);
-
+        !nothingFetched &&
+        data?.map(({ provider, data }) => {
           return (
             <StyledItem
               key={provider}
@@ -73,19 +80,30 @@ export const MachineTranslation: React.FC<Props> = ({
                 e.preventDefault();
               }}
               onClick={() => {
-                operationsRef.current.updateTranslation(translation);
+                if (data?.output) {
+                  operationsRef.current.updateTranslation(data?.output);
+                }
               }}
               role="button"
               data-cy="translation-tools-machine-translation-item"
             >
-              <StyledSource>
-                {providerImg && <img src={providerImg} width="16px" />}
-              </StyledSource>
-              <StyledValue>
-                <span dir={getLanguageDirection(languageTag)}>
-                  {translation}
-                </span>
-              </StyledValue>
+              <ProviderLogo
+                provider={provider}
+                contextPresent={contextPresent}
+              />
+              {data?.output && (
+                <>
+                  <StyledValue dir={getLanguageDirection(languageTag)}>
+                    <div>{data?.output}</div>
+                    {data.contextDescription && (
+                      <StyledDescription>
+                        {data.contextDescription}
+                      </StyledDescription>
+                    )}
+                  </StyledValue>
+                </>
+              )}
+              {!data?.output && isFetching && <Skeleton variant="text" />}
             </StyledItem>
           );
         })

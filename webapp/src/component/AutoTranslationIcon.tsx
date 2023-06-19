@@ -30,7 +30,7 @@ export const AutoTranslationIcon: React.FC<Props> = ({
   noTooltip,
 }) => {
   const getProviderImg = useProviderImg();
-  const providerImg = getProviderImg(provider);
+  const providerImg = getProviderImg(provider, false);
   const { t } = useTranslate();
 
   return (

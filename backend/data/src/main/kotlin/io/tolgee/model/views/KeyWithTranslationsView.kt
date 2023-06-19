@@ -12,6 +12,7 @@ data class KeyWithTranslationsView(
   val keyNamespaceId: Long?,
   val keyNamespace: String?,
   val screenshotCount: Long,
+  val contextPresent: Boolean,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
 ) {
   lateinit var keyTags: List<Tag>
@@ -25,7 +26,8 @@ data class KeyWithTranslationsView(
         keyName = data.removeFirst() as String,
         keyNamespaceId = data.removeFirst() as Long?,
         keyNamespace = data.removeFirst() as String?,
-        screenshotCount = data.removeFirst() as Long
+        screenshotCount = data.removeFirst() as Long,
+        contextPresent = data.removeFirst() as Boolean
       )
 
       (0 until data.size step 8).forEach { i ->

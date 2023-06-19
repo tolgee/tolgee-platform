@@ -4,8 +4,12 @@ import { components } from '../service/apiSchema.generated';
 import { ProjectContext } from './ProjectProvider';
 
 export const useProject = (): components['schemas']['ProjectModel'] => {
-  const projectDTOLoadable = useContext(ProjectContext);
+  const { project } = useProjectSettings();
+  return project;
+};
 
+export const useProjectSettings = () => {
+  const projectDTOLoadable = useContext(ProjectContext);
   if (!projectDTOLoadable) {
     throw new GlobalError(
       'Unexpected error',

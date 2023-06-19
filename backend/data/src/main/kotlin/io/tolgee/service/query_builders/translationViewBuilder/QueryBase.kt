@@ -11,6 +11,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
+import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.model.keyBigMeta.KeysDistance_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
@@ -58,6 +60,7 @@ class QueryBase<T>(
   private fun addLeftJoinedColumns() {
     addNamespace()
     addScreenshotCounts()
+    addContextCounts()
     addLanguageSpecificFields()
   }
 
@@ -164,6 +167,19 @@ class QueryBase<T>(
     this.fullTextFields.add(namespaceName)
     groupByExpressions.add(namespaceId)
     groupByExpressions.add(namespaceName)
+  }
+
+  private fun addContextCounts() {
+    val contextSubquery = this.query.subquery(Long::class.java)
+    val contextRoot = contextSubquery.from(KeysDistance::class.java)
+    contextSubquery.select(contextRoot.get(KeysDistance_.key1Id))
+    contextSubquery.where(
+      cb.or(
+        cb.equal(this.root.get(Key_.id), contextRoot.get(KeysDistance_.key1Id)),
+        cb.equal(this.root.get(Key_.id), contextRoot.get(KeysDistance_.key2Id))
+      )
+    )
+    this.querySelection[KeyWithTranslationsView::contextPresent.name] = cb.exists(contextSubquery)
   }
 
   val Expression<String>.isNotNullOrBlank: Predicate

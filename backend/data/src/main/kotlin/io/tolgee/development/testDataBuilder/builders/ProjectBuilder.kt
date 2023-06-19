@@ -13,6 +13,7 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
@@ -43,6 +44,7 @@ class ProjectBuilder(
     var namespaces = mutableListOf<NamespaceBuilder>()
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
     var screenshots = mutableListOf<ScreenshotBuilder>()
+    var keyDistances = mutableListOf<KeysDistanceBuilder>()
   }
 
   var data = DATA()
@@ -58,6 +60,20 @@ class ProjectBuilder(
     addOperation(data.languages, ft)
 
   fun addKey(ft: FT<Key>) = addOperation(data.keys, ft)
+
+  fun addKey(namespace: String? = null, keyName: String, ft: (KeyBuilder.() -> Unit)? = null): KeyBuilder {
+    return addKey(keyName, ft).build { setNamespace(namespace) }
+  }
+
+  fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
+    return addKey {
+      name = keyName
+    }.apply {
+      ft?.let {
+        apply(it)
+      }
+    }
+  }
 
   fun addTranslation(ft: FT<Translation>) = addOperation(data.translations, ft)
 
@@ -109,18 +125,15 @@ class ProjectBuilder(
     }
   }
 
-  fun addKey(namespace: String? = null, keyName: String, ft: KeyBuilder.() -> Unit): KeyBuilder {
-    return addKey(keyName, ft).build { setNamespace(namespace) }
-  }
-
-  fun addKey(keyName: String, ft: KeyBuilder.() -> Unit): KeyBuilder {
-    return addKey {
-      name = keyName
-    }.apply(ft)
-  }
-
   fun getLanguageByTag(tag: String): LanguageBuilder? {
     return data.languages.find { it.self.tag == tag }
+  }
+
+  fun addKeysDistance(key1: Key, key2: Key, ft: FT<KeysDistance>): KeysDistanceBuilder {
+    val builder = KeysDistanceBuilder(this, key1, key2)
+    ft(builder.self)
+    data.keyDistances.add(builder)
+    return builder
   }
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
