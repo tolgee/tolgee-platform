@@ -1,7 +1,6 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
-import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
 import io.tolgee.component.machineTranslation.metadata.Metadata

@@ -13,9 +13,12 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.repository.KeysDistanceRepository
 import io.tolgee.util.equalNullable
+import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.runSentryCatching
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 import javax.persistence.criteria.CriteriaBuilder
@@ -24,7 +27,8 @@ import javax.persistence.criteria.JoinType
 @Service
 class BigMetaService(
   private val keysDistanceRepository: KeysDistanceRepository,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val transactionManager: PlatformTransactionManager
 ) {
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
@@ -106,21 +110,25 @@ class BigMetaService(
   }
 
   @EventListener(OnProjectActivityEvent::class)
-  @Transactional
   @Async
   fun onKeyDeleted(event: OnProjectActivityEvent) {
-    val ids =
-      event.activityHolder.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }?.map { it.entityId }
+    runSentryCatching {
+      val ids =
+        event.activityHolder.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
+          ?.map { it.entityId }
 
-    if (ids.isNullOrEmpty()) {
-      return
-    }
+      if (ids.isNullOrEmpty()) {
+        return
+      }
 
-    entityManager.createQuery(
-      """
+      executeInNewTransaction(transactionManager) {
+        entityManager.createQuery(
+          """
       delete from KeysDistance kd 
       where kd.key1Id in :ids or kd.key2Id in :ids
       """
-    ).setParameter("ids", ids).executeUpdate()
+        ).setParameter("ids", ids).executeUpdate()
+      }
+    }
   }
 }
