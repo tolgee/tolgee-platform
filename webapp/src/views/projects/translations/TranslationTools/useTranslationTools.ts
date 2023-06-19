@@ -1,8 +1,13 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useProjectSettings } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsSelector } from '../context/TranslationsContext';
+
+type EnabledServicesType =
+  components['schemas']['LanguageConfigItemModel']['enabledServices'];
 
 type Props = {
   projectId: number;
@@ -26,6 +31,19 @@ export const useTranslationTools = ({
   const contextPresent = useTranslationsSelector(
     (c) => c.translations?.find((item) => item.keyId === keyId)?.contextPresent
   );
+
+  const { enabledMtServices, refetchSettings } = useProjectSettings();
+
+  const mtServices = useMemo(() => {
+    let result: EnabledServicesType = [];
+    enabledMtServices?.forEach((config) => {
+      result = [...result, ...config.enabledServices];
+    });
+    return Array.from(new Set(result));
+  }, [enabledMtServices]);
+
+  const fast = mtServices.filter((item) => item !== 'TOLGEE');
+  const slow = mtServices.filter((item) => item === 'TOLGEE');
 
   const dependencies = {
     keyId,
@@ -54,20 +72,21 @@ export const useTranslationTools = ({
     },
   });
 
-  const machine = useApiQuery({
+  const machineFast = useApiQuery({
     url: '/v2/projects/{projectId}/suggest/machine-translations',
     method: 'post',
     path: { projectId },
     // @ts-ignore add all dependencies to properly update query
-    query: { hash: stringHash(JSON.stringify(dependencies)) },
+    query: { hash: stringHash(JSON.stringify({ ...dependencies, fast })) },
     content: {
-      'application/json': data,
+      'application/json': { ...data, services: fast },
     },
     fetchOptions: {
       disableBadRequestHandling: true,
     },
     options: {
-      enabled,
+      keepPreviousData: true,
+      enabled: enabled && Boolean(fast.length),
       onSettled(data) {
         if (data) {
           updateUsage({
@@ -77,6 +96,41 @@ export const useTranslationTools = ({
         }
       },
     },
+  });
+
+  const machineSlow = useApiQuery({
+    url: '/v2/projects/{projectId}/suggest/machine-translations',
+    method: 'post',
+    path: { projectId },
+    // @ts-ignore add all dependencies to properly update query
+    query: { hash: stringHash(JSON.stringify({ ...dependencies, slow })) },
+    content: {
+      'application/json': { ...data, services: slow },
+    },
+    fetchOptions: {
+      disableBadRequestHandling: true,
+    },
+    options: {
+      keepPreviousData: true,
+      refetchOnMount: true,
+      enabled: enabled && Boolean(slow.length),
+      onSettled(data) {
+        if (data) {
+          updateUsage({
+            creditBalance: data.translationCreditsBalanceAfter,
+            extraCreditBalance: data.translationExtraCreditsBalanceAfter,
+          });
+        }
+      },
+    },
+  });
+
+  const machine = mtServices.map((provider) => {
+    const sourceData = slow.includes(provider) ? machineSlow : machineFast;
+    return {
+      provider,
+      data: sourceData.data?.result?.[provider],
+    };
   });
 
   const updateTranslation = (value: string) => {
@@ -91,22 +145,36 @@ export const useTranslationTools = ({
 
   operationsRef.current = operations;
 
+  useEffect(() => {
+    if (
+      [machineFast.error?.code, machineSlow.error?.code].includes(
+        'mt_service_not_enabled'
+      )
+    ) {
+      // refetch project mt settings if this error appears
+      refetchSettings();
+    }
+  }, [machineFast.error?.code]);
+
   return useMemo(
     () => ({
       operationsRef,
-      isFetching: memory.isFetching || machine.isFetching,
+      isFetching:
+        memory.isFetching || machineFast.isFetching || machineSlow.isFetching,
       memory: enabled ? memory : undefined,
       machine: enabled ? machine : undefined,
+      machineError: machineFast.error || machineSlow.error,
       contextPresent,
     }),
     [
       memory.status,
-      machine.status,
       memory.isFetching,
-      machine.isFetching,
       memory.data,
-      machine.data,
       operationsRef,
+      machineFast.isFetching,
+      machineFast.data,
+      machineSlow.isFetching,
+      machineSlow.data,
     ]
   );
 };

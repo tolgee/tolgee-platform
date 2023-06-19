@@ -4,6 +4,7 @@ import { Link as MuiLink, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { MtHint } from './billing/MtHint';
+import { useErrorTranslation } from 'tg.translationTools/useErrorTranslation';
 
 type Props = {
   code: string;
@@ -11,6 +12,7 @@ type Props = {
 
 export const NoCreditsHint = ({ code }: Props) => {
   const { preferredOrganization } = usePreferredOrganization();
+  const translateError = useErrorTranslation();
   const config = useConfig();
   const canGoToBilling =
     preferredOrganization.currentUserRole === 'OWNER' && config.billing.enabled;
@@ -60,5 +62,5 @@ export const NoCreditsHint = ({ code }: Props) => {
       />
     );
   }
-  return <Typography color="red">{code}</Typography>;
+  return <Typography color="red">{translateError(code)}</Typography>;
 };

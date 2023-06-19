@@ -6,13 +6,24 @@ import { components } from '../service/apiSchema.generated';
 import { useApiQuery } from '../service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-export const ProjectContext = createContext<
-  components['schemas']['ProjectModel'] | null
->(null);
+type ProjectModel = components['schemas']['ProjectModel'];
+type LanguageConfigItemModel = components['schemas']['LanguageConfigItemModel'];
+
+export const ProjectContext = createContext<{
+  project: ProjectModel;
+  enabledMtServices?: LanguageConfigItemModel[];
+  refetchSettings: () => void;
+} | null>(null);
 
 export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
-  const { isLoading, data, error } = useApiQuery({
+  const project = useApiQuery({
     url: '/v2/projects/{projectId}',
+    method: 'get',
+    path: { projectId: id },
+  });
+
+  const settings = useApiQuery({
+    url: '/v2/projects/{projectId}/machine-translation-service-settings',
     method: 'get',
     path: { projectId: id },
   });
@@ -20,23 +31,34 @@ export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
   const { updatePreferredOrganization } = usePreferredOrganization();
 
   useEffect(() => {
-    if (data?.organizationOwner) {
-      updatePreferredOrganization(data.organizationOwner.id);
+    if (project.data?.organizationOwner) {
+      updatePreferredOrganization(project.data.organizationOwner.id);
     }
-  }, [data]);
+  }, [project.data]);
 
-  if (isLoading) {
+  if (project.isLoading || settings.isLoading) {
     return <FullPageLoading />;
   }
 
-  if (data) {
+  if (project.data) {
     return (
-      <ProjectContext.Provider value={data}>{children}</ProjectContext.Provider>
+      <ProjectContext.Provider
+        value={{
+          project: project.data,
+          enabledMtServices: settings.data?._embedded?.languageConfigs,
+          refetchSettings: settings.refetch,
+        }}
+      >
+        {children}
+      </ProjectContext.Provider>
     );
   }
 
-  throw new GlobalError(
-    'Unexpected error occurred',
-    error?.code || 'Loadable error'
-  );
+  if (project.error || settings.error) {
+    throw new GlobalError(
+      'Unexpected error occurred',
+      project.error?.code || settings.error?.code || 'Loadable error'
+    );
+  }
+  return null;
 };

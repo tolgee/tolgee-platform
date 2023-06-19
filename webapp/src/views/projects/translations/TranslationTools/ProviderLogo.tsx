@@ -1,4 +1,4 @@
-import { styled, Tooltip, useTheme } from '@mui/material';
+import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProviderImg } from './useProviderImg';
 

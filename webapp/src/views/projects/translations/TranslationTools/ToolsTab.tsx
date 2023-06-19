@@ -1,7 +1,6 @@
 import React from 'react';
 import { styled, Typography } from '@mui/material';
 import { TabMessage } from './TabMessage';
-import { UseQueryResult } from 'react-query';
 import { NoCreditsHint } from 'tg.component/NoCreditsHint';
 
 const StyledContainer = styled('div')`
@@ -50,7 +49,7 @@ type Props = {
   icon: React.ReactNode;
   title: string;
   badgeNumber?: number;
-  data?: UseQueryResult<unknown, any>;
+  error?: any;
 };
 
 export const ToolsTab: React.FC<Props> = ({
@@ -58,9 +57,8 @@ export const ToolsTab: React.FC<Props> = ({
   title,
   badgeNumber,
   children,
-  data,
+  error,
 }) => {
-  const error = data?.error;
   const errorCode = error?.message || error?.code || error;
 
   return (
@@ -71,7 +69,7 @@ export const ToolsTab: React.FC<Props> = ({
         {badgeNumber ? <StyledBadge>{badgeNumber}</StyledBadge> : null}
       </StyledTab>
 
-      {data?.isError ? (
+      {error ? (
         <TabMessage>
           <NoCreditsHint code={errorCode} />
         </TabMessage>

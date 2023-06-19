@@ -73,7 +73,7 @@ const TranslationTools = React.memo(function TranslationTools({
           badgeNumber={
             data.memory?.data?._embedded?.translationMemoryItems?.length
           }
-          data={data.memory}
+          error={data.memory?.error}
         >
           <TranslationMemory
             data={data.memory?.data}
@@ -88,16 +88,15 @@ const TranslationTools = React.memo(function TranslationTools({
               'Machine translation'
             )}
             icon={<MachineTranslationIcon fontSize="small" color="inherit" />}
-            badgeNumber={
-              Object.keys(data.machine?.data?.machineTranslations || {}).length
-            }
-            data={data.machine}
+            badgeNumber={Object.keys(data.machine || {}).length}
+            error={data.machineError}
           >
             <MachineTranslation
               languageTag={languageTag}
-              data={data.machine?.data}
+              data={data.machine}
               operationsRef={data.operationsRef}
               contextPresent={data.contextPresent}
+              isFetching={data.isFetching}
             />
           </ToolsTab>
         )}

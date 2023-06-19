@@ -31,7 +31,7 @@ export interface paths {
     put: operations["setLanguage"];
   };
   "/v2/projects/{projectId}": {
-    get: operations["get_2"];
+    get: operations["get_3"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
@@ -109,7 +109,7 @@ export interface paths {
     put: operations["setState"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_3"];
+    get: operations["get_4"];
     put: operations["update_2"];
     delete: operations["delete_5"];
   };
@@ -131,7 +131,7 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_5"];
+    get: operations["get_6"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -149,7 +149,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/pats/{id}": {
-    get: operations["get_7"];
+    get: operations["get_8"];
     put: operations["update_4"];
     delete: operations["delete_7"];
   };
@@ -166,7 +166,7 @@ export interface paths {
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_9"];
+    get: operations["get_10"];
     put: operations["update_5"];
     delete: operations["delete_8"];
   };
@@ -342,6 +342,10 @@ export interface paths {
     /** Returns initial data always required by frontend */
     get: operations["get_1"];
   };
+  "/v2/public/configuration-properties": {
+    /** Return server configuration properties documentation */
+    get: operations["get_2"];
+  };
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
   };
@@ -425,7 +429,7 @@ export interface paths {
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_8"];
+    get: operations["get_9"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -459,7 +463,7 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_10"];
+    get: operations["get_11"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -572,18 +576,6 @@ export interface components {
         | "SERVER_ADMIN";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -606,6 +598,18 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       id: number;
@@ -974,11 +978,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1079,14 +1083,14 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
+      scopes: string[];
+      expiresAt?: number;
+      lastUsedAt?: number;
+      projectId: number;
+      username?: string;
+      description: string;
       userFullName?: string;
       projectName: string;
-      description: string;
-      projectId: number;
-      expiresAt?: number;
-      username?: string;
-      lastUsedAt?: number;
-      scopes: string[];
     };
     SuperTokenRequest: {
       /** Has to be provided when TOTP enabled */
@@ -1351,6 +1355,8 @@ export interface components {
       targetLanguageId: number;
       /** Text value of base translation. Useful, when base translation is not stored yet. */
       baseText?: string;
+      /** List of services to use. If null, then all enabled services are used. */
+      services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE")[];
     };
     PagedModelTranslationMemoryItemModel: {
       _embedded?: {
@@ -1365,18 +1371,18 @@ export interface components {
       similarity: number;
     };
     SuggestResultModel: {
-      /** Results provided by enabled services */
-      machineTranslations?: {
-        [key: string]: components["schemas"]["TranslationItemModel"];
-      };
+      /** String translations provided by enabled services. (deprecated, use `result` instead) */
+      machineTranslations?: { [key: string]: string };
       translationCreditsBalanceBefore: number;
       translationCreditsBalanceAfter: number;
+      /** Results provided by enabled services. */
+      result?: { [key: string]: components["schemas"]["TranslationItemModel"] };
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceBefore: number;
       /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
       translationExtraCreditsBalanceAfter: number;
     };
-    /** Results provided by enabled services */
+    /** Results provided by enabled services. */
     TranslationItemModel: {
       output: string;
       contextDescription?: string;
@@ -1519,16 +1525,16 @@ export interface components {
       )[];
       name: string;
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
+      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1536,6 +1542,7 @@ export interface components {
     PublicConfigurationDTO: {
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
       billing: components["schemas"]["PublicBillingConfigurationDTO"];
+      version: string;
       authentication: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
       passwordResettable: boolean;
@@ -1546,7 +1553,6 @@ export interface components {
       needsEmailVerification: boolean;
       userCanCreateOrganizations: boolean;
       appName: string;
-      version: string;
       showVersion: boolean;
       internalControllerEnabled: boolean;
       maxTranslationTextLength: number;
@@ -1554,6 +1560,11 @@ export interface components {
       chatwootToken?: string;
       capterraTracker?: string;
       ga4Tag?: string;
+    };
+    DocItem: {
+      name: string;
+      displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1608,17 +1619,17 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1955,11 +1966,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      description: string;
-      createdAt: number;
-      updatedAt: number;
       expiresAt?: number;
       lastUsedAt?: number;
+      createdAt: number;
+      updatedAt: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2035,14 +2046,14 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
+      scopes: string[];
+      expiresAt?: number;
+      lastUsedAt?: number;
+      projectId: number;
+      username?: string;
+      description: string;
       userFullName?: string;
       projectName: string;
-      description: string;
-      projectId: number;
-      expiresAt?: number;
-      username?: string;
-      lastUsedAt?: number;
-      scopes: string[];
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2370,7 +2381,7 @@ export interface operations {
       };
     };
   };
-  get_2: {
+  get_3: {
     parameters: {
       path: {
         projectId: number;
@@ -3120,7 +3131,7 @@ export interface operations {
       };
     };
   };
-  get_3: {
+  get_4: {
     parameters: {
       path: {
         translationId: number;
@@ -3455,7 +3466,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_6: {
     parameters: {
       path: {
         languageId: number;
@@ -3640,7 +3651,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_8: {
     parameters: {
       path: {
         id: number;
@@ -3840,7 +3851,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_10: {
     parameters: {
       path: {
         id: number;
@@ -5813,6 +5824,29 @@ export interface operations {
       };
     };
   };
+  /** Return server configuration properties documentation */
+  get_2: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["DocItem"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllUsers: {
     parameters: {
       path: {
@@ -6669,7 +6703,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_9: {
     parameters: {
       path: {
         slug: string;
@@ -7003,7 +7037,7 @@ export interface operations {
       };
     };
   };
-  get_10: {
+  get_11: {
     parameters: {
       path: {
         keyId: number;
