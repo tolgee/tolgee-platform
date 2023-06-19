@@ -5,14 +5,18 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
-import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
 import javax.persistence.EntityManager
 import kotlin.math.pow
 
-open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applicationContext: ApplicationContext) {
+open class ChunkProcessingUtil(
+  val execution: BatchJobChunkExecution,
+  val applicationContext: ApplicationContext,
+) : Logging {
   open fun processChunk() {
     try {
       batchJobService.getProcessor<Any>(job.type).process(job, toProcess)
@@ -38,27 +42,31 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     }
 
     if (exception is FailedDontRequeueException) {
-      successfulTargets = exception.successfulTargets
-      if (retries >= job.type.maxRetries) {
-        return
-      }
+      return
     }
 
     retryFailedExecution(exception)
   }
 
   private fun retryFailedExecution(exception: Throwable) {
-    retryExecution.executeAfter = Date(currentDateProvider.date.time + job.type.defaultRetryTimeoutInMs)
+    var maxRetries = job.type.maxRetries
+    var waitTime = job.type.defaultRetryWaitTimeInMs
 
     if (exception is RequeueWithTimeoutException) {
-      if (retries >= exception.maxRetries) {
-        Sentry.captureException(exception)
-        setJobFailed()
-        return
-      }
-      val timeout = getTimeout(exception)
-      retryExecution.executeAfter = Date(timeout + currentDateProvider.date.time)
+      maxRetries = exception.maxRetries
+      waitTime = getWaitTime(exception)
     }
+
+    if (retries >= maxRetries) {
+      logger.debug("Max retries reached for job execution $execution")
+      Sentry.captureException(exception)
+      setJobFailed()
+      return
+    }
+
+    logger.debug("Retrying job execution $execution in ${waitTime}ms")
+    retryExecution.executeAfter = Date(waitTime + currentDateProvider.date.time)
+    execution.retry = true
   }
 
   private fun setJobFailed() {
@@ -66,17 +74,13 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     entityManager.persist(job)
   }
 
-  private fun getTimeout(exception: RequeueWithTimeoutException) =
-    exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toLong()
+  private fun getWaitTime(exception: RequeueWithTimeoutException) =
+    exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toInt()
 
   private val job by lazy { execution.batchJob }
 
   private val entityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  private val transactionManager by lazy {
-    applicationContext.getBean(PlatformTransactionManager::class.java)
   }
 
   private val currentDateProvider by lazy {
@@ -98,7 +102,7 @@ open class ChunkProcessingUtil(val execution: BatchJobChunkExecution, val applic
     toProcess.toList()
   }
 
-  private val retryExecution: BatchJobChunkExecution by lazy {
+  val retryExecution: BatchJobChunkExecution by lazy {
     BatchJobChunkExecution().apply {
       batchJob = job
       chunkNumber = execution.chunkNumber

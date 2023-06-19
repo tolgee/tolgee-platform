@@ -35,7 +35,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    helper.listen()
+    helper.listenForTranslationDataModified()
   }
 
   @Test
@@ -187,7 +187,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       jwtTokenProvider.generateToken(notPermittedUser.id).toString(),
       testData.projectBuilder.self.id
     )
-    notPermittedSubscriptionHelper.listen()
+    notPermittedSubscriptionHelper.listenForTranslationDataModified()
     performProjectAuthPut(
       "translations",
       mapOf(

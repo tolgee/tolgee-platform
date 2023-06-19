@@ -1,18 +1,23 @@
 package io.tolgee.websocket
 
 import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
+import io.tolgee.batch.OnBatchOperationCompleted
+import io.tolgee.batch.OnBatchOperationFailed
 import io.tolgee.batch.OnBatchOperationProgress
+import io.tolgee.batch.OnBatchOperationSucceeded
 import io.tolgee.batch.WebsocketProgressInfo
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.security.UserAccountService
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class ActivityWebsocketListener(
@@ -65,7 +70,7 @@ class ActivityWebsocketListener(
     } else null
 
     websocketEventPublisher(
-      "/projects/${activityRevision.projectId!!}/${Types.TRANSLATION_DATA_MODIFIED.typeName}",
+      "/projects/${activityRevision.projectId!!}/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}",
       WebsocketEvent(
         actor = getActorInfo(activityRevision.authorId),
         data = data,
@@ -76,13 +81,36 @@ class ActivityWebsocketListener(
     )
   }
 
-  @EventListener(OnBatchOperationProgress::class)
+  @TransactionalEventListener(OnBatchOperationProgress::class)
   fun onBatchOperationProgress(event: OnBatchOperationProgress) {
     websocketEventPublisher(
-      "/projects/${event.job.project.id}/${Types.BATCH_OPERATION_PROGRESS.typeName}",
+      "/projects/${event.job.project.id}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
       WebsocketEvent(
         actor = getActorInfo(event.job.author?.id),
-        data = WebsocketProgressInfo(event.job.id, event.processed, event.total),
+        data = WebsocketProgressInfo(event.job.id, event.processed, event.total, BatchJobStatus.RUNNING),
+        sourceActivity = null,
+        activityId = null,
+        dataCollapsed = false
+      )
+    )
+  }
+
+  @TransactionalEventListener(OnBatchOperationSucceeded::class)
+  fun onBatchOperationSucceeded(event: OnBatchOperationSucceeded) {
+    onBatchOperationCompleted(event)
+  }
+
+  @TransactionalEventListener(OnBatchOperationFailed::class)
+  fun onBatchOperationFailed(event: OnBatchOperationFailed) {
+    onBatchOperationCompleted(event)
+  }
+
+  fun onBatchOperationCompleted(event: OnBatchOperationCompleted) {
+    websocketEventPublisher(
+      "/projects/${event.job.project.id}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
+      WebsocketEvent(
+        actor = getActorInfo(event.job.author?.id),
+        data = WebsocketProgressInfo(event.job.id, null, null, event.job.status),
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false

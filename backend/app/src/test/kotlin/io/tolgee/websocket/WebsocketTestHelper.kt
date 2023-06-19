@@ -21,7 +21,15 @@ import java.util.concurrent.TimeUnit
 class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) {
   lateinit var receivedMessages: LinkedBlockingDeque<String>
 
-  fun listen() {
+  fun listenForTranslationDataModified() {
+    listen("/projects/$projectId/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}")
+  }
+
+  fun listenForBatchOperationProgress() {
+    listen("/projects/$projectId/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}")
+  }
+
+  fun listen(path: String) {
     receivedMessages = LinkedBlockingDeque()
 
     val webSocketStompClient = WebSocketStompClient(
@@ -33,7 +41,7 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
     webSocketStompClient.connect(
       "http://localhost:$port/websocket", WebSocketHttpHeaders(),
       StompHeaders().apply { add("jwtToken", jwtToken) },
-      MySessionHandler("/projects/$projectId/translation-data-modified", receivedMessages)
+      MySessionHandler(path, receivedMessages)
     ).get(10, TimeUnit.SECONDS)
   }
 

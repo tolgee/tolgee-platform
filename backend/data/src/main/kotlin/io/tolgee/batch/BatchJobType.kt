@@ -6,7 +6,7 @@ enum class BatchJobType(
   val chunkSize: Int,
   val maxRetries: Int,
   val processor: KClass<out ChunkProcessor<*>>,
-  val defaultRetryTimeoutInMs: Int = 10000,
+  val defaultRetryWaitTimeInMs: Int = 2000,
 ) {
   TRANSLATION(
     chunkSize = 10,

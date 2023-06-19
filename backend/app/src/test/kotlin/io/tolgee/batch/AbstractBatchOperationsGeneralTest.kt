@@ -1,7 +1,9 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
+import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
@@ -12,16 +14,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import kotlin.math.ceil
 
-@SpringBootTest
 abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
 
   private lateinit var testData: BatchOperationsTestData
@@ -46,6 +47,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
+    Mockito.reset(translationBatchProcessor)
     Mockito.clearInvocations(translationBatchProcessor)
     whenever(translationBatchProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(translationBatchProcessor.getTarget(any())).thenCallRealMethod()
@@ -61,7 +63,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listen()
+    websocketHelper.listenForBatchOperationProgress()
 
     val job = runJob(1000)
 
@@ -79,7 +81,72 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     }
 
+    // 100 progress messages + 1 finish message
+    websocketHelper.receivedMessages.assert.hasSize(101)
+  }
+
+  @Test
+  fun `correctly reports failed test when FailedDontRequeueException thrown`() {
+    websocketHelper = WebsocketTestHelper(
+      port,
+      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      testData.projectBuilder.self.id
+    )
+    websocketHelper.listenForBatchOperationProgress()
+
+    val job = runJob(1000)
+
+    val exceptions = (1..50).map { _ ->
+      FailedDontRequeueException(
+        Message.OUT_OF_CREDITS,
+        cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),
+        successfulTargets = listOf()
+      )
+    }
+
+    whenever(translationBatchProcessor.process(any(), any()))
+      .thenThrow(*exceptions.toTypedArray())
+      .then {}
+
+    waitForNotThrowing(pollTime = 1000) {
+      val finishedJob = batchJobService.getJob(job.id)
+      finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+    }
+
+    // 100 progress messages + 1 finish message
+    websocketHelper.receivedMessages.assert.hasSize(101)
+    websocketHelper.receivedMessages.last.contains("FAILED")
+  }
+
+  @Test
+  fun `retries failed with generic exception`() {
+    websocketHelper = WebsocketTestHelper(
+      port,
+      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      testData.projectBuilder.self.id
+    )
+    websocketHelper.listenForBatchOperationProgress()
+
+    whenever(
+      translationBatchProcessor.process(
+        any(),
+        argThat { this.containsAll((1L..10).toList()) }
+      )
+    ).thenThrow(RuntimeException("OMG! It failed"))
+
+    val job = runJob(1000)
+
+    waitForNotThrowing(pollTime = 1000) {
+      val finishedJob = batchJobService.getJob(job.id)
+      finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+    }
+
+    entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
+      .setParameter("id", job.id).resultList.assert.hasSize(103)
+
+    // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
+    websocketHelper.receivedMessages.last.contains("FAILED")
   }
 
   protected fun runJob(keyCount: Int): BatchJob {

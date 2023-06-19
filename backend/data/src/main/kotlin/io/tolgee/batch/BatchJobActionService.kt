@@ -67,38 +67,50 @@ class BatchJobActionService(
 
           logger.debug("Jobs to launch: $jobsToLaunch")
           (1..jobsToLaunch).mapNotNull { queue.poll() }
-            .forEach { execution ->
-              if (!execution.isTimeToExecute()) {
-                logger.debug("""Execution ${execution.chunkExecutionId} not ready to execute, adding back to queue""")
-                queue.add(execution)
+            .forEach { executionItem ->
+              if (!executionItem.isTimeToExecute()) {
+                logger.debug("""Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue""")
+                queue.add(executionItem)
                 return@forEach
               }
               var runningJobsNow = runningJobs.incrementAndGet()
-              logger.debug("Execution ${execution.chunkExecutionId} launched. Running jobs: $runningJobsNow")
+              logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: $runningJobsNow")
               launch {
                 try {
+                  var retryExecution: BatchJobChunkExecution? = null
                   executeInNewTransaction(
                     transactionManager,
                     isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
                   ) {
-                    val lockedExecution = getItemIfCanAcquireLock(execution.chunkExecutionId)
+                    val lockedExecution = getItemIfCanAcquireLock(executionItem.chunkExecutionId)
                       ?: let {
-                        logger.debug("⚠️ Chunk ${execution.chunkExecutionId} is locked, skipping")
+                        logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
                         return@executeInNewTransaction
                       }
-                    publishRemoveConsuming(execution)
+                    publishRemoveConsuming(executionItem)
                     logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
-                    ChunkProcessingUtil(lockedExecution, applicationContext).processChunk()
-                    entityManager.persist(lockedExecution)
+                    val util = ChunkProcessingUtil(lockedExecution, applicationContext)
+                    util.processChunk()
                     progressManager.handleProgress(lockedExecution)
+                    entityManager.persist(lockedExecution)
+                    if (lockedExecution.retry) {
+                      retryExecution = util.retryExecution
+                    }
                     logger.debug("Job ${lockedExecution.batchJob.id}: ✅ Processed chunk ${lockedExecution.id}")
                   }
+                  retryExecution?.let {
+                    executeInNewTransaction(transactionManager) {
+                      entityManager.persist(it)
+                    }
+                    addToQueue(it)
+                    logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
+                  }
                 } catch (e: Throwable) {
-                  logger.error("Error processing chunk ${execution.chunkExecutionId}", e)
+                  logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
                   Sentry.captureException(e)
                 }
               }.invokeOnCompletion {
-                logger.debug("Chunk ${execution.chunkExecutionId}: Completed")
+                logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
                 runningJobsNow = runningJobs.decrementAndGet()
                 logger.debug("Running jobs: $runningJobsNow")
               }

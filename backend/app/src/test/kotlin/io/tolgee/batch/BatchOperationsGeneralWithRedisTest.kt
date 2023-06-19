@@ -48,6 +48,7 @@ class BatchOperationsGeneralWithRedisTest : AbstractBatchOperationsGeneralTest()
 
   @AfterAll
   fun cleanup() {
+    Mockito.reset(redisTemplate)
     redisRunner.stop()
   }
 
