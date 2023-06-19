@@ -154,7 +154,7 @@ export const useTranslationTools = ({
       // refetch project mt settings if this error appears
       refetchSettings();
     }
-  }, [machineFast.error?.code]);
+  }, [machineFast.error?.code, machineSlow.error?.code]);
 
   return useMemo(
     () => ({
