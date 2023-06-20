@@ -1,3 +1,10 @@
+# [3.20.0](https://github.com/tolgee/tolgee-platform/compare/v3.19.0...v3.20.0) (2023-06-20)
+
+
+### Features
+
+* Tolgee translator integration ([#1741](https://github.com/tolgee/tolgee-platform/issues/1741)) ([09a7ab2](https://github.com/tolgee/tolgee-platform/commit/09a7ab2675b6e43a980019efdf3f554322003bfe))
+
 # [3.19.0](https://github.com/tolgee/tolgee-platform/compare/v3.18.2...v3.19.0) (2023-06-14)
 
 
