@@ -36,10 +36,6 @@ const StyledToggle = styled('div')`
   }
 `;
 
-const StyledHint = styled(Typography)`
-  color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
 const StyledLoadingWrapper = styled('div')`
   position: absolute;
   top: 0px;
@@ -56,7 +52,6 @@ export const MachineTranslation = () => {
   const {
     settings,
     languages,
-    creditBalance,
     updateSettings,
     providers,
     baseSetting,
@@ -66,8 +61,7 @@ export const MachineTranslation = () => {
     onReset: () => setFormInstance((i) => i + 1),
   });
 
-  const isFetching =
-    settings.isFetching || languages.isFetching || creditBalance.isFetching;
+  const isFetching = settings.isFetching || languages.isFetching;
 
   useGlobalLoading(isFetching);
 
@@ -166,7 +160,7 @@ export const MachineTranslation = () => {
 
   return (
     <>
-      {settings.data && languages.data && creditBalance.data && (
+      {settings.data && languages.data && (
         <StyledContainer>
           <StyledLanguageTable style={{ gridTemplateColumns }}>
             <Formik
@@ -200,36 +194,6 @@ export const MachineTranslation = () => {
               <SmoothProgress loading={isUpdating} />
             </StyledLoadingWrapper>
           </StyledLanguageTable>
-          {creditBalance.data.creditBalance !== -1 && (
-            <Box my={1} display="flex" flexDirection="column">
-              <Typography variant="body1">
-                {t('project_languages_credit_balance', {
-                  balance: String(creditBalance.data.creditBalance),
-                })}
-              </Typography>
-              <StyledHint variant="caption">
-                {t('project_languages_credit_balance_help')}{' '}
-                {config.billing.enabled ? (
-                  preferredOrganization.currentUserRole === 'OWNER' ? (
-                    <T
-                      keyName="project_languages_credit_balance_help_owner"
-                      params={params}
-                    />
-                  ) : (
-                    <T
-                      keyName="project_languages_credit_balance_help_member"
-                      params={params}
-                    />
-                  )
-                ) : (
-                  <T
-                    keyName="project_languages_credit_balance_help_no_billing"
-                    params={params}
-                  />
-                )}
-              </StyledHint>
-            </Box>
-          )}
         </StyledContainer>
       )}
     </>
