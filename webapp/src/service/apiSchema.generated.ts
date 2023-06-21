@@ -1147,6 +1147,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       description: string;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2339,6 +2341,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       description: string;
+      expiresAt?: number;
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;

@@ -18,7 +18,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { ForOrganizationsList } from './ForOrganizationsList';
+import { CloudPlanOrganizations } from './CloudPlanOrganizations';
 
 type CloudPlanModel = components['schemas']['CloudPlanRequest'];
 type EnabledFeature =
@@ -36,12 +36,18 @@ type FormData = {
 };
 
 type Props = {
+  planId?: number;
   initialData: FormData;
   onSubmit: (value: FormData) => void;
   loading: boolean | undefined;
 };
 
-export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
+export function CloudPlanForm({
+  planId,
+  initialData,
+  onSubmit,
+  loading,
+}: Props) {
   const { t } = useTranslate();
 
   const productsLoadable = useBillingApiQuery({
@@ -176,20 +182,20 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
                 fullWidth
               />
               <TextField
-                name="prices.perThousandMtCredits"
+                name="prices.perThousandTranslations"
                 size="small"
                 label={t(
-                  'administration_cloud_plan_field_price_per_thousand_mt_credits'
+                  'administration_cloud_plan_field_price_per_thousand_translations'
                 )}
                 type="number"
                 fullWidth
                 disabled={values.type !== 'PAY_AS_YOU_GO'}
               />
               <TextField
-                name="prices.perThousandTranslations"
+                name="prices.perThousandMtCredits"
                 size="small"
                 label={t(
-                  'administration_cloud_plan_field_price_per_thousand_translations'
+                  'administration_cloud_plan_field_price_per_thousand_mt_credits'
                 )}
                 type="number"
                 fullWidth
@@ -271,12 +277,13 @@ export function CloudPlanForm({ initialData, onSubmit, loading }: Props) {
 
             {!values.public && (
               <Box>
-                <Typography sx={{ mt: 2 }}>
-                  {t('administration_cloud_plan_form_organizations_title')}
-                </Typography>
-                <ForOrganizationsList
-                  ids={values.forOrganizationIds}
-                  setIds={(ids) => setFieldValue('forOrganizationIds', ids)}
+                <CloudPlanOrganizations
+                  planId={planId}
+                  originalOrganizations={initialData.forOrganizationIds}
+                  organizations={values.forOrganizationIds}
+                  setOrganizations={(orgs: number[]) => {
+                    setFieldValue('forOrganizationIds', orgs);
+                  }}
                 />
                 {errors.forOrganizationIds && (
                   <Typography color="error">

@@ -16,7 +16,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { ForOrganizationsList } from './ForOrganizationsList';
+import { EePlanOrganizations } from './EePlanOrganizations';
 
 type SelfHostedEePlanRequest = components['schemas']['SelfHostedEePlanRequest'];
 type EnabledFeature =
@@ -33,12 +33,13 @@ type FormData = {
 };
 
 type Props = {
+  planId?: number;
   initialData: FormData;
   onSubmit: (value: FormData) => void;
   loading: boolean | undefined;
 };
 
-export function EePlanForm({ initialData, onSubmit, loading }: Props) {
+export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
   const { t } = useTranslate();
 
   const productsLoadable = useBillingApiQuery({
@@ -203,13 +204,13 @@ export function EePlanForm({ initialData, onSubmit, loading }: Props) {
 
             {!values.public && (
               <Box>
-                <Typography sx={{ mt: 2 }}>
-                  {t('administration_ee_plan_form_organizations_title')}
-                </Typography>
-
-                <ForOrganizationsList
-                  ids={values.forOrganizationIds}
-                  setIds={(ids) => setFieldValue('forOrganizationIds', ids)}
+                <EePlanOrganizations
+                  planId={planId}
+                  originalOrganizations={initialData.forOrganizationIds}
+                  organizations={values.forOrganizationIds}
+                  setOrganizations={(orgs: number[]) => {
+                    setFieldValue('forOrganizationIds', orgs);
+                  }}
                 />
                 {errors.forOrganizationIds && (
                   <Typography color="error">

@@ -91,8 +91,14 @@ export interface paths {
   "/v2/administration/billing/stripe-products": {
     get: operations["getStripeProducts"];
   };
+  "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
+    get: operations["getPlanOrganizations"];
+  };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
+  };
+  "/v2/administration/billing/cloud-plans/{planId}/organizations": {
+    get: operations["getPlanOrganizations_1"];
   };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}": {
     delete: operations["cancelEeSubscription"];
@@ -431,6 +437,62 @@ export interface components {
       _embedded?: {
         plans?: components["schemas"]["SelfHostedEePlanAdministrationModel"][];
       };
+    };
+    Avatar: {
+      large: string;
+      thumbnail: string;
+    };
+    PagedModelSimpleOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PermissionModel: {
+      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+      )[];
+      /** The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       */
+      permittedLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+    };
+    SimpleOrganizationModel: {
+      id: number;
+      name: string;
+      slug: string;
+      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
     };
     CollectionModelCloudPlanAdministrationModel: {
       _embedded?: {
@@ -1351,6 +1413,42 @@ export interface operations {
       };
     };
   };
+  getPlanOrganizations: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllFeatures: {
     responses: {
       /** OK */
@@ -1368,6 +1466,42 @@ export interface operations {
             | "ACCOUNT_MANAGER"
             | "STANDARD_SUPPORT"
           )[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getPlanOrganizations_1: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelSimpleOrganizationModel"];
         };
       };
       /** Bad Request */

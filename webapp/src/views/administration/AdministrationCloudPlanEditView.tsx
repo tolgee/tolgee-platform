@@ -67,6 +67,7 @@ export const AdministrationCloudPlanEditView = () => {
             {t('administration_cloud_plan_edit')}
           </Typography>
           <CloudPlanForm
+            planId={planId}
             loading={planEditLoadable.isLoading}
             initialData={{
               ...planData,

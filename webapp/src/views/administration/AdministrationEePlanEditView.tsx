@@ -67,6 +67,7 @@ export const AdministrationEePlanEditView = () => {
             {t('administration_ee_plan_edit')}
           </Typography>
           <EePlanForm
+            planId={planId}
             loading={false}
             initialData={{
               ...planData,
