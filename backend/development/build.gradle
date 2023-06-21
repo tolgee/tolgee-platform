@@ -72,6 +72,7 @@ dependencies {
     api libs.springDocOpenApiDataRest
     api libs.springDocOpenApiWebMvcCore
     implementation libs.kotlinReflect
+    implementation libs.kotlinCoroutines
 }
 
 
