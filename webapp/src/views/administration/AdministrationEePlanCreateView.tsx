@@ -51,6 +51,9 @@ export const AdministrationEePlanCreateView = () => {
                       ...values,
                       stripeProductId: values.stripeProductId!,
                       free: false,
+                      forOrganizationIds: values.public
+                        ? []
+                        : values.forOrganizationIds,
                     },
                   },
                 },
