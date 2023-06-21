@@ -16,6 +16,7 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.project_auth.ProjectNotSelectedException
 import org.hibernate.Transaction
 import org.hibernate.collection.internal.AbstractPersistentCollection
 import org.slf4j.LoggerFactory
@@ -200,7 +201,7 @@ class InterceptedEventsManager(
           try {
             revision.projectId = projectHolder.project.id
             activityHolder.organizationId = projectHolder.project.organizationOwnerId
-          } catch (e: UninitializedPropertyAccessException) {
+          } catch (e: ProjectNotSelectedException) {
             logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
           }
           revision.type = activityHolder.activity
