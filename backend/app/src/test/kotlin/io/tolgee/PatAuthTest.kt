@@ -1,6 +1,9 @@
 package io.tolgee
 
+import io.tolgee.constants.Message
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Pat
@@ -29,6 +32,18 @@ class PatAuthTest : AbstractControllerTest() {
     val lastUsedAt = patService.get(pat.id).lastUsedAt
     assertThat(lastUsedAt).isNotNull
     assertThat(lastUsedAt?.time).isLessThan(Date().time)
+  }
+
+  @Test
+  fun `throws project not selected`() {
+    val pat = createUserWithPat()
+
+    performGet(
+      "/v2/projects/translations/en",
+      HttpHeaders().apply {
+        add("X-API-Key", "tgpat_${pat.token}")
+      }
+    ).andIsBadRequest.andHasErrorMessage(Message.PROJECT_NOT_SELECTED)
   }
 
   @Test
