@@ -1,3 +1,10 @@
+## [3.20.1](https://github.com/tolgee/tolgee-platform/compare/v3.20.0...v3.20.1) (2023-06-21)
+
+
+### Bug Fixes
+
+* Remove credit balance from language view ([#1758](https://github.com/tolgee/tolgee-platform/issues/1758)) ([4b395f3](https://github.com/tolgee/tolgee-platform/commit/4b395f31cfd045066ddd138674395419c212be46))
+
 # [3.20.0](https://github.com/tolgee/tolgee-platform/compare/v3.19.0...v3.20.0) (2023-06-20)
 
 

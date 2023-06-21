@@ -537,7 +537,7 @@
   "project_integrate_title" : "Integrieren",
   "project_languages_base_language" : "Basissprache",
   "project_languages_credit_balance" : "Guthaben: {balance, number}",
-  "project_languages_credit_balance_help" : "Das Guthaben wird für die maschinellen Übersetzungen bei externen Anbietern genutzt (1 Guthaben = 1 übersetzter Buchstabe).",
+  "project_languages_credit_balance_help" : "Das Guthaben wird für die maschinellen Übersetzungen bei externen Anbietern genutzt.",
   "project_languages_credit_balance_help_member" : "Der Betrag wird monatlich aufgeladen. Wenden Sie sich an den Organisationsinhaber, wenn der Betrag aufgebraucht ist.",
   "project_languages_credit_balance_help_no_billing" : "Es wird monatlich aufgeladen, wenden Sie sich an den Tolgee-Administrator, wenn es aufgebraucht ist.",
   "project_languages_credit_balance_help_owner" : "Es wird monatlich aufgeladen, gehen Sie zum <link>Abrechnungsbereich</link>, wenn es aufgebraucht ist.",

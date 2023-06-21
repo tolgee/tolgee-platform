@@ -530,7 +530,7 @@
   "project_integrate_title" : "Integrar",
   "project_languages_base_language" : "Idioma base",
   "project_languages_credit_balance" : "Saldo de crédito: {balance, number}",
-  "project_languages_credit_balance_help" : "El crédito se utiliza para las traducciones automáticas en proveedores externos (1 crédito = 1 carácter traducido).",
+  "project_languages_credit_balance_help" : "El crédito se utiliza para las traducciones automáticas en proveedores externos.",
   "project_languages_credit_balance_help_member" : "Se recarga mensualmente, contacta con el propietario de la organización si se te acaba.",
   "project_languages_credit_balance_help_no_billing" : "Se recarga mensualmente, contacta con el administrador de Tolgee si se te acaba.",
   "project_languages_credit_balance_help_owner" : "Se recarga mensualmente, ve a la <link>sección de facturación</link> si se te acaba.",

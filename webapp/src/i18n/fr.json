@@ -709,7 +709,7 @@
   "project_integrate_title" : "Intégrer",
   "project_languages_base_language" : "Langue de base",
   "project_languages_credit_balance" : "Crédit : {balance, number}",
-  "project_languages_credit_balance_help" : "Le crédit est utilisé pour les traductions automatiques chez des fournisseurs externes (1 crédit = 1 caractère traduit).",
+  "project_languages_credit_balance_help" : "Le crédit est utilisé pour les traductions automatiques chez des fournisseurs externes.",
   "project_languages_credit_balance_help_member" : "Il est rechargé mensuellement, contactez le propriétaire de l'organisation si vous en manquez.",
   "project_languages_credit_balance_help_no_billing" : "Il est rechargé mensuellement, contactez l'administrateur Tolgee si vous en manquez.",
   "project_languages_credit_balance_help_owner" : "Il est rechargé mensuellement, rendez-vous dans la <link>section de facturation</link> si vous en manquez.",
