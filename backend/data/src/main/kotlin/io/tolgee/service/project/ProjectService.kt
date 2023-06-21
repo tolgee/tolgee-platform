@@ -21,6 +21,7 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.project_auth.ProjectNotSelectedException
 import io.tolgee.service.AvatarService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
@@ -215,7 +216,7 @@ class ProjectService constructor(
 
     try {
       projectHolder.project
-    } catch (e: UninitializedPropertyAccessException) {
+    } catch (e: ProjectNotSelectedException) {
       projectHolder.project = ProjectDto.fromEntity(project)
     }
 
