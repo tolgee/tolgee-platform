@@ -38,12 +38,6 @@ export const useMachineTranslationSettings = ({ onReset }: Props) => {
     path: { projectId: project.id },
   });
 
-  const creditBalance = useApiQuery({
-    url: '/v2/projects/{projectId}/machine-translation-credit-balance',
-    method: 'get',
-    path: { projectId: project.id },
-  });
-
   const updateSettings = useApiMutation({
     url: '/v2/projects/{projectId}/machine-translation-service-settings',
     method: 'put',
@@ -86,7 +80,6 @@ export const useMachineTranslationSettings = ({ onReset }: Props) => {
   return {
     languages,
     settings,
-    creditBalance,
     applyUpdate,
     baseSetting,
     updateSettings,

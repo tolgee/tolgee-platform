@@ -22,10 +22,10 @@ class MtCreditsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `returns organization project credit balance`() {
+  fun `returns project credit balance`() {
     performAuthGet("/v2/projects/${testData.organizationProject.id}/machine-translation-credit-balance")
       .andIsOk.andAssertThatJson {
-        node("creditBalance").isEqualTo(12000)
+        node("creditBalance").isEqualTo(120)
       }
   }
 
@@ -33,7 +33,7 @@ class MtCreditsControllerTest : AuthorizedControllerTest() {
   fun `returns organization credit balance`() {
     performAuthGet("/v2/organizations/${testData.organization.id}/machine-translation-credit-balance")
       .andIsOk.andAssertThatJson {
-        node("creditBalance").isEqualTo(12000)
+        node("creditBalance").isEqualTo(120)
       }
   }
 }
