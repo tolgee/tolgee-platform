@@ -74,8 +74,8 @@ class MtServiceManager(
       return foundInCache
     }
 
-    val translated = try {
-      params.serviceType.getProvider()
+    return try {
+      val translated = params.serviceType.getProvider()
         .translate(
           ProviderTranslateParams(
             params.text,
@@ -86,6 +86,17 @@ class MtServiceManager(
             params.metadata
           )
         )
+
+      val translateResult = TranslateResult(
+        translated?.translated,
+        translated?.contextDescription,
+        translated?.price ?: 0,
+        params.serviceType
+      )
+
+      params.cacheResult(translateResult)
+
+      return translateResult
     } catch (e: Exception) {
       logger.error(
         """An exception occurred while translating 
@@ -96,19 +107,13 @@ class MtServiceManager(
       )
       logger.error(e.stackTraceToString())
       Sentry.captureException(e)
-      null
+      TranslateResult(
+        null,
+        null,
+        0,
+        params.serviceType
+      )
     }
-
-    val result = TranslateResult(
-      translated?.translated,
-      translated?.contextDescription,
-      translated?.price ?: 0,
-      params.serviceType
-    )
-
-    result?.let { params.cacheResult(it) }
-
-    return result
   }
 
   fun getParams(

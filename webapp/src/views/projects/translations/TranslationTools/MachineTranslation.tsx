@@ -103,7 +103,9 @@ export const MachineTranslation: React.FC<Props> = ({
                   </StyledValue>
                 </>
               )}
-              {!data?.output && isFetching && <Skeleton variant="text" />}
+              {data?.output === undefined && isFetching && (
+                <Skeleton variant="text" />
+              )}
             </StyledItem>
           );
         })
