@@ -1,3 +1,10 @@
+## [3.20.3](https://github.com/tolgee/tolgee-platform/compare/v3.20.2...v3.20.3) (2023-06-22)
+
+
+### Bug Fixes
+
+* update tolgee SDK ([#1763](https://github.com/tolgee/tolgee-platform/issues/1763)) ([aabe6ec](https://github.com/tolgee/tolgee-platform/commit/aabe6ec8fb3645e3e4328dc2d443928cb0e4b104))
+
 ## [3.20.2](https://github.com/tolgee/tolgee-platform/compare/v3.20.1...v3.20.2) (2023-06-22)
 
 
