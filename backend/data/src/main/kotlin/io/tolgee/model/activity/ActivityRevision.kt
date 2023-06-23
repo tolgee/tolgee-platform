@@ -3,6 +3,7 @@ package io.tolgee.model.activity
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.model.batch.BatchJobChunkExecution
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
@@ -17,11 +18,13 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Index
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.PrePersist
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
@@ -81,6 +84,9 @@ class ActivityRevision : java.io.Serializable {
 
   @OneToMany(mappedBy = "activityRevision")
   var modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf()
+
+  @OneToOne(fetch = FetchType.LAZY)
+  var batchJobChunkExecution: BatchJobChunkExecution? = null
 
   companion object {
     @Configurable

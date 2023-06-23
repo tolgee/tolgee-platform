@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -37,7 +38,8 @@ class BatchJobActionService(
   private val transactionManager: PlatformTransactionManager,
   private val applicationContext: ApplicationContext,
   private val usingRedisProvider: UsingRedisProvider,
-  private val progressManager: ProgressManager
+  private val progressManager: ProgressManager,
+  private val activityHolder: ActivityHolder
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -95,6 +97,9 @@ class BatchJobActionService(
                     logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
                     val util = ChunkProcessingUtil(lockedExecution, applicationContext)
                     util.processChunk()
+                    val activityRevision = activityHolder.activityRevision
+                      ?: throw IllegalStateException("Activity revision not set")
+                    activityRevision.batchJobChunkExecution = lockedExecution
                     progressManager.handleProgress(lockedExecution)
                     entityManager.persist(lockedExecution)
                     if (lockedExecution.retry) {
@@ -174,10 +179,10 @@ class BatchJobActionService(
   fun populateQueue() {
     val data = entityManager.createQuery(
       """
-          from BatchJobChunkExecution bjce
-          join fetch bjce.batchJob
-          where bjce.status = :status
-          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+                        from BatchJobChunkExecution bjce
+                        join fetch bjce.batchJob
+                        where bjce.status = : status
+                        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
@@ -209,8 +214,8 @@ class BatchJobActionService(
   fun getItemIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
     return entityManager.createQuery(
       """
-         from BatchJobChunkExecution bjce
-         where bjce.id = :id
+                        from BatchJobChunkExecution bjce
+                        where bjce . id = :id
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )

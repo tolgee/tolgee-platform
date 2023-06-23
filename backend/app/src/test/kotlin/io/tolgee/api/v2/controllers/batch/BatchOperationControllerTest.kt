@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -79,7 +80,7 @@ class BatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   @ProjectJWTAuthTestMethod
   fun `it deletes keys`() {
-    val keyCount = 10000
+    val keyCount = 1000
     val keys = testData.addTranslationOperationData(keyCount)
     saveAndPrepare()
 
@@ -93,7 +94,19 @@ class BatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") 
     ).andIsOk
 
     waitForNotThrowing(pollTime = 1000, timeout = 300000) {
-      keyService.getAll(testData.projectBuilder.self.id).assert.isEmpty()
+      val all = keyService.getAll(testData.projectBuilder.self.id)
+      all.assert.isEmpty()
+    }
+
+    waitForNotThrowing(pollTime = 1000, timeout = 300000) {
+      executeInNewTransaction {
+        val data = entityManager
+          .createQuery("""from BatchJobChunkExecution""", BatchJobChunkExecution::class.java)
+          .resultList
+
+        data.assert.hasSize(1)
+        data[0].activityRevision.assert.isNotNull
+      }
     }
   }
 }

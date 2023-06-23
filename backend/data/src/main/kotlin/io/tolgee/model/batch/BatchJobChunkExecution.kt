@@ -2,6 +2,7 @@ package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.activity.ActivityRevision
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
@@ -11,7 +12,9 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
+import javax.persistence.OneToOne
 import javax.persistence.Table
 
 @Entity
@@ -43,4 +46,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   @ColumnDefault("false")
   var retry: Boolean = false
+
+  @OneToOne(fetch = FetchType.LAZY, mappedBy = "batchJobChunkExecution")
+  var activityRevision: ActivityRevision? = null
 }

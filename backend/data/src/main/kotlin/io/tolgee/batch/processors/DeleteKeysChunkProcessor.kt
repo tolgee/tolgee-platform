@@ -16,12 +16,11 @@ class DeleteKeysChunkProcessor(
   override fun process(job: BatchJob, chunk: List<Long>, onProgress: ((Int) -> Unit)) {
     val subChunked = chunk.chunked(100)
     var progress: Int = 0
-    subChunked.forEachIndexed { index, subChunk ->
+    subChunked.forEach { subChunk ->
       keyService.deleteMultiple(subChunk)
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)
-      return
     }
   }
 

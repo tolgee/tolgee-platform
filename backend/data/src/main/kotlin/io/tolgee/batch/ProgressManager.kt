@@ -43,18 +43,15 @@ class ProgressManager(
   }
 
   fun handleJobStatus(job: BatchJob, completedChunks: Long, progress: Long) {
-    val completedChunksNotNull = completedChunks
+    logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
 
-    logger.debug("Job ${job.id} completed chunks: $completedChunksNotNull of ${job.totalChunks}")
-    if (job.totalChunks.toLong() != completedChunksNotNull) {
+    if (job.totalChunks.toLong() != completedChunks) {
       return
     }
 
-    val progressNotNull = progress
+    logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
 
-    logger.debug("Job ${job.id} progress: $progressNotNull of ${job.totalItems}")
-
-    if (job.totalItems.toLong() != progressNotNull) {
+    if (job.totalItems.toLong() != progress) {
       job.status = BatchJobStatus.FAILED
       entityManager.persist(job)
       eventPublisher.publishEvent(OnBatchOperationFailed(job))

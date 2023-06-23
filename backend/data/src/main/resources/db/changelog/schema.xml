@@ -2625,4 +2625,12 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1687532552778-1">
+        <addColumn tableName="activity_revision">
+            <column name="batch_job_chunk_execution_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1687532552778-2">
+        <addForeignKeyConstraint baseColumnNames="batch_job_chunk_execution_id" baseTableName="activity_revision" constraintName="FK7rfcdgi5uj3k7bk02h7e3suft" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job_chunk_execution" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

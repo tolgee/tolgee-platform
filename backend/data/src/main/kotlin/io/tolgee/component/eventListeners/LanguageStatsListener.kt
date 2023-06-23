@@ -19,9 +19,9 @@ class LanguageStatsListener(
   @Async
   fun onActivity(event: OnProjectActivityEvent) {
     runSentryCatching {
-      val projectId = event.activityHolder.activityRevision?.projectId ?: return
+      val projectId = event.activityRevision.projectId ?: return
 
-      val modifiedEntityClasses = event.activityHolder.modifiedEntities.keys.toSet()
+      val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
       val isStatsModified = modifiedEntityClasses.contains(Language::class) ||
         modifiedEntityClasses.contains(Translation::class) ||
         modifiedEntityClasses.contains(Key::class) ||

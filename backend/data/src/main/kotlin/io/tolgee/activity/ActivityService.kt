@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewDataProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import org.springframework.context.ApplicationContext
@@ -20,9 +21,8 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
 ) {
   @Transactional
-  fun storeActivityData(activityHolder: ActivityHolder) {
-    val activityRevision = activityHolder.activityRevision ?: return
-    activityRevision.modifiedEntities = activityHolder.modifiedEntities.values.flatMap { it.values }.toMutableList()
+  fun storeActivityData(activityRevision: ActivityRevision, modifiedEntities: ModifiedEntitiesType) {
+    activityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
 
     entityManager.persist(activityRevision)
     activityRevision.describingRelations.forEach {
@@ -31,6 +31,7 @@ class ActivityService(
     activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
       entityManager.persist(activityModifiedEntity)
     }
+    entityManager.flush()
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }
 
