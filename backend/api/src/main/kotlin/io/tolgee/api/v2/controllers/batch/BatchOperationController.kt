@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
-import io.tolgee.batch.BatchTranslateRequest
+import io.tolgee.batch.request.BatchTranslateRequest
+import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -41,6 +42,20 @@ class BatchOperationController(
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
       BatchJobType.TRANSLATION
+    )
+  }
+
+  @PutMapping(value = ["/delete-keys"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_DELETE)
+  @Operation(summary = "Translates provided keys to provided languages")
+  fun deleteKeys(@Valid @RequestBody data: DeleteKeysRequest) {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.DELETE_KEYS
     )
   }
 }

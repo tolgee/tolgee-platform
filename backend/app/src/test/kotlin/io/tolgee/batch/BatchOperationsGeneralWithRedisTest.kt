@@ -55,14 +55,14 @@ class BatchOperationsGeneralWithRedisTest : AbstractBatchOperationsGeneralTest()
   @Test
   fun `removes from queue using event`() {
     var done = false
-    whenever(translationBatchProcessor.process(any(), any())).thenAnswer {
+    whenever(translationChunkProcessor.process(any(), any(), any())).thenAnswer {
       while (!done) {
         Thread.sleep(100)
       }
     }
     try {
 
-      runJob(keyCount = 200)
+      runChunkedJob(keyCount = 200)
 
       waitForNotThrowing {
         val peek = batchJobActionService.queue.peek()

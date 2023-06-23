@@ -19,7 +19,12 @@ open class ChunkProcessingUtil(
 ) : Logging {
   open fun processChunk() {
     try {
-      batchJobService.getProcessor<Any>(job.type).process(job, toProcess)
+      val total = toProcess.size
+      batchJobService.getProcessor<Any>(job.type).process(job, toProcess) {
+        if (it != total) {
+          progressManager.publishChunkProgress(job.id, it)
+        }
+      }
       successfulTargets = toProcess
       execution.status = BatchJobChunkExecutionStatus.SUCCESS
     } catch (e: Throwable) {
@@ -35,6 +40,7 @@ open class ChunkProcessingUtil(
     execution.exception = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     Sentry.captureException(exception)
+    logger.error(exception.message, exception)
 
     if (exception is ChunkFailedException) {
       successfulTargets = exception.successfulTargets
@@ -91,10 +97,14 @@ open class ChunkProcessingUtil(
     applicationContext.getBean(BatchJobService::class.java)
   }
 
+  private val progressManager by lazy {
+    applicationContext.getBean(ProgressManager::class.java)
+  }
+
   private var successfulTargets: List<Long>? = null
 
   private val toProcess by lazy {
-    val chunked = job.target.chunked(job.chunkSize)
+    val chunked = job.chunkedTarget
     val chunk = chunked[execution.chunkNumber]
     val previousSuccessfulTargets = previousExecutions.flatMap { it.successTargets }.toSet()
     val toProcess = chunk.toMutableSet()

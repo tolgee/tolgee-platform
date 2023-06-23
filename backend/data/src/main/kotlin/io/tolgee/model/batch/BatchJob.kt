@@ -37,4 +37,6 @@ class BatchJob : StandardAuditModel() {
 
   @Enumerated
   var type: BatchJobType = BatchJobType.TRANSLATION
+
+  val chunkedTarget get() = if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
 }

@@ -69,7 +69,7 @@ class BatchJobActionService(
           (1..jobsToLaunch).mapNotNull { queue.poll() }
             .forEach { executionItem ->
               if (!executionItem.isTimeToExecute()) {
-                logger.debug("""Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue""")
+                logger.debug("""Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue: Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""")
                 queue.add(executionItem)
                 return@forEach
               }
@@ -87,6 +87,10 @@ class BatchJobActionService(
                         logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
                         return@executeInNewTransaction
                       }
+                    if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
+                      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is not pending, skipping")
+                      return@executeInNewTransaction
+                    }
                     publishRemoveConsuming(executionItem)
                     logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
                     val util = ChunkProcessingUtil(lockedExecution, applicationContext)
@@ -129,7 +133,7 @@ class BatchJobActionService(
 
   fun ExecutionQueueItem.isTimeToExecute(): Boolean {
     val executeAfter = this.executeAfter ?: return true
-    return executeAfter < currentDateProvider.date.time
+    return executeAfter <= currentDateProvider.date.time
   }
 
   val redisTemplate: StringRedisTemplate by lazy { applicationContext.getBean(StringRedisTemplate::class.java) }
@@ -153,9 +157,9 @@ class BatchJobActionService(
   fun repeatForever(fn: () -> Unit) {
     while (run) {
       try {
-        val startTime = currentDateProvider.date.time
+        val startTime = System.currentTimeMillis()
         fn()
-        val sleepTime = MIN_TIME_BETWEEN_OPERATIONS - (currentDateProvider.date.time - startTime)
+        val sleepTime = MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
         if (sleepTime > 0) {
           Thread.sleep(sleepTime)
         }

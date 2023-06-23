@@ -1,5 +1,9 @@
-package io.tolgee.batch
+package io.tolgee.batch.processors
 
+import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.FailedDontRequeueException
+import io.tolgee.batch.RequeueWithTimeoutException
+import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.EntityWithId
@@ -18,7 +22,7 @@ class TranslationChunkProcessor(
   private val languageService: LanguageService,
   private val entityManager: EntityManager
 ) : ChunkProcessor<BatchTranslateRequest> {
-  override fun process(job: BatchJob, chunk: List<Long>) {
+  override fun process(job: BatchJob, chunk: List<Long>, onProgress: (Int) -> Unit) {
     val keys = keyService.find(chunk)
     val parameters = getParams(job)
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)

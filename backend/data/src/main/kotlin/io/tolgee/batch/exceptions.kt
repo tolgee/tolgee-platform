@@ -20,7 +20,7 @@ open class RequeueWithTimeoutException(
   message: Message,
   successfulTargets: List<Long>,
   cause: Throwable,
-  val timeoutInMs: Int = 10000,
+  val timeoutInMs: Int = 100,
   val increaseFactor: Int = 10,
-  val maxRetries: Int = 10
+  val maxRetries: Int = 3
 ) : ChunkFailedException(message, successfulTargets, cause)

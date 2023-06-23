@@ -75,4 +75,25 @@ class BatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       }
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it deletes keys`() {
+    val keyCount = 10000
+    val keys = testData.addTranslationOperationData(keyCount)
+    saveAndPrepare()
+
+    val keyIds = keys.map { it.id }.toList()
+
+    performProjectAuthPut(
+      "batch/delete-keys",
+      mapOf(
+        "keyIds" to keyIds,
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 300000) {
+      keyService.getAll(testData.projectBuilder.self.id).assert.isEmpty()
+    }
+  }
 }

@@ -46,7 +46,7 @@ class ActivityWebsocketListener(
 
   fun getActorInfo(userId: Long?): ActorInfo {
     return userId?.let {
-      val user = userAccountService.findActive(userId) ?: return@let null
+      val user = userAccountService.findDto(userId) ?: return@let null
       ActorInfo(
         type = ActorType.USER,
         data = simpleUserAccountModelAssembler.toModel(user)
@@ -81,7 +81,7 @@ class ActivityWebsocketListener(
     )
   }
 
-  @TransactionalEventListener(OnBatchOperationProgress::class)
+  @EventListener(OnBatchOperationProgress::class)
   fun onBatchOperationProgress(event: OnBatchOperationProgress) {
     websocketEventPublisher(
       "/projects/${event.job.project.id}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",

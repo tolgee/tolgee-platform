@@ -2618,4 +2618,11 @@
     <changeSet author="jenik (generated)" id="1687183532951-10">
         <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="batch_job_chunk_execution" constraintName="FKsj13l1iwca3bnl80dx1oxrcqp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1687340083918-1">
+        <addColumn tableName="batch_job_chunk_execution">
+            <column name="retry" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

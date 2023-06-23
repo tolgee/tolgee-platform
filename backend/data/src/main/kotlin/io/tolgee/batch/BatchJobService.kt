@@ -8,6 +8,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.repository.BatchJobRepository
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import javax.persistence.EntityManager
@@ -17,6 +18,7 @@ class BatchJobService(
   private val batchJobRepository: BatchJobRepository,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
+  @Lazy
   private val batchJobChunkService: BatchJobActionService,
   private val transactionManager: PlatformTransactionManager
 ) {
@@ -31,20 +33,23 @@ class BatchJobService(
       val processor = getProcessor<RequestType>(type)
       val target = processor.getTarget(request)
 
-      val chunked = target.chunked(BatchJobType.TRANSLATION.chunkSize)
-
-      val job = createJob(
-        project = project,
-        author = author,
-        target = target,
-        chunked = chunked,
-        chunkSize = BatchJobType.TRANSLATION.chunkSize
-      )
+      val job = BatchJob().apply {
+        this.project = project
+        this.author = author
+        this.target = target
+        this.totalItems = target.size
+        this.chunkSize = type.chunkSize
+        this.type = type
+      }
+      val chunked = job.chunkedTarget
+      job.totalChunks = chunked.size
 
       val params = processor.getParams(request, job)
 
       batchJobRepository.save(job)
-      entityManager.persist(params)
+      params?.let {
+        entityManager.persist(params)
+      }
 
       executions = chunked.mapIndexed { chunkNumber, _ ->
         BatchJobChunkExecution().apply {
@@ -58,23 +63,6 @@ class BatchJobService(
 
     executions?.forEach { batchJobChunkService.addToQueue(it) }
     return job
-  }
-
-  private fun createJob(
-    project: Project,
-    author: UserAccount?,
-    target: List<Long>,
-    chunked: List<List<Long>>,
-    chunkSize: Int,
-  ): BatchJob {
-    return BatchJob().apply {
-      this.project = project
-      this.author = author
-      this.target = target
-      this.totalChunks = chunked.size
-      this.totalItems = target.size
-      this.chunkSize = chunkSize
-    }
   }
 
   fun findJob(id: Long): BatchJob? {

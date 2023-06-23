@@ -2,6 +2,7 @@ package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.StandardAuditModel
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
@@ -40,6 +41,6 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   var executeAfter: Date? = null
 
-  @Transient
+  @ColumnDefault("false")
   var retry: Boolean = false
 }

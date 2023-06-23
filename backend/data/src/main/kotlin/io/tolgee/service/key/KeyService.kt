@@ -184,7 +184,7 @@ class KeyService(
     translationService.deleteAllByKeys(ids)
     keyMetaService.deleteAllByKeyIdIn(ids)
     screenshotService.deleteAllByKeyId(ids)
-    val keys = keyRepository.findAllByIdIn(ids)
+    val keys = keyRepository.findAllByIdInForDelete(ids)
     val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
     namespaceService.deleteUnusedNamespaces(namespaces)

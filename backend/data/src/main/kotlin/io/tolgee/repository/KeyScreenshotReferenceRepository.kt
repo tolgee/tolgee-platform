@@ -32,6 +32,7 @@ interface KeyScreenshotReferenceRepository : JpaRepository<KeyScreenshotReferenc
   @Query(
     """
     from KeyScreenshotReference ksr
+    left join fetch ksr.screenshot
     where ksr.key.id in :keyIds
   """
   )
