@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
@@ -22,18 +21,17 @@ class ActivityHolderConfig {
   @ConditionalOnMissingBean
   @Qualifier("transactionActivityHolder")
   fun transactionActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder(applicationContext)
+    return ActivityHolder()
   }
 
   @Bean
   @RequestScope
   @Qualifier("requestActivityHolder")
   fun requestActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder(applicationContext)
+    return ActivityHolder()
   }
 
   @Bean
-  @Lazy(false)
   @Primary
   @Scope(BeanDefinition.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
   fun activityHolder(applicationContext: ApplicationContext): ActivityHolder {
