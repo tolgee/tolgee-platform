@@ -13,7 +13,7 @@ class VersionProviderImpl : VersionProvider {
         val resource = ClassPathResource(".VERSION", this::class.java.classLoader)
         return@lazy if (!resource.exists()) "??" else resource.file.readText()
       } catch (e: FileNotFoundException) {
-        return@lazy Application::class.java.getPackage().implementationVersion
+        return@lazy Application::class.java.getPackage().implementationVersion ?: "??"
       }
     }
   }
