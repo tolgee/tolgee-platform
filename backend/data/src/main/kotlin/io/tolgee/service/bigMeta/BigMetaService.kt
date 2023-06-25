@@ -114,7 +114,7 @@ class BigMetaService(
   fun onKeyDeleted(event: OnProjectActivityEvent) {
     runSentryCatching {
       val ids =
-        event.activityHolder.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
+        event.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
           ?.map { it.entityId }
 
       if (ids.isNullOrEmpty()) {
