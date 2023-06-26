@@ -107,6 +107,9 @@ class Translation(
         if (!translation.text.isNullOrEmpty() && translation.state == TranslationState.UNTRANSLATED) {
           translation.state = TranslationState.TRANSLATED
         }
+        if (translation.text.isNullOrEmpty() && translation.state != TranslationState.UNTRANSLATED) {
+          translation.state = TranslationState.UNTRANSLATED
+        }
       }
     }
   }
