@@ -1,7 +1,5 @@
 package io.tolgee.batch
 
-import io.tolgee.model.batch.BatchJob
-
 data class OnBatchOperationSucceeded(
-  override val job: BatchJob,
+  override val job: BatchJobDto,
 ) : OnBatchOperationCompleted

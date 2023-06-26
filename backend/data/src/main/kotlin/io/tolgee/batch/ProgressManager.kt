@@ -22,7 +22,7 @@ class ProgressManager(
 ) : Logging {
 
   fun handleProgress(execution: BatchJobChunkExecution) {
-    val job = execution.batchJob
+    val job = batchJobService.getJobDto(execution.batchJob.id)
     val (progress, chunks) = atomicProgressState.withAtomicState(
       job.id,
       execution.id
@@ -39,10 +39,17 @@ class ProgressManager(
     if (execution.successTargets.isNotEmpty()) {
       eventPublisher.publishEvent(OnBatchOperationProgress(job, progress, job.totalItems.toLong()))
     }
-    handleJobStatus(execution.batchJob, progress = progress, completedChunks = chunks)
+    handleJobStatus(job, progress = progress, completedChunks = chunks)
   }
 
-  fun handleJobStatus(job: BatchJob, completedChunks: Long, progress: Long) {
+  fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
+    if (execution.retry) {
+      return
+    }
+    atomicProgressState.getCompletedChunksCommittedAtomicLong(execution.batchJob.id).addAndGet(1)
+  }
+
+  fun handleJobStatus(job: BatchJobDto, completedChunks: Long, progress: Long) {
     logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
 
     if (job.totalChunks.toLong() != completedChunks) {
@@ -51,17 +58,18 @@ class ProgressManager(
 
     logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
 
+    val jobEntity = batchJobService.getJobEntity(job.id)
     if (job.totalItems.toLong() != progress) {
-      job.status = BatchJobStatus.FAILED
-      entityManager.persist(job)
+      jobEntity.status = BatchJobStatus.FAILED
+      entityManager.persist(jobEntity)
       eventPublisher.publishEvent(OnBatchOperationFailed(job))
       return
     }
 
-    job.status = BatchJobStatus.SUCCESS
+    jobEntity.status = BatchJobStatus.SUCCESS
     logger.debug("Publishing success event for job ${job.id}")
     eventPublisher.publishEvent(OnBatchOperationSucceeded(job))
-    entityManager.persist(job)
+    entityManager.persist(jobEntity)
   }
 
   @Scheduled(fixedRate = 60 * 1000)
@@ -80,13 +88,13 @@ class ProgressManager(
       jobs.forEach { job ->
         // let's not keep the locked when we handle the status
         val (progress, chunks) = atomicProgressState.getAtomicState(job.id)
-        handleJobStatus(job, progress, chunks)
+        handleJobStatus(BatchJobDto.fromEntity(job), progress, chunks)
       }
     }
   }
 
   fun publishChunkProgress(jobId: Long, it: Int) {
-    val job = batchJobService.getJob(jobId)
+    val job = batchJobService.getJobDto(jobId)
     eventPublisher.publishEvent(OnBatchOperationProgress(job, it.toLong(), job.totalItems.toLong()))
   }
 }

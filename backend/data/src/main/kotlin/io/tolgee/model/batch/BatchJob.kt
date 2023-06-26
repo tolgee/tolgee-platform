@@ -5,6 +5,7 @@ import io.tolgee.batch.BatchJobType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.activity.ActivityRevision
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
@@ -12,6 +13,7 @@ import javax.persistence.Entity
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
+import javax.persistence.OneToOne
 
 @Entity
 @TypeDefs(
@@ -38,5 +40,13 @@ class BatchJob : StandardAuditModel() {
   @Enumerated
   var type: BatchJobType = BatchJobType.TRANSLATION
 
-  val chunkedTarget get() = if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
+  @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
+  var activityRevision: ActivityRevision? = null
+
+  val chunkedTarget get() = chunkTarget(chunkSize, target)
+
+  companion object {
+    fun chunkTarget(chunkSize: Int, target: List<Long>): List<List<Long>> =
+      if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
+  }
 }

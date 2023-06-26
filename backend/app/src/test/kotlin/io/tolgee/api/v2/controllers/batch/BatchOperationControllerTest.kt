@@ -4,7 +4,9 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -64,10 +66,23 @@ class BatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       )
     ).andIsOk
 
+    waitForAllTranslated(keyIds, keyCount)
+    executeInNewTransaction {
+      val jobs = entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+        .resultList
+      jobs.assert.hasSize(1)
+      val job = jobs[0]
+      job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      job.activityRevision.assert.isNotNull
+      job.activityRevision!!.modifiedEntities.assert.hasSize(200)
+    }
+  }
+
+  private fun waitForAllTranslated(keyIds: List<Long>, keyCount: Int) {
     waitForNotThrowing(pollTime = 1000) {
       @Suppress("UNCHECKED_CAST") val czechTranslations = entityManager.createQuery(
         """
-      from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
+        from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
         """.trimIndent()
       ).setParameter("keyIds", keyIds).resultList as List<Translation>
       czechTranslations.assert.hasSize(keyCount)

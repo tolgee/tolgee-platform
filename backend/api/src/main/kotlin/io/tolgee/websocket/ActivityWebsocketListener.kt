@@ -84,9 +84,9 @@ class ActivityWebsocketListener(
   @EventListener(OnBatchOperationProgress::class)
   fun onBatchOperationProgress(event: OnBatchOperationProgress) {
     websocketEventPublisher(
-      "/projects/${event.job.project.id}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
+      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
       WebsocketEvent(
-        actor = getActorInfo(event.job.author?.id),
+        actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, event.processed, event.total, BatchJobStatus.RUNNING),
         sourceActivity = null,
         activityId = null,
@@ -107,9 +107,9 @@ class ActivityWebsocketListener(
 
   fun onBatchOperationCompleted(event: OnBatchOperationCompleted) {
     websocketEventPublisher(
-      "/projects/${event.job.project.id}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
+      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}",
       WebsocketEvent(
-        actor = getActorInfo(event.job.author?.id),
+        actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, null, null, event.job.status),
         sourceActivity = null,
         activityId = null,

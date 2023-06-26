@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
 @Service
@@ -20,8 +21,11 @@ class BatchJobService(
   private val applicationContext: ApplicationContext,
   @Lazy
   private val batchJobChunkService: BatchJobActionService,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
+  private val cachingBatchJobService: CachingBatchJobService
 ) {
+
+  @Transactional
   fun <RequestType> startJob(
     request: RequestType,
     project: Project,
@@ -43,10 +47,10 @@ class BatchJobService(
       }
       val chunked = job.chunkedTarget
       job.totalChunks = chunked.size
+      cachingBatchJobService.saveJob(job)
 
       val params = processor.getParams(request, job)
 
-      batchJobRepository.save(job)
       params?.let {
         entityManager.persist(params)
       }
@@ -65,12 +69,19 @@ class BatchJobService(
     return job
   }
 
-  fun findJob(id: Long): BatchJob? {
+  fun findJobEntity(id: Long): BatchJob? {
     return batchJobRepository.findById(id).orElse(null)
   }
 
-  fun getJob(id: Long): BatchJob {
-    return findJob(id) ?: throw NotFoundException(io.tolgee.constants.Message.BATCH_JOB_NOT_FOUND)
+  fun getJobEntity(id: Long): BatchJob {
+    return findJobEntity(id) ?: throw NotFoundException(io.tolgee.constants.Message.BATCH_JOB_NOT_FOUND)
+  }
+
+  fun findJobDto(id: Long): BatchJobDto? {
+    return cachingBatchJobService.findJobDto(id)
+  }
+  fun getJobDto(id: Long): BatchJobDto {
+    return this.findJobDto(id) ?: throw NotFoundException(io.tolgee.constants.Message.BATCH_JOB_NOT_FOUND)
   }
 
   @Suppress("UNCHECKED_CAST")

@@ -1,9 +1,7 @@
 package io.tolgee.batch
 
-import io.tolgee.model.batch.BatchJob
-
 data class OnBatchOperationProgress(
-  val job: BatchJob,
+  val job: BatchJobDto,
   val processed: Long,
   val total: Long,
 )

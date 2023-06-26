@@ -1,5 +1,6 @@
 package io.tolgee.batch.processors
 
+import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.model.EntityWithId
@@ -13,7 +14,7 @@ class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager
 ) : ChunkProcessor<DeleteKeysRequest> {
-  override fun process(job: BatchJob, chunk: List<Long>, onProgress: ((Int) -> Unit)) {
+  override fun process(job: BatchJobDto, chunk: List<Long>, onProgress: ((Int) -> Unit)) {
     val subChunked = chunk.chunked(100)
     var progress: Int = 0
     subChunked.forEach { subChunk ->

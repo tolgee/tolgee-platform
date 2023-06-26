@@ -2,7 +2,6 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
-import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -19,6 +18,7 @@ import kotlinx.coroutines.runBlocking
 import org.hibernate.LockOptions
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
@@ -39,7 +39,8 @@ class BatchJobActionService(
   private val applicationContext: ApplicationContext,
   private val usingRedisProvider: UsingRedisProvider,
   private val progressManager: ProgressManager,
-  private val activityHolder: ActivityHolder
+  @Lazy
+  private val batchJobService: BatchJobService
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -80,43 +81,43 @@ class BatchJobActionService(
               launch {
                 try {
                   var retryExecution: BatchJobChunkExecution? = null
-                  executeInNewTransaction(
+                  val execution = executeInNewTransaction(
                     transactionManager,
                     isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
                   ) {
                     val lockedExecution = getItemIfCanAcquireLock(executionItem.chunkExecutionId)
                       ?: let {
                         logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
-                        return@executeInNewTransaction
+                        return@executeInNewTransaction null
                       }
                     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
                       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is not pending, skipping")
-                      return@executeInNewTransaction
+                      return@executeInNewTransaction null
                     }
                     publishRemoveConsuming(executionItem)
-                    logger.debug("Job ${lockedExecution.batchJob.id}: 🟡 Processing chunk ${lockedExecution.id}")
+                    val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
+                    logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
                     val util = ChunkProcessingUtil(lockedExecution, applicationContext)
                     util.processChunk()
-                    val activityRevision = activityHolder.activityRevision
-                      ?: throw IllegalStateException("Activity revision not set")
-                    activityRevision.batchJobChunkExecution = lockedExecution
                     progressManager.handleProgress(lockedExecution)
                     entityManager.persist(lockedExecution)
                     if (lockedExecution.retry) {
                       retryExecution = util.retryExecution
+                      entityManager.persist(util.retryExecution)
                     }
-                    logger.debug("Job ${lockedExecution.batchJob.id}: ✅ Processed chunk ${lockedExecution.id}")
+                    logger.debug("Job ${batchJobDto.id}: ✅ Processed chunk ${lockedExecution.id}")
+                    return@executeInNewTransaction lockedExecution
                   }
+                  execution?.let { progressManager.handleChunkCompletedCommitted(it) }
                   retryExecution?.let {
-                    executeInNewTransaction(transactionManager) {
-                      entityManager.persist(it)
-                    }
                     addToQueue(it)
-                    logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
+                    val batchJobDto = batchJobService.getJobDto(it.batchJob.id)
+                    logger.debug("Job ${batchJobDto.id}: Added chunk ${it.id} for re-trial")
                   }
                 } catch (e: Throwable) {
                   logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
                   Sentry.captureException(e)
+                  queue.add(executionItem)
                 }
               }.invokeOnCompletion {
                 logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")

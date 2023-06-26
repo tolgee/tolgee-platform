@@ -32,6 +32,7 @@ class ActivityService(
       entityManager.persist(activityModifiedEntity)
     }
     entityManager.flush()
+    activityRevision.afterFlush?.invoke()
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }
 

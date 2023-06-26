@@ -8,6 +8,10 @@ import kotlin.reflect.KClass
 
 open class ActivityHolder {
   open var activity: ActivityType? = null
+    set(value) {
+      field = value
+      activityRevision?.type = value
+    }
 
   open var meta: MutableMap<String, Any?> = mutableMapOf()
 

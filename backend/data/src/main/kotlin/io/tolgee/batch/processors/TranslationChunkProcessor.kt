@@ -1,5 +1,6 @@
 package io.tolgee.batch.processors
 
+import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.RequeueWithTimeoutException
@@ -22,7 +23,7 @@ class TranslationChunkProcessor(
   private val languageService: LanguageService,
   private val entityManager: EntityManager
 ) : ChunkProcessor<BatchTranslateRequest> {
-  override fun process(job: BatchJob, chunk: List<Long>, onProgress: (Int) -> Unit) {
+  override fun process(job: BatchJobDto, chunk: List<Long>, onProgress: (Int) -> Unit) {
     val keys = keyService.find(chunk)
     val parameters = getParams(job)
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
@@ -45,7 +46,7 @@ class TranslationChunkProcessor(
     }
   }
 
-  private fun getParams(job: BatchJob): TranslateJobParams {
+  private fun getParams(job: BatchJobDto): TranslateJobParams {
     return entityManager.createQuery("""from TranslateJobParams tjp where tjp.batchJob.id = :batchJobId""")
       .setParameter("batchJobId", job.id).singleResult as? TranslateJobParams
       ?: throw IllegalStateException("No params found")

@@ -99,7 +99,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJob(job.id)
+      val finishedJob = batchJobService.getJobDto(job.id)
       finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     }
 
@@ -131,7 +131,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       .then {}
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJob(job.id)
+      val finishedJob = batchJobService.getJobDto(job.id)
       finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
     }
 
@@ -167,7 +167,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJob(job.id)
+      val finishedJob = batchJobService.getJobDto(job.id)
       finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
     }
 
@@ -228,7 +228,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 10000)
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJob(job.id)
+      val finishedJob = batchJobService.getJobDto(job.id)
       finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
     }
 
@@ -270,7 +270,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     val job = runSingleChunkJob(100)
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJob(job.id)
+      val finishedJob = batchJobService.getJobDto(job.id)
       finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     }
 

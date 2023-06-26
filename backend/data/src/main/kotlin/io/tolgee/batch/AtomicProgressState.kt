@@ -52,6 +52,14 @@ class AtomicProgressState(
     }
   }
 
+  fun getCompletedChunksCommittedAtomicLong(jobId: Long, currentExecutionId: Long? = null): TolgeeAtomicLong {
+    return atomicLongProvider.get("batch_job_completed_chunks_committed_$jobId") {
+      val initial = getInitialCompletedChunks(jobId, currentExecutionId)
+      logger.debug("Initial completed chunks: $initial")
+      initial
+    }
+  }
+
   private fun getInitialCompletedChunks(jobId: Long, currentExecutionId: Long?): Long {
     return entityManager.createQuery(
       """

@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.sentry.Sentry
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -19,14 +20,14 @@ open class ChunkProcessingUtil(
 ) : Logging {
   open fun processChunk() {
     try {
-      val total = toProcess.size
       batchJobService.getProcessor<Any>(job.type).process(job, toProcess) {
-        if (it != total) {
+        if (it != toProcess.size) {
           progressManager.publishChunkProgress(job.id, it)
         }
       }
       successfulTargets = toProcess
       execution.status = BatchJobChunkExecutionStatus.SUCCESS
+      handleActivity()
     } catch (e: Throwable) {
       handleException(e)
     } finally {
@@ -34,6 +35,15 @@ open class ChunkProcessingUtil(
         execution.successTargets = it
       }
     }
+  }
+
+  private fun handleActivity() {
+    val activityRevision = activityHolder.activityRevision
+      ?: throw IllegalStateException("Activity revision not set")
+    activityRevision.batchJobChunkExecution = execution
+    val batchJobDto = batchJobService.getJobDto(job.id)
+    activityRevision.projectId = batchJobDto.projectId
+    activityHolder.activity = batchJobDto.type.activityType
   }
 
   private fun handleException(exception: Throwable) {
@@ -76,14 +86,19 @@ open class ChunkProcessingUtil(
   }
 
   private fun setJobFailed() {
-    job.status = BatchJobStatus.FAILED
-    entityManager.persist(job)
+    val entity = batchJobService.getJobEntity(job.id)
+    entity.status = BatchJobStatus.FAILED
+    entityManager.persist(entity)
   }
 
   private fun getWaitTime(exception: RequeueWithTimeoutException) =
     exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toInt()
 
-  private val job by lazy { execution.batchJob }
+  private val job by lazy { batchJobService.getJobDto(execution.batchJob.id) }
+
+  private val activityHolder by lazy {
+    applicationContext.getBean(ActivityHolder::class.java)
+  }
 
   private val entityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
@@ -114,7 +129,7 @@ open class ChunkProcessingUtil(
 
   val retryExecution: BatchJobChunkExecution by lazy {
     BatchJobChunkExecution().apply {
-      batchJob = job
+      batchJob = entityManager.getReference(execution.batchJob::class.java, job.id)
       chunkNumber = execution.chunkNumber
       status = BatchJobChunkExecutionStatus.PENDING
     }
@@ -135,7 +150,7 @@ open class ChunkProcessingUtil(
       """.trimIndent()
     )
       .setParameter("chunkNumber", execution.chunkNumber)
-      .setParameter("batchJobId", execution.batchJob.id)
+      .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "javax.persistence.lock.timeout",
