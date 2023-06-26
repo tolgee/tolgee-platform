@@ -26,6 +26,7 @@ class RedisPubSubReceiverConfiguration(
   companion object {
     const val WEBSOCKET_TOPIC = "websocket"
     const val JOB_QUEUE_TOPIC = "job_queue"
+    const val JOB_CANCEL_TOPIC = "job_cancel"
   }
 
   @Bean
@@ -44,6 +45,11 @@ class RedisPubSubReceiverConfiguration(
   }
 
   @Bean
+  fun redisJobCancelPubsubListenerAdapter(): MessageListenerAdapter {
+    return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobCancel.name)
+  }
+
+  @Bean
   fun redisPubsubContainer(): RedisMessageListenerContainer {
     val container = RedisMessageListenerContainer()
     container.connectionFactory = connectionFactory
@@ -51,6 +57,7 @@ class RedisPubSubReceiverConfiguration(
       container.addMessageListener(redisWebsocketPubsubListenerAdapter(), PatternTopic(WEBSOCKET_TOPIC))
     }
     container.addMessageListener(redisJobQueuePubsubListenerAdapter(), PatternTopic(JOB_QUEUE_TOPIC))
+    container.addMessageListener(redisJobQueuePubsubListenerAdapter(), PatternTopic(JOB_CANCEL_TOPIC))
     return container
   }
 }

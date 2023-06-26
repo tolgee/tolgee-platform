@@ -1,6 +1,7 @@
 package io.tolgee.pubSub
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.batch.JobCancelEvent
 import io.tolgee.batch.JobQueueItemEvent
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -22,5 +23,10 @@ class RedisPubSubReceiver(
   fun receiveJobQueueMessage(message: String) {
     val data = jacksonObjectMapper().readValue(message, JobQueueItemEvent::class.java)
     applicationEventPublisher.publishEvent(data)
+  }
+
+  fun receiveJobCancel(message: String) {
+    val data = jacksonObjectMapper().readValue(message, Long::class.java)
+    applicationEventPublisher.publishEvent(JobCancelEvent(data))
   }
 }

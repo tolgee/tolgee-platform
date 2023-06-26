@@ -2,10 +2,11 @@ package io.tolgee.websocket
 
 import io.tolgee.activity.projectActivityView.RelationDescriptionExtractor
 import io.tolgee.batch.OnBatchOperationCompleted
-import io.tolgee.batch.OnBatchOperationFailed
-import io.tolgee.batch.OnBatchOperationProgress
-import io.tolgee.batch.OnBatchOperationSucceeded
 import io.tolgee.batch.WebsocketProgressInfo
+import io.tolgee.batch.events.OnBatchOperationCancelled
+import io.tolgee.batch.events.OnBatchOperationFailed
+import io.tolgee.batch.events.OnBatchOperationProgress
+import io.tolgee.batch.events.OnBatchOperationSucceeded
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -102,6 +103,11 @@ class ActivityWebsocketListener(
 
   @TransactionalEventListener(OnBatchOperationFailed::class)
   fun onBatchOperationFailed(event: OnBatchOperationFailed) {
+    onBatchOperationCompleted(event)
+  }
+
+  @TransactionalEventListener(OnBatchOperationCancelled::class)
+  fun onBatchOperationCancelled(event: OnBatchOperationCancelled) {
     onBatchOperationCompleted(event)
   }
 

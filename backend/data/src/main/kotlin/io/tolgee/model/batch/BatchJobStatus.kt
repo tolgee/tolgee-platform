@@ -5,4 +5,5 @@ enum class BatchJobStatus {
   RUNNING,
   SUCCESS,
   FAILED,
+  CANCELLED,
 }

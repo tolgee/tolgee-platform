@@ -4,4 +4,5 @@ enum class BatchJobChunkExecutionStatus {
   PENDING,
   SUCCESS,
   FAILED,
+  CANCELLED,
 }

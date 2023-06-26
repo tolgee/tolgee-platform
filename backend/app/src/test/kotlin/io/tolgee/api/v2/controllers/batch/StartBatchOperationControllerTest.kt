@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class BatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class StartBatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BatchOperationsTestData
   var fakeBefore = false
 

@@ -1,6 +1,9 @@
 package io.tolgee.batch
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.events.OnBatchOperationCancelled
+import io.tolgee.batch.events.OnBatchOperationFailed
+import io.tolgee.batch.events.OnBatchOperationSucceeded
 import io.tolgee.fixtures.waitFor
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -19,6 +22,11 @@ class BatchJobActivityFinalizer(
 
   @EventListener(OnBatchOperationFailed::class)
   fun finalizeActivityWhenJobFailed(event: OnBatchOperationFailed) {
+    finalizeActivityWhenJobCompleted(event.job)
+  }
+
+  @EventListener(OnBatchOperationCancelled::class)
+  fun finalizeActivityWhenJobCancelled(event: OnBatchOperationCancelled) {
     finalizeActivityWhenJobCompleted(event.job)
   }
 

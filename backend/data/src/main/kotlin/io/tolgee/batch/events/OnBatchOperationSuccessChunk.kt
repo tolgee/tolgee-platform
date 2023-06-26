@@ -1,4 +1,4 @@
-package io.tolgee.batch
+package io.tolgee.batch.events
 
 import io.tolgee.model.batch.BatchJob
 

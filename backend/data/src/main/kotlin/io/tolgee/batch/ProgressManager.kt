@@ -1,5 +1,9 @@
 package io.tolgee.batch
 
+import io.tolgee.batch.events.OnBatchOperationCancelled
+import io.tolgee.batch.events.OnBatchOperationFailed
+import io.tolgee.batch.events.OnBatchOperationProgress
+import io.tolgee.batch.events.OnBatchOperationSucceeded
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobStatus
@@ -57,6 +61,11 @@ class ProgressManager(
     }
 
     logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
+
+    if (job.status == BatchJobStatus.CANCELLED) {
+      eventPublisher.publishEvent(OnBatchOperationCancelled(job))
+      return
+    }
 
     val jobEntity = batchJobService.getJobEntity(job.id)
     if (job.totalItems.toLong() != progress) {

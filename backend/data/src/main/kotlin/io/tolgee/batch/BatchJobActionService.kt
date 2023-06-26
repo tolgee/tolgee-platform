@@ -6,6 +6,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
@@ -25,8 +26,9 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.PreDestroy
 import javax.persistence.EntityManager
 import javax.persistence.LockModeType
@@ -40,7 +42,9 @@ class BatchJobActionService(
   private val usingRedisProvider: UsingRedisProvider,
   private val progressManager: ProgressManager,
   @Lazy
-  private val batchJobService: BatchJobService
+  private val batchJobService: BatchJobService,
+  @Lazy
+  private val cachingBatchJobService: CachingBatchJobService
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -51,7 +55,7 @@ class BatchJobActionService(
   var run = true
 
   var queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
-  var runningJobs: AtomicInteger = AtomicInteger(0)
+  var runningJobs: ConcurrentHashMap<Long, Job> = ConcurrentHashMap()
 
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
@@ -63,7 +67,7 @@ class BatchJobActionService(
     runJob = GlobalScope.launch {
       runBlocking(Dispatchers.IO) {
         repeatForever {
-          val jobsToLaunch = CONCURRENCY - runningJobs.get()
+          val jobsToLaunch = CONCURRENCY - runningJobs.size
           if (jobsToLaunch <= 0) {
             return@repeatForever
           }
@@ -76,9 +80,14 @@ class BatchJobActionService(
                 queue.add(executionItem)
                 return@forEach
               }
-              var runningJobsNow = runningJobs.incrementAndGet()
-              logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: $runningJobsNow")
-              launch {
+              batchJobService.getJobDto(executionItem.jobId).let { jobDto ->
+                if (jobDto.status == BatchJobStatus.CANCELLED) {
+                  logger.debug("Job ${jobDto.id} is cancelled, skipping")
+                  return@forEach
+                }
+              }
+              val runningJobsNow = runningJobs.size
+              val job = launch {
                 try {
                   var retryExecution: BatchJobChunkExecution? = null
                   val execution = executeInNewTransaction(
@@ -119,11 +128,22 @@ class BatchJobActionService(
                   Sentry.captureException(e)
                   queue.add(executionItem)
                 }
-              }.invokeOnCompletion {
-                logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
-                runningJobsNow = runningJobs.decrementAndGet()
-                logger.debug("Running jobs: $runningJobsNow")
               }
+              job.invokeOnCompletion {
+                runningJobs.remove(executionItem.chunkExecutionId)
+                logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
+                logger.debug("Running jobs: ${runningJobs.size}")
+                if (job.isCancelled) {
+                  executeInNewTransaction(transactionManager) {
+                    val execution =
+                      getItemIfCanAcquireLock(executionItem.chunkExecutionId) ?: return@executeInNewTransaction
+                    execution.status = BatchJobChunkExecutionStatus.CANCELLED
+                    entityManager.persist(execution)
+                    progressManager.handleProgress(execution)
+                  }
+                }
+              }
+              logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: $runningJobsNow")
             }
         }
       }
@@ -181,13 +201,14 @@ class BatchJobActionService(
     val data = entityManager.createQuery(
       """
                         from BatchJobChunkExecution bjce
-                        join fetch bjce.batchJob
-                        where bjce.status = : status
+                        join fetch bjce.batchJob bk
+                        where bjce.status = :status and bk.status not in :jobStatusNot
                         order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
-      .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
+      .setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+      .setParameter("jobStatusNot", listOf(BatchJobStatus.CANCELLED))
       .setHint(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
@@ -210,13 +231,13 @@ class BatchJobActionService(
   }
 
   private fun BatchJobChunkExecution.toItem() =
-    ExecutionQueueItem(id, executeAfter?.time)
+    ExecutionQueueItem(id, batchJob.id, executeAfter?.time)
 
   fun getItemIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
     return entityManager.createQuery(
       """
-                        from BatchJobChunkExecution bjce
-                        where bjce . id = :id
+            from BatchJobChunkExecution bjce
+            where bjce.id = :id
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
@@ -226,5 +247,30 @@ class BatchJobActionService(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList.singleOrNull()
+  }
+
+  @Transactional
+  fun cancel(id: Long) {
+    if (cachingBatchJobService.cancelJob(id)) {
+      if (usingRedisProvider.areWeUsingRedis) {
+        redisTemplate.convertAndSend(
+          RedisPubSubReceiverConfiguration.JOB_CANCEL_TOPIC,
+          jacksonObjectMapper().writeValueAsString(id)
+        )
+        return
+      }
+      cancelLocalJob(id)
+    }
+  }
+
+  @EventListener(JobCancelEvent::class)
+  fun cancelJobListener(event: JobCancelEvent) {
+    cancelLocalJob(event.jobId)
+  }
+
+  fun cancelLocalJob(jobId: Long) {
+    queue.filter { it.jobId == jobId }.forEach {
+      runningJobs[it.chunkExecutionId]?.cancel()
+    }
   }
 }
