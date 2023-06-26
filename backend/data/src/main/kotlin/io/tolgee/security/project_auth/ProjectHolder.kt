@@ -11,5 +11,12 @@ open class ProjectHolder(
     projectService.get(project.id)
   }
 
-  open lateinit var project: ProjectDto
+  private var _project: ProjectDto? = null
+  open var project: ProjectDto
+    set(value) {
+      _project = value
+    }
+    get() {
+      return _project ?: throw ProjectNotSelectedException()
+    }
 }

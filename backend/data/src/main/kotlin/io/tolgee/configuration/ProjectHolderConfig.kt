@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import io.tolgee.configuration.TransactionScopeConfig.Companion.SCOPE_TRANSACTION
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.project_auth.ProjectNotSelectedException
 import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
@@ -39,8 +40,8 @@ class ProjectHolderConfig {
         try {
           // we must try to access something to get the exception thrown
           it.project
-        } catch (e: UninitializedPropertyAccessException) {
-          // UninitializedPropertyAccessException is normal, since project is not set initially
+        } catch (e: ProjectNotSelectedException) {
+          // ProjectNotSelectedException is normal, since project is not set initially
           return it
         }
       }

@@ -146,7 +146,8 @@ enum class Message {
   SEATS_SPENDING_LIMIT_EXCEEDED,
   THIS_INSTANCE_IS_ALREADY_LICENSED,
   BIG_META_NOT_FROM_PROJECT,
-  MT_SERVICE_NOT_ENABLED;
+  MT_SERVICE_NOT_ENABLED,
+  PROJECT_NOT_SELECTED;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
