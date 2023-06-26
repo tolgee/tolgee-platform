@@ -103,7 +103,6 @@ class KeyController(
   @AccessWithAnyProjectPermission
   // key permissions are checked separately in method body
   @AccessWithApiKey
-  @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }

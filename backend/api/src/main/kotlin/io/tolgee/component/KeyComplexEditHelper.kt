@@ -15,8 +15,10 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
+import org.springframework.transaction.PlatformTransactionManager
 import kotlin.properties.Delegates
 
 class KeyComplexEditHelper(
@@ -34,6 +36,8 @@ class KeyComplexEditHelper(
   private val tagService: TagService = applicationContext.getBean(TagService::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
+  private val transactionManager: PlatformTransactionManager =
+    applicationContext.getBean(PlatformTransactionManager::class.java)
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<String, String?>? = null
@@ -46,33 +50,35 @@ class KeyComplexEditHelper(
   private var isScreenshotAdded by Delegates.notNull<Boolean>()
 
   fun doComplexUpdate(): KeyWithDataModel {
-    prepareData()
-    prepareConditions()
-    setActivityHolder()
+    return executeInNewTransaction(transactionManager = transactionManager) {
+      prepareData()
+      prepareConditions()
+      setActivityHolder()
 
-    if (modifiedTranslations != null && areTranslationsModified) {
-      projectHolder.projectEntity.checkTranslationsEditPermission()
-      securityService.checkLanguageTagPermissions(modifiedTranslations!!.keys, projectHolder.project.id)
-      translationService.setForKey(key, translations = modifiedTranslations!!)
+      if (modifiedTranslations != null && areTranslationsModified) {
+        projectHolder.projectEntity.checkTranslationsEditPermission()
+        securityService.checkLanguageTagPermissions(modifiedTranslations!!.keys, projectHolder.project.id)
+        translationService.setForKey(key, translations = modifiedTranslations!!)
+      }
+
+      if (dtoTags !== null && areTagsModified) {
+        key.project.checkKeysEditPermission()
+        tagService.updateTags(key, dtoTags)
+      }
+
+      if (isScreenshotAdded || isScreenshotDeleted) {
+        updateScreenshotsWithPermissionCheck(dto, key)
+      }
+
+      var edited = key
+
+      if (isKeyModified) {
+        key.project.checkKeysEditPermission()
+        edited = keyService.edit(key, dto.name, dto.namespace)
+      }
+
+      keyWithDataModelAssembler.toModel(edited)
     }
-
-    if (dtoTags !== null && areTagsModified) {
-      key.project.checkKeysEditPermission()
-      tagService.updateTags(key, dtoTags)
-    }
-
-    if (isScreenshotAdded || isScreenshotDeleted) {
-      updateScreenshotsWithPermissionCheck(dto, key)
-    }
-
-    var edited = key
-
-    if (isKeyModified) {
-      key.project.checkKeysEditPermission()
-      edited = keyService.edit(key, dto.name, dto.namespace)
-    }
-
-    return keyWithDataModelAssembler.toModel(edited)
   }
 
   private fun setActivityHolder() {
