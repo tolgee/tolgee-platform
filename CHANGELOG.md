@@ -1,3 +1,11 @@
+## [3.20.5](https://github.com/tolgee/tolgee-platform/compare/v3.20.4...v3.20.5) (2023-06-26)
+
+
+### Bug Fixes
+
+* Fix 500 with PAT token to project endpoints without projectId ([#1760](https://github.com/tolgee/tolgee-platform/issues/1760)) ([891c8bc](https://github.com/tolgee/tolgee-platform/commit/891c8bcd5f4e434db49ee212f20ee8513f473e88))
+* Set translation to UNTRANSLATED state when null or empty value ([#1767](https://github.com/tolgee/tolgee-platform/issues/1767)) ([37de81b](https://github.com/tolgee/tolgee-platform/commit/37de81b3194a6b8cb8fe1d034c563a290313d93c))
+
 ## [3.20.4](https://github.com/tolgee/tolgee-platform/compare/v3.20.3...v3.20.4) (2023-06-26)
 
 
