@@ -1,3 +1,11 @@
+## [3.20.4](https://github.com/tolgee/tolgee-platform/compare/v3.20.3...v3.20.4) (2023-06-26)
+
+
+### Bug Fixes
+
+* Angular step by step guide link ([#1766](https://github.com/tolgee/tolgee-platform/issues/1766)) ([c4ee209](https://github.com/tolgee/tolgee-platform/commit/c4ee2097c7d318ac1acf96ac7d297ac9b26aa053))
+* Key complex edit should return 400 on limit exceeded ([#1765](https://github.com/tolgee/tolgee-platform/issues/1765)) ([8f794b2](https://github.com/tolgee/tolgee-platform/commit/8f794b2a7b34aac1e7579cdc5ca63b183c12be37))
+
 ## [3.20.3](https://github.com/tolgee/tolgee-platform/compare/v3.20.2...v3.20.3) (2023-06-22)
 
 
