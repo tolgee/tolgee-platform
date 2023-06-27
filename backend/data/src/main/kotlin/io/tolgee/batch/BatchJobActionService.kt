@@ -51,7 +51,8 @@ class BatchJobActionService(
   var run = true
 
   var queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
-  var runningJobs: ConcurrentHashMap<Long, Job> = ConcurrentHashMap()
+  var runningJobs: ConcurrentHashMap<Long, Pair<Long, Job>> = ConcurrentHashMap()
+  var pause = false
 
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
@@ -63,6 +64,9 @@ class BatchJobActionService(
     runJob = GlobalScope.launch {
       runBlocking(Dispatchers.IO) {
         repeatForever {
+          if (pause) {
+            return@repeatForever
+          }
           val jobsToLaunch = CONCURRENCY - runningJobs.size
           if (jobsToLaunch <= 0) {
             return@repeatForever
@@ -72,11 +76,15 @@ class BatchJobActionService(
           (1..jobsToLaunch).mapNotNull { queue.poll() }
             .forEach { executionItem ->
               if (!executionItem.isTimeToExecute()) {
-                logger.debug("""Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue: Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""")
+                logger.debug(
+                  """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
+                  | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
+                )
                 queue.add(executionItem)
                 return@forEach
               }
               val runningJobsNow = runningJobs.size
+
               val job = launch {
                 try {
                   var retryExecution: BatchJobChunkExecution? = null
@@ -96,7 +104,7 @@ class BatchJobActionService(
                     publishRemoveConsuming(executionItem)
                     val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
                     logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
-                    val util = ChunkProcessingUtil(lockedExecution, applicationContext)
+                    val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
                     util.processChunk()
                     progressManager.handleProgress(lockedExecution)
                     entityManager.persist(lockedExecution)
@@ -118,20 +126,20 @@ class BatchJobActionService(
                   queue.add(executionItem)
                 }
               }
-              runningJobs[executionItem.chunkExecutionId] = job
+              runningJobs[executionItem.chunkExecutionId] = executionItem.jobId to job
               job.invokeOnCompletion {
                 runningJobs.remove(executionItem.chunkExecutionId)
                 logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
                 logger.debug("Running jobs: ${runningJobs.size}")
-                if (job.isCancelled) {
-                  executeInNewTransaction(transactionManager) {
-                    val execution =
-                      getItemIfCanAcquireLock(executionItem.chunkExecutionId) ?: return@executeInNewTransaction
-                    execution.status = BatchJobChunkExecutionStatus.CANCELLED
-                    entityManager.persist(execution)
-                    progressManager.handleProgress(execution)
-                  }
-                }
+//                if (job.isCancelled) {
+//                  executeInNewTransaction(transactionManager) {
+//                    val execution =
+//                      getItemIfCanAcquireLock(executionItem.chunkExecutionId) ?: return@executeInNewTransaction
+//                    execution.status = BatchJobChunkExecutionStatus.CANCELLED
+//                    entityManager.persist(execution)
+//                    progressManager.handleProgress(execution)
+//                  }
+//                }
               }
               logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: $runningJobsNow")
             }
@@ -222,6 +230,7 @@ class BatchJobActionService(
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time)
 
   fun getItemIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
+    entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager.createQuery(
       """
             from BatchJobChunkExecution bjce
@@ -238,8 +247,9 @@ class BatchJobActionService(
   }
 
   fun cancelLocalJob(jobId: Long) {
-    queue.filter { it.jobId == jobId }.forEach {
-      runningJobs[it.chunkExecutionId]?.cancel()
+    queue.removeIf { it.jobId == jobId }
+    runningJobs.filter { it.value.first == jobId }.forEach {
+      it.value.second.cancel()
     }
   }
 }

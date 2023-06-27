@@ -6,15 +6,23 @@ import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.service.key.KeyService
+import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
+import kotlin.coroutines.CoroutineContext
 
 @Component
 class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager
 ) : ChunkProcessor<DeleteKeysRequest> {
-  override fun process(job: BatchJobDto, chunk: List<Long>, onProgress: ((Int) -> Unit)) {
+  override fun process(
+    job: BatchJobDto,
+    chunk: List<Long>,
+    coroutineContext: CoroutineContext,
+    onProgress: ((Int) -> Unit)
+  ) {
+    coroutineContext.ensureActive()
     val subChunked = chunk.chunked(100)
     var progress: Int = 0
     subChunked.forEach { subChunk ->

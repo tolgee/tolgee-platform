@@ -8,6 +8,7 @@ import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import javax.persistence.EntityManager
 
 @Component
@@ -41,6 +42,14 @@ class BatchJobStateProvider(
     }
   }
 
+  fun getStatesMap(): ConcurrentMap<Long, MutableMap<Long, ExecutionState>> {
+    return if (usingRedisProvider.areWeUsingRedis) {
+      getRedissonStatesMap()
+    } else {
+      localJobStatesMap
+    }
+  }
+
   private fun getLocalMap(jobId: Long): MutableMap<Long, ExecutionState> {
     return localJobStatesMap.getOrPut(jobId) {
       getInitialState(jobId)
@@ -48,15 +57,16 @@ class BatchJobStateProvider(
   }
 
   private fun getRedissonMap(jobId: Long): MutableMap<Long, ExecutionState> {
-    val statesMap = getStatesMap()
+    val statesMap = getRedissonStatesMap()
 
     return statesMap.getOrPut(jobId) {
       getInitialState(jobId)
     }
   }
 
-  private fun getStatesMap(): RMap<Long, MutableMap<Long, ExecutionState>> =
-    redissonClient.getMap("batch_job_state")
+  private fun getRedissonStatesMap(): RMap<Long, MutableMap<Long, ExecutionState>> {
+    return redissonClient.getMap("batch_job_state")
+  }
 
   fun getInitialState(jobId: Long): MutableMap<Long, ExecutionState> {
     val executions = entityManager.createQuery(

@@ -1,6 +1,7 @@
 package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
@@ -44,6 +45,8 @@ class BatchJob : StandardAuditModel() {
   var activityRevision: ActivityRevision? = null
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)
+
+  val dto get() = BatchJobDto.fromEntity(this)
 
   companion object {
     fun chunkTarget(chunkSize: Int, target: List<Long>): List<List<Long>> =

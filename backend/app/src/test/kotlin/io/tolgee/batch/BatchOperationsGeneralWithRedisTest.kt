@@ -5,6 +5,7 @@ import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
 import io.tolgee.testing.assert
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -55,13 +56,16 @@ class BatchOperationsGeneralWithRedisTest : AbstractBatchOperationsGeneralTest()
   @Test
   fun `removes from queue using event`() {
     var done = false
-    whenever(translationChunkProcessor.process(any(), any(), any())).thenAnswer {
-      while (!done) {
-        Thread.sleep(100)
+
+    runBlocking {
+      whenever(translationChunkProcessor.process(any(), any(), any(), any())).thenAnswer {
+        while (!done) {
+          Thread.sleep(100)
+        }
       }
     }
-    try {
 
+    try {
       runChunkedJob(keyCount = 200)
 
       waitForNotThrowing {

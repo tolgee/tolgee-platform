@@ -13,8 +13,10 @@ import io.tolgee.model.batch.TranslateJobParams
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.AutoTranslationService
+import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
+import kotlin.coroutines.CoroutineContext
 
 @Component
 class TranslationChunkProcessor(
@@ -23,13 +25,19 @@ class TranslationChunkProcessor(
   private val languageService: LanguageService,
   private val entityManager: EntityManager
 ) : ChunkProcessor<BatchTranslateRequest> {
-  override fun process(job: BatchJobDto, chunk: List<Long>, onProgress: (Int) -> Unit) {
+  override fun process(
+    job: BatchJobDto,
+    chunk: List<Long>,
+    coroutineContext: CoroutineContext,
+    onProgress: (Int) -> Unit
+  ) {
     val keys = keyService.find(chunk)
     val parameters = getParams(job)
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
 
     val successfulTargets = mutableListOf<Long>()
     keys.forEach { key ->
+      coroutineContext.ensureActive()
       try {
         autoTranslationService.autoTranslate(
           key = key,

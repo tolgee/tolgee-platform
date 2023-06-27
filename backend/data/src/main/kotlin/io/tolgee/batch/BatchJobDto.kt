@@ -12,10 +12,10 @@ class BatchJobDto(
   val totalChunks: Int,
   val chunkSize: Int,
   val status: BatchJobStatus,
-  val type: BatchJobType,
-  val activityRevisionId: Long?
+  val type: BatchJobType
 ) {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
+
   companion object {
     fun fromEntity(entity: BatchJob): BatchJobDto {
       return BatchJobDto(
@@ -28,7 +28,6 @@ class BatchJobDto(
         chunkSize = entity.chunkSize,
         status = entity.status,
         type = entity.type,
-        activityRevisionId = entity.activityRevision?.id
       )
     }
   }

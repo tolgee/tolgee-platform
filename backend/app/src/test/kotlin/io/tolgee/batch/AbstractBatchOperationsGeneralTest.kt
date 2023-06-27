@@ -9,12 +9,14 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.assert
 import io.tolgee.websocket.WebsocketTestHelper
+import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
 abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
@@ -58,6 +61,9 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
+
+  @Autowired
+  lateinit var batchJobCancellationManager: BatchJobCancellationManager
 
   @BeforeEach
   fun setup() {
@@ -95,7 +101,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       verify(
         translationChunkProcessor,
         times(ceil(job.totalItems.toDouble() / BatchJobType.TRANSLATION.chunkSize).toInt())
-      ).process(any(), any(), any())
+      ).process(any(), any(), any(), any())
     }
 
     waitForNotThrowing(pollTime = 1000) {
@@ -128,7 +134,11 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       )
     }
 
-    whenever(translationChunkProcessor.process(any(), any(), any()))
+    whenever(
+      translationChunkProcessor.process(
+        any(), any(), any(), any()
+      )
+    )
       .thenThrow(*exceptions.toTypedArray())
       .then {}
 
@@ -157,6 +167,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       translationChunkProcessor.process(
         any(),
         argThat { this.containsAll((1L..10).toList()) },
+        any(),
         any()
       )
     ).thenThrow(RuntimeException("OMG! It failed"))
@@ -200,6 +211,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       translationChunkProcessor.process(
         any(),
         argThat { this.containsAll(throwingChunk) },
+        any(),
         any()
       )
     ).thenThrow(
@@ -261,6 +273,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       deleteKeysChunkProcessor.process(
         any(),
         any(),
+        any(),
         any()
       )
     ).thenAnswer {
@@ -268,7 +281,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       val chunk = it.arguments[1] as List<Long>
 
       @Suppress("UNCHECKED_CAST")
-      val onProgress = it.arguments[2] as ((progress: Int) -> Unit)
+      val onProgress = it.arguments[3] as ((progress: Int) -> Unit)
 
       chunk.forEachIndexed { index, _ ->
         onProgress(index + 1)
@@ -290,6 +303,47 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(101)
     websocketHelper.receivedMessages.last.contains("SUCCESS")
+  }
+
+  @Test
+  fun `cancels the job`() {
+    websocketHelper = WebsocketTestHelper(
+      port,
+      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      testData.projectBuilder.self.id
+    )
+    websocketHelper.listenForBatchOperationProgress()
+
+    var count = 0
+
+    whenever(translationChunkProcessor.process(any(), any(), any(), any())).then {
+      if (count++ > 50) {
+        while (true) {
+          val context = it.arguments[2] as CoroutineContext
+          context.ensureActive()
+          Thread.sleep(100)
+        }
+      }
+    }
+
+    val job = runChunkedJob(1000)
+
+    waitFor {
+      count > 50
+    }
+
+    batchJobCancellationManager.cancel(job.id)
+
+    waitForNotThrowing(pollTime = 1000) {
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+      }
+    }
+
+    // 100 progress messages + 1 finish message
+    websocketHelper.receivedMessages.assert.hasSize(52)
+    websocketHelper.receivedMessages.last.contains("CANCELLED")
   }
 
   protected fun runChunkedJob(keyCount: Int): BatchJob {

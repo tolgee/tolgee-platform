@@ -29,9 +29,8 @@ spring:
       initialize-schema: always
   jmx:
     enabled: false
-#  datasource:
-#    hikari:
-#      maximum-pool-size: 100
+  datasource:
+    maximum-pool-size: 100
 tolgee:
   postgres-autostart:
     enabled: true
@@ -76,6 +75,8 @@ logging:
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee.batch.ProgressManager: DEBUG
     io.tolgee.batch.ChunkProcessingUtil: DEBUG
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE

@@ -29,7 +29,7 @@ import javax.validation.Valid
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/", "/v2/projects/"])
 @Tag(name = "Batch operations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
-class BatchOperationController(
+class BatchOperationManagementController(
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val batchJobService: BatchJobService,

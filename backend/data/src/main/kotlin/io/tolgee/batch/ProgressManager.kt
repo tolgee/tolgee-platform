@@ -58,9 +58,10 @@ class ProgressManager(
   }
 
   fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
-    val state = batchJobStateProvider.get(execution.batchJob.id)
-    state.compute(execution.id) { _, v ->
-      v?.copy(transactionCommitted = true)
+    batchJobStateProvider.updateState(execution.batchJob.id) {
+      it.compute(execution.id) { _, v ->
+        v?.copy(transactionCommitted = true)
+      }
     }
   }
 
@@ -80,20 +81,21 @@ class ProgressManager(
     val jobEntity = batchJobService.getJobEntity(job.id)
     if (isAnyCancelled) {
       jobEntity.status = BatchJobStatus.CANCELLED
-      eventPublisher.publishEvent(OnBatchOperationCancelled(job))
+      cachingBatchJobService.saveJob(jobEntity)
+      eventPublisher.publishEvent(OnBatchOperationCancelled(jobEntity.dto))
       return
     }
 
     if (job.totalItems.toLong() != progress) {
       jobEntity.status = BatchJobStatus.FAILED
       cachingBatchJobService.saveJob(jobEntity)
-      eventPublisher.publishEvent(OnBatchOperationFailed(job))
+      eventPublisher.publishEvent(OnBatchOperationFailed(jobEntity.dto))
       return
     }
 
     jobEntity.status = BatchJobStatus.SUCCESS
     logger.debug("Publishing success event for job ${job.id}")
-    eventPublisher.publishEvent(OnBatchOperationSucceeded(job))
+    eventPublisher.publishEvent(OnBatchOperationSucceeded(jobEntity.dto))
     cachingBatchJobService.saveJob(jobEntity)
   }
 

@@ -12,15 +12,17 @@ import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import java.util.*
 import javax.persistence.EntityManager
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 
 open class ChunkProcessingUtil(
   val execution: BatchJobChunkExecution,
-  val applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
+  private val coroutineContext: CoroutineContext
 ) : Logging {
   open fun processChunk() {
     try {
-      batchJobService.getProcessor<Any>(job.type).process(job, toProcess) {
+      batchJobService.getProcessor<Any>(job.type).process(job, toProcess, coroutineContext) {
         if (it != toProcess.size) {
           progressManager.publishChunkProgress(job.id, it)
         }
@@ -39,7 +41,6 @@ open class ChunkProcessingUtil(
 
   private fun handleActivity() {
     val activityRevision = activityHolder.activityRevision
-      ?: throw IllegalStateException("Activity revision not set")
     activityRevision.batchJobChunkExecution = execution
     val batchJobDto = batchJobService.getJobDto(job.id)
     activityRevision.projectId = batchJobDto.projectId
@@ -47,6 +48,11 @@ open class ChunkProcessingUtil(
   }
 
   private fun handleException(exception: Throwable) {
+    if (exception is kotlinx.coroutines.CancellationException) {
+      execution.status = BatchJobChunkExecutionStatus.CANCELLED
+      return
+    }
+
     execution.exception = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     Sentry.captureException(exception)
