@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobCancellationManager
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.model.enums.Scope
@@ -33,7 +34,8 @@ class BatchOperationController(
   private val projectHolder: ProjectHolder,
   private val batchJobService: BatchJobService,
   private val authenticationFacade: AuthenticationFacade,
-  private val batchJobActionService: BatchJobActionService
+  private val batchJobActionService: BatchJobActionService,
+  private val batchJobCancellationManager: BatchJobCancellationManager
 ) {
   @GetMapping(value = ["batch-operations"])
   @AccessWithApiKey()
@@ -61,6 +63,6 @@ class BatchOperationController(
   @AccessWithAnyProjectPermission()
   @Operation(summary = "Stops batch operation (if possible)")
   fun cancel(@PathVariable id: Long) {
-    batchJobActionService.cancel(id)
+    batchJobCancellationManager.cancel(id)
   }
 }

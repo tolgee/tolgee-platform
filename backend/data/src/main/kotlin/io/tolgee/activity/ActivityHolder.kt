@@ -15,7 +15,9 @@ open class ActivityHolder {
 
   open var meta: MutableMap<String, Any?> = mutableMapOf()
 
-  open var activityRevision: ActivityRevision? = null
+  open val activityRevision: ActivityRevision by lazy {
+    ActivityRevision()
+  }
 
   open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
 

@@ -103,6 +103,15 @@ class ActivityRevision : java.io.Serializable {
   @Transient
   var afterFlush: (() -> Unit)? = null
 
+  /**
+   * The instance is created in the Holder by default, but it is not initialized by the interceptor,
+   * so projectId and authorId might be null.
+   *
+   * This flag is set to true when the instance is initialized by the interceptor.
+   */
+  @Transient
+  var isInitializedByInterceptor: Boolean = false
+
   companion object {
     @Configurable
     class ActivityRevisionListener {

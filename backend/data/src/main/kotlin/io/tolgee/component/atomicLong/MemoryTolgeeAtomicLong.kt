@@ -1,5 +1,6 @@
-package io.tolgee.util
+package io.tolgee.component.atomicLong
 
+import io.tolgee.util.TolgeeAtomicLong
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 

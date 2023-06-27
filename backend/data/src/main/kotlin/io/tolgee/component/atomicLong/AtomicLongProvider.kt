@@ -1,8 +1,7 @@
-package io.tolgee.component
+package io.tolgee.component.atomicLong
 
+import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
-import io.tolgee.util.MemoryTolgeeAtomicLong
-import io.tolgee.util.RedisTolgeeAtomicLong
 import io.tolgee.util.TolgeeAtomicLong
 import io.tolgee.util.logger
 import org.redisson.api.RedissonClient

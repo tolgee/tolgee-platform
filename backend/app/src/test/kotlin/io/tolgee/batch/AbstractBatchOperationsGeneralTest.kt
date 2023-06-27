@@ -99,8 +99,10 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJobDto(job.id)
-      finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      }
     }
 
     // 100 progress messages + 1 finish message
@@ -131,8 +133,10 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       .then {}
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJobDto(job.id)
-      finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      }
     }
 
     // 100 progress messages + 1 finish message
@@ -167,8 +171,10 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     }
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJobDto(job.id)
-      finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      }
     }
 
     entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
@@ -228,8 +234,10 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 10000)
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJobDto(job.id)
-      finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      }
     }
 
     entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
@@ -270,8 +278,10 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     val job = runSingleChunkJob(100)
 
     waitForNotThrowing(pollTime = 1000) {
-      val finishedJob = batchJobService.getJobDto(job.id)
-      finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      }
     }
 
     entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")

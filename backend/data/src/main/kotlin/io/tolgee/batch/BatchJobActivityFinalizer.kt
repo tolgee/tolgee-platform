@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.events.OnBatchOperationCancelled
 import io.tolgee.batch.events.OnBatchOperationFailed
 import io.tolgee.batch.events.OnBatchOperationSucceeded
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.waitFor
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -12,8 +13,8 @@ import javax.persistence.EntityManager
 @Component
 class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
-  private val atomicProgressState: AtomicProgressState,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
+  private val batchJobStateProvider: BatchJobStateProvider,
 ) {
   @EventListener(OnBatchOperationSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchOperationSucceeded) {
@@ -50,7 +51,9 @@ class BatchJobActivityFinalizer(
 
   private fun waitForOtherChunksToComplete(job: BatchJobDto) {
     waitFor(20000) {
-      atomicProgressState.getCompletedChunksCommittedAtomicLong(job.id).get() == job.totalChunks.toLong() - 1
+      val committedChunks = batchJobStateProvider.get(job.id).values
+        .count { !it.retry && it.transactionCommitted && it.status.completed }
+      committedChunks == job.totalChunks - 1
     }
   }
 
@@ -95,7 +98,7 @@ class BatchJobActivityFinalizer(
     activityRevisionIdToMergeInto: Long,
     revisionIds: MutableList<Long>
   ) {
-    removeDuplicitDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
+    removeDuplicityDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
 
     entityManager.createNativeQuery(
       """
@@ -108,7 +111,7 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
-  private fun removeDuplicitDescribingEntities(
+  private fun removeDuplicityDescribingEntities(
     activityRevisionIdToMergeInto: Long,
     revisionIds: MutableList<Long>
   ) {

@@ -1,7 +1,7 @@
 package io.tolgee.batch
 
-import io.tolgee.component.AtomicLongProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.atomicLong.AtomicLongProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.TolgeeAtomicLong
 import io.tolgee.util.logger

@@ -73,10 +73,9 @@ logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
     io.tolgee.batch.BatchJobActionService: DEBUG
-    io.tolgee.component.AtomicLongProvider: DEBUG
+    io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee.batch.ProgressManager: DEBUG
     io.tolgee.batch.ChunkProcessingUtil: DEBUG
-    io.tolgee.batch.AtomicProgressState: DEBUG
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE

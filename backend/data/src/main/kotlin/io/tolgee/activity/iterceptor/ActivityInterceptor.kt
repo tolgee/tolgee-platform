@@ -25,7 +25,8 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
   override fun beforeTransactionCompletion(tx: Transaction) {
     if (tx.isActive) {
       val holder = this.applicationContext.getBean(ActivityHolder::class.java)
-      val activityRevision = holder.activityRevision ?: return
+      val activityRevision = holder.activityRevision
+      if (!activityRevision.isInitializedByInterceptor) return
       applicationContext.publishEvent(
         OnProjectActivityEvent(
           activityRevision,
