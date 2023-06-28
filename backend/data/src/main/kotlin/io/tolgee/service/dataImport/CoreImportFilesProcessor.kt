@@ -146,10 +146,10 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processTranslations() {
     this.translations.forEach { entry ->
       val keyEntity = getOrCreateKey(entry.key)
-      entry.value.forEach { newTranslation ->
+      entry.value.forEach translationForeach@{ newTranslation ->
         val storedTranslations = importDataManager.getStoredTranslations(keyEntity, newTranslation.language)
         newTranslation.key = keyEntity
-        if (storedTranslations.size > 1) {
+        if (storedTranslations.size > 0) {
           storedTranslations.forEach { collidingTranslations ->
             fileEntity.addIssue(
               FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
@@ -159,7 +159,7 @@ class CoreImportFilesProcessor(
               )
             )
           }
-          return
+          return@translationForeach
         }
         this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
       }
