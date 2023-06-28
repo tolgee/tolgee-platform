@@ -1,3 +1,10 @@
+## [3.20.6](https://github.com/tolgee/tolgee-platform/compare/v3.20.5...v3.20.6) (2023-06-28)
+
+
+### Bug Fixes
+
+* Import collision handling ([#1768](https://github.com/tolgee/tolgee-platform/issues/1768)) ([33a05a7](https://github.com/tolgee/tolgee-platform/commit/33a05a759026cad186a0b432eaa6fa78cfb7cb08))
+
 ## [3.20.5](https://github.com/tolgee/tolgee-platform/compare/v3.20.4...v3.20.5) (2023-06-26)
 
 
