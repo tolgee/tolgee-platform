@@ -1,5 +1,5 @@
 package io.tolgee.batch
 
-interface OnBatchOperationCompleted {
+interface OnBatchJobCompleted {
   val job: BatchJobDto
 }

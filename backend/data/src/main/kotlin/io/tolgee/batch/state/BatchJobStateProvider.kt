@@ -42,6 +42,13 @@ class BatchJobStateProvider(
     }
   }
 
+  /**
+   * Doesn't init map if not exists
+   */
+  fun getCached(jobId: Long): MutableMap<Long, ExecutionState>? {
+    return getStatesMap()[jobId]
+  }
+
   fun getStatesMap(): ConcurrentMap<Long, MutableMap<Long, ExecutionState>> {
     return if (usingRedisProvider.areWeUsingRedis) {
       getRedissonStatesMap()

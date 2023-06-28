@@ -63,6 +63,7 @@ class Permission(
     get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
     set(value) {
       this._scopes = value
+      this.type = null
     }
 
   override val granular: Boolean

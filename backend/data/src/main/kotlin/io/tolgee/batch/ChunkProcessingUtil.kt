@@ -24,7 +24,7 @@ open class ChunkProcessingUtil(
     try {
       batchJobService.getProcessor<Any>(job.type).process(job, toProcess, coroutineContext) {
         if (it != toProcess.size) {
-          progressManager.publishChunkProgress(job.id, it)
+          progressManager.publishSingleChunkProgress(job.id, it)
         }
       }
       successfulTargets = toProcess

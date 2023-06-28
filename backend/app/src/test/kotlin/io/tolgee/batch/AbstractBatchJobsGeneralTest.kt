@@ -7,7 +7,7 @@ import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
-import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
+import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
@@ -33,9 +33,9 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
-abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
+abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
-  private lateinit var testData: BatchOperationsTestData
+  private lateinit var testData: BatchJobsTestData
 
   @Autowired
   lateinit var batchJobService: BatchJobService
@@ -74,7 +74,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
     whenever(deleteKeysChunkProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
     batchJobActionService.populateQueue()
-    testData = BatchOperationsTestData()
+    testData = BatchJobsTestData()
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = Date(1687237928000)
   }
@@ -91,7 +91,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     val job = runChunkedJob(1000)
 
@@ -122,7 +122,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     val job = runChunkedJob(1000)
 
@@ -161,7 +161,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     whenever(
       translationChunkProcessor.process(
@@ -203,7 +203,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     val throwingChunk = (1L..10).toList()
 
@@ -267,7 +267,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     whenever(
       deleteKeysChunkProcessor.process(
@@ -312,7 +312,7 @@ abstract class AbstractBatchOperationsGeneralTest : AbstractSpringTest() {
       jwtTokenProvider.generateToken(testData.user.id).toString(),
       testData.projectBuilder.self.id
     )
-    websocketHelper.listenForBatchOperationProgress()
+    websocketHelper.listenForBatchJobProgress()
 
     var count = 0
 

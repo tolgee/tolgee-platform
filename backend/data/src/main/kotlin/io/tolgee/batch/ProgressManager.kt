@@ -1,9 +1,9 @@
 package io.tolgee.batch
 
-import io.tolgee.batch.events.OnBatchOperationCancelled
-import io.tolgee.batch.events.OnBatchOperationFailed
-import io.tolgee.batch.events.OnBatchOperationProgress
-import io.tolgee.batch.events.OnBatchOperationSucceeded
+import io.tolgee.batch.events.OnBatchJobCancelled
+import io.tolgee.batch.events.OnBatchJobFailed
+import io.tolgee.batch.events.OnBatchJobProgress
+import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
 import io.tolgee.model.batch.BatchJob
@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import javax.persistence.EntityManager
 
 @Component
@@ -46,7 +47,7 @@ class ProgressManager(
     }
 
     if (execution.successTargets.isNotEmpty()) {
-      eventPublisher.publishEvent(OnBatchOperationProgress(job, info.progress, job.totalItems.toLong()))
+      eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
     }
 
     handleJobStatus(
@@ -82,20 +83,20 @@ class ProgressManager(
     if (isAnyCancelled) {
       jobEntity.status = BatchJobStatus.CANCELLED
       cachingBatchJobService.saveJob(jobEntity)
-      eventPublisher.publishEvent(OnBatchOperationCancelled(jobEntity.dto))
+      eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
       return
     }
 
     if (job.totalItems.toLong() != progress) {
       jobEntity.status = BatchJobStatus.FAILED
       cachingBatchJobService.saveJob(jobEntity)
-      eventPublisher.publishEvent(OnBatchOperationFailed(jobEntity.dto))
+      eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto))
       return
     }
 
     jobEntity.status = BatchJobStatus.SUCCESS
     logger.debug("Publishing success event for job ${job.id}")
-    eventPublisher.publishEvent(OnBatchOperationSucceeded(jobEntity.dto))
+    eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
     cachingBatchJobService.saveJob(jobEntity)
   }
 
@@ -137,9 +138,22 @@ class ProgressManager(
     }
   }
 
-  fun publishChunkProgress(jobId: Long, it: Int) {
+  fun getJobCachedProgress(jobId: Long): Long? {
+    return batchJobStateProvider.getCached(jobId)?.getInfoForJobResult()?.progress
+  }
+
+  fun publishSingleChunkProgress(jobId: Long, progress: Int) {
     val job = batchJobService.getJobDto(jobId)
-    eventPublisher.publishEvent(OnBatchOperationProgress(job, it.toLong(), job.totalItems.toLong()))
+    eventPublisher.publishEvent(OnBatchJobProgress(job, progress.toLong(), job.totalItems.toLong()))
+  }
+
+  fun handleJobRunning(id: Long) {
+    executeInNewTransaction(transactionManager, isolationLevel = TransactionDefinition.ISOLATION_DEFAULT) {
+      val job = batchJobService.getJobDto(id)
+      if (job.status == BatchJobStatus.PENDING) {
+        cachingBatchJobService.setRunningState(job.id)
+      }
+    }
   }
 
   data class JobResultInfo(val completedChunks: Long, val progress: Long, val isAnyCancelled: Boolean)

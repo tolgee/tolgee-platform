@@ -25,8 +25,8 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
     listen("/projects/$projectId/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}")
   }
 
-  fun listenForBatchOperationProgress() {
-    listen("/projects/$projectId/${WebsocketEventType.BATCH_OPERATION_PROGRESS.typeName}")
+  fun listenForBatchJobProgress() {
+    listen("/projects/$projectId/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}")
   }
 
   fun listen(path: String) {

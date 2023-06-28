@@ -28,8 +28,8 @@ enum class Scope(
   KEYS_VIEW("keys.view"),
   KEYS_DELETE("keys.delete"),
   KEYS_CREATE("keys.create"),
-  BATCH_OPERATIONS_VIEW("batch-operations.view"),
-  BATCH_OPERATIONS_CANCEL("batch-operations.cancel"),
+  BATCH_JOBS_VIEW("batch-jobs.view"),
+  BATCH_JOBS_CANCEL("batch-jobs.cancel"),
   BATCH_AUTO_TRANSLATE("batch-auto-translate"),
   ;
 
@@ -99,8 +99,8 @@ enum class Scope(
           TRANSLATIONS_STATE_EDIT,
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
         ),
-        HierarchyItem(BATCH_OPERATIONS_VIEW),
-        HierarchyItem(BATCH_OPERATIONS_CANCEL),
+        HierarchyItem(BATCH_JOBS_VIEW),
+        HierarchyItem(BATCH_JOBS_CANCEL),
         HierarchyItem(BATCH_AUTO_TRANSLATE, listOf(translationsEdit))
       )
     )

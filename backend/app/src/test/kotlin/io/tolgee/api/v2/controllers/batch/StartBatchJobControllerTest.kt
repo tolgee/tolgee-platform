@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.development.testDataBuilder.data.BatchOperationsTestData
+import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
@@ -18,13 +18,13 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class StartBatchOperationControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-  lateinit var testData: BatchOperationsTestData
+class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+  lateinit var testData: BatchJobsTestData
   var fakeBefore = false
 
   @BeforeEach
   fun setup() {
-    testData = BatchOperationsTestData()
+    testData = BatchJobsTestData()
     fakeBefore = internalProperties.fakeMtProviders
     internalProperties.fakeMtProviders = true
     machineTranslationProperties.google.apiKey = "mock"
@@ -56,7 +56,7 @@ class StartBatchOperationControllerTest : ProjectAuthControllerTest("/v2/project
     val keyIds = keys.map { it.id }.toList()
 
     performProjectAuthPut(
-      "batch/translate",
+      "start-batch-job/translate",
       mapOf(
         "keyIds" to keyIds,
         "targetLanguageIds" to listOf(
@@ -102,7 +102,7 @@ class StartBatchOperationControllerTest : ProjectAuthControllerTest("/v2/project
     val keyIds = keys.map { it.id }.toList()
 
     performProjectAuthPut(
-      "batch/delete-keys",
+      "start-batch-job/delete-keys",
       mapOf(
         "keyIds" to keyIds,
       )

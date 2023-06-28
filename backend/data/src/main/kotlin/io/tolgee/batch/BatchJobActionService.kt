@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
@@ -38,16 +39,17 @@ class BatchJobActionService(
   private val transactionManager: PlatformTransactionManager,
   private val applicationContext: ApplicationContext,
   private val usingRedisProvider: UsingRedisProvider,
+  @Lazy
   private val progressManager: ProgressManager,
   @Lazy
   private val batchJobService: BatchJobService,
+  private val batchProperties: BatchProperties
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 10
-    const val CONCURRENCY = 10
   }
 
-  var runJob: Job? = null
+  var masterRunJob: Job? = null
   var run = true
 
   var queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
@@ -61,13 +63,13 @@ class BatchJobActionService(
     }
 
     @Suppress("OPT_IN_USAGE")
-    runJob = GlobalScope.launch {
+    masterRunJob = GlobalScope.launch {
       runBlocking(Dispatchers.IO) {
         repeatForever {
           if (pause) {
             return@repeatForever
           }
-          val jobsToLaunch = CONCURRENCY - runningJobs.size
+          val jobsToLaunch = batchProperties.concurrency - runningJobs.size
           if (jobsToLaunch <= 0) {
             return@repeatForever
           }
@@ -102,6 +104,7 @@ class BatchJobActionService(
                       return@executeInNewTransaction null
                     }
                     publishRemoveConsuming(executionItem)
+                    progressManager.handleJobRunning(lockedExecution.batchJob.id)
                     val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
                     logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
                     val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
@@ -131,15 +134,6 @@ class BatchJobActionService(
                 runningJobs.remove(executionItem.chunkExecutionId)
                 logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
                 logger.debug("Running jobs: ${runningJobs.size}")
-//                if (job.isCancelled) {
-//                  executeInNewTransaction(transactionManager) {
-//                    val execution =
-//                      getItemIfCanAcquireLock(executionItem.chunkExecutionId) ?: return@executeInNewTransaction
-//                    execution.status = BatchJobChunkExecutionStatus.CANCELLED
-//                    entityManager.persist(execution)
-//                    progressManager.handleProgress(execution)
-//                  }
-//                }
               }
               logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: $runningJobsNow")
             }
@@ -174,7 +168,7 @@ class BatchJobActionService(
   fun stop() {
     run = false
     runBlocking(Dispatchers.IO) {
-      runJob?.join()
+      masterRunJob?.join()
     }
   }
 
@@ -198,10 +192,10 @@ class BatchJobActionService(
   fun populateQueue() {
     val data = entityManager.createQuery(
       """
-                        from BatchJobChunkExecution bjce
-                        join fetch bjce.batchJob bk
-                        where bjce.status = :executionStatus
-                        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+          from BatchJobChunkExecution bjce
+          join fetch bjce.batchJob bk
+          where bjce.status = :executionStatus
+          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)

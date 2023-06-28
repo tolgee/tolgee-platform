@@ -21,10 +21,10 @@ import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId:\\d+}/start-batch-operation", "/v2/projects/start-batch-operation"])
-@Tag(name = "Start batch operations")
+@RequestMapping(value = ["/v2/projects/{projectId:\\d+}/start-batch-job", "/v2/projects/start-batch-job"])
+@Tag(name = "Start batch jobs")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
-class StartBatchOperationController(
+class StartBatchJobController(
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val batchJobService: BatchJobService,

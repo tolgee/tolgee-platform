@@ -110,6 +110,12 @@ open class TolgeeProperties(
   @DocProperty(description = "Maximum length of translations.")
   open var maxTranslationTextLength: Long = 10000,
 
+  @DocProperty(
+    description = "Properties related to batch jobs",
+    displayName = "Batch jobs"
+  )
+  open var batch: BatchProperties = BatchProperties(),
+
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),

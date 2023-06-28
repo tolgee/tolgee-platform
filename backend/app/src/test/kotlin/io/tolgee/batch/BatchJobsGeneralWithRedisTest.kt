@@ -31,8 +31,8 @@ import org.springframework.test.context.ContextConfiguration
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = [BatchOperationsGeneralWithRedisTest.Companion.Initializer::class])
-class BatchOperationsGeneralWithRedisTest : AbstractBatchOperationsGeneralTest() {
+@ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
+class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()
 

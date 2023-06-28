@@ -57,7 +57,7 @@ class RedisPubSubReceiverConfiguration(
       container.addMessageListener(redisWebsocketPubsubListenerAdapter(), PatternTopic(WEBSOCKET_TOPIC))
     }
     container.addMessageListener(redisJobQueuePubsubListenerAdapter(), PatternTopic(JOB_QUEUE_TOPIC))
-    container.addMessageListener(redisJobQueuePubsubListenerAdapter(), PatternTopic(JOB_CANCEL_TOPIC))
+    container.addMessageListener(redisJobCancelPubsubListenerAdapter(), PatternTopic(JOB_CANCEL_TOPIC))
     return container
   }
 }

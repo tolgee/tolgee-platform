@@ -1,9 +1,9 @@
 package io.tolgee.batch
 
 import io.tolgee.activity.ActivityHolder
-import io.tolgee.batch.events.OnBatchOperationCancelled
-import io.tolgee.batch.events.OnBatchOperationFailed
-import io.tolgee.batch.events.OnBatchOperationSucceeded
+import io.tolgee.batch.events.OnBatchJobCancelled
+import io.tolgee.batch.events.OnBatchJobFailed
+import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.waitFor
 import org.springframework.context.event.EventListener
@@ -16,18 +16,18 @@ class BatchJobActivityFinalizer(
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
 ) {
-  @EventListener(OnBatchOperationSucceeded::class)
-  fun finalizeActivityWhenJobSucceeded(event: OnBatchOperationSucceeded) {
+  @EventListener(OnBatchJobSucceeded::class)
+  fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
     finalizeActivityWhenJobCompleted(event.job)
   }
 
-  @EventListener(OnBatchOperationFailed::class)
-  fun finalizeActivityWhenJobFailed(event: OnBatchOperationFailed) {
+  @EventListener(OnBatchJobFailed::class)
+  fun finalizeActivityWhenJobFailed(event: OnBatchJobFailed) {
     finalizeActivityWhenJobCompleted(event.job)
   }
 
-  @EventListener(OnBatchOperationCancelled::class)
-  fun finalizeActivityWhenJobCancelled(event: OnBatchOperationCancelled) {
+  @EventListener(OnBatchJobCancelled::class)
+  fun finalizeActivityWhenJobCancelled(event: OnBatchJobCancelled) {
     finalizeActivityWhenJobCompleted(event.job)
   }
 
