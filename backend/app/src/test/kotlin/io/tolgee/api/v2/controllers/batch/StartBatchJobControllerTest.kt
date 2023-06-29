@@ -5,7 +5,6 @@ import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -108,15 +107,15 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     ).andIsOk
 
-    waitForNotThrowing(pollTime = 1000, timeout = 300000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val all = keyService.getAll(testData.projectBuilder.self.id)
       all.assert.isEmpty()
     }
 
-    waitForNotThrowing(pollTime = 1000, timeout = 300000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       executeInNewTransaction {
         val data = entityManager
-          .createQuery("""from BatchJobChunkExecution""", BatchJobChunkExecution::class.java)
+          .createQuery("""from BatchJob""", BatchJob::class.java)
           .resultList
 
         data.assert.hasSize(1)

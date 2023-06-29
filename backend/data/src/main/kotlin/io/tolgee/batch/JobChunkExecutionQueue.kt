@@ -47,8 +47,12 @@ class JobChunkExecutionQueue(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
-    this.clear()
-    data.forEach { this.add(it.toItem()) }
+    val ids = this.map { it.chunkExecutionId }.toSet()
+    data.forEach {
+      if (!ids.contains(it.id)) {
+        this.add(it.toItem())
+      }
+    }
   }
 
   fun addToQueue(execution: BatchJobChunkExecution) {

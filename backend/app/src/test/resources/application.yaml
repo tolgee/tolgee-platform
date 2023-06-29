@@ -1,6 +1,8 @@
 spring:
   autoconfigure:
-    exclude: org.redisson.spring.starter.RedissonAutoConfiguration, org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
     show-sql: true
     properties:
