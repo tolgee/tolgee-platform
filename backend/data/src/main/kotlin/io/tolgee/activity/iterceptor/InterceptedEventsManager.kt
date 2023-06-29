@@ -193,7 +193,8 @@ class InterceptedEventsManager(
 
   private val activityRevision: ActivityRevision
     get() {
-      if (activityHolder.activityRevision.isInitializedByInterceptor) {
+      if (!activityHolder.activityRevision.isInitializedByInterceptor) {
+        activityHolder.activityRevision.isInitializedByInterceptor = true
         activityHolder.activityRevision.also { revision ->
           revision.authorId = userAccount?.id
           try {
