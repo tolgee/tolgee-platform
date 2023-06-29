@@ -69,12 +69,12 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
       runChunkedJob(keyCount = 200)
 
       waitForNotThrowing {
-        val peek = batchJobActionService.queue.peek()
+        val peek = jobChunkExecutionQueue.peek()
         peek.assert.isNotNull
       }
 
-      val peek = batchJobActionService.queue.peek()
-      batchJobActionService.queue.contains(peek).assert.isTrue()
+      val peek = jobChunkExecutionQueue.peek()
+      jobChunkExecutionQueue.contains(peek).assert.isTrue()
       Mockito.clearInvocations(redisTemplate)
       batchJobActionService.publishRemoveConsuming(peek)
       verify(redisTemplate, times(1))
@@ -86,7 +86,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
             )
           )
         )
-      batchJobActionService.queue.contains(peek).assert.isFalse()
+      jobChunkExecutionQueue.contains(peek).assert.isFalse()
     } finally {
       done = true
     }

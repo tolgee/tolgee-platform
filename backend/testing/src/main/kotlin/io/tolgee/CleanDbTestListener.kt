@@ -1,6 +1,6 @@
 package io.tolgee
 
-import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobConcurrentLauncher
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -23,14 +23,14 @@ class CleanDbTestListener : TestExecutionListener {
 
   override fun beforeTestMethod(testContext: TestContext) {
     val appContext: ApplicationContext = testContext.applicationContext
-    val batchJobActionService = appContext.getBean(BatchJobActionService::class.java)
-    batchJobActionService.pause = true
+    val jobChunkExecutionQueue = appContext.getBean(BatchJobConcurrentLauncher::class.java)
+    jobChunkExecutionQueue.pause = true
 
     if (!shouldClenBeforeClass(testContext)) {
       cleanWithRetries(testContext)
     }
 
-    batchJobActionService.pause = false
+    jobChunkExecutionQueue.pause = false
   }
 
   private fun cleanWithRetries(testContext: TestContext) {

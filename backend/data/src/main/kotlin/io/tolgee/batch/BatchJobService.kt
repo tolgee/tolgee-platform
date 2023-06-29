@@ -30,7 +30,8 @@ class BatchJobService(
   private val transactionManager: PlatformTransactionManager,
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
-  private val progressManager: ProgressManager
+  private val progressManager: ProgressManager,
+  private val jobChunkExecutionQueue: JobChunkExecutionQueue
 ) {
 
   @Transactional
@@ -73,7 +74,7 @@ class BatchJobService(
       job
     }
 
-    executions?.forEach { batchJobChunkService.addToQueue(it) }
+    executions?.forEach { jobChunkExecutionQueue.addToQueue(it) }
     return job
   }
 

@@ -2,9 +2,11 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.JobChunkExecutionQueue
 import io.tolgee.batch.processors.TranslationChunkProcessor
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.state.BatchJobStateProvider
@@ -49,17 +51,23 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Autowired
   lateinit var batchJobStateProvider: BatchJobStateProvider
 
+  @Autowired
+  lateinit var jobChunkExecutionQueue: JobChunkExecutionQueue
+
+  @Autowired
+  lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+
   @BeforeEach
   fun setup() {
     testData = BatchJobsTestData()
-    batchJobActionService.populateQueue()
+    jobChunkExecutionQueue.populateQueue()
     whenever(translationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(translationChunkProcessor.getTarget(any())).thenCallRealMethod()
   }
 
   @AfterEach
   fun after() {
-    batchJobActionService.pause = false
+    batchJobConcurrentLauncher.pause = false
   }
 
   @Test
@@ -70,7 +78,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     val keyIds = keys.map { it.id }.toList()
 
-    batchJobActionService.pause = true
+    batchJobConcurrentLauncher.pause = true
 
     performProjectAuthPut(
       "start-batch-job/translate",
@@ -97,7 +105,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun `cannot cancel other's job`() {
     saveAndPrepare()
 
-    batchJobActionService.pause = true
+    batchJobConcurrentLauncher.pause = true
 
     val job = runChunkedJob(10)
 
