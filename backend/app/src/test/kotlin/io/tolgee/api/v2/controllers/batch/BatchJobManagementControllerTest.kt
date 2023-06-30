@@ -19,6 +19,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: BatchJobsTestData

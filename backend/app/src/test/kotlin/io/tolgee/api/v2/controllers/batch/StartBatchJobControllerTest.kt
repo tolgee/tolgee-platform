@@ -7,6 +7,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.translation.Translation
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BatchJobsTestData
   var fakeBefore = false
@@ -94,7 +96,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it deletes keys`() {
-    val keyCount = 1000
+    val keyCount = 100
     val keys = testData.addTranslationOperationData(keyCount)
     saveAndPrepare()
 

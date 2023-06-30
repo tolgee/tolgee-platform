@@ -11,6 +11,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.springframework.context.event.ContextStoppedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.PreDestroy
@@ -29,7 +31,8 @@ class BatchJobConcurrentLauncher(
   var run = true
 
   @PreDestroy
-  fun stop() {
+  @EventListener(ContextStoppedEvent::class)
+  fun stop(event: ContextStoppedEvent) {
     logger.trace("Stopping batch job launcher ${System.identityHashCode(this)}}")
     run = false
     runBlocking(Dispatchers.IO) {
@@ -69,13 +72,23 @@ class BatchJobConcurrentLauncher(
         }
 
         logger.trace("Jobs to launch: $jobsToLaunch")
-        (1..jobsToLaunch)
+        val items = (1..jobsToLaunch)
           .mapNotNull { jobChunkExecutionQueue.poll() }
-          .forEach { executionItem ->
-            handleItem(executionItem, processExecution)
-          }
+
+        logItemsPulled(items)
+
+        items.forEach { executionItem ->
+          handleItem(executionItem, processExecution)
+        }
       }
     }
+  }
+
+  private fun logItemsPulled(items: List<ExecutionQueueItem>) {
+    if (items.isNotEmpty()) {
+      logger.debug("Pulled ${items.size} items from queue")
+    }
+    logger.debug("${jobChunkExecutionQueue.size} is left in the queue")
   }
 
   private fun CoroutineScope.handleItem(

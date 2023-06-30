@@ -18,7 +18,8 @@ import java.lang.reflect.Type
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
-class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) {
+class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) : Logging {
+  private var sessionHandler: MySessionHandler? = null
   lateinit var receivedMessages: LinkedBlockingDeque<String>
 
   fun listenForTranslationDataModified() {
@@ -35,28 +36,37 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
     )
   }
 
+  private var connection: StompSession? = null
+
   fun listen(path: String) {
     receivedMessages = LinkedBlockingDeque()
 
     webSocketStompClient.messageConverter = SimpleMessageConverter()
-
-    webSocketStompClient.connect(
+    sessionHandler = MySessionHandler(path, receivedMessages)
+    connection = webSocketStompClient.connect(
       "http://localhost:$port/websocket", WebSocketHttpHeaders(),
       StompHeaders().apply { add("jwtToken", jwtToken) },
-      MySessionHandler(path, receivedMessages)
+      sessionHandler!!
     ).get(10, TimeUnit.SECONDS)
   }
 
   fun stop() {
+    logger.info("Stopping websocket listener")
+    sessionHandler?.subscription?.unsubscribe()
+    connection?.disconnect()
     webSocketStompClient.stop()
+    logger.info("Stopped websocket listener")
   }
 
   private class MySessionHandler(
     val dest: String,
     val receivedMessages: LinkedBlockingDeque<String>
   ) : StompSessionHandlerAdapter(), Logging {
+
+    var subscription: StompSession.Subscription? = null
+
     override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
-      session.subscribe(dest, this)
+      subscription = session.subscribe(dest, this)
     }
 
     override fun handleException(

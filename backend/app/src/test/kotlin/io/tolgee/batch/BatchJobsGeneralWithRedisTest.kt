@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
@@ -32,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
+@ContextRecreatingTest
 class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()

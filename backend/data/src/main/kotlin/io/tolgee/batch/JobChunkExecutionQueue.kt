@@ -5,6 +5,7 @@ import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
+import io.tolgee.util.Logging
 import org.hibernate.LockOptions
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
@@ -22,7 +23,7 @@ class JobChunkExecutionQueue(
   @Lazy
   private val redisTemplate: StringRedisTemplate
 
-) : Queue<ExecutionQueueItem> by ConcurrentLinkedQueue() {
+) : Logging, Queue<ExecutionQueueItem> by ConcurrentLinkedQueue() {
 
   @EventListener(JobQueueItemEvent::class)
   fun onJobItemEvent(event: JobQueueItemEvent) {

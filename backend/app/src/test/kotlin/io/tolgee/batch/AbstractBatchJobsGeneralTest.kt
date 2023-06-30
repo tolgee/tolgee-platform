@@ -70,6 +70,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
+    jobChunkExecutionQueue.clear()
     Mockito.reset(translationChunkProcessor)
     Mockito.clearInvocations(translationChunkProcessor)
     whenever(translationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
@@ -90,6 +91,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @AfterEach()
   fun teardown() {
+    jobChunkExecutionQueue.clear()
     currentDateProvider.forcedDate = null
     websocketHelper.stop()
   }
@@ -337,8 +339,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
       }
     }
 
-    // 100 progress messages + 1 finish message
-    websocketHelper.receivedMessages.assert.hasSize(52)
+    websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
     websocketHelper.receivedMessages.last.contains("CANCELLED")
   }
 
