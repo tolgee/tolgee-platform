@@ -31,14 +31,17 @@ class BatchJobConcurrentLauncher(
   var run = true
 
   @PreDestroy
-  @EventListener(ContextStoppedEvent::class)
-  fun stop(event: ContextStoppedEvent) {
+  fun stop() {
     logger.trace("Stopping batch job launcher ${System.identityHashCode(this)}}")
     run = false
     runBlocking(Dispatchers.IO) {
       masterRunJob?.join()
     }
     logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
+  }
+  @EventListener(ContextStoppedEvent::class)
+  fun stop(event: ContextStoppedEvent) {
+    stop()
   }
 
   fun repeatForever(fn: () -> Unit) {
