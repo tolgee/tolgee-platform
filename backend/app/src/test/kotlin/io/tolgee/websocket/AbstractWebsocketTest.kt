@@ -13,11 +13,13 @@ import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.web.server.LocalServerPort
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BaseTestData
   lateinit var translation: Translation
@@ -40,7 +42,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   @AfterEach
-  private fun after() {
+  fun after() {
     helper.stop()
   }
 

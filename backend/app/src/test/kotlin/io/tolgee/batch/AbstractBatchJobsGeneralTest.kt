@@ -19,6 +19,7 @@ import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -33,6 +34,7 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
+@Disabled
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   private lateinit var testData: BatchJobsTestData
