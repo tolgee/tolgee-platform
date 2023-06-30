@@ -14,12 +14,12 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
+import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -34,7 +34,7 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
-@Disabled
+@WebsocketTest
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   private lateinit var testData: BatchJobsTestData

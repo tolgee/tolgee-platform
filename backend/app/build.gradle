@@ -180,7 +180,13 @@ task runContextRecreatingTests(type: Test, group: 'verification') {
 
 task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
-        excludeTags "contextRecreating"
+        excludeTags "contextRecreating", "websocket"
+    }
+}
+
+task runWebsocketTests(type: Test, group: 'verification') {
+    useJUnitPlatform {
+        includeTags "websocket"
     }
 }
 

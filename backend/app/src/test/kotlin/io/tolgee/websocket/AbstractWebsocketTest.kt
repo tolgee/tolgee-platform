@@ -8,18 +8,18 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.web.server.LocalServerPort
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
+@WebsocketTest
 abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BaseTestData
   lateinit var translation: Translation
