@@ -52,8 +52,12 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
   fun stop() {
     logger.info("Stopping websocket listener")
-    sessionHandler?.subscription?.unsubscribe()
-    connection?.disconnect()
+    try {
+      sessionHandler?.subscription?.unsubscribe()
+      connection?.disconnect()
+    } catch (e: IllegalStateException) {
+      logger.warn("Could not unsubscribe from websocket", e)
+    }
     webSocketStompClient.stop()
     logger.info("Stopped websocket listener")
   }

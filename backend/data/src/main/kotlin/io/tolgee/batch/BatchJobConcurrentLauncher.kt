@@ -39,6 +39,7 @@ class BatchJobConcurrentLauncher(
     }
     logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
   }
+
   @EventListener(ContextStoppedEvent::class)
   fun stop(event: ContextStoppedEvent) {
     stop()
@@ -89,9 +90,15 @@ class BatchJobConcurrentLauncher(
 
   private fun logItemsPulled(items: List<ExecutionQueueItem>) {
     if (items.isNotEmpty()) {
-      logger.debug("Pulled ${items.size} items from queue")
+      logger.debug(
+        "Pulled ${items.size} items from queue: " +
+          items.joinToString(", ") { it.chunkExecutionId.toString() }
+      )
     }
-    logger.debug("${jobChunkExecutionQueue.size} is left in the queue")
+    logger.debug(
+      "${jobChunkExecutionQueue.size} is left in the queue: " +
+        jobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
+    )
   }
 
   private fun CoroutineScope.handleItem(
