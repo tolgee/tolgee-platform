@@ -75,10 +75,7 @@ logging:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
     io.tolgee.batch.BatchJobActionService: DEBUG
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
-    io.tolgee.batch.ProgressManager: DEBUG
-    io.tolgee.batch.ChunkProcessingUtil: DEBUG
-    com.zaxxer.hikari.HikariConfig: DEBUG
-    com.zaxxer.hikari: TRACE
+    io.tolgee.batch: TRACE
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE

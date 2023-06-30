@@ -11,6 +11,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -36,6 +37,11 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       testData.projectBuilder.self.id
     )
     helper.listenForTranslationDataModified()
+  }
+
+  @AfterEach
+  private fun after() {
+    helper.stop()
   }
 
   @Test

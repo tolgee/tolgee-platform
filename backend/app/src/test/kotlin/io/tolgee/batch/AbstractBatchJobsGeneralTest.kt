@@ -80,11 +80,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     testData = BatchJobsTestData()
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = Date(1687237928000)
+    websocketHelper = WebsocketTestHelper(
+      port,
+      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      testData.projectBuilder.self.id
+    )
+    websocketHelper.listenForBatchJobProgress()
   }
 
   @AfterEach()
   fun teardown() {
     currentDateProvider.forcedDate = null
+    websocketHelper.stop()
   }
 
   @Test
@@ -265,13 +272,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `publishes progress of single chunk job`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     whenever(
       deleteKeysChunkProcessor.process(
         any(),
@@ -310,13 +310,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `cancels the job`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     var count = 0
 
     whenever(translationChunkProcessor.process(any(), any(), any(), any())).then {

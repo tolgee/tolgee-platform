@@ -29,12 +29,14 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
     listen("/projects/$projectId/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}")
   }
 
-  fun listen(path: String) {
-    receivedMessages = LinkedBlockingDeque()
-
-    val webSocketStompClient = WebSocketStompClient(
+  private val webSocketStompClient by lazy {
+    WebSocketStompClient(
       SockJsClient(listOf(WebSocketTransport(StandardWebSocketClient())))
     )
+  }
+
+  fun listen(path: String) {
+    receivedMessages = LinkedBlockingDeque()
 
     webSocketStompClient.messageConverter = SimpleMessageConverter()
 
@@ -43,6 +45,10 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
       StompHeaders().apply { add("jwtToken", jwtToken) },
       MySessionHandler(path, receivedMessages)
     ).get(10, TimeUnit.SECONDS)
+  }
+
+  fun stop() {
+    webSocketStompClient.stop()
   }
 
   private class MySessionHandler(
@@ -95,5 +101,6 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
       receivedMessages.isNotEmpty()
     }
     assertCallback(receivedMessages)
+    stop()
   }
 }

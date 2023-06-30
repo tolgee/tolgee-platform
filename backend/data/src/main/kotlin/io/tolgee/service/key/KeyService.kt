@@ -190,10 +190,11 @@ class KeyService(
     namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     val ids = keyRepository.getIdsByProjectId(projectId)
     keyMetaService.deleteAllByKeyIdIn(ids)
-    keyRepository.deleteAllByIdIn(ids)
+    this.deleteMultiple(ids)
   }
 
   @Autowired

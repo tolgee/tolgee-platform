@@ -58,14 +58,17 @@ class Permission(
   @Type(type = "enum-array")
   @Column(name = "scopes", columnDefinition = "varchar[]")
   private var _scopes: Array<Scope>? = null
+    set(value) {
+      field = value
+      if (!value.isNullOrEmpty()) {
+        this.type = null
+      }
+    }
 
   override var scopes: Array<Scope>
     get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
     set(value) {
       this._scopes = value
-      if (value != null) {
-        this.type = null
-      }
     }
 
   override val granular: Boolean
