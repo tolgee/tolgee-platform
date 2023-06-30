@@ -7,15 +7,15 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.util.runSentryCatching
-import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class LanguageStatsListener(
   private var languageStatsService: LanguageStatsService
 ) {
-  @EventListener
+  @TransactionalEventListener
   @Async
   fun onActivity(event: OnProjectActivityEvent) {
     runSentryCatching {

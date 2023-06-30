@@ -71,7 +71,7 @@ class LanguageStatsService(
             languageStatsRepository.save(it)
           }
         } catch (e: NotFoundException) {
-          logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?")
+          logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?", e)
         }
       }
     }

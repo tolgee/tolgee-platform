@@ -30,13 +30,16 @@ class BatchJobConcurrentLauncher(
 
   @PreDestroy
   fun stop() {
+    logger.trace("Stopping batch job launcher ${System.identityHashCode(this)}}")
     run = false
     runBlocking(Dispatchers.IO) {
       masterRunJob?.join()
     }
+    logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
   }
 
   fun repeatForever(fn: () -> Unit) {
+    logger.trace("Started batch job action service ${System.identityHashCode(this)}")
     while (run) {
       try {
         val startTime = System.currentTimeMillis()
