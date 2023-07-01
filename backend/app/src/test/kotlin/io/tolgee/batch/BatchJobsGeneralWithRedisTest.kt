@@ -86,7 +86,9 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
             )
           )
         )
-      jobChunkExecutionQueue.contains(peek).assert.isFalse()
+      waitForNotThrowing(timeout = 2000) {
+        jobChunkExecutionQueue.contains(peek).assert.isFalse()
+      }
     } finally {
       done = true
     }

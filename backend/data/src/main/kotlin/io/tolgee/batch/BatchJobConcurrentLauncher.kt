@@ -57,7 +57,7 @@ class BatchJobConcurrentLauncher(
       try {
         val startTime = System.currentTimeMillis()
         fn()
-        val sleepTime = BatchJobActionService.MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
+        val sleepTime = getSleepTime(startTime)
         if (sleepTime > 0) {
           Thread.sleep(sleepTime)
         }
@@ -66,6 +66,13 @@ class BatchJobConcurrentLauncher(
         logger.error("Error in batch job action service", e)
       }
     }
+  }
+
+  private fun getSleepTime(startTime: Long): Long {
+    if (!jobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0) {
+      return 0
+    }
+    return BatchJobActionService.MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
   }
 
   fun run(processExecution: (executionItem: ExecutionQueueItem, coroutineContext: CoroutineContext) -> Unit) {

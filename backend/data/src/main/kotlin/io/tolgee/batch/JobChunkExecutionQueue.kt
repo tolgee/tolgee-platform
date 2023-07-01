@@ -24,7 +24,6 @@ class JobChunkExecutionQueue(
   private val redisTemplate: StringRedisTemplate
 
 ) : Logging {
-
   private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
 
   @EventListener(JobQueueItemsEvent::class)
@@ -109,4 +108,6 @@ class JobChunkExecutionQueue(
 
   fun peek(): ExecutionQueueItem = queue.peek()
   fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
+
+  fun isEmpty(): Boolean = queue.isEmpty()
 }
