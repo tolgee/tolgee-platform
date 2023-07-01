@@ -25,8 +25,6 @@ class BatchJobService(
   private val batchJobRepository: BatchJobRepository,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
-  @Lazy
-  private val batchJobChunkService: BatchJobActionService,
   private val transactionManager: PlatformTransactionManager,
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
@@ -74,7 +72,7 @@ class BatchJobService(
       job
     }
 
-    executions?.forEach { jobChunkExecutionQueue.addToQueue(it) }
+    executions?.let { jobChunkExecutionQueue.addToQueue(it) }
     return job
   }
 

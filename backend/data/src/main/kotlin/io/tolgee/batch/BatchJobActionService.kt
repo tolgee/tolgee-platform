@@ -42,6 +42,7 @@ class BatchJobActionService(
 
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
+    println("Application ready")
     executeInNewTransaction(transactionManager) {
       jobChunkExecutionQueue.populateQueue()
     }
@@ -98,7 +99,7 @@ class BatchJobActionService(
 
   private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?) {
     retryExecution?.let {
-      jobChunkExecutionQueue.addToQueue(it)
+      jobChunkExecutionQueue.addToQueue(listOf(it))
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }
@@ -109,14 +110,15 @@ class BatchJobActionService(
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e)
-      jobChunkExecutionQueue.add(executionItem)
+      jobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
       null
     }
   }
 
   fun publishRemoveConsuming(item: ExecutionQueueItem) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val message = jacksonObjectMapper().writeValueAsString(JobQueueItemEvent(item, QueueItemType.REMOVE))
+      val message = jacksonObjectMapper()
+        .writeValueAsString(JobQueueItemsEvent(listOf(item), QueueEventType.REMOVE))
       redisTemplate.convertAndSend(RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC, message)
     }
   }
@@ -139,7 +141,7 @@ class BatchJobActionService(
   }
 
   fun cancelLocalJob(jobId: Long) {
-    jobChunkExecutionQueue.removeIf { it.jobId == jobId }
+    jobChunkExecutionQueue.cancelJob(jobId)
     concurrentExecutionLauncher.runningJobs.filter { it.value.first == jobId }.forEach {
       it.value.second.cancel()
     }

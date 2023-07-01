@@ -11,8 +11,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.springframework.context.event.ContextStoppedEvent
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.PreDestroy
@@ -24,13 +22,16 @@ class BatchJobConcurrentLauncher(
   private val jobChunkExecutionQueue: JobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider
 ) : Logging {
+  companion object {
+    val runningInstances: ConcurrentHashMap.KeySetView<BatchJobConcurrentLauncher, Boolean> =
+      ConcurrentHashMap.newKeySet()
+  }
 
   val runningJobs: ConcurrentHashMap<Long, Pair<Long, Job>> = ConcurrentHashMap()
   var pause = false
   var masterRunJob: Job? = null
   var run = true
 
-  @PreDestroy
   fun stop() {
     logger.trace("Stopping batch job launcher ${System.identityHashCode(this)}}")
     run = false
@@ -38,14 +39,19 @@ class BatchJobConcurrentLauncher(
       masterRunJob?.join()
     }
     logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
+    runningInstances.clear()
   }
 
-  @EventListener(ContextStoppedEvent::class)
-  fun stop(event: ContextStoppedEvent) {
-    stop()
+  @PreDestroy
+  fun preDestroy() {
+    this.stop()
+    runningInstances.clear()
   }
 
   fun repeatForever(fn: () -> Unit) {
+    runningInstances.forEach { it.stop() }
+    runningInstances.add(this)
+
     logger.trace("Started batch job action service ${System.identityHashCode(this)}")
     while (run) {
       try {
@@ -110,7 +116,7 @@ class BatchJobConcurrentLauncher(
         """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
                     | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
       )
-      jobChunkExecutionQueue.add(executionItem)
+      jobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
       return
     }
 

@@ -82,7 +82,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
           eq(JOB_QUEUE_TOPIC),
           eq(
             jacksonObjectMapper().writeValueAsString(
-              JobQueueItemEvent(peek, QueueItemType.REMOVE)
+              JobQueueItemsEvent(listOf(peek), QueueEventType.REMOVE)
             )
           )
         )

@@ -1,5 +1,5 @@
 package io.tolgee.batch
 
-enum class QueueItemType {
+enum class QueueEventType {
   ADD, REMOVE
 }

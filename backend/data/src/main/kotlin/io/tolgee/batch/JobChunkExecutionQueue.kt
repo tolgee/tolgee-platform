@@ -23,13 +23,15 @@ class JobChunkExecutionQueue(
   @Lazy
   private val redisTemplate: StringRedisTemplate
 
-) : Logging, Queue<ExecutionQueueItem> by ConcurrentLinkedQueue() {
+) : Logging {
 
-  @EventListener(JobQueueItemEvent::class)
-  fun onJobItemEvent(event: JobQueueItemEvent) {
+  private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+
+  @EventListener(JobQueueItemsEvent::class)
+  fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
-      QueueItemType.ADD -> this.add(event.item)
-      QueueItemType.REMOVE -> this.remove(event.item)
+      QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
+      QueueEventType.REMOVE -> queue.removeAll(event.items.toSet())
     }
   }
 
@@ -48,27 +50,63 @@ class JobChunkExecutionQueue(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
-    val ids = this.map { it.chunkExecutionId }.toSet()
+    addExecutionsToLocalQueue(data)
+  }
+
+  fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecution>) {
+    val ids = queue.map { it.chunkExecutionId }.toSet()
     data.forEach {
       if (!ids.contains(it.id)) {
-        this.add(it.toItem())
+        queue.add(it.toItem())
       }
     }
   }
 
-  fun addToQueue(execution: BatchJobChunkExecution) {
-    val item = execution.toItem()
+  fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
+    data.forEach {
+      if (!queue.contains(it)) {
+        queue.add(it)
+      }
+    }
+  }
+
+  fun addToQueue(executions: List<BatchJobChunkExecution>) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val event = JobQueueItemEvent(item, QueueItemType.ADD)
+      val items = executions.map { it.toItem() }
+      val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
         jacksonObjectMapper().writeValueAsString(event)
       )
       return
     }
-    this.add(item)
+    this.addExecutionsToLocalQueue(executions)
+  }
+
+  fun cancelJob(jobId: Long) {
+    queue.removeIf { it.jobId == jobId }
   }
 
   private fun BatchJobChunkExecution.toItem() =
     ExecutionQueueItem(id, batchJob.id, executeAfter?.time)
+
+  val size get() = queue.size
+
+  fun joinToString(separator: String = ", ", transform: (item: ExecutionQueueItem) -> String) =
+    queue.joinToString(separator, transform = transform)
+
+  fun poll(): ExecutionQueueItem? {
+    return queue.poll()
+  }
+
+  fun clear() {
+    queue.clear()
+  }
+
+  fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {
+    return queue.find(function)
+  }
+
+  fun peek(): ExecutionQueueItem = queue.peek()
+  fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
 }
