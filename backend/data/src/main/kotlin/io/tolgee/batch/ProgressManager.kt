@@ -149,8 +149,10 @@ class ProgressManager(
 
   fun handleJobRunning(id: Long) {
     executeInNewTransaction(transactionManager, isolationLevel = TransactionDefinition.ISOLATION_DEFAULT) {
+      logger.trace("""Fetching job $id""")
       val job = batchJobService.getJobDto(id)
       if (job.status == BatchJobStatus.PENDING) {
+        logger.debug("""Updating job state to running ${job.id}""")
         cachingBatchJobService.setRunningState(job.id)
       }
     }

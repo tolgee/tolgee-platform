@@ -28,7 +28,7 @@ import javax.persistence.Table
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
 class BatchJobChunkExecution : StandardAuditModel() {
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var batchJob: BatchJob
 
   @Enumerated(EnumType.STRING)
