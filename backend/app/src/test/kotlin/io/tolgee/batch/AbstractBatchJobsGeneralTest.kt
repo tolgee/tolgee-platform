@@ -304,14 +304,14 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
         val finishedJob = batchJobService.getJobDto(job.id)
         finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       }
+
+      entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
+        .setParameter("id", job.id).resultList.assert.hasSize(1)
+
+      // 100 progress messages + 1 finish message
+      websocketHelper.receivedMessages.assert.hasSize(101)
+      websocketHelper.receivedMessages.last.contains("SUCCESS")
     }
-
-    entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
-      .setParameter("id", job.id).resultList.assert.hasSize(1)
-
-    // 100 progress messages + 1 finish message
-    websocketHelper.receivedMessages.assert.hasSize(101)
-    websocketHelper.receivedMessages.last.contains("SUCCESS")
   }
 
   @Test

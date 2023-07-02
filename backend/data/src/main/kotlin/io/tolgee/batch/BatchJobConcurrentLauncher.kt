@@ -39,13 +39,12 @@ class BatchJobConcurrentLauncher(
       masterRunJob?.join()
     }
     logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
-    runningInstances.clear()
+    runningInstances.remove(this)
   }
 
   @PreDestroy
   fun preDestroy() {
     this.stop()
-    runningInstances.clear()
   }
 
   fun repeatForever(fn: () -> Unit) {
@@ -109,7 +108,7 @@ class BatchJobConcurrentLauncher(
       )
     }
     logger.debug(
-      "${jobChunkExecutionQueue.size} is left in the queue: " +
+      "${jobChunkExecutionQueue.size} is left in the queue (${System.identityHashCode(jobChunkExecutionQueue)}): " +
         jobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
     )
   }
