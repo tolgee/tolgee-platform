@@ -9,7 +9,9 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.views.BatchJobView
 import io.tolgee.repository.BatchJobRepository
+import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -30,7 +32,7 @@ class BatchJobService(
   @Lazy
   private val progressManager: ProgressManager,
   private val jobChunkExecutionQueue: JobChunkExecutionQueue
-) {
+) : Logging {
 
   @Transactional
   fun <RequestType> startJob(
@@ -73,6 +75,8 @@ class BatchJobService(
     }
 
     executions?.let { jobChunkExecutionQueue.addToQueue(it) }
+    logger.debug("Starting job ${job.id}, aadded ${executions?.size} executions to queue")
+
     return job
   }
 

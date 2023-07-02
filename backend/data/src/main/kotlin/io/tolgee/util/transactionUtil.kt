@@ -8,7 +8,7 @@ import javax.persistence.OptimisticLockException
 
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
-  isolationLevel: Int = TransactionDefinition.ISOLATION_SERIALIZABLE,
+  isolationLevel: Int = TransactionDefinition.ISOLATION_DEFAULT,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
   fn: () -> T
 ): T {
@@ -21,31 +21,6 @@ fun <T> executeInNewTransaction(
   } as T
 }
 
-fun <T> executeInNewRepeatableTransaction(
-  transactionManager: PlatformTransactionManager,
-  propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
-  fn: () -> T
-): T {
-  var exception: Exception? = null
-  var repeats = 0
-  for (it in 1..100) {
-    try {
-      return executeInNewTransaction(transactionManager, propagationBehavior = propagationBehavior) {
-        fn()
-      }
-    } catch (e: Exception) {
-      when (e) {
-        is OptimisticLockException, is CannotAcquireLockException -> {
-          exception = e
-          repeats++
-        }
-        else -> throw e
-      }
-    }
-  }
-  throw RepeatedlyCannotSerializeTransactionException(exception!!, repeats)
-}
-
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
   fn: () -> T
@@ -55,6 +30,36 @@ fun <T> executeInNewTransaction(
     fn = fn,
     propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
   )
+}
+
+fun <T> executeInNewRepeatableTransaction(
+  transactionManager: PlatformTransactionManager,
+  propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+  fn: () -> T
+): T {
+  var exception: Exception? = null
+  var repeats = 0
+  for (it in 1..100) {
+    try {
+      return executeInNewTransaction(
+        transactionManager,
+        propagationBehavior = propagationBehavior,
+        isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE
+      ) {
+        fn()
+      }
+    } catch (e: Exception) {
+      when (e) {
+        is OptimisticLockException, is CannotAcquireLockException -> {
+          exception = e
+          repeats++
+        }
+
+        else -> throw e
+      }
+    }
+  }
+  throw RepeatedlyCannotSerializeTransactionException(exception!!, repeats)
 }
 
 class RepeatedlyCannotSerializeTransactionException(cause: Throwable, repeats: Int) :
