@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest(
@@ -32,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = [BatchJobsGeneralWithRedisTest.Companion.Initializer::class])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()
@@ -50,6 +52,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   @AfterAll
   fun cleanup() {
     Mockito.reset(redisTemplate)
+    Mockito.clearInvocations(redisTemplate)
     redisRunner.stop()
   }
 
