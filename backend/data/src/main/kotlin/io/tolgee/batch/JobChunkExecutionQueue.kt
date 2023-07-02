@@ -24,7 +24,12 @@ class JobChunkExecutionQueue(
   private val redisTemplate: StringRedisTemplate
 
 ) : Logging {
-  private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+  companion object {
+    /**
+     * It's static
+     */
+    private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+  }
 
   @EventListener(JobQueueItemsEvent::class)
   fun onJobItemEvent(event: JobQueueItemsEvent) {
