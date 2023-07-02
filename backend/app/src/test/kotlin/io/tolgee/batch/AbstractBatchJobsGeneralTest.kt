@@ -198,6 +198,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     waitForNotThrowing(pollTime = 1000) {
       executeInNewTransaction {
         val finishedJob = batchJobService.getJobDto(job.id)
+        val finishedJobEntity = batchJobService.getJobEntity(job.id)
+        finishedJobEntity.status.assert.isEqualTo(BatchJobStatus.FAILED)
         finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
       }
     }

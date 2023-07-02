@@ -5,7 +5,6 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
-import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.hibernate.LockOptions
@@ -18,7 +17,7 @@ import kotlin.math.pow
 open class ChunkProcessingUtil(
   val execution: BatchJobChunkExecution,
   private val applicationContext: ApplicationContext,
-  private val coroutineContext: CoroutineContext
+  private val coroutineContext: CoroutineContext,
 ) : Logging {
   open fun processChunk() {
     try {
@@ -82,19 +81,12 @@ open class ChunkProcessingUtil(
     if (retries >= maxRetries) {
       logger.debug("Max retries reached for job execution $execution")
       Sentry.captureException(exception)
-      setJobFailed()
       return
     }
 
     logger.debug("Retrying job execution $execution in ${waitTime}ms")
     retryExecution.executeAfter = Date(waitTime + currentDateProvider.date.time)
     execution.retry = true
-  }
-
-  private fun setJobFailed() {
-    val entity = batchJobService.getJobEntity(job.id)
-    entity.status = BatchJobStatus.FAILED
-    entityManager.persist(entity)
   }
 
   private fun getWaitTime(exception: RequeueWithTimeoutException) =

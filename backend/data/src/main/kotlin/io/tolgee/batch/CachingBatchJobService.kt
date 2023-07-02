@@ -49,4 +49,11 @@ class CachingBatchJobService(
     val entity = batchJobService.findJobEntity(id) ?: return null
     return BatchJobDto.fromEntity(entity)
   }
+
+  @CacheEvict(
+    cacheNames = [Caches.BATCH_JOBS],
+    key = "#jobId"
+  )
+  fun evictJobCache(jobId: Long) {
+  }
 }

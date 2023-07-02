@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
+import io.tolgee.batch.events.OnBatchJobStatusUpdated
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.event.TransactionalEventListener
 import javax.persistence.EntityManager
 
 @Component
@@ -80,24 +82,34 @@ class ProgressManager(
     }
 
     val jobEntity = batchJobService.getJobEntity(job.id)
-    if (isAnyCancelled) {
-      jobEntity.status = BatchJobStatus.CANCELLED
-      cachingBatchJobService.saveJob(jobEntity)
-      eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
-      return
-    }
 
-    if (job.totalItems.toLong() != progress) {
-      jobEntity.status = BatchJobStatus.FAILED
-      cachingBatchJobService.saveJob(jobEntity)
-      eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto))
-      return
-    }
+    try {
+      if (isAnyCancelled) {
+        jobEntity.status = BatchJobStatus.CANCELLED
+        cachingBatchJobService.saveJob(jobEntity)
+        eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
+        return
+      }
 
-    jobEntity.status = BatchJobStatus.SUCCESS
-    logger.debug("Publishing success event for job ${job.id}")
-    eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
-    cachingBatchJobService.saveJob(jobEntity)
+      if (job.totalItems.toLong() != progress) {
+        jobEntity.status = BatchJobStatus.FAILED
+        cachingBatchJobService.saveJob(jobEntity)
+        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto))
+        return
+      }
+
+      jobEntity.status = BatchJobStatus.SUCCESS
+      logger.debug("Publishing success event for job ${job.id}")
+      eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
+      cachingBatchJobService.saveJob(jobEntity)
+    } finally {
+      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id))
+    }
+  }
+
+  @TransactionalEventListener(OnBatchJobStatusUpdated::class)
+  fun handleJobStatusUpdated(event: OnBatchJobStatusUpdated) {
+    cachingBatchJobService.evictJobCache(event.jobId)
   }
 
   fun Map<Long, ExecutionState>.getInfoForJobResult(): JobResultInfo {
