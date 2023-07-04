@@ -39,7 +39,7 @@ export const useWebsocketListener = (
             translationService.changeTranslations(translationUpdates);
           }
 
-          const keyUpdates = event.data.keys?.map((key) => ({
+          const keyUpdates = event.data?.keys?.map((key) => ({
             keyId: key.id,
             value:
               key.changeType == 'DEL'
