@@ -1,3 +1,10 @@
+## [3.20.7](https://github.com/tolgee/tolgee-platform/compare/v3.20.6...v3.20.7) (2023-07-04)
+
+
+### Bug Fixes
+
+* websocket delete all error + translation tools error ([#1770](https://github.com/tolgee/tolgee-platform/issues/1770)) ([5521af9](https://github.com/tolgee/tolgee-platform/commit/5521af9fbe9eacbcdd4037b47eae9d6b63b638e4))
+
 ## [3.20.6](https://github.com/tolgee/tolgee-platform/compare/v3.20.5...v3.20.6) (2023-06-28)
 
 

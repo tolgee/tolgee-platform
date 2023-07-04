@@ -161,6 +161,8 @@
   "authentication_cancelled" : "Autentizace zrušena",
   "back_to_editing" : "Zpět k editaci",
   "bad_credentials" : "Špatné přihlašovací údaje",
+  "batch_operations_delete" : "Odstranit",
+  "batch_operations_translate" : "Automaticky přeložit",
   "billing_actual_extra_credits" : "Extra <hint>MT kredit</hint>",
   "billing_actual_period" : "Účtování",
   "billing_actual_period_end" : "Konec období",

@@ -161,6 +161,8 @@
   "authentication_cancelled" : "Authentication cancelled",
   "back_to_editing" : "Back to editing",
   "bad_credentials" : "Invalid credentials",
+  "batch_operations_delete" : "Delete",
+  "batch_operations_translate" : "Auto translate",
   "billing_actual_extra_credits" : "Extra <hint>MT credit</hint>",
   "billing_actual_period" : "Billing",
   "billing_actual_period_end" : "Period end",
