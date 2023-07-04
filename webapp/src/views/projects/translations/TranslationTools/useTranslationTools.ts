@@ -2,12 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useProjectSettings } from 'tg.hooks/useProject';
-import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsSelector } from '../context/TranslationsContext';
-
-type EnabledServicesType =
-  components['schemas']['LanguageConfigItemModel']['enabledServices'];
 
 type Props = {
   projectId: number;
@@ -35,12 +31,12 @@ export const useTranslationTools = ({
   const { enabledMtServices, refetchSettings } = useProjectSettings();
 
   const mtServices = useMemo(() => {
-    let result: EnabledServicesType = [];
-    enabledMtServices?.forEach((config) => {
-      result = [...result, ...config.enabledServices];
-    });
-    return Array.from(new Set(result));
-  }, [enabledMtServices]);
+    const settingItem =
+      enabledMtServices?.find((i) => i.targetLanguageId === targetLanguageId) ||
+      enabledMtServices?.find((i) => i.targetLanguageId === null);
+
+    return settingItem?.enabledServices || [];
+  }, [enabledMtServices, targetLanguageId]);
 
   const fast = mtServices.filter((item) => item !== 'TOLGEE');
   const slow = mtServices.filter((item) => item === 'TOLGEE');
