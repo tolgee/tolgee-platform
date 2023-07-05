@@ -19,7 +19,7 @@
     "@tolgee/format-icu": "^5.6.0",
     "@tolgee/react": "^5.9.0",
     "clsx": "^1.1.1",
-    "codemirror": "^5.62.0",
+    "codemirror": "^5.65.13",
     "copy-to-clipboard": "^3.3.1",
     "date-fns": "2.29.2",
     "diff": "^5.0.0",
