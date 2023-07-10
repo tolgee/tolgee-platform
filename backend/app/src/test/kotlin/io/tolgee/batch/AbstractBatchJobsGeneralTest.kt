@@ -36,7 +36,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
 @WebsocketTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   private lateinit var testData: BatchJobsTestData
