@@ -27,6 +27,7 @@
     "intl-messageformat": "^9.8.1",
     "node-fetch": "3.3.0",
     "notistack": "^2.0.4",
+    "posthog-js": "1.70.1",
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",
     "react": "^17.0.1",

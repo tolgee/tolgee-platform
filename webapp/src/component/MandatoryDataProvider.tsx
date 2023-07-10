@@ -3,9 +3,8 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
-import { getCurrentHub } from '@sentry/browser';
 
-const SENTRY_INITIALIZED_WINDOW_PROPERTY = 'sentryInitialized';
+const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
@@ -24,31 +23,29 @@ export const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
-  async function initReplay() {
-    const { Replay } = await import('@sentry/browser');
-    if (!window[SENTRY_INITIALIZED_WINDOW_PROPERTY]) {
-      getCurrentHub()
-        .getClient()
-        ?.addIntegration?.(
-          new Replay({
-            maskAllText: false,
-            maskAllInputs: false,
-          })
-        );
-      window[SENTRY_INITIALIZED_WINDOW_PROPERTY] = true;
-      Sentry.setUser({
-        email: userData!.username,
-        id: userData!.id.toString(),
-      });
+  async function initPostHog() {
+    if (!window[POSTHOG_INITIALIZED_WINDOW_PROPERTY]) {
+      const posthog = await import('posthog-js').then((m) => m.default);
+      if (config?.postHogApiKey) {
+        posthog.init(config.postHogApiKey, {
+          api_host: config?.postHogHost || undefined,
+        });
+        window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
+        posthog.identify(userData!.id.toString(), {
+          name: userData!.username,
+          email: userData!.username,
+        });
+      }
     }
   }
 
   useEffect(() => {
-    if (userData?.id && config?.clientSentryDsn) {
-      // noinspection JSIgnoredPromiseFromCall
-      initReplay();
-    }
-  }, [userData?.id, config?.clientSentryDsn]);
+    Sentry.setUser({
+      email: userData!.username,
+      id: userData!.id.toString(),
+    });
+    initPostHog();
+  }, [userData?.id, config?.postHogApiKey]);
 
   useGlobalLoading(isFetching || isLoading);
 

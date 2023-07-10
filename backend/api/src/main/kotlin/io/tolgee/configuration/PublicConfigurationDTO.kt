@@ -12,7 +12,7 @@ class PublicConfigurationDTO(
   properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
   val billing: PublicBillingConfigurationDTO,
-  val version: String
+  val version: String,
 ) {
   val authentication: Boolean = properties.authentication.enabled
   var authMethods: AuthMethodsDTO? = null
@@ -31,6 +31,8 @@ class PublicConfigurationDTO(
   val chatwootToken = properties.chatwootToken
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
+  val postHogApiKey: String? = properties.postHog.apiKey
+  val postHogHost: String? = properties.postHog.host
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,

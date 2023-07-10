@@ -107,6 +107,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
 
+
     /**
      * DB
      */
@@ -165,6 +166,7 @@ dependencies {
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
+    implementation libs.postHog
 
     /**
      * Google translation API
