@@ -1,7 +1,6 @@
 package io.tolgee.batch
 
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest(
   properties = [
@@ -9,5 +8,4 @@ import org.springframework.test.annotation.DirtiesContext
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BatchJobsGeneralWithoutRedisTest : AbstractBatchJobsGeneralTest()
