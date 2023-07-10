@@ -9,6 +9,7 @@ import org.redisson.spring.cache.RedissonSpringCacheManager
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
 
 @ContextRecreatingTest
@@ -22,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration
   ]
 )
 @ContextConfiguration(initializers = [CacheWithRedisTest.Companion.Initializer::class])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CacheWithRedisTest : AbstractCacheTest() {
   companion object {
     val redisRunner = RedisRunner()

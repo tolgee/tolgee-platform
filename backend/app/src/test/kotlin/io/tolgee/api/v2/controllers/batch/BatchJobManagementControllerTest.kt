@@ -29,13 +29,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.annotation.DirtiesContext
 import java.util.concurrent.ConcurrentHashMap
 
-@SpringBootTest
 @AutoConfigureMockMvc
 @ContextRecreatingTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: BatchJobsTestData
@@ -46,8 +46,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Autowired
   lateinit var batchJobService: BatchJobService
 
-  @SpyBean
   @Autowired
+  @MockBean
   lateinit var translationChunkProcessor: TranslationChunkProcessor
 
   @Autowired
@@ -63,8 +63,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = BatchJobsTestData()
     jobChunkExecutionQueue.populateQueue()
-    whenever(translationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
-    whenever(translationChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(translationChunkProcessor.getParams(any<BatchTranslateRequest>(), any())).thenCallRealMethod()
+    whenever(translationChunkProcessor.getTarget(any<BatchTranslateRequest>())).thenCallRealMethod()
   }
 
   @AfterEach

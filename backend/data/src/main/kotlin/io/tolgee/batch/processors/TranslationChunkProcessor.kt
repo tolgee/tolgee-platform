@@ -64,13 +64,13 @@ class TranslationChunkProcessor(
     return data.keyIds
   }
 
-  override fun getParams(request: BatchTranslateRequest, job: BatchJob): EntityWithId {
+  override fun getParams(data: BatchTranslateRequest, job: BatchJob): EntityWithId {
     return TranslateJobParams().apply {
       this.batchJob = job
-      this.targetLanguageIds = request.targetLanguageIds
-      this.useMachineTranslation = request.useMachineTranslation
-      this.useTranslationMemory = request.useTranslationMemory
-      this.service = request.service
+      this.targetLanguageIds = data.targetLanguageIds
+      this.useMachineTranslation = data.useMachineTranslation
+      this.useTranslationMemory = data.useTranslationMemory
+      this.service = data.service
     }
   }
 }

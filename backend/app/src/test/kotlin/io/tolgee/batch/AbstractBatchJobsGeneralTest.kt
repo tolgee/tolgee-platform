@@ -30,11 +30,13 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.test.annotation.DirtiesContext
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
 @WebsocketTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   private lateinit var testData: BatchJobsTestData

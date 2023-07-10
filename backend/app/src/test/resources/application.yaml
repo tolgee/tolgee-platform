@@ -32,6 +32,8 @@ spring:
   jmx:
     enabled: false
   datasource:
+    hikari:
+      maximum-pool-size: 100
     maximum-pool-size: 15
 tolgee:
   postgres-autostart:
