@@ -103,6 +103,7 @@ export function CloudPlanForm({
               size="small"
               label={t('administration_cloud_plan_field_name')}
               fullWidth
+              data-cy="administration-cloud-plan-field-name"
             />
             <Box display="flex" gap={2} sx={{ mt: 2 }}>
               <FormControl sx={{ flexBasis: '50%' }} variant="standard">
@@ -114,12 +115,17 @@ export function CloudPlanForm({
                   size="small"
                   fullWidth
                   sx={{ flexBasis: '50%' }}
+                  data-cy="administration-cloud-plan-field-type"
                   renderValue={(val) =>
                     typeOptions.find((o) => o.value === val)?.label
                   }
                 >
                   {typeOptions.map(({ value, label }) => (
-                    <MenuItem key={value} value={value}>
+                    <MenuItem
+                      key={value}
+                      value={value}
+                      data-cy="administration-cloud-plan-field-type-item"
+                    >
                       {label}
                     </MenuItem>
                   ))}
@@ -137,6 +143,7 @@ export function CloudPlanForm({
                     }}
                     variant="standard"
                     error={!!meta.error && meta.touched}
+                    data-cy="administration-cloud-plan-field-stripe-product"
                   >
                     <InputLabel shrink>
                       {t('administration_cloud_plan_field_stripe_product')}
@@ -170,6 +177,7 @@ export function CloudPlanForm({
               <TextField
                 name="prices.subscriptionMonthly"
                 size="small"
+                data-cy="administration-cloud-plan-field-price-monthly"
                 label={t('administration_cloud_plan_field_price_monthly')}
                 type="number"
                 fullWidth
@@ -177,6 +185,7 @@ export function CloudPlanForm({
               <TextField
                 name="prices.subscriptionYearly"
                 size="small"
+                data-cy="administration-cloud-plan-field-price-yearly"
                 label={t('administration_cloud_plan_field_price_yearly')}
                 type="number"
                 fullWidth
@@ -184,6 +193,7 @@ export function CloudPlanForm({
               <TextField
                 name="prices.perThousandTranslations"
                 size="small"
+                data-cy="administration-cloud-plan-field-price-per-thousand-translations"
                 label={t(
                   'administration_cloud_plan_field_price_per_thousand_translations'
                 )}
@@ -194,6 +204,7 @@ export function CloudPlanForm({
               <TextField
                 name="prices.perThousandMtCredits"
                 size="small"
+                data-cy="administration-cloud-plan-field-price-per-thousand-mt-credits"
                 label={t(
                   'administration_cloud_plan_field_price_per_thousand_mt_credits'
                 )}
@@ -212,6 +223,7 @@ export function CloudPlanForm({
                 size="small"
                 type="number"
                 fullWidth
+                data-cy="administration-cloud-plan-field-included-mt-credits"
                 label={t('administration_cloud_plan_field_included_mt_credits')}
               />
               <TextField
@@ -219,6 +231,7 @@ export function CloudPlanForm({
                 size="small"
                 type="number"
                 fullWidth
+                data-cy="administration-cloud-plan-field-included-translations"
                 label={
                   values.type === 'SLOTS_FIXED'
                     ? t(
@@ -249,6 +262,7 @@ export function CloudPlanForm({
 
                     return (
                       <FormControlLabel
+                        data-cy="administration-cloud-plan-field-feature"
                         key={feature}
                         control={
                           <Checkbox
@@ -272,6 +286,7 @@ export function CloudPlanForm({
                   onChange={() => setFieldValue('public', !values.public)}
                 />
               }
+              data-cy="administration-cloud-plan-field-public"
               label={t('administration_cloud_plan_field_public')}
             />
 
@@ -299,6 +314,7 @@ export function CloudPlanForm({
                 variant="contained"
                 color="primary"
                 type="submit"
+                data-cy="administration-cloud-plan-submit-button"
               >
                 {t('global_form_save')}
               </LoadingButton>

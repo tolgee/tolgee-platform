@@ -81,7 +81,7 @@ export const AdministrationCloudPlansView = () => {
       >
         <Paper variant="outlined">
           {plansLoadable.data?._embedded?.plans?.map((plan, i) => (
-            <ListItem key={i}>
+            <ListItem key={i} data-cy="administration-cloud-plans-item">
               <Box
                 display="flex"
                 justifyContent="space-between"
@@ -92,6 +92,7 @@ export const AdministrationCloudPlansView = () => {
                   <ListItemText>{plan.name}</ListItemText>
                   {plan.public && (
                     <Chip
+                      data-cy="administration-cloud-plans-item-public-badge"
                       size="small"
                       label={t('administration_cloud_plan_public_badge')}
                     />
@@ -104,10 +105,15 @@ export const AdministrationCloudPlansView = () => {
                     to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
                       [PARAMS.PLAN_ID]: plan.id,
                     })}
+                    data-cy="administration-cloud-plans-item-edit"
                   >
                     {t('administration_cloud_plan_edit_button')}
                   </Button>
-                  <IconButton size="small" onClick={() => deletePlan(plan)}>
+                  <IconButton
+                    size="small"
+                    onClick={() => deletePlan(plan)}
+                    data-cy="administration-cloud-plans-item-delete"
+                  >
                     <Delete />
                   </IconButton>
                 </Box>

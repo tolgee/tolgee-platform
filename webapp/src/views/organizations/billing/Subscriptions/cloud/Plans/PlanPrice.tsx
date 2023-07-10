@@ -56,7 +56,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
 
   return (
     <StyledPrice>
-      <StyledPrimaryPrice>
+      <StyledPrimaryPrice data-cy="billing-plan-monthly-price">
         {subscriptionPrice === 0 ? (
           formatMoney(subscriptionPrice)
         ) : (
@@ -67,7 +67,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
         )}
       </StyledPrimaryPrice>
       {Boolean(perSeat) && (
-        <StyledSecondaryPrice>
+        <StyledSecondaryPrice data-cy="billing-plan-price-per-seat-extra">
           <T
             keyName="billing-plan-price-per-seat-extra"
             params={{ price: perSeat }}
@@ -75,7 +75,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
         </StyledSecondaryPrice>
       )}
       {Boolean(perThousandTranslations) && (
-        <StyledSecondaryPrice>
+        <StyledSecondaryPrice data-cy="billing-plan-price-per-thousand-strings-extra">
           <T
             keyName="billing-plan-price-per-thousand-strings-extra"
             params={{ price: perThousandTranslations }}
@@ -83,7 +83,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
         </StyledSecondaryPrice>
       )}
       {Boolean(perThousandMtCredits) && (
-        <StyledSecondaryPrice>
+        <StyledSecondaryPrice data-cy="billing-plan-price-per-thousand-mt-credits-extra">
           <T
             keyName="billing-plan-price-per-thousand-mt-credits-extra"
             params={{ price: perThousandMtCredits }}
@@ -91,7 +91,7 @@ export const PlanPrice: React.FC<Props> = ({ prices, period }) => {
         </StyledSecondaryPrice>
       )}
       {period === 'YEARLY' && differentPricesAnnualy && (
-        <StyledPeriod>
+        <StyledPeriod data-cy="billing_period_annual">
           <T keyName="billing_period_annual" />
         </StyledPeriod>
       )}

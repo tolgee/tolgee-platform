@@ -78,6 +78,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               size="small"
               label={t('administration_ee_plan_field_name')}
               fullWidth
+              data-cy="administration-ee-plan-field-name"
             />
             <Box display="grid" gap={2} sx={{ mt: 2 }}>
               <Field name="stripeProductId">
@@ -88,6 +89,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                     sx={{
                       display: 'grid',
                     }}
+                    data-cy="administration-ee-plan-field-stripe-product"
                   >
                     <InputLabel sx={{ position: 'static' }}>
                       {t('administration_ee_plan_field_stripe_product')}
@@ -123,6 +125,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               <TextField
                 name="prices.subscriptionMonthly"
                 size="small"
+                data-cy="administration-ee-plan-field-price-monthly"
                 label={t('administration_ee_plan_field_price_monthly')}
                 type="number"
                 fullWidth
@@ -130,6 +133,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               <TextField
                 name="prices.subscriptionYearly"
                 size="small"
+                data-cy="administration-ee-plan-field-price-yearly"
                 label={t('administration_ee_plan_field_price_yearly')}
                 type="number"
                 fullWidth
@@ -137,6 +141,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               <TextField
                 name="prices.perSeat"
                 size="small"
+                data-cy="administration-ee-plan-field-price-per-seat"
                 label={t('administration_ee_plan_field_price_per_seat')}
                 type="number"
                 fullWidth
@@ -152,6 +157,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                 size="small"
                 type="number"
                 fullWidth
+                data-cy="administration-ee-plan-field-included-seats"
                 label={t('administration_ee_plan_field_included_seats')}
               />
             </Box>
@@ -176,6 +182,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
 
                     return (
                       <FormControlLabel
+                        data-cy="administration-ee-plan-field-feature"
                         key={feature}
                         control={
                           <Checkbox
@@ -199,6 +206,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                   onChange={() => setFieldValue('public', !values.public)}
                 />
               }
+              data-cy="administration-ee-plan-field-public"
               label={t('administration_ee_plan_field_public')}
             />
 
@@ -226,6 +234,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                 variant="contained"
                 color="primary"
                 type="submit"
+                data-cy="administration-ee-plan-submit-button"
               >
                 {t('global_form_save')}
               </LoadingButton>

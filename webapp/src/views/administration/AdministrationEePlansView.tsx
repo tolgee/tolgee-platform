@@ -81,7 +81,7 @@ export const AdministrationEePlansView = () => {
       >
         <Paper variant="outlined">
           {plansLoadable.data?._embedded?.plans?.map((plan, i) => (
-            <ListItem key={i}>
+            <ListItem key={i} data-cy="administration-ee-plans-item">
               <Box
                 display="flex"
                 justifyContent="space-between"
@@ -92,6 +92,7 @@ export const AdministrationEePlansView = () => {
                   <ListItemText>{plan.name}</ListItemText>
                   {plan.public && (
                     <Chip
+                      data-cy="administration-ee-plans-item-public-badge"
                       size="small"
                       label={t('administration_ee_plan_public_badge')}
                     />
@@ -104,10 +105,15 @@ export const AdministrationEePlansView = () => {
                     to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
                       [PARAMS.PLAN_ID]: plan.id,
                     })}
+                    data-cy="administration-ee-plans-item-edit"
                   >
                     {t('administration_ee_plan_edit_button')}
                   </Button>
-                  <IconButton size="small" onClick={() => deletePlan(plan)}>
+                  <IconButton
+                    size="small"
+                    onClick={() => deletePlan(plan)}
+                    data-cy="administration-ee-plans-item-delete"
+                  >
                     <Delete />
                   </IconButton>
                 </Box>
