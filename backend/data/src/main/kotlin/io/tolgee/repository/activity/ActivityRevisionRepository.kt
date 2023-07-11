@@ -14,7 +14,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
     """
     from ActivityRevision ar
-    where ar.projectId = :projectId and ar.type is not null
+    where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null
   """
   )
   fun getForProject(projectId: Long, pageable: Pageable): Page<ActivityRevision>

@@ -58,6 +58,12 @@ class Permission(
   @Type(type = "enum-array")
   @Column(name = "scopes", columnDefinition = "varchar[]")
   private var _scopes: Array<Scope>? = null
+    set(value) {
+      field = value
+      if (!value.isNullOrEmpty()) {
+        this.type = null
+      }
+    }
 
   override var scopes: Array<Scope>
     get() = _scopes ?: type?.availableScopes ?: throw IllegalStateException()
