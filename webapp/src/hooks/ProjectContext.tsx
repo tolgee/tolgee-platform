@@ -23,6 +23,13 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       path: { projectId: id },
     });
 
+    const batchOperations = useApiQuery({
+      url: '/v2/projects/{projectId}/batch-jobs',
+      method: 'get',
+      path: { projectId: id },
+      query: { size: 100 },
+    });
+
     const { updatePreferredOrganization } = usePreferredOrganization();
 
     useEffect(() => {
@@ -31,7 +38,8 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       }
     }, [project.data]);
 
-    const isLoading = project.isLoading || settings.isLoading;
+    const isLoading =
+      project.isLoading || settings.isLoading || batchOperations.isLoading;
 
     useGlobalLoading(isLoading);
 
@@ -49,7 +57,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     const contextData = {
       project: project.data,
       enabledMtServices: settings.data?._embedded?.languageConfigs,
-      refetchSettings: settings.refetch,
+      batchOperations: batchOperations.data?._embedded?.batchJobs,
     };
 
     const actions = {
