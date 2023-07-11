@@ -7,7 +7,7 @@ import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { BatchOperationsSummary } from './translations/BatchOperations/BatchOperationsSummary';
+import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
 
 type Props = BaseViewProps;
 

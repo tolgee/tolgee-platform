@@ -3,7 +3,6 @@ import { Box, Select, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
-import { Bold } from '@dicebear/avatars-initials-sprites/dist/options';
 
 export type SelectItem<T> = {
   value: T;

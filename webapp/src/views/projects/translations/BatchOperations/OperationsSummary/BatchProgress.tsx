@@ -23,7 +23,7 @@ type Props = {
 };
 
 export const BatchProgress = ({ max, progress }: Props) => {
-  const percent = progress / (max || 1);
+  const percent = (progress / (max || 1)) * 100;
   return (
     <StyledContainer>
       <StyledProgress width={`${percent}%`} />
