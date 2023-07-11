@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
@@ -52,12 +53,18 @@ class SignUpService(
       organization = organizationService.createPreferred(user, name)
     }
 
+    recordEvent(organization, user)
+
     if (!tolgeeProperties.authentication.needsEmailVerification) {
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)
 
+    return null
+  }
+
+  private fun recordEvent(organization: Organization?, user: UserAccount) {
     applicationEventPublisher.publishEvent(
       OnEventToCaptureEvent(
         eventName = "SIGN_UP",
@@ -65,8 +72,6 @@ class SignUpService(
         organizationName = organization?.name,
         userAccountId = user.id,
       )
-    )
-
-    return null
+      )
   }
 }

@@ -1,20 +1,27 @@
 package io.tolgee.controllers
 
+import com.posthog.java.PostHog
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import kotlin.properties.Delegates
 
 @SpringBootTest(properties = ["tolgee.post-hog.api-key=mock"])
@@ -34,9 +41,9 @@ class PublicControllerTest :
     tolgeeProperties.authentication.userCanCreateOrganizations = canCreateOrganizations
   }
 
-//  @MockBean
-//  @Autowired
-//  lateinit var postHogWrapper: PostHogWrapper
+  @MockBean
+  @Autowired
+  lateinit var postHog: PostHog
 
   @Test
   fun `creates organization`() {
@@ -61,9 +68,9 @@ class PublicControllerTest :
   fun `logs event to post hog`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost("/api/public/sign_up", dto).andIsOk
-//    waitForNotThrowing(timeout = 2000) {
-//      verify(postHog, times(1)).capture(any(), eq("SIGN_UP"), any())
-//    }
+    waitForNotThrowing(timeout = 10000) {
+      verify(postHog, times(1)).capture(any(), eq("SIGN_UP"), any())
+    }
   }
 
   @Test

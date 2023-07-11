@@ -10,5 +10,6 @@ data class OnEventToCaptureEvent(
   val organizationId: Long? = null,
   val organizationName: String? = null,
   val userAccountId: Long? = null,
-  val userAccountDto: UserAccountDto? = null
+  val userAccountDto: UserAccountDto? = null,
+  val utmData: Map<String, Any?>? = null
 )

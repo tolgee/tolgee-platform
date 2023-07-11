@@ -21,6 +21,11 @@ class UtmReportingFilter(
   }
 
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    assignHolder(request)
+    filterChain.doFilter(request, response)
+  }
+
+  fun assignHolder(request: HttpServletRequest) {
     try {
       val headerValue = request.getHeader(UTM_HEADER_NAME) ?: return
       val parsed = parseUtmValues(headerValue) ?: return
@@ -29,7 +34,6 @@ class UtmReportingFilter(
       Sentry.captureException(e)
       logger.error(e)
     }
-    filterChain.doFilter(request, response)
   }
 
   fun parseUtmValues(headerValue: String?): Map<String, Any?>? {

@@ -1,33 +1,45 @@
 package io.tolgee.component.reporting
 
+import com.posthog.java.PostHog
 import io.tolgee.activity.UtmDataHolder
-import io.tolgee.component.PostHogWrapper
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class EventRecorder(
-  private val postHogWrapper: PostHogWrapper,
+  private val postHog: PostHog?,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
-  private val utmDataHolder: UtmDataHolder
+  private val utmDataHolder: UtmDataHolder,
 ) {
-  @TransactionalEventListener
+
+  @Lazy
+  @Autowired
+  private lateinit var selfProxied: EventRecorder
+
   @Async
-  fun capture(data: OnEventToCaptureEvent) {
-    postHogWrapper.postHog ?: return
+  fun captureAsync(data: OnEventToCaptureEvent) {
     val filledData = fillData(data)
     captureWithPostHog(filledData)
   }
 
+
+  @TransactionalEventListener
+  fun capture(data: OnEventToCaptureEvent) {
+    if (postHog == null) return
+    selfProxied.captureAsync(data.copy(utmData = utmDataHolder.data))
+  }
+
   private fun captureWithPostHog(data: OnEventToCaptureEvent) {
     val userAccountDto = data.userAccountDto ?: return
-    postHogWrapper.postHog?.capture(
+    postHog?.capture(
       userAccountDto.id.toString(), data.eventName,
       mapOf(
         "${'$'}set" to mapOf(
@@ -36,7 +48,7 @@ class EventRecorder(
         ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
-      ) + (utmDataHolder.data ?: emptyMap())
+      ) + (data.utmData ?: emptyMap())
     )
   }
 
