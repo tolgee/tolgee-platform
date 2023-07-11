@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { container } from 'tsyringe';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
@@ -37,7 +37,6 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
   const putTranslation = usePutTranslation();
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
-  const { t } = useTranslate();
 
   useEffect(() => {
     // field is also focused, which breaks the scrolling
@@ -154,25 +153,37 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     });
   };
 
-  const setEdit = (newPosition: Edit | undefined) => {
-    if (position?.changed) {
-      setPositionAndFocus({ ...position, mode: 'editor' });
-      confirmation({
-        title: t('translations_unsaved_changes_confirmation_title'),
-        message: t('translations_unsaved_changes_confirmation'),
-        cancelButtonText: t('back_to_editing'),
-        confirmButtonText: t('translations_cell_save'),
-        onConfirm: () => {
-          changeField({
-            onSuccess() {
-              setPositionAndFocus(newPosition);
-            },
-          });
-        },
-      });
-    } else {
-      setPositionAndFocus(newPosition);
-    }
+  const confirmUnsavedChanges = (newPosition?: Partial<Edit>) => {
+    return new Promise<boolean>((resolve) => {
+      const fieldIsDifferent =
+        newPosition?.keyId !== undefined &&
+        (newPosition?.keyId !== position?.keyId ||
+          newPosition?.language !== position?.language);
+
+      if (
+        position?.changed &&
+        position.keyId !== undefined &&
+        (!newPosition || fieldIsDifferent)
+      ) {
+        setPositionAndFocus({ ...position, mode: 'editor' });
+        confirmation({
+          title: <T keyName="translations_discard_unsaved_title" />,
+          message: <T keyName="translations_discard_unsaved_message" />,
+          cancelButtonText: <T keyName="back_to_editing" />,
+          confirmButtonText: (
+            <T keyName="translations_discard_button_confirm" />
+          ),
+          onConfirm() {
+            resolve(true);
+          },
+          onCancel() {
+            resolve(false);
+          },
+        });
+      } else {
+        resolve(true);
+      }
+    });
   };
 
   const changeField = async (data: ChangeValue) => {
@@ -243,8 +254,8 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     setPosition,
     updatePosition,
     setPositionAndFocus,
-    setEdit,
     changeField,
+    confirmUnsavedChanges,
     isLoading:
       putKey.isLoading ||
       putTranslation.isLoading ||
