@@ -105,6 +105,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       isEqualTo(
         """
       {
+        "2022-03-20" : 1,
         "2022-04-01" : 1,
         "2022-04-05" : 5,
         "2022-04-20" : 2

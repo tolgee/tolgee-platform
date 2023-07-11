@@ -11,6 +11,6 @@ class StoreProjectActivityListener(
 ) {
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
-    activityService.storeActivityData(event.activityHolder)
+    activityService.storeActivityData(event.activityRevision, event.modifiedEntities)
   }
 }

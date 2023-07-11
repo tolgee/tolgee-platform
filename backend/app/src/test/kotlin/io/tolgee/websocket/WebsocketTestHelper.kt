@@ -1,5 +1,6 @@
 package io.tolgee.websocket
 
+import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.lang.Nullable
@@ -17,31 +18,59 @@ import java.lang.reflect.Type
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
-class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) {
+class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) : Logging {
+  private var sessionHandler: MySessionHandler? = null
   lateinit var receivedMessages: LinkedBlockingDeque<String>
 
-  fun listen() {
-    receivedMessages = LinkedBlockingDeque()
+  fun listenForTranslationDataModified() {
+    listen("/projects/$projectId/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}")
+  }
 
-    val webSocketStompClient = WebSocketStompClient(
+  fun listenForBatchJobProgress() {
+    listen("/projects/$projectId/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}")
+  }
+
+  private val webSocketStompClient by lazy {
+    WebSocketStompClient(
       SockJsClient(listOf(WebSocketTransport(StandardWebSocketClient())))
     )
+  }
+
+  private var connection: StompSession? = null
+
+  fun listen(path: String) {
+    receivedMessages = LinkedBlockingDeque()
 
     webSocketStompClient.messageConverter = SimpleMessageConverter()
-
-    webSocketStompClient.connect(
+    sessionHandler = MySessionHandler(path, receivedMessages)
+    connection = webSocketStompClient.connect(
       "http://localhost:$port/websocket", WebSocketHttpHeaders(),
       StompHeaders().apply { add("jwtToken", jwtToken) },
-      MySessionHandler("/projects/$projectId/translation-data-modified", receivedMessages)
+      sessionHandler!!
     ).get(10, TimeUnit.SECONDS)
+  }
+
+  fun stop() {
+    logger.info("Stopping websocket listener")
+    try {
+      sessionHandler?.subscription?.unsubscribe()
+      connection?.disconnect()
+    } catch (e: IllegalStateException) {
+      logger.warn("Could not unsubscribe from websocket", e)
+    }
+    webSocketStompClient.stop()
+    logger.info("Stopped websocket listener")
   }
 
   private class MySessionHandler(
     val dest: String,
     val receivedMessages: LinkedBlockingDeque<String>
   ) : StompSessionHandlerAdapter(), Logging {
+
+    var subscription: StompSession.Subscription? = null
+
     override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
-      session.subscribe(dest, this)
+      subscription = session.subscribe(dest, this)
     }
 
     override fun handleException(
@@ -71,5 +100,21 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
         throw RuntimeException(e)
       }
     }
+  }
+
+  /**
+   * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
+   */
+  fun assertNotified(
+    dispatchCallback: () -> Unit,
+    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit)
+  ) {
+    Thread.sleep(200)
+    dispatchCallback()
+    waitFor(3000) {
+      receivedMessages.isNotEmpty()
+    }
+    assertCallback(receivedMessages)
+    stop()
   }
 }

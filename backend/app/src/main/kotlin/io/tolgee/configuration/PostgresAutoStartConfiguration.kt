@@ -1,9 +1,10 @@
 package io.tolgee.configuration
 
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
-import io.tolgee.postgresStarters.PostgresRunner
-import io.tolgee.postgresStarters.PostgresRunnerFactory
+import io.tolgee.postgresRunners.PostgresRunner
+import io.tolgee.postgresRunners.PostgresRunnerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,6 +20,7 @@ class PostgresAutoStartConfiguration(
   private var _dataSource: DataSource? = null
 
   @Bean
+  @ConfigurationProperties(prefix = "spring.datasource")
   fun getDataSource(): DataSource {
     _dataSource?.let { return it }
     postgresRunner.run()

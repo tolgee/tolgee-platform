@@ -106,6 +106,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
 
     /**
      * DB
@@ -113,6 +114,12 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     kapt "org.hibernate:hibernate-jpamodelgen"
+
+    /**
+     * Redisson
+     */
+    implementation libs.redissonSpringBootStarter
+    implementation libs.redissonSpringData
 
     /**
      * Liquibase

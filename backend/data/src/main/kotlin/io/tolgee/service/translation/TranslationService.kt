@@ -41,7 +41,8 @@ class TranslationService(
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val translationCommentService: TranslationCommentService
 ) {
   @set:Autowired
   @set:Lazy
@@ -218,6 +219,7 @@ class TranslationService(
 
   fun deleteByIdIn(ids: Collection<Long>) {
     importService.onExistingTranslationsRemoved(ids)
+    translationCommentService.deleteByTranslationIdIn(ids)
     translationRepository.deleteByIdIn(ids)
   }
 

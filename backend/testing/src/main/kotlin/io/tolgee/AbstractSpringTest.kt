@@ -50,7 +50,22 @@ import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
+@SpringBootTest(
+//  exclude = [
+//    CompositeMeterRegistryAutoConfiguration::class,
+//    DataSourcePoolMetricsAutoConfiguration::class,
+//    DiskSpaceHealthContributorAutoConfiguration::class,
+//    InfoContributorAutoConfiguration::class,
+//    JmxAutoConfiguration::class,
+//    JvmMetricsAutoConfiguration::class,
+//    JmxEndpointAutoConfiguration::class,
+//    LdapAutoConfiguration::class,
+//    LiquibaseEndpointAutoConfiguration::class,
+//    MetricsEndpointAutoConfiguration::class,
+//    StartupTimeMetricsListenerAutoConfiguration::class,
+//    TomcatMetricsAutoConfiguration::class,
+//  ]
+)
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -227,9 +242,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   fun <T> executeInNewTransaction(fn: () -> T): T {
     return io.tolgee.util.executeInNewTransaction(
-      platformTransactionManager,
-      TransactionDefinition.ISOLATION_DEFAULT,
-      fn
+      transactionManager = platformTransactionManager,
+      fn = fn,
+      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
     )
   }
 }

@@ -2,7 +2,6 @@ package io.tolgee.service.translation
 
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
-import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
@@ -27,25 +26,17 @@ class AutoTranslationService(
 
   fun autoTranslate(
     key: Key,
-    languageTags: Set<String>? = null,
+    languageTags: List<String>? = null,
+    useTranslationMemory: Boolean? = null,
+    useMachineTranslation: Boolean? = null
   ) {
     val config = getConfig(key.project)
-    if (config.usingPrimaryMtService || config.usingTm) {
-      autoTranslate(key, languageTags, config.usingTm, config.usingPrimaryMtService)
-    }
-  }
 
-  fun autoTranslate(
-    key: Key,
-    languageTags: Set<String>? = null,
-    useTranslationMemory: Boolean,
-    useMachineTranslation: Boolean
-  ) {
-    if (useTranslationMemory) {
-      autoTranslateUsingTm(key, languageTags)
+    if (useTranslationMemory ?: config.usingTm) {
+      autoTranslateUsingTm(key, languageTags?.toSet())
     }
-    if (useMachineTranslation) {
-      autoTranslateUsingMachineTranslation(key, languageTags)
+    if (useMachineTranslation ?: config.usingPrimaryMtService) {
+      autoTranslateUsingMachineTranslation(key, languageTags?.toSet())
     }
   }
 
@@ -60,20 +51,16 @@ class AutoTranslationService(
   ) {
     val languages = translations.map { it.language }
 
-    try {
-      mtService.getPrimaryMachineTranslations(key, languages)
-        .zip(translations)
-        .asSequence()
-        .forEach { (translateResult, translation) ->
-          translateResult?.let {
-            it.translatedText?.let { text ->
-              translation.setValueAndState(text, it.usedService)
-            }
+    mtService.getPrimaryMachineTranslations(key, languages)
+      .zip(translations)
+      .asSequence()
+      .forEach { (translateResult, translation) ->
+        translateResult?.let {
+          it.translatedText?.let { text ->
+            translation.setValueAndState(text, it.usedService)
           }
         }
-    } catch (e: OutOfCreditsException) {
-      logger.debug("Out of credits for primary MT service")
-    }
+      }
   }
 
   private fun autoTranslateUsingTm(key: Key, languageTags: Set<String>? = null) {

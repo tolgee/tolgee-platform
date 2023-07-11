@@ -12,7 +12,6 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -24,7 +23,6 @@ import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
-@ContextRecreatingTest
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 

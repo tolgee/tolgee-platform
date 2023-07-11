@@ -5,6 +5,7 @@ interface Caches {
     const val USER_ACCOUNTS = "userAccounts"
     const val PROJECTS = "projects"
     const val PERMISSIONS = "permissions"
+    const val BATCH_JOBS = "batchJobs"
     const val RATE_LIMITS = "rateLimits"
     const val MACHINE_TRANSLATIONS = "machineTranslations"
     const val PROJECT_TRANSLATIONS_MODIFIED = "projectTranslationsModified"
