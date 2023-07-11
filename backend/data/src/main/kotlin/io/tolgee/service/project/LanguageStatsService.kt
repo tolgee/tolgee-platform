@@ -8,7 +8,7 @@ import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.query_builders.LanguageStatsProvider
 import io.tolgee.util.Logging
-import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -28,14 +28,14 @@ class LanguageStatsService(
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId") {
-      executeInNewTransaction(platformTransactionManager) {
+      executeInNewRepeatableTransaction(platformTransactionManager) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
         try {
 
           val baseLanguage = projectService.getOrCreateBaseLanguage(projectId)
           val rawBaseLanguageStats = allRawLanguageStats.find { it.languageId == baseLanguage?.id }
-            ?: return@executeInNewTransaction
+            ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
           val languageStats = languageStatsRepository.getAllByProjectId(projectId)
             .associateBy { it.language.id }
@@ -49,7 +49,7 @@ class LanguageStatsService(
               val translatedOrReviewedKeys = rawLanguageStats.translatedKeys + rawLanguageStats.reviewedKeys
               val translatedOrReviewedWords = rawLanguageStats.translatedWords + rawLanguageStats.reviewedWords
               val untranslatedWords = baseWords - translatedOrReviewedWords
-              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@executeInNewTransaction
+              val language = languages.find { it.id == rawLanguageStats.languageId } ?: return@tx
               val stats = languageStats.computeIfAbsent(language.id) {
                 LanguageStats(language)
               }
@@ -71,7 +71,7 @@ class LanguageStatsService(
             languageStatsRepository.save(it)
           }
         } catch (e: NotFoundException) {
-          logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?")
+          logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?", e)
         }
       }
     }

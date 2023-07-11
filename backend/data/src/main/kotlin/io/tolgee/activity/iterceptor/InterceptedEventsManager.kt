@@ -193,10 +193,9 @@ class InterceptedEventsManager(
 
   private val activityRevision: ActivityRevision
     get() {
-      var activityRevision = activityHolder.activityRevision
-
-      if (activityRevision == null) {
-        activityRevision = ActivityRevision().also { revision ->
+      if (!activityHolder.activityRevision.isInitializedByInterceptor) {
+        activityHolder.activityRevision.isInitializedByInterceptor = true
+        activityHolder.activityRevision.also { revision ->
           revision.authorId = userAccount?.id
           try {
             revision.projectId = projectHolder.project.id
@@ -206,10 +205,9 @@ class InterceptedEventsManager(
           }
           revision.type = activityHolder.activity
         }
-        activityHolder.activityRevision = activityRevision
       }
 
-      return activityRevision
+      return activityHolder.activityRevision
     }
 
   private val userAccount: UserAccountDto?

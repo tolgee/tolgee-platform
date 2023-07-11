@@ -11,6 +11,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.KeyRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +21,8 @@ import java.io.Serializable
 @Service
 class SecurityService @Autowired constructor(
   private val authenticationFacade: AuthenticationFacade,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val keyRepository: KeyRepository
 ) {
 
   @set:Autowired
@@ -246,6 +248,24 @@ class SecurityService @Autowired constructor(
 
   fun getProjectPermissionScopes(projectId: Long, userId: Long = activeUser.id): Array<Scope>? {
     return permissionService.getProjectPermissionScopes(projectId, userId)
+  }
+
+  fun checkKeyIdsExistAndIsFromProject(keyIds: List<Long>, projectId: Long) {
+    val projectIds = keyRepository.getProjectIdsForKeyIds(keyIds)
+
+    if (projectIds.size != keyIds.size) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+
+    val firstProjectId = projectIds[0]
+
+    if (projectIds.any { it != firstProjectId }) {
+      throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+    }
+
+    if (firstProjectId != projectId) {
+      throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+    }
   }
 
   private fun isCurrentUserServerAdmin(): Boolean {

@@ -1,14 +1,17 @@
 package io.tolgee
 
+import io.tolgee.batch.BatchJobConcurrentLauncher
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.TestContext
 import org.springframework.test.context.TestExecutionListener
 import java.sql.ResultSet
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import javax.sql.DataSource
 import kotlin.system.measureTimeMillis
 
@@ -21,9 +24,15 @@ class CleanDbTestListener : TestExecutionListener {
   )
 
   override fun beforeTestMethod(testContext: TestContext) {
+    val appContext: ApplicationContext = testContext.applicationContext
+    val jobChunkExecutionQueue = appContext.getBean(BatchJobConcurrentLauncher::class.java)
+    jobChunkExecutionQueue.pause = true
+
     if (!shouldClenBeforeClass(testContext)) {
       cleanWithRetries(testContext)
     }
+
+    jobChunkExecutionQueue.pause = false
   }
 
   private fun cleanWithRetries(testContext: TestContext) {
@@ -32,10 +41,8 @@ class CleanDbTestListener : TestExecutionListener {
       var i = 0
       while (true) {
         try {
-          runBlocking {
-            withTimeout(3000) {
-              doClean(testContext)
-            }
+          withTimeout(3000) {
+            doClean(testContext)
           }
           break
         } catch (e: Exception) {
@@ -103,5 +110,19 @@ class CleanDbTestListener : TestExecutionListener {
 
   @Throws(Exception::class)
   override fun prepareTestInstance(testContext: TestContext) {
+  }
+
+  private fun withTimeout(timeout: Long, block: () -> Unit) {
+    val executor = Executors.newSingleThreadExecutor()
+    val future: Future<Any> = executor.submit<Any>(block)
+
+    try {
+      println(future[timeout, TimeUnit.MILLISECONDS])
+    } catch (e: TimeoutException) {
+      future.cancel(true)
+      throw e
+    }
+
+    executor.shutdownNow()
   }
 }
