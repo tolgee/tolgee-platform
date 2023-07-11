@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.batch
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.batch.BatchJobType
 import io.tolgee.hateoas.user_account.SimpleUserAccountModel
 import io.tolgee.model.batch.BatchJobStatus
 import org.springframework.hateoas.RepresentationModel
@@ -16,6 +17,9 @@ open class BatchJobModel(
   @Schema(description = "Status of the batch job")
   val status: BatchJobStatus,
 
+  @Schema(description = "Type of the batch job")
+  val type: BatchJobType,
+
   @Schema(description = "Total items, that have been processed so far")
   val progress: Int,
 
@@ -30,4 +34,7 @@ open class BatchJobModel(
 
   @Schema(description = "The activity revision id, that stores the activity details of the job")
   val activityRevisionId: Long?,
+
+  @Schema(description = "If the job failed, this is the error message")
+  val errorMessage: String?,
 ) : RepresentationModel<BatchJobModel>(), Serializable

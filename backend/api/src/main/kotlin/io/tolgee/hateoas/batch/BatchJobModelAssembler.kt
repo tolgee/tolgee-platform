@@ -15,12 +15,14 @@ class BatchJobModelAssembler(
   override fun toModel(view: BatchJobView): BatchJobModel {
     return BatchJobModel(
       id = view.batchJob.id,
+      type = view.batchJob.type,
       status = view.batchJob.status,
       progress = view.progress,
       totalItems = view.batchJob.totalItems,
       author = view.batchJob.author?.let { simpleUserAccountModelAssembler.toModel(it) },
       createdAt = view.batchJob.createdAt.toString(),
-      activityRevisionId = view.batchJob.activityRevision?.id
+      activityRevisionId = view.batchJob.activityRevision?.id,
+      errorMessage = view.errorMessage?.code
     )
   }
 }

@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus
 import java.io.Serializable
 
 abstract class ErrorException : ExceptionWithMessage {
-  constructor(message: Message, params: List<Serializable?>?) : super(message.code, params)
-
-  constructor(message: Message) : this(message, null)
+  constructor(message: Message, params: List<Serializable?>? = null) : super(message, params)
 
   constructor(code: String, params: List<Serializable?>? = null) : super(code, params)
 

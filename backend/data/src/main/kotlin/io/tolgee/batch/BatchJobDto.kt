@@ -2,18 +2,19 @@ package io.tolgee.batch
 
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.batch.IBatchJob
 
 class BatchJobDto(
-  val id: Long,
+  override var id: Long,
   val projectId: Long,
   val authorId: Long?,
   val target: List<Long>,
   val totalItems: Int,
   val totalChunks: Int,
   val chunkSize: Int,
-  val status: BatchJobStatus,
+  override var status: BatchJobStatus,
   val type: BatchJobType
-) {
+) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
   companion object {

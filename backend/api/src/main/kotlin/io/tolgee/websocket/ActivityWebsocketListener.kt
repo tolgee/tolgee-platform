@@ -7,6 +7,7 @@ import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
 import io.tolgee.batch.events.OnBatchJobSucceeded
+import io.tolgee.constants.Message
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -108,7 +109,7 @@ class ActivityWebsocketListener(
 
   @TransactionalEventListener(OnBatchJobFailed::class)
   fun onBatchJobFailed(event: OnBatchJobFailed) {
-    onBatchJobCompleted(event)
+    onBatchJobCompleted(event, event.errorMessage)
   }
 
   @TransactionalEventListener(OnBatchJobCancelled::class)
@@ -116,12 +117,12 @@ class ActivityWebsocketListener(
     onBatchJobCompleted(event)
   }
 
-  fun onBatchJobCompleted(event: OnBatchJobCompleted) {
+  fun onBatchJobCompleted(event: OnBatchJobCompleted, errorMessage: Message? = null) {
     websocketEventPublisher(
       "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
-        data = WebsocketProgressInfo(event.job.id, null, null, event.job.status),
+        data = WebsocketProgressInfo(event.job.id, null, null, event.job.status, errorMessage?.code),
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false

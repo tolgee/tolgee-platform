@@ -6,5 +6,6 @@ data class WebsocketProgressInfo(
   val jobId: Long,
   val processed: Long?,
   val total: Long?,
-  val status: BatchJobStatus
+  val status: BatchJobStatus,
+  val errorMessage: String? = null,
 )

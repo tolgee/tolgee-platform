@@ -168,6 +168,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(51)
     websocketHelper.receivedMessages.last.contains("FAILED")
+    websocketHelper.receivedMessages.last.contains("out_of_credits")
+
+    waitForNotThrowing {
+      executeInNewTransaction {
+        batchJobService.getView(job.id).errorMessage.assert.isEqualTo(Message.OUT_OF_CREDITS)
+      }
+    }
   }
 
   @Test

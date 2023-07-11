@@ -6,6 +6,9 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.hateoas.batch.BatchJobModel
+import io.tolgee.hateoas.batch.BatchJobModelAssembler
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.apiKeyAuth.AccessWithApiKey
@@ -28,34 +31,38 @@ class StartBatchJobController(
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val batchJobService: BatchJobService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val batchJobModelAssembler: BatchJobModelAssembler
 ) {
   @PutMapping(value = ["/translate"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_AUTO_TRANSLATE)
   @Operation(summary = "Translates provided keys to provided languages")
-  fun translate(@Valid @RequestBody data: BatchTranslateRequest) {
+  fun translate(@Valid @RequestBody data: BatchTranslateRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    batchJobService.startJob(
+    return batchJobService.startJob(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
       BatchJobType.TRANSLATION
-    )
+    ).model
   }
 
   @PutMapping(value = ["/delete-keys"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_DELETE)
   @Operation(summary = "Translates provided keys to provided languages")
-  fun deleteKeys(@Valid @RequestBody data: DeleteKeysRequest) {
+  fun deleteKeys(@Valid @RequestBody data: DeleteKeysRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    batchJobService.startJob(
+    return batchJobService.startJob(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
       BatchJobType.DELETE_KEYS
-    )
+    ).model
   }
+
+  val BatchJob.model
+    get() = batchJobModelAssembler.toModel(batchJobService.getView(this))
 }

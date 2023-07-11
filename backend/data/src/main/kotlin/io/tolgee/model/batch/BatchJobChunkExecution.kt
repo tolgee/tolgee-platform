@@ -1,6 +1,7 @@
 package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.tolgee.constants.Message
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.activity.ActivityRevision
 import org.hibernate.annotations.ColumnDefault
@@ -41,6 +42,9 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   @Column(columnDefinition = "text")
   var exception: String? = null
+
+  @Enumerated(EnumType.STRING)
+  var errorMessage: Message? = null
 
   var executeAfter: Date? = null
 

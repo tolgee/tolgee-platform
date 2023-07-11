@@ -20,7 +20,7 @@ import javax.persistence.OneToOne
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
-class BatchJob : StandardAuditModel() {
+class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
@@ -36,7 +36,7 @@ class BatchJob : StandardAuditModel() {
 
   var chunkSize: Int = 0
 
-  var status: BatchJobStatus = BatchJobStatus.PENDING
+  override var status: BatchJobStatus = BatchJobStatus.PENDING
 
   @Enumerated
   var type: BatchJobType = BatchJobType.TRANSLATION

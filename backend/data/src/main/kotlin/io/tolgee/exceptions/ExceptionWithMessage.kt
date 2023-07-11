@@ -3,18 +3,21 @@ package io.tolgee.exceptions
 import io.tolgee.constants.Message
 import java.io.Serializable
 
-abstract class ExceptionWithMessage : RuntimeException {
+abstract class ExceptionWithMessage(
+  private val _code: String? = null,
   val params: List<Serializable?>?
+) : RuntimeException("$_code $params") {
+
+  var tolgeeMessage: Message? = null
+
   val code: String
-  constructor(message: Message, params: List<Serializable?>?) : super(message.code) {
-    this.params = params
-    this.code = message.code
+    get() = _code ?: tolgeeMessage?.code ?: throw IllegalStateException("Exception code or message not set")
+
+  constructor(message: Message, params: List<Serializable?>?) : this(message.code, params) {
+    this.tolgeeMessage = message
   }
 
-  constructor(message: Message) : this(message, null)
-
-  constructor(code: String, params: List<Serializable?>? = null) : super(code + params.toString()) {
-    this.code = code
-    this.params = params
+  constructor(message: Message) : this(null, null) {
+    this.tolgeeMessage = message
   }
 }

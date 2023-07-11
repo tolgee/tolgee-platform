@@ -7,6 +7,7 @@ import io.tolgee.batch.events.OnBatchJobStatusUpdated
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
+import io.tolgee.constants.Message
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -72,7 +73,8 @@ class ProgressManager(
     job: BatchJobDto,
     progress: Long,
     completedChunks: Long,
-    isAnyCancelled: Boolean
+    isAnyCancelled: Boolean,
+    errorMessage: Message? = null
   ) {
     logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
     logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
@@ -94,7 +96,8 @@ class ProgressManager(
       if (job.totalItems.toLong() != progress) {
         jobEntity.status = BatchJobStatus.FAILED
         cachingBatchJobService.saveJob(jobEntity)
-        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto))
+        val errorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(job))[job.id]
+        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, errorMessage))
         return
       }
 

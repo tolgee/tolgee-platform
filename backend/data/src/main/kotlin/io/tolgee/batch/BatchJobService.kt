@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -7,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.batch.IBatchJob
 import io.tolgee.model.views.BatchJobView
 import io.tolgee.repository.BatchJobRepository
 import io.tolgee.util.Logging
@@ -104,33 +106,49 @@ class BatchJobService(
 
   fun getViews(projectId: Long, userAccount: UserAccountDto?, pageable: Pageable): Page<BatchJobView> {
     val jobs = batchJobRepository.getJobs(projectId, userAccount?.id, pageable)
+
+    val progresses = getProgresses(jobs)
+
+    val errorMessages = getErrorMessages(jobs)
+
+    return jobs.map {
+      BatchJobView(it, progresses[it.id] ?: 0, errorMessages[it.id])
+    }
+  }
+
+  fun getErrorMessages(jobs: Iterable<IBatchJob>): Map<Long, Message> {
+    val needsErrorMessage = jobs.filter { it.status == BatchJobStatus.FAILED }.map { it.id }.toList()
+
+    return batchJobRepository.getErrorMessages(needsErrorMessage)
+      .groupBy { it.batchJobId }
+      .mapValues { it.value.minBy { value -> value.updatedAt }.errorMessage }
+  }
+
+  private fun getProgresses(jobs: Iterable<BatchJob>): Map<Long, Int> {
     val cachedProgresses =
-      jobs.map {
+      jobs.associate {
         it.id to
           if (it.status == BatchJobStatus.RUNNING)
             progressManager.getJobCachedProgress(jobId = it.id)
           else
             null
-      }.toMap()
+      }
     val needsProgress = cachedProgresses.filter { it.value == null }.map { it.key }.toList()
     val progresses = batchJobRepository.getProgresses(needsProgress)
       .associate { (it[0] as BigInteger).toLong() to it[1] as BigInteger }
-    return jobs.map {
-      val progress = cachedProgresses[it.id] ?: progresses[it.id]?.toLong() ?: 0
-      BatchJobView(it, progress.toInt())
-    }
+
+    return jobs.associate { it.id to (cachedProgresses[it.id] ?: progresses[it.id]?.toLong() ?: 0).toInt() }
   }
 
   fun getView(jobId: Long): BatchJobView {
     val job = batchJobRepository.findById(jobId).orElseThrow { NotFoundException() }
-    val cachedProgress = if (job.status == BatchJobStatus.RUNNING)
-      progressManager.getJobCachedProgress(jobId = job.id)
-    else
-      null
-    val progress = cachedProgress
-      ?: (batchJobRepository.getProgresses(listOf(jobId)).singleOrNull()?.get(1) as? BigInteger)?.toLong() ?: 0
+    return getView(job)
+  }
 
-    return BatchJobView(job, progress.toInt())
+  fun getView(job: BatchJob): BatchJobView {
+    val progress = getProgresses(listOf(job))[job.id] ?: 0
+    val errorMessage = getErrorMessages(listOf(job))[job.id]
+    return BatchJobView(job, progress, errorMessage)
   }
 
   @Suppress("UNCHECKED_CAST")

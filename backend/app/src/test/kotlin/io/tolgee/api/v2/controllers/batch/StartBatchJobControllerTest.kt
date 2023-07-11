@@ -2,7 +2,9 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
@@ -63,7 +65,11 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           testData.projectBuilder.getLanguageByTag("de")!!.self.id
         )
       )
-    ).andIsOk
+    )
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isValidId
+      }
 
     waitForAllTranslated(keyIds, keyCount)
     executeInNewTransaction {

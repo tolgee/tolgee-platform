@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
@@ -55,6 +56,8 @@ open class ChunkProcessingUtil(
 
     execution.exception = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
+    execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
+
     Sentry.captureException(exception)
     logger.error(exception.message, exception)
 

@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.views.JobErrorMessagesView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -35,4 +36,14 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
   """
   )
   fun getProgresses(jobIds: List<Long>): List<Array<Any>>
+
+  @Query(
+    value = """
+     select bjce.batchJob.id as batchJobId, bjce.id as executionId, bjce.errorMessage as errorMessage, bjce.updatedAt as updatedAt 
+     from BatchJobChunkExecution bjce 
+       where bjce.batchJob.id in :jobIds 
+         and  bjce.errorMessage is not null
+  """
+  )
+  fun getErrorMessages(jobIds: List<Long>): List<JobErrorMessagesView>
 }
