@@ -16,11 +16,11 @@ open class FailedDontRequeueException(
   cause: Throwable
 ) : ChunkFailedException(message, successfulTargets, cause)
 
-open class RequeueWithTimeoutException(
+open class RequeueWithDelayException(
   message: Message,
   successfulTargets: List<Long>,
   cause: Throwable,
-  val timeoutInMs: Int = 100,
+  val delayInMs: Int = 100,
   val increaseFactor: Int = 10,
   val maxRetries: Int = 3
 ) : ChunkFailedException(message, successfulTargets, cause)

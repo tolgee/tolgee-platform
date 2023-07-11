@@ -77,7 +77,7 @@ open class ChunkProcessingUtil(
     var maxRetries = job.type.maxRetries
     var waitTime = job.type.defaultRetryWaitTimeInMs
 
-    if (exception is RequeueWithTimeoutException) {
+    if (exception is RequeueWithDelayException) {
       maxRetries = exception.maxRetries
       waitTime = getWaitTime(exception)
     }
@@ -93,8 +93,8 @@ open class ChunkProcessingUtil(
     execution.retry = true
   }
 
-  private fun getWaitTime(exception: RequeueWithTimeoutException) =
-    exception.timeoutInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toInt()
+  private fun getWaitTime(exception: RequeueWithDelayException) =
+    exception.delayInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toInt()
 
   private val job by lazy { batchJobService.getJobDto(execution.batchJob.id) }
 
