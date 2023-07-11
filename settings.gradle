@@ -43,7 +43,7 @@ dependencyResolutionManagement {
             library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
             library('assertJCore', 'org.assertj:assertj-core:3.19.0')
             library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
-            library('mockito', 'org.mockito.kotlin:mockito-kotlin:3.2.0')
+            library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.0.0')
             library('commonsCodec', 'commons-codec:commons-codec:1.15')
             library('icu4j', 'com.ibm.icu:icu4j:69.1')
             library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')

@@ -6,7 +6,7 @@ import org.redisson.Redisson
 import org.redisson.api.RedissonClient
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.core.RedisOperations
@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.RedisOperations
 @Configuration
 @ConditionalOnClass(Redisson::class, RedisOperations::class)
 @AutoConfigureAfter(ConditionalRedissonAutoConfiguration::class)
-@ConditionalOnProperty(name = ["tolgee.cache.use-redis"], havingValue = "true")
+@ConditionalOnExpression("\${tolgee.cache.use-redis:false} and \${tolgee.cache.enabled:false}")
 class RedisLockingConfiguration(
   val redissonClient: RedissonClient
 ) {

@@ -1,8 +1,10 @@
 package io.tolgee.events
 
-import io.tolgee.activity.ActivityHolder
-import org.springframework.context.ApplicationEvent
+import io.tolgee.activity.ModifiedEntitiesType
+import io.tolgee.model.activity.ActivityRevision
 
 class OnProjectActivityEvent(
-  val activityHolder: ActivityHolder,
-) : ApplicationEvent(activityHolder)
+  val activityRevision: ActivityRevision,
+  val modifiedEntities: ModifiedEntitiesType,
+  val organizationId: Long?
+)

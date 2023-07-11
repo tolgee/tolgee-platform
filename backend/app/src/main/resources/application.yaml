@@ -1,4 +1,6 @@
 spring:
+  autoconfigure:
+    exclude: org.redisson.spring.starter.RedissonAutoConfiguration, org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   data:
     redis:
       repositories:

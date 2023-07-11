@@ -16,4 +16,6 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
   fun getPagedByTranslation(translation: Translation, pageable: Pageable): Page<TranslationComment>
 
   fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
+
+  fun deleteByTranslationIdIn(ids: Collection<Long>)
 }

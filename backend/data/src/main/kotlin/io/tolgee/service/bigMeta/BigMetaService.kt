@@ -40,6 +40,7 @@ class BigMetaService(
     return keysDistanceRepository.save(keysDistance)
   }
 
+  @Transactional
   fun store(data: BigMetaDto, project: Project) {
     storeRelatedKeysInOrder(data.relatedKeysInOrder, project)
   }
@@ -78,6 +79,7 @@ class BigMetaService(
     return entityManager.createQuery(query).resultList
   }
 
+  @Transactional
   fun findExistingKeyDistances(keys: List<KeyIdFindResult>, project: Project): List<KeysDistance> {
     val keyIds = keys.map { it.id }
     return findExistingKeysDistancesByIds(keyIds)
@@ -114,7 +116,7 @@ class BigMetaService(
   fun onKeyDeleted(event: OnProjectActivityEvent) {
     runSentryCatching {
       val ids =
-        event.activityHolder.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
+        event.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
           ?.map { it.entityId }
 
       if (ids.isNullOrEmpty()) {

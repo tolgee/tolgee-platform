@@ -184,16 +184,17 @@ class KeyService(
     translationService.deleteAllByKeys(ids)
     keyMetaService.deleteAllByKeyIdIn(ids)
     screenshotService.deleteAllByKeyId(ids)
-    val keys = keyRepository.findAllByIdIn(ids)
+    val keys = keyRepository.findAllByIdInForDelete(ids)
     val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
     namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     val ids = keyRepository.getIdsByProjectId(projectId)
     keyMetaService.deleteAllByKeyIdIn(ids)
-    keyRepository.deleteAllByIdIn(ids)
+    this.deleteMultiple(ids)
   }
 
   @Autowired
@@ -242,4 +243,8 @@ class KeyService(
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
+
+  fun find(id: List<Long>): List<Key> {
+    return keyRepository.findAllByIdIn(id)
+  }
 }
