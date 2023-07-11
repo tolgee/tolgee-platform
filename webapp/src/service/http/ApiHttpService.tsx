@@ -13,6 +13,7 @@ import { errorCapture } from './errorCapture';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { getUtmCookie } from 'tg.fixtures/utmCookie';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -67,6 +68,7 @@ export class ApiHttpService {
             ...init.headers,
             Authorization: 'Bearer ' + jwtToken,
           };
+          addUtmHeader(init.headers!);
         }
 
         fetch(this.apiUrl + input, init)
@@ -237,7 +239,7 @@ export class ApiHttpService {
   }
 
   buildQuery(object: { [key: string]: any }): string {
-    const query = Object.keys(object)
+    return Object.keys(object)
       .filter((k) => !!object[k])
       .map((k) => {
         if (Array.isArray(object[k])) {
@@ -254,7 +256,6 @@ export class ApiHttpService {
         }
       })
       .join('&');
-    return query;
   }
 
   static async getResObject(r: Response, o?: RequestOptions) {
@@ -268,5 +269,12 @@ export class ApiHttpService {
     } catch (e) {
       return textBody;
     }
+  }
+}
+
+function addUtmHeader(headers: HeadersInit) {
+  const cookie = getUtmCookie();
+  if (cookie) {
+    headers['X-Tolgee-Utm'] = cookie;
   }
 }

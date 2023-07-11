@@ -3,6 +3,8 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
+import { PostHog } from 'posthog-js';
+import { getUtmParams } from 'tg.fixtures/utmCookie';
 
 const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
@@ -23,20 +25,28 @@ export const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
-  async function initPostHog() {
+  function initPostHog() {
+    let postHogPromise: Promise<PostHog> | undefined;
     if (!window[POSTHOG_INITIALIZED_WINDOW_PROPERTY]) {
-      const posthog = await import('posthog-js').then((m) => m.default);
-      if (config?.postHogApiKey) {
-        posthog.init(config.postHogApiKey, {
-          api_host: config?.postHogHost || undefined,
-        });
-        window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
-        posthog.identify(userData!.id.toString(), {
-          name: userData!.username,
-          email: userData!.username,
-        });
-      }
+      window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
+      postHogPromise = import('posthog-js').then((m) => m.default);
+      postHogPromise.then((posthog) => {
+        if (config?.postHogApiKey) {
+          posthog.init(config.postHogApiKey, {
+            api_host: config?.postHogHost || undefined,
+          });
+          posthog.identify(userData!.id.toString(), {
+            name: userData!.username,
+            email: userData!.username,
+            ...getUtmParams(),
+          });
+        }
+      });
     }
+    return () => {
+      postHogPromise?.then((ph) => ph.reset());
+      window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = false;
+    };
   }
 
   useEffect(() => {
@@ -44,7 +54,7 @@ export const MandatoryDataProvider = (props: any) => {
       email: userData!.username,
       id: userData!.id.toString(),
     });
-    initPostHog();
+    return initPostHog();
   }, [userData?.id, config?.postHogApiKey]);
 
   useGlobalLoading(isFetching || isLoading);

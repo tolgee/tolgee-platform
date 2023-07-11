@@ -1,39 +1,42 @@
 package io.tolgee.component.reporting
 
-import com.posthog.java.PostHog
+import io.tolgee.activity.UtmDataHolder
+import io.tolgee.component.PostHogWrapper
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
-@ConditionalOnBean(PostHog::class)
 class EventRecorder(
-  private val postHog: PostHog,
+  private val postHogWrapper: PostHogWrapper,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
+  private val utmDataHolder: UtmDataHolder
 ) {
-  @EventListener
+  @TransactionalEventListener
+  @Async
   fun capture(data: OnEventToCaptureEvent) {
+    postHogWrapper.postHog ?: return
     val filledData = fillData(data)
     captureWithPostHog(filledData)
   }
 
   private fun captureWithPostHog(data: OnEventToCaptureEvent) {
     val userAccountDto = data.userAccountDto ?: return
-    postHog.capture(
+    postHogWrapper.postHog?.capture(
       userAccountDto.id.toString(), data.eventName,
       mapOf(
+        "${'$'}set" to mapOf(
+          "email" to userAccountDto.username,
+          "name" to userAccountDto.name,
+        ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
-        "${'$'}set" to mapOf(
-          "email" to data.userAccountId,
-          "name" to userAccountDto.name,
-        )
-      )
+      ) + (utmDataHolder.data ?: emptyMap())
     )
   }
 

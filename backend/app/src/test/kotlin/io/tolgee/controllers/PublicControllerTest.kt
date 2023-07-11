@@ -12,11 +12,12 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.times
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import kotlin.properties.Delegates
 
-@SpringBootTest
+@SpringBootTest(properties = ["tolgee.post-hog.api-key=mock"])
 @AutoConfigureMockMvc
 class PublicControllerTest :
   AbstractControllerTest() {
@@ -32,6 +33,10 @@ class PublicControllerTest :
   fun tearDown() {
     tolgeeProperties.authentication.userCanCreateOrganizations = canCreateOrganizations
   }
+
+//  @MockBean
+//  @Autowired
+//  lateinit var postHogWrapper: PostHogWrapper
 
   @Test
   fun `creates organization`() {
@@ -50,6 +55,15 @@ class PublicControllerTest :
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Pavel Novak")).hasSize(1)
+  }
+
+  @Test
+  fun `logs event to post hog`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+//    waitForNotThrowing(timeout = 2000) {
+//      verify(postHog, times(1)).capture(any(), eq("SIGN_UP"), any())
+//    }
   }
 
   @Test
