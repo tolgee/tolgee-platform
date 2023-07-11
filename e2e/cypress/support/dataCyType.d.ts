@@ -38,6 +38,8 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "batch-operations-delete-button" |
+        "batch-operations-translate-button" |
         "billing-actual-extra-credits" |
         "billing-actual-period" |
         "billing-actual-period-end" |
@@ -359,7 +361,6 @@ declare namespace DataCy {
         "translations-cell-tab-history" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
-        "translations-delete-button" |
         "translations-filter-clear-all" |
         "translations-filter-option" |
         "translations-filter-select" |

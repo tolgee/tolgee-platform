@@ -70,6 +70,12 @@ export interface paths {
     get: operations["getAutoTranslationSettings"];
     put: operations["setAutoTranslationSettings"];
   };
+  "/v2/projects/{projectId}/start-batch-job/translate": {
+    put: operations["translate"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/delete-keys": {
+    put: operations["deleteKeys"];
+  };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
     /** Resolves translation conflict. The old translation will be overridden. */
     put: operations["resolveTranslationSetOverride"];
@@ -102,6 +108,9 @@ export interface paths {
     /** Imports the data prepared in previous step */
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
+    put: operations["cancel"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
     put: operations["setTranslationState"];
   };
@@ -109,7 +118,7 @@ export interface paths {
     put: operations["setState"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_4"];
+    get: operations["get_6"];
     put: operations["update_2"];
     delete: operations["delete_5"];
   };
@@ -131,7 +140,7 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_6"];
+    get: operations["get_8"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -149,7 +158,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/pats/{id}": {
-    get: operations["get_8"];
+    get: operations["get_10"];
     put: operations["update_4"];
     delete: operations["delete_7"];
   };
@@ -166,7 +175,7 @@ export interface paths {
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_10"];
+    get: operations["get_12"];
     put: operations["update_5"];
     delete: operations["delete_8"];
   };
@@ -373,6 +382,9 @@ export interface paths {
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
   };
+  "/v2/projects/{projectId}/my-batch-jobs": {
+    get: operations["myList"];
+  };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
     /** Returns translations prepared to import. */
     get: operations["getImportTranslations"];
@@ -394,6 +406,12 @@ export interface paths {
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
     get: operations["getAllNamespaces_2"];
+  };
+  "/v2/projects/{projectId}/batch-jobs/{id}": {
+    get: operations["get_4"];
+  };
+  "/v2/projects/{projectId}/batch-jobs": {
+    get: operations["list"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -429,7 +447,7 @@ export interface paths {
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_9"];
+    get: operations["get_11"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -463,7 +481,7 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_11"];
+    get: operations["get_13"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -597,13 +615,16 @@ export interface components {
         | "keys.view"
         | "keys.delete"
         | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate"
       )[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
       /** List of languages user can change state to. If null, changing state of all language values is permitted. */
       stateChangeLanguageIds?: number[];
       /** List of languages user can view. If null, all languages view is permitted. */
       viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
@@ -647,6 +668,9 @@ export interface components {
         | "keys.view"
         | "keys.delete"
         | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate"
       )[];
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -892,6 +916,17 @@ export interface components {
       /** If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
       usingMachineTranslation: boolean;
     };
+    BatchTranslateRequest: {
+      keyIds: number[];
+      targetLanguageIds: number[];
+      useMachineTranslation: boolean;
+      useTranslationMemory: boolean;
+      /** Translation service provider to use for translation. When null, Tolgee will use the primary service. */
+      service?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+    };
+    DeleteKeysRequest: {
+      keyIds: number[];
+    };
     SetFileNamespaceRequest: {
       namespace?: string;
     };
@@ -978,11 +1013,11 @@ export interface components {
     RevealedPatModel: {
       token: string;
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1084,11 +1119,11 @@ export interface components {
       key: string;
       id: number;
       scopes: string[];
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectId: number;
       username?: string;
       description: string;
+      lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       userFullName?: string;
       projectName: string;
     };
@@ -1470,7 +1505,10 @@ export interface components {
         | "translations.state-edit"
         | "keys.view"
         | "keys.delete"
-        | "keys.create";
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate";
       requires: components["schemas"]["HierarchyItem"][];
     };
     AuthMethodsDTO: {
@@ -1527,13 +1565,13 @@ export interface components {
       id: number;
       avatar?: components["schemas"]["Avatar"];
       slug: string;
+      description?: string;
       /**
        * The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
@@ -1619,16 +1657,16 @@ export interface components {
     KeySearchResultView: {
       name: string;
       id: number;
-      translation?: string;
       namespace?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       id: number;
-      translation?: string;
       namespace?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -1712,7 +1750,8 @@ export interface components {
         | "DELETE_LANGUAGE"
         | "CREATE_PROJECT"
         | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT";
+        | "NAMESPACE_EDIT"
+        | "BATCH_AUTO_TRANSLATE";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -1723,6 +1762,35 @@ export interface components {
     PropertyModification: {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
+    };
+    BatchJobModel: {
+      /** Batch job id */
+      id: number;
+      /** Status of the batch job */
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+      /** Total items, that have been processed so far */
+      progress: number;
+      /** Total items */
+      totalItems: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /** The time when the job created */
+      createdAt: string;
+      /** The activity revision id, that stores the activity details of the job */
+      activityRevisionId?: number;
+    };
+    PagedModelBatchJobModel: {
+      _embedded?: {
+        batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    /** The user who started the job */
+    SimpleUserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
     };
     ImportTranslationModel: {
       id: number;
@@ -1741,6 +1809,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1752,7 +1821,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1792,14 +1860,6 @@ export interface components {
         revisions?: components["schemas"]["TranslationHistoryModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    /** Author of the change */
-    SimpleUserAccountModel: {
-      id: number;
-      username: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
     };
     TranslationHistoryModel: {
       /** Modified fields */
@@ -1966,11 +2026,11 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
       createdAt: number;
       updatedAt: number;
       description: string;
+      lastUsedAt?: number;
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2047,11 +2107,11 @@ export interface components {
       permittedLanguageIds?: number[];
       id: number;
       scopes: string[];
-      expiresAt?: number;
-      lastUsedAt?: number;
-      projectId: number;
       username?: string;
       description: string;
+      lastUsedAt?: number;
+      projectId: number;
+      expiresAt?: number;
       userFullName?: string;
       projectName: string;
     };
@@ -2862,6 +2922,62 @@ export interface operations {
       };
     };
   };
+  translate: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchTranslateRequest"];
+      };
+    };
+  };
+  deleteKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysRequest"];
+      };
+    };
+  };
   /** Resolves translation conflict. The old translation will be overridden. */
   resolveTranslationSetOverride: {
     parameters: {
@@ -3073,6 +3189,30 @@ export interface operations {
       };
     };
   };
+  cancel: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   setTranslationState: {
     parameters: {
       path: {
@@ -3131,7 +3271,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_6: {
     parameters: {
       path: {
         translationId: number;
@@ -3466,7 +3606,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_8: {
     parameters: {
       path: {
         languageId: number;
@@ -3651,7 +3791,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_10: {
     parameters: {
       path: {
         id: number;
@@ -3851,7 +3991,7 @@ export interface operations {
       };
     };
   };
-  get_10: {
+  get_12: {
     parameters: {
       path: {
         id: number;
@@ -5756,6 +5896,9 @@ export interface operations {
               | "keys.view"
               | "keys.delete"
               | "keys.create"
+              | "batch-jobs.view"
+              | "batch-jobs.cancel"
+              | "batch-auto-translate"
             )[];
           };
         };
@@ -6137,6 +6280,41 @@ export interface operations {
       };
     };
   };
+  myList: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns translations prepared to import. */
   getImportTranslations: {
     parameters: {
@@ -6319,6 +6497,69 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_4: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  list: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelBatchJobModel"];
         };
       };
       /** Bad Request */
@@ -6703,7 +6944,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_11: {
     parameters: {
       path: {
         slug: string;
@@ -7037,7 +7278,7 @@ export interface operations {
       };
     };
   };
-  get_11: {
+  get_13: {
     parameters: {
       path: {
         keyId: number;

@@ -1,21 +1,7 @@
-import { useContext } from 'react';
-import { GlobalError } from '../error/GlobalError';
 import { components } from '../service/apiSchema.generated';
-import { ProjectContext } from './ProjectProvider';
+import { useProjectContext } from './ProjectContext';
 
 export const useProject = (): components['schemas']['ProjectModel'] => {
-  const { project } = useProjectSettings();
-  return project;
-};
-
-export const useProjectSettings = () => {
-  const projectDTOLoadable = useContext(ProjectContext);
-  if (!projectDTOLoadable) {
-    throw new GlobalError(
-      'Unexpected error',
-      'No data in loadable? Did you use provider before using hook?'
-    );
-  }
-
-  return projectDTOLoadable;
+  const project = useProjectContext((c) => c.project);
+  return project!;
 };

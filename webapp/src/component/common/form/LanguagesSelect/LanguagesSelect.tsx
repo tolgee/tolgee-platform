@@ -35,6 +35,7 @@ export type Props = {
   disabledLanguages?: number[] | undefined;
   value: string[];
   context: string;
+  enableEmpty?: boolean;
 };
 
 export const LanguagesSelect: FunctionComponent<Props> = (props) => {
@@ -72,6 +73,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           languages: props.languages,
           value: props.value,
           disabledLanguages: props.disabledLanguages,
+          enableEmpty: props.enableEmpty,
         })}
       </StyledSelect>
     </FormControl>

@@ -1,12 +1,16 @@
-import { Delete } from '@mui/icons-material';
-import { styled, IconButton, Tooltip, Checkbox } from '@mui/material';
+import { styled, IconButton, Tooltip, Checkbox, Box } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { useState } from 'react';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
-} from './context/TranslationsContext';
+} from '../context/TranslationsContext';
+import { BatchSelect } from './BatchSelect';
+import { OperationDelete } from './OperationDelete';
+import { OperationTranslate } from './OperationTranslate';
+import { BatchActions } from './types';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -19,9 +23,10 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledContent = styled('div')`
-  display: flex;
+  display: grid;
   gap: 10px;
   align-items: center;
+  grid-auto-flow: column;
   box-sizing: border-box;
   position: relative;
   transition: background-color 300ms ease-in-out, visibility 0ms;
@@ -42,17 +47,17 @@ const StyledToggleAllButton = styled(IconButton)`
   margin-left: 3px;
 `;
 
-export const TranslationsSelection = () => {
+export const BatchOperations = () => {
   const { t } = useTranslate();
   const selection = useTranslationsSelector((c) => c.selection);
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
   const isDeleting = useTranslationsSelector((c) => c.isDeleting);
-  const { selectAll, selectionClear, deleteTranslations } =
-    useTranslationsActions();
+  const { selectAll, selectionClear } = useTranslationsActions();
 
   const allSelected = totalCount === selection.length;
   const somethingSelected = !allSelected && Boolean(selection.length);
+  const [operation, setOperation] = useState<BatchActions>('delete');
 
   const handleToggleSelectAll = () => {
     if (!allSelected) {
@@ -62,7 +67,19 @@ export const TranslationsSelection = () => {
     }
   };
 
-  useGlobalLoading(isLoading || isDeleting);
+  const sharedProps = {
+    disabled: !selection.length,
+  };
+  function pickOperation() {
+    switch (operation) {
+      case 'delete':
+        return <OperationDelete {...sharedProps} />;
+      case 'translate':
+        return <OperationTranslate {...sharedProps} />;
+    }
+  }
+
+  useGlobalLoading(isLoading);
 
   return (
     <StyledContainer>
@@ -91,16 +108,14 @@ export const TranslationsSelection = () => {
           keyName="translations_selected_count"
           params={{ count: selection.length, total: totalCount }}
         />
-        <Tooltip title={t('translations_delete_selected')}>
-          <IconButton
-            data-cy="translations-delete-button"
-            onClick={deleteTranslations}
-            disabled={isDeleting || !selection.length}
-            size="small"
-          >
-            <Delete />
-          </IconButton>
-        </Tooltip>
+        <Box py={0.5}>
+          <BatchSelect
+            value={operation}
+            onChange={setOperation}
+            {...sharedProps}
+          />
+        </Box>
+        <Box>{pickOperation()}</Box>
       </StyledContent>
     </StyledContainer>
   );

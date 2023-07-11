@@ -94,8 +94,8 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
-      perThousandTranslations: number;
-      perThousandMtCredits: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
       subscriptionMonthly: number;
       subscriptionYearly: number;
     };
