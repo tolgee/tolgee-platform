@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Select, styled, Typography } from '@mui/material';
+import { InputLabel, Select, styled, Typography } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -35,6 +35,8 @@ export type Props = {
   disabledLanguages?: number[] | undefined;
   value: string[];
   context: string;
+  enableEmpty?: boolean;
+  placeholder?: string;
 };
 
 export const LanguagesSelect: FunctionComponent<Props> = (props) => {
@@ -54,6 +56,11 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
       variant="outlined"
       size="small"
     >
+      {props.placeholder && props.value.length === 0 && (
+        <InputLabel focused={false} shrink={false}>
+          {props.placeholder}
+        </InputLabel>
+      )}
       <StyledSelect
         labelId={`languages-${props.context}`}
         id={`languages-select-${props.context}`}
@@ -72,6 +79,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           languages: props.languages,
           value: props.value,
           disabledLanguages: props.disabledLanguages,
+          enableEmpty: props.enableEmpty,
         })}
       </StyledSelect>
     </FormControl>

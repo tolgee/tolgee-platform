@@ -4,13 +4,6 @@ import { Close } from '@mui/icons-material';
 import { Wrapper } from './Wrapper';
 import clsx from 'clsx';
 
-type Props = {
-  name: string;
-  onDelete?: React.MouseEventHandler<SVGElement>;
-  onClick?: (name: string) => void;
-  selected?: boolean;
-};
-
 const StyledTag = styled('div')`
   margin-left: 6px;
   margin-right: 6px;
@@ -37,11 +30,25 @@ const StyledWrapper = styled(Wrapper)`
   }
 `;
 
-export const Tag: React.FC<Props> = ({ name, onDelete, onClick, selected }) => {
+type Props = {
+  name: string;
+  onDelete?: React.MouseEventHandler<SVGElement>;
+  onClick?: (name: string) => void;
+  selected?: boolean;
+  className?: string;
+};
+
+export const Tag: React.FC<Props> = ({
+  name,
+  onDelete,
+  onClick,
+  selected,
+  className,
+}) => {
   return (
     <StyledWrapper
       onClick={onClick ? () => onClick?.(name) : undefined}
-      className={clsx({ selected })}
+      className={clsx({ selected }, className)}
     >
       <StyledTag>{name}</StyledTag>
       {onDelete && (

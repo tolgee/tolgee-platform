@@ -6,7 +6,8 @@ import {
 import { waitForGlobalLoading } from '../../common/loading';
 import { generateExampleKeys } from '../../common/apiCalls/testData/testData';
 import { deleteProject } from '../../common/apiCalls/common';
-import { confirmStandard, gcy } from '../../common/shared';
+import { gcy } from '../../common/shared';
+import { deleteSelected } from '../../common/groupActions';
 
 describe('Group actions', () => {
   let project: ProjectDTO = null;
@@ -32,8 +33,7 @@ describe('Group actions', () => {
     gcy('translations-row-checkbox').first().click();
     gcy('translations-select-all-button').click();
     waitForGlobalLoading(500);
-    gcy('translations-delete-button').click();
-    confirmStandard();
+    deleteSelected();
     waitForGlobalLoading(500);
     gcy('global-empty-list').should('be.visible');
   });
@@ -43,8 +43,7 @@ describe('Group actions', () => {
     gcy('translations-select-all-button').click();
     waitForGlobalLoading();
     gcy('translations-row-checkbox').first().click();
-    gcy('translations-delete-button').click();
-    confirmStandard();
+    deleteSelected();
     waitForGlobalLoading(500);
     gcy('translations-key-count').contains('1').should('be.visible');
   });

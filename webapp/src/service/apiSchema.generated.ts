@@ -102,6 +102,9 @@ export interface paths {
     /** Imports the data prepared in previous step */
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
+    put: operations["cancel"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
     put: operations["setTranslationState"];
   };
@@ -109,7 +112,7 @@ export interface paths {
     put: operations["setState"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_4"];
+    get: operations["get_6"];
     put: operations["update_2"];
     delete: operations["delete_5"];
   };
@@ -131,7 +134,7 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_6"];
+    get: operations["get_8"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -149,7 +152,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/pats/{id}": {
-    get: operations["get_8"];
+    get: operations["get_10"];
     put: operations["update_4"];
     delete: operations["delete_7"];
   };
@@ -166,7 +169,7 @@ export interface paths {
     put: operations["setBasePermissions_1"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_10"];
+    get: operations["get_12"];
     put: operations["update_5"];
     delete: operations["delete_8"];
   };
@@ -252,6 +255,21 @@ export interface paths {
     get: operations["getAll_3"];
     post: operations["create_1"];
     delete: operations["delete_3"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/translate": {
+    post: operations["translate"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/set-translation-state": {
+    post: operations["setTranslationState_2"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/delete-keys": {
+    post: operations["deleteKeys"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/copy-translations": {
+    post: operations["copyTranslations"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/clear-translations": {
+    post: operations["clearTranslations"];
   };
   "/v2/projects/{projectId}/import": {
     /** Prepares provided files to import. */
@@ -376,6 +394,9 @@ export interface paths {
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
   };
+  "/v2/projects/{projectId}/my-batch-jobs": {
+    get: operations["myList"];
+  };
   "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
     /** Returns translations prepared to import. */
     get: operations["getImportTranslations"];
@@ -397,6 +418,15 @@ export interface paths {
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
     get: operations["getAllNamespaces_2"];
+  };
+  "/v2/projects/{projectId}/current-batch-jobs": {
+    get: operations["currentJobs"];
+  };
+  "/v2/projects/{projectId}/batch-jobs/{id}": {
+    get: operations["get_4"];
+  };
+  "/v2/projects/{projectId}/batch-jobs": {
+    get: operations["list"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
@@ -432,7 +462,7 @@ export interface paths {
     get: operations["getCurrent"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_9"];
+    get: operations["get_11"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -466,7 +496,7 @@ export interface paths {
     get: operations["getInfo_3"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_11"];
+    get: operations["get_13"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent_1"];
@@ -582,14 +612,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -628,7 +650,18 @@ export interface components {
         | "keys.view"
         | "keys.delete"
         | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate"
       )[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -685,6 +718,9 @@ export interface components {
         | "keys.view"
         | "keys.delete"
         | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
@@ -1156,15 +1192,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1297,17 +1333,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
-      description: string;
       username?: string;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1533,6 +1569,85 @@ export interface components {
       /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
+    };
+    BatchTranslateRequest: {
+      keyIds: number[];
+      targetLanguageIds: number[];
+      useMachineTranslation: boolean;
+      useTranslationMemory: boolean;
+      /** @description Translation service provider to use for translation. When null, Tolgee will use the primary service. */
+      service?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+    };
+    BatchJobModel: {
+      /**
+       * Format: int64
+       * @description Batch job id
+       */
+      id: number;
+      /** @description Status of the batch job */
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+      /** @description Type of the batch job */
+      type:
+        | "AUTO_TRANSLATION"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS";
+      /**
+       * Format: int32
+       * @description Total items, that have been processed so far
+       */
+      progress: number;
+      /**
+       * Format: int32
+       * @description Total items
+       */
+      totalItems: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /**
+       * Format: int64
+       * @description The time when the job created
+       */
+      createdAt: number;
+      /**
+       * Format: int64
+       * @description The time when the job was last updated (status change)
+       */
+      updatedAt: number;
+      /**
+       * Format: int64
+       * @description The activity revision id, that stores the activity details of the job
+       */
+      activityRevisionId?: number;
+      /** @description If the job failed, this is the error message */
+      errorMessage?: string;
+    };
+    /** @description The user who started the job */
+    SimpleUserAccountModel: {
+      /** Format: int64 */
+      id: number;
+      username: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+    };
+    SetTranslationsStateStateRequest: {
+      keyIds: number[];
+      languageIds: number[];
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+    };
+    DeleteKeysRequest: {
+      keyIds: number[];
+    };
+    CopyTranslationRequest: {
+      keyIds: number[];
+      /** Format: int64 */
+      sourceLanguageId: number;
+      targetLanguageIds: number[];
+    };
+    ClearTranslationsRequest: {
+      keyIds: number[];
+      languageIds: number[];
     };
     ErrorResponseBody: {
       code: string;
@@ -1782,7 +1897,10 @@ export interface components {
         | "translations.state-edit"
         | "keys.view"
         | "keys.delete"
-        | "keys.create";
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "batch-auto-translate";
       requires: components["schemas"]["HierarchyItem"][];
     };
     AuthMethodsDTO: {
@@ -1840,7 +1958,6 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       /**
@@ -1852,6 +1969,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1952,18 +2070,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       namespace?: string;
       translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       namespace?: string;
       translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2052,7 +2170,10 @@ export interface components {
         | "DELETE_LANGUAGE"
         | "CREATE_PROJECT"
         | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT";
+        | "NAMESPACE_EDIT"
+        | "BATCH_AUTO_TRANSLATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -2063,6 +2184,12 @@ export interface components {
     PropertyModification: {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
+    };
+    PagedModelBatchJobModel: {
+      _embedded?: {
+        batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     ImportTranslationModel: {
       /** Format: int64 */
@@ -2084,6 +2211,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2096,7 +2224,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2130,6 +2257,11 @@ export interface components {
       /** @example homepage */
       name: string;
     };
+    CollectionModelBatchJobModel: {
+      _embedded?: {
+        batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+    };
     PagedModelTranslationCommentModel: {
       _embedded?: {
         translationComments?: components["schemas"]["TranslationCommentModel"][];
@@ -2141,15 +2273,6 @@ export interface components {
         revisions?: components["schemas"]["TranslationHistoryModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    /** @description Author of the change */
-    SimpleUserAccountModel: {
-      /** Format: int64 */
-      id: number;
-      username: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
     };
     TranslationHistoryModel: {
       /** @description Modified fields */
@@ -2396,15 +2519,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2523,17 +2646,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
-      description: string;
       username?: string;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      projectName: string;
+      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3554,6 +3677,30 @@ export interface operations {
       };
     };
   };
+  cancel: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   setTranslationState: {
     parameters: {
       path: {
@@ -3612,7 +3759,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_6: {
     parameters: {
       path: {
         translationId: number;
@@ -3947,7 +4094,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_8: {
     parameters: {
       path: {
         languageId: number;
@@ -4133,7 +4280,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_10: {
     parameters: {
       path: {
         id: number;
@@ -4333,7 +4480,7 @@ export interface operations {
       };
     };
   };
-  get_10: {
+  get_12: {
     parameters: {
       path: {
         id: number;
@@ -5263,6 +5410,166 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DeleteKeysDto"];
+      };
+    };
+  };
+  translate: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchTranslateRequest"];
+      };
+    };
+  };
+  setTranslationState_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsStateStateRequest"];
+      };
+    };
+  };
+  deleteKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysRequest"];
+      };
+    };
+  };
+  copyTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CopyTranslationRequest"];
+      };
+    };
+  };
+  clearTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ClearTranslationsRequest"];
       };
     };
   };
@@ -6264,6 +6571,9 @@ export interface operations {
               | "keys.view"
               | "keys.delete"
               | "keys.create"
+              | "batch-jobs.view"
+              | "batch-jobs.cancel"
+              | "batch-auto-translate"
             )[];
           };
         };
@@ -6645,6 +6955,41 @@ export interface operations {
       };
     };
   };
+  myList: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns translations prepared to import. */
   getImportTranslations: {
     parameters: {
@@ -6827,6 +7172,96 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelImportNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  currentJobs: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_4: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  list: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelBatchJobModel"];
         };
       };
       /** Bad Request */
@@ -7211,7 +7646,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_11: {
     parameters: {
       path: {
         slug: string;
@@ -7545,7 +7980,7 @@ export interface operations {
       };
     };
   };
-  get_11: {
+  get_13: {
     parameters: {
       path: {
         keyId: number;

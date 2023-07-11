@@ -2,7 +2,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { ProjectProvider } from 'tg.hooks/ProjectProvider';
+import { ProjectContext } from 'tg.hooks/ProjectContext';
 
 import { ProjectPage } from './ProjectPage';
 import { ExportView } from './export/ExportView';
@@ -35,7 +35,7 @@ export const ProjectRouter = () => {
 
   return (
     <Switch>
-      <ProjectProvider id={Number(projectId)}>
+      <ProjectContext id={Number(projectId)}>
         <ProjectPage topBarAutoHide={matchedTranslations?.isExact}>
           <React.Suspense fallback={<FullPageLoading />}>
             <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
@@ -86,7 +86,7 @@ export const ProjectRouter = () => {
             </Route>
           </React.Suspense>
         </ProjectPage>
-      </ProjectProvider>
+      </ProjectContext>
     </Switch>
   );
 };

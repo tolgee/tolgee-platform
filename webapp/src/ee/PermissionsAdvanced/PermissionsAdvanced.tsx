@@ -97,6 +97,14 @@ export const PermissionsAdvanced: React.FC<Props> = ({
             ],
           },
           {
+            label: t('permissions_item_batch_operations'),
+            children: [
+              { value: 'batch-jobs.view' },
+              { value: 'batch-jobs.cancel' },
+              { value: 'batch-auto-translate' },
+            ],
+          },
+          {
             label: t('permissions_item_members'),
             children: [
               {
