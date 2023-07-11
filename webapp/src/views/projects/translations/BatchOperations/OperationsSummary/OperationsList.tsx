@@ -31,7 +31,7 @@ export const OperationsList = ({ data }: Props) => {
     <StyledContainer>
       {data?.map((o) => (
         <React.Fragment key={o.id}>
-          <StyledCell>
+          <StyledCell sx={{ whiteSpace: 'nowrap' }}>
             {t('batch_operation_progress', {
               totalItems: o.totalItems,
               progress: o.progress,

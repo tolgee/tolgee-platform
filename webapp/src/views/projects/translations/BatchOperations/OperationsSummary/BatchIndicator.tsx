@@ -23,6 +23,8 @@ export const BatchIndicator = ({ data }: Props) => {
         return [t('batch_operation_status_success'), palette.success.main];
       case 'CANCELLED':
         return [t('batch_operation_status_cancelled'), palette.text.secondary];
+      case 'PENDING':
+        return [t('batch_operation_status_pending'), palette.text.secondary];
       default:
         return [];
     }
