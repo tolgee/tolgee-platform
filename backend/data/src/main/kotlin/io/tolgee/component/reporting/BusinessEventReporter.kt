@@ -52,12 +52,12 @@ class BusinessEventReporter(
   private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
     val projectDto = data.projectDto ?: data.projectId?.let { projectService.findDto(it) }
     val organizationId = data.organizationId ?: projectDto?.organizationOwnerId
-    val organization = organizationId?.let { organizationService.get(it) }
+    val organizationName = data.organizationName ?: organizationId?.let { organizationService.get(it).name }
     val userAccountDto = data.userAccountDto ?: data.userAccountId?.let { userAccountService.findDto(it) }
     return data.copy(
       projectDto = projectDto,
       organizationId = organizationId,
-      organizationName = organization?.name,
+      organizationName = organizationName,
       userAccountDto = userAccountDto
     )
   }

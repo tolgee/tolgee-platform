@@ -4,6 +4,7 @@ import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
@@ -71,6 +72,7 @@ class SignUpService(
         organizationId = organization?.id,
         organizationName = organization?.name,
         userAccountId = user.id,
+        userAccountDto = UserAccountDto.fromEntity(user)
       )
     )
   }
