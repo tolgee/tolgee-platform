@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.*
 import javax.servlet.FilterChain
@@ -52,7 +53,8 @@ class ActivityFilter(
   }
 
   fun parseUtmValues(headerValue: String?): Map<String, Any?>? {
-    val base64Decoded = Base64.getDecoder().decode(headerValue)
+    val urlDecoded = URLDecoder.decode(headerValue, StandardCharsets.UTF_8)
+    val base64Decoded = Base64.getDecoder().decode(urlDecoded)
     val utmParamsJson = String(base64Decoded, StandardCharsets.UTF_8)
     val utmParams = mutableMapOf<String, String>()
     return jacksonObjectMapper().readValue(utmParamsJson, utmParams::class.java)

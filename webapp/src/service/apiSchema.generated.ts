@@ -283,6 +283,9 @@ export interface paths {
   "/v2/ee-license/prepare-set-license-key": {
     post: operations["prepareSetLicenseKey"];
   };
+  "/v2/business-events/report": {
+    post: operations["report"];
+  };
   "/v2/api-keys": {
     get: operations["allByUser"];
     post: operations["create_10"];
@@ -559,14 +562,6 @@ export interface components {
         | "NONE"
         | "SERVER_ADMIN";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -581,6 +576,14 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1138,12 +1141,12 @@ export interface components {
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
       id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1274,19 +1277,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      projectName: string;
-      userFullName?: string;
-      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1638,6 +1641,14 @@ export interface components {
       credits?: components["schemas"]["SumUsageItemModel"];
       total: number;
     };
+    BusinessEventReportRequest: {
+      eventName: string;
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      projectId?: number;
+      data?: { [key: string]: { [key: string]: unknown } };
+    };
     CreateApiKeyDto: {
       /** Format: int64 */
       projectId: number;
@@ -1759,22 +1770,22 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
       )[];
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1806,9 +1817,9 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      description?: string;
-      displayName?: string;
       name: string;
+      displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1872,18 +1883,18 @@ export interface components {
       extraCreditBalance: number;
     };
     KeySearchResultView: {
-      baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
       name: string;
       /** Format: int64 */
       id: number;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
       name: string;
       /** Format: int64 */
       id: number;
@@ -2007,7 +2018,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2020,6 +2030,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2322,12 +2333,12 @@ export interface components {
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
       id: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2444,19 +2455,19 @@ export interface components {
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      projectName: string;
-      userFullName?: string;
-      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      projectName: string;
+      userFullName?: string;
       scopes: string[];
-      description: string;
       /** Format: int64 */
       id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5705,6 +5716,29 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BusinessEventReportRequest"];
       };
     };
   };

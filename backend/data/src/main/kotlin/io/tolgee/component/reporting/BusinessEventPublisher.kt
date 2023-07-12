@@ -21,8 +21,8 @@ class BusinessEventPublisher(
     applicationEventPublisher.publishEvent(
       event.copy(
         utmData = event.utmData ?: getUtmData(),
-        userAccountId = authenticationFacade.userAccount.id,
-        userAccountDto = authenticationFacade.userAccount
+        userAccountId = authenticationFacade.userAccountOrNull?.id,
+        userAccountDto = authenticationFacade.userAccountOrNull
       )
     )
   }

@@ -15,6 +15,7 @@ import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
@@ -35,6 +36,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
+    Mockito.reset(postHog)
     testData = BaseTestData()
     testData.user.name = "Franta"
     testData.projectBuilder.apply {

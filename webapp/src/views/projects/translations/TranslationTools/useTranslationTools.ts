@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { useProjectSettings } from 'tg.hooks/useProject';
+import { useProjectContext } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 
@@ -28,7 +28,7 @@ export const useTranslationTools = ({
     (c) => c.translations?.find((item) => item.keyId === keyId)?.contextPresent
   );
 
-  const { enabledMtServices, refetchSettings } = useProjectSettings();
+  const { enabledMtServices, refetchSettings } = useProjectContext();
 
   const mtServices = useMemo(() => {
     const settingItem =
