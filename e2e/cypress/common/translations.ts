@@ -110,8 +110,8 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
   }
 };
 
-export function confirmSaveChanges() {
-  cy.gcy('global-confirmation-confirm').contains('Save').click();
+export function confirmDiscard() {
+  cy.gcy('global-confirmation-confirm').contains('Discard').click();
 }
 
 export const toggleLang = (lang) => {

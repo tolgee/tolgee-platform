@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ReactList from 'react-list';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -115,6 +115,18 @@ export const [
     selectionService.clear();
   };
 
+  useEffect(() => {
+    // prevent leaving the page when there are unsaved changes
+    if (editService.position?.changed) {
+      const handler = (e) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [editService.position?.changed]);
+
   // actions
 
   const actions = {
@@ -126,18 +138,24 @@ export const [
       translationService.setUrlSearch(search);
       return handleTranslationsReset();
     },
-    setFilters(filters: Filters) {
-      translationService.setFilters(filters);
-      return handleTranslationsReset();
+    async setFilters(filters: Filters) {
+      if (await editService.confirmUnsavedChanges()) {
+        translationService.setFilters(filters);
+        return handleTranslationsReset();
+      }
     },
-    setEdit(edit: Edit | undefined) {
-      return editService.setEdit(edit);
+    async setEdit(edit: Edit | undefined) {
+      if (await editService.confirmUnsavedChanges(edit)) {
+        return editService.setPositionAndFocus(edit);
+      }
     },
     setEditForce(edit: Edit | undefined) {
       return editService.setPositionAndFocus(edit);
     },
-    updateEdit(edit: Partial<Edit>) {
-      return editService.updatePosition(edit);
+    async updateEdit(edit: Partial<Edit>) {
+      if (await editService.confirmUnsavedChanges(edit)) {
+        return editService.updatePosition(edit);
+      }
     },
     toggleSelect(index: number) {
       return selectionService.toggle(index);
