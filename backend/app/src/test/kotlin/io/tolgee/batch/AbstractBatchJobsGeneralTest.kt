@@ -240,11 +240,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
         any()
       )
     ).thenThrow(
-      RequeueWithTimeoutException(
+      RequeueWithDelayException(
         message = Message.OUT_OF_CREDITS,
         successfulTargets = listOf(),
         cause = OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS),
-        timeoutInMs = 100,
+        delayInMs = 100,
         increaseFactor = 10,
         maxRetries = 3
       )
