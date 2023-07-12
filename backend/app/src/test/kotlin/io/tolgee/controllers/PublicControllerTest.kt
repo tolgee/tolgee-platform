@@ -14,6 +14,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
@@ -31,6 +32,7 @@ class PublicControllerTest :
 
   @BeforeEach
   fun setup() {
+    Mockito.reset(postHog)
     canCreateOrganizations = tolgeeProperties.authentication.userCanCreateOrganizations
   }
 

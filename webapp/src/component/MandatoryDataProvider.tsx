@@ -28,11 +28,12 @@ export const MandatoryDataProvider = (props: any) => {
   function initPostHog() {
     let postHogPromise: Promise<PostHog> | undefined;
     if (!window[POSTHOG_INITIALIZED_WINDOW_PROPERTY]) {
-      window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
-      postHogPromise = import('posthog-js').then((m) => m.default);
-      postHogPromise.then((posthog) => {
-        if (config?.postHogApiKey) {
-          posthog.init(config.postHogApiKey, {
+      const postHogAPIKey = config?.postHogApiKey;
+      if (postHogAPIKey) {
+        window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
+        postHogPromise = import('posthog-js').then((m) => m.default);
+        postHogPromise.then((posthog) => {
+          posthog.init(postHogAPIKey, {
             api_host: config?.postHogHost || undefined,
           });
           posthog.identify(userData!.id.toString(), {
@@ -40,11 +41,13 @@ export const MandatoryDataProvider = (props: any) => {
             email: userData!.username,
             ...getUtmParams(),
           });
-        }
-      });
+        });
+      }
     }
     return () => {
-      postHogPromise?.then((ph) => ph.reset());
+      postHogPromise?.then((ph) => {
+        ph.reset();
+      });
       window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = false;
     };
   }
