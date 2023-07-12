@@ -33,7 +33,7 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'REVIEWED',
 ]);
 
-const EXPORT_DEFAULT_FORMAT: typeof FORMATS[number] = 'JSON';
+const EXPORT_DEFAULT_FORMAT: (typeof FORMATS)[number] = 'JSON';
 
 const StyledForm = styled('form')`
   display: grid;
@@ -157,7 +157,7 @@ export const ExportForm = () => {
           ? states
           : EXPORT_DEFAULT_STATES) as StateType[],
         languages: (languages?.length ? selectedTags : allowedTags) as string[],
-        format: (format || EXPORT_DEFAULT_FORMAT) as typeof FORMATS[number],
+        format: (format || EXPORT_DEFAULT_FORMAT) as (typeof FORMATS)[number],
         namespaces: allNamespaces || [],
         nested: nested === 'true',
       }}

@@ -12,7 +12,6 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { Box, ButtonGroup } from '@mui/material';
 import { SelfHostedEeSubscriptions } from './selfHostedEe/SelfHostedEeSubscriptions';
 import { ButtonGroupRouterItem } from 'tg.component/common/ButtonGroupRouter';
-import { useReportEvent } from '../../useReportEvent';
 
 export const OrganizationSubscriptionsView: FunctionComponent = () => {
   const { search, pathname } = useLocation();

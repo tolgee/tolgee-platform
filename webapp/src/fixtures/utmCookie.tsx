@@ -13,7 +13,6 @@ export function getUtmParams() {
     return JSON.parse(atob(cookie));
   } catch (e) {
     Sentry.captureException(e);
-    console.error(e);
   }
 }
 

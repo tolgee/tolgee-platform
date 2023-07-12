@@ -1,8 +1,5 @@
-import { useRouteMatch } from 'react-router-dom';
-
-import { PARAMS } from 'tg.constants/links';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectContextOptional } from 'tg.hooks/useProject';
 
 export const useReportEvent = () => {

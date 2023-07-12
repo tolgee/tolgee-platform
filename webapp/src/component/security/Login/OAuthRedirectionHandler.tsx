@@ -13,35 +13,33 @@ interface OAuthRedirectionHandlerProps {}
 
 const actions = container.resolve(GlobalActions);
 
-export const OAuthRedirectionHandler: FunctionComponent<OAuthRedirectionHandlerProps> =
-  (props) => {
-    const security = useSelector<AppState, GlobalState['security']>(
-      (state) => state.global.security
-    );
+export const OAuthRedirectionHandler: FunctionComponent<
+  OAuthRedirectionHandlerProps
+> = (props) => {
+  const security = useSelector<AppState, GlobalState['security']>(
+    (state) => state.global.security
+  );
 
-    const match = useRouteMatch();
+  const match = useRouteMatch();
 
-    useEffect(() => {
-      const code = new URLSearchParams(window.location.search).get('code');
-      if (code && !security.allowPrivate) {
-        actions.oAuthSuccessful.dispatch(
-          match.params[PARAMS.SERVICE_TYPE],
-          code
-        );
-      }
-    }, [security.allowPrivate]);
-
-    if (security.jwtToken) {
-      return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code && !security.allowPrivate) {
+      actions.oAuthSuccessful.dispatch(match.params[PARAMS.SERVICE_TYPE], code);
     }
+  }, [security.allowPrivate]);
 
-    if (security.loginErrorCode) {
-      return <Redirect to={LINKS.LOGIN.build()} />;
-    }
+  if (security.jwtToken) {
+    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  }
 
-    return (
-      <>
-        <FullPageLoading />
-      </>
-    );
-  };
+  if (security.loginErrorCode) {
+    return <Redirect to={LINKS.LOGIN.build()} />;
+  }
+
+  return (
+    <>
+      <FullPageLoading />
+    </>
+  );
+};
