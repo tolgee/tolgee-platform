@@ -594,6 +594,12 @@ export interface components {
         | "SERVER_ADMIN";
       /** The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      stateChangeLanguageIds?: number[];
+      /** List of languages user can view. If null, all languages view is permitted. */
+      viewLanguageIds?: number[];
+      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      translateLanguageIds?: number[];
       /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
       scopes: (
         | "translations.view"
@@ -619,12 +625,6 @@ export interface components {
         | "batch-jobs.cancel"
         | "batch-auto-translate"
       )[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
       /**
        * Deprecated (use translateLanguageIds).
        *
@@ -924,6 +924,33 @@ export interface components {
       /** Translation service provider to use for translation. When null, Tolgee will use the primary service. */
       service?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
     };
+    BatchJobModel: {
+      /** Batch job id */
+      id: number;
+      /** Status of the batch job */
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+      /** Type of the batch job */
+      type: "TRANSLATION" | "DELETE_KEYS";
+      /** Total items, that have been processed so far */
+      progress: number;
+      /** Total items */
+      totalItems: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /** The time when the job created */
+      createdAt: string;
+      /** The activity revision id, that stores the activity details of the job */
+      activityRevisionId?: number;
+      /** If the job failed, this is the error message */
+      errorMessage?: string;
+    };
+    /** The user who started the job */
+    SimpleUserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+    };
     DeleteKeysRequest: {
       keyIds: number[];
     };
@@ -1118,12 +1145,12 @@ export interface components {
       /** Resulting user's api key */
       key: string;
       id: number;
-      scopes: string[];
       username?: string;
       description: string;
-      lastUsedAt?: number;
       projectId: number;
+      lastUsedAt?: number;
       expiresAt?: number;
+      scopes: string[];
       userFullName?: string;
       projectName: string;
     };
@@ -1563,8 +1590,6 @@ export interface components {
       )[];
       name: string;
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
       description?: string;
       /**
        * The role of currently authorized user.
@@ -1572,6 +1597,8 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
+      slug: string;
       basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
@@ -1763,34 +1790,11 @@ export interface components {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
     };
-    BatchJobModel: {
-      /** Batch job id */
-      id: number;
-      /** Status of the batch job */
-      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
-      /** Total items, that have been processed so far */
-      progress: number;
-      /** Total items */
-      totalItems: number;
-      author?: components["schemas"]["SimpleUserAccountModel"];
-      /** The time when the job created */
-      createdAt: string;
-      /** The activity revision id, that stores the activity details of the job */
-      activityRevisionId?: number;
-    };
     PagedModelBatchJobModel: {
       _embedded?: {
         batchJobs?: components["schemas"]["BatchJobModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    /** The user who started the job */
-    SimpleUserAccountModel: {
-      id: number;
-      username: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
     };
     ImportTranslationModel: {
       id: number;
@@ -2106,12 +2110,12 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       id: number;
-      scopes: string[];
       username?: string;
       description: string;
-      lastUsedAt?: number;
       projectId: number;
+      lastUsedAt?: number;
       expiresAt?: number;
+      scopes: string[];
       userFullName?: string;
       projectName: string;
     };
@@ -2930,7 +2934,11 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -2958,7 +2966,11 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

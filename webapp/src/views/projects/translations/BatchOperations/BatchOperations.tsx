@@ -9,8 +9,9 @@ import {
 } from '../context/TranslationsContext';
 import { BatchSelect } from './BatchSelect';
 import { OperationDelete } from './OperationDelete';
+import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
 import { OperationTranslate } from './OperationTranslate';
-import { BatchActions } from './types';
+import { BatchActions, BatchJobModel } from './types';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -58,6 +59,7 @@ export const BatchOperations = () => {
   const allSelected = totalCount === selection.length;
   const somethingSelected = !allSelected && Boolean(selection.length);
   const [operation, setOperation] = useState<BatchActions>('delete');
+  const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
 
   const handleToggleSelectAll = () => {
     if (!allSelected) {
@@ -69,7 +71,9 @@ export const BatchOperations = () => {
 
   const sharedProps = {
     disabled: !selection.length,
+    onStart: (operation: BatchJobModel) => setRunningOperation(operation),
   };
+
   function pickOperation() {
     switch (operation) {
       case 'delete':
@@ -117,6 +121,9 @@ export const BatchOperations = () => {
         </Box>
         <Box>{pickOperation()}</Box>
       </StyledContent>
+      {runningOperation && (
+        <BatchOperationDialog operation={runningOperation} />
+      )}
     </StyledContainer>
   );
 };

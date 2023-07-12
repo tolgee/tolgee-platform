@@ -12,7 +12,7 @@ type Props = OperationProps & {
   disabled: boolean;
 };
 
-export const OperationTranslate = ({ disabled }: Props) => {
+export const OperationTranslate = ({ disabled, onStart }: Props) => {
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
   const selectedGloballyLanguages = useTranslationsSelector(
@@ -33,20 +33,27 @@ export const OperationTranslate = ({ disabled }: Props) => {
   });
 
   function handleSubmit() {
-    batchTranslate.mutate({
-      path: { projectId: project.id },
-      content: {
-        'application/json': {
-          keyIds: selection,
-          targetLanguageIds: allLanguages
-            ?.filter((l) => selectedLangs?.includes(l.tag))
-            .map((l) => l.id),
-          useMachineTranslation: true,
-          useTranslationMemory: true,
-          service: undefined,
+    batchTranslate.mutate(
+      {
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            keyIds: selection,
+            targetLanguageIds: allLanguages
+              ?.filter((l) => selectedLangs?.includes(l.tag))
+              .map((l) => l.id),
+            useMachineTranslation: true,
+            useTranslationMemory: true,
+            service: undefined,
+          },
         },
       },
-    });
+      {
+        onSuccess(data) {
+          onStart(data);
+        },
+      }
+    );
   }
 
   return (
