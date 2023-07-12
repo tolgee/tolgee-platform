@@ -9,6 +9,7 @@ import io.tolgee.hateoas.user_account.UserAccountModel
 import io.tolgee.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.OrganizationView
+import io.tolgee.security.AccessWithServerAdminPermission
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.NeedsSuperJwtToken
@@ -55,11 +56,11 @@ class AdministrationController(
   @Operation(summary = "Get all server organizations")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun getOrganizations(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
   ): PagedModel<OrganizationModel> {
-    securityService.checkUserIsServerAdmin()
     val organizations = organizationService.findAllPaged(pageable, search, authenticationFacade.userAccount.id)
     return pagedOrganizationResourcesAssembler.toModel(organizations, organizationModelAssembler)
   }
@@ -68,11 +69,11 @@ class AdministrationController(
   @Operation(summary = "Get all server users")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun getUsers(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
   ): PagedModel<UserAccountModel> {
-    securityService.checkUserIsServerAdmin()
     val users = userAccountService.findAllWithDisabledPaged(pageable, search)
     return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
   }
@@ -81,8 +82,8 @@ class AdministrationController(
   @Operation(summary = "Deletes an user")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun deleteUser(@PathVariable userId: Long) {
-    securityService.checkUserIsServerAdmin()
     if (userId == authenticationFacade.userAccount.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
     }
@@ -93,8 +94,8 @@ class AdministrationController(
   @Operation(summary = "Deletes an user")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun disableUser(@PathVariable userId: Long) {
-    securityService.checkUserIsServerAdmin()
     if (userId == authenticationFacade.userAccount.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
     }
@@ -105,8 +106,8 @@ class AdministrationController(
   @Operation(summary = "Deletes an user")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun enableUser(@PathVariable userId: Long) {
-    securityService.checkUserIsServerAdmin()
     userAccountService.enable(userId)
   }
 
@@ -114,11 +115,11 @@ class AdministrationController(
   @Operation(summary = "")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun setRole(
     @PathVariable userId: Long,
     @PathVariable role: UserAccount.Role
   ) {
-    securityService.checkUserIsServerAdmin()
     val user = userAccountService.get(userId)
     user.role = role
     userAccountService.save(user)
@@ -128,10 +129,10 @@ class AdministrationController(
   @Operation(summary = "Get all server users")
   @NeedsSuperJwtToken
   @DenyPatAccess
+  @AccessWithServerAdminPermission
   fun generateUserToken(
     @PathVariable userId: Long,
   ): String {
-    securityService.checkUserIsServerAdmin()
     val user = userAccountService.get(userId)
     val token = jwtTokenProvider.generateToken(user.id, isSuper = true)
     return token.toString()

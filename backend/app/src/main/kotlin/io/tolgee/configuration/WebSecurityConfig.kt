@@ -6,6 +6,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
+import io.tolgee.security.ServerAdminFilter
 import io.tolgee.security.apiKeyAuth.ApiKeyAuthFilter
 import io.tolgee.security.patAuth.PatAuthFilter
 import io.tolgee.security.project_auth.ProjectPermissionFilter
@@ -34,6 +35,7 @@ class WebSecurityConfig @Autowired constructor(
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
   private val patAuthFilter: PatAuthFilter,
   private val versionFilter: VersionFilter,
+  private val serverAdminFilter: ServerAdminFilter
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
@@ -52,6 +54,7 @@ class WebSecurityConfig @Autowired constructor(
       // this is used to authorize user's app calls with generated api key
       .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterAfter(disabledAuthenticationFilter, ApiKeyAuthFilter::class.java)
+      .addFilterAfter(serverAdminFilter, DisabledAuthenticationFilter::class.java)
       .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
       .addFilterAfter(activityFilter, ProjectPermissionFilter::class.java)
       .addFilterAfter(

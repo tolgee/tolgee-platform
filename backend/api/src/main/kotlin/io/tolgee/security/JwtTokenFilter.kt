@@ -50,9 +50,6 @@ class JwtTokenFilter @Autowired constructor(
             throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
           }
         }
-        if (this.needsToBeServerAdmin(req)) {
-          securityService.checkUserIsServerAdmin()
-        }
       }
       filterChain.doFilter(req, res)
     } catch (e: Exception) {
@@ -63,11 +60,6 @@ class JwtTokenFilter @Autowired constructor(
   private fun needsSuperToken(request: HttpServletRequest): Boolean {
     return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
       ?.method?.getAnnotation(NeedsSuperJwtToken::class.java) != null
-  }
-
-  private fun needsToBeServerAdmin(request: HttpServletRequest): Boolean {
-    return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-      ?.method?.getAnnotation(IsServerAdmin::class.java) != null
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
