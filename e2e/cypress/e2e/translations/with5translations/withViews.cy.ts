@@ -1,7 +1,7 @@
 import { getAnyContainingText } from '../../../common/xPath';
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 import {
-  confirmSaveChanges,
+  confirmDiscard,
   create4Translations,
   editCell,
   forEachView,
@@ -91,9 +91,8 @@ describe('Views with 5 Translations', () => {
       it('will ask for confirmation on changed edit', () => {
         editCell('Cool translated text 1', 'Cool translation edited', false);
         cy.contains('Cool translated text 4').click();
-        cy.contains(`Unsaved changes`).should('be.visible');
-        confirmSaveChanges();
-        cy.contains('Cool translation edited');
+        cy.contains(`Discard changes?`).should('be.visible');
+        confirmDiscard();
         cy.gcy('global-editor')
           .contains('Cool translation edited')
           .should('not.exist');
