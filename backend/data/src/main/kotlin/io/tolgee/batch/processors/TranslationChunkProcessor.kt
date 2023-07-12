@@ -3,7 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
-import io.tolgee.batch.RequeueWithTimeoutException
+import io.tolgee.batch.RequeueWithDelayException
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.OutOfCreditsException
@@ -49,7 +49,7 @@ class TranslationChunkProcessor(
       } catch (e: OutOfCreditsException) {
         throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
       } catch (e: Throwable) {
-        throw RequeueWithTimeoutException(Message.TRANSLATION_FAILED, successfulTargets, e)
+        throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
       }
     }
   }

@@ -1,6 +1,7 @@
 package io.tolgee.util
 
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
 import javax.persistence.EntityManager
 
 @Component
@@ -8,11 +9,15 @@ class EntityUtil(
   private val entityManager: EntityManager
 ) {
 
-  val cache = mutableMapOf<String, Class<out Any>?>()
+  companion object {
+    val REGEX = "\\$.*$".toRegex()
+  }
+
+  val cache = ConcurrentHashMap<String, Class<out Any>?>()
 
   fun getRealEntityClass(simpleName: String): Class<out Any>? {
     return cache.computeIfAbsent(simpleName) {
-      val entitySimpleName = simpleName.replace("\\$.*$".toRegex(), "")
+      val entitySimpleName = simpleName.replace(REGEX, "")
       entityManager
         .metamodel
         .entities
