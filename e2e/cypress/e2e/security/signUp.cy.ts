@@ -12,6 +12,7 @@ import {
   getUser,
   login,
   logout,
+  releaseForcedDate,
   setProperty,
   setRecaptchaSecretKey,
   setRecaptchaSiteKey,
@@ -60,6 +61,7 @@ context('Sign up', () => {
   let recaptchaSiteKey;
 
   beforeEach(() => {
+    releaseForcedDate();
     getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
     logout();
     visitSignUp();

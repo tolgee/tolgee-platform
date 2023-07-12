@@ -147,6 +147,7 @@ class InvitationService @Autowired constructor(
     return permissionService.acceptInvitation(permission, userAccount)
   }
 
+  @Transactional
   fun getInvitation(code: String?): Invitation {
     removeExpired()
     return invitationRepository.findOneByCode(code).orElseThrow {

@@ -36,11 +36,13 @@ export const MandatoryDataProvider = (props: any) => {
           posthog.init(postHogAPIKey, {
             api_host: config?.postHogHost || undefined,
           });
-          posthog.identify(userData!.id.toString(), {
-            name: userData!.username,
-            email: userData!.username,
-            ...getUtmParams(),
-          });
+          if (userData) {
+            posthog.identify(userData.id.toString(), {
+              name: userData.username,
+              email: userData.username,
+              ...getUtmParams(),
+            });
+          }
         });
       }
     }
@@ -53,12 +55,17 @@ export const MandatoryDataProvider = (props: any) => {
   }
 
   useEffect(() => {
-    Sentry.setUser({
-      email: userData!.username,
-      id: userData!.id.toString(),
-    });
     return initPostHog();
   }, [userData?.id, config?.postHogApiKey]);
+
+  useEffect(() => {
+    if (userData) {
+      Sentry.setUser({
+        email: userData.username,
+        id: userData.id.toString(),
+      });
+    }
+  }, [userData?.id]);
 
   useGlobalLoading(isFetching || isLoading);
 
