@@ -2,11 +2,11 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
-import io.tolgee.batch.JobChunkExecutionQueue
 import io.tolgee.batch.processors.TranslationChunkProcessor
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.state.BatchJobStateProvider
@@ -54,7 +54,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   lateinit var batchJobStateProvider: BatchJobStateProvider
 
   @Autowired
-  lateinit var jobChunkExecutionQueue: JobChunkExecutionQueue
+  lateinit var jobChunkExecutionQueue: BatchJobChunkExecutionQueue
 
   @Autowired
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher

@@ -33,7 +33,7 @@ class BatchJobService(
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
   private val progressManager: ProgressManager,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue
+  private val jobChunkExecutionQueue: BatchJobChunkExecutionQueue
 ) : Logging {
 
   @Transactional

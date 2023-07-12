@@ -31,7 +31,7 @@ class BatchJobActionService(
   private val progressManager: ProgressManager,
   @Lazy
   private val batchJobService: BatchJobService,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val jobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher
@@ -42,7 +42,6 @@ class BatchJobActionService(
 
   @EventListener(ApplicationReadyEvent::class)
   fun run() {
-    println("Application ready")
     executeInNewTransaction(transactionManager) {
       jobChunkExecutionQueue.populateQueue()
     }

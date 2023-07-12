@@ -6,6 +6,7 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.hibernate.LockOptions
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import javax.persistence.EntityManager
 
 @Component
-class JobChunkExecutionQueue(
+class BatchJobChunkExecutionQueue(
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
@@ -39,7 +40,7 @@ class JobChunkExecutionQueue(
     }
   }
 
-  @Scheduled(fixedDelay = 60000)
+  @Scheduled(fixedRate = 60000)
   fun populateQueue() {
     val data = entityManager.createQuery(
       """
@@ -54,6 +55,7 @@ class JobChunkExecutionQueue(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
+    logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
     addExecutionsToLocalQueue(data)
   }
 

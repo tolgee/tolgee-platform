@@ -31,5 +31,5 @@ enum class ActivityType(
   CREATE_PROJECT,
   EDIT_PROJECT,
   NAMESPACE_EDIT,
-  BATCH_AUTO_TRANSLATE
+  BATCH_AUTO_TRANSLATE(onlyCountsInList = true)
 }

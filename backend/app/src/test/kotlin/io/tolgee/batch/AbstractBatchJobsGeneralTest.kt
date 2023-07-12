@@ -70,7 +70,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   lateinit var batchJobCancellationManager: BatchJobCancellationManager
 
   @Autowired
-  lateinit var jobChunkExecutionQueue: JobChunkExecutionQueue
+  lateinit var jobChunkExecutionQueue: BatchJobChunkExecutionQueue
 
   @BeforeEach
   fun setup() {

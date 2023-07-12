@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class BatchJobConcurrentLauncher(
   private val batchProperties: BatchProperties,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val jobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   companion object {
@@ -106,11 +106,11 @@ class BatchJobConcurrentLauncher(
         "Pulled ${items.size} items from queue: " +
           items.joinToString(", ") { it.chunkExecutionId.toString() }
       )
+      logger.debug(
+        "${jobChunkExecutionQueue.size} is left in the queue (${System.identityHashCode(jobChunkExecutionQueue)}): " +
+          jobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
+      )
     }
-    logger.debug(
-      "${jobChunkExecutionQueue.size} is left in the queue (${System.identityHashCode(jobChunkExecutionQueue)}): " +
-        jobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
-    )
   }
 
   private fun CoroutineScope.handleItem(
