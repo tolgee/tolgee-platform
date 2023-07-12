@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
-import io.tolgee.component.reporting.OnEventToCaptureEvent
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
@@ -13,7 +14,6 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.organization.OrganizationService
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,7 +25,7 @@ class SignUpService(
   private val tokenProvider: JwtTokenProvider,
   private val emailVerificationService: EmailVerificationService,
   private val organizationService: OrganizationService,
-  private val applicationEventPublisher: ApplicationEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
@@ -53,7 +53,7 @@ class SignUpService(
       organization = organizationService.createPreferred(user, name)
     }
 
-    recordEvent(organization, user)
+    publishBusinessEvent(organization, user)
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
@@ -64,14 +64,14 @@ class SignUpService(
     return null
   }
 
-  private fun recordEvent(organization: Organization?, user: UserAccount) {
-    applicationEventPublisher.publishEvent(
-      OnEventToCaptureEvent(
+  private fun publishBusinessEvent(organization: Organization?, user: UserAccount) {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
         eventName = "SIGN_UP",
         organizationId = organization?.id,
         organizationName = organization?.name,
         userAccountId = user.id,
       )
-      )
+    )
   }
 }

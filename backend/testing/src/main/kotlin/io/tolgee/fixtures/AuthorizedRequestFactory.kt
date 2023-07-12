@@ -32,6 +32,8 @@ object AuthorizedRequestFactory {
   }
 
   fun addToken(builder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder {
-    return builder.header("Authorization", String.format("Bearer %s", token))
+    return builder.header("Authorization", getBearerTokenString(token))
   }
+
+  fun getBearerTokenString(token: String?) = String.format("Bearer %s", token)
 }

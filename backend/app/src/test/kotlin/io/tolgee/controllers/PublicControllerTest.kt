@@ -20,11 +20,9 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import kotlin.properties.Delegates
 
-@SpringBootTest(properties = ["tolgee.post-hog.api-key=mock"])
 @AutoConfigureMockMvc
 class PublicControllerTest :
   AbstractControllerTest() {

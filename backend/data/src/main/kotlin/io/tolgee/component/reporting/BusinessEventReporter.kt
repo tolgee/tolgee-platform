@@ -1,43 +1,40 @@
 package io.tolgee.component.reporting
 
 import com.posthog.java.PostHog
-import io.tolgee.activity.UtmDataHolder
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
-class EventRecorder(
+class BusinessEventReporter(
   private val postHog: PostHog?,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
-  private val utmDataHolder: UtmDataHolder,
 ) {
 
   @Lazy
   @Autowired
-  private lateinit var selfProxied: EventRecorder
+  private lateinit var selfProxied: BusinessEventReporter
 
   @Async
-  fun captureAsync(data: OnEventToCaptureEvent) {
-    val filledData = fillData(data)
+  fun captureAsync(data: OnBusinessEventToCaptureEvent) {
+    val filledData = fillOtherData(data)
     captureWithPostHog(filledData)
   }
 
-
-  @TransactionalEventListener
-  fun capture(data: OnEventToCaptureEvent) {
+  @EventListener
+  fun capture(data: OnBusinessEventToCaptureEvent) {
     if (postHog == null) return
-    selfProxied.captureAsync(data.copy(utmData = utmDataHolder.data))
+    selfProxied.captureAsync(data)
   }
 
-  private fun captureWithPostHog(data: OnEventToCaptureEvent) {
+  private fun captureWithPostHog(data: OnBusinessEventToCaptureEvent) {
     val userAccountDto = data.userAccountDto ?: return
     postHog?.capture(
       userAccountDto.id.toString(), data.eventName,
@@ -48,22 +45,19 @@ class EventRecorder(
         ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
-      ) + (data.utmData ?: emptyMap())
+      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap())
     )
   }
 
-  private fun fillData(data: OnEventToCaptureEvent): OnEventToCaptureEvent {
+  private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
     val projectDto = data.projectDto ?: data.projectId?.let { projectService.findDto(it) }
     val organizationId = data.organizationId ?: projectDto?.organizationOwnerId
     val organization = organizationId?.let { organizationService.get(it) }
     val userAccountDto = data.userAccountDto ?: data.userAccountId?.let { userAccountService.findDto(it) }
-    return OnEventToCaptureEvent(
-      eventName = data.eventName,
+    return data.copy(
       projectDto = projectDto,
-      projectId = data.projectId,
       organizationId = organizationId,
       organizationName = organization?.name,
-      userAccountId = data.userAccountId,
       userAccountDto = userAccountDto
     )
   }

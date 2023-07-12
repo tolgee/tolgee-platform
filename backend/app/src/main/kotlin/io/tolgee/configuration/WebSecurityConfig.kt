@@ -1,7 +1,6 @@
 package io.tolgee.configuration
 
 import io.tolgee.activity.ActivityFilter
-import io.tolgee.component.UtmReportingFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
@@ -35,7 +34,6 @@ class WebSecurityConfig @Autowired constructor(
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
   private val patAuthFilter: PatAuthFilter,
   private val versionFilter: VersionFilter,
-  private val utmReportingFilter: UtmReportingFilter,
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
@@ -56,7 +54,6 @@ class WebSecurityConfig @Autowired constructor(
       .addFilterAfter(disabledAuthenticationFilter, ApiKeyAuthFilter::class.java)
       .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
       .addFilterAfter(activityFilter, ProjectPermissionFilter::class.java)
-      .addFilterAfter(utmReportingFilter, ProjectPermissionFilter::class.java)
       .addFilterAfter(
         rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.AFTER_AUTHORIZATION),
         ProjectPermissionFilter::class.java

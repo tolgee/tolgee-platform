@@ -1,5 +1,7 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.BadRequestException
@@ -50,7 +52,8 @@ class ImportService(
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val businessEventPublisher: BusinessEventPublisher
 ) {
   @Transactional
   fun addFiles(
@@ -92,6 +95,13 @@ class ImportService(
   fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
     StoredDataImporter(applicationContext, import, forceMode).doImport()
     deleteImport(import)
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "IMPORT",
+        projectId = import.project.id,
+        userAccountId = import.author.id
+      )
+    )
   }
 
   @Transactional
