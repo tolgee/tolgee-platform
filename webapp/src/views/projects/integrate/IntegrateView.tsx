@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent } from 'react';
+import { default as React, FunctionComponent, useEffect } from 'react';
 import { Box, Step, StepContent, StepLabel, Stepper } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -10,6 +10,7 @@ import { MdxProvider } from 'tg.component/MdxProvider';
 import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState';
 import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
+import { useReportEvent } from '../../organizations/useReportEvent';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
@@ -27,6 +28,11 @@ export const IntegrateView: FunctionComponent = () => {
 
   const activeStep = !selectedWeapon ? 0 : !selectedApiKey ? 1 : 2;
   const { t } = useTranslate();
+
+  const reportEvent = useReportEvent();
+  useEffect(() => {
+    reportEvent('INTEGRATE_VIEW');
+  }, []);
 
   return (
     <BaseProjectView

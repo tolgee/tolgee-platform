@@ -53,7 +53,6 @@ class V2ExportController(
       .toList()
       .map { language -> language.tag }
       .toSet()
-
     val exported = exportService.export(projectHolder.project.id, params)
     checkExportNotEmpty(exported)
     return getExportResponse(params, exported)

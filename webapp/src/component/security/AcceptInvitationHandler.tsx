@@ -22,43 +22,44 @@ const redirectActions = container.resolve(RedirectionActions);
 const messaging = container.resolve(MessageService);
 const tokenService = container.resolve(TokenService);
 
-const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
-  () => {
-    const match = useRouteMatch();
+const AcceptInvitationHandler: FunctionComponent<
+  AcceptInvitationHandlerProps
+> = () => {
+  const match = useRouteMatch();
 
-    const code = match.params[PARAMS.INVITATION_CODE];
-    const { refetchInitialData } = useGlobalActions();
+  const code = match.params[PARAMS.INVITATION_CODE];
+  const { refetchInitialData } = useGlobalActions();
 
-    const acceptCode = useApiMutation({
-      url: '/v2/invitations/{code}/accept',
-      method: 'get',
-    });
+  const acceptCode = useApiMutation({
+    url: '/v2/invitations/{code}/accept',
+    method: 'get',
+  });
 
-    useEffect(() => {
-      if (!tokenService.getToken()) {
-        InvitationCodeService.setCode(code);
-        globalActions.allowRegistration.dispatch();
-        redirectActions.redirect.dispatch(LINKS.LOGIN.build());
-        messaging.success(<T keyName="invitation_log_in_first" />);
-      } else {
-        acceptCode.mutate(
-          { path: { code } },
-          {
-            onSuccess() {
-              refetchInitialData();
-              messaging.success(<T keyName="invitation_code_accepted" />);
-            },
-            onError(e) {
-              messaging.error(<TranslatedError code={e.code} />);
-            },
-            onSettled() {
-              redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
-            },
-          }
-        );
-      }
-    }, []);
+  useEffect(() => {
+    if (!tokenService.getToken()) {
+      InvitationCodeService.setCode(code);
+      globalActions.allowRegistration.dispatch();
+      redirectActions.redirect.dispatch(LINKS.LOGIN.build());
+      messaging.success(<T keyName="invitation_log_in_first" />);
+    } else {
+      acceptCode.mutate(
+        { path: { code } },
+        {
+          onSuccess() {
+            refetchInitialData();
+            messaging.success(<T keyName="invitation_code_accepted" />);
+          },
+          onError(e) {
+            messaging.error(<TranslatedError code={e.code} />);
+          },
+          onSettled() {
+            redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
+          },
+        }
+      );
+    }
+  }, []);
 
-    return <FullPageLoading />;
-  };
+  return <FullPageLoading />;
+};
 export default AcceptInvitationHandler;

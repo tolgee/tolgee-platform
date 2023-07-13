@@ -14,10 +14,6 @@ import org.springframework.transaction.annotation.Transactional
 @ContextRecreatingTest
 class HealthCheckTest : AbstractControllerTest() {
 
-//  @Autowired
-//  @MockBean(answer = Answers.CALLS_REAL_METHODS)
-//  private lateinit var ds: DataSource
-
   @Test
   fun `health check works`() {
     performGet("/actuator/health").andIsOk

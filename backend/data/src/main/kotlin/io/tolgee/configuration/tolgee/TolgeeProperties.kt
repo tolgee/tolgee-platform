@@ -116,8 +116,10 @@ open class TolgeeProperties(
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
 
   @DocProperty(hidden = true)
-  var sendInBlueProperties: SendInBlueProperties = SendInBlueProperties(),
+  var sendInBlue: SendInBlueProperties = SendInBlueProperties(),
 
   open var import: ImportProperties = ImportProperties(),
-  var rateLimitProperties: RateLimitProperties = RateLimitProperties()
+  var rateLimit: RateLimitProperties = RateLimitProperties(),
+  @DocProperty(hidden = true)
+  var postHog: PostHogProperties = PostHogProperties()
 )

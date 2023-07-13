@@ -56,7 +56,8 @@ dependencyResolutionManagement {
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate5:4.9.1")
             library('hibernateTypes', "com.vladmihalcea:hibernate-types-55:2.14.1")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.21.0")
-            library('redissonSpringData','org.redisson:redisson-spring-data-27:3.21.0')
+            library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.21.0')
+            library('postHog', 'com.posthog.java:posthog:1.1.0')
         }
     }
 }

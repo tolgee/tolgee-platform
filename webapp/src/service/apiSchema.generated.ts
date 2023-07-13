@@ -214,24 +214,6 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
-  "/v2/public/licensing/subscription": {
-    post: operations["getMySubscription"];
-  };
-  "/v2/public/licensing/set-key": {
-    post: operations["onLicenceSetKey"];
-  };
-  "/v2/public/licensing/report-usage": {
-    post: operations["reportUsage"];
-  };
-  "/v2/public/licensing/report-error": {
-    post: operations["reportError"];
-  };
-  "/v2/public/licensing/release-key": {
-    post: operations["releaseKey"];
-  };
-  "/v2/public/licensing/prepare-set-key": {
-    post: operations["prepareSetLicenseKey"];
-  };
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
@@ -299,7 +281,10 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/ee-license/prepare-set-license-key": {
-    post: operations["prepareSetLicenseKey_1"];
+    post: operations["prepareSetLicenseKey"];
+  };
+  "/v2/business-events/report": {
+    post: operations["report"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -524,7 +509,7 @@ export interface components {
       name: string;
       email: string;
       currentPassword?: string;
-      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      /** @description Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
       callbackUrl?: string;
     };
     Avatar: {
@@ -533,6 +518,7 @@ export interface components {
     };
     Links: { [key: string]: components["schemas"]["Link"] };
     PrivateUserAccountModel: {
+      /** Format: int64 */
       id: number;
       username: string;
       name?: string;
@@ -563,6 +549,7 @@ export interface components {
     EditProjectDTO: {
       name: string;
       slug?: string;
+      /** Format: int64 */
       baseLanguageId?: number;
       description?: string;
     };
@@ -574,9 +561,33 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN";
-      /** The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -598,35 +609,44 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
-      translateLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
-      stateChangeLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
-      viewLanguageIds?: number[];
-      /**
-       * Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       */
-      permittedLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
+      /** Format: int64 */
       id: number;
-      /** Language name in english */
+      /**
+       * @description Language name in english
+       * @example Czech
+       */
       name: string;
-      /** Language tag according to BCP 47 definition */
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
       tag: string;
-      /** Language name in this language */
+      /**
+       * @description Language name in this language
+       * @example čeština
+       */
       originalName?: string;
-      /** Language flag emoji as UTF-8 emoji */
+      /**
+       * @description Language flag emoji as UTF-8 emoji
+       * @example 🇨🇿
+       */
       flagEmoji?: string;
-      /** Whether is base language of project */
+      /** @description Whether is base language of project */
       base: boolean;
     };
-    /** Current user's direct permission */
+    /**
+     * @description Current user's direct permission
+     * @example MANAGE
+     */
     PermissionModel: {
-      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -648,22 +668,34 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** The user's permission type. This field is null if uses granular permissions */
+      /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * Deprecated (use translateLanguageIds).
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
        */
       permittedLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
       translateLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
       viewLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
       stateChangeLanguageIds?: number[];
     };
     ProjectModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       description?: string;
@@ -676,9 +708,13 @@ export interface components {
       computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     SimpleOrganizationModel: {
+      /** Format: int64 */
       id: number;
+      /** @example Beautiful organization */
       name: string;
+      /** @example btforg */
       slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
@@ -687,14 +723,22 @@ export interface components {
       name: string;
     };
     NamespaceModel: {
-      /** The id of namespace */
+      /**
+       * Format: int64
+       * @description The id of namespace
+       * @example 10000048
+       */
       id: number;
+      /** @example homepage */
       name: string;
     };
     MachineTranslationLanguagePropsDto: {
-      /** The language to apply those rules. If null, then this settings are default. */
+      /**
+       * Format: int64
+       * @description The language to apply those rules. If null, then this settings are default.
+       */
       targetLanguageId?: number;
-      /** This service will be used for automated translation */
+      /** @description This service will be used for automated translation */
       primaryService?:
         | "GOOGLE"
         | "AWS"
@@ -702,7 +746,7 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** List of enabled services */
+      /** @description List of enabled services */
       enabledServices: (
         | "GOOGLE"
         | "AWS"
@@ -721,13 +765,16 @@ export interface components {
       };
     };
     LanguageConfigItemModel: {
-      /** When null, its a default configuration applied to not configured languages */
+      /**
+       * Format: int64
+       * @description When null, its a default configuration applied to not configured languages
+       */
       targetLanguageId?: number;
-      /** When null, its a default configuration applied to not configured languages */
+      /** @description When null, its a default configuration applied to not configured languages */
       targetLanguageTag?: string;
-      /** When null, its a default configuration applied to not configured languages */
+      /** @description When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
-      /** Service used for automated translating */
+      /** @description Service used for automated translating */
       primaryService?:
         | "GOOGLE"
         | "AWS"
@@ -735,7 +782,7 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** Services to be used for suggesting */
+      /** @description Services to be used for suggesting */
       enabledServices: (
         | "GOOGLE"
         | "AWS"
@@ -749,37 +796,46 @@ export interface components {
       name: string;
     };
     TagModel: {
+      /** Format: int64 */
       id: number;
       name: string;
     };
     ComplexEditKeyDto: {
-      /** Name of the key */
+      /** @description Name of the key */
       name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
-      /** Translations to update */
+      /** @description Translations to update */
       translations?: { [key: string]: string };
-      /** Tags of the key. If not provided tags won't be modified */
+      /** @description Tags of the key. If not provided tags won't be modified */
       tags?: string[];
-      /** IDs of screenshots to delete */
+      /** @description IDs of screenshots to delete */
       screenshotIdsToDelete?: number[];
-      /** Ids of screenshots uploaded with /v2/image-upload endpoint */
+      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
       screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
     };
     KeyInScreenshotPositionDto: {
+      /** Format: int32 */
       x: number;
+      /** Format: int32 */
       y: number;
+      /** Format: int32 */
       width: number;
+      /** Format: int32 */
       height: number;
     };
     KeyScreenshotDto: {
       text?: string;
-      /** Ids of screenshot uploaded with /v2/image-upload endpoint */
+      /**
+       * Format: int64
+       * @description Ids of screenshot uploaded with /v2/image-upload endpoint
+       */
       uploadedImageId: number;
       positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
     };
     KeyInScreenshotModel: {
+      /** Format: int64 */
       keyId: number;
       position?: components["schemas"]["KeyInScreenshotPosition"];
       keyName: string;
@@ -787,129 +843,191 @@ export interface components {
       originalText?: string;
     };
     KeyInScreenshotPosition: {
+      /** Format: int32 */
       x: number;
+      /** Format: int32 */
       y: number;
+      /** Format: int32 */
       width: number;
+      /** Format: int32 */
       height: number;
     };
     KeyWithDataModel: {
-      /** Id of key record */
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
       id: number;
-      /** Name of key */
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
       name: string;
-      /** Namespace of key */
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
       namespace?: string;
-      /** Translations object containing values updated in this request */
+      /**
+       * @description Translations object containing values updated in this request
+       * @example [object Object]
+       */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
       };
-      /** Tags of key */
+      /** @description Tags of key */
       tags: components["schemas"]["TagModel"][];
-      /** Screenshots of the key */
+      /** @description Screenshots of the key */
       screenshots: components["schemas"]["ScreenshotModel"][];
     };
-    /** Screenshots of the key */
+    /** @description Screenshots of the key */
     ScreenshotModel: {
+      /** Format: int64 */
       id: number;
       /**
-       * File name, which may be downloaded from the screenshot path.
+       * @description File name, which may be downloaded from the screenshot path.
        *
        * When images are secured. Encrypted timestamp is appended to the filename.
        */
       filename: string;
       /**
-       * Thumbnail file name, which may be downloaded from the screenshot path.
+       * @description Thumbnail file name, which may be downloaded from the screenshot path.
        *
        * When images are secured. Encrypted timestamp is appended to the filename.
        */
       thumbnail: string;
       fileUrl: string;
       thumbnailUrl: string;
+      /** Format: date-time */
       createdAt?: string;
       keyReferences: components["schemas"]["KeyInScreenshotModel"][];
       location?: string;
+      /** Format: int32 */
       width?: number;
+      /** Format: int32 */
       height?: number;
     };
-    /** Translations object containing values updated in this request */
+    /**
+     * @description Translations object containing values updated in this request
+     * @example [object Object]
+     */
     TranslationModel: {
-      /** Id of translation record */
+      /**
+       * Format: int64
+       * @description Id of translation record
+       */
       id: number;
-      /** Translation text */
+      /** @description Translation text */
       text?: string;
-      /** State of translation */
+      /** @description State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Whether base language translation was changed after this translation was updated */
+      /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
-      /** Was translated using Translation Memory or Machine translation service? */
+      /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
-      /** Which machine translation service was used to auto translate this */
+      /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
     };
     EditKeyDto: {
       name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
     };
     KeyModel: {
-      /** Id of key record */
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
       id: number;
-      /** Name of key */
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
       name: string;
-      /** Namespace of key */
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
       namespace?: string;
     };
     ProjectInviteUserDto: {
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /** Granted scopes for the invited user */
+      /**
+       * @description Granted scopes for the invited user
+       * @example translations.view,translations.edit
+       */
       scopes?: string[];
-      /** Deprecated -> use translate languages */
+      /**
+       * @deprecated
+       * @description Deprecated -> use translate languages
+       */
       languages?: number[];
-      /** Languages user can translate to */
+      /**
+       * @deprecated
+       * @description Languages user can translate to
+       */
       translateLanguages?: number[];
-      /** Languages user can view */
+      /**
+       * @deprecated
+       * @description Languages user can view
+       */
       viewLanguages?: number[];
-      /** Languages user can change translation state (review) */
+      /**
+       * @deprecated
+       * @description Languages user can change translation state (review)
+       */
       stateChangeLanguages?: number[];
-      /** Email to send invitation to */
+      /** @description Email to send invitation to */
       email?: string;
-      /** Name of invited user */
+      /** @description Name of invited user */
       name?: string;
     };
     ProjectInvitationModel: {
+      /** Format: int64 */
       id: number;
       code: string;
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       permittedLanguageIds?: number[];
+      /** Format: date-time */
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
       permission: components["schemas"]["PermissionModel"];
     };
     AutoTranslationSettingsDto: {
-      /** If true, new keys will be automatically translated using translation memory when 100% match is found */
+      /** @description If true, new keys will be automatically translated using translation memory when 100% match is found */
       usingTranslationMemory: boolean;
-      /** If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      /** @description If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
       usingMachineTranslation: boolean;
     };
     SetFileNamespaceRequest: {
       namespace?: string;
     };
     TranslationCommentModel: {
-      /** Id of translation comment record */
+      /**
+       * Format: int64
+       * @description Id of translation comment record
+       */
       id: number;
-      /** Text of comment */
+      /** @description Text of comment */
       text: string;
-      /** State of translation */
+      /** @description State of translation */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
       author: components["schemas"]["UserAccountModel"];
-      /** Date when it was created */
+      /**
+       * Format: date-time
+       * @description Date when it was created
+       */
       createdAt: string;
-      /** Date when it was updated */
+      /**
+       * Format: date-time
+       * @description Date when it was updated
+       */
       updatedAt: string;
     };
-    /** User who created the comment */
+    /** @description User who created the comment */
     UserAccountModel: {
+      /** Format: int64 */
       id: number;
       username: string;
       name?: string;
@@ -924,82 +1042,135 @@ export interface components {
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
     };
     SetTranslationsWithKeyDto: {
-      /** Key name to set translations for */
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
       key: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
-      /** Object mapping language tag to translation */
+      /**
+       * @description Object mapping language tag to translation
+       * @example [object Object]
+       */
       translations: { [key: string]: string };
       /**
-       * List of languages to return translations for.
+       * @description List of languages to return translations for.
        *
        * If not provided, only modified translation will be provided.
+       *
+       * @example en,de,fr
        */
       languagesToReturn?: string[];
     };
     SetTranslationsResponseModel: {
-      /** Id of key record */
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
       keyId: number;
-      /** Name of key */
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
       keyName: string;
-      /** The namespace of the key */
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
       keyNamespace?: string;
-      /** Translations object containing values updated in this request */
+      /**
+       * @description Translations object containing values updated in this request
+       * @example [object Object]
+       */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
       };
     };
     LanguageDto: {
-      /** Language name in english */
+      /**
+       * @description Language name in english
+       * @example Czech
+       */
       name: string;
-      /** Language tag according to BCP 47 definition */
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
       originalName: string;
-      /** Language name in this language */
+      /**
+       * @description Language name in this language
+       * @example čeština
+       */
       tag: string;
-      /** Language flag emoji as UTF-8 emoji */
+      /**
+       * @description Language flag emoji as UTF-8 emoji
+       * @example 🇨🇿
+       */
       flagEmoji?: string;
     };
     UpdatePatDto: {
-      /** New description of the PAT */
+      /** @description New description of the PAT */
       description: string;
     };
     PatModel: {
+      /** Format: int64 */
       id: number;
       description: string;
+      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
       createdAt: number;
+      /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
       lastUsedAt?: number;
     };
     RegeneratePatDto: {
-      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
       expiresAt?: number;
     };
     RevealedPatModel: {
       token: string;
-      id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
+      /** Format: int64 */
       createdAt: number;
+      /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
       description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
     OrganizationDto: {
+      /** @example Beautiful organization */
       name: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      /** @example btforg */
       slug?: string;
     };
     OrganizationModel: {
+      /** Format: int64 */
       id: number;
+      /** @example Beautiful organization */
       name: string;
+      /** @example btforg */
       slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       /**
-       * The role of currently authorized user.
+       * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
@@ -1008,15 +1179,17 @@ export interface components {
     };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
-      /** Name of invited user */
+      /** @description Name of invited user */
       name?: string;
-      /** Email to send invitation to */
+      /** @description Email to send invitation to */
       email?: string;
     };
     OrganizationInvitationModel: {
+      /** Format: int64 */
       id: number;
       code: string;
       type: "MEMBER" | "OWNER";
+      /** Format: date-time */
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
@@ -1039,8 +1212,10 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
       )[];
+      /** Format: int64 */
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      /** Format: int64 */
       currentUserCount: number;
       status:
         | "ACTIVE"
@@ -1049,6 +1224,7 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
+      /** Format: date-time */
       lastValidCheck?: string;
     };
     V2EditApiKeyDto: {
@@ -1056,164 +1232,91 @@ export interface components {
       description?: string;
     };
     ApiKeyModel: {
-      /** ID of the API key */
+      /**
+       * Format: int64
+       * @description ID of the API key
+       */
       id: number;
-      /** Description */
+      /** @description Description */
       description: string;
-      /** Username of user owner */
+      /** @description Username of user owner */
       username?: string;
-      /** Full name of user owner */
+      /** @description Full name of user owner */
       userFullName?: string;
-      /** Api key's project ID */
+      /**
+       * Format: int64
+       * @description Api key's project ID
+       */
       projectId: number;
-      /** Api key's project name */
+      /** @description Api key's project name */
       projectName: string;
-      /** Timestamp of API key expiraion */
+      /**
+       * Format: int64
+       * @description Timestamp of API key expiraion
+       */
       expiresAt?: number;
-      /** Timestamp of API key last usage */
+      /**
+       * Format: int64
+       * @description Timestamp of API key last usage
+       */
       lastUsedAt?: number;
-      /** Api key's permission scopes */
+      /**
+       * @description Api key's permission scopes
+       * @example screenshots.upload,screenshots.delete,translations.edit,screenshots.view,translations.view,keys.edit
+       */
       scopes: string[];
     };
     RegenerateApiKeyDto: {
-      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
       expiresAt?: number;
     };
     RevealedApiKeyModel: {
-      /** Resulting user's api key */
+      /** @description Resulting user's api key */
       key: string;
-      id: number;
-      scopes: string[];
-      expiresAt?: number;
-      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
-      description: string;
-      userFullName?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     SuperTokenRequest: {
-      /** Has to be provided when TOTP enabled */
+      /** @description Has to be provided when TOTP enabled */
       otp?: string;
-      /** Has to be provided when TOTP not enabled */
+      /** @description Has to be provided when TOTP not enabled */
       password?: string;
     };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
     };
-    GetMySubscriptionDto: {
-      licenseKey: string;
-      instanceId: string;
-    };
-    PlanIncludedUsageModel: {
-      seats: number;
-      translationSlots: number;
-      translations: number;
-      mtCredits: number;
-    };
-    PlanPricesModel: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
-    };
-    SelfHostedEePlanModel: {
-      id: number;
-      name: string;
-      public: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-      )[];
-      prices: components["schemas"]["PlanPricesModel"];
-      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
-      hasYearlyPrice: boolean;
-    };
-    SelfHostedEeSubscriptionModel: {
-      id: number;
-      currentPeriodStart?: number;
-      currentPeriodEnd?: number;
-      currentBillingPeriod: "MONTHLY" | "YEARLY";
-      createdAt: number;
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      status:
-        | "ACTIVE"
-        | "CANCELED"
-        | "PAST_DUE"
-        | "UNPAID"
-        | "ERROR"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
-      licenseKey?: string;
-      estimatedCosts?: number;
-    };
-    SetLicenseKeyLicensingDto: {
-      licenseKey: string;
-      seats: number;
-      instanceId: string;
-    };
-    ReportUsageDto: {
-      licenseKey: string;
-      seats: number;
-    };
-    ReportErrorDto: {
-      stackTrace: string;
-      licenseKey: string;
-    };
-    ReleaseKeyDto: {
-      licenseKey: string;
-    };
-    PrepareSetLicenseKeyDto: {
-      licenseKey: string;
-      seats: number;
-    };
-    AverageProportionalUsageItemModel: {
-      total: number;
-      unusedQuantity: number;
-      usedQuantity: number;
-      usedQuantityOverPlan: number;
-    };
-    PrepareSetEeLicenceKeyModel: {
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      usage: components["schemas"]["UsageModel"];
-    };
-    SumUsageItemModel: {
-      total: number;
-      unusedQuantity: number;
-      usedQuantity: number;
-      usedQuantityOverPlan: number;
-    };
-    UsageModel: {
-      subscriptionPrice?: number;
-      /** Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
-      appliedStripeCredits?: number;
-      seats: components["schemas"]["AverageProportionalUsageItemModel"];
-      translations: components["schemas"]["AverageProportionalUsageItemModel"];
-      credits?: components["schemas"]["SumUsageItemModel"];
-      total: number;
-    };
     CreateProjectDTO: {
       name: string;
       languages: components["schemas"]["LanguageDto"][];
-      /** Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
+      /** @description Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
       slug?: string;
-      /** Organization to create the project in */
+      /**
+       * Format: int64
+       * @description Organization to create the project in
+       */
       organizationId: number;
-      /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
+      /** @description Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
-      /** Tags to return language translations in */
+      /** @description Tags to return language translations in */
       languageTags: string[];
     };
     KeyDefinitionDto: {
@@ -1229,56 +1332,73 @@ export interface components {
       keys: components["schemas"]["ImportKeysResolvableItemDto"][];
     };
     ImportKeysResolvableItemDto: {
-      /** Key name to set translations for */
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
       name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
-      /** Object mapping language tag to translation */
+      /** @description Object mapping language tag to translation */
       translations: {
         [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
       };
     };
-    /** Object mapping language tag to translation */
+    /** @description Object mapping language tag to translation */
     ImportTranslationResolvableDto: {
-      /** Translation text */
+      /**
+       * @description Translation text
+       * @example Hello! I am a translation!
+       */
       text: string;
       /**
-       * Determines, how conflict is resolved.
+       * @description Determines, how conflict is resolved.
        *
        * - KEEP: Translation is not changed
        * - OVERRIDE: Translation is overridden
        * - NEW: New translation is created)
+       *
+       * @example Hello! I am a translation!
        */
       resolution: "KEEP" | "OVERRIDE" | "NEW";
     };
     KeyImportResolvableResultModel: {
-      /** List of keys */
+      /** @description List of keys */
       keys: components["schemas"]["KeyModel"][];
-      /** Map uploadedImageId to screenshot */
+      /** @description Map uploadedImageId to screenshot */
       screenshots: { [key: string]: components["schemas"]["ScreenshotModel"] };
     };
     ImportKeysDto: {
       keys: components["schemas"]["ImportKeysItemDto"][];
     };
     ImportKeysItemDto: {
-      /** Key name to set translations for */
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
       name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
-      /** Object mapping language tag to translation */
+      /**
+       * @description Object mapping language tag to translation
+       * @example [object Object]
+       */
       translations: { [key: string]: string };
-      /** Tags of the key */
+      /**
+       * @description Tags of the key
+       * @example homepage,user-profile
+       */
       tags?: string[];
     };
     CreateKeyDto: {
-      /** Name of the key */
+      /** @description Name of the key */
       name: string;
-      /** The namespace of the key. (When empty or null default namespace will be used) */
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       translations?: { [key: string]: string };
       tags?: string[];
-      /** Ids of screenshots uploaded with /v2/image-upload endpoint */
+      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
     };
@@ -1291,24 +1411,35 @@ export interface components {
       result?: components["schemas"]["PagedModelImportLanguageModel"];
     };
     ImportLanguageModel: {
+      /** Format: int64 */
       id: number;
       name: string;
+      /** Format: int64 */
       existingLanguageId?: number;
       existingLanguageTag?: string;
       existingLanguageAbbreviation?: string;
       existingLanguageName?: string;
       importFileName: string;
+      /** Format: int64 */
       importFileId: number;
+      /** Format: int32 */
       importFileIssueCount: number;
       namespace?: string;
+      /** Format: int32 */
       totalCount: number;
+      /** Format: int32 */
       conflictCount: number;
+      /** Format: int32 */
       resolvedCount: number;
     };
     PageMetadata: {
+      /** Format: int64 */
       size?: number;
+      /** Format: int64 */
       totalElements?: number;
+      /** Format: int64 */
       totalPages?: number;
+      /** Format: int64 */
       number?: number;
     };
     PagedModelImportLanguageModel: {
@@ -1331,16 +1462,18 @@ export interface components {
     };
     StreamingResponseBody: { [key: string]: unknown };
     BigMetaDto: {
-      /** List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      /** @description List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
       relatedKeysInOrder: components["schemas"]["RelatedKeyDto"][];
     };
-    /** List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+    /** @description List of keys, visible, in order as they appear in the document. The order is important! We are using it for graph distance calculation. */
     RelatedKeyDto: {
       namespace?: string;
       keyName: string;
     };
     TranslationCommentWithLangKeyDto: {
+      /** Format: int64 */
       keyId: number;
+      /** Format: int64 */
       languageId: number;
       text: string;
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
@@ -1350,12 +1483,16 @@ export interface components {
       comment: components["schemas"]["TranslationCommentModel"];
     };
     SuggestRequestDto: {
-      /** Key Id to get results for. Use when key is stored already. */
+      /**
+       * Format: int64
+       * @description Key Id to get results for. Use when key is stored already.
+       */
       keyId: number;
+      /** Format: int64 */
       targetLanguageId: number;
-      /** Text value of base translation. Useful, when base translation is not stored yet. */
+      /** @description Text value of base translation. Useful, when base translation is not stored yet. */
       baseText?: string;
-      /** List of services to use. If null, then all enabled services are used. */
+      /** @description List of services to use. If null, then all enabled services are used. */
       services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE")[];
     };
     PagedModelTranslationMemoryItemModel: {
@@ -1368,21 +1505,44 @@ export interface components {
       targetText: string;
       baseText: string;
       keyName: string;
+      /** Format: float */
       similarity: number;
     };
     SuggestResultModel: {
-      /** String translations provided by enabled services. (deprecated, use `result` instead) */
+      /**
+       * @deprecated
+       * @description String translations provided by enabled services. (deprecated, use `result` instead)
+       * @example
+       *     {
+       *       "GOOGLE": "This was translated by Google",
+       *       "TOLGEE": "This was translated by Tolgee Translator",
+       *     }
+       */
       machineTranslations?: { [key: string]: string };
+      /** Format: int64 */
       translationCreditsBalanceBefore: number;
+      /** Format: int64 */
       translationCreditsBalanceAfter: number;
-      /** Results provided by enabled services. */
+      /**
+       * @description Results provided by enabled services.
+       * @example [object Object]
+       */
       result?: { [key: string]: components["schemas"]["TranslationItemModel"] };
-      /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      /**
+       * Format: int64
+       * @description Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud.
+       */
       translationExtraCreditsBalanceBefore: number;
-      /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      /**
+       * Format: int64
+       * @description Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud.
+       */
       translationExtraCreditsBalanceAfter: number;
     };
-    /** Results provided by enabled services. */
+    /**
+     * @description Results provided by enabled services.
+     * @example [object Object]
+     */
     TranslationItemModel: {
       output: string;
       contextDescription?: string;
@@ -1393,28 +1553,113 @@ export interface components {
       location?: string;
     };
     CreatePatDto: {
-      /** Description of the PAT */
+      /** @description Description of the PAT */
       description: string;
-      /** Expiration date in epoch format (milliseconds). When null, token never expires. */
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null, token never expires.
+       * @example 1661172869000
+       */
       expiresAt?: number;
     };
     ImageUploadInfoDto: {
       location?: string;
     };
     UploadedImageModel: {
+      /** Format: int64 */
       id: number;
       filename: string;
       fileUrl: string;
       requestFilename: string;
+      /** Format: date-time */
       createdAt: string;
       location?: string;
     };
+    AverageProportionalUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    PlanIncludedUsageModel: {
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translationSlots: number;
+      /** Format: int64 */
+      translations: number;
+      /** Format: int64 */
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    SelfHostedEePlanModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      public: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+      )[];
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
+    };
+    SumUsageItemModel: {
+      total: number;
+      /** Format: int64 */
+      unusedQuantity: number;
+      /** Format: int64 */
+      usedQuantity: number;
+      /** Format: int64 */
+      usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      credits?: components["schemas"]["SumUsageItemModel"];
+      total: number;
+    };
+    BusinessEventReportRequest: {
+      eventName: string;
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      projectId?: number;
+      data?: { [key: string]: { [key: string]: unknown } };
+    };
     CreateApiKeyDto: {
+      /** Format: int64 */
       projectId: number;
       scopes: string[];
-      /** Description of the project API key */
+      /** @description Description of the project API key */
       description?: string;
-      /** Expiration date in epoch format (milliseconds). When null key never expires. */
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
       expiresAt?: number;
     };
     TextNode: { [key: string]: unknown };
@@ -1448,6 +1693,7 @@ export interface components {
     };
     UserPreferencesModel: {
       language?: string;
+      /** Format: int64 */
       preferredOrganizationId?: number;
     };
     HierarchyItem: {
@@ -1511,6 +1757,7 @@ export interface components {
     };
     PrivateOrganizationModel: {
       organizationModel?: components["schemas"]["OrganizationModel"];
+      /** @example Features organization has enabled */
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -1523,18 +1770,22 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
       )[];
-      name: string;
-      id: number;
-      avatar?: components["schemas"]["Avatar"];
-      slug: string;
       /**
-       * The role of currently authorized user.
+       * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      description?: string;
+      /** @example btforg */
+      slug: string;
       basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      /** @example Beautiful organization */
+      name: string;
+      /** Format: int64 */
+      id: number;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1548,6 +1799,7 @@ export interface components {
       passwordResettable: boolean;
       allowRegistrations: boolean;
       screenshotsUrl: string;
+      /** Format: int32 */
       maxUploadFileSize: number;
       clientSentryDsn?: string;
       needsEmailVerification: boolean;
@@ -1555,11 +1807,14 @@ export interface components {
       appName: string;
       showVersion: boolean;
       internalControllerEnabled: boolean;
+      /** Format: int64 */
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       chatwootToken?: string;
       capterraTracker?: string;
       ga4Tag?: string;
+      postHogApiKey?: string;
+      postHogHost?: string;
     };
     DocItem: {
       name: string;
@@ -1579,6 +1834,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     UserAccountInProjectModel: {
+      /** Format: int64 */
       id: number;
       username: string;
       name?: string;
@@ -1594,9 +1850,16 @@ export interface components {
       };
     };
     UsedNamespaceModel: {
-      /** The id of namespace. Null for default namespace. */
+      /**
+       * Format: int64
+       * @description The id of namespace. Null for default namespace.
+       * @example 10000048
+       */
       id?: number;
-      /** Name of namespace. Null if default. */
+      /**
+       * @description Name of namespace. Null if default.
+       * @example homepage
+       */
       name?: string;
     };
     PagedModelTagModel: {
@@ -1612,24 +1875,29 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     CreditBalanceModel: {
+      /** Format: int64 */
       creditBalance: number;
+      /** Format: int64 */
       bucketSize: number;
+      /** Format: int64 */
       extraCreditBalance: number;
     };
     KeySearchResultView: {
-      name: string;
-      id: number;
       translation?: string;
       namespace?: string;
       baseTranslation?: string;
+      name: string;
+      /** Format: int64 */
+      id: number;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      name: string;
-      id: number;
       translation?: string;
       namespace?: string;
       baseTranslation?: string;
+      name: string;
+      /** Format: int64 */
+      id: number;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -1650,11 +1918,13 @@ export interface components {
     };
     EntityDescriptionWithRelations: {
       entityClass: string;
+      /** Format: int64 */
       entityId: number;
       data: { [key: string]: { [key: string]: unknown } };
     };
     ExistenceEntityDescription: {
       entityClass: string;
+      /** Format: int64 */
       entityId: number;
       data: { [key: string]: { [key: string]: unknown } };
       relations: {
@@ -1663,6 +1933,7 @@ export interface components {
       exists?: boolean;
     };
     ModifiedEntityModel: {
+      /** Format: int64 */
       entityId: number;
       description?: { [key: string]: { [key: string]: unknown } };
       modifications?: {
@@ -1680,6 +1951,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     ProjectActivityAuthorModel: {
+      /** Format: int64 */
       id: number;
       username?: string;
       name?: string;
@@ -1687,7 +1959,9 @@ export interface components {
       deleted: boolean;
     };
     ProjectActivityModel: {
+      /** Format: int64 */
       revisionId: number;
+      /** Format: int64 */
       timestamp: number;
       type:
         | "UNKNOWN"
@@ -1725,10 +1999,13 @@ export interface components {
       new?: { [key: string]: unknown };
     };
     ImportTranslationModel: {
+      /** Format: int64 */
       id: number;
       text?: string;
       keyName: string;
+      /** Format: int64 */
       keyId: number;
+      /** Format: int64 */
       conflictId?: number;
       conflictText?: string;
       override: boolean;
@@ -1741,6 +2018,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      /** Format: int64 */
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1777,8 +2055,13 @@ export interface components {
       };
     };
     ImportNamespaceModel: {
-      /** The id of namespace. When null, namespace doesn't exist and will be created by import. */
+      /**
+       * Format: int64
+       * @description The id of namespace. When null, namespace doesn't exist and will be created by import.
+       * @example 10000048
+       */
       id?: number;
+      /** @example homepage */
       name: string;
     };
     PagedModelTranslationCommentModel: {
@@ -1793,8 +2076,9 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    /** Author of the change */
+    /** @description Author of the change */
     SimpleUserAccountModel: {
+      /** Format: int64 */
       id: number;
       username: string;
       name?: string;
@@ -1802,11 +2086,14 @@ export interface components {
       deleted: boolean;
     };
     TranslationHistoryModel: {
-      /** Modified fields */
+      /** @description Modified fields */
       modifications?: {
         [key: string]: components["schemas"]["PropertyModification"];
       };
-      /** Unix timestamp of the revision */
+      /**
+       * Format: int64
+       * @description Unix timestamp of the revision
+       */
       timestamp: number;
       author?: components["schemas"]["SimpleUserAccountModel"];
       revisionType: "ADD" | "MOD" | "DEL";
@@ -1815,23 +2102,51 @@ export interface components {
       ids: number[];
     };
     KeyWithTranslationsModel: {
-      /** Id of key record */
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
       keyId: number;
-      /** Name of key */
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
       keyName: string;
-      /** The namespace id of the key */
+      /**
+       * Format: int64
+       * @description The namespace id of the key
+       * @example 100000282
+       */
       keyNamespaceId?: number;
-      /** The namespace of the key */
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
       keyNamespace?: string;
-      /** Tags of key */
+      /** @description Tags of key */
       keyTags: components["schemas"]["TagModel"][];
-      /** Count of screenshots provided for the key */
+      /**
+       * Format: int64
+       * @description Count of screenshots provided for the key
+       * @example 1
+       */
       screenshotCount: number;
-      /** Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
+      /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
       screenshots?: components["schemas"]["ScreenshotModel"][];
-      /** There is a context available for this key */
+      /** @description There is a context available for this key */
       contextPresent: boolean;
-      /** Translations object */
+      /**
+       * @description Translations object
+       * @example
+       *     {
+       *       "en": {
+       *         "id": 100000003,
+       *         "text": "This is super translation!"
+       *         "state": "TRANSLATED",
+       *         "commentCount": 1
+       *       }
+       *     }
+       */
       translations: {
         [key: string]: components["schemas"]["TranslationViewModel"];
       };
@@ -1841,30 +2156,53 @@ export interface components {
         keys?: components["schemas"]["KeyWithTranslationsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-      /** Provided languages data */
+      /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
-      /** Cursor to get next data */
+      /**
+       * @description Cursor to get next data
+       * @example eyJrZXlJZCI6eyJkaXJlY3Rpb24iOiJBU0MiLCJ2YWx1ZSI6IjEwMDAwMDAxMjAifX0=
+       */
       nextCursor?: string;
     };
-    /** Translations object */
+    /**
+     * @description Translations object
+     * @example
+     *     {
+     *       "en": {
+     *         "id": 100000003,
+     *         "text": "This is super translation!"
+     *         "state": "TRANSLATED",
+     *         "commentCount": 1
+     *       }
+     *     }
+     */
     TranslationViewModel: {
-      /** Id of translation record */
+      /**
+       * Format: int64
+       * @description Id of translation record
+       */
       id: number;
-      /** Translation text */
+      /** @description Translation text */
       text?: string;
-      /** State of translation */
+      /** @description State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Whether base language translation was changed after this translation was updated */
+      /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
-      /** Was translated using Translation Memory or Machine translation service? */
+      /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
-      /** Which machine translation service was used to auto translate this */
+      /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
-      /** Count of translation comments */
+      /**
+       * Format: int64
+       * @description Count of translation comments
+       */
       commentCount: number;
-      /** Count of unresolved translation comments */
+      /**
+       * Format: int64
+       * @description Count of unresolved translation comments
+       */
       unresolvedCommentCount: number;
-      /** Was translation memory used to translate this? */
+      /** @description Was translation memory used to translate this? */
       fromTranslationMemory: boolean;
     };
     CollectionModelProjectTransferOptionModel: {
@@ -1875,32 +2213,51 @@ export interface components {
     ProjectTransferOptionModel: {
       name: string;
       slug: string;
+      /** Format: int64 */
       id: number;
     };
     LanguageStatsModel: {
+      /** Format: int64 */
       languageId?: number;
       languageTag?: string;
       languageName?: string;
       languageOriginalName?: string;
       languageFlagEmoji?: string;
+      /** Format: int64 */
       translatedKeyCount: number;
+      /** Format: int64 */
       translatedWordCount: number;
+      /** Format: double */
       translatedPercentage: number;
+      /** Format: int64 */
       reviewedKeyCount: number;
+      /** Format: int64 */
       reviewedWordCount: number;
+      /** Format: double */
       reviewedPercentage: number;
+      /** Format: int64 */
       untranslatedKeyCount: number;
+      /** Format: int64 */
       untranslatedWordCount: number;
+      /** Format: double */
       untranslatedPercentage: number;
     };
     ProjectStatsModel: {
+      /** Format: int64 */
       projectId: number;
+      /** Format: int32 */
       languageCount: number;
+      /** Format: int64 */
       keyCount: number;
+      /** Format: int64 */
       baseWordsCount: number;
+      /** Format: double */
       translatedPercentage: number;
+      /** Format: double */
       reviewedPercentage: number;
+      /** Format: int64 */
       membersCount: number;
+      /** Format: int64 */
       tagCount: number;
       languageStats: components["schemas"]["LanguageStatsModel"][];
     };
@@ -1916,7 +2273,9 @@ export interface components {
       };
     };
     Pageable: {
+      /** Format: int32 */
       page?: number;
+      /** Format: int32 */
       size?: number;
       sort?: string[];
     };
@@ -1933,12 +2292,16 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     ProjectStatistics: {
+      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
       keyCount: number;
+      /** Format: int64 */
       languageCount: number;
       translationStatePercentages: { [key: string]: number };
     };
     ProjectWithStatsModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       description?: string;
@@ -1965,11 +2328,16 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      id: number;
-      expiresAt?: number;
-      lastUsedAt?: number;
+      /** Format: int64 */
       createdAt: number;
+      /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -1988,32 +2356,72 @@ export interface components {
       };
     };
     PublicUsageModel: {
+      /** Format: int64 */
       organizationId: number;
-      /** Current balance of standard credits. Standard credits are refilled every month */
+      /**
+       * Format: int64
+       * @description Current balance of standard credits. Standard credits are refilled every month
+       */
       creditBalance: number;
-      /** How many credits are included in your current plan */
+      /**
+       * Format: int64
+       * @description How many credits are included in your current plan
+       */
       includedMtCredits: number;
-      /** Date when credits were refilled. (In epoch format) */
+      /**
+       * Format: int64
+       * @description Date when credits were refilled. (In epoch format)
+       */
       creditBalanceRefilledAt: number;
-      /** Date when credits will be refilled. (In epoch format) */
+      /**
+       * Format: int64
+       * @description Date when credits will be refilled. (In epoch format)
+       */
       creditBalanceNextRefillAt: number;
-      /** Currently used credits over credits included in plan and extra credits */
+      /**
+       * Format: int64
+       * @description Currently used credits over credits included in plan and extra credits
+       */
       currentPayAsYouGoMtCredits: number;
-      /** The maximum amount organization can spend on MT credit usage before they reach the spending limit */
+      /**
+       * Format: int64
+       * @description The maximum amount organization can spend on MT credit usage before they reach the spending limit
+       */
       availablePayAsYouGoMtCredits: number;
-      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits */
+      /**
+       * Format: int64
+       * @description Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits
+       */
       extraCreditBalance: number;
-      /** How many translations can be stored within your organization */
+      /**
+       * Format: int64
+       * @description How many translations can be stored within your organization
+       */
       translationSlotsLimit: number;
-      /** How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs */
+      /**
+       * Format: int64
+       * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
+       */
       includedTranslationSlots: number;
-      /** How many translations are included in current subscription plan. How many translations can organization use without additional costs */
+      /**
+       * Format: int64
+       * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
+       */
       includedTranslations: number;
-      /** How many translations slots are currently used by organization */
+      /**
+       * Format: int64
+       * @description How many translations slots are currently used by organization
+       */
       currentTranslationSlots: number;
-      /** How many non-empty translations are currently stored by organization */
+      /**
+       * Format: int64
+       * @description How many non-empty translations are currently stored by organization
+       */
       currentTranslations: number;
-      /** How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit) */
+      /**
+       * Format: int64
+       * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
+       */
       translationsLimit: number;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
@@ -2023,6 +2431,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     SimpleProjectModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       description?: string;
@@ -2031,6 +2440,7 @@ export interface components {
       baseLanguage?: components["schemas"]["LanguageModel"];
     };
     UserAccountWithOrganizationRoleModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       username: string;
@@ -2040,20 +2450,24 @@ export interface components {
     };
     ApiKeyWithLanguagesModel: {
       /**
-       * Languages for which user has translate permission.
+       * @description Languages for which user has translate permission.
        *
        * If null, all languages are permitted.
        */
       permittedLanguageIds?: number[];
-      id: number;
-      scopes: string[];
-      expiresAt?: number;
-      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       username?: string;
-      description: string;
-      userFullName?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       projectName: string;
+      userFullName?: string;
+      scopes: string[];
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2065,7 +2479,7 @@ export interface components {
       password: string;
     };
     DeleteKeysDto: {
-      /** IDs of keys to delete */
+      /** @description IDs of keys to delete */
       ids: number[];
     };
     Link: {
@@ -2308,6 +2722,7 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": {
+          /** Format: binary */
           avatar: string;
         };
       };
@@ -3619,6 +4034,7 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": {
+          /** Format: binary */
           avatar: string;
         };
       };
@@ -4017,6 +4433,7 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": {
+          /** Format: binary */
           avatar: string;
         };
       };
@@ -4351,156 +4768,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  getMySubscription: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetMySubscriptionDto"];
-      };
-    };
-  };
-  onLicenceSetKey: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SelfHostedEeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
-      };
-    };
-  };
-  reportUsage: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReportUsageDto"];
-      };
-    };
-  };
-  reportError: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReportErrorDto"];
-      };
-    };
-  };
-  releaseKey: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReleaseKeyDto"];
-      };
-    };
-  };
-  prepareSetLicenseKey: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PrepareSetEeLicenceKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
       };
     };
   };
@@ -5267,6 +5534,7 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": {
+          /** Format: binary */
           screenshot: string;
           info?: components["schemas"]["ScreenshotInfoDto"];
         };
@@ -5417,13 +5685,14 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": {
+          /** Format: binary */
           image: string;
           info?: components["schemas"]["ImageUploadInfoDto"];
         };
       };
     };
   };
-  prepareSetLicenseKey_1: {
+  prepareSetLicenseKey: {
     responses: {
       /** OK */
       200: {
@@ -5447,6 +5716,29 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BusinessEventReportRequest"];
       };
     };
   };

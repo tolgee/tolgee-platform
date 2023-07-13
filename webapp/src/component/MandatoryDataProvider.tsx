@@ -3,9 +3,10 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
-import { getCurrentHub } from '@sentry/browser';
+import { PostHog } from 'posthog-js';
+import { getUtmParams } from 'tg.fixtures/utmCookie';
 
-const SENTRY_INITIALIZED_WINDOW_PROPERTY = 'sentryInitialized';
+const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
@@ -24,31 +25,47 @@ export const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
-  async function initReplay() {
-    const { Replay } = await import('@sentry/browser');
-    if (!window[SENTRY_INITIALIZED_WINDOW_PROPERTY]) {
-      getCurrentHub()
-        .getClient()
-        ?.addIntegration?.(
-          new Replay({
-            maskAllText: false,
-            maskAllInputs: false,
-          })
-        );
-      window[SENTRY_INITIALIZED_WINDOW_PROPERTY] = true;
-      Sentry.setUser({
-        email: userData!.username,
-        id: userData!.id.toString(),
-      });
+  function initPostHog() {
+    let postHogPromise: Promise<PostHog> | undefined;
+    if (!window[POSTHOG_INITIALIZED_WINDOW_PROPERTY]) {
+      const postHogAPIKey = config?.postHogApiKey;
+      if (postHogAPIKey) {
+        window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
+        postHogPromise = import('posthog-js').then((m) => m.default);
+        postHogPromise.then((posthog) => {
+          posthog.init(postHogAPIKey, {
+            api_host: config?.postHogHost || undefined,
+          });
+          if (userData) {
+            posthog.identify(userData.id.toString(), {
+              name: userData.username,
+              email: userData.username,
+              ...getUtmParams(),
+            });
+          }
+        });
+      }
     }
+    return () => {
+      postHogPromise?.then((ph) => {
+        ph.reset();
+      });
+      window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = false;
+    };
   }
 
   useEffect(() => {
-    if (userData?.id && config?.clientSentryDsn) {
-      // noinspection JSIgnoredPromiseFromCall
-      initReplay();
+    return initPostHog();
+  }, [userData?.id, config?.postHogApiKey]);
+
+  useEffect(() => {
+    if (userData) {
+      Sentry.setUser({
+        email: userData.username,
+        id: userData.id.toString(),
+      });
     }
-  }, [userData?.id, config?.clientSentryDsn]);
+  }, [userData?.id]);
 
   useGlobalLoading(isFetching || isLoading);
 

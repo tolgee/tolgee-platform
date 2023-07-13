@@ -13,7 +13,8 @@ import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { components } from 'tg.service/apiSchema.generated';
+import { components } from 'tg.service/billingApiSchema.generated';
+import { useReportEvent } from '../../../useReportEvent';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -69,6 +70,12 @@ export const SelfHostedEeSubscriptions = () => {
     url: `/v2/organizations/{organizationId}/billing/self-hosted-ee/refresh-subscriptions`,
     method: 'put',
   });
+
+  const reportEvent = useReportEvent();
+
+  useEffect(() => {
+    reportEvent('BILLING_SELF_HOSTED_EE_SUBSCRIPTIONS_VIEW');
+  }, []);
 
   useEffect(() => {
     if (isSuccess) {

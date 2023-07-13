@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -14,6 +14,7 @@ import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useReportEvent } from '../../organizations/useReportEvent';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
@@ -53,6 +54,12 @@ export const ProjectMembersView: FunctionComponent = () => {
   const translatePermission = usePermissionTranslation();
 
   useGlobalLoading(invitationsLoadable.isFetching);
+
+  const reportEvent = useReportEvent();
+
+  useEffect(() => {
+    reportEvent('PROJECT_MEMBERS_VIEW');
+  }, []);
 
   return (
     <BaseProjectView

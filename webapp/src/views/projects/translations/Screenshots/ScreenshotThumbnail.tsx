@@ -75,56 +75,57 @@ const StyledDeleteIcon = styled(ClearIcon)`
   font-size: 20px;
 `;
 
-export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
-  (props) => {
-    const [hover, setHover] = useState(false);
-    const { satisfiesPermission } = useProjectPermissions();
-    const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
+export const ScreenshotThumbnail: FunctionComponent<
+  ScreenshotThumbnailProps
+> = (props) => {
+  const [hover, setHover] = useState(false);
+  const { satisfiesPermission } = useProjectPermissions();
+  const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
 
-    const onMouseOver = () => {
-      setHover(true);
-    };
-
-    const onMouseOut = () => {
-      setHover(false);
-    };
-
-    const onDeleteClick = () => {
-      confirmation({
-        title: <T keyName="screenshot_delete_title" />,
-        message: <T keyName="screenshot_delete_message" />,
-        onConfirm: () => props.onDelete(),
-      });
-    };
-
-    return (
-      <>
-        <StyledScreenshotBox
-          onMouseOver={onMouseOver}
-          onMouseOut={onMouseOut}
-          data-cy="screenshot-thumbnail"
-        >
-          {canDeleteScreenshots && (
-            <Tooltip
-              title={<T keyName="translations.screenshots.delete_tooltip" />}
-            >
-              <StyledDeleteIconButton
-                className={clsx({ hover })}
-                onClick={onDeleteClick}
-                size="large"
-                data-cy="screenshot-thumbnail-delete"
-              >
-                <StyledDeleteIcon />
-              </StyledDeleteIconButton>
-            </Tooltip>
-          )}
-          <StyledScreenshotOverflowWrapper
-            key={props.screenshot.highlightedKeyId}
-            onClick={props.onClick}
-          >
-            <StyledScreenshotWithLabels screenshot={props.screenshot} />
-          </StyledScreenshotOverflowWrapper>
-        </StyledScreenshotBox>
-      </>
-    );
+  const onMouseOver = () => {
+    setHover(true);
   };
+
+  const onMouseOut = () => {
+    setHover(false);
+  };
+
+  const onDeleteClick = () => {
+    confirmation({
+      title: <T keyName="screenshot_delete_title" />,
+      message: <T keyName="screenshot_delete_message" />,
+      onConfirm: () => props.onDelete(),
+    });
+  };
+
+  return (
+    <>
+      <StyledScreenshotBox
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+        data-cy="screenshot-thumbnail"
+      >
+        {canDeleteScreenshots && (
+          <Tooltip
+            title={<T keyName="translations.screenshots.delete_tooltip" />}
+          >
+            <StyledDeleteIconButton
+              className={clsx({ hover })}
+              onClick={onDeleteClick}
+              size="large"
+              data-cy="screenshot-thumbnail-delete"
+            >
+              <StyledDeleteIcon />
+            </StyledDeleteIconButton>
+          </Tooltip>
+        )}
+        <StyledScreenshotOverflowWrapper
+          key={props.screenshot.highlightedKeyId}
+          onClick={props.onClick}
+        >
+          <StyledScreenshotWithLabels screenshot={props.screenshot} />
+        </StyledScreenshotOverflowWrapper>
+      </StyledScreenshotBox>
+    </>
+  );
+};

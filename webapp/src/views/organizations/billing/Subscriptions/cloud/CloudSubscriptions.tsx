@@ -8,8 +8,9 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrganization } from '../../../useOrganization';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { planIsPeriodDependant } from './Plans/PlanPrice';
+import { useReportEvent } from '../../../useReportEvent';
 
 const StyledShopping = styled('div')`
   display: grid;
@@ -59,6 +60,12 @@ export const CloudSubscriptions = () => {
   });
 
   useGlobalLoading(activeSubscription.isLoading || plansLoadable.isLoading);
+
+  const reportEvent = useReportEvent();
+
+  useEffect(() => {
+    reportEvent('BILLING_CLOUD_SUBSCRIPTIONS_VIEW');
+  }, []);
 
   return (
     <>

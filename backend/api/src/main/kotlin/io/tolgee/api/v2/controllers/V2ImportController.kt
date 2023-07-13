@@ -81,7 +81,6 @@ class V2ImportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val namespaceService: NamespaceService,
-
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @AccessWithAnyProjectPermission()

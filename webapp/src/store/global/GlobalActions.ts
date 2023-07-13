@@ -183,7 +183,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
   requestSuperJwt = this.createAction(
     'REQUEST_SUPER_JWT',
     (
-      payload: typeof GlobalState['prototype']['requestSuperJwtAfterActions'][0]
+      payload: (typeof GlobalState)['prototype']['requestSuperJwtAfterActions'][0]
     ) => payload
   ).build.on((state, action) => {
     return <GlobalState>{

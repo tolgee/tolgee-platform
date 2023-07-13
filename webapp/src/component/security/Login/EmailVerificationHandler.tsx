@@ -17,30 +17,31 @@ const messageService = container.resolve(MessageService);
 const redirectionActions = container.resolve(RedirectionActions);
 const signUpService = container.resolve(SignUpService);
 
-export const EmailVerificationHandler: FunctionComponent<OAuthRedirectionHandlerProps> =
-  () => {
-    const match = useRouteMatch();
+export const EmailVerificationHandler: FunctionComponent<
+  OAuthRedirectionHandlerProps
+> = () => {
+  const match = useRouteMatch();
 
-    const { data } = useApiQuery({
-      url: '/api/public/verify_email/{userId}/{code}',
-      method: 'get',
-      path: {
-        userId: match.params[PARAMS.USER_ID],
-        code: match.params[PARAMS.VERIFICATION_CODE],
-      },
-    });
+  const { data } = useApiQuery({
+    url: '/api/public/verify_email/{userId}/{code}',
+    method: 'get',
+    path: {
+      userId: match.params[PARAMS.USER_ID],
+      code: match.params[PARAMS.VERIFICATION_CODE],
+    },
+  });
 
-    useEffect(() => {
-      if (data) {
-        signUpService.verifyEmail(data.accessToken);
-        messageService.success(<T keyName="email_verified_message" />);
-        redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-      }
-    }, [data]);
+  useEffect(() => {
+    if (data) {
+      signUpService.verifyEmail(data.accessToken);
+      messageService.success(<T keyName="email_verified_message" />);
+      redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+    }
+  }, [data]);
 
-    return (
-      <>
-        <FullPageLoading />
-      </>
-    );
-  };
+  return (
+    <>
+      <FullPageLoading />
+    </>
+  );
+};

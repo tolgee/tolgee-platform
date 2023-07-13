@@ -70,6 +70,7 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
+    api libs.postHog
 }
 
 sourceSets {
