@@ -1,3 +1,15 @@
+# [3.21.0](https://github.com/tolgee/tolgee-platform/compare/v3.20.7...v3.21.0) (2023-07-13)
+
+
+### Bug Fixes
+
+* prevent unsaved changes loss ([#1786](https://github.com/tolgee/tolgee-platform/issues/1786)) ([02b6808](https://github.com/tolgee/tolgee-platform/commit/02b6808d243bae09804521b6fea068983441b52f))
+
+
+### Features
+
+* PostHog integration ([#1788](https://github.com/tolgee/tolgee-platform/issues/1788)) ([a006016](https://github.com/tolgee/tolgee-platform/commit/a00601699b242d121d09aa582b85b60f34ae6631))
+
 ## [3.20.7](https://github.com/tolgee/tolgee-platform/compare/v3.20.6...v3.20.7) (2023-07-04)
 
 
