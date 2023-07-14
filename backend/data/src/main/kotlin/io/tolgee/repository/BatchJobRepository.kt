@@ -1,12 +1,14 @@
 package io.tolgee.repository
 
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.views.JobErrorMessagesView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 interface BatchJobRepository : JpaRepository<BatchJob, Long> {
@@ -25,6 +27,24 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     """
   )
   fun getJobs(projectId: Long, userAccountId: Long?, pageable: Pageable): Page<BatchJob>
+
+  @Query(
+    value = """
+    select j from BatchJob j
+    left join fetch j.author
+    left join fetch j.activityRevision
+    where j.project.id = :projectId
+    and (:userAccountId is null or j.author.id = :userAccountId)
+    and (j.status not in :completedStatuses or j.updatedAt > :oneHourAgo)
+    order by j.updatedAt
+    """
+  )
+  fun getCurrentJobs(
+    projectId: Long,
+    userAccountId: Long?,
+    oneHourAgo: Date,
+    completedStatuses: List<BatchJobStatus>
+  ): List<BatchJob>
 
   @Query(
     nativeQuery = true,

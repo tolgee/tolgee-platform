@@ -7,6 +7,7 @@ import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
 import io.tolgee.batch.events.OnBatchJobSucceeded
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.hateoas.user_account.SimpleUserAccountModelAssembler
@@ -26,7 +27,8 @@ class ActivityWebsocketListener(
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   private val userAccountService: UserAccountService,
-  private val relationDescriptionExtractor: RelationDescriptionExtractor
+  private val relationDescriptionExtractor: RelationDescriptionExtractor,
+  private val currentDateProvider: CurrentDateProvider
 ) {
 
   @Async
@@ -78,7 +80,8 @@ class ActivityWebsocketListener(
         data = data,
         sourceActivity = activityRevision.type,
         activityId = activityRevision.id,
-        dataCollapsed = data == null
+        dataCollapsed = data == null,
+        timestamp = currentDateProvider.date.time
       )
     )
   }
@@ -97,7 +100,8 @@ class ActivityWebsocketListener(
         data = WebsocketProgressInfo(event.job.id, event.processed, event.total, realStatus),
         sourceActivity = null,
         activityId = null,
-        dataCollapsed = false
+        dataCollapsed = false,
+        timestamp = currentDateProvider.date.time
       )
     )
   }
@@ -125,7 +129,8 @@ class ActivityWebsocketListener(
         data = WebsocketProgressInfo(event.job.id, null, null, event.job.status, errorMessage?.code),
         sourceActivity = null,
         activityId = null,
-        dataCollapsed = false
+        dataCollapsed = false,
+        timestamp = currentDateProvider.date.time
       )
     )
   }
