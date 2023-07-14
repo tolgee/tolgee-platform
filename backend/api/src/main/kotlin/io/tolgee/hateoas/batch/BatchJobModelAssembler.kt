@@ -20,7 +20,8 @@ class BatchJobModelAssembler(
       progress = view.progress,
       totalItems = view.batchJob.totalItems,
       author = view.batchJob.author?.let { simpleUserAccountModelAssembler.toModel(it) },
-      createdAt = view.batchJob.createdAt.toString(),
+      createdAt = view.batchJob.createdAt?.time ?: 0,
+      updatedAt = view.batchJob.updatedAt?.time ?: 0,
       activityRevisionId = view.batchJob.activityRevision?.id,
       errorMessage = view.errorMessage?.code
     )

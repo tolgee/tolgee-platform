@@ -20,6 +20,7 @@ import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -63,6 +64,21 @@ class BatchJobManagementController(
       pageable = pageable
     )
     return pagedResourcesAssembler.toModel(views, batchJobModelAssembler)
+  }
+
+  @GetMapping(value = ["current-batch-jobs"])
+  @AccessWithApiKey()
+  @AccessWithAnyProjectPermission()
+  @Operation(
+    summary = "Returns all running and pending tasks. " +
+      "Completed tasks are returned only if they are not older than 1 hour. " +
+      "If user doesn't have permission to view all batch jobs, only their jobs are returned."
+  )
+  fun currentJobs(): CollectionModel<BatchJobModel> {
+    val views = batchJobService.getCurrentJobViews(
+      projectId = projectHolder.project.id,
+    )
+    return batchJobModelAssembler.toCollectionModel(views)
   }
 
   @GetMapping(value = ["batch-jobs/{id}"])
