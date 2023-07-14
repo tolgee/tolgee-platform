@@ -56,7 +56,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val keyIds = keys.map { it.id }.toList()
 
-    performProjectAuthPut(
+    performProjectAuthPost(
       "start-batch-job/translate",
       mapOf(
         "keyIds" to keyIds,
@@ -106,7 +106,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val keyIds = keys.map { it.id }.toList()
 
-    performProjectAuthPut(
+    performProjectAuthPost(
       "start-batch-job/delete-keys",
       mapOf(
         "keyIds" to keyIds,

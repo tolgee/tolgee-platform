@@ -11,6 +11,7 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
 import javax.persistence.Entity
+import javax.persistence.EnumType.STRING
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
@@ -36,9 +37,10 @@ class BatchJob : StandardAuditModel(), IBatchJob {
 
   var chunkSize: Int = 0
 
+  @Enumerated(STRING)
   override var status: BatchJobStatus = BatchJobStatus.PENDING
 
-  @Enumerated
+  @Enumerated(STRING)
   var type: BatchJobType = BatchJobType.TRANSLATION
 
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
