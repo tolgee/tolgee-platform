@@ -180,6 +180,7 @@ task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         excludeTags "contextRecreating"
     }
+    maxHeapSize = "8000m"
 }
 
 springBoot {
