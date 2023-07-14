@@ -30,7 +30,10 @@ open class BatchJobModel(
   val author: SimpleUserAccountModel?,
 
   @Schema(description = "The time when the job created")
-  val createdAt: String,
+  val createdAt: Long,
+
+  @Schema(description = "The time when the job was last updated (status change)")
+  val updatedAt: Long,
 
   @Schema(description = "The activity revision id, that stores the activity details of the job")
   val activityRevisionId: Long?,

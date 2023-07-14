@@ -16,7 +16,7 @@ import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.security.SecurityService
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -34,7 +34,7 @@ class StartBatchJobController(
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler
 ) {
-  @PutMapping(value = ["/translate"])
+  @PostMapping(value = ["/translate"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_AUTO_TRANSLATE)
   @Operation(summary = "Translates provided keys to provided languages")
@@ -49,7 +49,7 @@ class StartBatchJobController(
     ).model
   }
 
-  @PutMapping(value = ["/delete-keys"])
+  @PostMapping(value = ["/delete-keys"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_DELETE)
   @Operation(summary = "Translates provided keys to provided languages")
