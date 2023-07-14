@@ -1,17 +1,23 @@
 package io.tolgee.batch
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.batch.IBatchJob
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.BatchJobView
 import io.tolgee.repository.BatchJobRepository
+import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
+import io.tolgee.util.addMinutes
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
@@ -33,7 +39,10 @@ class BatchJobService(
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
   private val progressManager: ProgressManager,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue
+  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val currentDateProvider: CurrentDateProvider,
+  private val securityService: SecurityService,
+  private val authenticationFacade: AuthenticationFacade
 ) : Logging {
 
   @Transactional
@@ -108,11 +117,39 @@ class BatchJobService(
     val jobs = batchJobRepository.getJobs(projectId, userAccount?.id, pageable)
 
     val progresses = getProgresses(jobs)
-
     val errorMessages = getErrorMessages(jobs)
 
     return jobs.map {
       BatchJobView(it, progresses[it.id] ?: 0, errorMessages[it.id])
+    }
+  }
+
+  fun getCurrentJobViews(projectId: Long): List<BatchJobView> {
+    val jobs: List<BatchJob> = batchJobRepository.getCurrentJobs(
+      projectId,
+      userAccountId = getUserAccountIdForCurrentJobView(projectId),
+      oneHourAgo = currentDateProvider.date.addMinutes(-60),
+      completedStatuses = BatchJobStatus.values().filter { it.completed }
+    )
+
+    val progresses = getProgresses(jobs)
+    val errorMessages = getErrorMessages(jobs)
+
+    return jobs.map {
+      BatchJobView(it, progresses[it.id] ?: 0, errorMessages[it.id])
+    }
+  }
+
+  /**
+   * Returns user account id if user has no permission to view all jobs.
+   */
+  private fun getUserAccountIdForCurrentJobView(projectId: Long): Long? {
+    val userAccount = authenticationFacade.userAccount
+    return try {
+      securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW, userAccount)
+      null
+    } catch (e: PermissionException) {
+      userAccount.id
     }
   }
 

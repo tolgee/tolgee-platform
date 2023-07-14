@@ -2521,7 +2521,7 @@
     <changeSet author="jenik (generated)" id="1685956025153-2">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="keys_distance" constraintName="FK6vxvhrj75wf8eb41lqjrvb01t" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-1">
+    <changeSet author="jenik (generated)" id="1689327121705-1">
         <createTable tableName="batch_job">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="batch_jobPK"/>
@@ -2535,7 +2535,7 @@
             <column name="chunk_size" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="INTEGER"/>
+            <column name="status" type="VARCHAR(255)"/>
             <column name="target" type="JSONB"/>
             <column name="total_chunks" type="INTEGER">
                 <constraints nullable="false"/>
@@ -2543,12 +2543,12 @@
             <column name="total_items" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="type" type="INTEGER"/>
+            <column name="type" type="VARCHAR(255)"/>
             <column name="author_id" type="BIGINT"/>
             <column name="project_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-2">
+    <changeSet author="jenik (generated)" id="1689327121705-2">
         <createTable tableName="batch_job_chunk_execution">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="batch_job_chunk_executionPK"/>
@@ -2562,14 +2562,20 @@
             <column name="chunk_number" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
+            <column name="error_message" type="VARCHAR(255)"/>
             <column name="exception" type="TEXT"/>
             <column name="execute_after" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column defaultValueBoolean="false" name="retry" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
             <column name="status" type="VARCHAR(255)"/>
             <column name="success_targets" type="JSONB"/>
-            <column name="batch_job_id" type="BIGINT"/>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-3">
+    <changeSet author="jenik (generated)" id="1689327121705-3">
         <createTable tableName="translate_job_params">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="translate_job_paramsPK"/>
@@ -2593,60 +2599,45 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-4">
-        <addUniqueConstraint columnNames="batch_job_id" constraintName="UK_fx8pwnjgqfxsoehxy445xhhjm" tableName="translate_job_params"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-5">
-        <createIndex indexName="IDX5h2j06yfnbglka520ihhhb6jk" tableName="batch_job_chunk_execution">
-            <column name="chunk_number"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-6">
-        <createIndex indexName="IDXn6ce8mmknhvlp9xv4y2kdnx8w" tableName="batch_job_chunk_execution">
-            <column name="status"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-7">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="batch_job" constraintName="FK4d3xuj22nlemyybeq4k92ag5e" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-8">
-        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="translate_job_params" constraintName="FK4igdrucsk4py5b1laup9ilkj2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-9">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="batch_job" constraintName="FK53bipy4gqkbrlwmggk40bgle4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687183532951-10">
-        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="batch_job_chunk_execution" constraintName="FKsj13l1iwca3bnl80dx1oxrcqp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687340083918-1">
-        <addColumn tableName="batch_job_chunk_execution">
-            <column name="retry" type="boolean" defaultValue="false">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687532552778-1">
+    <changeSet author="jenik (generated)" id="1689327121705-4">
         <addColumn tableName="activity_revision">
             <column name="batch_job_chunk_execution_id" type="int8"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687532552778-2">
-        <addForeignKeyConstraint baseColumnNames="batch_job_chunk_execution_id" baseTableName="activity_revision" constraintName="FK7rfcdgi5uj3k7bk02h7e3suft" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job_chunk_execution" validate="true"/>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1687776281330-1">
+    <changeSet author="jenik (generated)" id="1689327121705-5">
         <addColumn tableName="activity_revision">
             <column name="batch_job_id" type="int8"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1687776281330-2">
+    <changeSet author="jenik (generated)" id="1689327121705-6">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UK_fx8pwnjgqfxsoehxy445xhhjm" tableName="translate_job_params"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-7">
+        <createIndex indexName="IDX5h2j06yfnbglka520ihhhb6jk" tableName="batch_job_chunk_execution">
+            <column name="chunk_number"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-8">
+        <createIndex indexName="IDXn6ce8mmknhvlp9xv4y2kdnx8w" tableName="batch_job_chunk_execution">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-9">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="batch_job" constraintName="FK4d3xuj22nlemyybeq4k92ag5e" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-10">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="translate_job_params" constraintName="FK4igdrucsk4py5b1laup9ilkj2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-11">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="batch_job" constraintName="FK53bipy4gqkbrlwmggk40bgle4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1689327121705-12">
         <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="activity_revision" constraintName="FK7oxqfs7mvotuk891xja4bhu4j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1689075097680-2">
-        <addColumn tableName="batch_job_chunk_execution">
-            <column name="error_message" type="varchar(255)"/>
-        </addColumn>
+    <changeSet author="jenik (generated)" id="1689327121705-13">
+        <addForeignKeyConstraint baseColumnNames="batch_job_chunk_execution_id" baseTableName="activity_revision" constraintName="FK7rfcdgi5uj3k7bk02h7e3suft" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job_chunk_execution" validate="true"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1689075097680-1">
-        <addNotNullConstraint columnDataType="bigint" columnName="batch_job_id" tableName="batch_job_chunk_execution" validate="true"/>
+    <changeSet author="jenik (generated)" id="1689327121705-14">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="batch_job_chunk_execution" constraintName="FKsj13l1iwca3bnl80dx1oxrcqp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
     </changeSet>
 </databaseChangeLog>

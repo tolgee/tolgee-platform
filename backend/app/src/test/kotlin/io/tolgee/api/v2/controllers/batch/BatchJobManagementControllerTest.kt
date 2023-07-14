@@ -10,18 +10,22 @@ import io.tolgee.batch.JobChunkExecutionQueue
 import io.tolgee.batch.processors.TranslationChunkProcessor
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.state.BatchJobStateProvider
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -59,6 +63,9 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @Autowired
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
 
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
   @BeforeEach
   fun setup() {
     testData = BatchJobsTestData()
@@ -70,6 +77,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @AfterEach
   fun after() {
     batchJobConcurrentLauncher.pause = false
+    currentDateProvider.forcedDate = null
   }
 
   @Test
@@ -82,7 +90,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     batchJobConcurrentLauncher.pause = true
 
-    performProjectAuthPut(
+    performProjectAuthPost(
       "start-batch-job/translate",
       mapOf(
         "keyIds" to keyIds,
@@ -209,6 +217,63 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns list of current jobs`() {
+    saveAndPrepare()
+
+    var wait = true
+    whenever(
+      translationChunkProcessor.process(any(), any(), any(), any())
+    ).then {
+      while (wait) {
+        Thread.sleep(100)
+      }
+    }
+
+    val adminsJobs = (1..3).map { runChunkedJob(50) }
+    val anotherUsersJobs = (1..3).map { runChunkedJob(50, testData.anotherUser) }
+
+    performProjectAuthGet("current-batch-jobs")
+      .andIsOk.andPrettyPrint.andAssertThatJson {
+        node("_embedded.batchJobs") {
+          isArray.hasSize(6)
+          node("[0].status").isEqualTo("RUNNING")
+          node("[1].status").isEqualTo("RUNNING")
+          node("[2].status").isEqualTo("PENDING")
+        }
+      }
+
+    wait = false
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
+      dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(6)
+    }
+
+    performProjectAuthGet("current-batch-jobs")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.batchJobs") {
+          isArray.hasSize(6)
+          node("[0].status").isEqualTo("SUCCESS")
+        }
+      }
+
+    userAccount = testData.anotherUser
+
+    performProjectAuthGet("current-batch-jobs")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.batchJobs").isArray.hasSize(3)
+      }
+
+    currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(61)
+
+    performProjectAuthGet("current-batch-jobs")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.batchJobs").isAbsent()
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns single job`() {
     saveAndPrepare()
 
@@ -250,14 +315,14 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     this.projectSupplier = { testData.projectBuilder.self }
   }
 
-  protected fun runChunkedJob(keyCount: Int): BatchJob {
+  protected fun runChunkedJob(keyCount: Int, author: UserAccount = testData.user): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
         request = BatchTranslateRequest().apply {
           keyIds = (1L..keyCount).map { it }
         },
         project = testData.projectBuilder.self,
-        author = testData.user,
+        author = author,
         type = BatchJobType.TRANSLATION
       )
     }
