@@ -3,7 +3,7 @@ package io.tolgee.util
 import org.springframework.dao.DataIntegrityViolationException
 import javax.persistence.PersistenceException
 
-fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
+inline fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
   var exception: Exception? = null
   var repeats = 0
   for (it in 1..100) {

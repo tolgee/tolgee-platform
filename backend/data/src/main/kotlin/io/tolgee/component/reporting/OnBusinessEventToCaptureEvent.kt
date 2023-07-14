@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 
 data class OnBusinessEventToCaptureEvent(
   val eventName: String,
+  val instanceId: String? = null,
   val projectDto: ProjectDto? = null,
   val projectId: Long? = null,
   val organizationId: Long? = null,

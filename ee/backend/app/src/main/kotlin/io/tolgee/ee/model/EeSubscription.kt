@@ -18,7 +18,7 @@ import javax.persistence.Table
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-@Entity()
+@Entity
 @TypeDef(
   name = "enum-array",
   typeClass = EnumArrayType::class,
