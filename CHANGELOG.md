@@ -1,3 +1,10 @@
+## [3.21.1](https://github.com/tolgee/tolgee-platform/compare/v3.21.0...v3.21.1) (2023-07-17)
+
+
+### Bug Fixes
+
+* Cors error when PUT request ([#1806](https://github.com/tolgee/tolgee-platform/issues/1806)) ([de2c231](https://github.com/tolgee/tolgee-platform/commit/de2c23161a5b7e70955de631865b8a116fbd9e67))
+
 # [3.21.0](https://github.com/tolgee/tolgee-platform/compare/v3.20.7...v3.21.0) (2023-07-13)
 
 
