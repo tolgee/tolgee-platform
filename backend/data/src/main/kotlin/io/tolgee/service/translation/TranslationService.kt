@@ -370,4 +370,16 @@ class TranslationService(
   ): List<Translation> {
     return translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
   }
+
+  @Transactional
+  fun setState(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
+    val translations = getTranslations(keyIds, languageIds)
+    translations.forEach { it.state = state }
+    saveAll(translations)
+  }
+
+  fun getTranslations(
+    keyIds: List<Long>,
+    languageIds: List<Long>
+  ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 }

@@ -8,6 +8,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -50,7 +51,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `it batch translates`() {
-    val keyCount = 100
+    val keyCount = 1000
     val keys = testData.addTranslationOperationData(keyCount)
     saveAndPrepare()
 
@@ -79,7 +80,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       job.activityRevision.assert.isNotNull
-      job.activityRevision!!.modifiedEntities.assert.hasSize(200)
+      job.activityRevision!!.modifiedEntities.assert.hasSize(2000)
     }
   }
 
@@ -127,6 +128,35 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         data.assert.hasSize(1)
         data[0].activityRevision.assert.isNotNull
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it changes translation state`() {
+    val keyCount = 100
+    val keys = testData.addStateChangeData(keyCount)
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(10)
+    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languagesToChangeStateIds = listOf(testData.germanLanguage.id, testData.englishLanguage.id)
+
+    performProjectAuthPost(
+      "start-batch-job/set-translation-state",
+      mapOf(
+        "keyIds" to keyIds,
+        "languageIds" to languagesToChangeStateIds,
+        "state" to "REVIEWED"
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val all = translationService.getTranslations(
+        keys.map { it.id }, allLanguageIds
+      )
+      all.count { it.state == TranslationState.REVIEWED }.assert.isEqualTo(keyIds.size * 2)
     }
   }
 }

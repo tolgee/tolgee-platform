@@ -6,6 +6,7 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.SetStateRequest
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
@@ -60,6 +61,20 @@ class StartBatchJobController(
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
       BatchJobType.DELETE_KEYS
+    ).model
+  }
+
+  @PostMapping(value = ["/set-translation-state"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
+  @Operation(summary = "Set")
+  fun setTranslationState(@Valid @RequestBody data: SetStateRequest): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.SET_TRANSLATION_STATE
     ).model
   }
 
