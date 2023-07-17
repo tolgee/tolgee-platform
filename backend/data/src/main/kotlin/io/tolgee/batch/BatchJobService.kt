@@ -39,7 +39,7 @@ class BatchJobService(
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
   private val progressManager: ProgressManager,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade
@@ -85,11 +85,11 @@ class BatchJobService(
       job
     }
 
-    executions?.let { jobChunkExecutionQueue.addToQueue(it) }
+    executions?.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions?.size} executions to queue ${
       System.identityHashCode(
-        jobChunkExecutionQueue
+        batchJobChunkExecutionQueue
       )
       }"
     )

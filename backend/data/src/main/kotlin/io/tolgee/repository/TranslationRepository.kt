@@ -163,4 +163,5 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
 
   fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
+  fun getAllByKeyIdInAndLanguageIdIn(keyIds: List<Long>, languageIds: List<Long>): List<Translation>
 }
