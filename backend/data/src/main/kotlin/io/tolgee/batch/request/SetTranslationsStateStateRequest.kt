@@ -5,7 +5,7 @@ import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
-class SetStateRequest {
+class SetTranslationsStateStateRequest {
   @NotEmpty
   var keyIds: List<Long> = listOf()
 

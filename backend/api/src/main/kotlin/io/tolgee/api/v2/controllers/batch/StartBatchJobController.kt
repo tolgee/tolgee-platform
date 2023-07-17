@@ -5,8 +5,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
 import io.tolgee.batch.request.BatchTranslateRequest
+import io.tolgee.batch.request.ClearTranslationsRequest
+import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
-import io.tolgee.batch.request.SetStateRequest
+import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
@@ -46,7 +48,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.TRANSLATION
+      BatchJobType.AUTO_TRANSLATION
     ).model
   }
 
@@ -67,14 +69,46 @@ class StartBatchJobController(
   @PostMapping(value = ["/set-translation-state"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_STATE_EDIT)
-  @Operation(summary = "Set")
-  fun setTranslationState(@Valid @RequestBody data: SetStateRequest): BatchJobModel {
+  @Operation(summary = "Set translation state")
+  fun setTranslationState(@Valid @RequestBody data: SetTranslationsStateStateRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkLanguageStateChangePermission(projectHolder.project.id, data.languageIds)
     return batchJobService.startJob(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.SET_TRANSLATION_STATE
+      BatchJobType.SET_TRANSLATIONS_STATE
+    ).model
+  }
+
+  @PostMapping(value = ["/clear-translations"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @Operation(summary = "Clear translation values")
+  fun clearTranslations(@Valid @RequestBody data: ClearTranslationsRequest): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.CLEAR_TRANSLATIONS
+    ).model
+  }
+
+  @PostMapping(value = ["/copy-translations"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @Operation(summary = "Clear translation values")
+  fun copyTranslations(@Valid @RequestBody data: CopyTranslationRequest): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
+    securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(data.sourceLanguageId))
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.COPY_TRANSLATIONS
     ).model
   }
 

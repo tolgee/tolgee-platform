@@ -7,7 +7,7 @@ import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
-import io.tolgee.batch.processors.TranslationChunkProcessor
+import io.tolgee.batch.processors.AutoTranslationChunkProcessor
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
@@ -52,7 +52,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Autowired
   @MockBean
-  lateinit var translationChunkProcessor: TranslationChunkProcessor
+  lateinit var autoTranslationChunkProcessor: AutoTranslationChunkProcessor
 
   @Autowired
   lateinit var batchJobStateProvider: BatchJobStateProvider
@@ -70,8 +70,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = BatchJobsTestData()
     batchJobChunkExecutionQueue.populateQueue()
-    whenever(translationChunkProcessor.getParams(any<BatchTranslateRequest>(), any())).thenCallRealMethod()
-    whenever(translationChunkProcessor.getTarget(any<BatchTranslateRequest>())).thenCallRealMethod()
+    whenever(autoTranslationChunkProcessor.getParams(any<BatchTranslateRequest>(), any())).thenCallRealMethod()
+    whenever(autoTranslationChunkProcessor.getTarget(any<BatchTranslateRequest>())).thenCallRealMethod()
   }
 
   @AfterEach
@@ -133,7 +133,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val jobIds = ConcurrentHashMap.newKeySet<Long>()
     var wait = true
     whenever(
-      translationChunkProcessor.process(any(), any(), any(), any())
+      autoTranslationChunkProcessor.process(any(), any(), any(), any())
     ).then {
       val id = it.getArgument<BatchJobDto>(0).id
       if (jobIds.size == 2 && !jobIds.contains(id)) {
@@ -222,7 +222,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     var wait = true
     whenever(
-      translationChunkProcessor.process(any(), any(), any(), any())
+      autoTranslationChunkProcessor.process(any(), any(), any(), any())
     ).then {
       while (wait) {
         Thread.sleep(100)
@@ -323,7 +323,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         },
         project = testData.projectBuilder.self,
         author = author,
-        type = BatchJobType.TRANSLATION
+        type = BatchJobType.AUTO_TRANSLATION
       )
     }
   }

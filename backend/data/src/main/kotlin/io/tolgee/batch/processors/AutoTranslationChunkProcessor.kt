@@ -19,7 +19,7 @@ import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component
-class TranslationChunkProcessor(
+class AutoTranslationChunkProcessor(
   private val autoTranslationService: AutoTranslationService,
   private val keyService: KeyService,
   private val languageService: LanguageService,

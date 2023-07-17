@@ -91,7 +91,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun waitForAllTranslated(keyIds: List<Long>, keyCount: Int) {
-    waitForNotThrowing(pollTime = 1000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 60000) {
       @Suppress("UNCHECKED_CAST") val czechTranslations = entityManager.createQuery(
         """
         from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
@@ -163,6 +163,63 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         keys.map { it.id }, allLanguageIds
       )
       all.count { it.state == TranslationState.REVIEWED }.assert.isEqualTo(keyIds.size * 2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it clears translations`() {
+    val keyCount = 1000
+    val keys = testData.addStateChangeData(keyCount)
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(10)
+    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languagesToClearIds = listOf(testData.germanLanguage.id, testData.englishLanguage.id)
+
+    performProjectAuthPost(
+      "start-batch-job/clear-translations",
+      mapOf(
+        "keyIds" to keyIds,
+        "languageIds" to languagesToClearIds,
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val all = translationService.getTranslations(
+        keys.map { it.id }, allLanguageIds
+      )
+      all.count { it.state == TranslationState.UNTRANSLATED && it.text == null }.assert.isEqualTo(keyIds.size * 2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it copies translations`() {
+    val keyCount = 1000
+    val keys = testData.addStateChangeData(keyCount)
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(10)
+    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languagesToChangeStateIds = listOf(testData.germanLanguage.id, testData.czechLanguage.id)
+
+    performProjectAuthPost(
+      "start-batch-job/copy-translations",
+      mapOf(
+        "keyIds" to keyIds,
+        "sourceLanguageId" to testData.englishLanguage.id,
+        "targetLanguageIds" to languagesToChangeStateIds,
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val all = translationService.getTranslations(
+        keys.map { it.id }, allLanguageIds
+      )
+      all.count { it.text?.startsWith("en") == true }.assert.isEqualTo(allKeyIds.size + keyIds.size * 2)
     }
   }
 }

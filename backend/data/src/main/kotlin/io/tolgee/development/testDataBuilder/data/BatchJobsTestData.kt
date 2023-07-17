@@ -30,7 +30,6 @@ class BatchJobsTestData : BaseTestData() {
   }
 
   fun addStateChangeData(keyCount: Int = 100): List<Key> {
-
     return (1..keyCount).map {
       this.projectBuilder.addKey {
         name = "key$it"

@@ -108,7 +108,8 @@ class BatchJobConcurrentLauncher(
       )
     }
     logger.debug(
-      "${batchJobChunkExecutionQueue.size} is left in the queue (${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
+      "${batchJobChunkExecutionQueue.size} is left in the queue " +
+        "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
         batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
     )
   }

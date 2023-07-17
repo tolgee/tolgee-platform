@@ -1,8 +1,8 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.processors.AutoTranslationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
-import io.tolgee.batch.processors.TranslationChunkProcessor
 import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.component.CurrentDateProvider
@@ -46,7 +46,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @MockBean
   @Autowired
-  lateinit var translationChunkProcessor: TranslationChunkProcessor
+  lateinit var autoTranslationChunkProcessor: AutoTranslationChunkProcessor
 
   @MockBean
   @Autowired
@@ -75,10 +75,10 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     batchJobChunkExecutionQueue.clear()
-    Mockito.reset(translationChunkProcessor)
-    Mockito.clearInvocations(translationChunkProcessor)
-    whenever(translationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
-    whenever(translationChunkProcessor.getTarget(any())).thenCallRealMethod()
+    Mockito.reset(autoTranslationChunkProcessor)
+    Mockito.clearInvocations(autoTranslationChunkProcessor)
+    whenever(autoTranslationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
+    whenever(autoTranslationChunkProcessor.getTarget(any())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
     batchJobChunkExecutionQueue.populateQueue()
@@ -115,8 +115,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     waitForNotThrowing(pollTime = 1000) {
       verify(
-        translationChunkProcessor,
-        times(ceil(job.totalItems.toDouble() / BatchJobType.TRANSLATION.chunkSize).toInt())
+        autoTranslationChunkProcessor,
+        times(ceil(job.totalItems.toDouble() / BatchJobType.AUTO_TRANSLATION.chunkSize).toInt())
       ).process(any(), any(), any(), any())
     }
 
@@ -151,7 +151,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
 
     whenever(
-      translationChunkProcessor.process(
+      autoTranslationChunkProcessor.process(
         any(), any(), any(), any()
       )
     )
@@ -187,7 +187,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     websocketHelper.listenForBatchJobProgress()
 
     whenever(
-      translationChunkProcessor.process(
+      autoTranslationChunkProcessor.process(
         any(),
         argThat { this.containsAll((1L..10).toList()) },
         any(),
@@ -233,7 +233,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     val throwingChunk = (1L..10).toList()
 
     whenever(
-      translationChunkProcessor.process(
+      autoTranslationChunkProcessor.process(
         any(),
         argThat { this.containsAll(throwingChunk) },
         any(),
@@ -327,7 +327,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   fun `cancels the job`() {
     var count = 0
 
-    whenever(translationChunkProcessor.process(any(), any(), any(), any())).then {
+    whenever(autoTranslationChunkProcessor.process(any(), any(), any(), any())).then {
       if (count++ > 50) {
         while (true) {
           val context = it.arguments[2] as CoroutineContext
@@ -364,7 +364,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
         },
         project = testData.projectBuilder.self,
         author = testData.user,
-        type = BatchJobType.TRANSLATION
+        type = BatchJobType.AUTO_TRANSLATION
       )
     }
   }

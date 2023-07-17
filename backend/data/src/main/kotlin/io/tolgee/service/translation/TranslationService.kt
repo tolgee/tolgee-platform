@@ -382,4 +382,30 @@ class TranslationService(
     keyIds: List<Long>,
     languageIds: List<Long>
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+
+  fun clear(keyIds: List<Long>, languageIds: List<Long>) {
+    val translations = getTranslations(keyIds, languageIds)
+    translations.forEach {
+      it.state = TranslationState.UNTRANSLATED
+      it.text = null
+      it.outdated = false
+      it.mtProvider = null
+      it.auto = false
+    }
+    saveAll(translations)
+  }
+
+  fun copy(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
+    val sourceTranslations = getTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
+    val targetTranslations = getTranslations(keyIds, targetLanguageIds).onEach {
+      it.text = sourceTranslations[it.key.id]?.text
+      if (!it.text.isNullOrEmpty()) {
+        it.state = TranslationState.TRANSLATED
+      }
+      it.auto = false
+      it.mtProvider = null
+      it.outdated = false
+    }
+    saveAll(targetTranslations)
+  }
 }
