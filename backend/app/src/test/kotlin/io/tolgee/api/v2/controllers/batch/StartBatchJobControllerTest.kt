@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -16,6 +17,7 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 
 @AutoConfigureMockMvc
@@ -24,8 +26,12 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: BatchJobsTestData
   var fakeBefore = false
 
+  @Autowired
+  lateinit var batchJobOperationQueue: BatchJobChunkExecutionQueue
+
   @BeforeEach
   fun setup() {
+    batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
     fakeBefore = internalProperties.fakeMtProviders
     internalProperties.fakeMtProviders = true

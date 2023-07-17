@@ -70,18 +70,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   lateinit var batchJobCancellationManager: BatchJobCancellationManager
 
   @Autowired
-  lateinit var jobChunkExecutionQueue: JobChunkExecutionQueue
+  lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
 
   @BeforeEach
   fun setup() {
-    jobChunkExecutionQueue.clear()
+    batchJobChunkExecutionQueue.clear()
     Mockito.reset(translationChunkProcessor)
     Mockito.clearInvocations(translationChunkProcessor)
     whenever(translationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(translationChunkProcessor.getTarget(any())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getParams(any(), any())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
-    jobChunkExecutionQueue.populateQueue()
+    batchJobChunkExecutionQueue.populateQueue()
     testData = BatchJobsTestData()
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = Date(1687237928000)
@@ -95,7 +95,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @AfterEach()
   fun teardown() {
-    jobChunkExecutionQueue.clear()
+    batchJobChunkExecutionQueue.clear()
     currentDateProvider.forcedDate = null
     websocketHelper.stop()
   }
@@ -199,7 +199,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     (1..3).forEach {
       waitForNotThrowing {
-        jobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 2000 }.assert.isNotNull
+        batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 2000 }.assert.isNotNull
       }
       currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 2000)
     }
@@ -253,19 +253,19 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     val job = runChunkedJob(1000)
 
     waitForNotThrowing {
-      jobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 100 }.assert.isNotNull
+      batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 100 }.assert.isNotNull
     }
 
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 100)
 
     waitForNotThrowing {
-      jobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 1000 }.assert.isNotNull
+      batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 1000 }.assert.isNotNull
     }
 
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 1000)
 
     waitForNotThrowing {
-      jobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 10000 }.assert.isNotNull
+      batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 10000 }.assert.isNotNull
     }
 
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 10000)
