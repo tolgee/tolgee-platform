@@ -31,7 +31,7 @@ class BatchJobActionService(
   private val progressManager: ProgressManager,
   @Lazy
   private val batchJobService: BatchJobService,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher
@@ -44,7 +44,7 @@ class BatchJobActionService(
   fun run() {
     println("Application ready")
     executeInNewTransaction(transactionManager) {
-      jobChunkExecutionQueue.populateQueue()
+      batchJobChunkExecutionQueue.populateQueue()
     }
 
     concurrentExecutionLauncher.run { executionItem, coroutineContext ->
@@ -99,7 +99,7 @@ class BatchJobActionService(
 
   private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?) {
     retryExecution?.let {
-      jobChunkExecutionQueue.addToQueue(listOf(it))
+      batchJobChunkExecutionQueue.addToQueue(listOf(it))
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }
@@ -110,7 +110,7 @@ class BatchJobActionService(
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e)
-      jobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
       null
     }
   }
@@ -141,7 +141,7 @@ class BatchJobActionService(
   }
 
   fun cancelLocalJob(jobId: Long) {
-    jobChunkExecutionQueue.cancelJob(jobId)
+    batchJobChunkExecutionQueue.cancelJob(jobId)
     concurrentExecutionLauncher.runningJobs.filter { it.value.first == jobId }.forEach {
       it.value.second.cancel()
     }

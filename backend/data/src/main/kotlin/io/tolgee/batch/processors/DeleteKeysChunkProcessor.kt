@@ -26,6 +26,7 @@ class DeleteKeysChunkProcessor(
     val subChunked = chunk.chunked(100)
     var progress: Int = 0
     subChunked.forEach { subChunk ->
+      coroutineContext.ensureActive()
       keyService.deleteMultiple(subChunk)
       entityManager.flush()
       progress += subChunk.size

@@ -41,7 +41,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   override var status: BatchJobStatus = BatchJobStatus.PENDING
 
   @Enumerated(STRING)
-  var type: BatchJobType = BatchJobType.TRANSLATION
+  var type: BatchJobType = BatchJobType.AUTO_TRANSLATION
 
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null

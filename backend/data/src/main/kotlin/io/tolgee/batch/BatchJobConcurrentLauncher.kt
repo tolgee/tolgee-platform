@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class BatchJobConcurrentLauncher(
   private val batchProperties: BatchProperties,
-  private val jobChunkExecutionQueue: JobChunkExecutionQueue,
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   companion object {
@@ -68,7 +68,7 @@ class BatchJobConcurrentLauncher(
   }
 
   private fun getSleepTime(startTime: Long): Long {
-    if (!jobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0) {
+    if (!batchJobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0) {
       return 0
     }
     return BatchJobActionService.MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
@@ -89,7 +89,7 @@ class BatchJobConcurrentLauncher(
 
         logger.trace("Jobs to launch: $jobsToLaunch")
         val items = (1..jobsToLaunch)
-          .mapNotNull { jobChunkExecutionQueue.poll() }
+          .mapNotNull { batchJobChunkExecutionQueue.poll() }
 
         logItemsPulled(items)
 
@@ -108,8 +108,9 @@ class BatchJobConcurrentLauncher(
       )
     }
     logger.debug(
-      "${jobChunkExecutionQueue.size} is left in the queue (${System.identityHashCode(jobChunkExecutionQueue)}): " +
-        jobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
+      "${batchJobChunkExecutionQueue.size} is left in the queue " +
+        "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
+        batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
     )
   }
 
@@ -122,7 +123,7 @@ class BatchJobConcurrentLauncher(
         """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
                     | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
       )
-      jobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
       return
     }
 

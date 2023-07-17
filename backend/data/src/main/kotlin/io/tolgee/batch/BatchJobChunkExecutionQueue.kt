@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import javax.persistence.EntityManager
 
 @Component
-class JobChunkExecutionQueue(
+class BatchJobChunkExecutionQueue(
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
