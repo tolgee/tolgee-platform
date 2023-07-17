@@ -5,6 +5,7 @@
 package io.tolgee.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.servlet.MultipartConfigFactory
@@ -49,7 +50,9 @@ class WebConfiguration(
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
-    registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
+    registry.addMapping("/**")
+      .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+      .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME)
   }
 
   @Bean
