@@ -1,7 +1,10 @@
 package io.tolgee.service
 
 import io.tolgee.component.email.InvitationEmailSender
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.misc.CreateInvitationParams
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
@@ -30,7 +33,8 @@ class InvitationService @Autowired constructor(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
-  private val invitationEmailSender: InvitationEmailSender
+  private val invitationEmailSender: InvitationEmailSender,
+  private val businessEventPublisher: BusinessEventPublisher
 ) {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -116,6 +120,14 @@ class InvitationService @Autowired constructor(
     invitation.permission = null
     invitation.organizationRole = null
     invitationRepository.delete(invitation)
+
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "INVITATION_ACCEPTED",
+        userAccountId = userAccount.id,
+        userAccountDto = UserAccountDto.fromEntity(userAccount)
+      )
+    )
   }
 
   private fun validateProjectXorOrganization(

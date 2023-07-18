@@ -1,15 +1,11 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.reporting.BusinessEventPublisher
-import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
-import io.tolgee.model.Organization
-import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
@@ -47,14 +43,10 @@ class SignUpService(
     }
 
     val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations
-
-    var organization: Organization? = null
     if (canCreateOrganization && (invitation == null || !dto.organizationName.isNullOrBlank())) {
       val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
-      organization = organizationService.createPreferred(user, name)
+      organizationService.createPreferred(user, name)
     }
-
-    publishBusinessEvent(organization, user)
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
@@ -63,17 +55,5 @@ class SignUpService(
     emailVerificationService.createForUser(user, dto.callbackUrl)
 
     return null
-  }
-
-  private fun publishBusinessEvent(organization: Organization?, user: UserAccount) {
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "SIGN_UP",
-        organizationId = organization?.id,
-        organizationName = organization?.name,
-        userAccountId = user.id,
-        userAccountDto = UserAccountDto.fromEntity(user)
-      )
-    )
   }
 }

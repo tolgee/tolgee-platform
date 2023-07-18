@@ -4,8 +4,16 @@
 
 package io.tolgee.service
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.AbstractSpringTest
+import io.tolgee.configuration.tolgee.TelemetryProperties
+import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.dtos.TelemetryReportRequest
 import io.tolgee.fixtures.mockHttpRequest
+import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,14 +28,62 @@ class TelemetryServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
+  @Autowired
+  lateinit var telemetryProperties: TelemetryProperties
+
+  @AfterEach
+  fun clean() {
+    telemetryProperties.enabled = true
+  }
+
   @Test
   fun `doesn't report when disabled`() {
+    telemetryProperties.enabled = false
     mockHttpRequest(restTemplate) {
       whenReq {
         url = { it.contains("/v2/public/telemetry") }
         method = { it == HttpMethod.POST }
       }
-      thenAnswer { throw RuntimeException("Should not be called") }
+      thenAnswer { }
+      verify {
+        Thread.sleep(5000)
+        this.captor.allValues.assert.hasSize(0)
+      }
+    }
+  }
+
+  @Test
+  fun `reports when enabled`() {
+    val testData = BaseTestData().apply {
+      this.root.addProject { name = "bbbb" }.build {
+        val en = addEnglish()
+        addKey("a") {
+          addTranslation {
+            language = en.self
+            text = "Hello"
+          }
+        }
+      }
+    }
+    testDataService.saveTestData(testData.root)
+    mockHttpRequest(restTemplate) {
+      whenReq {
+        url = { it.contains("/v2/public/telemetry") }
+        method = { it == HttpMethod.POST }
+      }
+      thenAnswer { }
+      verify {
+        waitForNotThrowing {
+          val first = this.captor.allValues[0].body as String
+          val data = jacksonObjectMapper().readValue<TelemetryReportRequest>(first)
+          data.instanceId.assert.isNotBlank()
+          data.projectsCount.assert.isEqualTo(2)
+          data.translationsCount.assert.isEqualTo(1)
+          data.languagesCount.assert.isEqualTo(2)
+          data.distinctLanguagesCount.assert.isEqualTo(1)
+          data.usersCount.assert.isEqualTo(1)
+        }
+      }
     }
   }
 }
