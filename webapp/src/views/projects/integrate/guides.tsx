@@ -95,4 +95,12 @@ export const guides = [
       () => import('!babel-loader!@mdx-js/loader!./guides/Figma.mdx')
     ),
   },
+  {
+    name: 'Unreal',
+    icon: getTechnologyImgComponent('unreal'),
+    guide: React.lazy(
+      // @ts-ignore
+      () => import('!babel-loader!@mdx-js/loader!./guides/Unreal.mdx')
+    ),
+  },
 ] as Guide[];

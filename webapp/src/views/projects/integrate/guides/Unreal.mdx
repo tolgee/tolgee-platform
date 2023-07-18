@@ -1,0 +1,41 @@
+import { GoToDocsButton } from '../component/GoToDocsButton';
+
+<GoToDocsButton
+  href="https://tolgee.io/platform/unreal-plugin/usage"
+  style={{ float: 'right' }}
+/>
+
+To read full documentation about the Tolgee Unreal plugin, visit [docs](https://tolgee.io/platform/unreal-plugin/usage).
+
+## Installing the plugin
+
+First, you need to install the plugin from the [Unreal Marketplace](https://www.unrealengine.com/marketplace/en-US/product/2757e202f8f3408bbf66f65d26223398) and add it to your project/engine.
+
+Alternatively, you can clone the plugin from [GitHub](https://github.com/tolgee/tolgee-unreal) and compile it locally.
+
+## Enabling the plugin
+
+To enable the Tolgee plugin inside Unreal, perform the following steps:
+
+1. Navigate to the Toolbar `Edit` menu
+1. Open the `Plugins` windows
+1. Find the Tolgee plugin and tick the checkbox next to it
+1. Press `Restart now` or restart your project manually.
+
+## Setting up the plugin
+
+After installing the plugin, you need to enable it and set the following properties in the Project Settings → Localization → Tolgee section:
+
+API key:
+```
+{{{apiKey}}}
+```
+
+If you are using the self-hosted version, you can change the URL to your instance.
+
+API URL:
+```
+{{{apiUrl}}}
+```
+
+Then you are now ready to start translating using the plugin!
