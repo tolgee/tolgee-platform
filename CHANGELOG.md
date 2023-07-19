@@ -1,3 +1,16 @@
+# [3.22.0](https://github.com/tolgee/tolgee-platform/compare/v3.21.1...v3.22.0) (2023-07-19)
+
+
+### Bug Fixes
+
+* Incorrect integrations docs links ([#1810](https://github.com/tolgee/tolgee-platform/issues/1810)) ([6dde2bc](https://github.com/tolgee/tolgee-platform/commit/6dde2bc3c3f347bc6780e6bfa4c753c5d428ec6d))
+* Update Tolgee MT engine name ([#1813](https://github.com/tolgee/tolgee-platform/issues/1813)) ([f6a9de1](https://github.com/tolgee/tolgee-platform/commit/f6a9de18bccf3d48a09341cdfbe18e1578a009da))
+
+
+### Features
+
+* Documentation for the Unreal Engine integration  ([#1742](https://github.com/tolgee/tolgee-platform/issues/1742)) ([2217a0c](https://github.com/tolgee/tolgee-platform/commit/2217a0c81c146219bb4bdb2aa6e2f2f9d7ac5eaf))
+
 ## [3.21.1](https://github.com/tolgee/tolgee-platform/compare/v3.21.0...v3.21.1) (2023-07-17)
 
 
