@@ -18,23 +18,23 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Service
 class EeSubscriptionService(
   private val eeSubscriptionRepository: EeSubscriptionRepository,
-  private val restTemplate: RestTemplate,
   private val eeProperties: EeProperties,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
-  private val httpClient: HttpClient
+  private val httpClient: HttpClient,
+  private val instanceIdService: InstanceIdService
 ) {
   companion object {
     const val setPath: String = "/v2/public/licensing/set-key"
@@ -64,7 +64,7 @@ class EeSubscriptionService(
       try {
         postRequest<SelfHostedEeSubscriptionModel>(
           setPath,
-          SetLicenseKeyLicensingDto(licenseKey, seats, entity.instanceId)
+          SetLicenseKeyLicensingDto(licenseKey, seats, instanceIdService.getInstanceId())
         )
       } catch (e: HttpClientErrorException.NotFound) {
         throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
@@ -179,7 +179,7 @@ class EeSubscriptionService(
     val responseBody = try {
       postRequest<SelfHostedEeSubscriptionModel>(
         subscriptionInfoPath,
-        GetMySubscriptionDto(subscription.licenseKey, subscription.instanceId)
+        GetMySubscriptionDto(subscription.licenseKey, instanceIdService.getInstanceId())
       )
     } catch (e: HttpClientErrorException.NotFound) {
       subscription.status = SubscriptionStatus.CANCELED
