@@ -14,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.*
@@ -22,15 +21,9 @@ import kotlin.system.measureTimeMillis
 
 abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
 
-  @Autowired
-  lateinit var cacheManager: CacheManager
-
   @AfterEach
-  fun clearCaches() {
-    cacheManager.cacheNames.stream().forEach { cacheName: String ->
-      @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-      cacheManager.getCache(cacheName).clear()
-    }
+  fun teardown() {
+    super.clearCaches()
   }
 
   @MockBean

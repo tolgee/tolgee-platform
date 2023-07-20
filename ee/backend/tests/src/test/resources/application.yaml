@@ -64,6 +64,8 @@ tolgee:
       secretKey: aaa
   billing:
     enabled: false
+  telemetry:
+    enabled: false
 
 management:
   endpoint:

@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
-import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
@@ -83,10 +82,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Autowired
   @MockBean
   lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
-
-  @Autowired
-  @MockBean
-  lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache
 

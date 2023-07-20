@@ -56,6 +56,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     Mockito.reset(postHog)
+    clearCaches()
   }
 
   @AfterEach

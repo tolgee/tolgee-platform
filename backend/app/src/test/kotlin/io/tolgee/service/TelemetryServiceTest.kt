@@ -15,13 +15,19 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.web.client.RestTemplate
 
-@SpringBootTest(properties = ["tolgee.telemetry.report-period-ms=200"])
+@SpringBootTest(
+  properties = [
+    "tolgee.telemetry.report-period-ms=200",
+    "tolgee.telemetry.enabled=true"
+  ]
+)
 class TelemetryServiceTest : AbstractSpringTest() {
 
   @MockBean
@@ -39,6 +45,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
   @Test
   fun `doesn't report when disabled`() {
     telemetryProperties.enabled = false
+    Mockito.reset(restTemplate)
     mockHttpRequest(restTemplate) {
       whenReq {
         url = { it.contains("/v2/public/telemetry") }

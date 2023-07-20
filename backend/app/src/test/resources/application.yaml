@@ -64,6 +64,8 @@ tolgee:
       secretKey: aaa
   billing:
     enabled: false
+  telemetry:
+    enabled: false
 logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
