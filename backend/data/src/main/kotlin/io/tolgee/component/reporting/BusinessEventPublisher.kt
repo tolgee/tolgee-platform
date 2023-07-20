@@ -55,7 +55,7 @@ class BusinessEventPublisher(
     keyProvider: (e: OnBusinessEventToCaptureEvent) -> String = { it.eventName + "_" + it.userAccountId }
   ) {
     val key = keyProvider(event)
-    if (shouldPublishOnceInTIme(key, onceIn)) {
+    if (shouldPublishOnceInTime(key, onceIn)) {
       publish(event)
       cachePublished(key)
     }
@@ -65,7 +65,7 @@ class BusinessEventPublisher(
     getEventThrottlingCache()?.put(key, ThrottledEventInCache(currentDateProvider.date.time))
   }
 
-  private fun shouldPublishOnceInTIme(
+  private fun shouldPublishOnceInTime(
     key: String,
     onceIn: Duration
   ): Boolean {
