@@ -1,3 +1,10 @@
+# [3.23.0](https://github.com/tolgee/tolgee-platform/compare/v3.22.0...v3.23.0) (2023-07-20)
+
+
+### Features
+
+* Add telemetry collection ([#1814](https://github.com/tolgee/tolgee-platform/issues/1814)) ([40d130d](https://github.com/tolgee/tolgee-platform/commit/40d130ddc4de0996f6e06fc368976bd23592ca4f))
+
 # [3.22.0](https://github.com/tolgee/tolgee-platform/compare/v3.21.1...v3.22.0) (2023-07-19)
 
 
