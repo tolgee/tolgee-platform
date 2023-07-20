@@ -202,7 +202,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var namespaceService: NamespaceService
 
   @Autowired
-  lateinit var cacheManager: CacheManager
+  open lateinit var cacheManager: CacheManager
 
   fun clearCaches() {
     cacheManager.cacheNames.stream().forEach { cacheName: String ->
