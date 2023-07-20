@@ -19,7 +19,7 @@ class ServerAdminFilter @Autowired constructor(
   private val securityService: SecurityService,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
   private val configuration: TolgeeProperties
-  ) : OncePerRequestFilter() {
+) : OncePerRequestFilter() {
 
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(
