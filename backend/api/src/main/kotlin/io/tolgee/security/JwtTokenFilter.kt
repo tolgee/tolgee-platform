@@ -5,7 +5,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.service.security.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,7 +27,6 @@ class JwtTokenFilter @Autowired constructor(
   private val resolver: HandlerExceptionResolver,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
   private val currentDateProvider: CurrentDateProvider,
-  private val securityService: SecurityService
 ) : OncePerRequestFilter() {
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(
