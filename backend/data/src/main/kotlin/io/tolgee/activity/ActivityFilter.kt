@@ -2,6 +2,7 @@ package io.tolgee.activity
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
+import io.tolgee.component.reporting.SdkInfoProvider
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse
 class ActivityFilter(
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
   private val activityHolder: ActivityHolder,
+  private val sdkInfoProvider: SdkInfoProvider
 ) : OncePerRequestFilter() {
 
   override fun doFilterInternal(
@@ -31,9 +33,14 @@ class ActivityFilter(
       activityHolder.activity = activityAnnotation.activity
     }
 
-    assignUtmDataHolder(request)
+    assignUtmData(request)
+    assignSdkInfo(request)
 
     filterChain.doFilter(request, response)
+  }
+
+  private fun assignSdkInfo(request: HttpServletRequest) {
+    activityHolder.sdkInfo = sdkInfoProvider.getSdkInfo(request)
   }
 
   private fun getActivityAnnotation(request: HttpServletRequest): RequestActivity? {
@@ -41,7 +48,7 @@ class ActivityFilter(
     return handlerMethod?.getMethodAnnotation(RequestActivity::class.java)
   }
 
-  fun assignUtmDataHolder(request: HttpServletRequest) {
+  fun assignUtmData(request: HttpServletRequest) {
     try {
       val headerValue = request.getHeader(UTM_HEADER_NAME) ?: return
       val parsed = parseUtmValues(headerValue) ?: return

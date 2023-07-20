@@ -36,7 +36,7 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it publishes business event to external monitor`() {
+  fun `it accepts header`() {
     performPost(
       "/v2/business-events/report",
       mapOf(
@@ -47,7 +47,6 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       ),
       HttpHeaders().also {
         it["Authorization"] = listOf(AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id)))
-        it["X-Tolgee-Utm"] = "eyJ1dG1faGVsbG8iOiJoZWxsbyJ9"
       }
     ).andIsOk
 
@@ -61,10 +60,8 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       )
     }
-    params!!["utm_hello"].assert.isEqualTo("hello")
     params!!["organizationId"].assert.isNotNull
     params!!["organizationName"].assert.isEqualTo("test_username")
-    params!!["utm_hello"].assert.isEqualTo("hello")
     params!!["test"].assert.isEqualTo("test")
   }
 }

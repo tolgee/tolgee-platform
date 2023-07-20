@@ -35,18 +35,40 @@ class BusinessEventReporter(
   }
 
   private fun captureWithPostHog(data: OnBusinessEventToCaptureEvent) {
-    val userAccountDto = data.userAccountDto ?: return
+    val id = data.userAccountDto?.id ?: data.instanceId
+    val setEntry = getSetMapForPostHog(data)
+
     postHog?.capture(
-      userAccountDto.id.toString(), data.eventName,
+      id.toString(), data.eventName,
+      mapOf(
+        "organizationId" to data.organizationId,
+        "organizationName" to data.organizationName,
+      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+    )
+  }
+
+  /**
+   * PostHog accepts user information in $set property.
+   *
+   * This method returns map with $set property if user information is present
+   * or if instanceId is sent by self-hosted instance.
+   */
+  private fun getSetMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Map<String, String>> {
+    val setEntry = data.userAccountDto?.let { userAccountDto ->
       mapOf(
         "${'$'}set" to mapOf(
           "email" to userAccountDto.username,
           "name" to userAccountDto.name,
-        ),
-        "organizationId" to data.organizationId,
-        "organizationName" to data.organizationName,
-      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap())
-    )
+        )
+      )
+    } ?: data.instanceId?.let {
+      mapOf(
+        "${'$'}set" to mapOf(
+          "instanceId" to it
+        )
+      )
+    } ?: emptyMap()
+    return setEntry
   }
 
   private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {

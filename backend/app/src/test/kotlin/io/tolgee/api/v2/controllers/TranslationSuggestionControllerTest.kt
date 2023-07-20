@@ -84,9 +84,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @MockBean
   lateinit var tolgeeTranslateApiService: TolgeeTranslateApiService
 
+  @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
   @MockBean
-  lateinit var cacheManager: CacheManager
+  override lateinit var cacheManager: CacheManager
 
   lateinit var cacheMock: Cache
 

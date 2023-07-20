@@ -24,14 +24,10 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.cache.CacheManager
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
-  @Autowired
-  lateinit var cacheManager: CacheManager
-
   @Autowired
   @MockBean
   lateinit var userAccountRepository: UserAccountRepository

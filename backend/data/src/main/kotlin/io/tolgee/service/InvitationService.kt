@@ -1,7 +1,10 @@
 package io.tolgee.service
 
 import io.tolgee.component.email.InvitationEmailSender
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.misc.CreateInvitationParams
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
@@ -30,7 +33,8 @@ class InvitationService @Autowired constructor(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService,
-  private val invitationEmailSender: InvitationEmailSender
+  private val invitationEmailSender: InvitationEmailSender,
+  private val businessEventPublisher: BusinessEventPublisher
 ) {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -104,18 +108,41 @@ class InvitationService @Autowired constructor(
 
     validateProjectXorOrganization(permission, organizationRole)
 
-    permission?.let {
-      acceptProjectInvitation(permission, userAccount)
-    }
-
-    organizationRole?.let {
-      acceptOrganizationInvitation(userAccount, organizationRole)
-    }
+    acceptProjectInvitation(permission, userAccount)
+    acceptOrganizationInvitation(organizationRole, userAccount)
 
     // avoid cascade delete
     invitation.permission = null
     invitation.organizationRole = null
     invitationRepository.delete(invitation)
+  }
+
+  private fun acceptProjectInvitation(permission: Permission?, userAccount: UserAccount) {
+    permission?.let {
+      acceptProjectInvitation(permission, userAccount)
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "PROJECT_INVITATION_ACCEPTED",
+          userAccountId = userAccount.id,
+          userAccountDto = UserAccountDto.fromEntity(userAccount)
+        )
+      )
+    }
+  }
+
+  private fun acceptOrganizationInvitation(organizationRole: OrganizationRole?, userAccount: UserAccount) {
+    organizationRole?.let {
+      acceptOrganizationInvitation(userAccount, organizationRole)
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "ORGANIZATION_INVITATION_ACCEPTED",
+          userAccountId = userAccount.id,
+          userAccountDto = UserAccountDto.fromEntity(userAccount),
+          organizationId = it.organization?.id,
+          organizationName = it.organization?.name
+        )
+      )
+    }
   }
 
   private fun validateProjectXorOrganization(

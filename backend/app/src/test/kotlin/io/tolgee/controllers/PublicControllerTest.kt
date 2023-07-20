@@ -10,18 +10,21 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpHeaders
 import kotlin.properties.Delegates
 
 @AutoConfigureMockMvc
@@ -65,12 +68,32 @@ class PublicControllerTest :
   }
 
   @Test
-  fun `logs event to post hog`() {
+  fun `logs event to external monitor`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
-    performPost("/api/public/sign_up", dto).andIsOk
+    performPost(
+      "/api/public/sign_up",
+      dto,
+      HttpHeaders().also {
+        it["X-Tolgee-Utm"] = "eyJ1dG1faGVsbG8iOiJoZWxsbyJ9"
+        // hypothetically every endpoint might be triggered from SDK
+        it["X-Tolgee-SDK-Type"] = "Unreal"
+        it["X-Tolgee-SDK-Version"] = "1.0.0"
+      }
+    ).andIsOk
+
+    var params: Map<String, Any?>? = null
     waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(any(), eq("SIGN_UP"), any())
+      verify(postHog, times(1)).capture(
+        any(), eq("SIGN_UP"),
+        argThat {
+          params = this
+          true
+        }
+      )
     }
+    params!!["utm_hello"].assert.isEqualTo("hello")
+    params!!["sdkType"].assert.isEqualTo("Unreal")
+    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   @Test

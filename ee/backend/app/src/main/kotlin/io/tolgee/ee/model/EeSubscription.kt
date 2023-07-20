@@ -18,7 +18,7 @@ import javax.persistence.Table
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-@Entity()
+@Entity
 @TypeDef(
   name = "enum-array",
   typeClass = EnumArrayType::class,
@@ -51,8 +51,6 @@ class EeSubscription : AuditModel() {
     get() {
       return if (status != SubscriptionStatus.ERROR && status != SubscriptionStatus.CANCELED) field else arrayOf()
     }
-
-  var instanceId: String = UUID.randomUUID().toString()
 
   @Enumerated(EnumType.STRING)
   @ColumnDefault("ACTIVE")

@@ -11,6 +11,7 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.time.Duration
 import javax.persistence.EntityManager
 
 @Service
@@ -35,11 +36,12 @@ class ExportService(
       baseTranslationsProvider = baseTranslationsProvider,
       baseLanguage
     ).produceFiles().also {
-      businessEventPublisher.publish(
+      businessEventPublisher.publishOnceInTime(
         OnBusinessEventToCaptureEvent(
           eventName = "EXPORT",
           projectId = projectId
-        )
+        ),
+        Duration.ofDays(1)
       )
     }
   }

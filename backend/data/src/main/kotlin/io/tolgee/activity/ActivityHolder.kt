@@ -26,6 +26,7 @@ open class ActivityHolder(
   open var organizationId: Long? = null
 
   open var utmData: UtmData = null
+  open var sdkInfo: Map<String, String?>? = null
 
   @PreDestroy
   open fun preDestroy() {

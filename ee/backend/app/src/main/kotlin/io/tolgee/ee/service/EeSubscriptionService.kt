@@ -1,8 +1,8 @@
 package io.tolgee.ee.service
 
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.HttpClient
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
 import io.tolgee.ee.api.v2.hateoas.PrepareSetEeLicenceKeyModel
@@ -18,25 +18,23 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Service
 class EeSubscriptionService(
   private val eeSubscriptionRepository: EeSubscriptionRepository,
-  private val restTemplate: RestTemplate,
   private val eeProperties: EeProperties,
   private val userAccountService: UserAccountService,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val httpClient: HttpClient,
+  private val instanceIdService: InstanceIdService
 ) {
   companion object {
     const val setPath: String = "/v2/public/licensing/set-key"
@@ -66,7 +64,7 @@ class EeSubscriptionService(
       try {
         postRequest<SelfHostedEeSubscriptionModel>(
           setPath,
-          SetLicenseKeyLicensingDto(licenseKey, seats, entity.instanceId)
+          SetLicenseKeyLicensingDto(licenseKey, seats, instanceIdService.getInstanceId())
         )
       } catch (e: HttpClientErrorException.NotFound) {
         throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
@@ -116,23 +114,7 @@ class EeSubscriptionService(
   }
 
   private inline fun <reified T> postRequest(url: String, body: Any): T? {
-    val bodyJson = jacksonObjectMapper().writeValueAsString(body)
-    val headers = HttpHeaders().apply {
-      contentType = MediaType.APPLICATION_JSON
-    }
-
-    val stringResponse = restTemplate.exchange(
-      "${eeProperties.licenseServer}$url",
-      HttpMethod.POST,
-      HttpEntity(bodyJson, headers),
-      String::class.java
-    )
-
-    return stringResponse?.body?.let { stringResponseBody ->
-      jacksonObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .readValue(stringResponseBody, T::class.java)
-    }
+    return httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
   }
 
   @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
@@ -197,7 +179,7 @@ class EeSubscriptionService(
     val responseBody = try {
       postRequest<SelfHostedEeSubscriptionModel>(
         subscriptionInfoPath,
-        GetMySubscriptionDto(subscription.licenseKey, subscription.instanceId)
+        GetMySubscriptionDto(subscription.licenseKey, instanceIdService.getInstanceId())
       )
     } catch (e: HttpClientErrorException.NotFound) {
       subscription.status = SubscriptionStatus.CANCELED

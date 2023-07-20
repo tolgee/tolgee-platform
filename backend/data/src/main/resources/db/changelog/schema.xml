@@ -2521,4 +2521,18 @@
     <changeSet author="jenik (generated)" id="1685956025153-2">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="keys_distance" constraintName="FK6vxvhrj75wf8eb41lqjrvb01t" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1689262461179-1">
+        <createTable tableName="instance_id">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="instance_idPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="instance_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

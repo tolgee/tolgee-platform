@@ -2,7 +2,9 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.posthog.java.PostHog
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
@@ -16,8 +18,19 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.addDays
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -25,14 +38,39 @@ import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
 @ContextRecreatingTest
+@SpringBootTest(
+  properties = [
+    "tolgee.cache.enabled=true"
+  ]
+)
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
+
+  @MockBean
+  @Autowired
+  lateinit var postHog: PostHog
+
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
+  @BeforeEach
+  fun setup() {
+    Mockito.reset(postHog)
+    clearCaches()
+  }
+
+  @AfterEach
+  fun tearDown() {
+    currentDateProvider.forcedDate = null
+  }
 
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to json`() {
-    initBaseData()
+    executeInNewTransaction {
+      initBaseData()
+    }
     val parsed = performExport()
 
     assertThatJson(parsed["en.json"]!!) {
@@ -41,10 +79,30 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
+  fun `it reports business event once in a day`() {
+    executeInNewTransaction {
+      initBaseData()
+    }
+    performExport()
+    performExport()
+    performExport()
+    performExport()
+    Thread.sleep(2000)
+    verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+    currentDateProvider.forcedDate = currentDateProvider.date.addDays(1)
+    performExport()
+    performExport()
+    verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+  }
+
+  @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to single json`() {
-    initBaseData()
+    executeInNewTransaction {
+      initBaseData()
+    }
     retry {
       val response = performProjectAuthGet("export?languages=en&zip=false")
         .andDo { obj: MvcResult -> obj.asyncResult }
@@ -62,7 +120,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to single xliff`() {
-    initBaseData()
+    executeInNewTransaction {
+      initBaseData()
+    }
     retry {
       val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
         .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
@@ -227,7 +287,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)
     prepareUserAndProject(testData)
-    commitTransaction()
   }
 
   private fun prepareUserAndProject(testData: TranslationsTestData) {

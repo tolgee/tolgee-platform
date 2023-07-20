@@ -121,5 +121,7 @@ open class TolgeeProperties(
   open var import: ImportProperties = ImportProperties(),
   var rateLimit: RateLimitProperties = RateLimitProperties(),
   @DocProperty(hidden = true)
-  var postHog: PostHogProperties = PostHogProperties()
+  var postHog: PostHogProperties = PostHogProperties(),
+
+  var telemetry: TelemetryProperties = TelemetryProperties()
 )

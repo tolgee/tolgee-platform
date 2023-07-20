@@ -44,6 +44,7 @@ import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
@@ -199,6 +200,16 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var namespaceService: NamespaceService
+
+  @Autowired
+  open lateinit var cacheManager: CacheManager
+
+  fun clearCaches() {
+    cacheManager.cacheNames.stream().forEach { cacheName: String ->
+      @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+      cacheManager.getCache(cacheName).clear()
+    }
+  }
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
