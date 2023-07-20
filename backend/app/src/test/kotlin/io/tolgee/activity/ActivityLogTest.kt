@@ -90,6 +90,8 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       HttpHeaders().also {
         it["Authorization"] = listOf(AuthorizedRequestFactory.getBearerTokenString(generateJwtToken(userAccount!!.id)))
         it["X-Tolgee-Utm"] = "eyJ1dG1faGVsbG8iOiJoZWxsbyJ9"
+        it["X-Tolgee-SDK-Type"] = "Unreal"
+        it["X-Tolgee-SDK-Version"] = "1.0.0"
       }
     ).andIsOk
 
@@ -104,6 +106,8 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     }
     params!!["utm_hello"].assert.isEqualTo("hello")
+    params!!["sdkType"].assert.isEqualTo("Unreal")
+    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   private fun JsonAssert.isValidTranslationModifications() {

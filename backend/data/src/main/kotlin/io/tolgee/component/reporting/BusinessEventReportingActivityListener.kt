@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BusinessEventReportingActivityListener(
-  private val applicationEventPublisher: ApplicationEventPublisher
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @EventListener
   fun listen(event: OnProjectActivityEvent) {
@@ -20,7 +20,8 @@ class BusinessEventReportingActivityListener(
         eventName = activityName,
         userAccountId = userId,
         projectId = projectId,
-        utmData = event.activityHolder.utmData
+        utmData = event.activityHolder.utmData,
+        data = event.activityHolder.sdkInfo
       )
     )
   }

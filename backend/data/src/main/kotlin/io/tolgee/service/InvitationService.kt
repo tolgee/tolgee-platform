@@ -108,26 +108,41 @@ class InvitationService @Autowired constructor(
 
     validateProjectXorOrganization(permission, organizationRole)
 
-    permission?.let {
-      acceptProjectInvitation(permission, userAccount)
-    }
-
-    organizationRole?.let {
-      acceptOrganizationInvitation(userAccount, organizationRole)
-    }
+    acceptProjectInvitation(permission, userAccount)
+    acceptOrganizationInvitation(organizationRole, userAccount)
 
     // avoid cascade delete
     invitation.permission = null
     invitation.organizationRole = null
     invitationRepository.delete(invitation)
+  }
 
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "INVITATION_ACCEPTED",
-        userAccountId = userAccount.id,
-        userAccountDto = UserAccountDto.fromEntity(userAccount)
+  private fun acceptProjectInvitation(permission: Permission?, userAccount: UserAccount) {
+    permission?.let {
+      acceptProjectInvitation(permission, userAccount)
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "PROJECT_INVITATION_ACCEPTED",
+          userAccountId = userAccount.id,
+          userAccountDto = UserAccountDto.fromEntity(userAccount)
+        )
       )
-    )
+    }
+  }
+
+  private fun acceptOrganizationInvitation(organizationRole: OrganizationRole?, userAccount: UserAccount) {
+    organizationRole?.let {
+      acceptOrganizationInvitation(userAccount, organizationRole)
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "ORGANIZATION_INVITATION_ACCEPTED",
+          userAccountId = userAccount.id,
+          userAccountDto = UserAccountDto.fromEntity(userAccount),
+          organizationId = it.organization?.id,
+          organizationName = it.organization?.name
+        )
+      )
+    }
   }
 
   private fun validateProjectXorOrganization(

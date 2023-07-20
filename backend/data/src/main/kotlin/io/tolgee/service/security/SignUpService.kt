@@ -1,6 +1,5 @@
 package io.tolgee.service.security
 
-import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
@@ -22,7 +21,6 @@ class SignUpService(
   private val tokenProvider: JwtTokenProvider,
   private val emailVerificationService: EmailVerificationService,
   private val organizationService: OrganizationService,
-  private val businessEventPublisher: BusinessEventPublisher
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
