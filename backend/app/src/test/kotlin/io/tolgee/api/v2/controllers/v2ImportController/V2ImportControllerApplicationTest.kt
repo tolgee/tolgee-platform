@@ -85,7 +85,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
     performAuthPut(path, null).andIsForbidden.andAssertThatJson {
       node("params") {
-        node("[0]").isEqualTo("""["keys.create"]""")
+        node("[0]").isEqualTo(""""keys.create"""")
       }
     }
   }
