@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -26,6 +27,8 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var amazonTranslate: TranslateClient
 
   fun initMachineTranslationMocks(translateDelay: Long = 0) {
+    Mockito.reset(googleTranslate)
+    Mockito.reset(amazonTranslate)
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult = TranslateTextResponse
       .builder().translatedText("Translated with Amazon").build()
