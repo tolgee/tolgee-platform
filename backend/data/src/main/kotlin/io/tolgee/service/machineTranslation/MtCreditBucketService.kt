@@ -10,12 +10,16 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.Logging
 import io.tolgee.util.addMonths
+import io.tolgee.util.logger
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 @Service
 class MtCreditBucketService(
@@ -24,19 +28,38 @@ class MtCreditBucketService(
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
   private val organizationService: OrganizationService,
   private val eventPublisher: ApplicationEventPublisher
-) {
+) : Logging {
+  @OptIn(ExperimentalTime::class)
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
-    val bucket = findOrCreateBucket(project)
-    consumeCredits(bucket, amount)
+    val time = measureTime {
+      val bucket = findOrCreateBucket(project)
+      consumeCredits(bucket, amount)
+    }
+    logger.debug("Consumed $amount credits in $time")
   }
 
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
-    val balances = getCreditBalances(bucket)
-    val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
-    val totalBalance = balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
+    checkPositiveBalance(bucket)
+    bucket.consumeSufficientCredits(amount, bucket.organization!!.id)
+    save(bucket)
+  }
+
+  @OptIn(ExperimentalTime::class)
+  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
+  fun checkPositiveBalance(project: Project) {
+    val time = measureTime {
+      val bucket = findOrCreateBucket(project)
+      checkPositiveBalance(bucket)
+    }
+    logger.debug("Checked for positive credits in $time")
+  }
+
+  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
+  fun checkPositiveBalance(bucket: MtCreditBucket) {
+    val totalBalance = getTotalBalance(bucket)
 
     if (totalBalance <= 0) {
       if (mtCreditBucketSizeProvider.isPayAsYouGo(bucket.organization)) {
@@ -44,10 +67,12 @@ class MtCreditBucketService(
       }
       throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS)
     }
+  }
 
-    bucket.consumeSufficientCredits(amount, bucket.organization!!.id)
-
-    save(bucket)
+  private fun MtCreditBucketService.getTotalBalance(bucket: MtCreditBucket): Long {
+    val balances = getCreditBalances(bucket)
+    val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
+    return balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
   }
 
   private fun MtCreditBucket.consumeSufficientCredits(amount: Int, organizationId: Long) {
@@ -74,13 +99,6 @@ class MtCreditBucketService(
         amountToConsumeFromPayAsYouGo
       )
     )
-  }
-
-  @Transactional
-  fun addCredits(bucket: MtCreditBucket, amount: Int) {
-    bucket.credits += amount
-    refillIfItsTime(bucket)
-    save(bucket)
   }
 
   @Transactional

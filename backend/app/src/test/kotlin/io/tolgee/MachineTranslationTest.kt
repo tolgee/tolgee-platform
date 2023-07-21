@@ -11,6 +11,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
@@ -56,20 +57,20 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   protected fun createAnotherThisIsBeautifulKey() {
     performCreateKey(
-      mapOf(
+      translations = mapOf(
         "en" to "This is beautiful",
       )
-    )
+    ).andIsCreated
   }
 
-  protected fun performCreateKey(translations: Map<String, String>) {
-    performProjectAuthPost(
+  protected fun performCreateKey(keyName: String = CREATE_KEY_NAME, translations: Map<String, String>): ResultActions {
+    return performProjectAuthPost(
       "keys",
       CreateKeyDto(
         name = CREATE_KEY_NAME,
         translations = translations
       )
-    ).andIsCreated
+    )
   }
 
   companion object {
