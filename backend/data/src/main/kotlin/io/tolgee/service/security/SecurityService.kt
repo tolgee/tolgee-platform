@@ -40,10 +40,6 @@ class SecurityService @Autowired constructor(
       throw PermissionException()
   }
 
-  fun checkProjectPermissionNoApiKey(projectId: Long, requiredScope: Scope, userAccountDto: UserAccountDto) {
-    checkProjectPermission(projectId, requiredScope, userAccountDto)
-  }
-
   fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKey) {
     checkProjectPermission(listOf(requiredScopes), apiKey)
   }
@@ -52,7 +48,7 @@ class SecurityService @Autowired constructor(
     this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
-  private fun checkProjectPermission(
+  private fun checkProjectPermissionNoApiKey(
     projectId: Long,
     requiredScope: Scope,
     userAccountDto: UserAccountDto
@@ -71,7 +67,7 @@ class SecurityService @Autowired constructor(
     requiredScope: Scope,
     allowedScopes: Array<Scope>
   ) {
-    if (allowedScopes.contains(requiredScope)) {
+    if (!allowedScopes.contains(requiredScope)) {
       @Suppress("UNCHECKED_CAST")
       throw PermissionException(
         Message.OPERATION_NOT_PERMITTED,
