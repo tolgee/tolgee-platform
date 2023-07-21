@@ -1,3 +1,10 @@
+## [3.23.2](https://github.com/tolgee/tolgee-platform/compare/v3.23.1...v3.23.2) (2023-07-21)
+
+
+### Bug Fixes
+
+* MT Credit consumption when 0 balance ([#1819](https://github.com/tolgee/tolgee-platform/issues/1819)) ([cc6b6cb](https://github.com/tolgee/tolgee-platform/commit/cc6b6cb9962a0f97a9a73e62806d4ae0adc02b52))
+
 ## [3.23.1](https://github.com/tolgee/tolgee-platform/compare/v3.23.0...v3.23.1) (2023-07-21)
 
 
