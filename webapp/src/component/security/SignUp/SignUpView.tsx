@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
@@ -20,7 +20,8 @@ import { container } from 'tsyringe';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useRecaptcha } from './useRecaptcha';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { SplitContent, SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
+import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
+import { useReportEvent } from 'tg.views/organizations/useReportEvent';
 
 export type SignUpType = {
   name: string;
@@ -61,6 +62,12 @@ export const SignUpView: FunctionComponent = () => {
       disableBadRequestHandling: true,
     },
   });
+
+  const reportEvent = useReportEvent();
+
+  useEffect(() => {
+    reportEvent('SIGN_UP_PAGE_OPENED');
+  }, []);
 
   const onSubmit = async (data: SignUpType) => {
     const request = {
