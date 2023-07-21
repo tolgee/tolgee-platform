@@ -1,3 +1,11 @@
+## [3.23.1](https://github.com/tolgee/tolgee-platform/compare/v3.23.0...v3.23.1) (2023-07-21)
+
+
+### Bug Fixes
+
+* Disable importing with any project permission ([#1818](https://github.com/tolgee/tolgee-platform/issues/1818)) ([4776cba](https://github.com/tolgee/tolgee-platform/commit/4776cba67e7bb8c1b0259376e3e5fa3bb46e45c7))
+* Report sign up page opened ([#1817](https://github.com/tolgee/tolgee-platform/issues/1817)) ([02f04bb](https://github.com/tolgee/tolgee-platform/commit/02f04bbb0a710132cfcfcc6b5cf29131d6c85e87))
+
 # [3.23.0](https://github.com/tolgee/tolgee-platform/compare/v3.22.0...v3.23.0) (2023-07-20)
 
 
