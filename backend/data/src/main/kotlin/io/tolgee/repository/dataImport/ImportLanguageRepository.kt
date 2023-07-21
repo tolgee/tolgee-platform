@@ -71,7 +71,11 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
 
   @Query(
     """
-      select distinct il.existingLanguage.id from ImportLanguage il join il.file if join if.import im where im.id = :importId
+      select distinct il.existingLanguage.id 
+        from ImportLanguage il 
+        join il.file if 
+        where if.import.id = :importId 
+          and il.existingLanguage.id is not null
     """
   )
   fun findAssignedExistingLanguageIds(importId: Long): List<Long>

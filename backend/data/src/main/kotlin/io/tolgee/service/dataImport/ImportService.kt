@@ -97,14 +97,14 @@ class ImportService(
     return importLanguageRepository.findAssignedExistingLanguageIds(importId)
   }
 
-  fun checkTransateLanguagePermissions(import: Import) {
+  fun checkTranslateLanguagePermissions(import: Import) {
     val languageIds = getAssignedExistingLanguageIds(import.id)
     securityService.checkLanguageTranslatePermission(import.project.id, languageIds)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
-    checkTransateLanguagePermissions(import)
+    checkTranslateLanguagePermissions(import)
     StoredDataImporter(applicationContext, import, forceMode).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
