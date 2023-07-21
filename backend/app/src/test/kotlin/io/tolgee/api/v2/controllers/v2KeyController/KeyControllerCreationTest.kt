@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
@@ -63,7 +64,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE])
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE, Scope.TRANSLATIONS_EDIT])
   @Test
   fun `creates key with keys create scope`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
@@ -71,6 +72,13 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         node("id").isValidId
         node("name").isEqualTo("super_key")
       }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE])
+  @Test
+  fun `create key with translations require translate permissions`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
+      .andIsForbidden
   }
 
   @ProjectJWTAuthTestMethod
