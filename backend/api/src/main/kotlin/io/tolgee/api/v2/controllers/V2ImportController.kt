@@ -68,7 +68,9 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/import", "/v2/projects/import"])
 @Tag(
   name = "Import",
-  description = "These endpoints handle multi-step data import. To use endpoints modifying import state, you need to have translations.edit, keys.edit, and keys.create permission scopes."
+  description = "These endpoints handle multi-step data import. " +
+    "To use endpoints modifying import state, you need to have " +
+    "translations.edit, keys.edit, and keys.create permission scopes."
 )
 class V2ImportController(
   private val importService: ImportService,
