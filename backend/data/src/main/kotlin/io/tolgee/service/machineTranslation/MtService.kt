@@ -8,6 +8,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.events.OnAfterMachineTranslationEvent
+import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
@@ -87,6 +88,8 @@ class MtService(
     baseLanguage: Language,
     targetLanguages: List<Language>
   ): List<TranslateResult?> {
+    publishBeforeEvent(project)
+
     checkTextLength(baseTranslationText)
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id }, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
@@ -132,7 +135,7 @@ class MtService(
 
     val actualPrice = translationResults.sumOf { it?.actualPrice ?: 0 }
 
-    publishOnAfterEvent(prepared, project, actualPrice)
+    publishAfterEvent(project, actualPrice)
 
     return translationResults
   }
@@ -145,6 +148,8 @@ class MtService(
     targetLanguage: Language,
     services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult?>? {
+    publishBeforeEvent(project)
+
     checkTextLength(baseTranslationText)
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     checkServices(desired = services, enabled = enabledServices)
@@ -171,7 +176,7 @@ class MtService(
 
     val actualPrice = results.entries.sumOf { it.value.actualPrice }
 
-    publishOnAfterEvent(prepared, project, actualPrice)
+    publishAfterEvent(project, actualPrice)
 
     return results.map { (serviceName, translated) ->
       translated.translatedText = translated.translatedText?.replaceParams(prepared.params)
@@ -185,13 +190,20 @@ class MtService(
     }
   }
 
-  private fun publishOnAfterEvent(
-    prepared: TextHelper.ReplaceIcuResult,
+  private fun publishAfterEvent(
     project: Project,
     actualPrice: Int
   ) {
     applicationEventPublisher.publishEvent(
-      OnAfterMachineTranslationEvent(this, prepared.text, project, actualPrice)
+      OnAfterMachineTranslationEvent(this, project, actualPrice)
+    )
+  }
+
+  private fun publishBeforeEvent(
+    project: Project,
+  ) {
+    applicationEventPublisher.publishEvent(
+      OnBeforeMachineTranslationEvent(this, project)
     )
   }
 

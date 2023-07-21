@@ -12,6 +12,9 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
@@ -99,7 +102,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     saveTestData()
     val time = measureTimeMillis {
       performCreateKey(
-        mapOf(
+        translations = mapOf(
           "en" to "This is it",
         )
       )
@@ -182,6 +185,12 @@ class AutoTranslatingTest : MachineTranslationTest() {
       ).isNotNull
     }
 
+    verify(googleTranslate, times(2)).translate(any<String>(), any())
+
+    performCreateKey("yay", mapOf("en" to "yay"))
+
+    verify(googleTranslate, times(2)).translate(any<String>(), any())
+
     val balance = mtCreditBucketService.getCreditBalances(testData.project)
     balance.creditBalance.assert.isEqualTo(0)
   }
@@ -219,7 +228,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
   private fun performCreateHalloKeyWithEnAndDeTranslations() {
     performCreateKey(
-      mapOf(
+      translations = mapOf(
         "en" to "Hello",
         "de" to "Hallo"
       )
