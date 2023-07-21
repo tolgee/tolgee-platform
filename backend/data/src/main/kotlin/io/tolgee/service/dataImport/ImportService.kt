@@ -29,6 +29,7 @@ import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.getSafeNamespace
 import org.hibernate.annotations.QueryHints
 import org.springframework.context.ApplicationContext
@@ -53,7 +54,8 @@ class ImportService(
   private val keyMetaService: KeyMetaService,
   private val removeExpiredImportService: RemoveExpiredImportService,
   private val entityManager: EntityManager,
-  private val businessEventPublisher: BusinessEventPublisher
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val securityService: SecurityService
 ) {
   @Transactional
   fun addFiles(
@@ -93,6 +95,8 @@ class ImportService(
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
+    val languageIds = import.files.flatMap { it.languages.map { it.existingLanguage?.id } }.filterNotNull()
+    securityService.checkLanguageTranslatePermission(import.project.id, languageIds)
     StoredDataImporter(applicationContext, import, forceMode).doImport()
     deleteImport(import)
     businessEventPublisher.publish(
