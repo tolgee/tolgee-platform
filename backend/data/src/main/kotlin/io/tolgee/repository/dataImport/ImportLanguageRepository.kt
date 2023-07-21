@@ -68,4 +68,11 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             """
   )
   fun findViewById(languageId: Long): Optional<ImportLanguageView>
+
+  @Query(
+    """
+      select distinct il.existingLanguage.id from ImportLanguage il join il.file if join if.import im where im.id = :importId
+    """
+  )
+  fun findAssignedExistingLanguageIds(importId: Long): List<Long>
 }

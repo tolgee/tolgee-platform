@@ -148,6 +148,7 @@ class V2ImportController(
   fun getImportResult(
     @ParameterObject pageable: Pageable
   ): PagedModel<ImportLanguageModel> {
+    checkBaseImportPermissions()
     val projectId = projectHolder.project.id
     val userId = authenticationFacade.userAccount.id
     val languages = importService.getResult(projectId, userId, pageable)
@@ -161,6 +162,7 @@ class V2ImportController(
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
   ): ImportLanguageModel {
+    checkBaseImportPermissions()
     checkImportLanguageInProject(languageId)
     val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
     return importLanguageModelAssembler.toModel(language)
@@ -344,6 +346,7 @@ class V2ImportController(
     summary = "Get namespaces"
   )
   fun getAllNamespaces(): CollectionModel<ImportNamespaceModel> {
+    checkBaseImportPermissions()
     val import = importService.get(
       projectId = projectHolder.project.id,
       authorId = authenticationFacade.userAccount.id
