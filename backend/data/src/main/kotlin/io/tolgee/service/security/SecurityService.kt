@@ -48,7 +48,7 @@ class SecurityService @Autowired constructor(
     this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
-  private fun checkProjectPermissionNoApiKey(
+  fun checkProjectPermissionNoApiKey(
     projectId: Long,
     requiredScope: Scope,
     userAccountDto: UserAccountDto
