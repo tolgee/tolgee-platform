@@ -228,7 +228,8 @@ class SecurityService @Autowired constructor(
 
   fun checkApiKeyScopesOr(scopes: Collection<Scope>, apiKey: ApiKey) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
-      if (!expandedScopes.any { it in apiKey.scopesEnum }) {
+      val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
+      if (!hasRequiredPermission) {
         throw PermissionException()
       }
     }

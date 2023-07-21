@@ -136,9 +136,7 @@ class V2ImportController(
   }
 
   private fun checkBaseImportPermissions() {
-    securityService.checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_EDIT)
-    securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_EDIT)
-    securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_CREATE)
+    securityService.checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
   }
 
   @GetMapping("/result")
