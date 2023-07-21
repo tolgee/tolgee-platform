@@ -52,7 +52,7 @@ class WebSocketConfig(
           if (projectId != null) {
             try {
               val user = (accessor.user as? UsernamePasswordAuthenticationToken)?.principal as UserAccountDto
-              securityService.checkProjectPermission(projectId = projectId, Scope.TRANSLATIONS_VIEW, user)
+              securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.TRANSLATIONS_VIEW, user)
             } catch (e: Exception) {
               throw MessagingException("Forbidden")
             }
