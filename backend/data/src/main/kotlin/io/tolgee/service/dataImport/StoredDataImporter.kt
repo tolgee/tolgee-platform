@@ -124,7 +124,7 @@ class StoredDataImporter(
   private fun checkKeyPermissions() {
     val isCreatingKey = keysToSave.values.any { it.id == 0L }
     if (isCreatingKey) {
-      securityService.checkProjectPermission(import.project.id, Scope.KEYS_EDIT)
+      securityService.checkProjectPermission(import.project.id, Scope.KEYS_CREATE)
     }
   }
 

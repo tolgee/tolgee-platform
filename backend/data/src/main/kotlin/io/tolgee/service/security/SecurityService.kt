@@ -40,21 +40,17 @@ class SecurityService @Autowired constructor(
       throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, userAccountDto: UserAccountDto) {
-    checkProjectPermissionOr(projectId, listOf(requiredScopes), userAccountDto)
-  }
-
   fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKey) {
-    checkProjectPermissionOr(listOf(requiredScopes), apiKey)
+    checkProjectPermission(listOf(requiredScopes), apiKey)
   }
 
-  private fun checkProjectPermissionOr(requiredScopes: List<Scope>, apiKey: ApiKey) {
-    this.checkApiKeyScopesOr(requiredScopes, apiKey)
+  private fun checkProjectPermission(requiredScopes: List<Scope>, apiKey: ApiKey) {
+    this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
-  fun checkProjectPermissionOr(
+  fun checkProjectPermissionNoApiKey(
     projectId: Long,
-    requiredScopes: Collection<Scope>,
+    requiredScope: Scope,
     userAccountDto: UserAccountDto
   ) {
     if (isUserAdmin(userAccountDto)) {
@@ -64,30 +60,25 @@ class SecurityService @Autowired constructor(
     val allowedScopes = getProjectPermissionScopes(projectId, userAccountDto.id)
       ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
-    checkProjectPermissionOr(projectId, requiredScopes, allowedScopes)
+    checkPermission(requiredScope, allowedScopes)
   }
 
-  fun checkProjectPermissionOr(
-    projectId: Long,
-    requiredScopes: Collection<Scope>,
+  private fun checkPermission(
+    requiredScope: Scope,
     allowedScopes: Array<Scope>
   ) {
-    if (!allowedScopes.any { requiredScopes.contains(it) }) {
+    if (!allowedScopes.contains(requiredScope)) {
       @Suppress("UNCHECKED_CAST")
       throw PermissionException(
         Message.OPERATION_NOT_PERMITTED,
-        listOf(requiredScopes.map { it.value }) as List<Serializable>
+        listOf(requiredScope.value) as List<Serializable>
       )
     }
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
-    val apiKey = activeApiKey ?: return checkProjectPermission(projectId, requiredPermission, activeUser)
+    val apiKey = activeApiKey ?: return checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
     return checkProjectPermission(projectId, requiredPermission, apiKey)
-  }
-
-  fun checkProjectPermissionOr(projectId: Long, requiredPermissions: Collection<Scope>) {
-    checkProjectPermissionOr(projectId, requiredPermissions, activeUser)
   }
 
   fun checkLanguageViewPermissionByTag(projectId: Long, languageTags: Collection<String>) {
@@ -226,9 +217,10 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  fun checkApiKeyScopesOr(scopes: Collection<Scope>, apiKey: ApiKey) {
+  fun checkApiKeyScopes(scopes: Collection<Scope>, apiKey: ApiKey) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
-      if (!expandedScopes.any { it in apiKey.scopesEnum }) {
+      val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
+      if (!hasRequiredPermission) {
         throw PermissionException()
       }
     }

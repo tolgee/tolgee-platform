@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -7,12 +8,13 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
-import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.model.enums.Scope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
+class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `it applies the import`() {
     val testData = ImportTestData()
@@ -83,7 +85,7 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
     performAuthPut(path, null).andIsForbidden.andAssertThatJson {
       node("params") {
-        node("[0]").isEqualTo("""["keys.edit"]""")
+        node("[0]").isEqualTo(""""keys.create"""")
       }
     }
   }
@@ -126,6 +128,22 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
 
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
     performAuthPut(path, null).andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  fun `it checks permissions with API key (view only)`() {
+    val testData = ImportTestData()
+    testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
+    val resolveFrench = testData.addFrenchTranslations()
+    resolveFrench()
+
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.userAccount
+
+    val path = "import/apply?forceMode=OVERRIDE"
+    performProjectAuthPut(path, null).andIsForbidden
   }
 
   @Test

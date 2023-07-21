@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate
 @SpringBootTest(
   properties = [
     "tolgee.telemetry.report-period-ms=200",
-    "tolgee.telemetry.enabled=true"
+    "tolgee.telemetry.enabled=false"
   ]
 )
 class TelemetryServiceTest : AbstractSpringTest() {
@@ -39,7 +39,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
 
   @AfterEach
   fun clean() {
-    telemetryProperties.enabled = true
+    telemetryProperties.enabled = false
   }
 
   @Test
@@ -61,6 +61,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
 
   @Test
   fun `reports when enabled`() {
+    telemetryProperties.enabled = true
     val testData = BaseTestData().apply {
       this.root.addProject { name = "bbbb" }.build {
         val en = addEnglish()

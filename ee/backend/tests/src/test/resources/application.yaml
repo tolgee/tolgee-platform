@@ -66,6 +66,7 @@ tolgee:
     enabled: false
   telemetry:
     enabled: false
+    server: http://localhost:8080
 
 management:
   endpoint:

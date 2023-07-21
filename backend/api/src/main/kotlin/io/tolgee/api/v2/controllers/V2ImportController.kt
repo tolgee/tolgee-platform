@@ -25,6 +25,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -36,6 +37,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.security.SecurityService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -64,7 +66,10 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/import", "/v2/projects/import"])
-@Tag(name = "Import")
+@Tag(
+  name = "Import",
+  description = "These endpoints handle multi-step data import"
+)
 class V2ImportController(
   private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,
@@ -81,6 +86,7 @@ class V2ImportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val namespaceService: NamespaceService,
+  private val securityService: SecurityService
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @AccessWithAnyProjectPermission()
@@ -90,6 +96,7 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams
   ): ImportAddFilesResultModel {
+    checkBaseImportPermissions()
     val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
     val errors = importService.addFiles(
       files = fileDtos,
@@ -122,7 +129,12 @@ class V2ImportController(
     forceMode: ForceMode,
   ) {
     val projectId = projectHolder.project.id
+    checkBaseImportPermissions()
     this.importService.import(projectId, authenticationFacade.userAccount.id, forceMode)
+  }
+
+  private fun checkBaseImportPermissions() {
+    securityService.checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
   }
 
   @GetMapping("/result")
@@ -132,6 +144,7 @@ class V2ImportController(
   fun getImportResult(
     @ParameterObject pageable: Pageable
   ): PagedModel<ImportLanguageModel> {
+    checkBaseImportPermissions()
     val projectId = projectHolder.project.id
     val userId = authenticationFacade.userAccount.id
     val languages = importService.getResult(projectId, userId, pageable)
@@ -145,6 +158,7 @@ class V2ImportController(
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
   ): ImportLanguageModel {
+    checkBaseImportPermissions()
     checkImportLanguageInProject(languageId)
     val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
     return importLanguageModelAssembler.toModel(language)
@@ -171,6 +185,7 @@ class V2ImportController(
     @RequestParam("search") search: String? = null,
     @ParameterObject @SortDefault("keyName") pageable: Pageable
   ): PagedModel<ImportTranslationModel> {
+    checkBaseImportPermissions()
     checkImportLanguageInProject(languageId)
     val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
     return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
@@ -181,6 +196,7 @@ class V2ImportController(
   @AccessWithApiKey()
   @Operation(description = "Deletes prepared import data.", summary = "Delete")
   fun cancelImport() {
+    checkBaseImportPermissions()
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.userAccount.id)
   }
 
@@ -189,6 +205,7 @@ class V2ImportController(
   @AccessWithApiKey()
   @Operation(description = "Deletes language prepared to import.", summary = "Delete language")
   fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
+    checkBaseImportPermissions()
     val language = checkImportLanguageInProject(languageId)
     this.importService.deleteLanguage(language)
   }
@@ -204,6 +221,7 @@ class V2ImportController(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
   ) {
+    checkBaseImportPermissions()
     resolveTranslation(languageId, translationId, true)
   }
 
@@ -218,6 +236,7 @@ class V2ImportController(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
   ) {
+    checkBaseImportPermissions()
     resolveTranslation(languageId, translationId, false)
   }
 
@@ -231,6 +250,7 @@ class V2ImportController(
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long
   ) {
+    checkBaseImportPermissions()
     resolveAllOfLanguage(languageId, true)
   }
 
@@ -244,6 +264,7 @@ class V2ImportController(
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
   ) {
+    checkBaseImportPermissions()
     resolveAllOfLanguage(languageId, false)
   }
 
@@ -259,6 +280,7 @@ class V2ImportController(
     @RequestBody req: SetFileNamespaceRequest,
     request: HttpServletRequest
   ) {
+    checkBaseImportPermissions()
     val file = checkFileFromProject(fileId)
     this.importService.selectNamespace(file, req.namespace)
   }
@@ -275,6 +297,7 @@ class V2ImportController(
     @PathVariable("importLanguageId") importLanguageId: Long,
     @PathVariable("existingLanguageId") existingLanguageId: Long,
   ) {
+    checkBaseImportPermissions()
     val existingLanguage = checkLanguageFromProject(existingLanguageId)
     val importLanguage = checkImportLanguageInProject(importLanguageId)
     this.importService.selectExistingLanguage(importLanguage, existingLanguage)
@@ -290,6 +313,7 @@ class V2ImportController(
   fun resetExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
   ) {
+    checkBaseImportPermissions()
     val importLanguage = checkImportLanguageInProject(importLanguageId)
     this.importService.selectExistingLanguage(importLanguage, null)
   }
@@ -318,6 +342,7 @@ class V2ImportController(
     summary = "Get namespaces"
   )
   fun getAllNamespaces(): CollectionModel<ImportNamespaceModel> {
+    checkBaseImportPermissions()
     val import = importService.get(
       projectId = projectHolder.project.id,
       authorId = authenticationFacade.userAccount.id
