@@ -1,3 +1,10 @@
+## [3.23.3](https://github.com/tolgee/tolgee-platform/compare/v3.23.2...v3.23.3) (2023-07-22)
+
+
+### Bug Fixes
+
+* Cache Mt Credits estimated costs ([#1820](https://github.com/tolgee/tolgee-platform/issues/1820)) ([03b3b66](https://github.com/tolgee/tolgee-platform/commit/03b3b6655a2fa66eda56938e35c738fd44daadcb))
+
 ## [3.23.2](https://github.com/tolgee/tolgee-platform/compare/v3.23.1...v3.23.2) (2023-07-21)
 
 
