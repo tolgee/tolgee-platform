@@ -1,3 +1,10 @@
+## [3.23.4](https://github.com/tolgee/tolgee-platform/compare/v3.23.3...v3.23.4) (2023-07-22)
+
+
+### Bug Fixes
+
+* Estimated usage caching fixes & testing ([#1821](https://github.com/tolgee/tolgee-platform/issues/1821)) ([0f7b17a](https://github.com/tolgee/tolgee-platform/commit/0f7b17a056ef69fe714ee5ccbd82ed6b423831bb))
+
 ## [3.23.3](https://github.com/tolgee/tolgee-platform/compare/v3.23.2...v3.23.3) (2023-07-22)
 
 
