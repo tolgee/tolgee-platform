@@ -6,5 +6,5 @@ data class SumUsageItem(
   var total: BigDecimal,
   var usedQuantityOverPlan: Long,
   var unusedQuantity: Long,
-  val usedQuantity: Long
+  var usedQuantity: Long
 )
