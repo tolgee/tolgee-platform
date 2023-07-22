@@ -42,7 +42,6 @@ class MtCreditBucketService(
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
-
     // The check for sufficient credit amount (bucket, extra credits, pay as you go spending limit)
     // is done before actual machine translation is performed,
     // so we don't need to check it here
@@ -50,7 +49,6 @@ class MtCreditBucketService(
     // we consume the rest of their credit and set the balance to 0.
     // So next time the exception will be thrown before the operation starts
     bucket.consumeSufficientCredits(amount, bucket.organization!!.id)
-
     save(bucket)
   }
 
