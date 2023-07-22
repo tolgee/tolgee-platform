@@ -397,6 +397,27 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it consumes last positive credits, next time throws exception`() {
+    mockDefaultMtBucketSize(200)
+    saveTestData()
+    performAuthPost(
+      "/v2/projects/${project.id}/suggest/machine-translations",
+      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations") {
+        node("GOOGLE").isEqualTo("Translated with Google")
+      }
+      node("translationCreditsBalanceBefore").isEqualTo(2)
+      node("translationCreditsBalanceAfter").isEqualTo(0)
+    }
+    performAuthPost(
+      "/v2/projects/${project.id}/suggest/machine-translations",
+      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it doesn't consume when cached`() {
     saveTestData()
     val valueWrapperMock = mock<Cache.ValueWrapper>()
