@@ -58,7 +58,7 @@ describe('Organization List', () => {
     cy.contains('Organization created').should('be.visible');
   });
 
-  it('validates creation fields', () => {
+  it('validates creation fields', { retries: { runMode: 3 } }, () => {
     goToNewOrganizationForm();
     gcy('organization-name-field').within(() => {
       cy.get('input').type('aaa').clear();

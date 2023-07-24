@@ -1,5 +1,6 @@
 package io.tolgee
 
+import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
 import kotlinx.coroutines.TimeoutCancellationException
 import org.postgresql.util.PSQLException
@@ -25,14 +26,15 @@ class CleanDbTestListener : TestExecutionListener {
 
   override fun beforeTestMethod(testContext: TestContext) {
     val appContext: ApplicationContext = testContext.applicationContext
-    val jobChunkExecutionQueue = appContext.getBean(BatchJobConcurrentLauncher::class.java)
-    jobChunkExecutionQueue.pause = true
+    val batchJobConcurrentLauncher = appContext.getBean(BatchJobConcurrentLauncher::class.java)
+    val batchJobQueue = appContext.getBean(BatchJobChunkExecutionQueue::class.java)
 
     if (!shouldClenBeforeClass(testContext)) {
+      batchJobConcurrentLauncher.pause = true
+      batchJobQueue.clear()
       cleanWithRetries(testContext)
+      batchJobConcurrentLauncher.pause = false
     }
-
-    jobChunkExecutionQueue.pause = false
   }
 
   private fun cleanWithRetries(testContext: TestContext) {
