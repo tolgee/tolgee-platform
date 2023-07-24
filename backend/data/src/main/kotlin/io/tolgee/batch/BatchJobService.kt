@@ -144,12 +144,15 @@ class BatchJobService(
    * Returns user account id if user has no permission to view all jobs.
    */
   private fun getUserAccountIdForCurrentJobView(projectId: Long): Long? {
-    val userAccount = authenticationFacade.userAccount
+
     return try {
-      securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW, userAccount)
+      securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW)
       null
     } catch (e: PermissionException) {
-      userAccount.id
+      if (authenticationFacade.isApiKeyAuthentication) {
+        throw e
+      }
+      authenticationFacade.userAccount.id
     }
   }
 

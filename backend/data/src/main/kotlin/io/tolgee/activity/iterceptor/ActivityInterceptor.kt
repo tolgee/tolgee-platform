@@ -31,7 +31,9 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
         OnProjectActivityEvent(
           activityRevision,
           holder.modifiedEntities,
-          holder.organizationId
+          holder.organizationId,
+          holder.utmData,
+          holder.sdkInfo
         )
       )
     }
