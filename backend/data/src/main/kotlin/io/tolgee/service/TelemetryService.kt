@@ -25,6 +25,8 @@ class TelemetryService(
   fun report() {
     if (!telemetryProperties.enabled) return
     val data: TelemetryReportRequest = getTelemetryData()
+    if (data.projectsCount == 0L) return
+    if (data.usersCount == 0L) return
     httpClient.requestForJson(
       "${telemetryProperties.server}/v2/public/telemetry/report",
       data,
