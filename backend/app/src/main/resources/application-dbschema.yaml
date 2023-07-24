@@ -11,3 +11,5 @@ tolgee:
     enabled: false
   internal:
     stop-right-after-start: true
+  telemetry:
+    enabled: false

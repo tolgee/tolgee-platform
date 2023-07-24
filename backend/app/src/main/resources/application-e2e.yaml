@@ -51,6 +51,8 @@ tolgee:
     aws:
       accessKey: mock
       secretKey: mock
+  telemetry:
+    enabled: false
 server:
   port: 8201
   error:
