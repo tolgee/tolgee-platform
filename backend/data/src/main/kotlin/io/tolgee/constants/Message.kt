@@ -147,7 +147,9 @@ enum class Message {
   THIS_INSTANCE_IS_ALREADY_LICENSED,
   BIG_META_NOT_FROM_PROJECT,
   MT_SERVICE_NOT_ENABLED,
-  PROJECT_NOT_SELECTED;
+  PROJECT_NOT_SELECTED,
+  PLAN_HAS_SUBSCRIBERS
+  ;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

@@ -32,6 +32,7 @@ type Props<T> = {
   popperMinWidth?: string | number;
   renderValue?: (value: T | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
+  compareFunction?: (prompt: string, label: string) => boolean;
 };
 
 export function SearchSelect<T extends React.Key>({
@@ -47,6 +48,7 @@ export function SearchSelect<T extends React.Key>({
   popperMinWidth,
   renderValue,
   SelectProps,
+  compareFunction,
 }: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -106,12 +108,13 @@ export function SearchSelect<T extends React.Key>({
           onSelect={handleSelect}
           anchorEl={anchorEl.current!}
           items={items}
-          onAddNew={handleOnAddNew}
+          onAddNew={onAddNew ? handleOnAddNew : undefined}
           displaySearch={displaySearch}
           searchPlaceholder={searchPlaceholder}
           title={title}
           addNewTooltip={addNewTooltip}
           minWidth={popperMinWidth}
+          compareFunction={compareFunction}
         />
       </SearchSelectPopover>
     </Box>

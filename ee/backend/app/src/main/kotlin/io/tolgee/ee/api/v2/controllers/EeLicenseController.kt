@@ -7,6 +7,7 @@ import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModel
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
 import io.tolgee.ee.service.EeSubscriptionService
+import io.tolgee.security.AccessWithServerAdminPermission
 import io.tolgee.service.security.SecurityService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,22 +26,22 @@ class EeLicenseController(
 ) {
   @PutMapping("set-license-key")
   @Operation(summary = "Sets the EE licence key for this instance")
+  @AccessWithServerAdminPermission
   fun setLicenseKey(@RequestBody body: SetLicenseKeyDto): EeSubscriptionModel {
-    securityService.checkUserIsServerAdmin()
     val eeSubscription = eeSubscriptionService.setLicenceKey(body.licenseKey)
     return eeSubscriptionModelAssembler.toModel(eeSubscription)
   }
 
   @PostMapping("prepare-set-license-key")
   @Operation(summary = "Returns info about the upcoming EE subscription")
+  @AccessWithServerAdminPermission
   fun prepareSetLicenseKey(@RequestBody body: SetLicenseKeyDto): PrepareSetEeLicenceKeyModel {
-    securityService.checkUserIsServerAdmin()
     return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
   }
 
   @PutMapping("/refresh")
+  @AccessWithServerAdminPermission
   fun refreshSubscription(): EeSubscriptionModel? {
-    securityService.checkUserIsServerAdmin()
     eeSubscriptionService.refreshSubscription()
     val eeSubscription = eeSubscriptionService.findSubscriptionEntity() ?: return null
     return eeSubscriptionModelAssembler.toModel(eeSubscription)
@@ -48,16 +49,16 @@ class EeLicenseController(
 
   @GetMapping("info")
   @Operation(summary = "Returns the info about the current EE subscription")
+  @AccessWithServerAdminPermission
   fun getInfo(): EeSubscriptionModel? {
-    securityService.checkUserIsServerAdmin()
     val eeSubscription = eeSubscriptionService.findSubscriptionEntity()
     return eeSubscription?.let { eeSubscriptionModelAssembler.toModel(it) }
   }
 
   @PutMapping("release-license-key")
   @Operation(summary = "Removes the EE licence key from this instance")
+  @AccessWithServerAdminPermission
   fun release() {
-    securityService.checkUserIsServerAdmin()
     eeSubscriptionService.releaseSubscription()
   }
 }

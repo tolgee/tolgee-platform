@@ -60,6 +60,7 @@ export enum PARAMS {
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
   TRANSLATION_ID = 'translationId',
+  PLAN_ID = 'planId',
 }
 
 export class LINKS {
@@ -175,6 +176,36 @@ export class LINKS {
     'ee-license'
   );
 
+  static ADMINISTRATION_BILLING_CLOUD_PLANS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'cloud-plans'
+  );
+
+  static ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
+    p(PARAMS.PLAN_ID)
+  );
+
+  static ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
+    'create'
+  );
+
+  static ADMINISTRATION_BILLING_EE_PLANS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'ee-plans'
+  );
+
+  static ADMINISTRATION_BILLING_EE_PLAN_EDIT = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
+    p(PARAMS.PLAN_ID)
+  );
+
+  static ADMINISTRATION_BILLING_EE_PLAN_CREATE = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
+    'create'
+  );
+
   /**
    * Organizations
    */
@@ -213,6 +244,11 @@ export class LINKS {
   static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
     LINKS.ORGANIZATION,
     'billing-test-clock-helper'
+  );
+
+  static ORGANIZATION_BILLING_PLANS_EDIT = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'billing-plans-edit'
   );
 
   static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(

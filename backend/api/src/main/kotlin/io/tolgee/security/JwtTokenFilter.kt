@@ -26,7 +26,7 @@ class JwtTokenFilter @Autowired constructor(
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : OncePerRequestFilter() {
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(

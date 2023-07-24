@@ -302,6 +302,31 @@ export class Validation {
   static readonly EE_LICENSE_FORM = Yup.object({
     licenseKey: Yup.string().required().max(100),
   });
+
+  static readonly CLOUD_PLAN_FORM = Yup.object({
+    name: Yup.string().required(),
+    stripeProductId: Yup.string().required(),
+    forOrganizationIds: Yup.array().when('public', {
+      is: false,
+      then: Yup.array().min(1),
+    }),
+    prices: Yup.object().when('type', {
+      is: 'PAY_AS_YOU_GO',
+      then: Yup.object({
+        perThousandMtCredits: Yup.number().moreThan(0),
+        perThousandTranslations: Yup.number().moreThan(0),
+      }),
+    }),
+  });
+
+  static readonly EE_PLAN_FORM = Yup.object({
+    name: Yup.string().required(),
+    stripeProductId: Yup.string().required(),
+    forOrganizationIds: Yup.array().when('public', {
+      is: false,
+      then: Yup.array().min(1),
+    }),
+  });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

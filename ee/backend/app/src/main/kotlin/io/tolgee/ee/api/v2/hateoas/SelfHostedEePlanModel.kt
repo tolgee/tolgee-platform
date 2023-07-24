@@ -6,12 +6,12 @@ import org.springframework.hateoas.server.core.Relation
 
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
-class SelfHostedEePlanModel(
+open class SelfHostedEePlanModel(
   val id: Long = 0,
   var name: String = "",
   val public: Boolean = true,
   val enabledFeatures: Array<Feature> = arrayOf(),
   val prices: PlanPricesModel,
   val includedUsage: PlanIncludedUsageModel = PlanIncludedUsageModel(),
-  val hasYearlyPrice: Boolean = false
+  val hasYearlyPrice: Boolean = false,
 ) : RepresentationModel<SelfHostedEePlanModel>()

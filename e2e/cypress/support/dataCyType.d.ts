@@ -7,10 +7,40 @@ declare namespace DataCy {
         "activity-detail" |
         "add-box" |
         "administration-access-message" |
+        "administration-cloud-plan-field-feature" |
+        "administration-cloud-plan-field-included-mt-credits" |
+        "administration-cloud-plan-field-included-translations" |
+        "administration-cloud-plan-field-name" |
+        "administration-cloud-plan-field-price-monthly" |
+        "administration-cloud-plan-field-price-per-thousand-mt-credits" |
+        "administration-cloud-plan-field-price-per-thousand-translations" |
+        "administration-cloud-plan-field-price-yearly" |
+        "administration-cloud-plan-field-public" |
+        "administration-cloud-plan-field-stripe-product" |
+        "administration-cloud-plan-field-type" |
+        "administration-cloud-plan-field-type-item" |
+        "administration-cloud-plan-submit-button" |
+        "administration-cloud-plans-item" |
+        "administration-cloud-plans-item-delete" |
+        "administration-cloud-plans-item-edit" |
+        "administration-cloud-plans-item-public-badge" |
         "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
+        "administration-ee-plan-field-feature" |
+        "administration-ee-plan-field-included-seats" |
+        "administration-ee-plan-field-name" |
+        "administration-ee-plan-field-price-monthly" |
+        "administration-ee-plan-field-price-per-seat" |
+        "administration-ee-plan-field-price-yearly" |
+        "administration-ee-plan-field-public" |
+        "administration-ee-plan-field-stripe-product" |
+        "administration-ee-plan-submit-button" |
+        "administration-ee-plans-item" |
+        "administration-ee-plans-item-delete" |
+        "administration-ee-plans-item-edit" |
+        "administration-ee-plans-item-public-badge" |
         "administration-frame" |
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
@@ -53,6 +83,10 @@ declare namespace DataCy {
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |
+        "billing-plan-monthly-price" |
+        "billing-plan-price-per-seat-extra" |
+        "billing-plan-price-per-thousand-mt-credits-extra" |
+        "billing-plan-price-per-thousand-strings-extra" |
         "billing-plan-subtitle" |
         "billing-plan-title" |
         "billing-progress-label-item" |
@@ -62,6 +96,7 @@ declare namespace DataCy {
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
+        "billing_period_annual" |
         "checkbox-group-multiselect" |
         "checkbox-group-multiselect-item" |
         "comment" |
