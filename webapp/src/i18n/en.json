@@ -175,6 +175,8 @@
   "batch_operation_set_translations_state" : "Set translations state",
   "batch_operations_mark_as_reviewed" : "Mark as reviewed",
   "batch_operations_mark_as_translated" : "Mark as translated",
+  "batch_operations_outdated_message" : "Translations might be outdated",
+  "batch_operations_refresh_button" : "Refresh",
   "batch_operations_remove_tags" : "Remove tags",
   "batch_operations_select_languages_placeholder" : "Select languages...",
   "batch_operation_status_cancelled" : "Cancelled",

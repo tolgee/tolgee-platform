@@ -1,3 +1,15 @@
+# [3.24.0](https://github.com/tolgee/tolgee-platform/compare/v3.23.4...v3.24.0) (2023-07-24)
+
+
+### Bug Fixes
+
+* Remove Telemetry from e2e tests ([#1822](https://github.com/tolgee/tolgee-platform/issues/1822)) ([e47b4e5](https://github.com/tolgee/tolgee-platform/commit/e47b4e5fdebb94dfbdce8c16a52656ab85cef9f3))
+
+
+### Features
+
+* billing plans ui ([#1749](https://github.com/tolgee/tolgee-platform/issues/1749)) ([d84b1bc](https://github.com/tolgee/tolgee-platform/commit/d84b1bc9bcad41f208201c1863e9e8917a72a2aa))
+
 ## [3.23.4](https://github.com/tolgee/tolgee-platform/compare/v3.23.3...v3.23.4) (2023-07-22)
 
 

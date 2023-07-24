@@ -175,6 +175,8 @@
   "batch_operation_set_translations_state" : "Nastavit stav překladů",
   "batch_operations_mark_as_reviewed" : "Označit jako zkontrolované",
   "batch_operations_mark_as_translated" : "Označit jako přeložené",
+  "batch_operations_outdated_message" : "Překlady mohou být zastaralé",
+  "batch_operations_refresh_button" : "Obnovit",
   "batch_operations_remove_tags" : "Odstranit tagy",
   "batch_operations_select_languages_placeholder" : "Vyber jazyky...",
   "batch_operation_status_cancelled" : "Zrušeno",
