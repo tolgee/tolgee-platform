@@ -183,6 +183,7 @@ task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
+    maxHeapSize = "8000m"
 }
 
 task runWebsocketTests(type: Test, group: 'verification') {

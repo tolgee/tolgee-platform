@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
+import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,17 @@ class BatchJobConcurrentLauncher(
   }
 
   val runningJobs: ConcurrentHashMap<Long, Pair<Long, Job>> = ConcurrentHashMap()
+
   var pause = false
+    set(value) {
+      field = value
+      if (value) {
+        waitFor(30000) {
+          runningJobs.size == 0
+        }
+      }
+    }
+
   var masterRunJob: Job? = null
   var run = true
 
@@ -106,12 +117,12 @@ class BatchJobConcurrentLauncher(
         "Pulled ${items.size} items from queue: " +
           items.joinToString(", ") { it.chunkExecutionId.toString() }
       )
+      logger.debug(
+        "${batchJobChunkExecutionQueue.size} is left in the queue " +
+          "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
+          batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
+      )
     }
-    logger.debug(
-      "${batchJobChunkExecutionQueue.size} is left in the queue " +
-        "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
-        batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
-    )
   }
 
   private fun CoroutineScope.handleItem(
