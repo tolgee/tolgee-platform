@@ -4,7 +4,7 @@ import { useProjectContextOptional } from 'tg.hooks/useProject';
 
 export const useReportEvent = () => {
   const reportMutation = useApiMutation({
-    url: '/v2/business-events/report',
+    url: '/v2/public/business-events/report',
     method: 'post',
   });
 

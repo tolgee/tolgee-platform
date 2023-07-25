@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/business-events"])
+@RequestMapping(value = ["/v2/public/business-events"])
 @Tag(name = "Business events reporting")
 class BusinessEventController(
   private val businessEventPublisher: BusinessEventPublisher,

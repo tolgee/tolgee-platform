@@ -38,7 +38,7 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it accepts header`() {
     performPost(
-      "/v2/business-events/report",
+      "/v2/public/business-events/report",
       mapOf(
         "eventName" to "TEST_EVENT",
         "organizationId" to testData.userAccountBuilder.defaultOrganizationBuilder.self.id,

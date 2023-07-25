@@ -301,7 +301,7 @@ export interface paths {
   "/v2/ee-license/prepare-set-license-key": {
     post: operations["prepareSetLicenseKey_1"];
   };
-  "/v2/business-events/report": {
+  "/v2/public/business-events/report": {
     post: operations["report"];
   };
   "/v2/api-keys": {
