@@ -8,6 +8,9 @@ import { OperationProps } from './types';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { useTranslate } from '@tolgee/react';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
+import { useTranslationsSelector } from '../context/TranslationsContext';
 
 const StyledTags = styled('div')`
   display: flex;
@@ -28,9 +31,9 @@ type Props = OperationProps;
 
 export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
   const { t } = useTranslate();
-  // const project = useProject();
+  const project = useProject();
 
-  // const selection = useTranslationsSelector((c) => c.selection);
+  const selection = useTranslationsSelector((c) => c.selection);
 
   const [tags, setTags] = useState<string[]>([]);
 
@@ -44,34 +47,29 @@ export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
     setTags((tags) => tags.filter((t) => t !== tag));
   }
 
-  // const batchTranslate = useApiMutation({
-  //   url: '/v2/projects/{projectId}/start-batch-job/translate',
-  //   method: 'post',
-  // });
+  const batchTranslate = useApiMutation({
+    url: '/v2/projects/{projectId}/start-batch-job/untag-keys',
+    method: 'post',
+  });
 
-  // function handleSubmit() {
-  //   batchTranslate.mutate(
-  //     {
-  //       path: { projectId: project.id },
-  //       content: {
-  //         'application/json': {
-  //           keyIds: selection,
-  //           targetLanguageIds: allLanguages
-  //             ?.filter((l) => selectedLangs?.includes(l.tag))
-  //             .map((l) => l.id),
-  //           useMachineTranslation: true,
-  //           useTranslationMemory: false,
-  //           service: undefined,
-  //         },
-  //       },
-  //     },
-  //     {
-  //       onSuccess(data) {
-  //         onStart(data);
-  //       },
-  //     }
-  //   );
-  // }
+  function handleSubmit() {
+    batchTranslate.mutate(
+      {
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            keyIds: selection,
+            tags,
+          },
+        },
+      },
+      {
+        onSuccess(data) {
+          onStart(data);
+        },
+      }
+    );
+  }
 
   return (
     <Box display="flex" gap="10px">
@@ -88,10 +86,10 @@ export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
       </StyledTags>
       <LoadingButton
         data-cy="batch-operations-submit-button"
-        // loading={batchTranslate.isLoading}
+        loading={batchTranslate.isLoading}
         disabled={disabled || tags.length === 0}
         sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
-        // onClick={handleSubmit}
+        onClick={handleSubmit}
         variant="contained"
         color="primary"
       >

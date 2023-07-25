@@ -256,11 +256,20 @@ export interface paths {
     post: operations["create_1"];
     delete: operations["delete_3"];
   };
+  "/v2/projects/{projectId}/start-batch-job/untag-keys": {
+    post: operations["untagKeys"];
+  };
   "/v2/projects/{projectId}/start-batch-job/translate": {
     post: operations["translate"];
   };
+  "/v2/projects/{projectId}/start-batch-job/tag-keys": {
+    post: operations["tagKeys"];
+  };
   "/v2/projects/{projectId}/start-batch-job/set-translation-state": {
     post: operations["setTranslationState_2"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/set-keys-namespace": {
+    post: operations["setKeysNamespace"];
   };
   "/v2/projects/{projectId}/start-batch-job/delete-keys": {
     post: operations["deleteKeys"];
@@ -620,21 +629,6 @@ export interface components {
        */
       permittedLanguageIds?: number[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -662,6 +656,21 @@ export interface components {
         | "batch-jobs.cancel"
         | "batch-auto-translate"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1193,14 +1202,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1335,15 +1344,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      username?: string;
-      description: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      lastUsedAt?: number;
+      username?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1570,13 +1579,9 @@ export interface components {
       screenshotUploadedImageIds?: number[];
       screenshots?: components["schemas"]["KeyScreenshotDto"][];
     };
-    BatchTranslateRequest: {
+    UntagKeysRequest: {
       keyIds: number[];
-      targetLanguageIds: number[];
-      useMachineTranslation: boolean;
-      useTranslationMemory: boolean;
-      /** @description Translation service provider to use for translation. When null, Tolgee will use the primary service. */
-      service?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      tags: string[];
     };
     BatchJobModel: {
       /**
@@ -1592,7 +1597,10 @@ export interface components {
         | "DELETE_KEYS"
         | "SET_TRANSLATIONS_STATE"
         | "CLEAR_TRANSLATIONS"
-        | "COPY_TRANSLATIONS";
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE";
       /**
        * Format: int32
        * @description Total items, that have been processed so far
@@ -1631,10 +1639,26 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
     };
+    BatchTranslateRequest: {
+      keyIds: number[];
+      targetLanguageIds: number[];
+      useMachineTranslation: boolean;
+      useTranslationMemory: boolean;
+      /** @description Translation service provider to use for translation. When null, Tolgee will use the primary service. */
+      service?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+    };
+    TagKeysRequest: {
+      keyIds: number[];
+      tags: string[];
+    };
     SetTranslationsStateStateRequest: {
       keyIds: number[];
       languageIds: number[];
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+    };
+    SetKeysNamespaceRequest: {
+      keyIds: number[];
+      namespace: string;
     };
     DeleteKeysRequest: {
       keyIds: number[];
@@ -1959,17 +1983,17 @@ export interface components {
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2001,8 +2025,8 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      name: string;
       displayName?: string;
+      name: string;
       description?: string;
     };
     PagedModelProjectModel: {
@@ -2071,8 +2095,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -2080,8 +2104,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2172,8 +2196,12 @@ export interface components {
         | "EDIT_PROJECT"
         | "NAMESPACE_EDIT"
         | "BATCH_AUTO_TRANSLATE"
-        | "CLEAR_TRANSLATIONS"
-        | "COPY_TRANSLATIONS";
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -2211,6 +2239,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2223,7 +2252,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2520,14 +2548,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
       description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2648,15 +2676,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      username?: string;
-      description: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      scopes: string[];
+      /** Format: int64 */
+      lastUsedAt?: number;
+      username?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5413,6 +5441,38 @@ export interface operations {
       };
     };
   };
+  untagKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UntagKeysRequest"];
+      };
+    };
+  };
   translate: {
     parameters: {
       path: {
@@ -5445,6 +5505,38 @@ export interface operations {
       };
     };
   };
+  tagKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagKeysRequest"];
+      };
+    };
+  };
   setTranslationState_2: {
     parameters: {
       path: {
@@ -5474,6 +5566,38 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsStateStateRequest"];
+      };
+    };
+  };
+  setKeysNamespace: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetKeysNamespaceRequest"];
       };
     };
   };
