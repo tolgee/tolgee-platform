@@ -2,7 +2,8 @@ import { components } from 'tg.service/apiSchema.generated';
 
 export type BatchActions =
   | 'delete'
-  | 'auto_translate'
+  | 'machine_translate'
+  | 'pre_translate'
   | 'mark_as_reviewed'
   | 'mark_as_translated'
   | 'add_tags'

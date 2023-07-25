@@ -18,8 +18,9 @@ import { OperationMarkAsReviewed } from './OperationMarkAsReviewed';
 import { OperationMarkAsTranslated } from './OperationMarkAsTranslated';
 import { OperationRemoveTags } from './OperationRemoveTags';
 import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
-import { OperationAutoTranslate } from './OperationAutoTranslate';
+import { OperationMachineTranslate } from './OperationMachineTranslate';
 import { BatchActions, BatchJobModel } from './types';
+import { OperationPreTranslate } from './OperationPreTranslate';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -112,8 +113,10 @@ export const BatchOperations = ({ open, onClose }: Props) => {
     switch (operation) {
       case 'delete':
         return <OperationDelete {...sharedProps} />;
-      case 'auto_translate':
-        return <OperationAutoTranslate {...sharedProps} />;
+      case 'machine_translate':
+        return <OperationMachineTranslate {...sharedProps} />;
+      case 'pre_translate':
+        return <OperationPreTranslate {...sharedProps} />;
       case 'mark_as_translated':
         return <OperationMarkAsTranslated {...sharedProps} />;
       case 'mark_as_reviewed':

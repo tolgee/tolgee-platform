@@ -17,7 +17,8 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   const { t } = useTranslate();
 
   const options: { id: BatchActions; label: string; divider?: boolean }[] = [
-    { id: 'auto_translate', label: t('batch_operations_translate') },
+    { id: 'machine_translate', label: t('batch_operations_translate') },
+    { id: 'pre_translate', label: t('batch_operations_pre_translate') },
     {
       id: 'mark_as_translated',
       label: t('batch_operations_mark_as_translated'),
@@ -36,7 +37,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
 
   return (
     <Autocomplete
-      sx={{ width: 250 }}
+      sx={{ width: 280 }}
       value={options.find((o) => o.id === value) || null}
       onChange={(_, value) => {
         onChange(value?.id);

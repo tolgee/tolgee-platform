@@ -13,7 +13,7 @@ import { useTranslate } from '@tolgee/react';
 
 type Props = OperationProps;
 
-export const OperationAutoTranslate = ({ disabled, onStart }: Props) => {
+export const OperationPreTranslate = ({ disabled, onStart }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
@@ -38,8 +38,8 @@ export const OperationAutoTranslate = ({ disabled, onStart }: Props) => {
             targetLanguageIds: allLanguages
               ?.filter((l) => selectedLangs?.includes(l.tag))
               .map((l) => l.id),
-            useMachineTranslation: true,
-            useTranslationMemory: false,
+            useMachineTranslation: false,
+            useTranslationMemory: true,
             service: undefined,
           },
         },

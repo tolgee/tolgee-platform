@@ -61,7 +61,7 @@ export const OperationMarkAsTranslated = ({ disabled, onStart }: Props) => {
       <LoadingButton
         data-cy="batch-operations-submit-button"
         loading={batchLoadable.isLoading}
-        disabled={disabled}
+        disabled={disabled || selectedLangs.length === 0}
         sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
         onClick={handleSubmit}
         variant="contained"

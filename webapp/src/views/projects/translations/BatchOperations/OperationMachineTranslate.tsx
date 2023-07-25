@@ -3,9 +3,9 @@ import { ChevronRight } from '@mui/icons-material';
 import { Box } from '@mui/material';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
@@ -13,17 +13,18 @@ import { useTranslate } from '@tolgee/react';
 
 type Props = OperationProps;
 
-export const OperationMarkAsReviewed = ({ disabled, onStart }: Props) => {
-  const { t } = useTranslate();
+export const OperationMachineTranslate = ({ disabled, onStart }: Props) => {
   const project = useProject();
+  const { t } = useTranslate();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
-
   const selection = useTranslationsSelector((c) => c.selection);
+
+  const languages = allLanguages.filter((l) => !l.base);
 
   const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
 
   const batchLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/start-batch-job/set-translation-state',
+    url: '/v2/projects/{projectId}/start-batch-job/translate',
     method: 'post',
   });
 
@@ -34,10 +35,12 @@ export const OperationMarkAsReviewed = ({ disabled, onStart }: Props) => {
         content: {
           'application/json': {
             keyIds: selection,
-            languageIds: allLanguages
+            targetLanguageIds: allLanguages
               ?.filter((l) => selectedLangs?.includes(l.tag))
               .map((l) => l.id),
-            state: 'REVIEWED',
+            useMachineTranslation: true,
+            useTranslationMemory: false,
+            service: undefined,
           },
         },
       },
@@ -52,7 +55,7 @@ export const OperationMarkAsReviewed = ({ disabled, onStart }: Props) => {
   return (
     <Box display="flex" gap="10px">
       <LanguagesSelect
-        languages={allLanguages || []}
+        languages={languages || []}
         value={selectedLangs || []}
         onChange={setSelectedLangs}
         enableEmpty
