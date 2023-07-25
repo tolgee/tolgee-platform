@@ -48,6 +48,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -251,7 +252,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     internalProperties.fakeMtProviders = false
   }
 
-  fun <T> executeInNewTransaction(fn: () -> T): T {
+  fun <T> executeInNewTransaction(fn: (ts: TransactionStatus) -> T): T {
     return io.tolgee.util.executeInNewTransaction(
       transactionManager = platformTransactionManager,
       fn = fn,

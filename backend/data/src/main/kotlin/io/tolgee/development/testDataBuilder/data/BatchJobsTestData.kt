@@ -49,4 +49,31 @@ class BatchJobsTestData : BaseTestData() {
       }.self
     }
   }
+
+  fun addTagKeysData(keyCount: Int = 100): List<Key> {
+    this.projectBuilder.addKey {
+      name = "a-key"
+    }.build {
+      addTag("a-tag")
+    }.self
+    return (1..keyCount).map {
+      this.projectBuilder.addKey {
+        name = "key$it"
+      }.build {
+        addTag("tag1")
+        addTag("tag2")
+        addTag("tag3")
+      }.self
+    }
+  }
+
+  fun addNamespaceData(): List<Key> {
+    this.projectBuilder.addKey("namespace", "key")
+    return (1..500).map {
+      this.projectBuilder.addKey("namespace1", "key$it").self
+    } +
+      (1..500).map {
+        this.projectBuilder.addKey(keyName = "key-without-namespace-$it").self
+      }
+  }
 }

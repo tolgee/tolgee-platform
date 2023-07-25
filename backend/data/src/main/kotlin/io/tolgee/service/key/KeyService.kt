@@ -163,6 +163,16 @@ class KeyService(
     return key
   }
 
+  @Transactional
+  fun setNamespace(keyIds: List<Long>, namespace: String?) {
+    val keys = keyRepository.getKeysWithNamespaces(keyIds)
+    val projectId = keys.map { it.project.id }.distinct().singleOrNull() ?: return
+    val namespaceEntity = namespaceService.findOrCreate(namespace, projectId)
+
+    keys.forEach { it.namespace = namespaceEntity }
+    keyRepository.saveAll(keys)
+  }
+
   fun checkKeyNotExisting(projectId: Long, name: String, namespace: String?) {
     if (findOptional(projectId, name, namespace).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
@@ -243,6 +253,7 @@ class KeyService(
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
+  fun getKeysWithTagsById(keysIds: Iterable<Long>): Set<Key> = keyRepository.getWithTagsByIds(keysIds)
 
   fun find(id: List<Long>): List<Key> {
     return keyRepository.findAllByIdIn(id)
