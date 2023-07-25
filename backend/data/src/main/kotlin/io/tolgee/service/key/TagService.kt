@@ -47,20 +47,40 @@ class TagService(
     return tag
   }
 
+  /**
+   * @param map key entity to list of tags
+   */
   fun tagKeys(map: Map<Key, List<String>>) {
     if (map.isEmpty()) {
       return
     }
 
-    val keysWithTags = keyService.getKeysWithTags(map.keys).associateBy { it.id }
-    val projectId = getSingleProjectId(keysWithTags)
+    val keysWithTags = keyService.getKeysWithTags(map.keys)
+    tagKeys(keysWithTags, map.mapKeys { it.key.id })
+  }
+
+  /**
+   * @param map keyId entity to list of tags
+   */
+  fun tagKeysById(map: Map<Long, List<String>>) {
+    if (map.isEmpty()) {
+      return
+    }
+
+    val keysWithTags = keyService.getKeysWithTagsById(map.keys)
+    tagKeys(keysWithTags, map)
+  }
+
+  private fun tagKeys(keysWithFetchedTags: Iterable<Key>, map: Map<Long, List<String>>) {
+    val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
+    val projectId = getSingleProjectId(keysByIdMap)
 
     val existingTags =
       this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
 
-    map.forEach { (key, tagsToAdd) ->
+    map.forEach { (keyId, tagsToAdd) ->
       tagsToAdd.forEach { tagToAdd ->
-        val keyWithData = keysWithTags[key.id] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+        val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
         val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
         val tag = existingTags[tagToAdd]?.let {
           if (!keyMeta.tags.contains(it)) {
@@ -70,7 +90,7 @@ class TagService(
           it
         } ?: let {
           Tag().apply {
-            project = key.project
+            project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
             keyMetas.add(keyMeta)
             name = tagToAdd
             keyMeta.tags.add(this)
@@ -78,6 +98,26 @@ class TagService(
           }
         }
         tagRepository.save(tag)
+        keyMetaService.save(keyMeta)
+      }
+    }
+  }
+
+  fun untagKeys(map: Map<Long, List<String>>) {
+    if (map.isEmpty()) {
+      return
+    }
+
+    val keysWithTags = keyService.getKeysWithTagsById(map.keys)
+    untagKeys(keysWithTags, map)
+  }
+
+  private fun untagKeys(keysWithFetchedTags: Iterable<Key>, map: Map<Long, List<String>>) {
+    val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
+
+    map.forEach { (keyId, tagsToRemove) ->
+      keysByIdMap[keyId]?.keyMeta?.let { keyMeta ->
+        keyMeta.tags.removeIf { tagsToRemove.contains(it.name) }
         keyMetaService.save(keyMeta)
       }
     }

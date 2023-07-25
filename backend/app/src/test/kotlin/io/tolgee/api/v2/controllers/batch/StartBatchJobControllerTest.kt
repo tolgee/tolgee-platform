@@ -2,10 +2,14 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
+import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
@@ -19,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.test.web.servlet.ResultActions
+import java.util.function.Consumer
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
@@ -28,6 +34,9 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var batchJobOperationQueue: BatchJobChunkExecutionQueue
+
+  @Autowired
+  lateinit var batchJobService: BatchJobService
 
   @BeforeEach
   fun setup() {
@@ -222,4 +231,136 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       all.count { it.text?.startsWith("en") == true }.assert.isEqualTo(allKeyIds.size + keyIds.size * 2)
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it validates tag length`() {
+    performProjectAuthPost(
+      "start-batch-job/tag-keys",
+      mapOf(
+        "keyIds" to listOf(1),
+        "tags" to listOf("a".repeat(101)),
+      )
+    ).andIsBadRequest.andPrettyPrint
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it tags keys`() {
+    val keyCount = 1000
+    val keys = testData.addTagKeysData(keyCount)
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(500)
+    val newTags = listOf("tag1", "tag3", "a-tag", "b-tag")
+
+    performProjectAuthPost(
+      "start-batch-job/tag-keys",
+      mapOf(
+        "keyIds" to keyIds,
+        "tags" to newTags,
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val all = keyService.getKeysWithTagsById(keyIds)
+      all.assert.hasSize(keyIds.size)
+      all.count {
+        it.keyMeta?.tags?.map { it.name }?.containsAll(newTags) == true
+      }.assert.isEqualTo(keyIds.size)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it untags keys`() {
+    val keyCount = 1000
+    val keys = testData.addTagKeysData(keyCount)
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(300)
+    val tagsToRemove = listOf("tag1", "a-tag", "b-tag")
+
+    performProjectAuthPost(
+      "start-batch-job/untag-keys",
+      mapOf(
+        "keyIds" to keyIds,
+        "tags" to tagsToRemove
+      )
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val all = keyService.getKeysWithTagsById(keyIds)
+      all.assert.hasSize(keyIds.size)
+      all.count {
+        it.keyMeta?.tags?.map { it.name }?.any { tagsToRemove.contains(it) } == false &&
+          it.keyMeta?.tags?.map { it.name }?.contains("tag3") == true
+      }.assert.isEqualTo(keyIds.size)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it moves to other namespace`() {
+    val keys = testData.addNamespaceData()
+    saveAndPrepare()
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val keyIds = allKeyIds.take(700)
+
+    performProjectAuthPost(
+      "start-batch-job/set-keys-namespace",
+      mapOf(
+        "keyIds" to keyIds,
+        "namespace" to "other-namespace"
+      )
+    ).andIsOk.waitForJobCompleted()
+
+    val all = keyService.find(keyIds)
+    all.count { it.namespace?.name == "other-namespace" }.assert.isEqualTo(keyIds.size)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it fails on collision`() {
+    testData.addNamespaceData()
+    val key = testData.projectBuilder.addKey(keyName = "key").self
+    saveAndPrepare()
+
+    val jobId = performProjectAuthPost(
+      "start-batch-job/set-keys-namespace",
+      mapOf(
+        "keyIds" to listOf(key.id),
+        "namespace" to "namespace"
+      )
+    ).andIsOk.waitForJobCompleted().jobId
+    keyService.get(key.id).namespace.assert.isNull()
+    batchJobService.findJobDto(jobId)?.status.assert.isEqualTo(BatchJobStatus.FAILED)
+  }
+
+  fun ResultActions.waitForJobCompleted() = andAssertThatJson {
+    node("id").isNumber.satisfies(
+      Consumer {
+        waitFor(pollTime = 2000) {
+          val job = batchJobService.findJobDto(it.toLong())
+          job?.status?.completed == true
+        }
+      }
+    )
+  }
+
+  val ResultActions.jobId: Long
+    get() {
+      var jobId: Long? = null
+      this.andAssertThatJson {
+        node("id").isNumber.satisfies(
+          Consumer {
+            jobId = it.toLong()
+          }
+        )
+      }
+      return jobId!!
+    }
 }
