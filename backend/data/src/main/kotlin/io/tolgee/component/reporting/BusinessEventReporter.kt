@@ -38,6 +38,16 @@ class BusinessEventReporter(
     val id = data.userAccountDto?.id ?: data.instanceId
     val setEntry = getSetMapForPostHog(data)
 
+    if (data.userDistinctId != null && data.userAccountDto != null) {
+      postHog?.identify(
+        data.userDistinctId,
+        mapOf(
+          "email" to data.userAccountDto.username,
+          "name" to data.userAccountDto.name,
+        )
+      )
+    }
+
     postHog?.capture(
       id.toString(), data.eventName,
       mapOf(

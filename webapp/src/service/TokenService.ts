@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+import { DistinctUserIdService } from './DistinctUserIdService';
 
 export const JWT_LOCAL_STORAGE_KEY = 'jwtToken';
 export const ADMIN_JWT_LOCAL_STORAGE_KEY = 'adminJwtToken';
@@ -10,6 +11,7 @@ export class TokenService {
   }
 
   disposeToken() {
+    DistinctUserIdService.reset();
     return localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
   }
 
