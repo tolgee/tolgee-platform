@@ -2727,4 +2727,73 @@
             <column name="instance_id" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-1">
+        <createTable tableName="tag_keys_params">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tag_keys_paramsPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tags" type="JSONB"/>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-2">
+        <createTable tableName="untag_keys_params">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="untag_keys_paramsPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tags" type="JSONB"/>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-3">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UK_jhcxhllwwshka7mbm4q2uajmp" tableName="tag_keys_params"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-4">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UK_mrekp8c7x99sxuttwvjsu71mr" tableName="untag_keys_params"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-5">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="tag_keys_params" constraintName="FKo4my8133ihub7l9767725gbhu" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690208596943-6">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="untag_keys_params" constraintName="FKt0wwsyd94ls94fo1s33ywthsp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690210555248-1">
+        <createTable tableName="set_keys_namespace_params">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="set_keys_namespace_paramsPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="namespace" type="varchar(255)"/>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690210555248-2">
+        <addUniqueConstraint columnNames="batch_job_id" constraintName="UK_jbqpq52mc24ykm531tdcy7iad" tableName="set_keys_namespace_params"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690210555248-3">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="set_keys_namespace_params" constraintName="FKs8y37r7p5o9gnkfhur7dn1mb2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch_job" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

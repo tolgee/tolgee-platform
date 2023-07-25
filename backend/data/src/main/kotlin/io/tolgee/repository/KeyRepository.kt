@@ -127,8 +127,27 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
+    select k from Key k
+    left join fetch k.keyMeta km
+    left join fetch km.tags
+    where k.id in :keyIds
+  """
+  )
+  fun getWithTagsByIds(keyIds: Iterable<Long>): Set<Key>
+
+  @Query(
+    """
     select k.project.id from Key k where k.id in :keysIds
   """
   )
   fun getProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.namespace
+    where k.id in :keyIds
+  """
+  )
+  fun getKeysWithNamespaces(keyIds: List<Long>): List<Key>
 }

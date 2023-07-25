@@ -8,7 +8,12 @@ import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
+import io.tolgee.batch.request.TagKeysRequest
+import io.tolgee.batch.request.UntagKeysRequest
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
@@ -112,6 +117,54 @@ class StartBatchJobController(
     ).model
   }
 
+  @PostMapping(value = ["/tag-keys"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @Operation(summary = "Tag keys")
+  fun tagKeys(@Valid @RequestBody data: TagKeysRequest): BatchJobModel {
+    data.tags.validate()
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.TAG_KEYS
+    ).model
+  }
+
+  @PostMapping(value = ["/untag-keys"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @Operation(summary = "Tag keys")
+  fun untagKeys(@Valid @RequestBody data: UntagKeysRequest): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.UNTAG_KEYS
+    ).model
+  }
+
+  @PostMapping(value = ["/set-keys-namespace"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.KEYS_EDIT)
+  @Operation(summary = "Tag keys")
+  fun setKeysNamespace(@Valid @RequestBody data: SetKeysNamespaceRequest): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.SET_KEYS_NAMESPACE
+    ).model
+  }
+
   val BatchJob.model
     get() = batchJobModelAssembler.toModel(batchJobService.getView(this))
+
+  private fun List<String>.validate() {
+    if (this.any { it.isBlank() }) throw BadRequestException(Message.TAG_IS_BLANK)
+    if (this.any { it.length > 100 }) throw BadRequestException(Message.TAG_TOO_LOG)
+  }
 }

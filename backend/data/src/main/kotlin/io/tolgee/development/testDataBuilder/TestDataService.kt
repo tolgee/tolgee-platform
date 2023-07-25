@@ -118,10 +118,10 @@ class TestDataService(
       organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
     }
 
-    additionalTestDataSavers.forEach {
+    additionalTestDataSavers.forEach { dataSaver ->
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
-          it.clean(builder)
+          dataSaver.clean(builder)
         }
       }
     }
@@ -130,7 +130,7 @@ class TestDataService(
   private fun updateLanguageStats(builder: TestDataBuilder) {
     builder.data.projects.forEach {
       try {
-        executeInNewTransaction(transactionManager) {
+        executeInNewTransaction(transactionManager) { _ ->
           languageStatsService.refreshLanguageStats(it.self.id)
           entityManager.flush()
         }
