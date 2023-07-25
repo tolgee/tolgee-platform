@@ -21,7 +21,7 @@ import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useRecaptcha } from './useRecaptcha';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
-import { useReportEvent } from 'tg.views/organizations/useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 export type SignUpType = {
   name: string;

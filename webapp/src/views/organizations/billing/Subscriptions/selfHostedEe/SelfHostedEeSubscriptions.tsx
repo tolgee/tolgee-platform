@@ -14,7 +14,7 @@ import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { useReportEvent } from '../../../useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];

@@ -22,7 +22,6 @@ import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
 import { Ga4Tag } from './Ga4Tag';
 import { SpendingLimitExceededPopover } from './billing/SpendingLimitExceeded';
-import { DistinctUserIdService } from 'tg.service/DistinctUserIdService';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -122,15 +121,11 @@ const Head: FC = () => {
     </Helmet>
   );
 };
-
-DistinctUserIdService.init();
-
 export class App extends React.Component {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     errorActions.globalError.dispatch(error as GlobalError);
     throw error;
   }
-
   render() {
     return (
       <>

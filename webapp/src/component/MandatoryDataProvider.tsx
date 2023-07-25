@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
 import { PostHog } from 'posthog-js';
 import { getUtmParams } from 'tg.fixtures/utmCookie';
+import { useIdentify } from 'tg.hooks/useIdentify';
 
 const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
@@ -12,6 +13,8 @@ export const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
   const isLoading = useGlobalContext((v) => v.isLoading);
   const isFetching = useGlobalContext((v) => v.isFetching);
+
+  useIdentify(!!userData?.id);
 
   useEffect(() => {
     if (config?.clientSentryDsn) {

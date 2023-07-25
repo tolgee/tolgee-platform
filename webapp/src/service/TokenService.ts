@@ -1,5 +1,5 @@
 import { singleton } from 'tsyringe';
-import { DistinctUserIdService } from './DistinctUserIdService';
+import { AnonymousIdService } from './AnonymousIdService';
 
 export const JWT_LOCAL_STORAGE_KEY = 'jwtToken';
 export const ADMIN_JWT_LOCAL_STORAGE_KEY = 'adminJwtToken';
@@ -7,11 +7,15 @@ export const ADMIN_JWT_LOCAL_STORAGE_KEY = 'adminJwtToken';
 @singleton()
 export class TokenService {
   getToken() {
-    return localStorage.getItem(JWT_LOCAL_STORAGE_KEY);
+    const token = localStorage.getItem(JWT_LOCAL_STORAGE_KEY);
+    if (!token) {
+      AnonymousIdService.init();
+    }
+    return token;
   }
 
   disposeToken() {
-    DistinctUserIdService.reset();
+    AnonymousIdService.reset();
     return localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
   }
 

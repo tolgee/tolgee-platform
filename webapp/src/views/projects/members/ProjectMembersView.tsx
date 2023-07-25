@@ -14,7 +14,7 @@ import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useReportEvent } from '../../organizations/useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
