@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useEffect } from 'react';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -19,6 +19,8 @@ import { BatchJobModel } from '../types';
 import { BatchProgress } from './BatchProgress';
 import { END_STATUSES, useStatusColor } from './utils';
 import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOperationTypeTranslation';
+import { useOperationCancel } from './useOperationCancel';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 type Props = {
   operation: BatchJobModel;
@@ -31,6 +33,7 @@ export const BatchOperationDialog = ({
   onClose,
   onFinished,
 }: Props) => {
+  const { t } = useTranslate();
   const project = useProject();
 
   const liveBatch = useProjectContext((c) =>
@@ -52,6 +55,10 @@ export const BatchOperationDialog = ({
   const typeLabel = useBatchOperationTypeTranslate()(data.type);
 
   const isFinished = END_STATUSES.includes(data.status);
+
+  const { cancelable, handleCancel, loading } = useOperationCancel({
+    operation: data,
+  });
 
   useEffect(() => {
     if (isFinished) {
@@ -94,7 +101,19 @@ export const BatchOperationDialog = ({
           </Box>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ justifyContent: 'space-between' }}>
+        {cancelable ? (
+          <LoadingButton
+            data-cy="batch-operation-dialog-cancel-job"
+            loading={loading}
+            onClick={handleCancel}
+          >
+            {t('batch_operations_dialog_cancel_job')}
+          </LoadingButton>
+        ) : (
+          <div />
+        )}
+
         {isFinished ? (
           <Button onClick={onClose} data-cy="batch-operation-dialog-ok">
             <T keyName="batch_operations_dialog_ok" />

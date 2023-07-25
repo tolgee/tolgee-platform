@@ -8,7 +8,6 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOperationTypeTranslation';
 import { OperationAbortButton } from './OperationAbortButton';
-import { CANCELLABLE_STATUSES } from './utils';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -71,9 +70,7 @@ export const OperationsList = ({ data }: Props) => {
             )}
           </StyledCell>
           <StyledCell>
-            {CANCELLABLE_STATUSES.includes(o.status) && (
-              <OperationAbortButton operation={o} />
-            )}
+            <OperationAbortButton operation={o} />
           </StyledCell>
           {o.errorMessage && (
             <StyledCell

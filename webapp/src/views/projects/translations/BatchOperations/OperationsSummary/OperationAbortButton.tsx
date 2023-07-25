@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import clsx from 'clsx';
 import { Box, CircularProgress, styled } from '@mui/material';
 import { Close } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProject } from 'tg.hooks/useProject';
+import { useOperationCancel } from './useOperationCancel';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -28,28 +26,21 @@ type Props = {
 };
 
 export function OperationAbortButton({ operation }: Props) {
-  const project = useProject();
-  const [cancelled, setCancelled] = useState(false);
-
-  const cancelLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/batch-jobs/{id}/cancel',
-    method: 'put',
+  const { handleCancel, loading, cancelable } = useOperationCancel({
+    operation,
   });
 
-  function handleCancel() {
-    setCancelled(true);
-    cancelLoadable.mutate({
-      path: { projectId: project.id, id: operation.id },
-    });
+  if (!cancelable) {
+    return null;
   }
 
   return (
     <AbortButton
       role="button"
       onClick={handleCancel}
-      className={clsx({ disabled: cancelled })}
+      className={clsx({ disabled: loading })}
     >
-      {!cancelled ? (
+      {!loading ? (
         <Close fontSize="small" color="inherit" />
       ) : (
         <CircularProgress size={18} />
