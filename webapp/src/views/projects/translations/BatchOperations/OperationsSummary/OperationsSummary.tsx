@@ -13,13 +13,9 @@ const StyledPopper = styled(Popper)`
 
 export const BatchOperationsSummary = () => {
   const batchOperations = useProjectContext((c) => c.batchOperations);
-  const running = batchOperations?.find((o) => o.status === 'RUNNING');
-  const pending = batchOperations?.find((o) => o.status === 'PENDING');
-  const failed = batchOperations?.find((o) => o.status === 'FAILED');
-  const cancelled = batchOperations?.find((o) => o.status === 'CANCELLED');
-  const success = batchOperations?.find((o) => o.status === 'SUCCESS');
-
-  const relevantTask = running || pending || failed || cancelled || success;
+  const relevantTask =
+    batchOperations?.find((o) => o.status === 'RUNNING') ||
+    batchOperations?.[0];
 
   if (!batchOperations || !relevantTask) {
     return null;

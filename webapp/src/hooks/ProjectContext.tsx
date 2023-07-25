@@ -160,9 +160,9 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     const contextData = {
       project: project.data,
       enabledMtServices: settings.data?._embedded?.languageConfigs,
-      batchOperations: batchOperations?.filter(
-        (o) => o.type
-      ) as BatchJobModel[],
+      batchOperations: batchOperations?.filter((o) => o.type) as
+        | BatchJobModel[]
+        | undefined,
     };
 
     const actions = {

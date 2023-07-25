@@ -1,6 +1,7 @@
-import { Alert, Box, Button, Portal } from '@mui/material';
+import { Alert, Box, Portal } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useEffect, useState } from 'react';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
 import {
   useTranslationsActions,
@@ -11,19 +12,21 @@ import { END_STATUSES } from './OperationsSummary/utils';
 export const BatchOperationsChangeIndicator = () => {
   const { t } = useTranslate();
   const { refetchTranslations } = useTranslationsActions();
+  const [isRefetching, setIsRefetching] = useState(false);
   const lastJob = useProjectContext((c) => {
     return c.batchOperations
       ? c.batchOperations.find((o) => END_STATUSES.includes(o.status))?.id
       : 'not-loaded';
   });
-  const translations = useTranslationsSelector((c) => c.translations);
-  const translationsFetching = useTranslationsSelector((c) => c.isFetching);
+  const isFetching = useTranslationsSelector((c) => c.isFetching);
 
   const [previousLast, setPreviousLast] = useState(lastJob);
   const [dataChanged, setDataChanged] = useState(false);
 
-  function handleRefetch() {
-    refetchTranslations();
+  async function handleRefetch() {
+    setIsRefetching(true);
+    await refetchTranslations();
+    setIsRefetching(false);
   }
 
   // check when job is finished
@@ -41,20 +44,25 @@ export const BatchOperationsChangeIndicator = () => {
   // reset outdated status when data are updated
   useEffect(() => {
     setDataChanged(false);
-  }, [translations, translationsFetching]);
+  }, [isFetching]);
 
   return (
     <>
-      {dataChanged && (
+      {(dataChanged || isRefetching) && (
         <Portal>
           <Box sx={{ zIndex: 10000, position: 'fixed', right: 10, top: 60 }}>
             <Alert
               elevation={1}
               severity="warning"
               action={
-                <Button color="inherit" size="small" onClick={handleRefetch}>
+                <LoadingButton
+                  color="inherit"
+                  size="small"
+                  onClick={handleRefetch}
+                  loading={isRefetching}
+                >
                   {t('batch_operations_refresh_button')}
-                </Button>
+                </LoadingButton>
               }
             >
               {t('batch_operations_outdated_message')}

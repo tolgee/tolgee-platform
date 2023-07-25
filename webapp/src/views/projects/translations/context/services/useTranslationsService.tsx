@@ -191,13 +191,15 @@ export const useTranslationsService = (props: Props) => {
   };
 
   const refetchTranslations = (callback?: () => any) => {
-    // force refetch from first page
-    translations.remove();
-    callback?.();
-    window?.scrollTo(0, 0);
-    setTimeout(() => {
-      // make sure that we are refetching, but prevent double fetch
-      translations.refetch();
+    return new Promise<void>((resolve) => {
+      // force refetch from first page
+      translations.remove();
+      callback?.();
+      window?.scrollTo(0, 0);
+      setTimeout(() => {
+        // make sure that we are refetching, but prevent double fetch
+        translations.refetch().then(() => resolve());
+      });
     });
   };
 

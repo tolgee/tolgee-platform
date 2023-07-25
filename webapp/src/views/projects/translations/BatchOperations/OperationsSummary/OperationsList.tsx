@@ -7,12 +7,14 @@ import { useTolgee, useTranslate } from '@tolgee/react';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOperationTypeTranslation';
+import { OperationAbortButton } from './OperationAbortButton';
+import { CANCELLABLE_STATUSES } from './utils';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto auto auto 1fr auto;
+  grid-template-columns: auto auto auto 1fr auto auto;
   align-items: center;
   padding: 15px;
   gap: 0 10px;
@@ -35,6 +37,7 @@ export const OperationsList = ({ data }: Props) => {
   const translateType = useBatchOperationTypeTranslate();
   const theme = useTheme();
   const { t } = useTranslate();
+
   return (
     <StyledContainer>
       {data?.map((o) => (
@@ -42,7 +45,6 @@ export const OperationsList = ({ data }: Props) => {
           <StyledCell>
             {Intl.DateTimeFormat(tolgee.getLanguage(), {
               timeStyle: 'short',
-              dateStyle: 'short',
             }).format(o.updatedAt)}
           </StyledCell>
           <StyledCell>{translateType(o.type)}</StyledCell>
@@ -66,6 +68,11 @@ export const OperationsList = ({ data }: Props) => {
                 }}
                 size={24}
               />
+            )}
+          </StyledCell>
+          <StyledCell>
+            {CANCELLABLE_STATUSES.includes(o.status) && (
+              <OperationAbortButton operation={o} />
             )}
           </StyledCell>
           {o.errorMessage && (

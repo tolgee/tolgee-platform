@@ -34,7 +34,7 @@ export const BatchOperationDialog = ({
   const project = useProject();
 
   const liveBatch = useProjectContext((c) =>
-    c.batchOperations.find((o) => o.id === operation.id)
+    c.batchOperations?.find((o) => o.id === operation.id)
   );
 
   const operationLoadable = useApiQuery({

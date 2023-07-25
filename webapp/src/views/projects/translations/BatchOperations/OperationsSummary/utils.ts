@@ -29,3 +29,5 @@ export const STATIC_STATUSES: BatchJobStatus[] = [
   'CANCELLED',
   'PENDING',
 ];
+
+export const CANCELLABLE_STATUSES: BatchJobStatus[] = ['PENDING', 'RUNNING'];
