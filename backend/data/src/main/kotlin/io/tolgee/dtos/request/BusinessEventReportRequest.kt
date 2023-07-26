@@ -6,6 +6,8 @@ data class BusinessEventReportRequest(
   @field:NotBlank
   var eventName: String = "",
 
+  var anonymousUserId: String? = null,
+
   var organizationId: Long? = null,
 
   var projectId: Long? = null,

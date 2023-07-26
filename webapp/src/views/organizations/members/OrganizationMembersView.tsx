@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -12,7 +12,7 @@ import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { InviteDialog } from './InviteDialog';
 import { InvitationItem } from './InvitationItem';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useReportEvent } from '../useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 export const OrganizationMembersView: FunctionComponent = () => {
   const organization = useOrganization();

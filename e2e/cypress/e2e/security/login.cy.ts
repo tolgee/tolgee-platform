@@ -12,6 +12,9 @@ import {
 } from '../../common/apiCalls/common';
 import { assertMessage, getPopover } from '../../common/shared';
 import {
+  checkAnonymousIdSet,
+  checkAnonymousIdUnset,
+  checkAnonymousUserIdentified,
   loginViaForm,
   loginWithFakeGithub,
   loginWithFakeOAuth2,
@@ -24,7 +27,13 @@ context('Login', () => {
   });
 
   it('login', () => {
+    checkAnonymousIdSet();
+
     loginViaForm();
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+
     cy.gcy('login-button').should('not.exist');
     cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
   });
@@ -42,7 +51,12 @@ context('Login', () => {
   });
 
   it('login with github', () => {
+    checkAnonymousIdSet();
+
     loginWithFakeGithub();
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
   });
   it('login with oauth2', () => {
     loginWithFakeOAuth2();
@@ -51,9 +65,11 @@ context('Login', () => {
   it('logout', () => {
     login();
     cy.reload();
+    checkAnonymousIdUnset();
     cy.xpath("//*[@aria-controls='user-menu']").click();
     getPopover().contains('Logout').click();
     cy.gcy('login-button').should('be.visible');
+    checkAnonymousIdSet();
   });
 
   it('resets password', () => {

@@ -12,11 +12,11 @@ import { AppState } from 'tg.store/index';
 import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { SPLIT_CONTENT_BREAK_POINT } from '../SplitContent';
+import { SPLIT_CONTENT_BREAK_POINT, SplitContent } from '../SplitContent';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { SplitContent } from '../SplitContent';
 import { LoginMoreInfo } from './LoginMoreInfo';
+import { useReportOnce } from 'tg.hooks/useReportEvent';
 
 interface LoginProps {}
 
@@ -33,6 +33,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   const history = useHistory();
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
+
+  useReportOnce('LOGIN_PAGE_OPENED');
 
   const authLoading = useSelector(
     (state: AppState) => state.global.authLoading

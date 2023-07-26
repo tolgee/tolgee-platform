@@ -10,7 +10,7 @@ import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
 import { useEffect, useState } from 'react';
 import { planIsPeriodDependant } from './Plans/PlanPrice';
-import { useReportEvent } from '../../../useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 const StyledShopping = styled('div')`
   display: grid;

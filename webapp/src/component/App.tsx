@@ -121,13 +121,11 @@ const Head: FC = () => {
     </Helmet>
   );
 };
-
 export class App extends React.Component {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     errorActions.globalError.dispatch(error as GlobalError);
     throw error;
   }
-
   render() {
     return (
       <>

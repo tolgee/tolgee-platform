@@ -6,6 +6,7 @@ import io.tolgee.activity.UtmData
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.request.BusinessEventReportRequest
+import io.tolgee.dtos.request.IdentifyRequest
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -33,7 +34,8 @@ class BusinessEventPublisher(
         projectId = request.projectId,
         organizationId = request.organizationId,
         utmData = getUtmData(),
-        data = request.data
+        data = request.data,
+        anonymousUserId = request.anonymousUserId
       )
     )
   }
@@ -47,6 +49,17 @@ class BusinessEventPublisher(
         data = getDataWithSdkInfo(event.data)
       )
     )
+  }
+
+  fun publish(event: IdentifyRequest) {
+    authenticationFacade.userAccountOrNull?.id?.let { userId ->
+      applicationEventPublisher.publishEvent(
+        OnIdentifyEvent(
+          userAccountId = userId,
+          anonymousUserId = event.anonymousUserId
+        )
+      )
+    }
   }
 
   fun publishOnceInTime(

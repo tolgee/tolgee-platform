@@ -214,6 +214,9 @@ export interface paths {
   "/v2/slug/generate-organization": {
     post: operations["generateOrganizationSlug"];
   };
+  "/v2/public/telemetry/report": {
+    post: operations["report"];
+  };
   "/v2/public/licensing/subscription": {
     post: operations["getMySubscription"];
   };
@@ -231,6 +234,12 @@ export interface paths {
   };
   "/v2/public/licensing/prepare-set-key": {
     post: operations["prepareSetLicenseKey"];
+  };
+  "/v2/public/business-events/report": {
+    post: operations["report_1"];
+  };
+  "/v2/public/business-events/identify": {
+    post: operations["identify"];
   };
   "/v2/projects": {
     get: operations["getAll"];
@@ -300,9 +309,6 @@ export interface paths {
   };
   "/v2/ee-license/prepare-set-license-key": {
     post: operations["prepareSetLicenseKey_1"];
-  };
-  "/v2/business-events/report": {
-    post: operations["report"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -1156,15 +1162,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1299,15 +1305,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
-      username?: string;
-      /** Format: int64 */
-      projectId: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      username?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1318,6 +1324,19 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    TelemetryReportRequest: {
+      instanceId: string;
+      /** Format: int64 */
+      projectsCount: number;
+      /** Format: int64 */
+      translationsCount: number;
+      /** Format: int64 */
+      languagesCount: number;
+      /** Format: int64 */
+      distinctLanguagesCount: number;
+      /** Format: int64 */
+      usersCount: number;
     };
     GetMySubscriptionDto: {
       licenseKey: string;
@@ -1432,6 +1451,18 @@ export interface components {
       translations: components["schemas"]["AverageProportionalUsageItemModel"];
       credits?: components["schemas"]["SumUsageItemModel"];
       total: number;
+    };
+    BusinessEventReportRequest: {
+      eventName: string;
+      anonymousUserId?: string;
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      projectId?: number;
+      data?: { [key: string]: { [key: string]: unknown } };
+    };
+    IdentifyRequest: {
+      anonymousUserId: string;
     };
     CreateProjectDTO: {
       name: string;
@@ -1707,14 +1738,6 @@ export interface components {
       createdAt: string;
       location?: string;
     };
-    BusinessEventReportRequest: {
-      eventName: string;
-      /** Format: int64 */
-      organizationId?: number;
-      /** Format: int64 */
-      projectId?: number;
-      data?: { [key: string]: { [key: string]: unknown } };
-    };
     CreateApiKeyDto: {
       /** Format: int64 */
       projectId: number;
@@ -1841,17 +1864,17 @@ export interface components {
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1883,8 +1906,8 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      displayName?: string;
       name: string;
+      displayName?: string;
       description?: string;
     };
     PagedModelProjectModel: {
@@ -1953,8 +1976,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -1962,8 +1985,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2396,15 +2419,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
+      description: string;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2525,15 +2548,15 @@ export interface components {
       id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
-      username?: string;
-      /** Format: int64 */
-      projectId: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       lastUsedAt?: number;
-      scopes: string[];
+      username?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -4837,6 +4860,29 @@ export interface operations {
       };
     };
   };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
   getMySubscription: {
     responses: {
       /** OK */
@@ -4984,6 +5030,52 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+      };
+    };
+  };
+  report_1: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BusinessEventReportRequest"];
+      };
+    };
+  };
+  identify: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IdentifyRequest"];
       };
     };
   };
@@ -5932,29 +6024,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetLicenseKeyDto"];
-      };
-    };
-  };
-  report: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BusinessEventReportRequest"];
       };
     };
   };

@@ -10,7 +10,7 @@ import { MdxProvider } from 'tg.component/MdxProvider';
 import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState';
 import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
-import { useReportEvent } from '../../organizations/useReportEvent';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
