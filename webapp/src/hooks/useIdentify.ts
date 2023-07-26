@@ -14,12 +14,13 @@ export const useIdentify = (userId?: number) => {
   });
 
   useEffect(() => {
-    const enabled = !!AnonymousIdService.get() && !!userId;
+    const anonymousId = AnonymousIdService.get();
+    const enabled = !!anonymousId && !!userId;
     if (enabled) {
       mutation.mutate({
         content: {
           'application/json': {
-            anonymousUserId: AnonymousIdService.get(),
+            anonymousUserId: anonymousId!,
           },
         },
       });

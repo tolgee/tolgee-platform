@@ -52,7 +52,7 @@ export const loginViaForm = (username = USERNAME, password = PASSWORD) => {
     .type(password)
     .should('have.value', password);
   cy.gcy('login-button').click();
-  waitForGlobalLoading();
+  return waitForGlobalLoading();
 };
 
 export const visitSignUp = () => cy.visit(HOST + '/sign_up');
@@ -77,3 +77,18 @@ export const signUpAfter = (username: string) => {
   enableRegistration();
   deleteUserSql(username);
 };
+
+export function checkAnonymousIdUnset() {
+  cy.wrap(localStorage).invoke('getItem', 'anonymousUserId').should('be.null');
+}
+
+export function checkAnonymousIdSet() {
+  cy.intercept('POST', '/v2/public/business-events/identify').as('identify');
+  cy.wrap(localStorage)
+    .invoke('getItem', 'anonymousUserId')
+    .should('have.length', 36);
+}
+
+export function checkAnonymousUserIdentified() {
+  cy.wait('@identify').its('response.statusCode').should('eq', 200);
+}

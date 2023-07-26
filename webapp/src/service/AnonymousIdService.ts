@@ -12,6 +12,7 @@ export const AnonymousIdService = {
   reset() {
     return localStorage.setItem(
       ANONYMOUS_ID_LOCAL_STORAGE_KEY,
+      // @ts-ignore
       crypto.randomUUID()
     );
   },

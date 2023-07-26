@@ -588,6 +588,11 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
        * @example 200001,200004
        */
@@ -597,11 +602,6 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
       /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
@@ -1304,9 +1304,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       username?: string;
@@ -2547,9 +2547,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       username?: string;

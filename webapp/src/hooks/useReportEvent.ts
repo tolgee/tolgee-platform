@@ -1,7 +1,6 @@
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectContextOptional } from './useProject';
-import { AnonymousIdService } from 'tg.service/AnonymousIdService';
 
 export const useReportEvent = () => {
   const reportMutation = useApiMutation({
@@ -26,7 +25,6 @@ export const useReportEvent = () => {
           data,
           projectId: project?.id,
           organizationId: organizationId,
-          anonymousUserId: AnonymousIdService.get(),
         },
       },
     });

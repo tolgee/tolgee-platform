@@ -14,7 +14,7 @@ export const MandatoryDataProvider = (props: any) => {
   const isLoading = useGlobalContext((v) => v.isLoading);
   const isFetching = useGlobalContext((v) => v.isFetching);
 
-  useIdentify(!!userData?.id);
+  useIdentify(userData?.id);
 
   useEffect(() => {
     if (config?.clientSentryDsn) {
