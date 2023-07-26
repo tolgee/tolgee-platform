@@ -304,17 +304,19 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val adminsJobs = (1..3).map { runChunkedJob(50) }
     val anotherUsersJobs = (1..3).map { runChunkedJob(50, testData.anotherUser) }
 
-    performProjectAuthGet("current-batch-jobs")
-      .andIsOk.andPrettyPrint.andAssertThatJson {
-        node("_embedded.batchJobs") {
-          isArray.hasSize(6)
-          node("[0].status").isEqualTo("RUNNING")
-          node("[1].status").isEqualTo("RUNNING")
-          node("[2].status").isEqualTo("PENDING")
+    try {
+      performProjectAuthGet("current-batch-jobs")
+        .andIsOk.andPrettyPrint.andAssertThatJson {
+          node("_embedded.batchJobs") {
+            isArray.hasSize(6)
+            node("[0].status").isEqualTo("RUNNING")
+            node("[1].status").isEqualTo("PENDING")
+            node("[2].status").isEqualTo("PENDING")
+          }
         }
-      }
-
-    wait = false
+    } finally {
+      wait = false
+    }
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
