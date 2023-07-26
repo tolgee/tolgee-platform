@@ -5,20 +5,30 @@
 package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class ProjectServiceTest : AbstractSpringTest() {
+
+  @Autowired
+  private lateinit var batchJobService: BatchJobService
 
   @Test
   fun testFindAllPermitted() {
@@ -136,6 +146,36 @@ class ProjectServiceTest : AbstractSpringTest() {
     }
     executeInNewTransaction(platformTransactionManager) {
       projectService.deleteProject(testData.projectBuilder.self.id)
+    }
+  }
+
+  @Test
+  fun `deletes project with batch jobs`() {
+    val testData = BatchJobsTestData()
+    val keys = testData.addTranslationOperationData(10)
+    testDataService.saveTestData(testData.root)
+
+    val job = batchJobService.startJob(
+      request = DeleteKeysRequest().apply {
+        keyIds = keys.map { it.id }
+      },
+      project = testData.projectBuilder.self,
+      author = testData.user,
+      type = BatchJobType.DELETE_KEYS
+    )
+
+    waitFor {
+      executeInNewTransaction {
+        batchJobService.getJobDto(job.id).status.completed
+      }
+    }
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.deleteProject(projectService.get(testData.projectBuilder.self.id).id)
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
     }
   }
 }

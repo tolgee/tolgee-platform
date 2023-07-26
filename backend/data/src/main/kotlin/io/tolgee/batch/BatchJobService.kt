@@ -194,4 +194,53 @@ class BatchJobService(
   @Suppress("UNCHECKED_CAST")
   fun <RequestType> getProcessor(type: BatchJobType): ChunkProcessor<RequestType> =
     applicationContext.getBean(type.processor.java) as ChunkProcessor<RequestType>
+
+  fun deleteAllByProjectId(projectId: Long) {
+    val batchJobs = getAllByProjectId(projectId)
+    val batchJobIds = batchJobs.map { it.id }
+    val executions = findAllExecutionsByBatchJobIdIn(batchJobIds)
+    val executionIds = executions.map { it.id }
+    setActivityRevisionFieldsToNull(batchJobIds, executionIds)
+    deleteExecutions(executions)
+    batchJobRepository.deleteAll(batchJobs)
+  }
+
+  private fun deleteExecutions(executions: List<BatchJobChunkExecution>) {
+    entityManager.createQuery(
+      """
+      delete from BatchJobChunkExecution e where e.id in :executionIds
+      """.trimIndent()
+    ).setParameter("executionIds", executions.map { it.id })
+      .executeUpdate()
+  }
+
+  private fun setActivityRevisionFieldsToNull(batchJobIds: List<Long>, executionIds: List<Long>) {
+    entityManager.createQuery(
+      """
+      update ActivityRevision ar set ar.batchJob = null, ar.batchJobChunkExecution = null
+      where ar.batchJob.id in :batchJobIds or ar.batchJobChunkExecution.id in :executionIds
+      """.trimIndent()
+    ).setParameter("batchJobIds", batchJobIds)
+      .setParameter("executionIds", executionIds)
+      .executeUpdate()
+  }
+
+  private fun findAllExecutionsByBatchJobIdIn(jobIds: List<Long>): List<BatchJobChunkExecution> {
+    return entityManager.createQuery(
+      """
+      from BatchJobChunkExecution e
+      where e.batchJob.id in :jobIds
+      """.trimIndent(),
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("jobIds", jobIds)
+      .resultList
+  }
+
+  fun getAllByProjectId(projectId: Long): List<BatchJob> {
+    return batchJobRepository.findAllByProjectId(projectId)
+  }
+
+  fun deleteMultiple(ids: Iterable<Long>) {
+  }
 }
