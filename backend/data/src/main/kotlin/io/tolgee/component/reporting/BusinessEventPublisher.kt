@@ -35,6 +35,7 @@ class BusinessEventPublisher(
         organizationId = request.organizationId,
         utmData = getUtmData(),
         data = request.data,
+        anonymousUserId = request.anonymousUserId
       )
     )
   }

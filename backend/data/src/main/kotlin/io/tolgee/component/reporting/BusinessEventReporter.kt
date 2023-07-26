@@ -48,7 +48,7 @@ class BusinessEventReporter(
   }
 
   private fun captureWithPostHog(data: OnBusinessEventToCaptureEvent) {
-    val id = data.userAccountDto?.id ?: data.instanceId ?: return
+    val id = data.userAccountDto?.id ?: data.instanceId ?: data.anonymousUserId
     val setEntry = getIdentificationMapForPostHog(data)
 
     postHog?.capture(
@@ -76,7 +76,7 @@ class BusinessEventReporter(
         )
       )
     } ?: emptyMap()
-    return setEntry
+    return setEntry + getAnonIdMap(data)
   }
 
   private fun getSetMapOfUserData(userAccountDto: UserAccountDto) = mapOf(
@@ -85,6 +85,16 @@ class BusinessEventReporter(
       "name" to userAccountDto.name,
     ),
   )
+
+  fun getAnonIdMap(data: OnBusinessEventToCaptureEvent): Map<String, String> {
+    return (
+      data.anonymousUserId?.let {
+        mapOf(
+          "${'$'}anon_distinct_id" to data.anonymousUserId,
+        )
+      }
+      ) ?: emptyMap()
+  }
 
   private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
     val projectDto = data.projectDto ?: data.projectId?.let { projectService.findDto(it) }
