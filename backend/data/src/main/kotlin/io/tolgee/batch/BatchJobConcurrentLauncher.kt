@@ -174,7 +174,10 @@ class BatchJobConcurrentLauncher(
      * Only single job can run in project at the same time
      */
     if (!batchJobProjectLockingManager.canRunBatchJobOfExecution(executionItem.jobId)) {
-      logger.debug("⚠️ Cannot run execution ${executionItem.chunkExecutionId}. Other job from the project is currently running, skipping")
+      logger.debug(
+        "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
+          "Other job from the project is currently running, skipping"
+      )
 
       // we haven't publish consuming, so we can add it only to the local queue
       batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
