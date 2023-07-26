@@ -1,3 +1,10 @@
+## [3.24.1](https://github.com/tolgee/tolgee-platform/compare/v3.24.0...v3.24.1) (2023-07-26)
+
+
+### Bug Fixes
+
+* Sign up reporting permission error ([#1825](https://github.com/tolgee/tolgee-platform/issues/1825)) ([af1dad9](https://github.com/tolgee/tolgee-platform/commit/af1dad9d8c0dfc2a813c4b144c135217482ab387))
+
 # [3.24.0](https://github.com/tolgee/tolgee-platform/compare/v3.23.4...v3.24.0) (2023-07-24)
 
 
