@@ -41,7 +41,8 @@ class BatchJobActionService(
   private val redisTemplate: StringRedisTemplate,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -116,7 +117,8 @@ class BatchJobActionService(
   }
 
   private fun getPendingUnlockedExecutionItem(executionItem: ExecutionQueueItem): BatchJobChunkExecution? {
-    val lockedExecution = getExecutionIfCanAcquireLock(executionItem.chunkExecutionId)
+    val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
+
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
@@ -127,7 +129,8 @@ class BatchJobActionService(
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       return null
     }
-    return lockedExecution
+
+    return getExecutionIfCanLockJobForProject(lockedExecution)
   }
 
   private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?, jobCharacter: JobCharacter) {
@@ -175,12 +178,26 @@ class BatchJobActionService(
     }
   }
 
-  fun getExecutionIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
+  /**
+   * Only single job can run in project at the same time
+   */
+  private fun getExecutionIfCanLockJobForProject(execution: BatchJobChunkExecution): BatchJobChunkExecution? {
+    if (batchJobProjectLockingManager.canRunBatchJobOfExecution(execution)) {
+      return execution
+    }
+    logger.debug("⚠️ Cannot run execution ${execution.id}. Other job from the project is currently running, skipping")
+
+    // we haven't publish consuming, so we can add it only to the local queue
+    batchJobChunkExecutionQueue.addExecutionsToLocalQueue(listOf(execution))
+    return null
+  }
+
+  private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager.createQuery(
       """
-          from BatchJobChunkExecution bjce
-          where bjce.id = :id
+              from BatchJobChunkExecution bjce
+              where bjce.id = :id
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )

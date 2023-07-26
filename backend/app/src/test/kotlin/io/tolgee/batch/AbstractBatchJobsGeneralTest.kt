@@ -12,6 +12,8 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
@@ -23,9 +25,11 @@ import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.timeout
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -75,6 +79,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
+
+  @Autowired
+  lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+
+  @Autowired
+  @SpyBean
+  lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
 
   @Autowired
   @SpyBean
@@ -363,27 +374,90 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     batchJobCancellationManager.cancel(job.id)
 
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        val finishedJob = batchJobService.getJobDto(job.id)
-        finishedJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-      }
-    }
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
-    assertStatusReported(BatchJobStatus.CANCELLED)
+    websocketHelper.receivedMessages.last.contains("CANCELLED")
   }
 
   @Test
-  /**
-   * the chunk processing status is stored in the database in the same transaction
-   * so when it fails on some management processing issue, we need to handle this
-   *
-   * The execution itself is added back to queue and retried, but we don't want it to be retreied forever.
-   * That's why there is a limit of few retries per chunk
-   *
-   * This test tests that the job fails after few retries
-   */
+  fun `it locks the single job for project`() {
+    batchJobConcurrentLauncher.pause = true
+
+    val job1 = runChunkedJob(20)
+    val job2 = runChunkedJob(20)
+
+    val executions = getExecutions(listOf(job1.id, job2.id))
+
+    val firstExecution = executions[job1.id]!!.first()
+    val secondExecution = executions[job2.id]!!.first()
+    val thirdExecution = executions[job1.id]!![1]
+    val fourthExecution = executions[job2.id]!![1]
+
+    batchJobChunkExecutionQueue.clear()
+
+    batchJobConcurrentLauncher.pause = false
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
+
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(firstExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
+    }
+    // The first job is now locked
+    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job1.id)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
+
+    // it tries to lock the second job but it can't since the first job is locked
+    verify(batchJobProjectLockingManager, timeout(1000).times(1))
+      .canRunBatchJobOfExecution(
+        argThat {
+          this.batchJob.id == job2.id
+        }
+      )
+
+    // it doesn't run the second execution since the first job is locked
+    Thread.sleep(1000)
+    batchJobService.getExecution(secondExecution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(thirdExecution))
+
+    // second and last execution of job1 is done, so the second job is locked now
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(thirdExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
+    }
+
+    waitForNotThrowing {
+      // the project was unlocked before job2 acquired the job
+      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id))
+    }
+
+    waitForNotThrowing(pollTime = 1000) {
+      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job2.id)
+    }
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(fourthExecution))
+
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(fourthExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS &&
+        batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
+    }
+
+    batchJobService.getJobDto(job1.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+  }
+
+
+  @Test
+    /**
+     * the chunk processing status is stored in the database in the same transaction
+     * so when it fails on some management processing issue, we need to handle this
+     *
+     * The execution itself is added back to queue and retried, but we don't want it to be retreied forever.
+     * That's why there is a limit of few retries per chunk
+     *
+     * This test tests that the job fails after few retries
+     */
   fun `retries and fails on management exceptions issues`() {
     whenever(preTranslationByTmChunkProcessor.process(any(), any(), any(), any())).then {}
 
@@ -416,7 +490,26 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
   }
 
-  protected fun runChunkedJob(keyCount: Int): BatchJob {
+  private fun BatchJob.waitForCompleted(): BatchJobDto {
+    waitForNotThrowing(pollTime = 1000) {
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(this.id)
+        finishedJob.status.completed.assert.isTrue()
+      }
+    }
+    return batchJobService.getJobDto(this.id)
+  }
+
+  private fun getExecutions(
+    jobIds: List<Long>,
+  ): Map<Long, List<BatchJobChunkExecution>> =
+    entityManager.createQuery(
+      """from BatchJobChunkExecution b where b.batchJob.id in :ids""",
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }
+
+  fun runChunkedJob(keyCount: Int): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
         request = PreTranslationByTmRequest().apply {

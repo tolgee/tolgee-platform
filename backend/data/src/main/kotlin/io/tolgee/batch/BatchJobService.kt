@@ -20,6 +20,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -190,6 +191,22 @@ class BatchJobService(
     return BatchJobView(job, progress, errorMessage)
   }
 
+  fun getAllUnlockedChunksForJobs(jobIds: Iterable<Long>): MutableList<BatchJobChunkExecution> {
+    return entityManager.createQuery(
+      """
+          from BatchJobChunkExecution bjce
+          join fetch bjce.batchJob bk
+          where bjce.batchJob.id in :jobIds
+      """.trimIndent(),
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("jobIds", jobIds)
+      .setHint(
+        "javax.persistence.lock.timeout",
+        LockOptions.SKIP_LOCKED
+      ).resultList
+  }
+
   fun getProcessor(type: BatchJobType): ChunkProcessor<Any, Any, Any> =
     applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
@@ -249,5 +266,30 @@ class BatchJobService(
     )
       .setParameter("id", id)
       .resultList
+  }
+
+  fun getAllIncompleteJobs(projectId: Long): List<BatchJob> {
+    return entityManager.createQuery(
+      """from BatchJob j
+      where j.project.id = :projectId
+      and j.status not in :completedStatuses
+    """,
+      BatchJob::class.java
+    )
+      .setParameter("projectId", projectId)
+      .setParameter("completedStatuses", BatchJobStatus.values().filter { it.completed })
+      .resultList
+  }
+
+  fun getExecution(id: Long): BatchJobChunkExecution {
+    return entityManager.createQuery(
+      """from BatchJobChunkExecution bjce
+      join fetch bjce.batchJob bk
+      where bjce.id = :id
+    """,
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("id", id)
+      .singleResult ?: throw NotFoundException()
   }
 }
