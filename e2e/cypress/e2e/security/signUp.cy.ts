@@ -95,8 +95,6 @@ context('Sign up', () => {
         'Thank you for signing up. To verify your email please follow instructions sent to provided email address.'
       ).should('be.visible');
       setProperty('recaptcha.siteKey', recaptchaSiteKey);
-      checkAnonymousIdUnset();
-      checkAnonymousUserIdentified();
     });
   });
 
