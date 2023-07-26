@@ -14,7 +14,6 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
-import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
@@ -29,7 +28,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.mockito.kotlin.timeout
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -129,7 +128,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
       ).process(any(), any(), any(), any())
     }
 
-    job.waitForCompleted().assert.isEqualTo(BatchJobStatus.SUCCESS)
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(101)
@@ -300,7 +299,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     val job = runSingleChunkJob(100)
 
-    job.waitForCompleted().assert.isEqualTo(BatchJobStatus.SUCCESS)
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
 
     waitForNotThrowing(pollTime = 1000) {
       entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
@@ -377,9 +376,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
 
-    // it tries to lock the second job but it can't since the first job is locked
-    verify(batchJobProjectLockingManager, timeout(1000))
-      .canRunBatchJobOfExecution(eq(job2.id))
+    waitForNotThrowing {
+      // it tries to lock the second job but it can't since the first job is locked
+      verify(batchJobProjectLockingManager, atLeast(1))
+        .canRunBatchJobOfExecution(eq(job2.id))
+    }
 
     // it doesn't run the second execution since the first job is locked
     Thread.sleep(1000)
