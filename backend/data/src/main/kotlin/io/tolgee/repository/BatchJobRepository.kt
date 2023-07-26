@@ -66,4 +66,5 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
   """
   )
   fun getErrorMessages(jobIds: List<Long>): List<JobErrorMessagesView>
+  fun findAllByProjectId(projectId: Long): List<BatchJob>
 }
