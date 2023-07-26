@@ -127,7 +127,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "keyIds" to keyIds,
       )
-    ).andIsOk
+    ).andIsOk.waitForJobCompleted()
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val all = keyService.getAll(testData.projectBuilder.self.id)
