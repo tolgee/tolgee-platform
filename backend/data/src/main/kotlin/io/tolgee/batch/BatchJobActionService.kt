@@ -130,7 +130,7 @@ class BatchJobActionService(
       return null
     }
 
-    return getExecutionIfCanLockJobForProject(lockedExecution)
+    return lockedExecution
   }
 
   private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?, jobCharacter: JobCharacter) {
@@ -176,20 +176,6 @@ class BatchJobActionService(
         .writeValueAsString(JobQueueItemsEvent(listOf(item), QueueEventType.REMOVE))
       redisTemplate.convertAndSend(RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC, message)
     }
-  }
-
-  /**
-   * Only single job can run in project at the same time
-   */
-  private fun getExecutionIfCanLockJobForProject(execution: BatchJobChunkExecution): BatchJobChunkExecution? {
-    if (batchJobProjectLockingManager.canRunBatchJobOfExecution(execution)) {
-      return execution
-    }
-    logger.debug("⚠️ Cannot run execution ${execution.id}. Other job from the project is currently running, skipping")
-
-    // we haven't publish consuming, so we can add it only to the local queue
-    batchJobChunkExecutionQueue.addExecutionsToLocalQueue(listOf(execution))
-    return null
   }
 
   private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {

@@ -1,7 +1,6 @@
 package io.tolgee.batch
 
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.model.batch.BatchJobChunkExecution
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
@@ -26,8 +25,8 @@ class BatchJobProjectLockingManager(
     }
   }
 
-  fun canRunBatchJobOfExecution(execution: BatchJobChunkExecution): Boolean {
-    val jobDto = batchJobService.getJobDto(execution.batchJob.id)
+  fun canRunBatchJobOfExecution(batchJobId: Long): Boolean {
+    val jobDto = batchJobService.getJobDto(batchJobId)
     return tryLockJobForProject(jobDto)
   }
 

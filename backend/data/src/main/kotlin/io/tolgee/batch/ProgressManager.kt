@@ -146,14 +146,16 @@ class ProgressManager(
       eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
       cachingBatchJobService.saveJob(jobEntity)
     } finally {
-      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id, job.projectId))
+      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id, job.projectId, jobEntity.status))
     }
   }
 
   @TransactionalEventListener(OnBatchJobStatusUpdated::class)
   fun handleJobStatusUpdated(event: OnBatchJobStatusUpdated) {
     cachingBatchJobService.evictJobCache(event.jobId)
-    batchJobProjectLockingManager.unlockJobForProject(event.projectId)
+    if (event.status.completed) {
+      batchJobProjectLockingManager.unlockJobForProject(event.projectId)
+    }
   }
 
   fun Map<Long, ExecutionState>.getInfoForJobResult(): JobResultInfo {
