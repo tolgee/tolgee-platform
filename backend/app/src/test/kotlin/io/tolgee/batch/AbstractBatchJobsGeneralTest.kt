@@ -18,6 +18,8 @@ import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import io.tolgee.util.addSeconds
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
@@ -44,7 +46,7 @@ import kotlin.math.ceil
 
 @WebsocketTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
+abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   private lateinit var testData: BatchJobsTestData
 
@@ -350,6 +352,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `it locks the single job for project`() {
+    logger.info("Running test: it locks the single job for project")
     batchJobConcurrentLauncher.pause = true
 
     val job1 = runChunkedJob(20)

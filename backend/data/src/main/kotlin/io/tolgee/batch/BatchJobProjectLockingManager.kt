@@ -1,6 +1,8 @@
 package io.tolgee.batch
 
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
@@ -18,7 +20,7 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
-) {
+) : Logging {
   companion object {
     private val localProjectLocks by lazy {
       ConcurrentHashMap<Long, Long?>()
@@ -31,6 +33,7 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockJobForProject(jobDto: BatchJobDto): Boolean {
+    logger.debug("Trying to lock job ${jobDto.id} for project ${jobDto.projectId}")
     return if (usingRedisProvider.areWeUsingRedis) {
       tryLockWithRedisson(jobDto)
     } else {
@@ -71,15 +74,26 @@ class BatchJobProjectLockingManager(
   private fun computeFnBody(toLock: BatchJobDto, currentValue: Long?): Long {
     // nothing is locked
     if (currentValue == 0L) {
+      logger.debug("Locking job ${toLock.id} for project ${toLock.projectId}, nothing is locked")
       return toLock.id
     }
 
     // value for the project is not initialized yet
     if (currentValue == null) {
+      logger.debug("Getting initial locked state from DB state")
       // we have to find out from database if there is any running job for the project
-      return getInitialJobId(toLock.projectId) ?: toLock.id
+      val initial = getInitialJobId(toLock.projectId)
+      logger.debug("Initial locked job $initial for project ${toLock.projectId}")
+      return if (initial == null) {
+        logger.debug("No job found, locking ${toLock.id}")
+        toLock.id
+      } else {
+        logger.debug("Job found, locking $initial")
+        initial
+      }
     }
 
+    logger.debug("Job $currentValue is locked for project ${toLock.projectId}")
     // if we cannot lock, we are returning current value
     return currentValue
   }
