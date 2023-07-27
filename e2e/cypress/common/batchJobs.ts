@@ -24,3 +24,8 @@ export function executeBatchOperation() {
   cy.waitForDom();
   cy.gcy('batch-operation-dialog-ok', { timeout: 10_000 }).click();
 }
+
+export function deleteSelected() {
+  selectOperation('Delete');
+  executeBatchOperationWithConfirmation();
+}
