@@ -3,9 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.request.TagKeysRequest
-import io.tolgee.model.EntityWithId
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.batch.TagKeysParams
+import io.tolgee.model.batch.params.TagKeysParams
 import io.tolgee.service.key.TagService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -16,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class TagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService
-) : ChunkProcessor<TagKeysRequest> {
+) : ChunkProcessor<TagKeysRequest, TagKeysParams> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -39,17 +37,12 @@ class TagKeysChunkProcessor(
     return data.keyIds
   }
 
-  private fun getParams(job: BatchJobDto): TagKeysParams {
-    return entityManager.createQuery(
-      """from TagKeysParams tkp where tkp.batchJob.id = :batchJobId""",
-      TagKeysParams::class.java
-    ).setParameter("batchJobId", job.id).singleResult
-      ?: throw IllegalStateException("No params found")
+  override fun getParamsType(): Class<TagKeysParams> {
+    return TagKeysParams::class.java
   }
 
-  override fun getParams(data: TagKeysRequest, job: BatchJob): EntityWithId? {
+  override fun getParams(data: TagKeysRequest): TagKeysParams {
     return TagKeysParams().apply {
-      this.batchJob = job
       this.tags = data.tags
     }
   }

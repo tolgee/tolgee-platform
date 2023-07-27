@@ -28,7 +28,8 @@ class ProjectActivityModelAssembler(
       },
       modifiedEntities = getModifiedEntities(view),
       meta = view.meta,
-      counts = view.counts
+      counts = view.counts,
+      params = view.params
     )
   }
 

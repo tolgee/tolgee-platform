@@ -4,10 +4,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
-import io.tolgee.batch.request.BatchTranslateRequest
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.MachineTranslationRequest
+import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.batch.request.TagKeysRequest
@@ -42,18 +43,33 @@ class StartBatchJobController(
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler
 ) {
-  @PostMapping(value = ["/translate"])
+  @PostMapping(value = ["/pre-translate-by-tm"])
   @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.BATCH_AUTO_TRANSLATE)
+  @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_MT)
   @Operation(summary = "Translates provided keys to provided languages")
-  fun translate(@Valid @RequestBody data: BatchTranslateRequest): BatchJobModel {
+  fun translate(@Valid @RequestBody data: PreTranslationByTmRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     return batchJobService.startJob(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.AUTO_TRANSLATION
+      BatchJobType.PRE_TRANSLATE_BY_MT
+    ).model
+  }
+
+  @PostMapping(value = ["/machine-translate"])
+  @AccessWithApiKey()
+  @AccessWithProjectPermission(Scope.BATCH_MACHINE_TRANSLATE)
+  @Operation(summary = "Translates provided keys to provided languages")
+  fun machineTranslation(@Valid @RequestBody data: MachineTranslationRequest): BatchJobModel {
+    securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.userAccountEntity,
+      BatchJobType.MACHINE_TRANSLATE
     ).model
   }
 

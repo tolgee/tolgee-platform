@@ -5,9 +5,7 @@ import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.constants.Message
-import io.tolgee.model.EntityWithId
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.batch.SetKeysNamespaceParams
+import io.tolgee.model.batch.params.SetKeysNamespaceParams
 import io.tolgee.service.key.KeyService
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage
@@ -20,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
   private val keyService: KeyService
-) : ChunkProcessor<SetKeysNamespaceRequest> {
+) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -50,17 +48,12 @@ class SetKeysNamespaceChunkProcessor(
     return data.keyIds
   }
 
-  private fun getParams(job: BatchJobDto): SetKeysNamespaceParams {
-    return entityManager.createQuery(
-      """from SetKeysNamespaceParams tkp where tkp.batchJob.id = :batchJobId""",
-      SetKeysNamespaceParams::class.java
-    ).setParameter("batchJobId", job.id).singleResult
-      ?: throw IllegalStateException("No params found")
+  override fun getParamsType(): Class<SetKeysNamespaceParams> {
+    return SetKeysNamespaceParams::class.java
   }
 
-  override fun getParams(data: SetKeysNamespaceRequest, job: BatchJob): EntityWithId? {
+  override fun getParams(data: SetKeysNamespaceRequest): SetKeysNamespaceParams {
     return SetKeysNamespaceParams().apply {
-      this.batchJob = job
       this.namespace = data.namespace
     }
   }

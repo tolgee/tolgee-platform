@@ -65,7 +65,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it batch translates`() {
+  fun `it pre-translates by mt`() {
     val keyCount = 1000
     val keys = testData.addTranslationOperationData(keyCount)
     saveAndPrepare()
@@ -73,7 +73,43 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val keyIds = keys.map { it.id }.toList()
 
     performProjectAuthPost(
-      "start-batch-job/translate",
+      "start-batch-job/pre-translate-by-tm",
+      mapOf(
+        "keyIds" to keyIds,
+        "targetLanguageIds" to listOf(
+          testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+          testData.projectBuilder.getLanguageByTag("de")!!.self.id
+        )
+      )
+    )
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isValidId
+      }
+
+    waitForAllTranslated(keyIds, keyCount, "cs")
+    executeInNewTransaction {
+      val jobs = entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+        .resultList
+      jobs.assert.hasSize(1)
+      val job = jobs[0]
+      job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      job.activityRevision.assert.isNotNull
+      job.activityRevision!!.modifiedEntities.assert.hasSize(2000)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it machine translates`() {
+    val keyCount = 1000
+    val keys = testData.addTranslationOperationData(keyCount)
+    saveAndPrepare()
+
+    val keyIds = keys.map { it.id }.toList()
+
+    performProjectAuthPost(
+      "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
         "targetLanguageIds" to listOf(
@@ -99,7 +135,11 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  private fun waitForAllTranslated(keyIds: List<Long>, keyCount: Int) {
+  private fun waitForAllTranslated(
+    keyIds: List<Long>,
+    keyCount: Int,
+    expectedCsValue: String = "translated with GOOGLE from en to cs"
+  ) {
     waitForNotThrowing(pollTime = 1000, timeout = 60000) {
       @Suppress("UNCHECKED_CAST") val czechTranslations = entityManager.createQuery(
         """
@@ -108,7 +148,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       ).setParameter("keyIds", keyIds).resultList as List<Translation>
       czechTranslations.assert.hasSize(keyCount)
       czechTranslations.forEach {
-        it.text.assert.contains("translated with GOOGLE from en to cs")
+        it.text.assert.contains(expectedCsValue)
       }
     }
   }
@@ -131,7 +171,7 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val all = keyService.getAll(testData.projectBuilder.self.id)
-      all.assert.isEmpty()
+      all.assert.hasSize(1)
     }
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {

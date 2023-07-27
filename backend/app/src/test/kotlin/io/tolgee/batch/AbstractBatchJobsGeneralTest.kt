@@ -1,10 +1,10 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.batch.processors.AutoTranslationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
-import io.tolgee.batch.request.BatchTranslateRequest
+import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -46,7 +46,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @MockBean
   @Autowired
-  lateinit var autoTranslationChunkProcessor: AutoTranslationChunkProcessor
+  lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
   @MockBean
   @Autowired
@@ -75,11 +75,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     batchJobChunkExecutionQueue.clear()
-    Mockito.reset(autoTranslationChunkProcessor)
-    Mockito.clearInvocations(autoTranslationChunkProcessor)
-    whenever(autoTranslationChunkProcessor.getParams(any(), any())).thenCallRealMethod()
-    whenever(autoTranslationChunkProcessor.getTarget(any())).thenCallRealMethod()
-    whenever(deleteKeysChunkProcessor.getParams(any(), any())).thenCallRealMethod()
+    Mockito.reset(preTranslationByTmChunkProcessor)
+    Mockito.clearInvocations(preTranslationByTmChunkProcessor)
+    whenever(preTranslationByTmChunkProcessor.getParams(any<PreTranslationByTmRequest>())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getParams(any<DeleteKeysRequest>())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
     batchJobChunkExecutionQueue.populateQueue()
     testData = BatchJobsTestData()
@@ -115,8 +115,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     waitForNotThrowing(pollTime = 1000) {
       verify(
-        autoTranslationChunkProcessor,
-        times(ceil(job.totalItems.toDouble() / BatchJobType.AUTO_TRANSLATION.chunkSize).toInt())
+        preTranslationByTmChunkProcessor,
+        times(ceil(job.totalItems.toDouble() / BatchJobType.PRE_TRANSLATE_BY_MT.chunkSize).toInt())
       ).process(any(), any(), any(), any())
     }
 
@@ -151,7 +151,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
 
     whenever(
-      autoTranslationChunkProcessor.process(
+      preTranslationByTmChunkProcessor.process(
         any(), any(), any(), any()
       )
     )
@@ -187,7 +187,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     websocketHelper.listenForBatchJobProgress()
 
     whenever(
-      autoTranslationChunkProcessor.process(
+      preTranslationByTmChunkProcessor.process(
         any(),
         argThat { this.containsAll((1L..10).toList()) },
         any(),
@@ -233,7 +233,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     val throwingChunk = (1L..10).toList()
 
     whenever(
-      autoTranslationChunkProcessor.process(
+      preTranslationByTmChunkProcessor.process(
         any(),
         argThat { this.containsAll(throwingChunk) },
         any(),
@@ -327,7 +327,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   fun `cancels the job`() {
     var count = 0
 
-    whenever(autoTranslationChunkProcessor.process(any(), any(), any(), any())).then {
+    whenever(preTranslationByTmChunkProcessor.process(any(), any(), any(), any())).then {
       if (count++ > 50) {
         while (true) {
           val context = it.arguments[2] as CoroutineContext
@@ -359,12 +359,12 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   protected fun runChunkedJob(keyCount: Int): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
-        request = BatchTranslateRequest().apply {
+        request = PreTranslationByTmRequest().apply {
           keyIds = (1L..keyCount).map { it }
         },
         project = testData.projectBuilder.self,
         author = testData.user,
-        type = BatchJobType.AUTO_TRANSLATION
+        type = BatchJobType.PRE_TRANSLATE_BY_MT
       )
     }
   }
