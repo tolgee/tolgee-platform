@@ -42,6 +42,7 @@ class BatchJobProjectLockingManager(
   }
 
   fun unlockJobForProject(projectId: Long) {
+    logger.debug("Unlocking project $projectId")
     if (usingRedisProvider.areWeUsingRedis) {
       getRedissonProjectLocks()[projectId] = 0L
     } else {
@@ -59,14 +60,15 @@ class BatchJobProjectLockingManager(
   fun getLockedForProject(projectId: Long): Long? {
     if (usingRedisProvider.areWeUsingRedis) {
       return getRedissonProjectLocks()[projectId]
-    } else {
-      return localProjectLocks[projectId]
     }
+    return localProjectLocks[projectId]
   }
 
   private fun tryLockLocal(toLock: BatchJobDto): Boolean {
     val computed = localProjectLocks.compute(toLock.projectId) { _, value ->
-      computeFnBody(toLock, value)
+      val newLocked = computeFnBody(toLock, value)
+      logger.debug("While trying to lock ${toLock.id} for project ${toLock.projectId} new lock value is $newLocked")
+      newLocked
     }
     return computed == toLock.id
   }
@@ -84,13 +86,13 @@ class BatchJobProjectLockingManager(
       // we have to find out from database if there is any running job for the project
       val initial = getInitialJobId(toLock.projectId)
       logger.debug("Initial locked job $initial for project ${toLock.projectId}")
-      return if (initial == null) {
+      if (initial == null) {
         logger.debug("No job found, locking ${toLock.id}")
-        toLock.id
-      } else {
-        logger.debug("Job found, locking $initial")
-        initial
+        return toLock.id
       }
+
+      logger.debug("Job found, locking $initial")
+      return initial
     }
 
     logger.debug("Job $currentValue is locked for project ${toLock.projectId}")
