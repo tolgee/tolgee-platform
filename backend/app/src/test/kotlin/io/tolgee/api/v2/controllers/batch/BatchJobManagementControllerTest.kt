@@ -7,8 +7,8 @@ import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.BatchJobType
-import io.tolgee.batch.processors.AutoTranslationChunkProcessor
-import io.tolgee.batch.request.BatchTranslateRequest
+import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -52,7 +52,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Autowired
   @MockBean
-  lateinit var autoTranslationChunkProcessor: AutoTranslationChunkProcessor
+  lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
   @Autowired
   lateinit var batchJobStateProvider: BatchJobStateProvider
@@ -70,8 +70,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = BatchJobsTestData()
     batchJobChunkExecutionQueue.populateQueue()
-    whenever(autoTranslationChunkProcessor.getParams(any<BatchTranslateRequest>(), any())).thenCallRealMethod()
-    whenever(autoTranslationChunkProcessor.getTarget(any<BatchTranslateRequest>())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getParams(any<PreTranslationByTmRequest>())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getTarget(any<PreTranslationByTmRequest>())).thenCallRealMethod()
   }
 
   @AfterEach
@@ -133,7 +133,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val jobIds = ConcurrentHashMap.newKeySet<Long>()
     var wait = true
     whenever(
-      autoTranslationChunkProcessor.process(any(), any(), any(), any())
+      preTranslationByTmChunkProcessor.process(any(), any(), any(), any())
     ).then {
       val id = it.getArgument<BatchJobDto>(0).id
       if (jobIds.size == 2 && !jobIds.contains(id)) {
@@ -222,7 +222,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     var wait = true
     whenever(
-      autoTranslationChunkProcessor.process(any(), any(), any(), any())
+      preTranslationByTmChunkProcessor.process(any(), any(), any(), any())
     ).then {
       while (wait) {
         Thread.sleep(100)
@@ -318,12 +318,12 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   protected fun runChunkedJob(keyCount: Int, author: UserAccount = testData.user): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
-        request = BatchTranslateRequest().apply {
+        request = PreTranslationByTmRequest().apply {
           keyIds = (1L..keyCount).map { it }
         },
         project = testData.projectBuilder.self,
         author = author,
-        type = BatchJobType.AUTO_TRANSLATION
+        type = BatchJobType.PRE_TRANSLATE_BY_MT
       )
     }
   }

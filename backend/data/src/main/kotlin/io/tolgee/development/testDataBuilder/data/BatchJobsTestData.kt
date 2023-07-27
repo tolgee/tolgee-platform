@@ -17,13 +17,29 @@ class BatchJobsTestData : BaseTestData() {
   }
 
   fun addTranslationOperationData(keyCount: Int = 100): List<Key> {
+    this.projectBuilder.addKey {
+      name = "a-key"
+    }.build {
+      addTranslation {
+        language = englishLanguage
+        text = "en"
+      }
+      addTranslation {
+        language = czechLanguage
+        text = "cs"
+      }
+      addTranslation {
+        language = germanLanguage
+        text = "de"
+      }
+    }
     return (1..keyCount).map {
       this.projectBuilder.addKey {
         name = "key$it"
       }.build {
         addTranslation {
           language = englishLanguage
-          text = "en$it"
+          text = "en"
         }
       }.self
     }

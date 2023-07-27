@@ -13,7 +13,8 @@ class BatchJobDto(
   val totalChunks: Int,
   val chunkSize: Int,
   override var status: BatchJobStatus,
-  val type: BatchJobType
+  val type: BatchJobType,
+  val params: Any?,
 ) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
@@ -29,6 +30,7 @@ class BatchJobDto(
         chunkSize = entity.chunkSize,
         status = entity.status,
         type = entity.type,
+        params = entity.params,
       )
     }
   }
