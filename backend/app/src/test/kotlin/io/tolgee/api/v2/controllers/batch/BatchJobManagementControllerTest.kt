@@ -91,7 +91,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     batchJobConcurrentLauncher.pause = true
 
     performProjectAuthPost(
-      "start-batch-job/translate",
+      "start-batch-job/machine-translate",
       mapOf(
         "keyIds" to keyIds,
         "targetLanguageIds" to listOf(

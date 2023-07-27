@@ -27,7 +27,7 @@ class MachineTranslationChunkProcessor(
       chunk,
       coroutineContext,
       onProgress,
-      GenericAutoTranslationChunkProcessor.Type.PRE_TRANSLATION_BY_TM,
+      GenericAutoTranslationChunkProcessor.Type.MACHINE_TRANSLATION,
       languages
     )
   }
