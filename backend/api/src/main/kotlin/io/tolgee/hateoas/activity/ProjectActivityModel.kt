@@ -15,4 +15,5 @@ class ProjectActivityModel(
   val modifiedEntities: Map<String, List<ModifiedEntityModel>>?,
   val meta: Map<String, Any?>?,
   val counts: MutableMap<String, Long>?,
+  val params: Any?,
 ) : RepresentationModel<ProjectActivityModel>(), Serializable

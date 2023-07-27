@@ -49,10 +49,10 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
   @Query(
     nativeQuery = true,
     value = """
-     select batch_job_chunk_execution.batch_job_id, sum(jsonb_array_length(success_targets)) 
-      from batch_job_chunk_execution 
+     select tolgee_batch_job_chunk_execution.batch_job_id, sum(jsonb_array_length(success_targets)) 
+      from tolgee_batch_job_chunk_execution 
       where batch_job_id in :jobIds
-      group by batch_job_chunk_execution.batch_job_id
+      group by tolgee_batch_job_chunk_execution.batch_job_id
   """
   )
   fun getProgresses(jobIds: List<Long>): List<Array<Any>>

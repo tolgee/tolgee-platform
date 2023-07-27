@@ -54,7 +54,7 @@ class BatchJobService(
   ): BatchJob {
     var executions: List<BatchJobChunkExecution>? = null
     val job = executeInNewTransaction(transactionManager) {
-      val processor = getProcessor<RequestType>(type)
+      val processor = getProcessor<RequestType, Any>(type)
       val target = processor.getTarget(request)
 
       val job = BatchJob().apply {
@@ -69,11 +69,7 @@ class BatchJobService(
       job.totalChunks = chunked.size
       cachingBatchJobService.saveJob(job)
 
-      val params = processor.getParams(request, job)
-
-      params?.let {
-        entityManager.persist(params)
-      }
+      job.params = processor.getParams(request)
 
       executions = chunked.mapIndexed { chunkNumber, _ ->
         BatchJobChunkExecution().apply {
@@ -191,9 +187,9 @@ class BatchJobService(
     return BatchJobView(job, progress, errorMessage)
   }
 
-  @Suppress("UNCHECKED_CAST")
-  fun <RequestType> getProcessor(type: BatchJobType): ChunkProcessor<RequestType> =
-    applicationContext.getBean(type.processor.java) as ChunkProcessor<RequestType>
+  @Suppress("USELESS_CAST")
+  fun <RequestType, ParamsType> getProcessor(type: BatchJobType): ChunkProcessor<RequestType, ParamsType> =
+    applicationContext.getBean(type.processor.java) as ChunkProcessor<RequestType, ParamsType>
 
   fun deleteAllByProjectId(projectId: Long) {
     val batchJobs = getAllByProjectId(projectId)

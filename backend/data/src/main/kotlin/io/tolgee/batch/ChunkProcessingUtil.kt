@@ -22,7 +22,7 @@ open class ChunkProcessingUtil(
 ) : Logging {
   open fun processChunk() {
     try {
-      val processor = batchJobService.getProcessor<Any>(job.type)
+      val processor = batchJobService.getProcessor<Any, Any?>(job.type)
       processor.process(job, toProcess, coroutineContext) {
         if (it != toProcess.size) {
           progressManager.publishSingleChunkProgress(job.id, it)

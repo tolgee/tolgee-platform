@@ -3,8 +3,6 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.request.DeleteKeysRequest
-import io.tolgee.model.EntityWithId
-import io.tolgee.model.batch.BatchJob
 import io.tolgee.service.key.KeyService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -15,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager
-) : ChunkProcessor<DeleteKeysRequest> {
+) : ChunkProcessor<DeleteKeysRequest, Any?> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -34,11 +32,15 @@ class DeleteKeysChunkProcessor(
     }
   }
 
-  override fun getTarget(data: DeleteKeysRequest): List<Long> {
-    return data.keyIds
+  override fun getParamsType(): Class<Any?>? {
+    return null
   }
 
-  override fun getParams(data: DeleteKeysRequest, job: BatchJob): EntityWithId? {
+  override fun getParams(data: DeleteKeysRequest): Any? {
     return null
+  }
+
+  override fun getTarget(data: DeleteKeysRequest): List<Long> {
+    return data.keyIds
   }
 }

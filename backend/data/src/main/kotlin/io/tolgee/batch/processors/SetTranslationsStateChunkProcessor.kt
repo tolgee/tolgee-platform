@@ -3,8 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.batch.SetTranslationStateJobParams
+import io.tolgee.model.batch.params.SetTranslationStateJobParams
 import io.tolgee.service.translation.TranslationService
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -15,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class SetTranslationsStateChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager
-) : ChunkProcessor<SetTranslationsStateStateRequest> {
+) : ChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -34,22 +33,16 @@ class SetTranslationsStateChunkProcessor(
     }
   }
 
-  private fun getParams(job: BatchJobDto): SetTranslationStateJobParams {
-    return entityManager.createQuery(
-      """from SetTranslationStateJobParams tjp where tjp.batchJob.id = :batchJobId""",
-      SetTranslationStateJobParams::class.java
-    )
-      .setParameter("batchJobId", job.id).singleResult
-      ?: throw IllegalStateException("No params found")
-  }
-
   override fun getTarget(data: SetTranslationsStateStateRequest): List<Long> {
     return data.keyIds
   }
 
-  override fun getParams(data: SetTranslationsStateStateRequest, job: BatchJob): SetTranslationStateJobParams {
+  override fun getParamsType(): Class<SetTranslationStateJobParams> {
+    return SetTranslationStateJobParams::class.java
+  }
+
+  override fun getParams(data: SetTranslationsStateStateRequest): SetTranslationStateJobParams {
     return SetTranslationStateJobParams().apply {
-      batchJob = job
       languageIds = data.languageIds
       state = data.state
     }

@@ -1,10 +1,11 @@
 package io.tolgee.batch
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.batch.processors.AutoTranslationChunkProcessor
 import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
 import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
+import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
 import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
 import io.tolgee.batch.processors.TagKeysChunkProcessor
@@ -18,14 +19,20 @@ enum class BatchJobType(
    */
   val chunkSize: Int,
   val maxRetries: Int,
-  val processor: KClass<out ChunkProcessor<*>>,
+  val processor: KClass<out ChunkProcessor<*, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
 ) {
-  AUTO_TRANSLATION(
-    activityType = ActivityType.BATCH_AUTO_TRANSLATE,
+  PRE_TRANSLATE_BY_MT(
+    activityType = ActivityType.BATCH_PRE_TRANSLATE_BY_MT,
     chunkSize = 10,
     maxRetries = 3,
-    processor = AutoTranslationChunkProcessor::class,
+    processor = PreTranslationByTmChunkProcessor::class,
+  ),
+  MACHINE_TRANSLATE(
+    activityType = ActivityType.BATCH_MACHINE_TRANSLATE,
+    chunkSize = 10,
+    maxRetries = 3,
+    processor = MachineTranslationChunkProcessor::class,
   ),
   DELETE_KEYS(
     activityType = ActivityType.KEY_DELETE,
