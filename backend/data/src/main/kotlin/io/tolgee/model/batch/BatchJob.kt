@@ -16,11 +16,13 @@ import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
+import javax.persistence.Table
 
 @Entity
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
+@Table(name = "tolgee_batch_job")
 class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -41,10 +43,13 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   override var status: BatchJobStatus = BatchJobStatus.PENDING
 
   @Enumerated(STRING)
-  var type: BatchJobType = BatchJobType.AUTO_TRANSLATION
+  var type: BatchJobType = BatchJobType.PRE_TRANSLATE_BY_MT
 
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null
+
+  @Type(type = "jsonb")
+  var params: Any? = null
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)
 

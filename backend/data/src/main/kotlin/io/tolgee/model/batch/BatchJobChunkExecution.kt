@@ -20,6 +20,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(
+  name = "tolgee_batch_job_chunk_execution",
   indexes = [
     javax.persistence.Index(columnList = "chunkNumber"),
     javax.persistence.Index(columnList = "status"),

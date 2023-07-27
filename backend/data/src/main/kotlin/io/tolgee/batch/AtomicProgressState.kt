@@ -76,7 +76,7 @@ class AtomicProgressState(
     return entityManager.createNativeQuery(
       """
             select sum(jsonb_array_length(success_targets)) 
-            from batch_job_chunk_execution 
+            from tolgee_batch_job_chunk_execution 
             where batch_job_id = :jobId and id <> :currentId
             """
     )

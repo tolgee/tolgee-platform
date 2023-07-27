@@ -1,5 +1,7 @@
 package io.tolgee.activity.data
 
+import io.tolgee.activity.PublicParamsProvider
+import io.tolgee.batch.BatchActivityParamsProvider
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
 import kotlin.reflect.KClass
@@ -7,6 +9,7 @@ import kotlin.reflect.KClass
 enum class ActivityType(
   val onlyCountsInList: Boolean = false,
   val restrictEntitiesInList: Array<KClass<out EntityWithId>>? = null,
+  val paramsProvider: KClass<out PublicParamsProvider>? = null
 ) {
   UNKNOWN,
   SET_TRANSLATION_STATE,
@@ -31,12 +34,13 @@ enum class ActivityType(
   CREATE_PROJECT,
   EDIT_PROJECT,
   NAMESPACE_EDIT,
-  BATCH_AUTO_TRANSLATE(true),
-  BATCH_CLEAR_TRANSLATIONS(true),
-  BATCH_COPY_TRANSLATIONS(true),
-  BATCH_SET_TRANSLATION_STATE(true),
-  BATCH_TAG_KEYS(true),
-  BATCH_UNTAG_KEYS(true),
-  BATCH_SET_KEYS_NAMESPACE(true)
+  BATCH_PRE_TRANSLATE_BY_MT(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_MACHINE_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_CLEAR_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_COPY_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_SET_TRANSLATION_STATE(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_TAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class)
   ;
 }
