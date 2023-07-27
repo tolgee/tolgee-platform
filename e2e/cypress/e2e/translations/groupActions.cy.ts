@@ -7,7 +7,11 @@ import { waitForGlobalLoading } from '../../common/loading';
 import { generateExampleKeys } from '../../common/apiCalls/testData/testData';
 import { deleteProject } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
-import { deleteSelected } from '../../common/groupActions';
+import {
+  selectOperation,
+  executeBatchOperation,
+  executeBatchOperationWithConfirmation,
+} from '../../common/batchJobs';
 
 describe('Group actions', () => {
   let project: ProjectDTO = null;
@@ -33,7 +37,8 @@ describe('Group actions', () => {
     gcy('translations-row-checkbox').first().click();
     gcy('translations-select-all-button').click();
     waitForGlobalLoading(500);
-    deleteSelected();
+    selectOperation('Delete');
+    executeBatchOperationWithConfirmation();
     waitForGlobalLoading(500);
     gcy('global-empty-list').should('be.visible');
   });
@@ -43,7 +48,8 @@ describe('Group actions', () => {
     gcy('translations-select-all-button').click();
     waitForGlobalLoading();
     gcy('translations-row-checkbox').first().click();
-    deleteSelected();
+    selectOperation('Delete');
+    executeBatchOperationWithConfirmation();
     waitForGlobalLoading(500);
     gcy('translations-key-count').contains('1').should('be.visible');
   });

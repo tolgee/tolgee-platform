@@ -60,7 +60,11 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
     <Box display="flex" gap="10px" alignItems="center" flexWrap="wrap">
       <Box display="flex" gap="10px" alignItems="center">
         <Box>{t('batch_operations_copy_from_label')}</Box>
-        <FormControl variant="outlined" size="small">
+        <FormControl
+          variant="outlined"
+          size="small"
+          data-cy="batch-operation-copy-source-select"
+        >
           {!sourceLanguage && (
             <InputLabel focused={false} shrink={false}>
               {t('batch_operations_copy_source_language_placeholder')}
@@ -73,7 +77,11 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
             sx={{ width: 150 }}
           >
             {allLanguages.map((l) => (
-              <MenuItem key={l.id} value={l.tag}>
+              <MenuItem
+                key={l.id}
+                value={l.tag}
+                data-cy="batch-operation-copy-source-select-item"
+              >
                 {l.name}
               </MenuItem>
             ))}

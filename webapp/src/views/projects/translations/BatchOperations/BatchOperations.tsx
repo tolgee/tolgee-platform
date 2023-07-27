@@ -146,7 +146,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   return (
     <>
       {open && (
-        <StyledContainer>
+        <StyledContainer data-cy="batch-operations-section">
           <StyledContent>
             <StyledBase>
               <StyledItem>
