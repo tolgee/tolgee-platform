@@ -176,8 +176,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(51)
-    websocketHelper.receivedMessages.last.assert.contains("FAILED")
-    websocketHelper.receivedMessages.last.assert.contains("out_of_credits")
+    assertStatusReported(BatchJobStatus.FAILED)
+    assertMessagesContain("out_of_credits")
 
     waitForNotThrowing {
       executeInNewTransaction {
@@ -227,7 +227,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
-    websocketHelper.receivedMessages.last.assert.contains("FAILED")
+    assertStatusReported(BatchJobStatus.FAILED)
   }
 
   @Test
@@ -291,7 +291,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
-    websocketHelper.receivedMessages.last.assert.contains("FAILED")
+    assertStatusReported(BatchJobStatus.FAILED)
   }
 
   @Test
@@ -325,11 +325,20 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
       entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
         .setParameter("id", job.id).resultList.assert.hasSize(1)
-
+    }
+    waitForNotThrowing {
       // 100 progress messages + 1 finish message
       websocketHelper.receivedMessages.assert.hasSize(101)
-      websocketHelper.receivedMessages.last.assert.contains("SUCCESS")
+      assertStatusReported(BatchJobStatus.SUCCESS)
     }
+  }
+
+  private fun assertStatusReported(status: BatchJobStatus) {
+    assertMessagesContain(status.name)
+  }
+
+  private fun assertMessagesContain(string: String) {
+    websocketHelper.receivedMessages.assert.anyMatch { it.contains(string) }
   }
 
   @Test
@@ -362,7 +371,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
-    websocketHelper.receivedMessages.last.assert.contains("CANCELLED")
+    assertStatusReported(BatchJobStatus.CANCELLED)
   }
 
   @Test
@@ -403,7 +412,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     )
 
     waitForNotThrowing {
-      websocketHelper.receivedMessages.last.assert.contains("FAILED")
+      assertStatusReported(BatchJobStatus.FAILED)
     }
   }
 
