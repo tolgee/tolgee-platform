@@ -145,7 +145,7 @@ export class SecurityService {
           '/v2/invitations/{code}/accept',
           'get'
         )({ path: { code } });
-      } catch (e) {
+      } catch (e: any) {
         if (e.code === 'invitation_code_does_not_exist_or_expired') {
           this.messageService.error(<TranslatedError code={e.code} />);
         } else {
