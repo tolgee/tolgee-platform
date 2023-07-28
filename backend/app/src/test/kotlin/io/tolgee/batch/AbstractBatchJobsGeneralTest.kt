@@ -353,6 +353,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `it locks the single job for project`() {
     logger.info("Running test: it locks the single job for project")
+    currentDateProvider.forcedDate = null
     batchJobConcurrentLauncher.pause = true
 
     val job1 = runChunkedJob(20)

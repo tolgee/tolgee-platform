@@ -180,7 +180,13 @@ class BatchJobConcurrentLauncher(
       )
 
       // we haven't publish consuming, so we can add it only to the local queue
-      batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(
+        listOf(
+          executionItem.also {
+            it.executeAfter = currentDateProvider.date.time + 1000
+          }
+        )
+      )
       return
     }
 
