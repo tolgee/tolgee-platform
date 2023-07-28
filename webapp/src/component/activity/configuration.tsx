@@ -240,6 +240,49 @@ export const entitiesConfiguration: Record<EntityEnum, EntityOptions> = {
       },
     },
   },
+  Params: {
+    label() {
+      return <T keyName="activity_entity_params" />;
+    },
+    fields: {
+      sourceLanguageId: {
+        type: 'batch_language_id',
+        label() {
+          return <T keyName="activity_entity_params.source_language_id" />;
+        },
+      },
+      targetLanguageIds: {
+        type: 'batch_language_ids',
+        label() {
+          return <T keyName="activity_entity_params.target_language_ids" />;
+        },
+      },
+      languageIds: {
+        type: 'batch_language_ids',
+        label() {
+          return <T keyName="activity_entity_params.target_language_ids" />;
+        },
+      },
+      state: {
+        type: 'batch_translation_state',
+        label() {
+          return <T keyName="activity_entity_params.state" />;
+        },
+      },
+      tags: {
+        type: 'batch_key_tag_list',
+        label() {
+          return <T keyName="activity_entity_params.tags" />;
+        },
+      },
+      namespace: {
+        type: 'batch_namespace',
+        label() {
+          return <T keyName="activity_entity_params.namespace" />;
+        },
+      },
+    },
+  },
 };
 
 export const actionsConfiguration: Partial<
@@ -396,5 +439,86 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_edit_namespace" params={params} />;
     },
     entities: { Namespace: true },
+  },
+  BATCH_PRE_TRANSLATE_BY_MT: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_pre_translate_by_tm"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_MACHINE_TRANSLATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_machine_translate"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_SET_TRANSLATION_STATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_set_translation_state"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+    compactFieldCount: 2,
+  },
+  BATCH_COPY_TRANSLATIONS: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_copy_translations"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: ['targetLanguageIds'] },
+  },
+  BATCH_CLEAR_TRANSLATIONS: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_clear_translations"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_TAG_KEYS: {
+    label(params) {
+      return <T keyName="activity_batch_operation_tag_keys" params={params} />;
+    },
+    entities: { Params: true },
+  },
+  BATCH_UNTAG_KEYS: {
+    label(params) {
+      return (
+        <T keyName="activity_batch_operation_untag_keys" params={params} />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_SET_KEYS_NAMESPACE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_set_keys_namespace"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
   },
 };

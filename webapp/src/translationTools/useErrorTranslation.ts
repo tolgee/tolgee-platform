@@ -75,6 +75,8 @@ export function useErrorTranslation() {
         return t('mt_service_not_enabled');
       case 'out_of_credits':
         return t('out_of_credits');
+      case 'key_exists_in_namespace':
+        return t('key_exists_in_namespace');
 
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':

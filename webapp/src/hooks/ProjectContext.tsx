@@ -66,6 +66,8 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
                   status: existingProgress?.status ?? job.status,
                   totalItems: existingProgress?.totalItems ?? job.totalItems,
                   progress: existingProgress?.progress ?? job.progress,
+                  errorMessage:
+                    existingProgress?.errorMessage ?? job.errorMessage,
                 };
               }) || []
             ).reverse()
@@ -94,6 +96,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
               progress: data.processed,
               totalItems: data.total,
               status: data.status,
+              errorMessage: data.errorMessage,
             },
           ]);
           batchJobsLoadable.refetch();
@@ -107,6 +110,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
                 totalItems: data.total ?? job.totalItems,
                 progress: data.processed ?? job.progress,
                 status: data.status ?? job.status,
+                errorMessage: data.errorMessage ?? job.errorMessage,
               };
             }
             return job;
