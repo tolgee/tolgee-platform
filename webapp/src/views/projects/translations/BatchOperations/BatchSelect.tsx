@@ -51,7 +51,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
     if (option?.label) {
       return (
         getTextWidth(option.label, `400 16px ${theme.typography.fontFamily}`) +
-        80
+        85
       );
     }
     return 250;
