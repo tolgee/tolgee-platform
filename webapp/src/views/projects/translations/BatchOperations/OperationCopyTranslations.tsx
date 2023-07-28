@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { ChevronRight } from '@mui/icons-material';
 import { Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
-import { useTranslate } from '@tolgee/react';
+import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
+import { OperationContainer } from './components/OperationContainer';
 
 type Props = OperationProps;
 
@@ -57,8 +57,8 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
   }
 
   return (
-    <Box display="flex" gap="10px" alignItems="center" flexWrap="wrap">
-      <Box display="flex" gap="10px" alignItems="center">
+    <OperationContainer flexWrap="wrap">
+      <OperationContainer alignItems="center">
         <Box>{t('batch_operations_copy_from_label')}</Box>
         <FormControl
           variant="outlined"
@@ -87,8 +87,8 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
             ))}
           </Select>
         </FormControl>
-      </Box>
-      <Box display="flex" gap="10px" alignItems="center">
+      </OperationContainer>
+      <OperationContainer alignItems="center">
         <Box>{t('batch_operations_copy_to_label')}</Box>
         <LanguagesSelect
           languages={allLanguages || []}
@@ -101,18 +101,12 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
           context="batch-operations"
           placeholder={t('batch_operations_select_languages_placeholder')}
         />
-        <LoadingButton
-          data-cy="batch-operations-submit-button"
+        <BatchOperationsSubmit
           loading={batchLoadable.isLoading}
           disabled={disabled || !sourceLanguage || selectedLangs.length === 0}
-          sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
           onClick={handleSubmit}
-          variant="contained"
-          color="primary"
-        >
-          <ChevronRight />
-        </LoadingButton>
-      </Box>
-    </Box>
+        />
+      </OperationContainer>
+    </OperationContainer>
   );
 };

@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { ChevronRight } from '@mui/icons-material';
-import { Box } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProject } from 'tg.hooks/useProject';
-import { useTranslate } from '@tolgee/react';
+import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
+import { OperationContainer } from './components/OperationContainer';
 
 type Props = OperationProps;
 
@@ -49,7 +48,7 @@ export const OperationMarkAsTranslated = ({ disabled, onStart }: Props) => {
   }
 
   return (
-    <Box display="flex" gap="10px">
+    <OperationContainer>
       <LanguagesSelect
         languages={allLanguages || []}
         value={selectedLangs || []}
@@ -58,17 +57,11 @@ export const OperationMarkAsTranslated = ({ disabled, onStart }: Props) => {
         context="batch-operations"
         placeholder={t('batch_operations_select_languages_placeholder')}
       />
-      <LoadingButton
-        data-cy="batch-operations-submit-button"
+      <BatchOperationsSubmit
         loading={batchLoadable.isLoading}
         disabled={disabled || selectedLangs.length === 0}
-        sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
         onClick={handleSubmit}
-        variant="contained"
-        color="primary"
-      >
-        <ChevronRight />
-      </LoadingButton>
-    </Box>
+      />
+    </OperationContainer>
   );
 };

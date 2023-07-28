@@ -1,5 +1,14 @@
-import { Autocomplete, ListItem, styled, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  ListItem,
+  styled,
+  TextField,
+  useTheme,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { useMemo } from 'react';
+import { getTextWidth } from 'tg.fixtures/getTextWidth';
+
 import { BatchActions } from './types';
 
 const StyledSeparator = styled('div')`
@@ -14,6 +23,7 @@ type Props = {
 };
 
 export const BatchSelect = ({ value, onChange }: Props) => {
+  const theme = useTheme();
   const { t } = useTranslate();
 
   const options: { id: BatchActions; label: string; divider?: boolean }[] = [
@@ -35,9 +45,23 @@ export const BatchSelect = ({ value, onChange }: Props) => {
     { id: 'delete', label: t('batch_operations_delete') },
   ];
 
+  const option = options.find((o) => o.id === value);
+
+  const width = useMemo(() => {
+    if (option?.label) {
+      return (
+        getTextWidth(option.label, `400 16px ${theme.typography.fontFamily}`) +
+        80
+      );
+    }
+    return 250;
+  }, [option?.label]);
+
+  const normalizedWidth = Math.min(Math.max(250, width), 350);
+
   return (
     <Autocomplete
-      sx={{ width: 280 }}
+      sx={{ width: normalizedWidth }}
       value={options.find((o) => o.id === value) || null}
       onChange={(_, value) => {
         onChange(value?.id);
@@ -51,10 +75,13 @@ export const BatchSelect = ({ value, onChange }: Props) => {
         </>
       )}
       options={options}
-      renderInput={(params) => (
-        <TextField {...params} placeholder={t('batch_select_placeholder')} />
-      )}
+      renderInput={(params) => {
+        return (
+          <TextField {...params} placeholder={t('batch_select_placeholder')} />
+        );
+      }}
       size="small"
+      ListboxProps={{ style: { maxHeight: '80vh' } }}
     />
   );
 };

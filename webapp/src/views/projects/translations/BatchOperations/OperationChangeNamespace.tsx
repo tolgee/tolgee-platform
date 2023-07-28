@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { ChevronRight } from '@mui/icons-material';
-import { Box } from '@mui/material';
 
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { OperationProps } from './types';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+
 import { useTranslationsSelector } from '../context/TranslationsContext';
+import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
+import { OperationContainer } from './components/OperationContainer';
+import { OperationProps } from './types';
 
 type Props = OperationProps;
 
@@ -42,23 +42,17 @@ export const OperationChangeNamespace = ({ disabled, onStart }: Props) => {
   }
 
   return (
-    <Box display="flex" gap="10px">
+    <OperationContainer>
       <NamespaceSelector
         value={namespace}
         onChange={(value) => setNamespace(value)}
         SearchSelectProps={{ SelectProps: { sx: { minWidth: 200 } } }}
       />
-      <LoadingButton
-        data-cy="batch-operations-submit-button"
+      <BatchOperationsSubmit
         loading={batchLoadable.isLoading}
         disabled={disabled || namespace === undefined}
-        sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
         onClick={handleSubmit}
-        variant="contained"
-        color="primary"
-      >
-        <ChevronRight />
-      </LoadingButton>
-    </Box>
+      />
+    </OperationContainer>
   );
 };

@@ -1,4 +1,4 @@
-import { styled, IconButton, Tooltip, Checkbox, Box } from '@mui/material';
+import { styled, Tooltip, Checkbox, Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
@@ -38,16 +38,20 @@ const StyledContainer = styled('div')`
 
 const StyledContent = styled('div')`
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: start;
   box-sizing: border-box;
   position: relative;
   transition: background-color 300ms ease-in-out, visibility 0ms;
-  padding: ${({ theme }) => theme.spacing(0.5, 2, 0.5, 2)};
+  padding: 6px 12px 6px 20px;
+  margin-left: 10px;
   pointer-events: all;
   border-radius: 6px;
-  background-color: ${({ theme }) => theme.palette.emphasis[200]};
+  background-color: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? theme.palette.emphasis[200]
+      : theme.palette.emphasis[100]};
   -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
 `;
@@ -55,15 +59,13 @@ const StyledContent = styled('div')`
 const StyledBase = styled('div')`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 `;
 
-const StyledToggleAllButton = styled(IconButton)`
-  display: flex;
-  flex-shrink: 1;
+const StyledToggleAllButton = styled(Box)`
   width: 38px;
   height: 38px;
-  margin-left: 3px;
+  margin: 0px -12px;
 `;
 
 const StyledItem = styled(Box)`
@@ -156,14 +158,13 @@ export const BatchOperations = ({ open, onClose }: Props) => {
                       ? t('translations_clear_selection')
                       : t('translations_select_all')
                   }
+                  disableInteractive
                 >
-                  <StyledToggleAllButton
-                    onClick={handleToggleSelectAll}
-                    data-cy="translations-select-all-button"
-                    size="small"
-                  >
+                  <StyledToggleAllButton>
                     <Checkbox
+                      data-cy="translations-select-all-button"
                       disabled={isLoading || isDeleting}
+                      onClick={handleToggleSelectAll}
                       size="small"
                       checked={Boolean(selection.length)}
                       indeterminate={somethingSelected}
@@ -180,7 +181,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
                 />
               </StyledItem>
             </StyledBase>
-            <Box>{pickOperation()}</Box>
+            {pickOperation()}
           </StyledContent>
         </StyledContainer>
       )}

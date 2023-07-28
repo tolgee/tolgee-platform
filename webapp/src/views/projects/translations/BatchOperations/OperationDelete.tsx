@@ -1,12 +1,11 @@
-import { ChevronRight } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
+import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationProps } from './types';
 
 type Props = OperationProps;
@@ -46,16 +45,10 @@ export const OperationDelete = ({ disabled, onStart }: Props) => {
   }
 
   return (
-    <LoadingButton
-      data-cy="batch-operations-submit-button"
+    <BatchOperationsSubmit
       onClick={handleSubmit}
       loading={batchLoadable.isLoading}
       disabled={disabled}
-      sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
-      variant="contained"
-      color="primary"
-    >
-      <ChevronRight />
-    </LoadingButton>
+    />
   );
 };

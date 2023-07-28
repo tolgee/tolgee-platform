@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight } from '@mui/icons-material';
-import { Box, styled } from '@mui/material';
-
-import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { styled } from '@mui/material';
 
 import { OperationProps } from './types';
 import { Tag } from '../Tags/Tag';
@@ -11,6 +8,8 @@ import { useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsSelector } from '../context/TranslationsContext';
+import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
+import { OperationContainer } from './components/OperationContainer';
 
 const StyledTags = styled('div')`
   display: flex;
@@ -24,7 +23,7 @@ const StyledTags = styled('div')`
 `;
 
 const StyledTag = styled(Tag)`
-  border-color: ${({ theme }) => theme.palette.error.main};
+  border-color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 type Props = OperationProps;
@@ -72,7 +71,7 @@ export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
   }
 
   return (
-    <Box display="flex" gap="10px">
+    <OperationContainer>
       <StyledTags>
         {tags.map((tag) => (
           <StyledTag key={tag} name={tag} onDelete={() => handleDelete(tag)} />
@@ -84,17 +83,11 @@ export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
           filtered={tags}
         />
       </StyledTags>
-      <LoadingButton
-        data-cy="batch-operations-submit-button"
+      <BatchOperationsSubmit
         loading={batchTranslate.isLoading}
         disabled={disabled || tags.length === 0}
-        sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40 }}
         onClick={handleSubmit}
-        variant="contained"
-        color="primary"
-      >
-        <ChevronRight />
-      </LoadingButton>
-    </Box>
+      />
+    </OperationContainer>
   );
 };
