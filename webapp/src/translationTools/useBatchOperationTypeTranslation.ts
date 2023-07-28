@@ -10,8 +10,10 @@ export function useBatchOperationTypeTranslate() {
     switch (type) {
       case 'DELETE_KEYS':
         return t('batch_operation_type_delete_keys');
-      case 'AUTO_TRANSLATION':
-        return t('batch_operation_type_translation');
+      case 'MACHINE_TRANSLATE':
+        return t('batch_operation_type_machine_translation');
+      case 'PRE_TRANSLATE_BY_MT':
+        return t('batch_operation_type_machine_pre_translate_by_tm');
       case 'COPY_TRANSLATIONS':
         return t('batch_operation_type_copy_translations');
       case 'CLEAR_TRANSLATIONS':

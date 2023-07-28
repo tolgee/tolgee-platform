@@ -23,7 +23,7 @@ export const OperationPreTranslate = ({ disabled, onStart }: Props) => {
   const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
 
   const batchLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/start-batch-job/translate',
+    url: '/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm',
     method: 'post',
   });
 
@@ -37,9 +37,6 @@ export const OperationPreTranslate = ({ disabled, onStart }: Props) => {
             targetLanguageIds: allLanguages
               ?.filter((l) => selectedLangs?.includes(l.tag))
               .map((l) => l.id),
-            useMachineTranslation: false,
-            useTranslationMemory: true,
-            service: undefined,
           },
         },
       },

@@ -101,7 +101,8 @@ export const PermissionsAdvanced: React.FC<Props> = ({
             children: [
               { value: 'batch-jobs.view' },
               { value: 'batch-jobs.cancel' },
-              { value: 'batch-auto-translate' },
+              { value: 'translations.batch-by-mt' },
+              { value: 'translations.batch-machine' },
             ],
           },
           {

@@ -27,7 +27,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   const { t } = useTranslate();
 
   const options: { id: BatchActions; label: string; divider?: boolean }[] = [
-    { id: 'machine_translate', label: t('batch_operations_translate') },
+    { id: 'machine_translate', label: t('batch_operations_machine_translate') },
     { id: 'pre_translate', label: t('batch_operations_pre_translate') },
     {
       id: 'mark_as_translated',
