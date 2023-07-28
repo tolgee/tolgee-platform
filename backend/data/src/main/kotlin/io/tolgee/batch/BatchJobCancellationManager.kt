@@ -69,11 +69,14 @@ class BatchJobCancellationManager(
         .resultList
 
       executions.forEach { execution ->
-        execution.status = BatchJobChunkExecutionStatus.CANCELLED
-        entityManager.persist(execution)
+        cancelExecution(execution)
       }
-
-      executions.forEach { progressManager.handleProgress(it) }
     }
+  }
+
+  fun cancelExecution(execution: BatchJobChunkExecution) {
+    execution.status = BatchJobChunkExecutionStatus.CANCELLED
+    entityManager.persist(execution)
+    progressManager.handleProgress(execution)
   }
 }

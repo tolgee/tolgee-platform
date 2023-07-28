@@ -12,10 +12,12 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
+import io.tolgee.util.addSeconds
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
@@ -24,11 +26,13 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.annotation.DirtiesContext
 import java.util.*
@@ -72,8 +76,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   @Autowired
   lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
 
+  @Autowired
+  @SpyBean
+  lateinit var progressManager: ProgressManager
+
   @BeforeEach
   fun setup() {
+    Mockito.reset(progressManager)
     batchJobChunkExecutionQueue.clear()
     Mockito.reset(preTranslationByTmChunkProcessor)
     Mockito.clearInvocations(preTranslationByTmChunkProcessor)
@@ -167,8 +176,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(51)
-    websocketHelper.receivedMessages.last.contains("FAILED")
-    websocketHelper.receivedMessages.last.contains("out_of_credits")
+    websocketHelper.receivedMessages.last.assert.contains("FAILED")
+    websocketHelper.receivedMessages.last.assert.contains("out_of_credits")
 
     waitForNotThrowing {
       executeInNewTransaction {
@@ -218,7 +227,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
-    websocketHelper.receivedMessages.last.contains("FAILED")
+    websocketHelper.receivedMessages.last.assert.contains("FAILED")
   }
 
   @Test
@@ -282,7 +291,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
-    websocketHelper.receivedMessages.last.contains("FAILED")
+    websocketHelper.receivedMessages.last.assert.contains("FAILED")
   }
 
   @Test
@@ -319,7 +328,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
       // 100 progress messages + 1 finish message
       websocketHelper.receivedMessages.assert.hasSize(101)
-      websocketHelper.receivedMessages.last.contains("SUCCESS")
+      websocketHelper.receivedMessages.last.assert.contains("SUCCESS")
     }
   }
 
@@ -353,7 +362,49 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
-    websocketHelper.receivedMessages.last.contains("CANCELLED")
+    websocketHelper.receivedMessages.last.assert.contains("CANCELLED")
+  }
+
+  @Test
+  /**
+   * the chunk processing status is stored in the database in the same transaction
+   * so when it fails on some management processing issue, we need to handle this
+   *
+   * The execution itself is added back to queue and retried, but we don't want it to be retreied forever.
+   * That's why there is a limit of few retries per chunk
+   *
+   * This test tests that the job fails after few retries
+   */
+  fun `retries and fails on management exceptions issues`() {
+    whenever(preTranslationByTmChunkProcessor.process(any(), any(), any(), any())).then {}
+
+    val keyCount = 100
+    val job = runChunkedJob(keyCount)
+
+    doThrow(RuntimeException("test")).whenever(progressManager)
+      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED })
+
+    waitForNotThrowing(pollTime = 100) {
+      currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(2)
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(job.id)
+        finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
+      }
+    }
+
+    // verify it retreied, so the processor was executed multiple times
+    val totalChunks = keyCount / 10
+    val totalRetries = 3
+    verify(preTranslationByTmChunkProcessor, times((totalRetries + 1) * totalChunks)).process(
+      any(),
+      any(),
+      any(),
+      any()
+    )
+
+    waitForNotThrowing {
+      websocketHelper.receivedMessages.last.assert.contains("FAILED")
+    }
   }
 
   protected fun runChunkedJob(keyCount: Int): BatchJob {

@@ -2,12 +2,15 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SavePointManager
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.constants.Message
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
+import io.tolgee.util.addSeconds
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.hibernate.LockOptions
@@ -37,7 +40,8 @@ class BatchJobActionService(
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
-  private val savePointManager: SavePointManager
+  private val savePointManager: SavePointManager,
+  private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 10
@@ -53,12 +57,11 @@ class BatchJobActionService(
     concurrentExecutionLauncher.run { executionItem, coroutineContext ->
       var retryExecution: BatchJobChunkExecution? = null
       try {
-        val execution = executeInNewTransaction(
-          transactionManager,
-          isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
-        ) { transactionStatus ->
-          catchingExceptions(executionItem) {
-
+        val execution = catchingExceptions(executionItem) {
+          executeInNewTransaction(
+            transactionManager,
+            isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
+          ) { transactionStatus ->
             val lockedExecution = getPendingUnlockedExecutionItem(executionItem)
               ?: return@executeInNewTransaction null
 
@@ -75,6 +78,8 @@ class BatchJobActionService(
             if (transactionStatus.isRollbackOnly) {
               logger.debug("Job ${batchJobDto.id}: 🛑 Rollbacking chunk ${lockedExecution.id}")
               savePointManager.rollbackSavepoint(savepoint)
+              // we have rolled back the transaction, so no targets were actually successfull
+              lockedExecution.successTargets = listOf()
             }
 
             progressManager.handleProgress(lockedExecution)
@@ -99,6 +104,7 @@ class BatchJobActionService(
                 " thrown UnexpectedRollbackException"
             )
           }
+
           else -> {
             logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
             Sentry.captureException(e)
@@ -123,7 +129,7 @@ class BatchJobActionService(
 
   private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?) {
     retryExecution?.let {
-      batchJobChunkExecutionQueue.addToQueue(listOf(it))
+      batchJobChunkExecutionQueue.addExecutionToQueue(listOf(it))
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }
@@ -133,9 +139,27 @@ class BatchJobActionService(
       fn()
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
-      Sentry.captureException(e)
-      batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
+      Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
+      val maxRetries = 3
+      if (++executionItem.managementErrorRetrials > maxRetries) {
+        logger.error("Chunk ${executionItem.chunkExecutionId} failed $maxRetries times, failing...")
+        failExecution(executionItem.chunkExecutionId, e)
+        return null
+      }
+      executionItem.executeAfter = currentDateProvider.date.addSeconds(2).time
+      batchJobChunkExecutionQueue.addItemToQueue(listOf(executionItem))
       null
+    }
+  }
+
+  private fun failExecution(chunkExecutionId: Long, e: Throwable) {
+    executeInNewTransaction(transactionManager) {
+      val execution = entityManager.find(BatchJobChunkExecution::class.java, chunkExecutionId)
+      execution.status = BatchJobChunkExecutionStatus.FAILED
+      execution.errorMessage = Message.EXECUTION_FAILED_ON_MANAGEMENT_ERROR
+      execution.exception = e.stackTraceToString()
+      entityManager.persist(execution)
+      progressManager.handleProgress(execution)
     }
   }
 

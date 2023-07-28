@@ -20,6 +20,12 @@ fun Date.addMinutes(minutes: Int): Date {
   return calendar.time
 }
 
+fun Date.addSeconds(seconds: Int): Date {
+  val calendar = toUtcCalendar()
+  calendar.add(Calendar.SECOND, seconds)
+  return calendar.time
+}
+
 private fun Date.toUtcCalendar(): Calendar {
   val calendar = getUtcCalendar()
   calendar.time = this

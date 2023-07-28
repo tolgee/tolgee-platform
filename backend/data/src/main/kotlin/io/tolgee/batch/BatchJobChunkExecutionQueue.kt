@@ -74,9 +74,13 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  fun addToQueue(executions: List<BatchJobChunkExecution>) {
+  fun addExecutionToQueue(executions: List<BatchJobChunkExecution>) {
+    val items = executions.map { it.toItem() }
+    addItemToQueue(items)
+  }
+
+  fun addItemToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val items = executions.map { it.toItem() }
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
@@ -84,7 +88,7 @@ class BatchJobChunkExecutionQueue(
       )
       return
     }
-    this.addExecutionsToLocalQueue(executions)
+    this.addItemsToLocalQueue(items)
   }
 
   fun cancelJob(jobId: Long) {
