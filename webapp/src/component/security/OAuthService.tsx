@@ -62,7 +62,7 @@ export const oauth2Service = (
     authenticationUrl: encodeURI(
       `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes
         .map((scope) => `${scope}`)
-        .join('+')}}&state=${state}`
+        .join('+')}&state=${state}`
     ),
     buttonIcon: <LoginIcon />,
     loginButtonTitle: <T keyName="login_oauth2_login_button" />,
