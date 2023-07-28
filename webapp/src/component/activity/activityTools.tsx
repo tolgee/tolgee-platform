@@ -177,6 +177,30 @@ export const buildActivity = (
 
   let allReferences: Reference[] = [];
 
+  // add params as "entity" with only `new` modifications
+  if (data.params && (!filter || options?.entities?.Params)) {
+    const entityOptions = entitiesConfiguration.Params;
+    const selectedFields =
+      filter && Array.isArray(options?.entities?.Params)
+        ? (options?.entities?.Params as string[])
+        : Object.keys(entityOptions?.fields || {});
+
+    const modifications: ModifiedEntityModel['modifications'] = {};
+    Object.entries(data.params).map(([key, value]) => {
+      // @ts-ignore
+      modifications[key] = { new: value };
+    });
+
+    result.entities.push(
+      buildEntity(
+        'Params',
+        { entityId: 0, modifications },
+        entityOptions,
+        selectedFields
+      )
+    );
+  }
+
   if (data.modifiedEntities) {
     const entities = filter
       ? Object.keys(options?.entities || {})

@@ -146,6 +146,7 @@ export type BatchJobProgress = WebsocketEvent<{
   processed: number;
   status: BatchJobModelStatus;
   total: number;
+  errorMessage: string | undefined;
 }>;
 
 export type EntityModification<T> = T extends keyof schemas
