@@ -53,6 +53,7 @@ open class ChunkProcessingUtil(
     val batchJobDto = batchJobService.getJobDto(job.id)
     activityRevision.projectId = batchJobDto.projectId
     activityHolder.activity = batchJobDto.type.activityType
+    activityRevision.authorId = batchJobDto.authorId
   }
 
   private fun handleException(exception: Throwable) {
