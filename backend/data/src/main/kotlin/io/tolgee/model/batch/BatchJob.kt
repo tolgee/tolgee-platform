@@ -31,7 +31,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   var author: UserAccount? = null
 
   @Type(type = "jsonb")
-  var target: List<Long> = listOf()
+  var target: List<Any> = listOf()
 
   var totalItems: Int = 0
 
@@ -56,7 +56,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   val dto get() = BatchJobDto.fromEntity(this)
 
   companion object {
-    fun chunkTarget(chunkSize: Int, target: List<Long>): List<List<Long>> =
+    fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =
       if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
   }
 }

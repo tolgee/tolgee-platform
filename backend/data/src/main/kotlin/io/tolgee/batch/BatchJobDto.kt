@@ -8,7 +8,7 @@ class BatchJobDto(
   override var id: Long,
   val projectId: Long,
   val authorId: Long?,
-  val target: List<Long>,
+  val target: List<Any>,
   val totalItems: Int,
   val totalChunks: Int,
   val chunkSize: Int,

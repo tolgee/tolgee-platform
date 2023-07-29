@@ -14,14 +14,15 @@ import kotlin.coroutines.CoroutineContext
 class UntagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService
-) : ChunkProcessor<UntagKeysRequest, UntagKeysParams> {
+) : ChunkProcessor<UntagKeysRequest, UntagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: (Int) -> Unit
   ) {
-    val subChunked = chunk.chunked(100)
+    @Suppress("UNCHECKED_CAST")
+    val subChunked = chunk.chunked(100) as List<List<Long>>
     var progress = 0
     val params = getParams(job)
     subChunked.forEach { subChunk ->
@@ -39,6 +40,10 @@ class UntagKeysChunkProcessor(
 
   override fun getParamsType(): Class<UntagKeysParams> {
     return UntagKeysParams::class.java
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getParams(data: UntagKeysRequest): UntagKeysParams {

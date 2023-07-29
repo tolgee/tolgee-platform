@@ -113,11 +113,11 @@ class BatchJobConcurrentLauncher(
 
   private fun logItemsPulled(items: List<ExecutionQueueItem>) {
     if (items.isNotEmpty()) {
-      logger.debug(
+      logger.trace(
         "Pulled ${items.size} items from queue: " +
           items.joinToString(", ") { it.chunkExecutionId.toString() }
       )
-      logger.debug(
+      logger.trace(
         "${batchJobChunkExecutionQueue.size} is left in the queue " +
           "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
           batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
@@ -130,7 +130,7 @@ class BatchJobConcurrentLauncher(
     processExecution: (executionItem: ExecutionQueueItem, coroutineContext: CoroutineContext) -> Unit
   ) {
     if (!executionItem.isTimeToExecute()) {
-      logger.debug(
+      logger.trace(
         """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
                     | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
       )

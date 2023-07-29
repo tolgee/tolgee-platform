@@ -24,6 +24,7 @@ class AutoTranslationListener(
       if (wasUntranslatedBefore && isTranslatedAfter) {
         autoTranslationService.autoTranslate(
           key = event.key,
+          isBatch = true,
         )
       }
     } catch (e: OutOfCreditsException) {

@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class CopyTranslationsChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager
-) : ChunkProcessor<CopyTranslationRequest, CopyTranslationJobParams> {
+) : ChunkProcessor<CopyTranslationRequest, CopyTranslationJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -39,6 +39,10 @@ class CopyTranslationsChunkProcessor(
 
   override fun getTarget(data: CopyTranslationRequest): List<Long> {
     return data.keyIds
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getParams(data: CopyTranslationRequest): CopyTranslationJobParams {
