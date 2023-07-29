@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.BatchJobDto
+import io.tolgee.batch.BatchTranslationTargetItem
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.model.batch.params.PreTranslationByTmJobParams
@@ -12,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 class PreTranslationByTmChunkProcessor(
   private val languageService: LanguageService,
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor
-) : ChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams> {
+) : ChunkProcessor<PreTranslationByTmRequest, PreTranslationByTmJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -22,14 +23,23 @@ class PreTranslationByTmChunkProcessor(
     val parameters = getParams(job)
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
 
+    val preparedChunk = chunk.map { keyId ->
+      languages.map { language ->
+        BatchTranslationTargetItem(keyId as Long, language.id)
+      }
+    }.flatten()
+
     genericAutoTranslationChunkProcessor.process(
       job,
-      chunk,
+      preparedChunk,
       coroutineContext,
       onProgress,
       GenericAutoTranslationChunkProcessor.Type.PRE_TRANSLATION_BY_TM,
-      languages
     )
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getTarget(data: PreTranslationByTmRequest): List<Long> {

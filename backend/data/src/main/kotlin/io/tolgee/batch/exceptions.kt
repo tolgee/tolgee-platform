@@ -5,20 +5,20 @@ import io.tolgee.exceptions.ExceptionWithMessage
 
 open class ChunkFailedException(
   message: Message,
-  val successfulTargets: List<Long>,
+  val successfulTargets: List<Any>,
   override val cause: Throwable
 ) :
   ExceptionWithMessage(message)
 
 open class FailedDontRequeueException(
   message: Message,
-  successfulTargets: List<Long>,
+  successfulTargets: List<Any>,
   cause: Throwable
 ) : ChunkFailedException(message, successfulTargets, cause)
 
 open class RequeueWithDelayException(
   message: Message,
-  successfulTargets: List<Long>,
+  successfulTargets: List<Any>,
   cause: Throwable,
   val delayInMs: Int = 100,
   val increaseFactor: Int = 10,

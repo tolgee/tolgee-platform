@@ -39,7 +39,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
   var chunkNumber: Int = 0
 
   @Type(type = "jsonb")
-  var successTargets: List<Long> = listOf()
+  var successTargets: List<Any> = listOf()
 
   @Column(columnDefinition = "text")
   var exception: String? = null

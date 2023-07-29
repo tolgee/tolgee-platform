@@ -18,12 +18,12 @@ import kotlin.coroutines.CoroutineContext
 class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
   private val keyService: KeyService
-) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams> {
+) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: (Int) -> Unit
   ) {
     val subChunked = chunk.chunked(100)
     var progress = 0
@@ -42,6 +42,10 @@ class SetKeysNamespaceChunkProcessor(
       progress += subChunk.size
       onProgress.invoke(progress)
     }
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getTarget(data: SetKeysNamespaceRequest): List<Long> {

@@ -11,7 +11,8 @@ data class TranslationParams(
   val sourceLanguageTag: String,
   val targetLanguageTag: String,
   val serviceType: MtServiceType,
-  val metadata: Metadata?
+  val metadata: Metadata?,
+  val isBatch: Boolean
 ) {
 
   val cacheKey: String

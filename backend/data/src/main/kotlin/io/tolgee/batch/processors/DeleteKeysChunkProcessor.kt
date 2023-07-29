@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager
-) : ChunkProcessor<DeleteKeysRequest, Any?> {
+) : ChunkProcessor<DeleteKeysRequest, Any?, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -25,7 +25,8 @@ class DeleteKeysChunkProcessor(
     var progress: Int = 0
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      keyService.deleteMultiple(subChunk)
+      @Suppress("UNCHECKED_CAST")
+      keyService.deleteMultiple(subChunk as List<Long>)
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)
@@ -38,6 +39,10 @@ class DeleteKeysChunkProcessor(
 
   override fun getParams(data: DeleteKeysRequest): Any? {
     return null
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getTarget(data: DeleteKeysRequest): List<Long> {
