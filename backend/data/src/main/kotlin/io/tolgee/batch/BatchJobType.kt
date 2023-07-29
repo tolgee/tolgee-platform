@@ -19,7 +19,7 @@ enum class BatchJobType(
    */
   val chunkSize: Int,
   val maxRetries: Int,
-  val processor: KClass<out ChunkProcessor<*, *>>,
+  val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
 ) {
   PRE_TRANSLATE_BY_MT(
