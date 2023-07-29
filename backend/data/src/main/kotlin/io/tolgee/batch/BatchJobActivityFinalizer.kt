@@ -47,7 +47,7 @@ class BatchJobActivityFinalizer(
       mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
       mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
       deleteUnusedRevisions(revisionIds)
-      setJobIdToRevision(activityRevisionIdToMergeInto, job.id)
+      setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
     }
   }
 
@@ -60,15 +60,20 @@ class BatchJobActivityFinalizer(
     }
   }
 
-  private fun setJobIdToRevision(activityRevisionIdToMergeInto: Long, jobId: Long) {
+  private fun setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto: Long, job: BatchJobDto) {
     entityManager.createNativeQuery(
       """
-        update activity_revision set batch_job_chunk_execution_id = null, batch_job_id = :jobId
+        update activity_revision 
+        set
+         batch_job_chunk_execution_id = null, 
+         batch_job_id = :jobId, 
+         author_id = :authorId
         where id = :activityRevisionIdToMergeInto
         """
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
-      .setParameter("jobId", jobId)
+      .setParameter("jobId", job.id)
+      .setParameter("authorId", job.authorId)
       .executeUpdate()
   }
 
