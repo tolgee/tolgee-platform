@@ -47,15 +47,13 @@ export const getProgressData = (usage: UsageModel): ProgressData => {
       ? 0
       : creditProgressWithExtraUnnormalized;
 
-  // const biggerProgress = Math.max(translationsProgress, creditProgress);
-
   const moreCriticalProgress = Math.max(
     translationsProgress,
     creditProgressExtra
   );
-  const limit = isPayAsYouGo ? 1 : BILLING_CRITICAL_FRACTION;
 
-  const isCritical = Number(moreCriticalProgress) > limit;
+  const isCritical =
+    !isPayAsYouGo && Number(moreCriticalProgress) > BILLING_CRITICAL_FRACTION;
 
   return {
     usesSlots,

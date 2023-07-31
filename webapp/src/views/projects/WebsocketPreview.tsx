@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { WebsocketClient } from '../../websocket-client/WebsocketClient';
+import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
 
 export const WebsocketPreview = () => {
   const config = useConfig();

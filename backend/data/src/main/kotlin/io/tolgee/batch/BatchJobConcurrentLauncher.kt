@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 class BatchJobConcurrentLauncher(
   private val batchProperties: BatchProperties,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   companion object {
     val runningInstances: ConcurrentHashMap.KeySetView<BatchJobConcurrentLauncher, Boolean> =

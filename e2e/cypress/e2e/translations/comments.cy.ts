@@ -114,6 +114,7 @@ function logInAs(user: string) {
   login(user, 'admin');
   visitList();
   enterProject("Franta's project", 'franta');
+  cy.waitForDom();
 }
 
 function userCanResolveComment(index: number, lang: string, comment: string) {

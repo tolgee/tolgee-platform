@@ -14,6 +14,7 @@ import java.util.*
 import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
+import kotlin.system.measureTimeMillis
 
 open class ChunkProcessingUtil(
   val execution: BatchJobChunkExecution,
@@ -21,23 +22,26 @@ open class ChunkProcessingUtil(
   private val coroutineContext: CoroutineContext,
 ) : Logging {
   open fun processChunk() {
-    try {
-      val processor = batchJobService.getProcessor<Any, Any?>(job.type)
-      processor.process(job, toProcess, coroutineContext) {
-        if (it != toProcess.size) {
-          progressManager.publishSingleChunkProgress(job.id, it)
+    val time = measureTimeMillis {
+      try {
+        val processor = batchJobService.getProcessor<Any, Any>(job.type)
+        processor.process(job, toProcess, coroutineContext) {
+          if (it != toProcess.size) {
+            progressManager.publishSingleChunkProgress(job.id, it)
+          }
+        }
+        successfulTargets = toProcess
+        execution.status = BatchJobChunkExecutionStatus.SUCCESS
+        handleActivity()
+      } catch (e: Throwable) {
+        handleException(e)
+      } finally {
+        successfulTargets?.let {
+          execution.successTargets = it
         }
       }
-      successfulTargets = toProcess
-      execution.status = BatchJobChunkExecutionStatus.SUCCESS
-      handleActivity()
-    } catch (e: Throwable) {
-      handleException(e)
-    } finally {
-      successfulTargets?.let {
-        execution.successTargets = it
-      }
     }
+    logger.debug("Chunk ${execution.id} executed in ${time}ms")
   }
 
   private fun handleActivity() {

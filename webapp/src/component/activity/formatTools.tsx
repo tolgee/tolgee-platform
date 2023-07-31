@@ -10,6 +10,11 @@ import { getProjectLanguageChange } from './types/getProjectLanguageChange';
 import { getNoDiffChange } from './types/getNoDiffChange';
 import { getNamespaceChange } from './types/getNamespaceChange';
 import { getOutdatedChange } from './types/getOutdatedChange';
+import { getBatchLanguageIdsChange } from './types/getBatchLanguageIdsChange';
+import { getBatchLanguageIdChange } from './types/getBatchLanguageIdChange';
+import { getBatchKeyTagListChange } from './types/getBatchKeyTagListChange';
+import { getBatchNamespaceChange } from './types/getBatchNamespaceChange';
+import { getBatchStateChange } from './types/getBatchStateChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -45,6 +50,16 @@ export const formatDiff = ({
       return getNamespaceChange(value, diffEnabled);
     case 'outdated':
       return getOutdatedChange(value);
+    case 'batch_language_ids':
+      return getBatchLanguageIdsChange(value);
+    case 'batch_language_id':
+      return getBatchLanguageIdChange(value);
+    case 'batch_key_tag_list':
+      return getBatchKeyTagListChange(value);
+    case 'batch_namespace':
+      return getBatchNamespaceChange(value);
+    case 'batch_translation_state':
+      return getBatchStateChange(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }

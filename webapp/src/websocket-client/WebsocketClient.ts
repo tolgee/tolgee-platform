@@ -2,6 +2,8 @@ import { CompatClient, Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { components } from 'tg.service/apiSchema.generated';
 
+type BatchJobModelStatus = components['schemas']['BatchJobModel']['status'];
+
 type TranslationsClientOptions = {
   serverUrl?: string;
   authentication: {
@@ -131,12 +133,20 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
   return Object.freeze({ subscribe, disconnect });
 };
 
-export type EventType = 'translation-data-modified';
+export type EventType = 'translation-data-modified' | 'batch-job-progress';
 export type Channel = `/projects/${number}/${EventType}`;
 
 export type TranslationsModifiedData = WebsocketEvent<{
   translations: EntityModification<'translation'>[] | null;
   keys: EntityModification<'key'>[] | null;
+}>;
+
+export type BatchJobProgress = WebsocketEvent<{
+  jobId: number;
+  processed: number;
+  status: BatchJobModelStatus;
+  total: number;
+  errorMessage: string | undefined;
 }>;
 
 export type EntityModification<T> = T extends keyof schemas
@@ -200,4 +210,6 @@ export type Modification<T> = { old: T; new: T };
 
 export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
+  : T extends `/projects/${number}/batch-job-progress`
+  ? BatchJobProgress
   : never;

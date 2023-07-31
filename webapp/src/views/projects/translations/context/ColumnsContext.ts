@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createProviderNew } from 'tg.fixtures/createProviderNew';
+import { createProvider } from 'tg.fixtures/createProvider';
 import { useResize, resizeColumn } from '../useResize';
 
 type PassedRefType = React.RefObject<HTMLElement | undefined>;
 
 export const [ColumnsContext, useColumnsActions, useColumnsContext] =
-  createProviderNew(() => {
+  createProvider(() => {
     const [columnSizes, setColumnSizes] = useState<number[]>();
 
     const [tableRef, setTableRef] = useState<PassedRefType>({

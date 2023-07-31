@@ -68,6 +68,16 @@ declare namespace DataCy {
         "avatar-upload-button" |
         "avatar-upload-file-input" |
         "base-language-select" |
+        "batch-operation-copy-source-select" |
+        "batch-operation-copy-source-select-item" |
+        "batch-operation-dialog-cancel-job" |
+        "batch-operation-dialog-end-status" |
+        "batch-operation-dialog-minimize" |
+        "batch-operation-dialog-ok" |
+        "batch-operations-section" |
+        "batch-operations-select" |
+        "batch-operations-submit-button" |
+        "batch-select-item" |
         "billing-actual-extra-credits" |
         "billing-actual-period" |
         "billing-actual-period-end" |
@@ -394,7 +404,6 @@ declare namespace DataCy {
         "translations-cell-tab-history" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
-        "translations-delete-button" |
         "translations-filter-clear-all" |
         "translations-filter-option" |
         "translations-filter-select" |
@@ -414,6 +423,7 @@ declare namespace DataCy {
         "translations-table-cell" |
         "translations-table-cell-language" |
         "translations-table-cell-translation" |
+        "translations-table-cell-translation-text" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |

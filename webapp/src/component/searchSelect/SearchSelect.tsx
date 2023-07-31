@@ -14,7 +14,6 @@ const StyledInputContent = styled('div')`
   overflow: hidden;
   text-overflow: ellipsis;
   margin-right: -5px;
-  contain: size;
   height: 23px;
 `;
 
@@ -33,6 +32,7 @@ type Props<T> = {
   renderValue?: (value: T | undefined) => React.ReactNode;
   SelectProps?: React.ComponentProps<typeof Select>;
   compareFunction?: (prompt: string, label: string) => boolean;
+  noContain?: boolean;
 };
 
 export function SearchSelect<T extends React.Key>({
@@ -49,6 +49,7 @@ export function SearchSelect<T extends React.Key>({
   renderValue,
   SelectProps,
   compareFunction,
+  noContain,
 }: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -67,17 +68,19 @@ export function SearchSelect<T extends React.Key>({
   };
 
   const myRenderValue = () => (
-    <StyledInputContent>
+    <StyledInputContent style={{ contain: noContain ? undefined : 'size' }}>
       {renderValue
         ? renderValue(value)
         : (valueItem ? valueItem.name : value) || ''}
     </StyledInputContent>
   );
 
-  const handleOnAddNew = (searchValue: string) => {
-    setIsOpen(false);
-    onAddNew?.(searchValue);
-  };
+  const handleOnAddNew = onAddNew
+    ? (searchValue: string) => {
+        setIsOpen(false);
+        onAddNew?.(searchValue);
+      }
+    : undefined;
 
   const valueItem = items.find((i) => i.value === value);
 

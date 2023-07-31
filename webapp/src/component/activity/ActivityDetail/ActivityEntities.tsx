@@ -65,7 +65,7 @@ export const ActivityEntities: React.FC<Props> = ({
               });
               return value ? (
                 <React.Fragment key={i}>
-                  {label && <StyledFieldLabel>{label?.()}</StyledFieldLabel>}
+                  {label && <StyledFieldLabel>{label?.()}:</StyledFieldLabel>}
                   <StyledFieldContent
                     gridColumn={!label ? '1 / span 2' : undefined}
                   >
