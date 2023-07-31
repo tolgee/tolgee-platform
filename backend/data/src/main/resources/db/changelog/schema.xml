@@ -2655,4 +2655,16 @@
     <changeSet author="jenik (generated)" id="1690707891775-2">
         <renameColumn tableName="tolgee_batch_job_chunk_execution" oldColumnName="exception" newColumnName="stack_trace"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-1">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="job_character" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-2">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="max_per_job_concurrency" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

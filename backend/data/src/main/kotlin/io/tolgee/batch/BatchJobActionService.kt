@@ -44,7 +44,7 @@ class BatchJobActionService(
   private val currentDateProvider: CurrentDateProvider
 ) : Logging {
   companion object {
-    const val MIN_TIME_BETWEEN_OPERATIONS = 10
+    const val MIN_TIME_BETWEEN_OPERATIONS = 100
   }
 
   @EventListener(ApplicationReadyEvent::class)
@@ -95,8 +95,9 @@ class BatchJobActionService(
           }
         }
         execution?.let { progressManager.handleChunkCompletedCommitted(it) }
-        addRetryExecutionToQueue(retryExecution)
+        addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
       } catch (e: Throwable) {
+        progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
         when (e) {
           is UnexpectedRollbackException -> {
             logger.debug(
@@ -118,18 +119,20 @@ class BatchJobActionService(
     val lockedExecution = getExecutionIfCanAcquireLock(executionItem.chunkExecutionId)
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
+      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is not pending, skipping")
+      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       return null
     }
     return lockedExecution
   }
 
-  private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?) {
+  private fun addRetryExecutionToQueue(retryExecution: BatchJobChunkExecution?, jobCharacter: JobCharacter) {
     retryExecution?.let {
-      batchJobChunkExecutionQueue.addExecutionToQueue(listOf(it))
+      batchJobChunkExecutionQueue.addToQueue(it, jobCharacter)
       logger.debug("Job ${it.batchJob.id}: Added chunk ${it.id} for re-trial")
     }
   }
@@ -157,7 +160,8 @@ class BatchJobActionService(
       val execution = entityManager.find(BatchJobChunkExecution::class.java, chunkExecutionId)
       execution.status = BatchJobChunkExecutionStatus.FAILED
       execution.errorMessage = Message.EXECUTION_FAILED_ON_MANAGEMENT_ERROR
-      execution.exception = e.stackTraceToString()
+      execution.stackTrace = e.stackTraceToString()
+      execution.errorKey = "management_error"
       entityManager.persist(execution)
       progressManager.handleProgress(execution)
     }
@@ -175,8 +179,8 @@ class BatchJobActionService(
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager.createQuery(
       """
-            from BatchJobChunkExecution bjce
-            where bjce.id = :id
+          from BatchJobChunkExecution bjce
+          where bjce.id = :id
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
@@ -190,7 +194,7 @@ class BatchJobActionService(
 
   fun cancelLocalJob(jobId: Long) {
     batchJobChunkExecutionQueue.cancelJob(jobId)
-    concurrentExecutionLauncher.runningJobs.filter { it.value.first == jobId }.forEach {
+    concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
       it.value.second.cancel()
     }
   }
