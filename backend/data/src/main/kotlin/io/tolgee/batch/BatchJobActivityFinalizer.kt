@@ -6,6 +6,8 @@ import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.waitFor
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
@@ -15,7 +17,7 @@ class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
-) {
+) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
     finalizeActivityWhenJobCompleted(event.job)
@@ -45,27 +47,33 @@ class BatchJobActivityFinalizer(
       mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
       mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
       deleteUnusedRevisions(revisionIds)
-      setJobIdToRevision(activityRevisionIdToMergeInto, job.id)
+      setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
     }
   }
 
   private fun waitForOtherChunksToComplete(job: BatchJobDto) {
     waitFor(20000) {
       val committedChunks = batchJobStateProvider.get(job.id).values
-        .count { !it.retry && it.transactionCommitted && it.status.completed }
+        .count { it.retry == false && it.transactionCommitted && it.status.completed }
+      logger.debug("Waitinng for completed chunks ($committedChunks) to be equal to all other chunks count (${job.totalChunks - 1})")
       committedChunks == job.totalChunks - 1
     }
   }
 
-  private fun setJobIdToRevision(activityRevisionIdToMergeInto: Long, jobId: Long) {
+  private fun setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto: Long, job: BatchJobDto) {
     entityManager.createNativeQuery(
       """
-        update activity_revision set batch_job_chunk_execution_id = null, batch_job_id = :jobId
+        update activity_revision 
+        set
+         batch_job_chunk_execution_id = null, 
+         batch_job_id = :jobId, 
+         author_id = :authorId
         where id = :activityRevisionIdToMergeInto
         """
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
-      .setParameter("jobId", jobId)
+      .setParameter("jobId", job.id)
+      .setParameter("authorId", job.authorId)
       .executeUpdate()
   }
 
@@ -126,12 +134,13 @@ class BatchJobActivityFinalizer(
                group by entity_class, entity_id
                having count(*) > 1)
         and
-            activity_revision_id not in (select min(activity_revision_id)
-         from activity_describing_entity
-         where activity_revision_id in (:revisionIds)
-            or activity_revision_id = :activityRevisionIdToMergeInto
-         group by entity_class, entity_id
-         having count(*) > 1)
+            (activity_revision_id, entity_class, entity_id) not in (
+            select min(activity_revision_id), entity_class, entity_id
+                from activity_describing_entity
+                where activity_revision_id in (:revisionIds)
+                    or activity_revision_id = :activityRevisionIdToMergeInto
+                group by entity_class, entity_id
+                having count(*) > 1)
       """.trimIndent()
     )
       .setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)

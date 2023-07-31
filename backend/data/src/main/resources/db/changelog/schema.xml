@@ -2647,4 +2647,24 @@
     <changeSet author="jenik (generated)" id="1690466722895-11">
         <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="tolgee_batch_job" constraintName="FKrt8ahtsfk7phco5o4p5x7kaog" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1690707891775-1">
+        <addColumn tableName="tolgee_batch_job_chunk_execution">
+            <column name="error_key" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690707891775-2">
+        <renameColumn tableName="tolgee_batch_job_chunk_execution" oldColumnName="exception" newColumnName="stack_trace"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-1">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="job_character" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-2">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="max_per_job_concurrency" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

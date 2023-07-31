@@ -75,7 +75,8 @@ When no languages provided, it translates only untranslated languages."""
       key = key,
       languageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
-      useMachineTranslation = useMachineTranslation ?: false
+      useMachineTranslation = useMachineTranslation ?: false,
+      isBatch = true
     )
   }
 

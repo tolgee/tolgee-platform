@@ -169,7 +169,18 @@ class KeyService(
     val projectId = keys.map { it.project.id }.distinct().singleOrNull() ?: return
     val namespaceEntity = namespaceService.findOrCreate(namespace, projectId)
 
-    keys.forEach { it.namespace = namespaceEntity }
+    val oldNamespaces = keys.map {
+      val oldNamespace = it.namespace
+      it.namespace = namespaceEntity
+      oldNamespace
+    }
+
+    val modifiedNamespaces = oldNamespaces
+      .filter { it?.name != namespace }
+      .filterNotNull()
+      .distinctBy { it.id }
+
+    namespaceService.deleteIfUnused(modifiedNamespaces)
     keyRepository.saveAll(keys)
   }
 

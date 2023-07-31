@@ -57,7 +57,8 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       keyName = "key-name",
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
-      serviceType = MtServiceType.GOOGLE
+      serviceType = MtServiceType.GOOGLE,
+      isBatch = false
     )
   }
 

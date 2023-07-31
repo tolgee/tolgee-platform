@@ -33,6 +33,52 @@ class ProgressManager(
   private val cachingBatchJobService: CachingBatchJobService
 ) : Logging {
 
+  /**
+   * This method tries to set execution running in the state
+   * @param canRunFn function that returns true if execution can be run
+   */
+  fun trySetExecutionRunning(
+    executionId: Long,
+    batchJobId: Long,
+    canRunFn: (Map<Long, ExecutionState>) -> Boolean
+  ): Boolean {
+    return batchJobStateProvider.updateState(batchJobId) {
+      if (it[executionId] != null) {
+        // we expect the item wasn't touched by others
+        // if it was, there are other mechanisms to handle it,
+        // so we just ignore it
+        return@updateState true
+      }
+      if (canRunFn(it)) {
+        it[executionId] =
+          ExecutionState(
+            successTargets = listOf(),
+            status = BatchJobChunkExecutionStatus.RUNNING,
+            chunkNumber = null,
+            retry = null,
+            transactionCommitted = false
+          )
+        return@updateState true
+      }
+      return@updateState false
+    }
+  }
+
+  /**
+   * This method is called when the execution is not even started, because it was locked or something,
+   * it doesn't set it when the status is different from RUNNING
+   */
+  fun rollbackSetToRunning(
+    executionId: Long,
+    batchJobId: Long,
+  ) {
+    return batchJobStateProvider.updateState(batchJobId) {
+      if (it[executionId]?.status == BatchJobChunkExecutionStatus.RUNNING) {
+        it.remove(executionId)
+      }
+    }
+  }
+
   fun handleProgress(execution: BatchJobChunkExecution) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
@@ -57,7 +103,8 @@ class ProgressManager(
       job,
       progress = info.progress,
       isAnyCancelled = info.isAnyCancelled,
-      completedChunks = info.completedChunks
+      completedChunks = info.completedChunks,
+      errorMessage = execution.errorMessage
     )
   }
 
@@ -119,7 +166,7 @@ class ProgressManager(
     var completedChunks = 0L
     var progress = 0L
     this.values.forEach {
-      if (it.status.completed && !it.retry) completedChunks++
+      if (it.status.completed && it.retry == false) completedChunks++
       progress += it.successTargets.size
     }
     val isAnyCancelled = this.values.any { it.status == BatchJobChunkExecutionStatus.CANCELLED }

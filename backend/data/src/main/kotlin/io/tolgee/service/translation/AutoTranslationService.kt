@@ -28,7 +28,8 @@ class AutoTranslationService(
     key: Key,
     languageTags: List<String>? = null,
     useTranslationMemory: Boolean? = null,
-    useMachineTranslation: Boolean? = null
+    useMachineTranslation: Boolean? = null,
+    isBatch: Boolean,
   ) {
     val config = getConfig(key.project)
 
@@ -36,22 +37,23 @@ class AutoTranslationService(
       autoTranslateUsingTm(key, languageTags?.toSet())
     }
     if (useMachineTranslation ?: config.usingPrimaryMtService) {
-      autoTranslateUsingMachineTranslation(key, languageTags?.toSet())
+      autoTranslateUsingMachineTranslation(key, languageTags?.toSet(), isBatch)
     }
   }
 
-  private fun autoTranslateUsingMachineTranslation(key: Key, languageTags: Set<String>? = null) {
+  private fun autoTranslateUsingMachineTranslation(key: Key, languageTags: Set<String>? = null, isBatch: Boolean) {
     val translations = languageTags?.let { getTranslations(key, languageTags) } ?: getUntranslatedTranslations(key)
-    autoTranslateUsingMachineTranslation(translations, key)
+    autoTranslateUsingMachineTranslation(translations, key, isBatch)
   }
 
   private fun autoTranslateUsingMachineTranslation(
     translations: List<Translation>,
-    key: Key
+    key: Key,
+    isBatch: Boolean
   ) {
     val languages = translations.map { it.language }
 
-    mtService.getPrimaryMachineTranslations(key, languages)
+    mtService.getPrimaryMachineTranslations(key, languages, isBatch)
       .zip(translations)
       .asSequence()
       .forEach { (translateResult, translation) ->

@@ -125,7 +125,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     waitForNotThrowing(pollTime = 1000) {
       verify(
         preTranslationByTmChunkProcessor,
-        times(ceil(job.totalItems.toDouble() / BatchJobType.PRE_TRANSLATE_BY_MT.chunkSize).toInt())
+        times(ceil(job.totalItems.toDouble() / 10).toInt())
       ).process(any(), any(), any(), any())
     }
 
