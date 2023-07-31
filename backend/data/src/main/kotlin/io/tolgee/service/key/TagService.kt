@@ -121,6 +121,14 @@ class TagService(
         keyMetaService.save(keyMeta)
       }
     }
+
+    keysWithFetchedTags.map { it.project.id }.forEach {
+      this.removeUnusedTags(it)
+    }
+  }
+
+  private fun removeUnusedTags(projectId: Long) {
+    tagRepository.deleteAllUnused(projectId)
   }
 
   private fun getSingleProjectId(keysWithTags: Map<Long, Key>): Long {

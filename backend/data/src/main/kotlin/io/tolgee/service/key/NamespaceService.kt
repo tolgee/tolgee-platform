@@ -20,7 +20,11 @@ class NamespaceService(
 ) {
   private fun getKeysInNamespaceCount(namespace: Namespace?): Long? {
     namespace ?: return null
-    return namespaceRepository.getKeysInNamespaceCount(listOf(namespace.id)).firstOrNull()?.get(1) ?: 0
+    return getKeysInNamespaceCount(listOf(namespace.id)).values.firstOrNull()
+  }
+
+  private fun getKeysInNamespaceCount(namespaceIds: List<Long>): Map<Long, Long> {
+    return namespaceRepository.getKeysInNamespaceCount(namespaceIds).associate { it[0] to it[1] }
   }
 
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
@@ -47,9 +51,15 @@ class NamespaceService(
 
   fun deleteIfUnused(namespace: Namespace?) {
     namespace ?: return
-    val count = getKeysInNamespaceCount(namespace)
-    if (count == 0L) {
-      delete(namespace)
+    deleteIfUnused(listOf(namespace))
+  }
+
+  fun deleteIfUnused(namespaces: List<Namespace>) {
+    val counts = getKeysInNamespaceCount(namespaces.map { it.id })
+    namespaces.forEach {
+      if (counts[it.id] == 0L || counts[it.id] == null) {
+        delete(it)
+      }
     }
   }
 

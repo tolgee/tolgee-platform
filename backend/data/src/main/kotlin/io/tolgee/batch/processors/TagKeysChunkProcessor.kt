@@ -14,14 +14,14 @@ import kotlin.coroutines.CoroutineContext
 class TagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService
-) : ChunkProcessor<TagKeysRequest, TagKeysParams> {
+) : ChunkProcessor<TagKeysRequest, TagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: (Int) -> Unit
   ) {
-    val subChunked = chunk.chunked(100)
+    val subChunked = chunk.chunked(100) as List<List<Long>>
     var progress: Int = 0
     var params = getParams(job)
     subChunked.forEach { subChunk ->
@@ -39,6 +39,10 @@ class TagKeysChunkProcessor(
 
   override fun getParamsType(): Class<TagKeysParams> {
     return TagKeysParams::class.java
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getParams(data: TagKeysRequest): TagKeysParams {

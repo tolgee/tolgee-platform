@@ -46,7 +46,7 @@ class BatchJobCancellationManager(
   }
 
   fun cancelJob(jobId: Long) {
-    executeInNewTransaction(
+    val executions = executeInNewTransaction(
       transactionManager = transactionManager,
       isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
     ) {
@@ -71,6 +71,11 @@ class BatchJobCancellationManager(
       executions.forEach { execution ->
         cancelExecution(execution)
       }
+
+      executions
+    }
+    executions.forEach {
+      progressManager.handleChunkCompletedCommitted(it)
     }
   }
 

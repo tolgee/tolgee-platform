@@ -3,6 +3,7 @@ package io.tolgee.model.batch
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.JobCharacter
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
@@ -31,7 +32,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   var author: UserAccount? = null
 
   @Type(type = "jsonb")
-  var target: List<Long> = listOf()
+  var target: List<Any> = listOf()
 
   var totalItems: Int = 0
 
@@ -53,10 +54,15 @@ class BatchJob : StandardAuditModel(), IBatchJob {
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)
 
+  var maxPerJobConcurrency: Int = -1
+
+  @Enumerated(STRING)
+  var jobCharacter: JobCharacter = JobCharacter.FAST
+
   val dto get() = BatchJobDto.fromEntity(this)
 
   companion object {
-    fun chunkTarget(chunkSize: Int, target: List<Long>): List<List<Long>> =
+    fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =
       if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
   }
 }
