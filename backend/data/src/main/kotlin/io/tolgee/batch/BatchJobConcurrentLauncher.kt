@@ -187,7 +187,7 @@ class BatchJobConcurrentLauncher(
           }
         )
       )
-      return
+      return false
     }
 
     val job = launch {

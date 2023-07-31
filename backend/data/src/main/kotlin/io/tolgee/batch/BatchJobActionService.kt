@@ -42,7 +42,6 @@ class BatchJobActionService(
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
-  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100

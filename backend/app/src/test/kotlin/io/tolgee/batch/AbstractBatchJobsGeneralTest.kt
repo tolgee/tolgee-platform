@@ -19,8 +19,8 @@ import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import io.tolgee.util.addSeconds
+import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
@@ -100,9 +100,18 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     Mockito.reset(preTranslationByTmChunkProcessor)
     Mockito.clearInvocations(preTranslationByTmChunkProcessor)
     whenever(preTranslationByTmChunkProcessor.getParams(any<PreTranslationByTmRequest>())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getJobCharacter()).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getMaxPerJobConcurrency()).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getChunkSize(any(), any())).thenCallRealMethod()
     whenever(preTranslationByTmChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getTargetItemType()).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getParams(any<DeleteKeysRequest>())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getJobCharacter()).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getMaxPerJobConcurrency()).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getChunkSize(any(), any())).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getTargetItemType()).thenCallRealMethod()
+
     batchJobChunkExecutionQueue.populateQueue()
     testData = BatchJobsTestData()
     testDataService.saveTestData(testData.root)
@@ -419,17 +428,16 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
   }
 
-
   @Test
-    /**
-     * the chunk processing status is stored in the database in the same transaction
-     * so when it fails on some management processing issue, we need to handle this
-     *
-     * The execution itself is added back to queue and retried, but we don't want it to be retreied forever.
-     * That's why there is a limit of few retries per chunk
-     *
-     * This test tests that the job fails after few retries
-     */
+  /**
+   * the chunk processing status is stored in the database in the same transaction
+   * so when it fails on some management processing issue, we need to handle this
+   *
+   * The execution itself is added back to queue and retried, but we don't want it to be retreied forever.
+   * That's why there is a limit of few retries per chunk
+   *
+   * This test tests that the job fails after few retries
+   */
   fun `retries and fails on management exceptions issues`() {
     whenever(preTranslationByTmChunkProcessor.process(any(), any(), any(), any())).then {}
 
@@ -476,7 +484,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     jobIds: List<Long>,
   ): Map<Long, List<BatchJobChunkExecution>> =
     entityManager.createQuery(
-      """from BatchJobChunkExecution b where b.batchJob.id in :ids""",
+      """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
       BatchJobChunkExecution::class.java
     )
       .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }

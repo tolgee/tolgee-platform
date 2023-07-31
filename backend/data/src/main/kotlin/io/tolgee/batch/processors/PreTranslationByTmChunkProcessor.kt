@@ -50,6 +50,10 @@ class PreTranslationByTmChunkProcessor(
     return PreTranslationByTmJobParams::class.java
   }
 
+  override fun getChunkSize(request: PreTranslationByTmRequest, projectId: Long): Int {
+    return 10
+  }
+
   override fun getParams(data: PreTranslationByTmRequest): PreTranslationByTmJobParams {
     return PreTranslationByTmJobParams().apply {
       this.targetLanguageIds = data.targetLanguageIds
