@@ -22,6 +22,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 import java.time.Duration
+import kotlin.math.ceil
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
@@ -84,7 +85,7 @@ class TolgeeTranslateApiService(
     return MtValueProvider.MtResult(
       response.body?.output
         ?: throw RuntimeException(response.toString()),
-      cost * 10,
+      ceil(cost * tolgeeMachineTranslationProperties.tokensToMtCredits).toInt(),
       response.body?.contextDescription,
     )
   }
