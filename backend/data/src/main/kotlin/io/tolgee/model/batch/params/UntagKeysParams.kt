@@ -1,7 +1,5 @@
 package io.tolgee.model.batch.params
 
-import io.tolgee.model.StandardAuditModel
-
-class UntagKeysParams : StandardAuditModel() {
+class UntagKeysParams {
   var tags: List<String> = listOf()
 }

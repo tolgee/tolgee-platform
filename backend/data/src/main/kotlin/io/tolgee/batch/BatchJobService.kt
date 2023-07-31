@@ -81,7 +81,7 @@ class BatchJobService(
       job
     }
 
-    executions?.let { batchJobChunkExecutionQueue.addToQueue(it) }
+    executions?.let { batchJobChunkExecutionQueue.addExecutionToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions?.size} executions to queue ${
       System.identityHashCode(
@@ -98,7 +98,7 @@ class BatchJobService(
   }
 
   fun getJobEntity(id: Long): BatchJob {
-    return findJobEntity(id) ?: throw NotFoundException(io.tolgee.constants.Message.BATCH_JOB_NOT_FOUND)
+    return findJobEntity(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
   fun findJobDto(id: Long): BatchJobDto? {
@@ -106,7 +106,7 @@ class BatchJobService(
   }
 
   fun getJobDto(id: Long): BatchJobDto {
-    return this.findJobDto(id) ?: throw NotFoundException(io.tolgee.constants.Message.BATCH_JOB_NOT_FOUND)
+    return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
   fun getViews(projectId: Long, userAccount: UserAccountDto?, pageable: Pageable): Page<BatchJobView> {
@@ -237,6 +237,15 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
-  fun deleteMultiple(ids: Iterable<Long>) {
+  fun getExecutions(id: Long): List<BatchJobChunkExecution> {
+    return entityManager.createQuery(
+      """
+      from BatchJobChunkExecution e
+      where e.batchJob.id = :id
+      """.trimIndent(),
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("id", id)
+      .resultList
   }
 }
