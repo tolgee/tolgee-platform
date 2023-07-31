@@ -3,14 +3,14 @@ import { useState } from 'react';
 import { useTranslationsSelector } from './TranslationsContext';
 import { useDebouncedCallback } from 'use-debounce';
 import { NsBannerRecord, useNsBanners } from './useNsBanners';
-import { createProviderNew } from 'tg.fixtures/createProviderNew';
+import { createProvider } from 'tg.fixtures/createProvider';
 
 /**
  * Context responsible for top namespace banner in translations header
  * keeps track of banner elements and decides which one should be displayed
  */
 export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
-  createProviderNew(() => {
+  createProvider(() => {
     const translations = useTranslationsSelector((c) => c.translations);
     const reactList = useTranslationsSelector((c) => c.reactList);
     const [topNamespace, setTopNamespace] = useState<

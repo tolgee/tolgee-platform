@@ -190,7 +190,7 @@ export const CellTranslation: React.FC<Props> = ({
           {language.tag}
         </StyledLanguage>
 
-        <StyledTranslation>
+        <StyledTranslation data-cy="translations-table-cell-translation-text">
           <StyledTranslationContent>
             <TranslationVisual
               width={width}

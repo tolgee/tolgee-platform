@@ -1,13 +1,13 @@
 import { useOrganizationUsageService } from './useOrganizationUsageService';
 import { useInitialDataService } from './useInitialDataService';
 import { globalContext } from './globalActions';
-import { createProviderNew } from 'tg.fixtures/createProviderNew';
+import { createProvider } from 'tg.fixtures/createProvider';
 import { components } from 'tg.service/apiSchema.generated';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
-  createProviderNew(() => {
+  createProvider(() => {
     const initialData = useInitialDataService();
 
     const organizationUsage = useOrganizationUsageService({

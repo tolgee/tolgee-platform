@@ -10,7 +10,6 @@ import {
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
-import { TranslationsToolbar } from '../TranslationsToolbar';
 import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
 import {
@@ -65,7 +64,6 @@ export const TranslationsTable = () => {
 
   const columnSizes = useColumnsContext((c) => c.columnSizes);
   const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
-  const totalWidth = useColumnsContext((c) => c.totalWidth);
 
   const { startResize, resizeColumn, addResizer, resetColumns } =
     useColumnsActions();
@@ -204,7 +202,6 @@ export const TranslationsTable = () => {
           );
         }}
       />
-      <TranslationsToolbar width={totalWidth} />
     </StyledContainer>
   );
 };

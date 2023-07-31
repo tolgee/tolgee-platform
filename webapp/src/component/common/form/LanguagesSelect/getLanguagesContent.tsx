@@ -13,6 +13,7 @@ type Props = {
   languages: LanguageModel[];
   value: string[];
   disabledLanguages: number[] | undefined;
+  enableEmpty?: boolean;
 };
 
 const messaging = container.resolve(MessageService);
@@ -22,6 +23,7 @@ export const getLanguagesContent = ({
   value,
   onChange,
   disabledLanguages,
+  enableEmpty,
 }: Props) => {
   const handleLanguageChange = (lang: string) => () => {
     const baseLang = languages.find((l) => l.base)?.tag;
@@ -29,11 +31,11 @@ export const getLanguagesContent = ({
       ? value.filter((l) => l !== lang)
       : putBaseLangFirst([...value, lang], baseLang);
 
-    if (!result?.length) {
+    if (!result?.length && !enableEmpty) {
       messaging.error(<T keyName="set_at_least_one_language_error" />);
       return;
     }
-    onChange(result);
+    onChange(result || []);
   };
 
   return languages.map((lang) => (

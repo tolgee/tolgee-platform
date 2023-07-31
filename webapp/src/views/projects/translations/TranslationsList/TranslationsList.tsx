@@ -9,7 +9,6 @@ import {
 } from '../context/TranslationsContext';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
-import { TranslationsToolbar } from '../TranslationsToolbar';
 import { NamespaceBanner } from '../Namespace/NamespaceBanner';
 import { useNsBanners } from '../context/useNsBanners';
 import {
@@ -47,7 +46,6 @@ export const TranslationsList = () => {
 
   const columnSizes = useColumnsContext((c) => c.columnSizes);
   const columnSizesPercent = useColumnsContext((c) => c.columnSizesPercent);
-  const totalWidth = useColumnsContext((c) => c.totalWidth);
 
   const { startResize, resizeColumn, addResizer, resetColumns } =
     useColumnsActions();
@@ -154,7 +152,6 @@ export const TranslationsList = () => {
           );
         }}
       />
-      <TranslationsToolbar width={totalWidth} />
     </StyledContainer>
   );
 };

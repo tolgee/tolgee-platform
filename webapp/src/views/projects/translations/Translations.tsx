@@ -18,6 +18,9 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';
+import { TranslationsToolbar } from './TranslationsToolbar';
+import { useColumnsContext } from './context/ColumnsContext';
+import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 
 export const Translations = () => {
   const { t } = useTranslate();
@@ -28,6 +31,7 @@ export const Translations = () => {
   const isFetching = useTranslationsSelector((c) => c.isFetching);
   const view = useTranslationsSelector((v) => v.view);
   const translations = useTranslationsSelector((c) => c.translations);
+  const totalWidth = useColumnsContext((c) => c.totalWidth);
 
   const filtersOrSearchApplied = useTranslationsSelector((c) =>
     Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
@@ -119,6 +123,7 @@ export const Translations = () => {
         ],
       ]}
     >
+      <BatchOperationsChangeIndicator />
       <TranslationsHeader />
       {translationsEmpty ? (
         renderPlaceholder()
@@ -127,6 +132,7 @@ export const Translations = () => {
       ) : (
         <TranslationsList />
       )}
+      <TranslationsToolbar width={totalWidth} />
     </BaseProjectView>
   );
 };
