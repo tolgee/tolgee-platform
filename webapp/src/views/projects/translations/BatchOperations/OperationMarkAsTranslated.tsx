@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { useTranslate } from '@tolgee/react';
 
-import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 
@@ -9,11 +7,11 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
 import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationContainer } from './components/OperationContainer';
+import { BatchOperationsLanguagesSelect } from './components/BatchOperationsLanguagesSelect';
 
 type Props = OperationProps;
 
 export const OperationMarkAsTranslated = ({ disabled, onStart }: Props) => {
-  const { t } = useTranslate();
   const project = useProject();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
   const selection = useTranslationsSelector((c) => c.selection);
@@ -49,13 +47,10 @@ export const OperationMarkAsTranslated = ({ disabled, onStart }: Props) => {
 
   return (
     <OperationContainer>
-      <LanguagesSelect
+      <BatchOperationsLanguagesSelect
         languages={allLanguages || []}
         value={selectedLangs || []}
         onChange={setSelectedLangs}
-        enableEmpty
-        context="batch-operations"
-        placeholder={t('batch_operations_select_languages_placeholder')}
       />
       <BatchOperationsSubmit
         loading={batchLoadable.isLoading}

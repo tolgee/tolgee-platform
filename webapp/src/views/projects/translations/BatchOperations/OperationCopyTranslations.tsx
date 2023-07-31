@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 
@@ -10,6 +9,7 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
 import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationContainer } from './components/OperationContainer';
+import { BatchOperationsLanguagesSelect } from './components/BatchOperationsLanguagesSelect';
 
 type Props = OperationProps;
 
@@ -75,6 +75,16 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
             onChange={(e) => handleChangeSource(e.target.value)}
             size="small"
             sx={{ width: 150 }}
+            MenuProps={{
+              anchorOrigin: {
+                vertical: 'top',
+                horizontal: 'center',
+              },
+              transformOrigin: {
+                vertical: 'bottom',
+                horizontal: 'center',
+              },
+            }}
           >
             {allLanguages.map((l) => (
               <MenuItem
@@ -90,16 +100,13 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
       </OperationContainer>
       <OperationContainer alignItems="center">
         <Box>{t('batch_operations_copy_to_label')}</Box>
-        <LanguagesSelect
+        <BatchOperationsLanguagesSelect
           languages={allLanguages || []}
           value={selectedLangs || []}
           onChange={setSelectedLangs}
-          enableEmpty
           disabledLanguages={allLanguages
             .filter((l) => l.tag === sourceLanguage)
             .map((l) => l.id)}
-          context="batch-operations"
-          placeholder={t('batch_operations_select_languages_placeholder')}
         />
         <BatchOperationsSubmit
           loading={batchLoadable.isLoading}
