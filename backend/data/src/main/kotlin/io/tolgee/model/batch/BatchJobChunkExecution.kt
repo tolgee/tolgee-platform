@@ -42,7 +42,15 @@ class BatchJobChunkExecution : StandardAuditModel() {
   var successTargets: List<Any> = listOf()
 
   @Column(columnDefinition = "text")
-  var exception: String? = null
+  var stackTrace: String? = null
+
+  /**
+   * This is used to count allowed retries
+   *
+   * When max retries for this error keys are reached, the chunk will be marked as failed
+   */
+  @Column(columnDefinition = "text")
+  var errorKey: String? = null
 
   @Enumerated(EnumType.STRING)
   var errorMessage: Message? = null

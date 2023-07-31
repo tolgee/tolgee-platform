@@ -55,7 +55,9 @@ class BatchJobChunkExecutionQueue(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
-    logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+    if (data.size > 0) {
+      logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+    }
     addExecutionsToLocalQueue(data)
   }
 

@@ -62,9 +62,10 @@ open class ChunkProcessingUtil(
       return
     }
 
-    execution.exception = exception.stackTraceToString()
+    execution.stackTrace = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
+    execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
 
     logException(exception)
 
@@ -101,7 +102,7 @@ open class ChunkProcessingUtil(
       waitTime = getWaitTime(exception)
     }
 
-    if (retries >= maxRetries && maxRetries != -1) {
+    if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
       Sentry.captureException(exception)
       return
@@ -113,7 +114,7 @@ open class ChunkProcessingUtil(
   }
 
   private fun getWaitTime(exception: RequeueWithDelayException) =
-    exception.delayInMs * (exception.increaseFactor.toDouble().pow(retries.toDouble())).toInt()
+    exception.delayInMs * (exception.increaseFactor.toDouble().pow(errorKeyRetries.toDouble())).toInt()
 
   private val job by lazy { batchJobService.getJobDto(execution.batchJob.id) }
 
@@ -183,8 +184,13 @@ open class ChunkProcessingUtil(
     }
   }
 
-  private val retries: Int by lazy {
-    previousExecutions.size
+  private val errorKeyRetries by lazy {
+    val errorKey = execution.errorKey ?: throw IllegalStateException("Error key is not set")
+    retries[errorKey] ?: 0
+  }
+
+  private val retries: Map<String?, Long> by lazy {
+    previousExecutions.groupBy { it.errorKey }.map { it.key to it.value.size.toLong() }.toMap()
   }
 
   @Suppress("UNCHECKED_CAST")
