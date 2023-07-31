@@ -53,6 +53,8 @@ export const BatchOperationDialog = ({
   const statusColor = getStatusColor(data.status);
   const statusLabel = useBatchOperationStatusTranslate()(data.status);
   const typeLabel = useBatchOperationTypeTranslate()(data.type);
+  const isFinalizing =
+    data.status === 'RUNNING' && data.progress === data.totalItems;
 
   const isFinished = END_STATUSES.includes(data.status);
 
@@ -81,12 +83,14 @@ export const BatchOperationDialog = ({
               }}
             />
           </Box>
-          {(isFinished || data.status === 'PENDING') && (
+          {(isFinished || data.status === 'PENDING' || isFinalizing) && (
             <Box
               data-cy="batch-operation-dialog-end-status"
-              color={statusColor}
+              color={isFinalizing ? undefined : statusColor}
             >
-              {statusLabel}
+              {isFinalizing
+                ? t('batch-operation-dialog-finalizing')
+                : statusLabel}
             </Box>
           )}
         </Box>
