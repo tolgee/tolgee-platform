@@ -78,9 +78,18 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
+  fun addToQueue(execution: BatchJobChunkExecution, jobCharacter: JobCharacter) {
+    val item = execution.toItem(jobCharacter)
+    addItemsToQueue(listOf(item))
+  }
+
   fun addToQueue(executions: List<BatchJobChunkExecution>) {
+    val items = executions.map { it.toItem() }
+    addItemsToQueue(items)
+  }
+
+  private fun addItemsToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val items = executions.map { it.toItem() }
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
         RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
@@ -88,15 +97,21 @@ class BatchJobChunkExecutionQueue(
       )
       return
     }
-    this.addExecutionsToLocalQueue(executions)
+
+    this.addItemsToLocalQueue(items)
   }
 
   fun cancelJob(jobId: Long) {
     queue.removeIf { it.jobId == jobId }
   }
 
-  private fun BatchJobChunkExecution.toItem() =
-    ExecutionQueueItem(id, batchJob.id, executeAfter?.time)
+  private fun BatchJobChunkExecution.toItem(
+    // Yes. jobCharacter is part of the batchJob entity.
+    // However, we don't want to fetch it here, because it would be a waste of resources.
+    // So we can provide the jobCharacter here.
+    jobCharacter: JobCharacter? = null
+  ) =
+    ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
   val size get() = queue.size
 
@@ -119,4 +134,7 @@ class BatchJobChunkExecutionQueue(
   fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
 
   fun isEmpty(): Boolean = queue.isEmpty()
+  fun getJobCharacterCounts(): Map<JobCharacter, Int> {
+    return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
+  }
 }

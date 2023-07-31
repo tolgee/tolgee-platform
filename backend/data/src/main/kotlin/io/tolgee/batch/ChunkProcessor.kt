@@ -18,6 +18,18 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
     return jacksonObjectMapper().convertValue(job.params, getParamsType())
   }
 
+  fun getMaxPerJobConcurrency(): Int {
+    return -1
+  }
+
+  fun getJobCharacter(): JobCharacter {
+    return JobCharacter.FAST
+  }
+
+  fun getChunkSize(request: RequestType, projectId: Long): Int {
+    return 0
+  }
+
   fun getParamsType(): Class<ParamsType>?
 
   fun getTargetItemType(): Class<TargetItemType>

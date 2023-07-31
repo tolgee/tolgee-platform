@@ -62,16 +62,19 @@ class BatchJobService(
         this.author = author
         this.target = target
         this.totalItems = target.size
-        this.chunkSize = type.chunkSize
+        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
+        this.jobCharacter = processor.getJobCharacter()
+        this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type
       }
+
       val chunked = job.chunkedTarget
       job.totalChunks = chunked.size
       cachingBatchJobService.saveJob(job)
 
       job.params = processor.getParams(request)
 
-      executions = chunked.mapIndexed { chunkNumber, _ ->
+      executions = List(chunked.size) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber
