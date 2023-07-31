@@ -84,7 +84,7 @@ class BatchJobService(
       job
     }
 
-    executions?.let { batchJobChunkExecutionQueue.addExecutionToQueue(it) }
+    executions?.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions?.size} executions to queue ${
       System.identityHashCode(

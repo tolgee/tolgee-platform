@@ -150,7 +150,7 @@ class BatchJobActionService(
         return null
       }
       executionItem.executeAfter = currentDateProvider.date.addSeconds(2).time
-      batchJobChunkExecutionQueue.addItemToQueue(listOf(executionItem))
+      batchJobChunkExecutionQueue.addItemsToQueue(listOf(executionItem))
       null
     }
   }

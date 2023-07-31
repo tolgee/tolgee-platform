@@ -88,7 +88,7 @@ class BatchJobChunkExecutionQueue(
     addItemsToQueue(items)
   }
 
-  private fun addItemsToQueue(items: List<ExecutionQueueItem>) {
+  fun addItemsToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
