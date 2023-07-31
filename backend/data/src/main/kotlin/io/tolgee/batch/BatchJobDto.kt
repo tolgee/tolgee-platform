@@ -15,6 +15,8 @@ class BatchJobDto(
   override var status: BatchJobStatus,
   val type: BatchJobType,
   val params: Any?,
+  var maxPerJobConcurrency: Int,
+  var jobCharacter: JobCharacter,
 ) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
@@ -31,6 +33,8 @@ class BatchJobDto(
         status = entity.status,
         type = entity.type,
         params = entity.params,
+        maxPerJobConcurrency = entity.maxPerJobConcurrency,
+        jobCharacter = entity.jobCharacter,
       )
     }
   }
