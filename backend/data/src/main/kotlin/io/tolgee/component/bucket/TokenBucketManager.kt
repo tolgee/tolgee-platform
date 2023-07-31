@@ -88,8 +88,8 @@ class TokenBucketManager(
 
   fun setEmptyUntil(bucketId: String, refillAt: Long) {
     logger.debug(
-      "Setting bucket $bucketId empty for " +
-        "next ${Duration.ofMillis(refillAt - currentDateProvider.date.time).seconds} seconds"
+      "Setting bucket $bucketId empty for next " +
+        "${Duration.ofMillis(refillAt - currentDateProvider.date.time).seconds} seconds"
     )
     updateBucket(bucketId) { setEmptyUntilMappingFn(it, refillAt) }
   }
