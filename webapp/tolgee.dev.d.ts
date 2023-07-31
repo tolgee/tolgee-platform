@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import type en from './src/i18n/en.json';
 
 declare module '@tolgee/core/lib/types' {
