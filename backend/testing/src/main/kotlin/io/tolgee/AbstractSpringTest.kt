@@ -185,7 +185,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var applicationContext: ApplicationContext
 
   @Autowired
-  lateinit var mtCreditBucketService: MtCreditBucketService
+  open lateinit var mtCreditBucketService: MtCreditBucketService
 
   @Autowired
   lateinit var mtService: MtService

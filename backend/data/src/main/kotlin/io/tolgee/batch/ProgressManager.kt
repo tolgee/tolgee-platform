@@ -96,7 +96,7 @@ class ProgressManager(
       if (job.totalItems.toLong() != progress) {
         jobEntity.status = BatchJobStatus.FAILED
         cachingBatchJobService.saveJob(jobEntity)
-        val errorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(job))[job.id]
+        val errorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
         eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, errorMessage))
         return
       }
