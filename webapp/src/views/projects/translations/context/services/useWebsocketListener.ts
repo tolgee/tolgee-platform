@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import {
   Modification,
   WebsocketClient,
-} from '../../../../../websocket-client/WebsocketClient';
+} from 'tg.websocket-client/WebsocketClient';
 
 export const useWebsocketListener = (
   translationService: ReturnType<typeof useTranslationsService>
