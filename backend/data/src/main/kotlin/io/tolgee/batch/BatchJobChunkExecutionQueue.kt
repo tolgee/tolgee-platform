@@ -55,7 +55,9 @@ class BatchJobChunkExecutionQueue(
         "javax.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
-    logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+    if (data.size > 0) {
+      logger.debug("Adding ${data.size} items to queue ${System.identityHashCode(this)}")
+    }
     addExecutionsToLocalQueue(data)
   }
 
@@ -76,12 +78,17 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  fun addExecutionToQueue(executions: List<BatchJobChunkExecution>) {
-    val items = executions.map { it.toItem() }
-    addItemToQueue(items)
+  fun addToQueue(execution: BatchJobChunkExecution, jobCharacter: JobCharacter) {
+    val item = execution.toItem(jobCharacter)
+    addItemsToQueue(listOf(item))
   }
 
-  fun addItemToQueue(items: List<ExecutionQueueItem>) {
+  fun addToQueue(executions: List<BatchJobChunkExecution>) {
+    val items = executions.map { it.toItem() }
+    addItemsToQueue(items)
+  }
+
+  fun addItemsToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
       val event = JobQueueItemsEvent(items, QueueEventType.ADD)
       redisTemplate.convertAndSend(
@@ -90,6 +97,7 @@ class BatchJobChunkExecutionQueue(
       )
       return
     }
+
     this.addItemsToLocalQueue(items)
   }
 
@@ -97,8 +105,13 @@ class BatchJobChunkExecutionQueue(
     queue.removeIf { it.jobId == jobId }
   }
 
-  private fun BatchJobChunkExecution.toItem() =
-    ExecutionQueueItem(id, batchJob.id, executeAfter?.time)
+  private fun BatchJobChunkExecution.toItem(
+    // Yes. jobCharacter is part of the batchJob entity.
+    // However, we don't want to fetch it here, because it would be a waste of resources.
+    // So we can provide the jobCharacter here.
+    jobCharacter: JobCharacter? = null
+  ) =
+    ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
   val size get() = queue.size
 
@@ -121,4 +134,7 @@ class BatchJobChunkExecutionQueue(
   fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
 
   fun isEmpty(): Boolean = queue.isEmpty()
+  fun getJobCharacterCounts(): Map<JobCharacter, Int> {
+    return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
+  }
 }

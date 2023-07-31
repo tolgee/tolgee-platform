@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class ClearTranslationsChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager
-) : ChunkProcessor<ClearTranslationsRequest, ClearTranslationsJobParams> {
+) : ChunkProcessor<ClearTranslationsRequest, ClearTranslationsJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
@@ -26,6 +26,7 @@ class ClearTranslationsChunkProcessor(
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
+      @Suppress("UNCHECKED_CAST")
       translationService.clear(subChunk, params.languageIds)
       entityManager.flush()
       progress += subChunk.size
@@ -35,6 +36,10 @@ class ClearTranslationsChunkProcessor(
 
   override fun getParamsType(): Class<ClearTranslationsJobParams> {
     return ClearTranslationsJobParams::class.java
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getTarget(data: ClearTranslationsRequest): List<Long> {

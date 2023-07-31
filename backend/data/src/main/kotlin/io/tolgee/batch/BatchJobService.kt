@@ -46,15 +46,15 @@ class BatchJobService(
 ) : Logging {
 
   @Transactional
-  fun <RequestType> startJob(
-    request: RequestType,
+  fun startJob(
+    request: Any,
     project: Project,
     author: UserAccount?,
     type: BatchJobType
   ): BatchJob {
     var executions: List<BatchJobChunkExecution>? = null
     val job = executeInNewTransaction(transactionManager) {
-      val processor = getProcessor<RequestType, Any>(type)
+      val processor = getProcessor(type)
       val target = processor.getTarget(request)
 
       val job = BatchJob().apply {
@@ -62,16 +62,19 @@ class BatchJobService(
         this.author = author
         this.target = target
         this.totalItems = target.size
-        this.chunkSize = type.chunkSize
+        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
+        this.jobCharacter = processor.getJobCharacter()
+        this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type
       }
+
       val chunked = job.chunkedTarget
       job.totalChunks = chunked.size
       cachingBatchJobService.saveJob(job)
 
       job.params = processor.getParams(request)
 
-      executions = chunked.mapIndexed { chunkNumber, _ ->
+      executions = List(chunked.size) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber
@@ -81,7 +84,7 @@ class BatchJobService(
       job
     }
 
-    executions?.let { batchJobChunkExecutionQueue.addExecutionToQueue(it) }
+    executions?.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
       "Starting job ${job.id}, aadded ${executions?.size} executions to queue ${
       System.identityHashCode(
@@ -187,9 +190,8 @@ class BatchJobService(
     return BatchJobView(job, progress, errorMessage)
   }
 
-  @Suppress("USELESS_CAST")
-  fun <RequestType, ParamsType> getProcessor(type: BatchJobType): ChunkProcessor<RequestType, ParamsType> =
-    applicationContext.getBean(type.processor.java) as ChunkProcessor<RequestType, ParamsType>
+  fun getProcessor(type: BatchJobType): ChunkProcessor<Any, Any, Any> =
+    applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
   fun deleteAllByProjectId(projectId: Long) {
     val batchJobs = getAllByProjectId(projectId)

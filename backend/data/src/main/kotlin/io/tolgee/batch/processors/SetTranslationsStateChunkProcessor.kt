@@ -14,12 +14,12 @@ import kotlin.coroutines.CoroutineContext
 class SetTranslationsStateChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager
-) : ChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams> {
+) : ChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit)
+    onProgress: (Int) -> Unit
   ) {
     val subChunked = chunk.chunked(1000)
     var progress: Int = 0
@@ -39,6 +39,10 @@ class SetTranslationsStateChunkProcessor(
 
   override fun getParamsType(): Class<SetTranslationStateJobParams> {
     return SetTranslationStateJobParams::class.java
+  }
+
+  override fun getTargetItemType(): Class<Long> {
+    return Long::class.java
   }
 
   override fun getParams(data: SetTranslationsStateStateRequest): SetTranslationStateJobParams {
