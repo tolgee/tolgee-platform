@@ -3,6 +3,8 @@ package io.tolgee.component.bucket
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -16,7 +18,7 @@ class TokenBucketManager(
   val lockingProvider: LockingProvider,
   @Lazy
   var redissonClient: RedissonClient
-) {
+) : Logging {
   companion object {
     val localTokenBucketStorage = ConcurrentHashMap<String, TokenBucket>()
   }
@@ -56,7 +58,7 @@ class TokenBucketManager(
       getCurrentOrNewBucket(tokenBucket, bucketSize, renewPeriod)
     currentTokenBucket.refillIfItsTime(currentDateProvider.date.time, bucketSize)
     if (currentTokenBucket.tokens < tokensToConsume) {
-      throw NotEnoughTokensException(currentTokenBucket.refillAt + currentTokenBucket.period.toMillis())
+      throw NotEnoughTokensException(currentTokenBucket.refillAt)
     }
     return currentTokenBucket.copy(tokens = currentTokenBucket.tokens - tokensToConsume)
   }
@@ -85,6 +87,7 @@ class TokenBucketManager(
   }
 
   fun setEmptyUntil(bucketId: String, refillAt: Long) {
+    logger.debug("Setting bucket $bucketId empty for next ${Duration.ofMillis(refillAt - currentDateProvider.date.time).seconds} seconds")
     updateBucket(bucketId) { setEmptyUntilMappingFn(it, refillAt) }
   }
 

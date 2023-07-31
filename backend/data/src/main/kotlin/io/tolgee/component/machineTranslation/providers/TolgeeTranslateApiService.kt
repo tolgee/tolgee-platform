@@ -22,7 +22,6 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 import java.time.Duration
-import java.util.*
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
@@ -50,7 +49,8 @@ class TolgeeTranslateApiService(
       params.sourceTag,
       params.targetTag,
       examples,
-      closeItems
+      closeItems,
+      priority = if (params.isBatch) "low" else "high"
     )
     val request = HttpEntity(requestBody, headers)
 
@@ -70,25 +70,32 @@ class TolgeeTranslateApiService(
       val data = e.parse()
       tokenBucketManager.addTokens(TOKEN_BUCKET_KEY, tolgeeMachineTranslationProperties.tokensToPreConsume)
       syncBuckets(data)
-      val waitTime = (data.retryAfter ?: 0) * 1000 + (0..1000).random()
-      logger.debug("Translator thrown TooManyRequests exception. Waiting for $waitTime ms")
-      throw TranslationApiRateLimitException(currentDateProvider.date.time + waitTime, e)
+      val waitTime = data.retryAfter ?: 0
+      logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
+      throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
     }
 
     val costString = response.headers.get("Mt-Credits-Cost")?.singleOrNull()
       ?: throw IllegalStateException("No valid Credits-Cost header in response")
     val cost = costString.toInt()
 
-    tokenBucketManager.addTokens(
-      TOKEN_BUCKET_KEY,
-      tolgeeMachineTranslationProperties.tokensToPreConsume - cost
-    )
+    finalizeTokenCost(params.isBatch, cost)
 
     return MtValueProvider.MtResult(
       response.body?.output
         ?: throw RuntimeException(response.toString()),
       cost * 10,
       response.body?.contextDescription,
+    )
+  }
+
+  private fun finalizeTokenCost(isBatch: Boolean, cost: Int) {
+    if (!isBatch) {
+      return
+    }
+    tokenBucketManager.addTokens(
+      TOKEN_BUCKET_KEY,
+      tolgeeMachineTranslationProperties.tokensToPreConsume - cost
     )
   }
 
@@ -105,9 +112,13 @@ class TolgeeTranslateApiService(
         BUCKET_INTERVAL
       )
     } catch (e: NotEnoughTokensException) {
-      logger.debug("Not enough token rate limit tokens to translate. Tokens will be refilled at ${Date(e.refillAt)}")
+      logger.debug(
+        "Not enough token rate limit tokens to translate. " +
+          "Tokens will be refilled at ${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s"
+      )
       throw TranslationApiRateLimitException(e.refillAt, e)
     }
+
     try {
       tokenBucketManager.consume(
         CALL_BUCKET_KEY,
@@ -116,7 +127,10 @@ class TolgeeTranslateApiService(
         BUCKET_INTERVAL
       )
     } catch (e: NotEnoughTokensException) {
-      logger.debug("Not enough token rate limit tokens to translate. Tokens will be refilled at ${Date(e.refillAt)}")
+      logger.debug(
+        "Not enough call rate limit tokens to translate. " +
+          "Tokens will be refilled at ${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s"
+      )
       throw TranslationApiRateLimitException(e.refillAt, e)
     }
   }
@@ -156,6 +170,7 @@ class TolgeeTranslateApiService(
       val target: String?,
       val examples: List<TolgeeTranslateExample>?,
       val closeItems: List<TolgeeTranslateExample>?,
+      val priority: String = "low"
     )
 
     class TolgeeTranslateParams(
