@@ -197,7 +197,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     batchJobConcurrentLauncher.pause = true
 
-    val job = runChunkedJob(10)
+    val job = runChunkedJob(100)
 
     userAccount = testData.anotherUser
 

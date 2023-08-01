@@ -4,12 +4,12 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 
 @Component
 class TokenBucketManager(
@@ -34,16 +34,28 @@ class TokenBucketManager(
     }
   }
 
-  fun addTokens(bucketId: String, tokensToAdd: Long) {
-    updateTokens(bucketId) {
-      it + tokensToAdd
+  fun checkPositiveBalance(bucketId: String) {
+    updateBucket(bucketId) {
+      checkPositiveMappingFn(
+        tokenBucket = it,
+      )
     }
   }
 
-  fun updateTokens(bucketId: String, updateFn: ((oldTokens: Long) -> Long)) {
+  fun addTokens(bucketId: String, tokensToAdd: Long) {
+    updateTokens(bucketId) { oldTokens, bucketSize ->
+      min(oldTokens + tokensToAdd, bucketSize)
+    }
+  }
+
+  fun updateTokens(bucketId: String, updateFn: ((oldTokens: Long, bucketSize: Long) -> Long)) {
     updateBucket(bucketId) {
       updateMappingFn(it, updateFn)
     }
+  }
+
+  fun setEmptyUntil(bucketId: String, refillAt: Long) {
+    updateBucket(bucketId) { setEmptyUntilMappingFn(it, refillAt) }
   }
 
   private fun getLockingId(bucketId: String) = "lock_bucket_$bucketId"
@@ -56,19 +68,35 @@ class TokenBucketManager(
   ): TokenBucket {
     val currentTokenBucket =
       getCurrentOrNewBucket(tokenBucket, bucketSize, renewPeriod)
-    currentTokenBucket.refillIfItsTime(currentDateProvider.date.time, bucketSize)
+    currentTokenBucket.refillIfItsTime(currentDateProvider.date.time, bucketSize, renewPeriod)
     if (currentTokenBucket.tokens < tokensToConsume) {
       throw NotEnoughTokensException(currentTokenBucket.refillAt)
     }
-    return currentTokenBucket.copy(tokens = currentTokenBucket.tokens - tokensToConsume)
+    return currentTokenBucket.apply { tokens = currentTokenBucket.tokens - tokensToConsume }
+  }
+
+  private fun checkPositiveMappingFn(
+    tokenBucket: TokenBucket?,
+  ): TokenBucket? {
+    tokenBucket ?: return null
+    if (tokenBucket.isTimeToRefill(currentDateProvider.date.time)) {
+      return tokenBucket
+    }
+    if (tokenBucket.tokens <= 0) {
+      throw NotEnoughTokensException(tokenBucket.refillAt)
+    }
+    return tokenBucket
   }
 
   private fun setEmptyUntilMappingFn(
     tokenBucket: TokenBucket?,
     emptyUntil: Long,
-  ): TokenBucket? {
-    tokenBucket ?: return null
-    return tokenBucket.copy(tokens = 0, refillAt = emptyUntil)
+  ): TokenBucket {
+    val currentBucket = getCurrentOrNewBucket(tokenBucket, 0, Duration.ZERO)
+    return currentBucket.apply {
+      tokens = 0
+      refillAt = emptyUntil
+    }
   }
 
   private fun getCurrentOrNewBucket(
@@ -79,22 +107,14 @@ class TokenBucketManager(
 
   private fun updateMappingFn(
     tokenBucket: TokenBucket?,
-    updateFn: ((oldTokens: Long) -> Long)
+    updateFn: ((oldTokens: Long, bucketSize: Long) -> Long)
   ): TokenBucket? {
     tokenBucket ?: return null
-    val newTokens = updateFn(tokenBucket.tokens)
-    return tokenBucket.copy(tokens = newTokens)
+    val newTokens = updateFn(tokenBucket.tokens, tokenBucket.size)
+    return tokenBucket.apply { tokens = newTokens }
   }
 
-  fun setEmptyUntil(bucketId: String, refillAt: Long) {
-    logger.debug(
-      "Setting bucket $bucketId empty for next " +
-        "${Duration.ofMillis(refillAt - currentDateProvider.date.time).seconds} seconds"
-    )
-    updateBucket(bucketId) { setEmptyUntilMappingFn(it, refillAt) }
-  }
-
-  fun updateBucket(bucketId: String, mappingFn: (bucket: TokenBucket?) -> TokenBucket?): TokenBucket? {
+  private fun updateBucket(bucketId: String, mappingFn: (bucket: TokenBucket?) -> TokenBucket?): TokenBucket? {
     if (!usingRedisProvider.areWeUsingRedis) {
       return localTokenBucketStorage.compute(bucketId) { _, bucket ->
         mappingFn(bucket)

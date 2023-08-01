@@ -10,6 +10,7 @@ import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.logger
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -54,7 +55,7 @@ class TolgeeTranslateApiService(
     )
     val request = HttpEntity(requestBody, headers)
 
-    consumeRateLimitTokens(params)
+    checkPositiveRateLimitTokens(params)
 
     val response: ResponseEntity<TolgeeTranslateResponse> = try {
       val (value, time) = measureTimedValue {
@@ -68,8 +69,7 @@ class TolgeeTranslateApiService(
       value
     } catch (e: HttpClientErrorException.TooManyRequests) {
       val data = e.parse()
-      tokenBucketManager.addTokens(TOKEN_BUCKET_KEY, tolgeeMachineTranslationProperties.tokensToPreConsume)
-      syncBuckets(data)
+      emptyBucket(data)
       val waitTime = data.retryAfter ?: 0
       logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
       throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
@@ -79,8 +79,6 @@ class TolgeeTranslateApiService(
       ?: throw IllegalStateException("No valid Credits-Cost header in response")
     val cost = costString.toInt()
 
-    finalizeTokenCost(params.isBatch, cost)
-
     return MtValueProvider.MtResult(
       response.body?.output
         ?: throw RuntimeException(response.toString()),
@@ -89,80 +87,34 @@ class TolgeeTranslateApiService(
     )
   }
 
-  private fun finalizeTokenCost(isBatch: Boolean, cost: Int) {
-    if (!isBatch) {
-      return
-    }
-    tokenBucketManager.addTokens(
-      TOKEN_BUCKET_KEY,
-      tolgeeMachineTranslationProperties.tokensToPreConsume - cost
-    )
-  }
-
-  private fun consumeRateLimitTokens(params: TolgeeTranslateParams) {
+  private fun checkPositiveRateLimitTokens(params: TolgeeTranslateParams) {
     if (!params.isBatch) {
       return
     }
 
     try {
-      tokenBucketManager.consume(
-        TOKEN_BUCKET_KEY,
-        tolgeeMachineTranslationProperties.tokensToPreConsume,
-        getTokensRateLimitTokensPerInterval(),
-        BUCKET_INTERVAL
-      )
+      tokenBucketManager.checkPositiveBalance(BUCKET_KEY)
     } catch (e: NotEnoughTokensException) {
-      logger.debug(
-        "Not enough token rate limit tokens to translate. " +
-          "Tokens will be refilled at ${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s"
-      )
-      throw TranslationApiRateLimitException(e.refillAt, e)
-    }
-
-    try {
-      tokenBucketManager.consume(
-        CALL_BUCKET_KEY,
-        1,
-        getCallRateLimitTokensPerInterval(),
-        BUCKET_INTERVAL
-      )
-    } catch (e: NotEnoughTokensException) {
-      logger.debug(
-        "Not enough call rate limit tokens to translate. " +
-          "Tokens will be refilled at ${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s"
-      )
+      logger.debug {
+        "Cannot translate using the translator for next " +
+          "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty."
+      }
       throw TranslationApiRateLimitException(e.refillAt, e)
     }
   }
 
-  private fun syncBuckets(data: TooManyRequestsData) {
+  private fun emptyBucket(data: TooManyRequestsData) {
     val retryAfter = data.retryAfter ?: return
-    val bucketKey = when (data.rateLimit) {
-      "token" -> TOKEN_BUCKET_KEY
-      "call" -> CALL_BUCKET_KEY
-      else -> return
-    }
-
-    tokenBucketManager.setEmptyUntil(bucketKey, currentDateProvider.date.time + retryAfter * 1000)
-  }
-
-  private fun getTokensRateLimitTokensPerInterval(): Long {
-    return tolgeeMachineTranslationProperties.batchMaxTokensPerMinute * BUCKET_INTERVAL.seconds / 60
-  }
-
-  private fun getCallRateLimitTokensPerInterval(): Long {
-    return tolgeeMachineTranslationProperties.batchMaxCallsPerMinute * BUCKET_INTERVAL.seconds / 60
+    tokenBucketManager.setEmptyUntil(BUCKET_KEY, currentDateProvider.date.time + retryAfter * 1000)
   }
 
   /**
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
   companion object {
-    private const val TOKEN_BUCKET_KEY = "tolgee-translate-token-rate-limit"
-    private const val CALL_BUCKET_KEY = "tolgee-translate-call-rate-limit"
+    const val BUCKET_KEY = "tolgee-translate-rate-limit"
 
-    private val BUCKET_INTERVAL = Duration.ofMinutes(1)
-
+    @Suppress("unused")
     class TolgeeTranslateRequest(
       val input: String,
       val keyName: String?,
@@ -194,7 +146,6 @@ class TolgeeTranslateApiService(
   class TooManyRequestsData(
     val error: String? = null,
     val retryAfter: Int? = null,
-    val rateLimit: String? = null
   )
 }
 

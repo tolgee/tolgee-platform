@@ -2,17 +2,27 @@ package io.tolgee.component.bucket
 
 import java.time.Duration
 
-data class TokenBucket(
-  var refillAt: Long,
+class TokenBucket(
+  currentTimestamp: Long,
   var size: Long,
   var tokens: Long,
-  val period: Duration
+  var period: Duration
 ) {
-  fun refillIfItsTime(currentTimestamp: Long, newTokens: Long): TokenBucket {
-    if (refillAt < currentTimestamp) {
+  var refillAt: Long
+
+  init {
+    refillAt = currentTimestamp + period.toMillis()
+  }
+
+  fun refillIfItsTime(currentTimestamp: Long, newTokens: Long, renewPeriod: Duration): TokenBucket {
+    if (isTimeToRefill(currentTimestamp)) {
       this.tokens = newTokens
-      this.refillAt = currentTimestamp + period.toMillis()
+      this.size = newTokens
+      this.refillAt = currentTimestamp + renewPeriod.toMillis()
+      this.period = renewPeriod
     }
     return this
   }
+
+  fun isTimeToRefill(currentTimestamp: Long) = refillAt <= currentTimestamp
 }
