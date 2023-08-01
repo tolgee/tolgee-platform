@@ -34,6 +34,7 @@ import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
@@ -96,6 +97,12 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = BatchJobsTestData()
     batchJobChunkExecutionQueue.populateQueue()
+    Mockito.reset(
+      mtCreditBucketService,
+      autoTranslationService,
+      machineTranslationChunkProcessor,
+      preTranslationByTmChunkProcessor
+    )
   }
 
   @AfterEach
@@ -175,7 +182,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     }
 
     val executions = batchJobService.getExecutions(getSingleJob().id)
-    executions.assert.hasSize(40)
+    executions.assert.hasSize(80)
     executions.forEach {
       it.status.assert.isEqualTo(BatchJobChunkExecutionStatus.FAILED)
       // no successful targets, since all was rolled back
@@ -206,59 +213,62 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val jobIds = ConcurrentHashMap.newKeySet<Long>()
     var wait = true
 
-    doAnswer {
-      val id = it.getArgument<BatchJobDto>(0).id
-      if (jobIds.size == 2 && !jobIds.contains(id)) {
-        while (wait) {
-          Thread.sleep(100)
-        }
-      } else {
-        jobIds.add(id)
-      }
-    }
-      .whenever(preTranslationByTmChunkProcessor)
-      .process(any(), any(), any(), any())
-
-    val jobs = (1..3).map { runChunkedJob(50) }
-
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val dtos = jobs.map { batchJobService.getJobDto(it.id) }
-      dtos.forEach {
-        val state = batchJobStateProvider.getCached(it.id)
-        println(
-          "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}"
-        )
-      }
-      dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
-      dtos.count { it.status == BatchJobStatus.RUNNING }.assert.isEqualTo(1)
-    }
-
-    performProjectAuthGet("batch-jobs?sort=status&sort=id")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.batchJobs") {
-          isArray.hasSize(3)
-          node("[0].status").isEqualTo("RUNNING")
-          node("[0].progress").isEqualTo(0)
-          node("[1].id").isValidId
-          node("[1].status").isEqualTo("SUCCESS")
-          node("[1].progress").isEqualTo(50)
+    try {
+      doAnswer {
+        val id = it.getArgument<BatchJobDto>(0).id
+        if (jobIds.size == 2 && !jobIds.contains(id)) {
+          while (wait) {
+            Thread.sleep(100)
+          }
+        } else {
+          jobIds.add(id)
         }
       }
+        .whenever(preTranslationByTmChunkProcessor)
+        .process(any(), any(), any(), any())
 
-    wait = false
+      val jobs = (1..3).map { runChunkedJob(50) }
 
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val dtos = jobs.map { batchJobService.getJobDto(it.id) }
-      dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(3)
-    }
-
-    performProjectAuthGet("batch-jobs?sort=status&sort=id")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.batchJobs") {
-          isArray.hasSize(3)
-          node("[0].status").isEqualTo("SUCCESS")
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+        val dtos = jobs.map { batchJobService.getJobDto(it.id) }
+        dtos.forEach {
+          val state = batchJobStateProvider.getCached(it.id)
+          println(
+            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}"
+          )
         }
+        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
+        dtos.count { it.status == BatchJobStatus.RUNNING }.assert.isEqualTo(1)
       }
+
+      performProjectAuthGet("batch-jobs?sort=status&sort=id")
+        .andIsOk.andAssertThatJson {
+          node("_embedded.batchJobs") {
+            isArray.hasSize(3)
+            node("[0].status").isEqualTo("RUNNING")
+            node("[0].progress").isEqualTo(0)
+            node("[1].id").isValidId
+            node("[1].status").isEqualTo("SUCCESS")
+            node("[1].progress").isEqualTo(50)
+          }
+        }
+      wait = false
+
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+        val dtos = jobs.map { batchJobService.getJobDto(it.id) }
+        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(3)
+      }
+
+      performProjectAuthGet("batch-jobs?sort=status&sort=id")
+        .andIsOk.andAssertThatJson {
+          node("_embedded.batchJobs") {
+            isArray.hasSize(3)
+            node("[0].status").isEqualTo("SUCCESS")
+          }
+        }
+    } finally {
+      wait = false
+    }
   }
 
   @Test
@@ -314,36 +324,38 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
             node("[2].status").isEqualTo("PENDING")
           }
         }
+
+      wait = false
+
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+        val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
+        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(6)
+      }
+
+      performProjectAuthGet("current-batch-jobs")
+        .andIsOk.andAssertThatJson {
+          node("_embedded.batchJobs") {
+            isArray.hasSize(6)
+            node("[0].status").isEqualTo("SUCCESS")
+          }
+        }
+
+      userAccount = testData.anotherUser
+
+      performProjectAuthGet("current-batch-jobs")
+        .andIsOk.andAssertThatJson {
+          node("_embedded.batchJobs").isArray.hasSize(3)
+        }
+
+      currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(61)
+
+      performProjectAuthGet("current-batch-jobs")
+        .andIsOk.andAssertThatJson {
+          node("_embedded.batchJobs").isAbsent()
+        }
     } finally {
       wait = false
     }
-
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
-      dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(6)
-    }
-
-    performProjectAuthGet("current-batch-jobs")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.batchJobs") {
-          isArray.hasSize(6)
-          node("[0].status").isEqualTo("SUCCESS")
-        }
-      }
-
-    userAccount = testData.anotherUser
-
-    performProjectAuthGet("current-batch-jobs")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.batchJobs").isArray.hasSize(3)
-      }
-
-    currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(61)
-
-    performProjectAuthGet("current-batch-jobs")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.batchJobs").isAbsent()
-      }
   }
 
   @Test
