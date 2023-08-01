@@ -33,7 +33,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/", "/v2/projects/"])
-@Tag(name = "Batch job management")
+@Tag(name = "Batch Operations management")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class BatchJobManagementController(
   private val batchJobCancellationManager: BatchJobCancellationManager,
@@ -47,7 +47,7 @@ class BatchJobManagementController(
   @GetMapping(value = ["batch-jobs"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_JOBS_VIEW)
-  @Operation(summary = "Lists all batch jobs in project")
+  @Operation(summary = "Lists all batch operations in project")
   fun list(@Valid @ParameterObject @SortDefault("id") pageable: Pageable): PagedModel<BatchJobModel> {
     val views = batchJobService.getViews(projectHolder.project.id, null, pageable)
     return pagedResourcesAssembler.toModel(views, batchJobModelAssembler)
@@ -56,7 +56,7 @@ class BatchJobManagementController(
   @GetMapping(value = ["my-batch-jobs"])
   @AccessWithApiKey()
   @AccessWithAnyProjectPermission()
-  @Operation(summary = "Lists all batch jobs in project started by current user")
+  @Operation(summary = "Lists all batch operations in project started by current user")
   fun myList(@Valid @ParameterObject @SortDefault("id") pageable: Pageable): PagedModel<BatchJobModel> {
     val views = batchJobService.getViews(
       projectId = projectHolder.project.id,
@@ -70,9 +70,9 @@ class BatchJobManagementController(
   @AccessWithApiKey()
   @AccessWithAnyProjectPermission()
   @Operation(
-    summary = "Returns all running and pending tasks. " +
-      "Completed tasks are returned only if they are not older than 1 hour. " +
-      "If user doesn't have permission to view all batch jobs, only their jobs are returned."
+    summary = "Returns all running and pending batch operations",
+    description = "Completed batch operations are returned only if they are not older than 1 hour. " +
+      "If user doesn't have permission to view all batch operations, only their operations are returned."
   )
   fun currentJobs(): CollectionModel<BatchJobModel> {
     val views = batchJobService.getCurrentJobViews(
@@ -84,7 +84,7 @@ class BatchJobManagementController(
   @GetMapping(value = ["batch-jobs/{id}"])
   @AccessWithApiKey()
   @AccessWithAnyProjectPermission()
-  @Operation(summary = "Returns the batch job")
+  @Operation(summary = "Returns batch operation")
   fun get(@PathVariable id: Long): BatchJobModel {
     val view = batchJobService.getView(id)
     checkViewPermission(view.batchJob)
@@ -94,7 +94,7 @@ class BatchJobManagementController(
   @PutMapping(value = ["batch-jobs/{id}/cancel"])
   @AccessWithApiKey()
   @AccessWithAnyProjectPermission()
-  @Operation(summary = "Stops batch job (if possible)")
+  @Operation(summary = "Stops batch operation (if possible)")
   fun cancel(@PathVariable id: Long) {
     checkCancelPermission(batchJobService.getJobDto(id))
     batchJobCancellationManager.cancel(id)
