@@ -34,7 +34,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/start-batch-job", "/v2/projects/start-batch-job"])
-@Tag(name = "Start batch jobs")
+@Tag(name = "Batch Operations")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class StartBatchJobController(
   private val securityService: SecurityService,
@@ -46,7 +46,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/pre-translate-by-tm"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_MT)
-  @Operation(summary = "Translates provided keys to provided languages")
+  @Operation(
+    summary = "Pre-translate by TM",
+    description = "Pre-translate provided keys to provided languages by TM."
+  )
   fun translate(@Valid @RequestBody data: PreTranslationByTmRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
@@ -61,7 +64,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/machine-translate"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_MACHINE_TRANSLATE)
-  @Operation(summary = "Translates provided keys to provided languages")
+  @Operation(
+    summary = "Machine Translation",
+    description = "Translate provided keys to provided languages through primary MT provider."
+  )
   fun machineTranslation(@Valid @RequestBody data: MachineTranslationRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
@@ -76,7 +82,7 @@ class StartBatchJobController(
   @PostMapping(value = ["/delete-keys"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_DELETE)
-  @Operation(summary = "Translates provided keys to provided languages")
+  @Operation(summary = "Delete keys")
   fun deleteKeys(@Valid @RequestBody data: DeleteKeysRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     return batchJobService.startJob(
@@ -105,7 +111,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/clear-translations"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @Operation(summary = "Clear translation values")
+  @Operation(
+    summary = "Clear translation values",
+    description = "Clear translation values for provided keys in selected languages."
+  )
   fun clearTranslations(@Valid @RequestBody data: ClearTranslationsRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
@@ -120,7 +129,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/copy-translations"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @Operation(summary = "Clear translation values")
+  @Operation(
+    summary = "Copy translation values",
+    description = "Copy translation values from one language to other languages."
+  )
   fun copyTranslations(@Valid @RequestBody data: CopyTranslationRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
@@ -136,7 +148,7 @@ class StartBatchJobController(
   @PostMapping(value = ["/tag-keys"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @Operation(summary = "Tag keys")
+  @Operation(summary = "Add tags")
   fun tagKeys(@Valid @RequestBody data: TagKeysRequest): BatchJobModel {
     data.tags.validate()
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
@@ -151,7 +163,7 @@ class StartBatchJobController(
   @PostMapping(value = ["/untag-keys"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @Operation(summary = "Tag keys")
+  @Operation(summary = "Remove tags")
   fun untagKeys(@Valid @RequestBody data: UntagKeysRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     return batchJobService.startJob(
@@ -165,7 +177,7 @@ class StartBatchJobController(
   @PostMapping(value = ["/set-keys-namespace"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @Operation(summary = "Tag keys")
+  @Operation(summary = "Set keys namespace")
   fun setKeysNamespace(@Valid @RequestBody data: SetKeysNamespaceRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     return batchJobService.startJob(
