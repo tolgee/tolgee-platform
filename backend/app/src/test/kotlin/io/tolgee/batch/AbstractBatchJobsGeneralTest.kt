@@ -12,20 +12,25 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
+import io.tolgee.util.Logging
 import io.tolgee.util.addSeconds
+import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -41,7 +46,7 @@ import kotlin.math.ceil
 
 @WebsocketTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
+abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   private lateinit var testData: BatchJobsTestData
 
@@ -77,29 +82,41 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
   lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
 
   @Autowired
+  lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+
+  @Autowired
+  @SpyBean
+  lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
+
+  @Autowired
   @SpyBean
   lateinit var progressManager: ProgressManager
 
   @BeforeEach
   fun setup() {
+    Mockito.reset(batchJobProjectLockingManager)
     Mockito.reset(progressManager)
     batchJobChunkExecutionQueue.clear()
     Mockito.reset(preTranslationByTmChunkProcessor)
     Mockito.clearInvocations(preTranslationByTmChunkProcessor)
     whenever(preTranslationByTmChunkProcessor.getParams(any<PreTranslationByTmRequest>())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getJobCharacter()).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getMaxPerJobConcurrency()).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getChunkSize(any(), any())).thenCallRealMethod()
     whenever(preTranslationByTmChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(preTranslationByTmChunkProcessor.getTargetItemType()).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getParams(any<DeleteKeysRequest>())).thenCallRealMethod()
     whenever(deleteKeysChunkProcessor.getTarget(any())).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getJobCharacter()).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getMaxPerJobConcurrency()).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getChunkSize(any(), any())).thenCallRealMethod()
+    whenever(deleteKeysChunkProcessor.getTargetItemType()).thenCallRealMethod()
+
     batchJobChunkExecutionQueue.populateQueue()
     testData = BatchJobsTestData()
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = Date(1687237928000)
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
+    initWebsocketHelper()
   }
 
   @AfterEach()
@@ -111,13 +128,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `executes operation`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     val job = runChunkedJob(1000)
 
     job.totalItems.assert.isEqualTo(1000)
@@ -129,12 +139,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
       ).process(any(), any(), any(), any())
     }
 
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        val finishedJob = batchJobService.getJobDto(job.id)
-        finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      }
-    }
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
 
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(101)
@@ -142,13 +147,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `correctly reports failed test when FailedDontRequeueException thrown`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     val job = runChunkedJob(1000)
 
     val exceptions = (1..50).map { _ ->
@@ -188,13 +186,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `retries failed with generic exception`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     whenever(
       preTranslationByTmChunkProcessor.process(
         any(),
@@ -232,13 +223,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
   @Test
   fun `retries failed with RequeueWithTimeoutException`() {
-    websocketHelper = WebsocketTestHelper(
-      port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
-      testData.projectBuilder.self.id
-    )
-    websocketHelper.listenForBatchJobProgress()
-
     val throwingChunk = (1L..10).toList()
 
     whenever(
@@ -294,6 +278,15 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     assertStatusReported(BatchJobStatus.FAILED)
   }
 
+  private fun initWebsocketHelper() {
+    websocketHelper = WebsocketTestHelper(
+      port,
+      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      testData.projectBuilder.self.id
+    )
+    websocketHelper.listenForBatchJobProgress()
+  }
+
   @Test
   fun `publishes progress of single chunk job`() {
     whenever(
@@ -317,12 +310,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     val job = runSingleChunkJob(100)
 
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        val finishedJob = batchJobService.getJobDto(job.id)
-        finishedJob.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      }
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
 
+    waitForNotThrowing(pollTime = 1000) {
       entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
         .setParameter("id", job.id).resultList.assert.hasSize(1)
     }
@@ -363,15 +353,79 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
 
     batchJobCancellationManager.cancel(job.id)
 
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        val finishedJob = batchJobService.getJobDto(job.id)
-        finishedJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-      }
-    }
+    job.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
-    assertStatusReported(BatchJobStatus.CANCELLED)
+    websocketHelper.receivedMessages.last.contains("CANCELLED")
+  }
+
+  @Test
+  fun `it locks the single job for project`() {
+    logger.info("Running test: it locks the single job for project")
+    currentDateProvider.forcedDate = null
+    batchJobConcurrentLauncher.pause = true
+
+    val job1 = runChunkedJob(20)
+    val job2 = runChunkedJob(20)
+
+    val executions = getExecutions(listOf(job1.id, job2.id))
+
+    val firstExecution = executions[job1.id]!!.first()
+    val secondExecution = executions[job2.id]!!.first()
+    val thirdExecution = executions[job1.id]!![1]
+    val fourthExecution = executions[job2.id]!![1]
+
+    batchJobChunkExecutionQueue.clear()
+
+    batchJobConcurrentLauncher.pause = false
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
+
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(firstExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
+    }
+    // The first job is now locked
+    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job1.id)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
+
+    waitForNotThrowing {
+      // it tries to lock the second job but it can't since the first job is locked
+      verify(batchJobProjectLockingManager, atLeast(1))
+        .canRunBatchJobOfExecution(eq(job2.id))
+    }
+
+    // it doesn't run the second execution since the first job is locked
+    Thread.sleep(1000)
+    batchJobService.getExecution(secondExecution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(thirdExecution))
+
+    // second and last execution of job1 is done, so the second job is locked now
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(thirdExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
+    }
+
+    job1.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+
+    waitForNotThrowing {
+      // the project was unlocked before job2 acquired the job
+      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id))
+    }
+
+    waitForNotThrowing(pollTime = 1000) {
+      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job2.id)
+    }
+
+    batchJobChunkExecutionQueue.addToQueue(listOf(fourthExecution))
+
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(fourthExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS &&
+        batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
+    }
+
+    batchJobService.getJobDto(job1.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
   }
 
   @Test
@@ -416,7 +470,26 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest() {
     }
   }
 
-  protected fun runChunkedJob(keyCount: Int): BatchJob {
+  private fun BatchJob.waitForCompleted(): BatchJobDto {
+    waitForNotThrowing(pollTime = 1000) {
+      executeInNewTransaction {
+        val finishedJob = batchJobService.getJobDto(this.id)
+        finishedJob.status.completed.assert.isTrue()
+      }
+    }
+    return batchJobService.getJobDto(this.id)
+  }
+
+  private fun getExecutions(
+    jobIds: List<Long>,
+  ): Map<Long, List<BatchJobChunkExecution>> =
+    entityManager.createQuery(
+      """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
+      BatchJobChunkExecution::class.java
+    )
+      .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }
+
+  fun runChunkedJob(keyCount: Int): BatchJob {
     return executeInNewTransaction {
       batchJobService.startJob(
         request = PreTranslationByTmRequest().apply {
