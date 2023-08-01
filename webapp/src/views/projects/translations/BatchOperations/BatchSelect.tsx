@@ -81,6 +81,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
         );
       }}
       size="small"
+      noOptionsText={t('batch_select_no_operation')}
       ListboxProps={{ style: { maxHeight: '80vh' } }}
     />
   );
