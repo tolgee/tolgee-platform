@@ -46,8 +46,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/pre-translate-by-tm"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_MT)
-  @Operation(summary = "Pre-translate by TM",
-    description = "Pre-translate provided keys to provided languages by TM.")
+  @Operation(
+    summary = "Pre-translate by TM",
+    description = "Pre-translate provided keys to provided languages by TM."
+  )
   fun translate(@Valid @RequestBody data: PreTranslationByTmRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
@@ -62,8 +64,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/machine-translate"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.BATCH_MACHINE_TRANSLATE)
-  @Operation(summary = "Machine Translation",
-    description = "Translate provided keys to provided languages through primary MT provider.")
+  @Operation(
+    summary = "Machine Translation",
+    description = "Translate provided keys to provided languages through primary MT provider."
+  )
   fun machineTranslation(@Valid @RequestBody data: MachineTranslationRequest): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
@@ -107,8 +111,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/clear-translations"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @Operation(summary = "Clear translation values",
-    description = "Clear translation values for provided keys in selected languages.")
+  @Operation(
+    summary = "Clear translation values",
+    description = "Clear translation values for provided keys in selected languages."
+  )
   fun clearTranslations(@Valid @RequestBody data: ClearTranslationsRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
@@ -123,8 +129,10 @@ class StartBatchJobController(
   @PostMapping(value = ["/copy-translations"])
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @Operation(summary = "Copy translation values",
-    description = "Copy translation values from one language to other languages.")
+  @Operation(
+    summary = "Copy translation values",
+    description = "Copy translation values from one language to other languages."
+  )
   fun copyTranslations(@Valid @RequestBody data: CopyTranslationRequest): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)

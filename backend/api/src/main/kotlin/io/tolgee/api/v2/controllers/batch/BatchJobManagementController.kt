@@ -70,8 +70,8 @@ class BatchJobManagementController(
   @AccessWithApiKey()
   @AccessWithAnyProjectPermission()
   @Operation(
-    summary = "Returns all running and pending batch operations", description =
-      "Completed batch operations are returned only if they are not older than 1 hour. " +
+    summary = "Returns all running and pending batch operations",
+    description = "Completed batch operations are returned only if they are not older than 1 hour. " +
       "If user doesn't have permission to view all batch operations, only their operations are returned."
   )
   fun currentJobs(): CollectionModel<BatchJobModel> {
