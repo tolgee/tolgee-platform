@@ -41,7 +41,7 @@ class BatchJobActionService(
   private val redisTemplate: StringRedisTemplate,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -116,7 +116,8 @@ class BatchJobActionService(
   }
 
   private fun getPendingUnlockedExecutionItem(executionItem: ExecutionQueueItem): BatchJobChunkExecution? {
-    val lockedExecution = getExecutionIfCanAcquireLock(executionItem.chunkExecutionId)
+    val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
+
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
@@ -127,6 +128,7 @@ class BatchJobActionService(
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       return null
     }
+
     return lockedExecution
   }
 
@@ -175,12 +177,12 @@ class BatchJobActionService(
     }
   }
 
-  fun getExecutionIfCanAcquireLock(id: Long): BatchJobChunkExecution? {
+  private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager.createQuery(
       """
-          from BatchJobChunkExecution bjce
-          where bjce.id = :id
+              from BatchJobChunkExecution bjce
+              where bjce.id = :id
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )

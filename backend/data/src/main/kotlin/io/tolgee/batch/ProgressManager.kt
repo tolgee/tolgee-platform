@@ -30,7 +30,8 @@ class ProgressManager(
   private val transactionManager: PlatformTransactionManager,
   private val batchJobService: BatchJobService,
   private val batchJobStateProvider: BatchJobStateProvider,
-  private val cachingBatchJobService: CachingBatchJobService
+  private val cachingBatchJobService: CachingBatchJobService,
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
 ) : Logging {
 
   /**
@@ -83,15 +84,7 @@ class ProgressManager(
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
     val info = batchJobStateProvider.updateState(job.id) {
-      it[execution.id] =
-        ExecutionState(
-          successTargets = execution.successTargets,
-          status = execution.status,
-          chunkNumber = execution.chunkNumber,
-          retry = execution.retry,
-          transactionCommitted = false
-        )
-
+      it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
       it.getInfoForJobResult()
     }
 
@@ -143,8 +136,8 @@ class ProgressManager(
       if (job.totalItems.toLong() != progress) {
         jobEntity.status = BatchJobStatus.FAILED
         cachingBatchJobService.saveJob(jobEntity)
-        val errorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
-        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, errorMessage))
+        val safeErrorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
+        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, safeErrorMessage))
         return
       }
 
@@ -153,13 +146,16 @@ class ProgressManager(
       eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
       cachingBatchJobService.saveJob(jobEntity)
     } finally {
-      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id))
+      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id, job.projectId, jobEntity.status))
     }
   }
 
   @TransactionalEventListener(OnBatchJobStatusUpdated::class)
   fun handleJobStatusUpdated(event: OnBatchJobStatusUpdated) {
     cachingBatchJobService.evictJobCache(event.jobId)
+    if (event.status.completed) {
+      batchJobProjectLockingManager.unlockJobForProject(event.projectId)
+    }
   }
 
   fun Map<Long, ExecutionState>.getInfoForJobResult(): JobResultInfo {

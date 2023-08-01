@@ -34,6 +34,16 @@ class BatchJobStateProvider(
     }
   }
 
+  fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState {
+    return ExecutionState(
+      successTargets = execution.successTargets,
+      status = execution.status,
+      chunkNumber = execution.chunkNumber,
+      retry = execution.retry,
+      transactionCommitted = false
+    )
+  }
+
   fun get(jobId: Long): MutableMap<Long, ExecutionState> {
     return if (usingRedisProvider.areWeUsingRedis) {
       getRedissonMap(jobId)

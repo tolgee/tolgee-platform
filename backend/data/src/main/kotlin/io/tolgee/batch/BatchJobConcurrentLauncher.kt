@@ -24,6 +24,7 @@ class BatchJobConcurrentLauncher(
   private val batchProperties: BatchProperties,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider,
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val batchJobService: BatchJobService,
   private val progressManager: ProgressManager,
 ) : Logging {
@@ -166,6 +167,26 @@ class BatchJobConcurrentLauncher(
           |(there are already max concurrent executions running of this specific job)""".trimMargin()
       )
       addBackToQueue(executionItem)
+      return false
+    }
+
+    /**
+     * Only single job can run in project at the same time
+     */
+    if (!batchJobProjectLockingManager.canRunBatchJobOfExecution(executionItem.jobId)) {
+      logger.debug(
+        "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
+          "Other job from the project is currently running, skipping"
+      )
+
+      // we haven't publish consuming, so we can add it only to the local queue
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(
+        listOf(
+          executionItem.also {
+            it.executeAfter = currentDateProvider.date.time + 1000
+          }
+        )
+      )
       return false
     }
 

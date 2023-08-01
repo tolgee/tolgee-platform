@@ -7,7 +7,4 @@ open class TolgeeMachineTranslationProperties(
   override var defaultEnabled: Boolean = true,
   override var defaultPrimary: Boolean = false,
   var url: String? = null,
-  var batchMaxTokensPerMinute: Long = 100000,
-  var batchMaxCallsPerMinute: Long = 500,
-  var tokensToPreConsume: Long = 1000
 ) : MachineTranslationServiceProperties

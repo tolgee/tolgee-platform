@@ -102,6 +102,10 @@ open class ChunkProcessingUtil(
       waitTime = getWaitTime(exception)
     }
 
+    logger.debug(
+      "Total retries ${retries.values.sum()}, " +
+        "retries for error key: $errorKeyRetries, max retries $maxRetries"
+    )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
       Sentry.captureException(exception)
