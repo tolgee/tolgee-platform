@@ -34,7 +34,7 @@ enum class ActivityType(
   CREATE_PROJECT,
   EDIT_PROJECT,
   NAMESPACE_EDIT,
-  BATCH_PRE_TRANSLATE_BY_MT(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_PRE_TRANSLATE_BY_TM(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_MACHINE_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_CLEAR_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_COPY_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),

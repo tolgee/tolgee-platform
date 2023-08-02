@@ -57,7 +57,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.PRE_TRANSLATE_BY_MT
+      BatchJobType.PRE_TRANSLATE_BT_TM
     ).model
   }
 

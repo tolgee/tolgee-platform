@@ -1,12 +1,12 @@
 import { getDiffVersion } from './activityTools';
 import { T } from '@tolgee/react';
 import {
-  EntityOptions,
-  Reference,
   ActivityOptions,
-  EntityEnum,
-  KeyReferenceData,
   ActivityTypeEnum,
+  EntityEnum,
+  EntityOptions,
+  KeyReferenceData,
+  Reference,
 } from './types';
 
 const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {
@@ -440,7 +440,7 @@ export const actionsConfiguration: Partial<
     },
     entities: { Namespace: true },
   },
-  BATCH_PRE_TRANSLATE_BY_MT: {
+  BATCH_PRE_TRANSLATE_BY_TM: {
     label(params) {
       return (
         <T

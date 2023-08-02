@@ -536,7 +536,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         },
         project = testData.projectBuilder.self,
         author = testData.user,
-        type = BatchJobType.PRE_TRANSLATE_BY_MT
+        type = BatchJobType.PRE_TRANSLATE_BT_TM
       )
     }
   }

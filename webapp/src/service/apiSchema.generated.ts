@@ -1466,7 +1466,7 @@ export interface components {
       status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
       /** @description Type of the batch job */
       type:
-        | "PRE_TRANSLATE_BY_MT"
+        | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
         | "DELETE_KEYS"
         | "SET_TRANSLATIONS_STATE"
@@ -2136,7 +2136,7 @@ export interface components {
         | "CREATE_PROJECT"
         | "EDIT_PROJECT"
         | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_MT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
         | "BATCH_MACHINE_TRANSLATE"
         | "BATCH_CLEAR_TRANSLATIONS"
         | "BATCH_COPY_TRANSLATIONS"
