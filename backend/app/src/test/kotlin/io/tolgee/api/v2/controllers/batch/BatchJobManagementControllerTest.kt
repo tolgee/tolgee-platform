@@ -335,15 +335,17 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val anotherUsersJobs = (1..3).map { runChunkedJob(50, testData.anotherUser) }
 
     try {
-      performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andPrettyPrint.andAssertThatJson {
-          node("_embedded.batchJobs") {
-            isArray.hasSize(6)
-            node("[0].status").isEqualTo("RUNNING")
-            node("[1].status").isEqualTo("PENDING")
-            node("[2].status").isEqualTo("PENDING")
+      waitForNotThrowing {
+        performProjectAuthGet("current-batch-jobs")
+          .andIsOk.andPrettyPrint.andAssertThatJson {
+            node("_embedded.batchJobs") {
+              isArray.hasSize(6)
+              node("[0].status").isEqualTo("RUNNING")
+              node("[1].status").isEqualTo("PENDING")
+              node("[2].status").isEqualTo("PENDING")
+            }
           }
-        }
+      }
 
       wait = false
 

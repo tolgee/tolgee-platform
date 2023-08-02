@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
-import org.springframework.transaction.event.TransactionalEventListener
 import javax.persistence.EntityManager
 
 @Component
@@ -110,8 +109,16 @@ class ProgressManager(
     }
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
     if (isJobCompleted) {
-      batchJobStateProvider.removeJobState(execution.batchJob.id)
+      onJobCompletedCommitted(execution)
     }
+  }
+
+  private fun onJobCompletedCommitted(execution: BatchJobChunkExecution) {
+    batchJobStateProvider.removeJobState(execution.batchJob.id)
+    val jobDto = batchJobService.getJobDto(execution.batchJob.id)
+    batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId)
+    eventPublisher.publishEvent(OnBatchJobStatusUpdated(jobDto.id, jobDto.projectId, jobDto.status))
+    cachingBatchJobService.evictJobCache(execution.batchJob.id)
   }
 
   fun handleJobStatus(
@@ -130,37 +137,25 @@ class ProgressManager(
 
     val jobEntity = batchJobService.getJobEntity(job.id)
 
-    try {
-      if (isAnyCancelled) {
-        jobEntity.status = BatchJobStatus.CANCELLED
-        cachingBatchJobService.saveJob(jobEntity)
-        eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
-        return
-      }
-
-      if (job.totalItems.toLong() != progress) {
-        jobEntity.status = BatchJobStatus.FAILED
-        cachingBatchJobService.saveJob(jobEntity)
-        val safeErrorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
-        eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, safeErrorMessage))
-        return
-      }
-
-      jobEntity.status = BatchJobStatus.SUCCESS
-      logger.debug("Publishing success event for job ${job.id}")
-      eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
+    if (isAnyCancelled) {
+      jobEntity.status = BatchJobStatus.CANCELLED
       cachingBatchJobService.saveJob(jobEntity)
-    } finally {
-      eventPublisher.publishEvent(OnBatchJobStatusUpdated(job.id, job.projectId, jobEntity.status))
+      eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
+      return
     }
-  }
 
-  @TransactionalEventListener(OnBatchJobStatusUpdated::class)
-  fun handleJobStatusUpdated(event: OnBatchJobStatusUpdated) {
-    cachingBatchJobService.evictJobCache(event.jobId)
-    if (event.status.completed) {
-      batchJobProjectLockingManager.unlockJobForProject(event.projectId)
+    if (job.totalItems.toLong() != progress) {
+      jobEntity.status = BatchJobStatus.FAILED
+      cachingBatchJobService.saveJob(jobEntity)
+      val safeErrorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
+      eventPublisher.publishEvent(OnBatchJobFailed(jobEntity.dto, safeErrorMessage))
+      return
     }
+
+    jobEntity.status = BatchJobStatus.SUCCESS
+    logger.debug("Publishing success event for job ${job.id}")
+    eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
+    cachingBatchJobService.saveJob(jobEntity)
   }
 
   fun Map<Long, ExecutionState>.getInfoForJobResult(): JobResultInfo {
