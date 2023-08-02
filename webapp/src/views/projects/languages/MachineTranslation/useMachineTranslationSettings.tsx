@@ -77,6 +77,11 @@ export const useMachineTranslationSettings = ({ onReset }: Props) => {
     .map(([service, value]) => (value.enabled ? service : undefined))
     .filter(Boolean) as string[];
 
+  providers.sort((a) => {
+    if (a === 'TOLGEE') return -1;
+    else return 1;
+  });
+
   return {
     languages,
     settings,
