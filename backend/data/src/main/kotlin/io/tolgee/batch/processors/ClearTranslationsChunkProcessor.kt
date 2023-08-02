@@ -1,7 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.model.batch.params.ClearTranslationsJobParams
 import io.tolgee.service.translation.TranslationService

@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest

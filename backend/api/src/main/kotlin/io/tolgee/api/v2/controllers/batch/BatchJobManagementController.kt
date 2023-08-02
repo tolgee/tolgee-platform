@@ -3,8 +3,8 @@ package io.tolgee.api.v2.controllers.batch
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobCancellationManager
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob

@@ -1,9 +1,9 @@
 package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import io.tolgee.batch.BatchJobDto
-import io.tolgee.batch.BatchJobType
 import io.tolgee.batch.JobCharacter
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount

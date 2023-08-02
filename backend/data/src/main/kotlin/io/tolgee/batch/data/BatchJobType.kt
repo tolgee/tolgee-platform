@@ -1,6 +1,7 @@
-package io.tolgee.batch
+package io.tolgee.batch.data
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
 import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor

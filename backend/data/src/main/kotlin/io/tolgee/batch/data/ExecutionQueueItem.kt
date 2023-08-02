@@ -1,4 +1,6 @@
-package io.tolgee.batch
+package io.tolgee.batch.data
+
+import io.tolgee.batch.JobCharacter
 
 data class ExecutionQueueItem(
   val chunkExecutionId: Long,

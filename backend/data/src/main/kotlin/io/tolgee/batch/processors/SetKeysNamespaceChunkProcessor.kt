@@ -1,8 +1,8 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.constants.Message
 import io.tolgee.model.batch.params.SetKeysNamespaceParams

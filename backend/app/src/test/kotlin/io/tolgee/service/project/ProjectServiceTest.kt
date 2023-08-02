@@ -6,7 +6,7 @@ package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData

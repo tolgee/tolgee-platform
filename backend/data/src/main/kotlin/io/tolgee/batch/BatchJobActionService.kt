@@ -3,6 +3,9 @@ package io.tolgee.batch
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.ExecutionQueueItem
+import io.tolgee.batch.data.QueueEventType
+import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SavePointManager
 import io.tolgee.component.UsingRedisProvider
@@ -43,7 +46,8 @@ class BatchJobActionService(
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -127,13 +131,16 @@ class BatchJobActionService(
     val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
 
     if (lockedExecution == null) {
-      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
+      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
-      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is not pending, skipping")
+      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is not pending, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
+
       return null
     }
 

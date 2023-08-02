@@ -1,8 +1,8 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
-import io.tolgee.batch.BatchTranslationTargetItem
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.model.batch.params.PreTranslationByTmJobParams
 import io.tolgee.service.LanguageService

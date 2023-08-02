@@ -1,9 +1,9 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
-import io.tolgee.batch.BatchTranslationTargetItem
 import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.RequeueWithDelayException
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message

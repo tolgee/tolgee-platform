@@ -122,7 +122,7 @@ class TagService(
       }
     }
 
-    keysWithFetchedTags.map { it.project.id }.forEach {
+    keysWithFetchedTags.map { it.project.id }.toSet().forEach {
       this.removeUnusedTags(it)
     }
   }

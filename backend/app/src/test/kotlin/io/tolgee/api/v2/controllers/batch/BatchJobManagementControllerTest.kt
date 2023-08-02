@@ -5,9 +5,9 @@ import io.tolgee.batch.BatchJobActionService
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.PreTranslationByTmRequest
@@ -102,6 +102,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @BeforeEach
   fun setup() {
+    batchJobChunkExecutionQueue.clear()
     testData = BatchJobsTestData()
     batchJobChunkExecutionQueue.populateQueue()
     Mockito.reset(
