@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.batch.BatchJobDto
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -93,6 +96,10 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @SpyBean
   lateinit var autoTranslationService: AutoTranslationService
 
+  @SpyBean
+  @Autowired
+  lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
+
   @BeforeEach
   fun setup() {
     testData = BatchJobsTestData()
@@ -101,7 +108,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       mtCreditBucketService,
       autoTranslationService,
       machineTranslationChunkProcessor,
-      preTranslationByTmChunkProcessor
+      preTranslationByTmChunkProcessor,
+      batchJobActivityFinalizer
     )
   }
 
@@ -148,7 +156,19 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       .andIsOk
 
     waitForNotThrowing(pollTime = 1000) {
+      entityManager.clear()
       getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+    }
+
+    Thread.sleep(1000)
+
+    verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+
+    waitForNotThrowing(pollTime = 1000) {
+      // asset activity stored
+      entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+        .setParameter("id", job.id).resultList
+        .assert.hasSize(1)
     }
   }
 

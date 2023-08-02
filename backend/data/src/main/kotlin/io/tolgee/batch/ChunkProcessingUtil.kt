@@ -27,6 +27,7 @@ open class ChunkProcessingUtil(
 ) : Logging {
   open fun processChunk() {
     val time = measureTimeMillis {
+      handleActivity()
       try {
         processor.process(job, toProcess, coroutineContext) {
           if (it != toProcess.size) {
@@ -35,7 +36,6 @@ open class ChunkProcessingUtil(
         }
         successfulTargets = toProcess
         execution.status = BatchJobChunkExecutionStatus.SUCCESS
-        handleActivity()
       } catch (e: Throwable) {
         handleException(e)
       } finally {

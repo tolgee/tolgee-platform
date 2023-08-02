@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.hibernate.EmptyInterceptor
 import org.hibernate.Transaction
 import org.hibernate.type.Type
@@ -26,7 +27,8 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
     if (tx.isActive) {
       val holder = this.applicationContext.getBean(ActivityHolder::class.java)
       val activityRevision = holder.activityRevision
-      if (!activityRevision.isInitializedByInterceptor) return
+      if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null) return
+      logger.debug("Publishing project activity event")
       applicationContext.publishEvent(
         OnProjectActivityEvent(
           activityRevision,

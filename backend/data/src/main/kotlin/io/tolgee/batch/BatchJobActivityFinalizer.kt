@@ -34,12 +34,12 @@ class BatchJobActivityFinalizer(
   }
 
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
-    val activityRevision =
-      activityHolder.activityRevision ?: throw IllegalStateException("Activity revision is not set")
-
+    val activityRevision = activityHolder.activityRevision
     activityRevision.afterFlush = afterFlush@{
+      logger.debug("Finalizing activity for job ${job.id} (after flush)")
       waitForOtherChunksToComplete(job)
       val revisionIds = getRevisionIds(job.id)
+      logger.debug("Merging revisions (${revisionIds.size})")
 
       val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
       revisionIds.remove(activityRevisionIdToMergeInto)
