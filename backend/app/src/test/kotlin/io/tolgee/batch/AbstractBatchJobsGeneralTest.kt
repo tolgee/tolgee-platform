@@ -5,6 +5,7 @@ import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -93,6 +94,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   @SpyBean
   lateinit var progressManager: ProgressManager
+
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
 
   @BeforeEach
   fun setup() {
@@ -184,6 +188,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         batchJobService.getView(job.id).errorMessage.assert.isEqualTo(Message.OUT_OF_CREDITS)
       }
     }
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -199,7 +204,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     val job = runChunkedJob(1000)
 
-    (1..3).forEach {
+    repeat(3) {
       waitForNotThrowing {
         batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 2000 }.assert.isNotNull
       }
@@ -221,6 +226,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
     assertStatusReported(BatchJobStatus.FAILED)
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -258,6 +264,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     errorKeys.count { it == "IllegalStateException" }.assert.isEqualTo(4)
     errorKeys.count { it == "NotFoundException" }.assert.isEqualTo(2)
     errorKeys.count { it == "RuntimeException" }.assert.isEqualTo(2)
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -315,6 +322,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
     assertStatusReported(BatchJobStatus.FAILED)
+    assertJobStateCacheCleared(job)
   }
 
   private fun initWebsocketHelper() {
@@ -360,6 +368,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
       websocketHelper.receivedMessages.assert.hasSize(101)
       assertStatusReported(BatchJobStatus.SUCCESS)
     }
+
+    assertJobStateCacheCleared(job)
   }
 
   private fun assertStatusReported(status: BatchJobStatus) {
@@ -396,6 +406,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
     websocketHelper.receivedMessages.last.contains("CANCELLED")
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -465,6 +476,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     batchJobService.getJobDto(job1.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    assertJobStateCacheCleared(job1)
+    assertJobStateCacheCleared(job2)
   }
 
   @Test
@@ -507,6 +520,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     waitForNotThrowing {
       assertStatusReported(BatchJobStatus.FAILED)
     }
+
+    assertJobStateCacheCleared(job)
+  }
+
+  private fun assertJobStateCacheCleared(job: BatchJob) {
+    Thread.sleep(500)
+    batchJobStateProvider.hasCachedJobState(job.id).assert.isFalse()
   }
 
   private fun BatchJob.waitForCompleted(): BatchJobDto {

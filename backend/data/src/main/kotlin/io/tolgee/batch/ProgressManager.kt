@@ -102,10 +102,15 @@ class ProgressManager(
   }
 
   fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
-    batchJobStateProvider.updateState(execution.batchJob.id) {
+    val state = batchJobStateProvider.updateState(execution.batchJob.id) {
       it.compute(execution.id) { _, v ->
         v?.copy(transactionCommitted = true)
       }
+      it
+    }
+    val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
+    if (isJobCompleted) {
+      batchJobStateProvider.removeJobState(execution.batchJob.id)
     }
   }
 

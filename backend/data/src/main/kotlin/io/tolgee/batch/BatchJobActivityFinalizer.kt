@@ -8,6 +8,7 @@ import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
@@ -17,6 +18,7 @@ class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
+  private val applicationEventPublisher: ApplicationEventPublisher
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
