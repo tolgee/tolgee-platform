@@ -95,6 +95,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@craco/craco": "^6.4.5",
     "@mdx-js/loader": "1.6.22",
     "@sentry/types": "^6.5.1",
@@ -115,8 +116,8 @@
     "@types/react-redux": "^7.1.18",
     "@types/react-router-dom": "^5.1.8",
     "@types/yup": "^0.29.13",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "babel-loader": "8.1.0",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
     "concurrently": "^6.2.0",
@@ -132,7 +133,7 @@
     "react-scripts": "4.0.3",
     "redux-devtools-extension": "^2.13.9",
     "ts-unused-exports": "^9.0.4",
-    "typescript": "^4.3.2",
+    "typescript": "^4.6.4",
     "webpack": "4.44.2"
   }
 }
