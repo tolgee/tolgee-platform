@@ -1,3 +1,15 @@
+# [3.25.0](https://github.com/tolgee/tolgee-platform/compare/v3.24.1...v3.25.0) (2023-08-02)
+
+
+### Bug Fixes
+
+* Update ordering of MT providers ([#1841](https://github.com/tolgee/tolgee-platform/issues/1841)) ([2744fe4](https://github.com/tolgee/tolgee-platform/commit/2744fe481c0f5fd62c8df28e87306dc88ed987bb))
+
+
+### Features
+
+* add state param to oauth calls ([#1832](https://github.com/tolgee/tolgee-platform/issues/1832)) ([b9ac361](https://github.com/tolgee/tolgee-platform/commit/b9ac361b620b069829d6e63f818d024defef8a0a))
+
 ## [3.24.1](https://github.com/tolgee/tolgee-platform/compare/v3.24.0...v3.24.1) (2023-07-26)
 
 

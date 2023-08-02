@@ -1,4 +1,5 @@
 {
+  "access_revoked_message" : "Acceso revocado",
   "account-deleted-message" : "Cuenta eliminada",
   "account-security-mfa" : "Autenticación de dos factores",
   "account-security-mfa-disabled-success" : "Se ha desactivado la autenticación de dos factores.",
@@ -21,6 +22,8 @@
   "account-security-set-password" : "Establecer contraseña",
   "account-security-set-password-instructions-sent" : "Te hemos enviado un correo electrónico con las instrucciones a seguir.",
   "account-security-set-password-third-party-info" : "Tu cuenta actualmente utiliza un método de inicio de sesión a través de una cuenta de terceros. Para administrar la configuración de seguridad de tu cuenta, primero debes establecer una contraseña. Una vez establecida la contraseña, podrás iniciar sesión tanto con la nueva contraseña como con la cuenta de terceros que estás utilizando actualmente.",
+  "active-plan-estimated-costs-show-usage-button-tooltip" : "Mostrar uso",
+  "active-plan-estimated-costs-title" : "Costos estimados",
   "activity_complex_edit" : "Clave editada",
   "activity_create_key" : "Clave creada",
   "activity_create_language" : "Idioma creado",
@@ -586,7 +589,7 @@
   "translation_single_tag_placeholder" : "Añadir etiqueta...",
   "translation_single_translations_title" : "Traducciones",
   "translations_key_created" : "Clave creada",
-  "translations_key_delete_confirmation_text" : "¿Estás seguro de que quieres eliminar todas las {count} claves marcadas y sus traducciones?",
+  "translations_key_delete_confirmation_text" : "¿Estás seguro de que quieres eliminar {count, plural, one {1 clave marcada} other {todas las # claves marcadas}} y sus traducciones?",
   "translations_key_edit_label" : "Clave",
   "translations_key_edit_label_namespace" : "Namespace",
   "translations_key_edit_label_tags" : "Etiquetas",

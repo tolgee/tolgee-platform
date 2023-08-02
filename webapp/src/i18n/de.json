@@ -591,7 +591,7 @@
   "translation_single_tag_placeholder" : "Tag hinzufügen...",
   "translation_single_translations_title" : "Übersetzungen",
   "translations_key_created" : "Schlüssel erstellt",
-  "translations_key_delete_confirmation_text" : "Sind Sie sicher, dass Sie alle {count} markierten Schlüssel und ihre Übersetzungen löschen wollen?",
+  "translations_key_delete_confirmation_text" : "Sind Sie sicher, dass Sie {count, plural, one {1 markierten Schlüssel seine Übersetzungen} other {alle # markierten Schlüssel und ihre Übersetzungen}} löschen wollen?",
   "translations_languages_limit_reached" : "Es können nicht mehr als {max} Sprachen ausgewählt werden",
   "translations_nothing_found" : "Keine Übersetzungen gefunden.",
   "translations_nothing_found_action" : "Filter löschen",
