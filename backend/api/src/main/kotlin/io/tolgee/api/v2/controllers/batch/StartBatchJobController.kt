@@ -45,7 +45,7 @@ class StartBatchJobController(
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_MT)
+  @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_TM)
   @Operation(
     summary = "Pre-translate by TM",
     description = "Pre-translate provided keys to provided languages by TM."

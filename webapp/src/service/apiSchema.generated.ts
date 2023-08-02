@@ -639,7 +639,7 @@ export interface components {
         | "keys.create"
         | "batch-jobs.view"
         | "batch-jobs.cancel"
-        | "translations.batch-by-mt"
+        | "translations.batch-by-tm"
         | "translations.batch-machine"
       )[];
       /**
@@ -715,7 +715,7 @@ export interface components {
         | "keys.create"
         | "batch-jobs.view"
         | "batch-jobs.cancel"
-        | "translations.batch-by-mt"
+        | "translations.batch-by-tm"
         | "translations.batch-machine"
       )[];
       /** @description The user's permission type. This field is null if uses granular permissions */
@@ -1864,7 +1864,7 @@ export interface components {
         | "keys.create"
         | "batch-jobs.view"
         | "batch-jobs.cancel"
-        | "translations.batch-by-mt"
+        | "translations.batch-by-tm"
         | "translations.batch-machine";
       requires: components["schemas"]["HierarchyItem"][];
     };
@@ -6522,7 +6522,7 @@ export interface operations {
               | "keys.create"
               | "batch-jobs.view"
               | "batch-jobs.cancel"
-              | "translations.batch-by-mt"
+              | "translations.batch-by-tm"
               | "translations.batch-machine"
             )[];
           };
