@@ -256,7 +256,7 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
-  fun getExecutions(id: Long): List<BatchJobChunkExecution> {
+  fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
     return entityManager.createQuery(
       """
       from BatchJobChunkExecution e
@@ -264,7 +264,7 @@ class BatchJobService(
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
-      .setParameter("id", id)
+      .setParameter("id", batchJobId)
       .resultList
   }
 
