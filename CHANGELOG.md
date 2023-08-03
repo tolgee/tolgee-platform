@@ -1,3 +1,10 @@
+## [3.25.2](https://github.com/tolgee/tolgee-platform/compare/v3.25.1...v3.25.2) (2023-08-03)
+
+
+### Bug Fixes
+
+* Update ordering of MT providers in Editor ([#1843](https://github.com/tolgee/tolgee-platform/issues/1843)) ([4a73210](https://github.com/tolgee/tolgee-platform/commit/4a732100c03c99eb6e9ea2feaa2288af76387bf2))
+
 ## [3.25.1](https://github.com/tolgee/tolgee-platform/compare/v3.25.0...v3.25.1) (2023-08-03)
 
 
