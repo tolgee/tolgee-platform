@@ -10,7 +10,7 @@ data class LanguageDto(
   @field:NotBlank @field:Size(max = 100)
   var name: String = "",
 
-  @Schema(example = "cs-CZ", description = "Language name in this language")
+  @Schema(example = "čeština", description = "Language name in this language")
   @field:NotBlank @field:Size(max = 100)
   var originalName: String? = null,
 
