@@ -10,11 +10,11 @@ data class LanguageDto(
   @field:NotBlank @field:Size(max = 100)
   var name: String = "",
 
-  @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
+  @Schema(example = "cs-CZ", description = "Language name in this language")
   @field:NotBlank @field:Size(max = 100)
   var originalName: String? = null,
 
-  @Schema(example = "čeština", description = "Language name in this language")
+  @Schema(example = "čeština", description = "Language tag according to BCP 47 definition")
   @field:NotBlank @field:Size(max = 20) @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
   var tag: String = "",
 
