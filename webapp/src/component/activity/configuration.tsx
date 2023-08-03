@@ -521,4 +521,11 @@ export const actionsConfiguration: Partial<
     },
     entities: { Params: true },
   },
+  AUTO_TRANSLATE: {
+    label(params) {
+      return (
+        <T keyName="activity_batch_operation_auto_translate" params={params} />
+      );
+    },
+  },
 };

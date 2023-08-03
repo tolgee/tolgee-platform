@@ -1,6 +1,6 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
 import { createKey } from '../apiCalls/common';
-import { deleteSelected } from '../batchJobs';
+import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
 import { confirmStandard } from '../shared';
 import { createTag } from '../tags';

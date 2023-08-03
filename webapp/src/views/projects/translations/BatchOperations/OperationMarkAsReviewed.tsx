@@ -52,6 +52,7 @@ export const OperationMarkAsReviewed = ({ disabled, onStart }: Props) => {
         languages={allLanguages || []}
         value={selectedLangs || []}
         onChange={setSelectedLangs}
+        languagePermission="translations.state-edit"
       />
       <BatchOperationsSubmit
         loading={batchLoadable.isLoading}

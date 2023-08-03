@@ -223,23 +223,25 @@ export const updateByDependenciesSoftly = (
     scopes: Array.from(new Set([...currentState.scopes, ...myScopes])),
   };
   myScopes.forEach((myScope) => {
-    if (!newState.scopes.includes(myScope)) {
-      // add required scope to selected scopes
-      newState.scopes = [...newState.scopes, myScope];
-    }
-    const languageProp = getScopeLanguagePermission(myScope);
-    if (languageProp) {
-      const requiredScopes = getRequiredScopes(myScope, dependencies);
-      const maximalLanguages = getLanguagesIntersection(
-        requiredScopes,
-        newState,
-        allLangs
-      );
-
-      if (!isSubset(newState[languageProp], maximalLanguages)) {
-        newState[languageProp] = maximalLanguages;
+    getRequiredScopes(myScope, dependencies).forEach((requiredScope) => {
+      if (!newState.scopes.includes(requiredScope)) {
+        // add required scope to selected scopes
+        newState.scopes = [...newState.scopes, requiredScope];
       }
-    }
+      const languageProp = getScopeLanguagePermission(requiredScope);
+      if (languageProp) {
+        const requiredScopes = getRequiredScopes(requiredScope, dependencies);
+        const maximalLanguages = getLanguagesIntersection(
+          requiredScopes,
+          newState,
+          allLangs
+        );
+
+        if (!isSubset(newState[languageProp], maximalLanguages)) {
+          newState[languageProp] = maximalLanguages;
+        }
+      }
+    });
   });
   return newState;
 };

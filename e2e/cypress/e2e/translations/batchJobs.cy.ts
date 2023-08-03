@@ -1,4 +1,4 @@
-import { visitTranslations } from '../../common/translations';
+import { getCell, visitTranslations } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { batchJobs } from '../../common/apiCalls/testData/testData';
 import { gcy } from '../../common/shared';
@@ -7,12 +7,13 @@ import {
   executeBatchOperationWithConfirmation,
   selectAll,
   selectOperation,
-} from '../../common/batchJobs';
+} from '../../common/batchOperations';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
 import { login } from '../../common/apiCalls/common';
 import { selectNamespace } from '../../common/namespace';
+import { assertHasState } from '../../common/state';
 
-describe('Batch jobs', () => {
+describe('Batch jobs', { scrollBehavior: false }, () => {
   let project: TestDataStandardResponse['projects'][number] = null;
 
   beforeEach(() => {
@@ -33,6 +34,14 @@ describe('Batch jobs', () => {
     selectOperation('Delete');
     executeBatchOperationWithConfirmation();
     gcy('global-empty-list').should('be.visible');
+  });
+
+  it('will delete all except first one', () => {
+    selectAll();
+    gcy('translations-row-checkbox').first().click();
+    selectOperation('Delete');
+    executeBatchOperationWithConfirmation();
+    gcy('translations-key-count').contains('1').should('be.visible');
   });
 
   it('will change namespace', () => {
@@ -78,6 +87,52 @@ describe('Batch jobs', () => {
       .should('not.exist');
   });
 
+  it('will change state to reviewed and back to translated', () => {
+    selectAll();
+    selectOperation('Mark as reviewed');
+    cy.gcy('batch-operations-section')
+      .findDcy('translations-language-select-form-control')
+      .click();
+    cy.gcy('translations-language-select-item').contains('English').click();
+    cy.get('body').click(0, 0);
+    executeBatchOperation();
+    assertHasState('en', 'Reviewed');
+
+    selectAll();
+    selectOperation('Mark as translated');
+    cy.gcy('batch-operations-section')
+      .findDcy('translations-language-select-form-control')
+      .click();
+    cy.gcy('translations-language-select-item').contains('English').click();
+    cy.get('body').click(0, 0);
+    executeBatchOperation();
+    assertHasState('en', 'Translated');
+  });
+
+  it('will pretranslate with TM', () => {
+    cy.gcy('translations-row-checkbox').first().click();
+    selectOperation('Pre-translate by TM');
+    cy.gcy('batch-operations-section')
+      .findDcy('translations-language-select-form-control')
+      .click();
+    cy.gcy('translations-language-select-item').contains('German').click();
+    cy.get('body').click(0, 0);
+    executeBatchOperation();
+  });
+
+  it('will Machine translate', () => {
+    cy.gcy('translations-row-checkbox').first().click();
+    selectOperation('Machine translation');
+    cy.gcy('batch-operations-section')
+      .findDcy('translations-language-select-form-control')
+      .click();
+    cy.gcy('translations-language-select-item').contains('German').click();
+    cy.get('body').click(0, 0);
+    executeBatchOperation();
+    getCell('en translated with GOOGLE from en to de').should('be.visible');
+    cy.gcy('translations-auto-translated-indicator').should('exist');
+  });
+
   it('will copy translations', () => {
     selectAll();
     selectOperation('Copy translations');
@@ -90,13 +145,15 @@ describe('Batch jobs', () => {
       .click();
     cy.gcy('translations-language-select-item').contains('German').click();
     cy.get('body').click(0, 0);
-    cy.gcy('translations-table-cell-translation-text')
-      .contains('en1')
-      .should('have.length', 1);
     executeBatchOperation();
-    cy.gcy('translations-table-cell-translation-text')
-      .contains('en1')
-      .should('have.length', 2);
+    cy.gcy('translations-row')
+      .eq(1)
+      .findDcy('translations-table-cell-language')
+      .contains('de')
+      .closestDcy('translations-table-cell')
+      .findDcy('translations-table-cell-translation-text')
+      .contains('en')
+      .should('exist');
   });
 
   const visit = () => {

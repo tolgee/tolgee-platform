@@ -107,6 +107,7 @@ export const OperationCopyTranslations = ({ disabled, onStart }: Props) => {
           disabledLanguages={allLanguages
             .filter((l) => l.tag === sourceLanguage)
             .map((l) => l.id)}
+          languagePermission="translations.edit"
         />
         <BatchOperationsSubmit
           loading={batchLoadable.isLoading}
