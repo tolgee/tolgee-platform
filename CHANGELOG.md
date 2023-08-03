@@ -1,3 +1,10 @@
+## [3.25.1](https://github.com/tolgee/tolgee-platform/compare/v3.25.0...v3.25.1) (2023-08-03)
+
+
+### Bug Fixes
+
+* Update redisson ([#1842](https://github.com/tolgee/tolgee-platform/issues/1842)) ([8bb5248](https://github.com/tolgee/tolgee-platform/commit/8bb5248b6c3c26738d50c38979df46e61a79bbab))
+
 # [3.25.0](https://github.com/tolgee/tolgee-platform/compare/v3.24.1...v3.25.0) (2023-08-02)
 
 
