@@ -35,7 +35,12 @@ export const useTranslationTools = ({
       enabledMtServices?.find((i) => i.targetLanguageId === targetLanguageId) ||
       enabledMtServices?.find((i) => i.targetLanguageId === null);
 
-    return settingItem?.enabledServices || [];
+    const orderedEnabledServices = settingItem?.enabledServices.sort((a) => {
+      if (a === 'TOLGEE') return -1;
+      else return 1;
+    });
+
+    return orderedEnabledServices || [];
   }, [enabledMtServices, targetLanguageId]);
 
   const fast = mtServices.filter((item) => item !== 'TOLGEE');
