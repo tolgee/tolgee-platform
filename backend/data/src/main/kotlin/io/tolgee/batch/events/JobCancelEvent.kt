@@ -1,4 +1,4 @@
-package io.tolgee.batch
+package io.tolgee.batch.events
 
 class JobCancelEvent(
   val jobId: Long

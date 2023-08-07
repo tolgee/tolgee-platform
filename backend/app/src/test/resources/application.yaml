@@ -80,7 +80,7 @@ logging:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
     io.tolgee.batch.BatchJobActionService: DEBUG
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
-    io.tolgee.batch: DEBUG
+    io.tolgee: DEBUG
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE

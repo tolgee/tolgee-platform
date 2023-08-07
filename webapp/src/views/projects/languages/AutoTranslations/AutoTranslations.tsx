@@ -63,6 +63,7 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
         initialValues={{
           usingTranslationMemory: settings.data.usingTranslationMemory,
           usingMachineTranslation: settings.data.usingMachineTranslation,
+          enableForImport: settings.data.enableForImport,
         }}
         enableReinitialize={true}
         onSubmit={() => {}}
@@ -95,6 +96,17 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
                   'Enable translation memory'
                 )}
                 checked={form.values.usingTranslationMemory}
+                onChange={form.handleChange}
+                control={<Checkbox />}
+              />
+              <FormControlLabel
+                name="enableForImport"
+                data-cy="languages-auto-for-import"
+                label={t(
+                  'project_languages_auto_translation_enable_for_import_switch',
+                  'Enable for import'
+                )}
+                checked={form.values.enableForImport}
                 onChange={form.handleChange}
                 control={<Checkbox />}
               />

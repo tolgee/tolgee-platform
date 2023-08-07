@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobSucceeded
@@ -34,12 +35,12 @@ class BatchJobActivityFinalizer(
   }
 
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
-    val activityRevision =
-      activityHolder.activityRevision ?: throw IllegalStateException("Activity revision is not set")
-
+    val activityRevision = activityHolder.activityRevision
     activityRevision.afterFlush = afterFlush@{
+      logger.debug("Finalizing activity for job ${job.id} (after flush)")
       waitForOtherChunksToComplete(job)
       val revisionIds = getRevisionIds(job.id)
+      logger.debug("Merging revisions (${revisionIds.size})")
 
       val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
       revisionIds.remove(activityRevisionIdToMergeInto)

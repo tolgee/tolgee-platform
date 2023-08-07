@@ -2667,4 +2667,18 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1690984220965-1">
+        <addColumn tableName="auto_translation_config">
+            <column name="enable_for_import" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1691069582950-1">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="hidden" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

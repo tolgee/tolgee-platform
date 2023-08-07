@@ -10,7 +10,7 @@ open class ActivityHolder {
   open var activity: ActivityType? = null
     set(value) {
       field = value
-      activityRevision?.type = value
+      activityRevision.type = value
     }
 
   open var meta: MutableMap<String, Any?> = mutableMapOf()
@@ -33,6 +33,8 @@ open class ActivityHolder {
    */
   open var modifiedEntities:
     ModifiedEntitiesType = mutableMapOf()
+
+  var enableAutoCompletition: Boolean = true
 }
 
 typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

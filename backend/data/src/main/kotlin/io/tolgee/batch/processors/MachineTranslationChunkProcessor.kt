@@ -1,9 +1,9 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
-import io.tolgee.batch.BatchTranslationTargetItem
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.JobCharacter
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Project
@@ -31,7 +31,8 @@ class MachineTranslationChunkProcessor(
       chunk,
       coroutineContext,
       onProgress,
-      GenericAutoTranslationChunkProcessor.Type.MACHINE_TRANSLATION,
+      useMachineTranslation = true,
+      useTranslationMemory = false
     )
   }
 

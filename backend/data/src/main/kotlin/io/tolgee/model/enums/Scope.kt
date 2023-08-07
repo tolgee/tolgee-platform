@@ -30,7 +30,7 @@ enum class Scope(
   KEYS_CREATE("keys.create"),
   BATCH_JOBS_VIEW("batch-jobs.view"),
   BATCH_JOBS_CANCEL("batch-jobs.cancel"),
-  BATCH_PRE_TRANSLATE_BY_MT("translations.batch-by-mt"),
+  BATCH_PRE_TRANSLATE_BY_TM("translations.batch-by-tm"),
   BATCH_MACHINE_TRANSLATE("translations.batch-machine"),
   ;
 
@@ -102,7 +102,7 @@ enum class Scope(
         ),
         HierarchyItem(BATCH_JOBS_VIEW),
         HierarchyItem(BATCH_JOBS_CANCEL),
-        HierarchyItem(BATCH_PRE_TRANSLATE_BY_MT, listOf(translationsEdit)),
+        HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
         HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit))
       )
     )

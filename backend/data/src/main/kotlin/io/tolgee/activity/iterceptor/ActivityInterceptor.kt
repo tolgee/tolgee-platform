@@ -1,9 +1,11 @@
 package io.tolgee.activity.iterceptor
 
+import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.hibernate.EmptyInterceptor
 import org.hibernate.Transaction
 import org.hibernate.type.Type
@@ -25,17 +27,27 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
   override fun beforeTransactionCompletion(tx: Transaction) {
     if (tx.isActive) {
       val holder = this.applicationContext.getBean(ActivityHolder::class.java)
+      if (!holder.enableAutoCompletition) {
+        return
+      }
       val activityRevision = holder.activityRevision
-      if (!activityRevision.isInitializedByInterceptor) return
-      applicationContext.publishEvent(
-        OnProjectActivityEvent(
-          activityRevision,
-          holder.modifiedEntities,
-          holder.organizationId,
-          holder.utmData,
-          holder.sdkInfo
+      if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null) return
+      logger.debug("Publishing project activity event")
+      try {
+        applicationContext.publishEvent(
+          OnProjectActivityEvent(
+            activityRevision,
+            holder.modifiedEntities,
+            holder.organizationId,
+            holder.utmData,
+            holder.sdkInfo
+          )
         )
-      )
+      } catch (e: Exception) {
+        Sentry.captureException(e)
+        logger.error("Error publishing project activity event: ", e)
+        throw e
+      }
     }
   }
 

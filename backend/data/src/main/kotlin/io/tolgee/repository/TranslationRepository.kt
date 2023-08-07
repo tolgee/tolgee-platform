@@ -97,7 +97,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
       select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
-      similarity(baseTranslation.text, :baseTranslationText) as similarity
+      1 as similarity
       from Translation baseTranslation
       join baseTranslation.key key
       join Translation target on 
@@ -106,9 +106,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = :baseLanguage and
-        similarity(baseTranslation.text, :baseTranslationText) = 1 and
+        baseTranslation.text = :baseTranslationText and
         key <> :key
-      order by similarity desc
       """
   )
   fun getTranslationMemoryValue(

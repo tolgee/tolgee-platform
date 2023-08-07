@@ -1,6 +1,6 @@
 package io.tolgee.batch.events
 
-import io.tolgee.batch.BatchJobDto
+import io.tolgee.batch.data.BatchJobDto
 
 data class OnBatchJobProgress(
   val job: BatchJobDto,

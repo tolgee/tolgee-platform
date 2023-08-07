@@ -1,7 +1,7 @@
 package io.tolgee.batch.processors
 
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.model.batch.params.TagKeysParams
 import io.tolgee.service.key.TagService

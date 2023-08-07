@@ -1,13 +1,17 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
@@ -19,6 +23,7 @@ import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
+import io.tolgee.util.addMinutes
 import io.tolgee.util.addSeconds
 import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
@@ -91,6 +96,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   @SpyBean
   lateinit var progressManager: ProgressManager
+
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
 
   @BeforeEach
   fun setup() {
@@ -182,6 +190,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         batchJobService.getView(job.id).errorMessage.assert.isEqualTo(Message.OUT_OF_CREDITS)
       }
     }
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -197,7 +206,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     val job = runChunkedJob(1000)
 
-    (1..3).forEach {
+    repeat(3) {
       waitForNotThrowing {
         batchJobChunkExecutionQueue.find { it.executeAfter == currentDateProvider.date.time + 2000 }.assert.isNotNull
       }
@@ -219,6 +228,45 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
     assertStatusReported(BatchJobStatus.FAILED)
+    assertJobStateCacheCleared(job)
+  }
+
+  @Test
+  fun `retrying works with error keys`() {
+    val exceptions = (0..100).flatMap {
+      listOf(
+        IllegalStateException("a"),
+        NotFoundException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE),
+        RuntimeException("c"),
+        RuntimeException(IllegalStateException("d")),
+      )
+    }
+
+    whenever(
+      deleteKeysChunkProcessor.process(
+        any(),
+        any(),
+        any(),
+        any()
+      )
+    ).thenThrow(*exceptions.toTypedArray())
+
+    val job = runSingleChunkJob(100)
+
+    waitForNotThrowing {
+      currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(1)
+      batchJobService.getJobEntity(job.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
+    }
+
+    val executions = batchJobService.getExecutions(job.id)
+    val errorKeys = executions.sortedBy { it.id }.map { it.errorKey }
+
+    // the retry count is computed for each error key separately, root cause exception is used
+    // as the error key by default
+    errorKeys.count { it == "IllegalStateException" }.assert.isEqualTo(4)
+    errorKeys.count { it == "NotFoundException" }.assert.isEqualTo(2)
+    errorKeys.count { it == "RuntimeException" }.assert.isEqualTo(2)
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -276,6 +324,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     // 100 progress messages + 1 finish message
     websocketHelper.receivedMessages.assert.hasSize(100)
     assertStatusReported(BatchJobStatus.FAILED)
+    assertJobStateCacheCleared(job)
   }
 
   private fun initWebsocketHelper() {
@@ -321,6 +370,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
       websocketHelper.receivedMessages.assert.hasSize(101)
       assertStatusReported(BatchJobStatus.SUCCESS)
     }
+
+    assertJobStateCacheCleared(job)
   }
 
   private fun assertStatusReported(status: BatchJobStatus) {
@@ -357,6 +408,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
     websocketHelper.receivedMessages.last.contains("CANCELLED")
+    assertJobStateCacheCleared(job)
   }
 
   @Test
@@ -426,6 +478,8 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     batchJobService.getJobDto(job1.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    assertJobStateCacheCleared(job1)
+    assertJobStateCacheCleared(job2)
   }
 
   @Test
@@ -455,7 +509,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
       }
     }
 
-    // verify it retreied, so the processor was executed multiple times
+    // verify it retried, so the processor was executed multiple times
     val totalChunks = keyCount / 10
     val totalRetries = 3
     verify(preTranslationByTmChunkProcessor, times((totalRetries + 1) * totalChunks)).process(
@@ -468,6 +522,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     waitForNotThrowing {
       assertStatusReported(BatchJobStatus.FAILED)
     }
+
+    assertJobStateCacheCleared(job)
+  }
+
+  private fun assertJobStateCacheCleared(job: BatchJob) {
+    Thread.sleep(500)
+    batchJobStateProvider.hasCachedJobState(job.id).assert.isFalse()
   }
 
   private fun BatchJob.waitForCompleted(): BatchJobDto {
@@ -497,7 +558,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         },
         project = testData.projectBuilder.self,
         author = testData.user,
-        type = BatchJobType.PRE_TRANSLATE_BY_MT
+        type = BatchJobType.PRE_TRANSLATE_BT_TM,
       )
     }
   }
@@ -510,7 +571,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         },
         project = testData.projectBuilder.self,
         author = testData.user,
-        type = BatchJobType.DELETE_KEYS
+        type = BatchJobType.DELETE_KEYS,
       )
     }
   }

@@ -1,9 +1,9 @@
 package io.tolgee.model.batch
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import io.tolgee.batch.BatchJobDto
-import io.tolgee.batch.BatchJobType
 import io.tolgee.batch.JobCharacter
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
@@ -44,7 +44,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   override var status: BatchJobStatus = BatchJobStatus.PENDING
 
   @Enumerated(STRING)
-  var type: BatchJobType = BatchJobType.PRE_TRANSLATE_BY_MT
+  var type: BatchJobType = BatchJobType.PRE_TRANSLATE_BT_TM
 
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null
@@ -58,6 +58,8 @@ class BatchJob : StandardAuditModel(), IBatchJob {
 
   @Enumerated(STRING)
   var jobCharacter: JobCharacter = JobCharacter.FAST
+
+  var hidden: Boolean = false
 
   val dto get() = BatchJobDto.fromEntity(this)
 

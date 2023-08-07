@@ -1,6 +1,8 @@
 package io.tolgee.batch
 
 import io.sentry.Sentry
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.fixtures.waitFor

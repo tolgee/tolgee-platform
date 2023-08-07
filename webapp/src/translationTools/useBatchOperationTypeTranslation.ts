@@ -12,7 +12,7 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_delete_keys');
       case 'MACHINE_TRANSLATE':
         return t('batch_operation_type_machine_translation');
-      case 'PRE_TRANSLATE_BY_MT':
+      case 'PRE_TRANSLATE_BT_TM':
         return t('batch_operation_type_machine_pre_translate_by_tm');
       case 'COPY_TRANSLATIONS':
         return t('batch_operation_type_copy_translations');
