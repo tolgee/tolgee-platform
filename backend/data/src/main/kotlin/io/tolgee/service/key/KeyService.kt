@@ -103,6 +103,7 @@ class KeyService(
   }
 
   private fun storeScreenshots(dto: CreateKeyDto, key: Key) {
+    @Suppress("DEPRECATION")
     val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
     val screenshots = dto.screenshots
 
