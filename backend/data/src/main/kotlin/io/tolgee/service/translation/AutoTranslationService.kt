@@ -70,6 +70,9 @@ class AutoTranslationService(
     autoTranslateViaBatchJob(project, request, isHiddenJob)
   }
 
+  /**
+   * It auto translates the strings, but only if it is not translated yet or if it has auto translated flag.
+   */
   fun softAutoTranslate(
     projectId: Long,
     keyId: Long,

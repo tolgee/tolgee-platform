@@ -162,7 +162,6 @@ class ProjectServiceTest : AbstractSpringTest() {
       project = testData.projectBuilder.self,
       author = testData.user,
       type = BatchJobType.DELETE_KEYS,
-      isHidden = isHiddenJob
     )
 
     waitFor {

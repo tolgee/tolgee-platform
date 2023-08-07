@@ -433,7 +433,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         project = testData.projectBuilder.self,
         author = author,
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
-        isHidden = isHiddenJob
+        isHidden = false
       )
     }
   }

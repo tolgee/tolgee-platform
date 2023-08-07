@@ -4,6 +4,7 @@ import com.google.cloud.translate.Translation
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.Language
+import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.key.Key
 import io.tolgee.service.project.ProjectService
@@ -12,24 +13,33 @@ import io.tolgee.util.Logging
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class AutoTranslationListener(
   private val autoTranslationService: AutoTranslationService,
   private val projectService: ProjectService,
+  private val entityManager: EntityManager,
 ) : Logging {
 
   companion object {
-    private val ACTIVITIES_FOR_VISIBLE_BATCH_JOB = listOf(ActivityType.IMPORT)
-    private val ACTIVITIES_FOR_HIDDEN_JOB = listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY)
-    private val ALLOWED_ACTIVITIES = ACTIVITIES_FOR_VISIBLE_BATCH_JOB + ACTIVITIES_FOR_HIDDEN_JOB
+    /**
+     * import activities start visible batch job
+     */
+    private val IMPORT_ACTIVITIES = listOf(ActivityType.IMPORT)
+
+    /**
+     * Low volume activities start hidden batch job
+     */
+    private val LOW_VOLUME_ACTIVITIES = listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY)
   }
 
   @Order(2)
   @EventListener
   fun onApplicationEvent(event: OnProjectActivityStoredEvent) {
     val projectId = event.activityRevision.projectId ?: return
-    if (event.activityRevision.type !in ALLOWED_ACTIVITIES) {
+
+    if (!shouldRunTheOperation(event, projectId)) {
       return
     }
 
@@ -44,36 +54,63 @@ class AutoTranslationListener(
         projectId = projectId,
         keyIds = keyIds,
         isBatch = true,
-        isHiddenJob = ACTIVITIES_FOR_HIDDEN_JOB.contains(event.activityRevision.type)
+        isHiddenJob = event.isLowVolumeActivity()
       )
     }
   }
 
-  fun getKeyIdsToAutoTranslate(projectId: Long, modifiedEntities: MutableList<ActivityModifiedEntity>): List<Long> {
-    val baseLanguageId = projectService.get(projectId).baseLanguage?.id ?: return listOf()
-    return modifiedEntities.mapNotNull { modifiedEntity ->
-      if (modifiedEntity.entityClass != Translation::class.simpleName) {
-        return@mapNotNull null
-      }
+  private fun shouldRunTheOperation(event: OnProjectActivityStoredEvent, projectId: Long): Boolean {
+    val config = autoTranslationService.getConfig(
+      entityManager.getReference(Project::class.java, projectId)
+    )
 
-      val isBaseLanguageTranslation = modifiedEntity.describingRelations?.values
-        ?.any { it.entityClass == Language::class.simpleName && it.entityId == baseLanguageId }
-        ?: return@mapNotNull null
-
-      if (!isBaseLanguageTranslation) {
-        return@mapNotNull null
-      }
-
-      val modification = modifiedEntity.modifications["text"] ?: return@mapNotNull null
-      val isBaseChanged = (modification.new as? String)?.isBlank() == false &&
-        modification.old != modification.new
-
-      if (!isBaseChanged) {
-        return@mapNotNull null
-      }
-
-      modifiedEntity.describingRelations?.values
-        ?.find { it.entityClass == Key::class.simpleName }?.entityId
+    if (!config.usingPrimaryMtService && !config.usingTm) {
+      return false
     }
+
+    if (event.isLowVolumeActivity()) {
+      return true
+    }
+
+    val hasEnabledForImport = config.enableForImport
+
+    return hasEnabledForImport && event.activityRevision.type in IMPORT_ACTIVITIES
+  }
+
+  private fun OnProjectActivityStoredEvent.isLowVolumeActivity() =
+    activityRevision.type in LOW_VOLUME_ACTIVITIES
+
+  fun getKeyIdsToAutoTranslate(projectId: Long, modifiedEntities: MutableList<ActivityModifiedEntity>): List<Long> {
+    return modifiedEntities.mapNotNull { modifiedEntity ->
+      if (!modifiedEntity.isBaseTranslationTextChanged(projectId)) {
+        return@mapNotNull null
+      }
+      getKeyId(modifiedEntity)
+    }
+  }
+
+  private fun ActivityModifiedEntity.isBaseTranslationTextChanged(projectId: Long): Boolean {
+    return this.isTranslation() && this.isBaseTranslation(projectId) && this.isTextChanged()
+  }
+
+  private fun getKeyId(modifiedEntity: ActivityModifiedEntity) =
+    modifiedEntity.describingRelations?.values
+      ?.find { it.entityClass == Key::class.simpleName }?.entityId
+
+  private fun ActivityModifiedEntity.isTextChanged(): Boolean {
+    val modification = this.modifications["text"] ?: return false
+    return (modification.new as? String)?.isBlank() == false &&
+      modification.old != modification.new
+  }
+
+  private fun ActivityModifiedEntity.isTranslation() =
+    entityClass == Translation::class.simpleName
+
+  private fun ActivityModifiedEntity.isBaseTranslation(projectId: Long): Boolean {
+    val baseLanguageId = projectService.get(projectId).baseLanguage?.id ?: return false
+
+    return describingRelations?.values
+      ?.any { it.entityClass == Language::class.simpleName && it.entityId == baseLanguageId }
+      ?: false
   }
 }
