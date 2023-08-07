@@ -124,8 +124,10 @@ class BatchJobProjectLockingManager(
    */
   fun unlockJobIfCompleted(jobId: Long) {
     val cached = batchJobStateProvider.getCached(jobId)
+    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
     val isCompleted = cached?.all { it.value.status.completed } ?: true
     if (isCompleted) {
+      logger.debug("Job $jobId is completed, unlocking project")
       val jobDto = batchJobService.getJobDto(jobId)
       unlockJobForProject(jobDto.projectId)
     }

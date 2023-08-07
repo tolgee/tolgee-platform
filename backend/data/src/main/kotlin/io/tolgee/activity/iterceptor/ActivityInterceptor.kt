@@ -1,5 +1,6 @@
 package io.tolgee.activity.iterceptor
 
+import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.events.OnProjectActivityEvent
@@ -29,15 +30,21 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
       val activityRevision = holder.activityRevision
       if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null) return
       logger.debug("Publishing project activity event")
-      applicationContext.publishEvent(
-        OnProjectActivityEvent(
-          activityRevision,
-          holder.modifiedEntities,
-          holder.organizationId,
-          holder.utmData,
-          holder.sdkInfo
+      try {
+        applicationContext.publishEvent(
+          OnProjectActivityEvent(
+            activityRevision,
+            holder.modifiedEntities,
+            holder.organizationId,
+            holder.utmData,
+            holder.sdkInfo
+          )
         )
-      )
+      } catch (e: Exception) {
+        Sentry.captureException(e)
+        logger.error("Error publishing project activity event: ", e)
+        throw e
+      }
     }
   }
 

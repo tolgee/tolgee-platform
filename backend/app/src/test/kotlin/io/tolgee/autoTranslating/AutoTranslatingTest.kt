@@ -122,7 +122,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `config test tm enabled`() {
     saveTestData()
-    performSetConfig(true, false)
+    performSetConfig(true, false, false)
     testUsingTmWorks()
   }
 
@@ -130,7 +130,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `config test mt disabled`() {
     saveTestData()
-    performSetConfig(true, false)
+    performSetConfig(true, false, false)
     testUsingMtDoesNotWork()
   }
 
@@ -138,7 +138,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `config test mt enabled`() {
     saveTestData()
-    performSetConfig(false, true)
+    performSetConfig(false, true, false)
     testUsingMtWorks()
   }
 
@@ -146,7 +146,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `config test tm disabled`() {
     saveTestData()
-    performSetConfig(false, true)
+    performSetConfig(false, true, false)
     testUsingTmDoesNotWork()
   }
 
@@ -250,12 +250,13 @@ class AutoTranslatingTest : MachineTranslationTest() {
   private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
     .getLangTranslation(testData.germanLanguage).text
 
-  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean) {
+  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean, enableForImport: Boolean) {
     performProjectAuthPut(
       "auto-translation-settings",
       mapOf(
         "usingTranslationMemory" to usingTm,
-        "usingMachineTranslation" to usingMt
+        "usingMachineTranslation" to usingMt,
+        "enableForImport" to enableForImport
       )
     ).andIsOk
   }

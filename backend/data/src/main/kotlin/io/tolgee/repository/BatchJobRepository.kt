@@ -33,7 +33,7 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     select j from BatchJob j
     left join fetch j.author
     left join fetch j.activityRevision
-    where j.project.id = :projectId
+    where j.project.id = :projectId and (j.hidden = false or j.status = 'FAILED')
     and (:userAccountId is null or j.author.id = :userAccountId)
     and (j.status not in :completedStatuses or j.updatedAt > :oneHourAgo)
     order by j.updatedAt

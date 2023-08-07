@@ -59,8 +59,8 @@ fun CriteriaBuilder.equalNullable(
 }
 
 inline fun <reified RootT, reified Result> EntityManager.query(
-  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Void
-): TypedQuery<Result>? {
+  fn: CriteriaQuery<Result>.(cb: CriteriaBuilder, root: Root<RootT>) -> Unit
+): TypedQuery<Result> {
   val cb = this.criteriaBuilder
   val cq = cb.createQuery(Result::class.java)
   val root = cq.from(RootT::class.java)

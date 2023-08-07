@@ -184,7 +184,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     // although it passes once, there should be no successful targets, because the whole transaction is rolled back
     doAnswer { it.callRealMethod() }
       .doAnswer { throwingService.throwExceptionInTransaction() }
-      .whenever(autoTranslationService).autoTranslate(any(), any(), any(), any(), any())
+      .whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
 
     performProjectAuthPost(
       "start-batch-job/machine-translate",
@@ -432,7 +432,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         },
         project = testData.projectBuilder.self,
         author = author,
-        type = BatchJobType.PRE_TRANSLATE_BT_TM
+        type = BatchJobType.PRE_TRANSLATE_BT_TM,
+        isHidden = isHiddenJob
       )
     }
   }

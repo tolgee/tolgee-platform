@@ -18,6 +18,7 @@ class BatchJobDto(
   val params: Any?,
   var maxPerJobConcurrency: Int,
   var jobCharacter: JobCharacter,
+  var hidden: Boolean
 ) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
@@ -36,6 +37,7 @@ class BatchJobDto(
         params = entity.params,
         maxPerJobConcurrency = entity.maxPerJobConcurrency,
         jobCharacter = entity.jobCharacter,
+        hidden = entity.hidden
       )
     }
   }

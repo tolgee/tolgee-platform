@@ -34,7 +34,8 @@ class PreTranslationByTmChunkProcessor(
       preparedChunk,
       coroutineContext,
       onProgress,
-      GenericAutoTranslationChunkProcessor.Type.PRE_TRANSLATION_BY_TM,
+      useTranslationMemory = true,
+      useMachineTranslation = false
     )
   }
 

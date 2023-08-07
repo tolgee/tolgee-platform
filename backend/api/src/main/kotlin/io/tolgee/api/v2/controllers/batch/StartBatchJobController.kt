@@ -57,7 +57,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.PRE_TRANSLATE_BT_TM
+      BatchJobType.PRE_TRANSLATE_BT_TM,
     ).model
   }
 
@@ -75,7 +75,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.MACHINE_TRANSLATE
+      BatchJobType.MACHINE_TRANSLATE,
     ).model
   }
 
@@ -89,7 +89,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.DELETE_KEYS
+      BatchJobType.DELETE_KEYS,
     ).model
   }
 
@@ -104,7 +104,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.SET_TRANSLATIONS_STATE
+      BatchJobType.SET_TRANSLATIONS_STATE,
     ).model
   }
 
@@ -122,7 +122,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.CLEAR_TRANSLATIONS
+      BatchJobType.CLEAR_TRANSLATIONS,
     ).model
   }
 
@@ -141,7 +141,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.COPY_TRANSLATIONS
+      BatchJobType.COPY_TRANSLATIONS,
     ).model
   }
 
@@ -156,7 +156,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.TAG_KEYS
+      BatchJobType.TAG_KEYS,
     ).model
   }
 
@@ -170,7 +170,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.UNTAG_KEYS
+      BatchJobType.UNTAG_KEYS,
     ).model
   }
 
@@ -184,7 +184,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.SET_KEYS_NAMESPACE
+      BatchJobType.SET_KEYS_NAMESPACE,
     ).model
   }
 

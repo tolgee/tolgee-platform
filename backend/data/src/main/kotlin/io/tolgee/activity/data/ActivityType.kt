@@ -36,6 +36,7 @@ enum class ActivityType(
   NAMESPACE_EDIT,
   BATCH_PRE_TRANSLATE_BY_TM(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_MACHINE_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
+  AUTO_TRANSLATE(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_CLEAR_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_COPY_TRANSLATIONS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_SET_TRANSLATION_STATE(true, paramsProvider = BatchActivityParamsProvider::class),

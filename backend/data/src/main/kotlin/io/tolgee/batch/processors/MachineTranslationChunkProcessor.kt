@@ -31,7 +31,8 @@ class MachineTranslationChunkProcessor(
       chunk,
       coroutineContext,
       onProgress,
-      GenericAutoTranslationChunkProcessor.Type.MACHINE_TRANSLATION,
+      useMachineTranslation = true,
+      useTranslationMemory = false
     )
   }
 

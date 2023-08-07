@@ -59,6 +59,8 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @Enumerated(STRING)
   var jobCharacter: JobCharacter = JobCharacter.FAST
 
+  var hidden: Boolean = false
+
   val dto get() = BatchJobDto.fromEntity(this)
 
   companion object {
