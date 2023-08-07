@@ -34,7 +34,7 @@ open class ActivityHolder {
   open var modifiedEntities:
     ModifiedEntitiesType = mutableMapOf()
 
-  var enableAutoCompletition: Boolean = true
+  open var enableAutoCompletion: Boolean = true
 }
 
 typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

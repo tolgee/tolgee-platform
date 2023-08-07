@@ -87,6 +87,9 @@ class KeyService(
   fun create(project: Project, dto: CreateKeyDto): Key {
     val key = create(project, dto.name, dto.namespace)
     dto.translations?.let {
+      if (it.isEmpty()) {
+        return@let
+      }
       translationService.setForKey(key, it)
     }
 

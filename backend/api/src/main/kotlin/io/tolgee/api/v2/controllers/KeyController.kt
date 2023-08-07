@@ -90,7 +90,7 @@ class KeyController(
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
     }
 
-    dto.translations?.keys?.let { languageTags ->
+    dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
       securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
     }
 

@@ -27,7 +27,7 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
   override fun beforeTransactionCompletion(tx: Transaction) {
     if (tx.isActive) {
       val holder = this.applicationContext.getBean(ActivityHolder::class.java)
-      if (!holder.enableAutoCompletition) {
+      if (!holder.enableAutoCompletion) {
         return
       }
       val activityRevision = holder.activityRevision
