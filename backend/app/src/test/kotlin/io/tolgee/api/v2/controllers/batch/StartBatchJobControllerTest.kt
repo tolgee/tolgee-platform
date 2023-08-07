@@ -339,6 +339,33 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           it.keyMeta?.tags?.map { it.name }?.contains("tag3") == true
       }.assert.isEqualTo(keyIds.size)
     }
+
+    val aKeyId = keyService.get(testData.projectBuilder.self.id, "a-key", null)
+    performProjectAuthPost(
+      "start-batch-job/untag-keys",
+      mapOf(
+        "keyIds" to keyIds,
+        "tags" to listOf("a-tag")
+      )
+    ).andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it deletes tags when not used`() {
+    val keyCount = 1000
+    val keys = testData.addTagKeysData(keyCount)
+    saveAndPrepare()
+
+    val aKeyId = keyService.get(testData.projectBuilder.self.id, "a-key", null).id
+    performProjectAuthPost(
+      "start-batch-job/untag-keys",
+      mapOf(
+        "keyIds" to listOf(aKeyId),
+        "tags" to listOf("a-tag")
+      )
+    ).andIsOk
+    waitForNotThrowing { tagService.find(testData.projectBuilder.self, "a-tag").assert.isNull() }
   }
 
   @Test
@@ -360,11 +387,12 @@ class StartBatchJobControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val all = keyService.find(keyIds)
     all.count { it.namespace?.name == "other-namespace" }.assert.isEqualTo(keyIds.size)
+    namespaceService.find(testData.projectBuilder.self.id, "namespace1").assert.isNull()
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it fails on collision`() {
+  fun `it fails on collision when setting namespaces`() {
     testData.addNamespaceData()
     val key = testData.projectBuilder.addKey(keyName = "key").self
     saveAndPrepare()

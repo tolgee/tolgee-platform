@@ -2,6 +2,10 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.ExecutionQueueItem
+import io.tolgee.batch.data.QueueEventType
+import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SavePointManager
 import io.tolgee.component.UsingRedisProvider
@@ -42,6 +46,8 @@ class BatchJobActionService(
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
+  private val activityHolder: ActivityHolder,
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -80,6 +86,7 @@ class BatchJobActionService(
               savePointManager.rollbackSavepoint(savepoint)
               // we have rolled back the transaction, so no targets were actually successfull
               lockedExecution.successTargets = listOf()
+              rollbackActivity()
             }
 
             progressManager.handleProgress(lockedExecution)
@@ -115,17 +122,25 @@ class BatchJobActionService(
     }
   }
 
+  private fun rollbackActivity() {
+    activityHolder.modifiedEntities.clear()
+    activityHolder.activityRevision.describingRelations.clear()
+  }
+
   private fun getPendingUnlockedExecutionItem(executionItem: ExecutionQueueItem): BatchJobChunkExecution? {
     val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
 
     if (lockedExecution == null) {
-      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is locked, skipping")
+      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
-      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} is not pending, skipping")
+      logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is not pending, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
+
       return null
     }
 
@@ -158,7 +173,7 @@ class BatchJobActionService(
   }
 
   private fun failExecution(chunkExecutionId: Long, e: Throwable) {
-    executeInNewTransaction(transactionManager) {
+    val execution = executeInNewTransaction(transactionManager) {
       val execution = entityManager.find(BatchJobChunkExecution::class.java, chunkExecutionId)
       execution.status = BatchJobChunkExecutionStatus.FAILED
       execution.errorMessage = Message.EXECUTION_FAILED_ON_MANAGEMENT_ERROR
@@ -166,7 +181,9 @@ class BatchJobActionService(
       execution.errorKey = "management_error"
       entityManager.persist(execution)
       progressManager.handleProgress(execution)
+      execution
     }
+    progressManager.handleChunkCompletedCommitted(execution)
   }
 
   fun publishRemoveConsuming(item: ExecutionQueueItem) {

@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.constants.Caches
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus

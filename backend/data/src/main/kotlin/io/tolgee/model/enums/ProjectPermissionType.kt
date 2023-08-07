@@ -48,7 +48,10 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
       Scope.TRANSLATIONS_COMMENTS_EDIT,
-      Scope.TRANSLATIONS_STATE_EDIT
+      Scope.TRANSLATIONS_STATE_EDIT,
+      Scope.BATCH_PRE_TRANSLATE_BY_TM,
+      Scope.BATCH_MACHINE_TRANSLATE,
+      Scope.BATCH_JOBS_VIEW
     )
   ),
   MANAGE(

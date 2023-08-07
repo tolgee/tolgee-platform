@@ -59,6 +59,14 @@ class BatchJobStateProvider(
     return getStatesMap()[jobId]
   }
 
+  fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
+    return getStatesMap().remove(jobId)
+  }
+
+  fun hasCachedJobState(jobId: Long): Boolean {
+    return getStatesMap().containsKey(jobId)
+  }
+
   fun getStatesMap(): ConcurrentMap<Long, MutableMap<Long, ExecutionState>> {
     return if (usingRedisProvider.areWeUsingRedis) {
       getRedissonStatesMap()

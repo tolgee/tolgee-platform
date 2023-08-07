@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -45,7 +45,7 @@ class StartBatchJobController(
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_MT)
+  @AccessWithProjectPermission(Scope.BATCH_PRE_TRANSLATE_BY_TM)
   @Operation(
     summary = "Pre-translate by TM",
     description = "Pre-translate provided keys to provided languages by TM."
@@ -57,7 +57,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.PRE_TRANSLATE_BY_MT
+      BatchJobType.PRE_TRANSLATE_BT_TM,
     ).model
   }
 
@@ -75,7 +75,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.MACHINE_TRANSLATE
+      BatchJobType.MACHINE_TRANSLATE,
     ).model
   }
 
@@ -89,7 +89,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.DELETE_KEYS
+      BatchJobType.DELETE_KEYS,
     ).model
   }
 
@@ -104,7 +104,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.SET_TRANSLATIONS_STATE
+      BatchJobType.SET_TRANSLATIONS_STATE,
     ).model
   }
 
@@ -122,7 +122,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.CLEAR_TRANSLATIONS
+      BatchJobType.CLEAR_TRANSLATIONS,
     ).model
   }
 
@@ -141,7 +141,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.COPY_TRANSLATIONS
+      BatchJobType.COPY_TRANSLATIONS,
     ).model
   }
 
@@ -156,7 +156,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.TAG_KEYS
+      BatchJobType.TAG_KEYS,
     ).model
   }
 
@@ -170,7 +170,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.UNTAG_KEYS
+      BatchJobType.UNTAG_KEYS,
     ).model
   }
 
@@ -184,7 +184,7 @@ class StartBatchJobController(
       data,
       projectHolder.projectEntity,
       authenticationFacade.userAccountEntity,
-      BatchJobType.SET_KEYS_NAMESPACE
+      BatchJobType.SET_KEYS_NAMESPACE,
     ).model
   }
 

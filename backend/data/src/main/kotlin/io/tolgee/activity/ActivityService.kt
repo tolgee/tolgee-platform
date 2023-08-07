@@ -7,11 +7,14 @@ import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityExistsException
 import javax.persistence.EntityManager
 
 @Service
@@ -19,21 +22,45 @@ class ActivityService(
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
-) {
+) : Logging {
   @Transactional
   fun storeActivityData(activityRevision: ActivityRevision, modifiedEntities: ModifiedEntitiesType) {
-    activityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
+    val mergedActivityRevision = activityRevision.persist()
+    mergedActivityRevision.persistedDescribingRelations()
 
-    entityManager.persist(activityRevision)
-    activityRevision.describingRelations.forEach {
+    mergedActivityRevision.modifiedEntities = modifiedEntities.values.flatMap { it.values }.toMutableList()
+    mergedActivityRevision.persistModifiedEntities()
+
+    entityManager.flush()
+    mergedActivityRevision.afterFlush?.invoke()
+
+    applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
+  }
+
+  private fun ActivityRevision.persistModifiedEntities() {
+    modifiedEntities.forEach { activityModifiedEntity ->
+      try {
+        entityManager.persist(activityModifiedEntity)
+      } catch (e: EntityExistsException) {
+        logger.debug("ModifiedEntity entity already exists in persistence context, skipping", e)
+      }
+    }
+  }
+
+  private fun ActivityRevision.persistedDescribingRelations() {
+    @Suppress("UselessCallOnCollection")
+    describingRelations.filterNotNull().forEach {
       entityManager.persist(it)
     }
-    activityRevision.modifiedEntities.forEach { activityModifiedEntity ->
-      entityManager.persist(activityModifiedEntity)
+  }
+
+  private fun ActivityRevision.persist(): ActivityRevision {
+    return if (id == 0L) {
+      entityManager.persist(this)
+      this
+    } else {
+      entityManager.getReference(ActivityRevision::class.java, id)
     }
-    entityManager.flush()
-    activityRevision.afterFlush?.invoke()
-    applicationContext.publishEvent(OnProjectActivityStoredEvent(this, activityRevision))
   }
 
   @Transactional

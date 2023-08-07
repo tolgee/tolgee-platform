@@ -6,7 +6,7 @@ package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
@@ -161,7 +161,7 @@ class ProjectServiceTest : AbstractSpringTest() {
       },
       project = testData.projectBuilder.self,
       author = testData.user,
-      type = BatchJobType.DELETE_KEYS
+      type = BatchJobType.DELETE_KEYS,
     )
 
     waitFor {

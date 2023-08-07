@@ -1,5 +1,8 @@
 package io.tolgee.batch
 
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.events.OnBatchJobCreated
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -18,7 +21,6 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
-import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
@@ -26,8 +28,8 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigInteger
 import javax.persistence.EntityManager
 
@@ -36,7 +38,6 @@ class BatchJobService(
   private val batchJobRepository: BatchJobRepository,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
-  private val transactionManager: PlatformTransactionManager,
   private val cachingBatchJobService: CachingBatchJobService,
   @Lazy
   private val progressManager: ProgressManager,
@@ -51,50 +52,57 @@ class BatchJobService(
     request: Any,
     project: Project,
     author: UserAccount?,
-    type: BatchJobType
+    type: BatchJobType,
+    isHidden: Boolean = false
   ): BatchJob {
-    var executions: List<BatchJobChunkExecution>? = null
-    val job = executeInNewTransaction(transactionManager) {
-      val processor = getProcessor(type)
-      val target = processor.getTarget(request)
+    val processor = getProcessor(type)
+    val target = processor.getTarget(request)
 
-      val job = BatchJob().apply {
-        this.project = project
-        this.author = author
-        this.target = target
-        this.totalItems = target.size
-        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
-        this.jobCharacter = processor.getJobCharacter()
-        this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
-        this.type = type
-      }
-
-      val chunked = job.chunkedTarget
-      job.totalChunks = chunked.size
-      cachingBatchJobService.saveJob(job)
-
-      job.params = processor.getParams(request)
-
-      executions = List(chunked.size) { chunkNumber ->
-        BatchJobChunkExecution().apply {
-          batchJob = job
-          this.chunkNumber = chunkNumber
-          entityManager.persist(this)
-        }
-      }
-      job
+    val job = BatchJob().apply {
+      this.project = project
+      this.author = author
+      this.target = target
+      this.totalItems = target.size
+      this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
+      this.jobCharacter = processor.getJobCharacter()
+      this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
+      this.type = type
+      this.hidden = isHidden
     }
 
-    executions?.let { batchJobChunkExecutionQueue.addToQueue(it) }
+    val chunked = job.chunkedTarget
+    job.totalChunks = chunked.size
+    cachingBatchJobService.saveJob(job)
+
+    job.params = processor.getParams(request)
+
+    val executions = List(chunked.size) { chunkNumber ->
+      BatchJobChunkExecution().apply {
+        batchJob = job
+        this.chunkNumber = chunkNumber
+        entityManager.persist(this)
+      }
+    }
+
+    entityManager.flush()
+    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
+
+    return job
+  }
+
+  @TransactionalEventListener
+  fun onCreated(event: OnBatchJobCreated) {
+    val (job, executions) = event
+    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
+
+    executions.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
-      "Starting job ${job.id}, aadded ${executions?.size} executions to queue ${
+      "Starting job ${job.id}, aadded ${executions.size} executions to queue ${
       System.identityHashCode(
         batchJobChunkExecutionQueue
       )
       }"
     )
-
-    return job
   }
 
   fun findJobEntity(id: Long): BatchJob? {
@@ -256,7 +264,7 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
-  fun getExecutions(id: Long): List<BatchJobChunkExecution> {
+  fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {
     return entityManager.createQuery(
       """
       from BatchJobChunkExecution e
@@ -264,7 +272,7 @@ class BatchJobService(
       """.trimIndent(),
       BatchJobChunkExecution::class.java
     )
-      .setParameter("id", id)
+      .setParameter("id", batchJobId)
       .resultList
   }
 

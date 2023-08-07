@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.batch
 
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.hateoas.user_account.SimpleUserAccountModel
 import io.tolgee.model.batch.BatchJobStatus
 import org.springframework.hateoas.RepresentationModel

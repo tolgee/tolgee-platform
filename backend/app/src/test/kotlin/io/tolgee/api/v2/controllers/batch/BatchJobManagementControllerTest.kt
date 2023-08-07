@@ -2,11 +2,12 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActionService
+import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.batch.BatchJobDto
 import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobType
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.PreTranslationByTmRequest
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -93,15 +96,21 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @SpyBean
   lateinit var autoTranslationService: AutoTranslationService
 
+  @SpyBean
+  @Autowired
+  lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
+
   @BeforeEach
   fun setup() {
+    batchJobChunkExecutionQueue.clear()
     testData = BatchJobsTestData()
     batchJobChunkExecutionQueue.populateQueue()
     Mockito.reset(
       mtCreditBucketService,
       autoTranslationService,
       machineTranslationChunkProcessor,
-      preTranslationByTmChunkProcessor
+      preTranslationByTmChunkProcessor,
+      batchJobActivityFinalizer
     )
   }
 
@@ -148,7 +157,19 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       .andIsOk
 
     waitForNotThrowing(pollTime = 1000) {
+      entityManager.clear()
       getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+    }
+
+    Thread.sleep(1000)
+
+    verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+
+    waitForNotThrowing(pollTime = 1000) {
+      // asset activity stored
+      entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+        .setParameter("id", job.id).resultList
+        .assert.hasSize(1)
     }
   }
 
@@ -163,7 +184,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     // although it passes once, there should be no successful targets, because the whole transaction is rolled back
     doAnswer { it.callRealMethod() }
       .doAnswer { throwingService.throwExceptionInTransaction() }
-      .whenever(autoTranslationService).autoTranslate(any(), any(), any(), any(), any())
+      .whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
 
     performProjectAuthPost(
       "start-batch-job/machine-translate",
@@ -315,15 +336,17 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
     val anotherUsersJobs = (1..3).map { runChunkedJob(50, testData.anotherUser) }
 
     try {
-      performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andPrettyPrint.andAssertThatJson {
-          node("_embedded.batchJobs") {
-            isArray.hasSize(6)
-            node("[0].status").isEqualTo("RUNNING")
-            node("[1].status").isEqualTo("PENDING")
-            node("[2].status").isEqualTo("PENDING")
+      waitForNotThrowing {
+        performProjectAuthGet("current-batch-jobs")
+          .andIsOk.andPrettyPrint.andAssertThatJson {
+            node("_embedded.batchJobs") {
+              isArray.hasSize(6)
+              node("[0].status").isEqualTo("RUNNING")
+              node("[1].status").isEqualTo("PENDING")
+              node("[2].status").isEqualTo("PENDING")
+            }
           }
-        }
+      }
 
       wait = false
 
@@ -409,7 +432,8 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
         },
         project = testData.projectBuilder.self,
         author = author,
-        type = BatchJobType.PRE_TRANSLATE_BY_MT
+        type = BatchJobType.PRE_TRANSLATE_BT_TM,
+        isHidden = false
       )
     }
   }

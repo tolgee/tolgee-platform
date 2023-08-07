@@ -30,8 +30,8 @@ export const useScopeTranslations = () => {
     'activity.view': t('permissions_item_activity_view'),
     'batch-jobs.view': t('permissions_item_batch_jobs_view'),
     'batch-jobs.cancel': t('permissions_item_batch_jobs_cancel'),
-    'translations.batch-by-mt': t(
-      'permissions_item_batch_jobs_batch_translate_by_mt'
+    'translations.batch-by-tm': t(
+      'permissions_item_batch_jobs_batch_translate_by_tm'
     ),
     'translations.batch-machine': t(
       'permissions_item_batch_jobs_batch_translate_by_machine'

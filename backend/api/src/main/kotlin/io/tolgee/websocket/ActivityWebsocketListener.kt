@@ -88,6 +88,8 @@ class ActivityWebsocketListener(
 
   @EventListener(OnBatchJobProgress::class)
   fun onBatchJobProgress(event: OnBatchJobProgress) {
+    if (event.job.hidden) return
+
     val realStatus = if (event.job.status == BatchJobStatus.PENDING)
       BatchJobStatus.RUNNING
     else
@@ -122,6 +124,8 @@ class ActivityWebsocketListener(
   }
 
   fun onBatchJobCompleted(event: OnBatchJobCompleted, errorMessage: Message? = null) {
+    if (event.job.hidden) return
+
     websocketEventPublisher(
       "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
       WebsocketEvent(

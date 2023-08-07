@@ -1,5 +1,6 @@
-package io.tolgee.batch
+package io.tolgee.batch.data
 
+import io.tolgee.batch.JobCharacter
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.batch.IBatchJob
@@ -17,6 +18,7 @@ class BatchJobDto(
   val params: Any?,
   var maxPerJobConcurrency: Int,
   var jobCharacter: JobCharacter,
+  var hidden: Boolean
 ) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
@@ -35,6 +37,7 @@ class BatchJobDto(
         params = entity.params,
         maxPerJobConcurrency = entity.maxPerJobConcurrency,
         jobCharacter = entity.jobCharacter,
+        hidden = entity.hidden
       )
     }
   }

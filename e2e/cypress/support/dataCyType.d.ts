@@ -218,6 +218,7 @@ declare namespace DataCy {
         "invite-generate-button" |
         "language-delete-button" |
         "language-modify-form" |
+        "languages-auto-for-import" |
         "languages-auto-machine-translation" |
         "languages-auto-translation-memory" |
         "languages-create-autocomplete-field" |

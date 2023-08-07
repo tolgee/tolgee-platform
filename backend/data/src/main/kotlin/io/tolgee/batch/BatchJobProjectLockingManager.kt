@@ -1,5 +1,7 @@
 package io.tolgee.batch
 
+import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -20,6 +22,7 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
+  private val batchJobStateProvider: BatchJobStateProvider
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
@@ -110,5 +113,23 @@ class BatchJobProjectLockingManager(
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {
     return redissonClient.getMap("project_batch_job_locks")
+  }
+
+  /**
+   * It can happen that some other thread or instance will try to
+   * execute execution of already completed job
+   *
+   * The execution is skipped, since it's not pending, but
+   * we have to unlock the project, otherwise it will be locked forever
+   */
+  fun unlockJobIfCompleted(jobId: Long) {
+    val cached = batchJobStateProvider.getCached(jobId)
+    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
+    val isCompleted = cached?.all { it.value.status.completed } ?: true
+    if (isCompleted) {
+      logger.debug("Job $jobId is completed, unlocking project")
+      val jobDto = batchJobService.getJobDto(jobId)
+      unlockJobForProject(jobDto.projectId)
+    }
   }
 }

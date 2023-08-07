@@ -1,6 +1,8 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.batch.data.QueueEventType
+import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
