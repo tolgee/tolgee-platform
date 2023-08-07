@@ -26,6 +26,8 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_tag_keys');
       case 'UNTAG_KEYS':
         return t('batch_operation_type_untag_keys');
+      case 'AUTO_TRANSLATE':
+        return t('batch_operation_type_auto_translate');
       default:
         return type;
     }
