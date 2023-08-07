@@ -1,3 +1,10 @@
+## [3.25.3](https://github.com/tolgee/tolgee-platform/compare/v3.25.2...v3.25.3) (2023-08-07)
+
+
+### Bug Fixes
+
+* swapped description ([#1845](https://github.com/tolgee/tolgee-platform/issues/1845)) ([f2eeed9](https://github.com/tolgee/tolgee-platform/commit/f2eeed9dd20c953dcce7b86f40d972d6831a387b))
+
 ## [3.25.2](https://github.com/tolgee/tolgee-platform/compare/v3.25.1...v3.25.2) (2023-08-03)
 
 
