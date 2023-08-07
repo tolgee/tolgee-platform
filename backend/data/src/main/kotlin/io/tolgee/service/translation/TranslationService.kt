@@ -373,7 +373,7 @@ class TranslationService(
 
   @Transactional
   fun setState(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
-    val translations = getTranslations(keyIds, languageIds)
+    val translations = getTargetTranslations(keyIds, languageIds)
     translations.forEach { it.state = state }
     saveAll(translations)
   }
@@ -384,7 +384,7 @@ class TranslationService(
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
   fun clear(keyIds: List<Long>, languageIds: List<Long>) {
-    val translations = getTranslations(keyIds, languageIds)
+    val translations = getTargetTranslations(keyIds, languageIds)
     translations.forEach {
       it.state = TranslationState.UNTRANSLATED
       it.text = null
@@ -396,8 +396,8 @@ class TranslationService(
   }
 
   fun copy(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
-    val sourceTranslations = getTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
-    val targetTranslations = getTranslations(keyIds, targetLanguageIds).onEach {
+    val sourceTranslations = getTargetTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
+    val targetTranslations = getTargetTranslations(keyIds, targetLanguageIds).onEach {
       it.text = sourceTranslations[it.key.id]?.text
       if (!it.text.isNullOrEmpty()) {
         it.state = TranslationState.TRANSLATED
@@ -407,5 +407,25 @@ class TranslationService(
       it.outdated = false
     }
     saveAll(targetTranslations)
+  }
+
+  private fun getTargetTranslations(
+    keyIds: List<Long>,
+    targetLanguageIds: List<Long>
+  ): List<Translation> {
+    val existing = getTranslations(keyIds, targetLanguageIds)
+    val existingMap = existing.groupBy { it.key.id }
+      .map { entry ->
+        entry.key to
+          entry.value.associateBy { translation -> translation.language.id }
+      }.toMap()
+    return keyIds.flatMap { keyId ->
+      targetLanguageIds.map { languageId ->
+        existingMap[keyId]?.get(languageId) ?: getOrCreate(
+          entityManager.getReference(Key::class.java, keyId),
+          entityManager.getReference(Language::class.java, languageId)
+        )
+      }
+    }
   }
 }

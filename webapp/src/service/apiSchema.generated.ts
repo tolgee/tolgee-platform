@@ -238,6 +238,12 @@ export interface paths {
   "/v2/public/licensing/prepare-set-key": {
     post: operations["prepareSetLicenseKey"];
   };
+  "/v2/public/business-events/report": {
+    post: operations["report_1"];
+  };
+  "/v2/public/business-events/identify": {
+    post: operations["identify"];
+  };
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
@@ -337,9 +343,6 @@ export interface paths {
   };
   "/v2/ee-license/prepare-set-license-key": {
     post: operations["prepareSetLicenseKey_1"];
-  };
-  "/v2/business-events/report": {
-    post: operations["report_1"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -632,10 +635,13 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        * @example 200001,200004
        */
-      translateLanguageIds?: number[];
+      permittedLanguageIds?: number[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
        * @example 200001,200004
@@ -647,13 +653,10 @@ export interface components {
        */
       viewLanguageIds?: number[];
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
-      permittedLanguageIds?: number[];
+      translateLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1175,13 +1178,13 @@ export interface components {
        */
       name: string;
       /**
-       * @description Language tag according to BCP 47 definition
-       * @example cs-CZ
+       * @description Language name in this language
+       * @example čeština
        */
       originalName: string;
       /**
-       * @description Language name in this language
-       * @example čeština
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
        */
       tag: string;
       /**
@@ -1220,13 +1223,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -1360,16 +1363,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       userFullName?: string;
       projectName: string;
       scopes: string[];
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     SuperTokenRequest: {
@@ -1508,6 +1511,18 @@ export interface components {
       translations: components["schemas"]["AverageProportionalUsageItemModel"];
       credits?: components["schemas"]["SumUsageItemModel"];
       total: number;
+    };
+    BusinessEventReportRequest: {
+      eventName: string;
+      anonymousUserId?: string;
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      projectId?: number;
+      data?: { [key: string]: { [key: string]: unknown } };
+    };
+    IdentifyRequest: {
+      anonymousUserId: string;
     };
     CreateProjectDTO: {
       name: string;
@@ -1879,14 +1894,6 @@ export interface components {
       createdAt: string;
       location?: string;
     };
-    BusinessEventReportRequest: {
-      eventName: string;
-      /** Format: int64 */
-      organizationId?: number;
-      /** Format: int64 */
-      projectId?: number;
-      data?: { [key: string]: { [key: string]: unknown } };
-    };
     CreateApiKeyDto: {
       /** Format: int64 */
       projectId: number;
@@ -2016,6 +2023,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /**
        * @description The role of currently authorized user.
        *
@@ -2024,8 +2033,6 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER";
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
-      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
     };
@@ -2128,18 +2135,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      namespace?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2585,13 +2592,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     OrganizationRequestParamsDto: {
@@ -2711,16 +2718,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       userFullName?: string;
       projectName: string;
       scopes: string[];
+      username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
     };
     PagedModelUserAccountModel: {
@@ -5222,6 +5229,52 @@ export interface operations {
       };
     };
   };
+  report_1: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BusinessEventReportRequest"];
+      };
+    };
+  };
+  identify: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IdentifyRequest"];
+      };
+    };
+  };
   getAll: {
     parameters: {
       query: {
@@ -6459,29 +6512,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetLicenseKeyDto"];
-      };
-    };
-  };
-  report_1: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BusinessEventReportRequest"];
       };
     };
   };
