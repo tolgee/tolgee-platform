@@ -154,7 +154,9 @@ export const BatchOperations = ({ open, onClose }: Props) => {
               <StyledItem>
                 <Tooltip
                   title={
-                    allSelected
+                    runningOperation
+                      ? ''
+                      : allSelected
                       ? t('translations_clear_selection')
                       : t('translations_select_all')
                   }

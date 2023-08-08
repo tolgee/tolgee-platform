@@ -8,6 +8,7 @@ export const stateColors = {
 
 export const getCell = (translationText: string) => {
   return cy
+    .gcy('translations-table-cell-translation-text')
     .contains(translationText)
     .should('be.visible')
     .closestDcy('translations-table-cell');

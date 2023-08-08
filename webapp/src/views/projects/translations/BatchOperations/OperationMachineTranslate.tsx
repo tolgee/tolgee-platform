@@ -52,6 +52,7 @@ export const OperationMachineTranslate = ({ disabled, onStart }: Props) => {
         languages={languages || []}
         value={selectedLangs || []}
         onChange={setSelectedLangs}
+        languagePermission="translations.edit"
       />
       <BatchOperationsSubmit
         loading={batchLoadable.isLoading}

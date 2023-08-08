@@ -58,7 +58,8 @@ export type FieldTypeEnum =
   | 'batch_language_id'
   | 'batch_key_tag_list'
   | 'batch_namespace'
-  | 'batch_translation_state';
+  | 'batch_translation_state'
+  | 'batch_boolean';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;

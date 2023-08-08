@@ -60,7 +60,6 @@ describe('Keys permissions', () => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
           'project-menu-item-translations': RUN,
-          'project-menu-item-import': RUN,
           'project-menu-item-integrate': SKIP,
         });
       }

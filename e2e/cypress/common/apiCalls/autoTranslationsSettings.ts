@@ -1,8 +1,9 @@
 import { v2apiFetch } from './common';
 
 type Options = {
-  usingTranslationMemory: true;
-  usingMachineTranslation: true;
+  usingTranslationMemory: boolean;
+  usingMachineTranslation: boolean;
+  enableForImport?: boolean;
 };
 
 export const putAutoTranslationsSettings = (

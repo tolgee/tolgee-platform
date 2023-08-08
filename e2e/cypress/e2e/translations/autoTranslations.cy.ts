@@ -5,10 +5,11 @@ import {
   editCell,
   selectLangsInLocalstorage,
   translationsBeforeEach,
+  visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { getCell } from '../../common/state';
-import { deleteProject } from '../../common/apiCalls/common';
+import { deleteProject, importData } from '../../common/apiCalls/common';
 import { putAutoTranslationsSettings } from '../../common/apiCalls/autoTranslationsSettings';
 
 describe('Translation memory', () => {
@@ -136,6 +137,27 @@ describe('Translation memory', () => {
 
     waitForGlobalLoading();
     getAutoTranslatedIndicator('Translation edited').should('not.exist');
+  });
+
+  it('auto translates when importing', () => {
+    putAutoTranslationsSettings(project.id, {
+      usingTranslationMemory: true,
+      usingMachineTranslation: true,
+      enableForImport: true,
+    });
+    importData(project.id, [
+      { name: 'aaa-key', translations: { en: 'Hello first' } },
+      { name: 'aab-key', translations: { en: 'Hello second' } },
+    ]);
+    visitTranslations(project.id);
+
+    waitForGlobalLoading();
+    cy.gcy('translations-table-cell')
+      .contains('Hello first translated with GOOGLE from en to cs')
+      .should('exist');
+    cy.gcy('translations-table-cell')
+      .contains('Hello second translated with GOOGLE from en to cs')
+      .should('exist');
   });
 
   const getAutoTranslatedIndicator = (translationText: string) => {

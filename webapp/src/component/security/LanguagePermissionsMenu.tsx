@@ -84,26 +84,28 @@ export const LanguagePermissionsMenu: FunctionComponent<{
         }
         disableInteractive
       >
-        <StyledButton
-          data-cy="permissions-language-menu-button"
-          disabled={props.disabled === true}
-          ref={anchorEl}
-          {...props.buttonProps}
-          size="small"
-          variant="outlined"
-          aria-controls="simple-menu"
-          aria-haspopup="true"
-          onClick={handleClick}
-        >
-          <LanguagesPermittedList
-            languages={props.selected.map(
-              (lid) => props.allLanguages.find((l) => l.id === lid)!
-            )}
-            disabled={props.disabled}
-            maxItems={5}
-          />
-          <ArrowDropDown fontSize="small" />
-        </StyledButton>
+        <span>
+          <StyledButton
+            data-cy="permissions-language-menu-button"
+            disabled={props.disabled === true}
+            ref={anchorEl}
+            {...props.buttonProps}
+            size="small"
+            variant="outlined"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
+          >
+            <LanguagesPermittedList
+              languages={props.selected.map(
+                (lid) => props.allLanguages.find((l) => l.id === lid)!
+              )}
+              disabled={props.disabled}
+              maxItems={5}
+            />
+            <ArrowDropDown fontSize="small" />
+          </StyledButton>
+        </span>
       </Tooltip>
       {anchorEl && (
         <Popover

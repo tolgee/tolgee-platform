@@ -50,6 +50,7 @@ export const OperationClearTranslations = ({ disabled, onStart }: Props) => {
         languages={allLanguages || []}
         value={selectedLangs || []}
         onChange={setSelectedLangs}
+        languagePermission="translations.edit"
       />
       <BatchOperationsSubmit
         loading={batchLoadable.isLoading}

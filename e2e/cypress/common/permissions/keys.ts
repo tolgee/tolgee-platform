@@ -1,10 +1,9 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
-import { createKey } from '../apiCalls/common';
-import { deleteSelected } from '../batchJobs';
+import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
 import { confirmStandard } from '../shared';
 import { createTag } from '../tags';
-import { editCell } from '../translations';
+import { createTranslation, editCell } from '../translations';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
 
 export function testKeys(info: ProjectInfo) {
@@ -61,7 +60,7 @@ export function testKeys(info: ProjectInfo) {
   }
 
   if (scopes.includes('keys.create')) {
-    createKey(info.project.id, 'new_test_key', { en: 'Test translation' });
+    createTranslation('new_test_key');
   }
 
   if (scopes.includes('keys.delete')) {

@@ -15,7 +15,7 @@ export const OperationChangeNamespace = ({ disabled, onStart }: Props) => {
   const project = useProject();
   const selection = useTranslationsSelector((c) => c.selection);
 
-  const [namespace, setNamespace] = useState<string>();
+  const [namespace, setNamespace] = useState<string>('');
 
   const batchLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/start-batch-job/set-keys-namespace',
@@ -45,7 +45,7 @@ export const OperationChangeNamespace = ({ disabled, onStart }: Props) => {
     <OperationContainer>
       <NamespaceSelector
         value={namespace}
-        onChange={(value) => setNamespace(value)}
+        onChange={(value) => setNamespace(value || '')}
         SearchSelectProps={{ SelectProps: { sx: { minWidth: 200 } } }}
       />
       <BatchOperationsSubmit

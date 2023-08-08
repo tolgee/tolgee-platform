@@ -91,7 +91,9 @@ class KeyController(
     }
 
     dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
-      securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+      if (languageTags.isNotEmpty()) {
+        securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+      }
     }
 
     val key = keyService.create(projectHolder.projectEntity, dto)

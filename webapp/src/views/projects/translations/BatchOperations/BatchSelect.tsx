@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import {
   Autocomplete,
   ListItem,
@@ -6,8 +7,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useMemo } from 'react';
 import { getTextWidth } from 'tg.fixtures/getTextWidth';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 import { BatchActions } from './types';
 
@@ -25,24 +26,78 @@ type Props = {
 export const BatchSelect = ({ value, onChange }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
+  const permissions = useProjectPermissions();
+  const canEditKey = permissions.satisfiesPermission('keys.edit');
+  const canDeleteKey = permissions.satisfiesPermission('keys.delete');
+  const canMachineTranslate = permissions.satisfiesPermission(
+    'translations.batch-machine'
+  );
+  const canPretranslate = permissions.satisfiesPermission(
+    'translations.batch-by-tm'
+  );
+  const canChangeState = permissions.satisfiesPermission(
+    'translations.state-edit'
+  );
+  const canEditTranslations =
+    permissions.satisfiesPermission('translations.edit');
 
-  const options: { id: BatchActions; label: string; divider?: boolean }[] = [
-    { id: 'machine_translate', label: t('batch_operations_machine_translate') },
-    { id: 'pre_translate', label: t('batch_operations_pre_translate') },
+  const options: {
+    id: BatchActions;
+    label: string;
+    divider?: boolean;
+    enabled?: boolean;
+  }[] = [
+    {
+      id: 'machine_translate',
+      label: t('batch_operations_machine_translate'),
+      enabled: canMachineTranslate,
+    },
+    {
+      id: 'pre_translate',
+      label: t('batch_operations_pre_translate'),
+      enabled: canPretranslate,
+    },
     {
       id: 'mark_as_translated',
       label: t('batch_operations_mark_as_translated'),
+      enabled: canChangeState,
     },
-    { id: 'mark_as_reviewed', label: t('batch_operations_mark_as_reviewed') },
-    { id: 'copy_translations', label: t('batch_operations_copy_translations') },
+    {
+      id: 'mark_as_reviewed',
+      label: t('batch_operations_mark_as_reviewed'),
+      enabled: canChangeState,
+    },
+    {
+      id: 'copy_translations',
+      label: t('batch_operations_copy_translations'),
+      enabled: canEditTranslations,
+    },
     {
       id: 'clear_translations',
       label: t('batch_operation_clear_translations'),
+      enabled: canEditTranslations,
     },
-    { id: 'add_tags', label: t('batch_operations_add_tags'), divider: true },
-    { id: 'remove_tags', label: t('batch_operations_remove_tags') },
-    { id: 'change_namespace', label: t('batch_operations_change_namespace') },
-    { id: 'delete', label: t('batch_operations_delete') },
+    {
+      id: 'add_tags',
+      label: t('batch_operations_add_tags'),
+      divider: true,
+      enabled: canEditKey,
+    },
+    {
+      id: 'remove_tags',
+      label: t('batch_operations_remove_tags'),
+      enabled: canEditKey,
+    },
+    {
+      id: 'change_namespace',
+      label: t('batch_operations_change_namespace'),
+      enabled: canEditKey,
+    },
+    {
+      id: 'delete',
+      label: t('batch_operations_delete'),
+      enabled: canDeleteKey,
+    },
   ];
 
   const option = options.find((o) => o.id === value);
@@ -67,12 +122,18 @@ export const BatchSelect = ({ value, onChange }: Props) => {
         onChange(value?.id);
       }}
       renderOption={(props, o) => (
-        <>
+        <React.Fragment key={o.id}>
           {o.divider && <StyledSeparator />}
-          <ListItem {...props} data-cy="batch-select-item">
-            {o.label}
-          </ListItem>
-        </>
+          {o.enabled === false ? (
+            <ListItem data-cy="batch-select-item" disabled={true}>
+              {o.label}
+            </ListItem>
+          ) : (
+            <ListItem {...props} data-cy="batch-select-item">
+              {o.label}
+            </ListItem>
+          )}
+        </React.Fragment>
       )}
       options={options}
       renderInput={(params) => {
