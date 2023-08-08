@@ -108,7 +108,6 @@ declare namespace DataCy {
         "billing-usage-table" |
         "billing_period_annual" |
         "checkbox-group-multiselect" |
-        "checkbox-group-multiselect-item" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |

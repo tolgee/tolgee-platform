@@ -1,14 +1,19 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
+  CircularProgress,
   FormControlProps,
   FormGroup,
   FormHelperText,
   FormLabel,
 } from '@mui/material';
 import { useField } from 'formik';
+import { Hierarchy } from 'tg.ee/PermissionsAdvanced/Hierarchy';
+import {
+  limitStructureToOptions,
+  usePermissionsStructure,
+} from 'tg.ee/PermissionsAdvanced/usePermissionsStructure';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { PermissionAdvancedState } from 'tg.component/PermissionsSettings/types';
 
 interface CheckBoxGroupMultiSelectProps {
   name: string;
@@ -22,12 +27,22 @@ type Props = CheckBoxGroupMultiSelectProps & FormControlProps;
 export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
   const [field, meta, helpers] = useField<Set<string>>(props.name);
 
-  const onChange = (option, checked) => {
-    const newValue = new Set(field.value);
-    newValue.add(option);
-    if (!checked) {
-      newValue.delete(option);
-    }
+  const structure = usePermissionsStructure();
+
+  const limitedStructure = useMemo(
+    () =>
+      limitStructureToOptions([structure], Array.from(props.options) as any),
+    [props.options]
+  );
+
+  const dependenciesLoadable = useApiQuery({
+    url: '/v2/public/scope-info/hierarchy',
+    method: 'get',
+    query: {},
+  });
+
+  const onChange = (data: PermissionAdvancedState) => {
+    const newValue = new Set(data.scopes);
     helpers.setValue(newValue);
   };
 
@@ -36,29 +51,19 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
       <FormLabel error={!!meta.error} component="legend">
         {props.label}
       </FormLabel>
-      {Array.from(props.options).map((option, index) => {
-        return (
-          <FormControl
-            key={index}
-            error={!!meta.error}
-            sx={{
-              mt: 0.5,
-              mb: 0.5,
-            }}
-            data-cy="checkbox-group-multiselect-item"
-          >
-            <FormControlLabel
-              label={option}
-              control={
-                <Checkbox
-                  onChange={(e) => onChange(option, e.target.checked)}
-                  checked={field.value.has(option)}
-                />
-              }
-            />
-          </FormControl>
-        );
-      })}
+      {dependenciesLoadable.isLoading ? (
+        <CircularProgress />
+      ) : (
+        limitedStructure.map((structureItem, i) => (
+          <Hierarchy
+            key={i}
+            structure={structureItem}
+            dependencies={dependenciesLoadable.data!}
+            state={{ scopes: Array.from(field.value) as any }}
+            onChange={onChange}
+          />
+        ))
+      )}
       {!!meta.error && (
         <FormHelperText error={!!meta.error}>{meta.error}</FormHelperText>
       )}
