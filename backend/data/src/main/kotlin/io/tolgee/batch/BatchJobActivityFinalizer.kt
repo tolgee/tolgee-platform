@@ -1,11 +1,13 @@
 package io.tolgee.batch
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
+import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -18,6 +20,7 @@ class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
+  private val cachingBatchJobService: CachingBatchJobService
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
@@ -53,14 +56,24 @@ class BatchJobActivityFinalizer(
   }
 
   private fun waitForOtherChunksToComplete(job: BatchJobDto) {
-    waitFor(20000) {
-      val committedChunks = batchJobStateProvider.get(job.id).values
-        .count { it.retry == false && it.transactionCommitted && it.status.completed }
+    try {
+      // how many executions are being committed in this transaction
+      val committedInThisTransactions = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 1
+      logger.debug("Committed chunks executions in this transaction: $committedInThisTransactions")
+      waitFor(20000) {
+        val committedChunks = batchJobStateProvider.get(job.id).values
+          .count { it.retry == false && it.transactionCommitted && it.status.completed }
+        logger.debug(
+          "Waiting for completed chunks ($committedChunks) to be equal to all other chunks" +
+            " count (${job.totalChunks - committedInThisTransactions})"
+        )
+        committedChunks == job.totalChunks - committedInThisTransactions
+      }
+    } catch (e: WaitNotSatisfiedException) {
       logger.debug(
-        "Waiting for completed chunks ($committedChunks) to be equal to all other chunks" +
-          " count (${job.totalChunks - 1})"
+        jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(batchJobStateProvider.get(job.id))
       )
-      committedChunks == job.totalChunks - 1
+      throw e
     }
   }
 

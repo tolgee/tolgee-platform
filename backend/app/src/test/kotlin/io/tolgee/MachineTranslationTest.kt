@@ -70,7 +70,7 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
     return performProjectAuthPost(
       "keys",
       CreateKeyDto(
-        name = CREATE_KEY_NAME,
+        name = keyName,
         translations = translations
       )
     )

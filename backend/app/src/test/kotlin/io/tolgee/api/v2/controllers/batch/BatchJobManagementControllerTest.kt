@@ -30,6 +30,7 @@ import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
@@ -54,7 +55,7 @@ import kotlin.coroutines.CoroutineContext
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
 
   lateinit var testData: BatchJobsTestData
 
@@ -151,25 +152,22 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
       )
     ).andIsOk
 
-    val job = getSingleJob()
+    Thread.sleep(2000)
 
+    val job = getSingleJob()
     performProjectAuthPut("batch-jobs/${job.id}/cancel")
       .andIsOk
 
     waitForNotThrowing(pollTime = 1000) {
-      entityManager.clear()
-      getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-    }
+      executeInNewTransaction {
+        getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+        verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
-    Thread.sleep(1000)
-
-    verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
-
-    waitForNotThrowing(pollTime = 1000) {
-      // asset activity stored
-      entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-        .setParameter("id", job.id).resultList
-        .assert.hasSize(1)
+        // assert activity stored
+        entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+          .setParameter("id", job.id).resultList
+          .assert.hasSize(1)
+      }
     }
   }
 

@@ -169,7 +169,9 @@ dependencies {
 test {
     useJUnitPlatform()
     maxHeapSize = "2048m"
-    //maxParallelForks = (int) (Runtime.runtime.availableProcessors() / 2 + 1)
+    testLogging {
+        events = ["passed", "failed", "skipped"]
+    }
 }
 
 task runContextRecreatingTests(type: Test, group: 'verification') {

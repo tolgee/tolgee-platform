@@ -103,6 +103,7 @@ class ProgressManager(
 
   fun handleChunkCompletedCommitted(execution: BatchJobChunkExecution) {
     val state = batchJobStateProvider.updateState(execution.batchJob.id) {
+      logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
       it.compute(execution.id) { _, v ->
         v?.copy(transactionCommitted = true)
       }

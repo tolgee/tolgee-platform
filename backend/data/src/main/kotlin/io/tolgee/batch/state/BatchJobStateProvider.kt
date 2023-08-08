@@ -3,6 +3,8 @@ package io.tolgee.batch.state
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
@@ -18,7 +20,7 @@ class BatchJobStateProvider(
   val redissonClient: RedissonClient,
   val entityManager: EntityManager,
   val lockingProvider: LockingProvider
-) {
+) : Logging {
   companion object {
     private val localJobStatesMap by lazy {
       ConcurrentHashMap<Long, MutableMap<Long, ExecutionState>>()
@@ -94,6 +96,7 @@ class BatchJobStateProvider(
   }
 
   fun getInitialState(jobId: Long): MutableMap<Long, ExecutionState> {
+    logger.debug("Initializing batch job state for job $jobId")
     val executions = entityManager.createQuery(
       """
       from BatchJobChunkExecution bjce

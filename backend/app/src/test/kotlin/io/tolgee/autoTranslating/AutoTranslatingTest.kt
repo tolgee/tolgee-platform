@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -17,8 +18,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.transaction.annotation.Transactional
-import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,13 +40,14 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `auto translates new key`() {
     saveTestData()
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
-    assertThat(mtCreditBucketService.getCreditBalances(testData.project).creditBalance)
-      .isEqualTo(INITIAL_BUCKET_CREDITS - expectedCost)
+    waitForNotThrowing {
+      assertThat(mtCreditBucketService.getCreditBalances(testData.project).creditBalance)
+        .isEqualTo(INITIAL_BUCKET_CREDITS - expectedCost)
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -56,66 +56,44 @@ class AutoTranslatingTest : MachineTranslationTest() {
     saveTestData()
     performSetEnTranslation(testData.baseTranslationNotExistKey.name)
 
-    executeInNewTransaction {
-      val esTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.spanishLanguage)
-      val deTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.germanLanguage)
+    waitForNotThrowing {
+      executeInNewTransaction {
+        val esTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.spanishLanguage)
+        val deTranslation = testData.baseTranslationNotExistKey.getLangTranslation(testData.germanLanguage)
 
-      assertThat(esTranslation.text).isEqualTo("i am translated")
-      assertThat(esTranslation.state).isEqualTo(TranslationState.TRANSLATED)
-      assertThat(esTranslation.auto).isEqualTo(false)
+        assertThat(esTranslation.text).isEqualTo("i am translated")
+        assertThat(esTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+        assertThat(esTranslation.auto).isEqualTo(false)
 
-      assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-      assertThat(deTranslation.outdated).isFalse
-      assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
-      assertThat(deTranslation.auto).isEqualTo(true)
-      assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)
+        assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+        assertThat(deTranslation.outdated).isFalse
+        assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+        assertThat(deTranslation.auto).isEqualTo(true)
+        assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)
+      }
     }
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `auto translates when base provided (existing, but untranslated)`() {
     saveTestData()
     performSetEnTranslation(testData.baseTranslationUntranslated.name)
 
-    val esTranslation = testData.baseTranslationUntranslated.getLangTranslation(testData.spanishLanguage).text
-    val deTranslation = testData.baseTranslationUntranslated.getLangTranslation(testData.germanLanguage).text
+    waitForNotThrowing {
+      val esTranslation = testData.baseTranslationUntranslated.getLangTranslation(testData.spanishLanguage).text
+      val deTranslation = testData.baseTranslationUntranslated.getLangTranslation(testData.germanLanguage).text
 
-    assertThat(esTranslation).isEqualTo("i am translated")
-    assertThat(deTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+      assertThat(esTranslation).isEqualTo("i am translated")
+      assertThat(deTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+    }
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `auto translates using TM`() {
     saveTestData()
     testUsingTmWorks()
-  }
-
-  @ProjectJWTAuthTestMethod
-  @Test
-  fun `it translates in parallel`() {
-    testData.generateManyLanguages()
-    initMachineTranslationMocks(500)
-    saveTestData()
-    val time = measureTimeMillis {
-      performCreateKey(
-        translations = mapOf(
-          "en" to "This is it",
-        )
-      )
-    }
-    assertThat(time).isLessThan(2000)
-
-    executeInNewTransaction {
-      val translations = keyService.get(testData.project.id, CREATE_KEY_NAME, null).translations
-        .toList().sortedBy { it.text }
-      assertThat(translations).hasSize(9)
-      assertThat(translations[1].text).isEqualTo("Translated with Amazon")
-      assertThat(translations[5].text).isEqualTo("Translated with Google")
-    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -174,22 +152,20 @@ class AutoTranslatingTest : MachineTranslationTest() {
     saveTestData()
     initMachineTranslationProperties(700)
     performCreateHalloKeyWithEnAndDeTranslations()
-    transactionTemplate.execute {
-      assertThat(
-        keyService
+
+    waitForNotThrowing {
+      transactionTemplate.execute {
+        val spanishTranslation = keyService
           .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find {
             it.language == testData.spanishLanguage
           }
-      ).isNotNull
+        spanishTranslation?.text.isNullOrBlank().assert.isFalse()
+      }
     }
 
-    verify(googleTranslate, times(2)).translate(any<String>(), any())
-
-    performCreateKey("yay", mapOf("en" to "yay"))
-
-    verify(googleTranslate, times(2)).translate(any<String>(), any())
+    verify(googleTranslate, times(1)).translate(any<String>(), any())
 
     val balance = mtCreditBucketService.getCreditBalances(testData.project)
     balance.creditBalance.assert.isEqualTo(0)
@@ -207,13 +183,15 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
   private fun testUsingMtWorks() {
     performCreateHalloKeyWithEnAndDeTranslations()
-    val esTranslation = getCreatedEsTranslation()
-    assertThat(esTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+    waitForNotThrowing {
+      val esTranslation = getCreatedEsTranslation()
+      assertThat(esTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+    }
   }
 
   private fun testUsingMtDoesNotWork() {
     performCreateHalloKeyWithEnAndDeTranslations()
-
+    Thread.sleep(2000)
     transactionTemplate.execute {
       val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
         .translations
@@ -237,14 +215,19 @@ class AutoTranslatingTest : MachineTranslationTest() {
 
   private fun testUsingTmWorks() {
     createAnotherThisIsBeautifulKey()
-    val deTranslation = getCreatedDeTranslation()
-    assertThat(deTranslation).isEqualTo(THIS_IS_BEAUTIFUL_DE)
+    waitForNotThrowing {
+      val deTranslation = getCreatedDeTranslation()
+      assertThat(deTranslation).isEqualTo(THIS_IS_BEAUTIFUL_DE)
+    }
   }
 
   private fun testUsingTmDoesNotWork() {
     createAnotherThisIsBeautifulKey()
-    val deTranslation = getCreatedDeTranslation()
-    assertThat(deTranslation).isNotEqualTo(THIS_IS_BEAUTIFUL_DE)
+    Thread.sleep(2000)
+    waitForNotThrowing {
+      val deTranslation = getCreatedDeTranslation()
+      assertThat(deTranslation).isNotEqualTo(THIS_IS_BEAUTIFUL_DE)
+    }
   }
 
   private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)

@@ -112,6 +112,9 @@ class ActivityRevision : java.io.Serializable {
   @Transient
   var isInitializedByInterceptor: Boolean = false
 
+  @Transient
+  var cancelledBatchJobExecutionCount: Int? = null
+
   companion object {
     @Configurable
     class ActivityRevisionListener {

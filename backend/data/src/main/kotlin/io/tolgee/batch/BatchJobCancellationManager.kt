@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -26,7 +27,8 @@ class BatchJobCancellationManager(
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
   private val batchJobActionService: BatchJobActionService,
-  private val progressManager: ProgressManager
+  private val progressManager: ProgressManager,
+  private val activityHolder: ActivityHolder
 ) {
   @Transactional
   fun cancel(id: Long) {
@@ -84,5 +86,11 @@ class BatchJobCancellationManager(
     execution.status = BatchJobChunkExecutionStatus.CANCELLED
     entityManager.persist(execution)
     progressManager.handleProgress(execution)
+    incrementCancelledCount()
+  }
+
+  private fun incrementCancelledCount() {
+    val current = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 0
+    activityHolder.activityRevision.cancelledBatchJobExecutionCount = current + 1
   }
 }
