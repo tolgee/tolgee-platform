@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -18,9 +19,12 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ContextRecreatingTest
 class AutoTranslatingTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
