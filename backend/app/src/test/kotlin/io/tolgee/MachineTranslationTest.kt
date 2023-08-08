@@ -27,6 +27,7 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var amazonTranslate: TranslateClient
 
   fun initMachineTranslationMocks(translateDelay: Long = 0) {
+    internalProperties.fakeMtProviders = false
     Mockito.reset(googleTranslate)
     Mockito.reset(amazonTranslate)
     val googleTranslationMock = mock() as Translation

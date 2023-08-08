@@ -178,12 +178,10 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
         val finishedJob = batchJobService.getJobDto(job.id)
         finishedJob.status.assert.isEqualTo(BatchJobStatus.FAILED)
       }
+      websocketHelper.receivedMessages.assert.hasSize(51)
+      assertStatusReported(BatchJobStatus.FAILED)
+      assertMessagesContain("out_of_credits")
     }
-
-    // 100 progress messages + 1 finish message
-    websocketHelper.receivedMessages.assert.hasSize(51)
-    assertStatusReported(BatchJobStatus.FAILED)
-    assertMessagesContain("out_of_credits")
 
     waitForNotThrowing {
       executeInNewTransaction {

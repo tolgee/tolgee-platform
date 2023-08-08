@@ -148,27 +148,40 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   @Test
   fun `consumes last positive credits`() {
-    testData.generateLanguagesWithDifferentPrimaryServices()
     saveTestData()
     initMachineTranslationProperties(700)
     performCreateHalloKeyWithEnAndDeTranslations()
 
+    waitForSpanishTranslationSet(CREATE_KEY_NAME)
+
+    performCreateKey(
+      keyName = "jaj",
+      translations = mapOf(
+        "en" to "Hello2",
+        "de" to "Hallo2"
+      )
+    )
+    waitForSpanishTranslationSet("jaj")
+
+    verify(googleTranslate, times(2)).translate(any<String>(), any())
+
+    val balance = mtCreditBucketService.getCreditBalances(testData.project)
+    balance.creditBalance.assert.isEqualTo(0)
+  }
+
+  private fun waitForSpanishTranslationSet(keyName: String) {
     waitForNotThrowing {
       transactionTemplate.execute {
-        val spanishTranslation = keyService
-          .get(testData.project.id, CREATE_KEY_NAME, null)
+        val translations = keyService
+          .get(testData.project.id, keyName, null)
           .translations
+        val spanishTranslation = translations
           .find {
             it.language == testData.spanishLanguage
           }
         spanishTranslation?.text.isNullOrBlank().assert.isFalse()
       }
     }
-
-    verify(googleTranslate, times(1)).translate(any<String>(), any())
-
-    val balance = mtCreditBucketService.getCreditBalances(testData.project)
-    balance.creditBalance.assert.isEqualTo(0)
   }
 
   @ProjectJWTAuthTestMethod
@@ -204,8 +217,9 @@ class AutoTranslatingTest : MachineTranslationTest() {
   private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
     .getLangTranslation(testData.spanishLanguage).text
 
-  private fun performCreateHalloKeyWithEnAndDeTranslations() {
+  private fun performCreateHalloKeyWithEnAndDeTranslations(keyName: String = CREATE_KEY_NAME) {
     performCreateKey(
+      keyName = keyName,
       translations = mapOf(
         "en" to "Hello",
         "de" to "Hallo"
