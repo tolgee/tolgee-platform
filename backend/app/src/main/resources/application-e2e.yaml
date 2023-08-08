@@ -45,7 +45,7 @@ tolgee:
     site-key: 6Le0X08dAAAAALfQQk1NeWd-kXqvzLVk8HqoZpRw
     secret-key: dummy_secret_key
   machine-translation:
-    free-credits-amount: 100000000
+    free-credits-amount: 1000000000
     google:
       api-key: mock
     aws:

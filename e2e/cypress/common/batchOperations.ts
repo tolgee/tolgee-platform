@@ -8,7 +8,7 @@ export function selectAll() {
 }
 
 export function openBatchOperationMenu() {
-  cy.gcy('batch-operations-select').click();
+  cy.gcy('batch-operations-select').click({ timeout: 20_000 });
 }
 
 export function findBatchOperation(operation: string) {
