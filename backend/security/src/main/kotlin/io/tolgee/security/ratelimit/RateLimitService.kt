@@ -33,6 +33,7 @@ class RateLimitService(
   private val cacheManager: CacheManager,
   private val lockingProvider: LockingProvider,
   private val currentDateProvider: CurrentDateProvider,
+  private val rateLimitProperties: RateLimitProperties,
 ) {
 
   private val cache: Cache by lazy { cacheManager.getCache(Caches.RATE_LIMITS) }
@@ -45,25 +46,23 @@ class RateLimitService(
    */
   fun consumeBucket(policy: RateLimitPolicy) {
     lockingProvider.withLocking("tolgee.ratelimit.${policy.bucketName}") {
-      val time = currentDateProvider.date.time
       val bucket = cache.get(policy.bucketName, Bucket::class.java)
+      cache.put(policy.bucketName, doConsumeBucket(policy, bucket))
+    }
+  }
 
-      // No bucket exists for current window
-      if (bucket == null || bucket.resetAt < time) {
-        val tokensRemaining = policy.limit - 1
-        val tokensResetAt = time + policy.windowSize
-
-        cache.put(policy.bucketName, Bucket(tokensRemaining, tokensResetAt))
-        return@withLocking
-      }
-
-      // Rate limit reached
-      if (bucket.tokens == 0) {
-        throw RateLimitedException(bucket.resetAt - time)
-      }
-
-      // Remove a token
-      cache.put(policy.bucketName, Bucket(bucket.tokens - 1, bucket.resetAt))
+  /**
+   * Consumes a token from the provided rate limit policy unless a condition is met.
+   * The bucket must contain at least 1 token even if the condition would evaluate to true.
+   *
+   * @param policy The rate limit policy.
+   * @throws RateLimitedException There are no longer any tokens in the bucket.
+   */
+  fun consumeBucketUnless(policy: RateLimitPolicy, cond: () -> Boolean) {
+    lockingProvider.withLocking("tolgee.ratelimit.${policy.bucketName}") {
+      val bucket = cache.get(policy.bucketName, Bucket::class.java)
+      val consumed = doConsumeBucket(policy, bucket)
+      if (!cond()) cache.put(policy.bucketName, consumed)
     }
   }
 
@@ -74,11 +73,14 @@ class RateLimitService(
    * @return The applicable rate limit policy, if any.
    */
   fun getGlobalIpRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
-    // TODO: take into account server configuration - DO NOT MERGE UNTIL ADDRESSED.
+    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.globalLimits) return null
+
     return RateLimitPolicy(
       "global.ip.${request.remoteAddr}",
-      20_000,
-      5 * 60_000
+      rateLimitProperties.ipRequestLimit,
+      rateLimitProperties.ipRequestWindow,
+      true,
     )
   }
 
@@ -90,11 +92,14 @@ class RateLimitService(
    * @return The applicable rate limit policy, if any.
    */
   fun getGlobalUserRateLimitPolicy(request: HttpServletRequest, account: UserAccount): RateLimitPolicy? {
-    // TODO: take into account server configuration - DO NOT MERGE UNTIL ADDRESSED.
+    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.globalLimits) return null
+
     return RateLimitPolicy(
       "global.user.${account.id}",
-      400,
-      60_000,
+      rateLimitProperties.userRequestLimit,
+      rateLimitProperties.userRequestWindow,
+      true,
     )
   }
 
@@ -108,9 +113,17 @@ class RateLimitService(
    * @return The applicable rate limit policy, if any.
    */
   fun getEndpointRateLimit(request: HttpServletRequest, account: UserAccount?, handler: HandlerMethod): RateLimitPolicy? {
-    // TODO: take into account server configuration - DO NOT MERGE UNTIL ADDRESSED.
+    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+
     val annotation = AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
       ?: return null
+
+    if (
+      (!annotation.isAuthentication && !rateLimitProperties.endpointLimits) ||
+      (annotation.isAuthentication && !rateLimitProperties.authenticationLimits)
+    ) {
+      return null
+    }
 
     val matchedPath = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE) as String
     val pathVariablesMap = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
@@ -137,7 +150,32 @@ class RateLimitService(
     return RateLimitPolicy(
       bucketName,
       annotation.limit,
-      annotation.windowSize
+      annotation.windowSize,
+      false,
     )
+  }
+
+  /**
+   * Consumes a token from a bucket according to the rate limit policy.
+   *
+   * @param policy The rate limit policy.
+   * @param bucket The bucket to consume. Can be null or expired.
+   * @return The updated rate limit bucket.
+   * @throws RateLimitedException There are no longer any tokens in the bucket.
+   */
+  private fun doConsumeBucket(policy: RateLimitPolicy, bucket: Bucket?): Bucket {
+    val time = currentDateProvider.date.time
+    if (bucket == null || bucket.resetAt < time) {
+      val tokensRemaining = policy.limit - 1
+      val tokensResetAt = time + policy.windowSize
+
+      return Bucket(tokensRemaining, tokensResetAt)
+    }
+
+    if (bucket.tokens == 0) {
+      throw RateLimitedException(bucket.resetAt - time, policy.global)
+    }
+
+    return Bucket(bucket.tokens - 1, bucket.resetAt)
   }
 }

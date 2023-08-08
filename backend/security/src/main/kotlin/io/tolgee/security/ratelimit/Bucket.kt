@@ -21,4 +21,4 @@ import java.io.Serializable
 data class Bucket(
   val tokens: Int,
   val resetAt: Long
-): Serializable
+) : Serializable

@@ -20,4 +20,4 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-class RateLimitedException(val retryAfter: Long) : RuntimeException()
+class RateLimitedException(val retryAfter: Long, val global: Boolean) : RuntimeException()

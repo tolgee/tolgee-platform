@@ -19,5 +19,6 @@ package io.tolgee.security.ratelimit
 data class RateLimitPolicy(
   val bucketName: String,
   val limit: Int,
-  val windowSize: Long
+  val windowSize: Long,
+  val global: Boolean,
 )

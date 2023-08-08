@@ -41,4 +41,10 @@ annotation class RateLimited(
    * despite the route being the same (`/v2/projects/{id}/activity`).
    */
   val majorParametersToDiscriminate: Int = 1,
+  /**
+   * Whether this rate limit applies to an authentication-related endpoint.
+   *
+   * This controls the config flag used to determine if the limit should be applied or not.
+   */
+  val isAuthentication: Boolean = false,
 )
