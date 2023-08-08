@@ -1,3 +1,10 @@
+## [3.25.4](https://github.com/tolgee/tolgee-platform/compare/v3.25.3...v3.25.4) (2023-08-08)
+
+
+### Bug Fixes
+
+* Missing crypto.randomUUID() ([#1849](https://github.com/tolgee/tolgee-platform/issues/1849)) ([4dcd435](https://github.com/tolgee/tolgee-platform/commit/4dcd4350cb1600c4f0979e4f4ee55383dfae381e))
+
 ## [3.25.3](https://github.com/tolgee/tolgee-platform/compare/v3.25.2...v3.25.3) (2023-08-07)
 
 
