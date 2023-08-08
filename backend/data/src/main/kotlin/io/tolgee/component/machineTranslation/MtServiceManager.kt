@@ -78,6 +78,7 @@ class MtServiceManager(
 
   fun translate(params: TranslationParams): TranslateResult {
     if (internalProperties.fakeMtProviders) {
+      logger.debug("Fake MT provider is enabled")
       return getFaked(params)
     }
 
@@ -224,6 +225,7 @@ class MtServiceManager(
         isBatch = isBatch
       )
     } else targetLanguageTags.map {
+      logger.debug("Fake MT provider is enabled")
       getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null, isBatch))
     }
   }
