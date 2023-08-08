@@ -4,6 +4,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import LoginIcon from '@mui/icons-material/Login';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
+import { v4 as uuidv4 } from 'uuid';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -52,7 +53,7 @@ export const oauth2Service = (
   authorizationUrl: string,
   scopes: string[] = []
 ): OAuthService => {
-  const state = crypto.randomUUID();
+  const state = uuidv4();
   localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
   const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
     [PARAMS.SERVICE_TYPE]: 'oauth2',
