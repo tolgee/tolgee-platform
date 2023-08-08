@@ -3,7 +3,7 @@ import { confirmStandard } from './shared';
 
 export function selectAll() {
   cy.gcy('translations-row-checkbox').first().click();
-  cy.gcy('translations-select-all-button').click();
+  cy.gcy('translations-select-all-button').click({ timeout: 20_000 });
   waitForGlobalLoading(500);
 }
 
