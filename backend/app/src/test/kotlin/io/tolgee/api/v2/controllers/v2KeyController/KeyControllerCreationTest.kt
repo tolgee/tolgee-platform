@@ -77,8 +77,10 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE])
   @Test
   fun `create key with translations require translate permissions`() {
-    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
-      .andIsForbidden
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(name = "super_key", translations = mapOf("en" to "hello", "de" to "hello"))
+    ).andIsForbidden
   }
 
   @ProjectJWTAuthTestMethod
