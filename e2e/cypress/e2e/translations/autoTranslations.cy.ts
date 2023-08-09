@@ -33,6 +33,8 @@ describe('Translation memory', () => {
     createTranslation('aakey', 'Cool translated text 1');
     waitForGlobalLoading();
     visitTranslations(project.id);
+    waitForGlobalLoading();
+
     cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
       .filter(':contains("Cool translated text 1")')
@@ -51,6 +53,8 @@ describe('Translation memory', () => {
     createTranslation('aakey', 'mytranslation');
     waitForGlobalLoading();
     visitTranslations(project.id);
+    waitForGlobalLoading();
+
     cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
       .contains('mytranslation')
@@ -72,6 +76,7 @@ describe('Translation memory', () => {
     createTranslation('aakey', 'Cool translated text 1');
     waitForGlobalLoading();
     visitTranslations(project.id);
+    waitForGlobalLoading();
 
     cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
@@ -100,6 +105,8 @@ describe('Translation memory', () => {
     createTranslation('aakey', 'New translation');
     waitForGlobalLoading();
     visitTranslations(project.id);
+    waitForGlobalLoading();
+
     cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     getAutoTranslatedIndicator(
       'New translation translated with GOOGLE from en to cs'
@@ -130,6 +137,7 @@ describe('Translation memory', () => {
     createTranslation('aakey', 'New translation');
     waitForGlobalLoading();
     visitTranslations(project.id);
+    waitForGlobalLoading();
 
     cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     getAutoTranslatedIndicator(
@@ -157,6 +165,7 @@ describe('Translation memory', () => {
       { name: 'aab-key', translations: { en: 'Hello second' } },
     ]);
     visitTranslations(project.id);
+    waitForGlobalLoading();
 
     waitForGlobalLoading();
     cy.gcy('translations-table-cell')
