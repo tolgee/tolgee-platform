@@ -7,6 +7,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
@@ -182,7 +183,7 @@ open class ChunkProcessingUtil(
 
   val retryExecution: BatchJobChunkExecution by lazy {
     BatchJobChunkExecution().apply {
-      batchJob = entityManager.getReference(execution.batchJob::class.java, job.id)
+      batchJob = entityManager.getReference(BatchJob::class.java, job.id)
       chunkNumber = execution.chunkNumber
       status = BatchJobChunkExecutionStatus.PENDING
     }

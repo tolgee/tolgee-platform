@@ -24,3 +24,6 @@ open class RequeueWithDelayException(
   val increaseFactor: Int = 10,
   val maxRetries: Int = 3
 ) : ChunkFailedException(message, successfulTargets, cause)
+
+open class CannotFinalizeActivityException(cause: Throwable) :
+  ExceptionWithMessage(Message.CANNOT_FINALIZE_ACTIVITY, cause = cause)

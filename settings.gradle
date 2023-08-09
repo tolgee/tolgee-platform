@@ -58,6 +58,7 @@ dependencyResolutionManagement {
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.23.2")
             library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.23.2')
             library('postHog', 'com.posthog.java:posthog:1.1.0')
+            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.11.2")
         }
     }
 }

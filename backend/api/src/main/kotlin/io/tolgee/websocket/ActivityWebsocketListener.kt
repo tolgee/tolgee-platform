@@ -20,6 +20,7 @@ import io.tolgee.service.security.UserAccountService
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
@@ -108,7 +109,7 @@ class ActivityWebsocketListener(
     )
   }
 
-  @TransactionalEventListener(OnBatchJobSucceeded::class)
+  @TransactionalEventListener(OnBatchJobSucceeded::class, phase = TransactionPhase.AFTER_COMMIT)
   fun onBatchJobSucceeded(event: OnBatchJobSucceeded) {
     onBatchJobCompleted(event)
   }

@@ -43,9 +43,10 @@ class ActivityInterceptor : EmptyInterceptor(), Logging {
             holder.sdkInfo
           )
         )
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         Sentry.captureException(e)
         logger.error("Error publishing project activity event: ", e)
+        holder.onBeforeTransactionCompletionError?.invoke(e)
         throw e
       }
     }

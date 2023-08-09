@@ -32,41 +32,46 @@ class GenericAutoTranslationChunkProcessor(
   ) {
     val languages = languageService.findByIdIn(chunk.map { it.languageId }.toSet()).associateBy { it.id }
     val keys = keyService.find(chunk.map { it.keyId }).associateBy { it.id }
-    chunk.forEach { item ->
+
+    iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
-      coroutineContext.ensureActive()
-      doCatching(item) {
-        val languageTag = languages[languageId]?.tag ?: return@doCatching
-        val key = keys[keyId] ?: return@doCatching
-        autoTranslationService.autoTranslateSync(
-          key = key,
-          languageTags = listOf(languageTag),
-          useTranslationMemory = useTranslationMemory,
-          useMachineTranslation = useMachineTranslation,
-          isBatch = true
-        )
-      }
+      val languageTag = languages[languageId]?.tag ?: return@iterateCatching
+      val key = keys[keyId] ?: return@iterateCatching
+      autoTranslationService.autoTranslateSync(
+        key = key,
+        languageTags = listOf(languageTag),
+        useTranslationMemory = useTranslationMemory,
+        useMachineTranslation = useMachineTranslation,
+        isBatch = true
+      )
     }
   }
 
-  fun doCatching(item: BatchTranslationTargetItem, fn: () -> Unit) {
+  fun iterateCatching(
+    chunk: List<BatchTranslationTargetItem>,
+    coroutineContext: CoroutineContext,
+    fn: (item: BatchTranslationTargetItem) -> Unit
+  ) {
     val successfulTargets = mutableListOf<BatchTranslationTargetItem>()
-    try {
-      fn()
-      successfulTargets.add(item)
-    } catch (e: OutOfCreditsException) {
-      throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
-    } catch (e: TranslationApiRateLimitException) {
-      throw RequeueWithDelayException(
-        Message.TRANSLATION_API_RATE_LIMIT,
-        successfulTargets,
-        e,
-        (e.retryAt - currentDateProvider.date.time).toInt(),
-        increaseFactor = 1,
-        maxRetries = -1
-      )
-    } catch (e: Throwable) {
-      throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
+    chunk.forEach { item ->
+      coroutineContext.ensureActive()
+      try {
+        fn(item)
+        successfulTargets.add(item)
+      } catch (e: OutOfCreditsException) {
+        throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
+      } catch (e: TranslationApiRateLimitException) {
+        throw RequeueWithDelayException(
+          Message.TRANSLATION_API_RATE_LIMIT,
+          successfulTargets,
+          e,
+          (e.retryAt - currentDateProvider.date.time).toInt(),
+          increaseFactor = 1,
+          maxRetries = -1
+        )
+      } catch (e: Throwable) {
+        throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
+      }
     }
   }
 }

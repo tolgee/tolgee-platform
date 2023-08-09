@@ -63,11 +63,13 @@ class BatchJobActionService(
     concurrentExecutionLauncher.run { executionItem, coroutineContext ->
       var retryExecution: BatchJobChunkExecution? = null
       try {
-        val execution = catchingExceptions(executionItem) {
+        val execution = catchingExceptions(executionItem) { onBeforeTransactionCompletionError ->
           executeInNewTransaction(
             transactionManager,
             isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
           ) { transactionStatus ->
+            activityHolder.onBeforeTransactionCompletionError = onBeforeTransactionCompletionError
+
             val lockedExecution = getPendingUnlockedExecutionItem(executionItem)
               ?: return@executeInNewTransaction null
 
@@ -154,9 +156,16 @@ class BatchJobActionService(
     }
   }
 
-  private inline fun <reified T> catchingExceptions(executionItem: ExecutionQueueItem, fn: () -> T): T? {
+  private inline fun <reified T> catchingExceptions(
+    executionItem: ExecutionQueueItem,
+    fn: ((Throwable) -> Unit) -> T
+  ): T? {
     return try {
-      fn()
+      var beforeTransactionCompletionError: Throwable? = null
+      val onBeforeTransactionCompletionError: (Throwable) -> Unit =
+        { beforeTransactionCompletionError = it }
+      fn(onBeforeTransactionCompletionError)
+      beforeTransactionCompletionError?.let { throw it }
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
@@ -180,8 +189,10 @@ class BatchJobActionService(
       execution.stackTrace = e.stackTraceToString()
       execution.errorKey = "management_error"
       entityManager.persist(execution)
-      progressManager.handleProgress(execution)
       execution
+    }
+    executeInNewTransaction(transactionManager) {
+      progressManager.handleProgress(execution, failOnly = true)
     }
     progressManager.handleChunkCompletedCommitted(execution)
   }

@@ -44,13 +44,10 @@ class ProgressManager(
     canRunFn: (Map<Long, ExecutionState>) -> Boolean
   ): Boolean {
     return batchJobStateProvider.updateState(batchJobId) {
-      if (it[executionId] != null) {
-        // we expect the item wasn't touched by others
-        // if it was, there are other mechanisms to handle it,
-        // so we just ignore it
-        return@updateState true
-      }
       if (canRunFn(it)) {
+        if (it[executionId] != null) {
+          return@updateState true
+        }
         it[executionId] =
           ExecutionState(
             successTargets = listOf(),
@@ -80,7 +77,7 @@ class ProgressManager(
     }
   }
 
-  fun handleProgress(execution: BatchJobChunkExecution) {
+  fun handleProgress(execution: BatchJobChunkExecution, failOnly: Boolean = false) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
     val info = batchJobStateProvider.updateState(job.id) {
@@ -97,7 +94,8 @@ class ProgressManager(
       progress = info.progress,
       isAnyCancelled = info.isAnyCancelled,
       completedChunks = info.completedChunks,
-      errorMessage = execution.errorMessage
+      errorMessage = execution.errorMessage,
+      failOnly = failOnly
     )
   }
 
@@ -128,7 +126,8 @@ class ProgressManager(
     progress: Long,
     completedChunks: Long,
     isAnyCancelled: Boolean,
-    errorMessage: Message? = null
+    errorMessage: Message? = null,
+    failOnly: Boolean = false
   ) {
     logger.debug("Job ${job.id} completed chunks: $completedChunks of ${job.totalChunks}")
     logger.debug("Job ${job.id} progress: $progress of ${job.totalItems}")
@@ -139,14 +138,14 @@ class ProgressManager(
 
     val jobEntity = batchJobService.getJobEntity(job.id)
 
-    if (isAnyCancelled) {
+    if (isAnyCancelled && !failOnly) {
       jobEntity.status = BatchJobStatus.CANCELLED
       cachingBatchJobService.saveJob(jobEntity)
       eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
       return
     }
 
-    if (job.totalItems.toLong() != progress) {
+    if (job.totalItems.toLong() != progress || failOnly) {
       jobEntity.status = BatchJobStatus.FAILED
       cachingBatchJobService.saveJob(jobEntity)
       val safeErrorMessage = errorMessage ?: batchJobService.getErrorMessages(listOf(jobEntity))[job.id]
@@ -192,7 +191,7 @@ class ProgressManager(
           BatchJobDto.fromEntity(job),
           progress = info.progress,
           completedChunks = info.completedChunks,
-          info.isAnyCancelled
+          info.isAnyCancelled,
         )
       }
     }

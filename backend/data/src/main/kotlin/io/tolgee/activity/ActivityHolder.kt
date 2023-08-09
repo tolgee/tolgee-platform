@@ -36,6 +36,8 @@ open class ActivityHolder {
     ModifiedEntitiesType = mutableMapOf()
 
   open var enableAutoCompletion: Boolean = true
+
+  open var onBeforeTransactionCompletionError: ((throwable: Throwable) -> Unit)? = null
 }
 
 typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

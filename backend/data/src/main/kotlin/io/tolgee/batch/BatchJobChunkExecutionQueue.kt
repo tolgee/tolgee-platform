@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.Metrics
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -11,6 +12,7 @@ import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.hibernate.LockOptions
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -25,9 +27,9 @@ class BatchJobChunkExecutionQueue(
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
-  private val redisTemplate: StringRedisTemplate
-
-) : Logging {
+  private val redisTemplate: StringRedisTemplate,
+  private val metrics: Metrics
+) : Logging, InitializingBean {
   companion object {
     /**
      * It's static
@@ -139,5 +141,9 @@ class BatchJobChunkExecutionQueue(
   fun isEmpty(): Boolean = queue.isEmpty()
   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
     return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
+  }
+
+  override fun afterPropertiesSet() {
+    metrics.registerJobQueue(queue)
   }
 }

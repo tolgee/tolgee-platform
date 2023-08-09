@@ -10,7 +10,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.translation.AutoTranslationService
-import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
 import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
@@ -29,12 +28,9 @@ class AutoTranslateChunkProcessor(
     onProgress: (Int) -> Unit
   ) {
     val params = getParams(job)
-    chunk.forEach { item ->
-      coroutineContext.ensureActive()
-      genericAutoTranslationChunkProcessor.doCatching(item) {
-        val (keyId, languageId) = item
-        autoTranslationService.softAutoTranslate(job.projectId, keyId, languageId)
-      }
+    genericAutoTranslationChunkProcessor.iterateCatching(chunk, coroutineContext) { item ->
+      val (keyId, languageId) = item
+      autoTranslationService.softAutoTranslate(job.projectId, keyId, languageId)
     }
   }
 

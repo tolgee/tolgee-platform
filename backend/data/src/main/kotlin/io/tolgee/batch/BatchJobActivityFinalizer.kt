@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
@@ -20,7 +21,6 @@ class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
-  private val cachingBatchJobService: CachingBatchJobService
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
@@ -40,18 +40,23 @@ class BatchJobActivityFinalizer(
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
     val activityRevision = activityHolder.activityRevision
     activityRevision.afterFlush = afterFlush@{
-      logger.debug("Finalizing activity for job ${job.id} (after flush)")
-      waitForOtherChunksToComplete(job)
-      val revisionIds = getRevisionIds(job.id)
-      logger.debug("Merging revisions (${revisionIds.size})")
+      try {
+        logger.debug("Finalizing activity for job ${job.id} (after flush)")
+        waitForOtherChunksToComplete(job)
+        val revisionIds = getRevisionIds(job.id)
+        logger.debug("Merging revisions (${revisionIds.size})")
 
-      val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
-      revisionIds.remove(activityRevisionIdToMergeInto)
+        val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
+        revisionIds.remove(activityRevisionIdToMergeInto)
 
-      mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
-      mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
-      deleteUnusedRevisions(revisionIds)
-      setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
+        mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
+        mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
+        deleteUnusedRevisions(revisionIds)
+        setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
+      } catch (e: Exception) {
+        Sentry.captureException(e)
+        throw CannotFinalizeActivityException(e)
+      }
     }
   }
 

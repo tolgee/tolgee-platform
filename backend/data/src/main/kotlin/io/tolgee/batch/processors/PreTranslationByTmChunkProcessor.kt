@@ -25,7 +25,7 @@ class PreTranslationByTmChunkProcessor(
 
     val preparedChunk = chunk.map { keyId ->
       languages.map { language ->
-        BatchTranslationTargetItem(keyId as Long, language.id)
+        BatchTranslationTargetItem(keyId, language.id)
       }
     }.flatten()
 
