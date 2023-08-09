@@ -30,9 +30,10 @@ describe('Translation memory', () => {
 
   it("doesn't trigger auto translation when not enabled", () => {
     waitForGlobalLoading();
-    createTranslation('mykey', 'Cool translated text 1');
+    createTranslation('aakey', 'Cool translated text 1');
     waitForGlobalLoading();
-    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    visitTranslations(project.id);
+    cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
       .filter(':contains("Cool translated text 1")')
       .should('have.length', 2);
@@ -47,9 +48,10 @@ describe('Translation memory', () => {
       usingMachineTranslation: true,
     });
     waitForGlobalLoading();
-    createTranslation('mykey', 'mytranslation');
+    createTranslation('aakey', 'mytranslation');
     waitForGlobalLoading();
-    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    visitTranslations(project.id);
+    cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
       .contains('mytranslation')
       .should('be.visible');
@@ -67,9 +69,11 @@ describe('Translation memory', () => {
       usingMachineTranslation: true,
     });
     waitForGlobalLoading();
-    createTranslation('mykey', 'Cool translated text 1');
+    createTranslation('aakey', 'Cool translated text 1');
     waitForGlobalLoading();
-    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    visitTranslations(project.id);
+
+    cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     cy.gcy('translations-table-cell')
       .filter(':contains("Cool translated text 1")')
       .should('have.length', 2);
@@ -93,9 +97,10 @@ describe('Translation memory', () => {
     });
 
     waitForGlobalLoading();
-    createTranslation('mykey', 'New translation');
+    createTranslation('aakey', 'New translation');
     waitForGlobalLoading();
-    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    visitTranslations(project.id);
+    cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     getAutoTranslatedIndicator(
       'New translation translated with GOOGLE from en to cs'
     ).should('be.visible');
@@ -122,9 +127,11 @@ describe('Translation memory', () => {
     });
 
     waitForGlobalLoading();
-    createTranslation('mykey', 'New translation');
+    createTranslation('aakey', 'New translation');
     waitForGlobalLoading();
-    cy.gcy('translations-table-cell').contains('mykey').should('be.visible');
+    visitTranslations(project.id);
+
+    cy.gcy('translations-table-cell').contains('aakey').should('be.visible');
     getAutoTranslatedIndicator(
       'New translation translated with GOOGLE from en to cs'
     ).should('be.visible');
