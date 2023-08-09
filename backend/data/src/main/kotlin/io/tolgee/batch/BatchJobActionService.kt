@@ -164,8 +164,9 @@ class BatchJobActionService(
       var beforeTransactionCompletionError: Throwable? = null
       val onBeforeTransactionCompletionError: (Throwable) -> Unit =
         { beforeTransactionCompletionError = it }
-      fn(onBeforeTransactionCompletionError)
+      val result = fn(onBeforeTransactionCompletionError)
       beforeTransactionCompletionError?.let { throw it }
+      result
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")

@@ -69,7 +69,7 @@ class BatchJobActivityFinalizer(
         val committedChunks = batchJobStateProvider.get(job.id).values
           .count { it.retry == false && it.transactionCommitted && it.status.completed }
         logger.debug(
-          "Waiting for completed chunks ($committedChunks) to be equal to all other chunks" +
+          "Waiting for completed chunks and committed ($committedChunks) to be equal to all other chunks" +
             " count (${job.totalChunks - committedInThisTransactions})"
         )
         committedChunks == job.totalChunks - committedInThisTransactions
