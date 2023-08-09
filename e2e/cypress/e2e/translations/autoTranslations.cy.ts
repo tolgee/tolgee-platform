@@ -85,7 +85,7 @@ describe('Translation memory', () => {
     cy.gcy('translations-table-cell')
       .filter(':contains("Studený přeložený text 1")')
       .should('have.length', 2);
-    getAutoTranslatedIndicator('Studený přeložený text 1')
+    cy.gcy('translations-auto-translated-indicator')
       .should('be.visible')
       .findDcy('translations-auto-translated-clear-button')
       .invoke('show')
