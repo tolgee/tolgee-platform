@@ -497,7 +497,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val job = runChunkedJob(keyCount)
 
     doThrow(RuntimeException("test")).whenever(progressManager)
-      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED })
+      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED }, any())
 
     waitForNotThrowing(pollTime = 100) {
       currentDateProvider.forcedDate = currentDateProvider.date.addSeconds(2)
