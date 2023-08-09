@@ -63,7 +63,7 @@ class RateLimitProperties(
 
   @DocProperty(
     description = "Size, in milliseconds, of the time window for IP-based limiting.",
-    defaultValue = "5 minutes"
+    defaultExplanation = "= 5 minutes"
   )
   val ipRequestWindow: Long = 5 * 60 * 1000,
 
@@ -72,7 +72,7 @@ class RateLimitProperties(
 
   @DocProperty(
     description = "Size, in milliseconds, of the time window for user-based limiting.",
-    defaultValue = "1 minute"
+    defaultExplanation = "= 1 minute"
   )
   val userRequestWindow: Long = 5 * 60 * 1000,
 )

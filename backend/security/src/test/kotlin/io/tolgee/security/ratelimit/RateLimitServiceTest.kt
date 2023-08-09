@@ -70,8 +70,6 @@ class RateLimitServiceTest {
     Mockito.`when`(rateLimitProperties.ipRequestWindow).thenReturn(TEST_IP_WINDOW)
     Mockito.`when`(rateLimitProperties.userRequestLimit).thenReturn(TEST_USER_LIMIT)
     Mockito.`when`(rateLimitProperties.userRequestWindow).thenReturn(TEST_USER_WINDOW)
-
-    println(rateLimitProperties.globalLimits)
   }
 
   @AfterEach
