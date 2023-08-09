@@ -525,7 +525,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   }
 
   private fun assertJobStateCacheCleared(job: BatchJob) {
-    Thread.sleep(500)
+    Thread.sleep(300)
     batchJobStateProvider.hasCachedJobState(job.id).assert.isFalse()
   }
 

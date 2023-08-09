@@ -135,14 +135,12 @@ class BatchJobActionService(
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
-      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is not pending, skipping")
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
-      batchJobProjectLockingManager.unlockJobIfCompleted(executionItem.jobId)
-
+      batchJobProjectLockingManager.finalizeIfCompleted(executionItem.jobId)
       return null
     }
 

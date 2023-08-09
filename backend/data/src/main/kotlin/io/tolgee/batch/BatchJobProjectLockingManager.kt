@@ -122,14 +122,15 @@ class BatchJobProjectLockingManager(
    * The execution is skipped, since it's not pending, but
    * we have to unlock the project, otherwise it will be locked forever
    */
-  fun unlockJobIfCompleted(jobId: Long) {
+  fun finalizeIfCompleted(jobId: Long) {
     val cached = batchJobStateProvider.getCached(jobId)
     logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
     val isCompleted = cached?.all { it.value.status.completed } ?: true
     if (isCompleted) {
-      logger.debug("Job $jobId is completed, unlocking project")
       val jobDto = batchJobService.getJobDto(jobId)
+      logger.debug("Job $jobId is completed, unlocking project, removing job state")
       unlockJobForProject(jobDto.projectId)
+      batchJobStateProvider.removeJobState(jobId)
     }
   }
 }
