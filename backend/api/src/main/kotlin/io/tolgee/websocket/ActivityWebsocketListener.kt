@@ -125,7 +125,7 @@ class ActivityWebsocketListener(
   }
 
   fun onBatchJobCompleted(event: OnBatchJobCompleted, errorMessage: Message? = null) {
-    if (event.job.hidden) return
+    if (event.job.hidden && event.job.status != BatchJobStatus.FAILED) return
 
     websocketEventPublisher(
       "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
