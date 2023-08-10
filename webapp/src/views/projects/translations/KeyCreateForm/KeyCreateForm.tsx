@@ -16,6 +16,7 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { useTranslationsWebsocketBlocker } from '../context/useTranslationsWebsocketBlocker';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -55,6 +56,8 @@ export const KeyCreateForm: React.FC<Props> = ({
     url: '/v2/projects/{projectId}/keys/create',
     method: 'post',
   });
+
+  useTranslationsWebsocketBlocker(createKey.isLoading);
 
   const handleSubmit = (values: ValuesCreateType) => {
     return createKey.mutateAsync(
@@ -96,7 +99,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: keyName,
         translations: translationValues,
         tags: [],
-        namespace: namespace,
+        namespace,
       }}
       onSubmit={handleSubmit}
       validationSchema={Yup.object().shape({
