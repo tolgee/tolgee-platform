@@ -74,15 +74,14 @@ export const useWebsocketService = (
 
   useEffect(() => {
     if (jwtToken && client) {
-      client.subscribe(
+      return client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (event) => {
           // arbitrary delay, so the socket event is not faster
           // than response of http request
-          handerRef.current(event);
+          setTimeout(() => handerRef.current(event), 100);
         }
       );
-      return () => client.disconnect();
     }
   }, [config, project, jwtToken, client]);
 

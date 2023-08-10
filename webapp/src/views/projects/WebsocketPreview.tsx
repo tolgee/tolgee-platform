@@ -16,11 +16,10 @@ export const WebsocketPreview = () => {
 
   useEffect(() => {
     if (jwtToken && client) {
-      client.subscribe(
+      return client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (data) => addMessage(JSON.stringify(data, undefined, 2))
       );
-      return () => client.disconnect();
     }
   }, [config, project, jwtToken, client]);
 

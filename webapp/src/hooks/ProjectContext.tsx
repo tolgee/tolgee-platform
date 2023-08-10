@@ -122,10 +122,9 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
 
     useEffect(() => {
       if (jwtToken && client) {
-        client.subscribe(`/projects/${id}/batch-job-progress`, (e) => {
+        return client.subscribe(`/projects/${id}/batch-job-progress`, (e) => {
           changeHandlerRef?.current(e);
         });
-        return () => client.disconnect();
       }
     }, [id, jwtToken, client]);
 

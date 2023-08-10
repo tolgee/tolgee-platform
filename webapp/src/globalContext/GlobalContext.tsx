@@ -30,7 +30,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
           onConnectionClose: () => setClientConnected(false),
         });
         setClient(newClient);
-        return () => newClient.disconnect();
+        return () => {
+          newClient.disconnect();
+        };
       }
     }, [jwtToken]);
 
