@@ -1,3 +1,10 @@
+# [3.26.0](https://github.com/tolgee/tolgee-platform/compare/v3.25.4...v3.26.0) (2023-08-10)
+
+
+### Features
+
+* Batch operations ([#1793](https://github.com/tolgee/tolgee-platform/issues/1793)) ([d54a56b](https://github.com/tolgee/tolgee-platform/commit/d54a56bc44ee83d516db9d356a75281b2eb3ed77))
+
 ## [3.25.4](https://github.com/tolgee/tolgee-platform/compare/v3.25.3...v3.25.4) (2023-08-08)
 
 

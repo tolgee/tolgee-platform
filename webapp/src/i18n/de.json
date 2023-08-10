@@ -363,6 +363,7 @@
   "organization_role_type_OWNER_hint" : "Verwalten der Organisation und ihrer Projekte",
   "organizations_add_new" : "Organisation hinzufügen",
   "organizations_title" : "Organisationen",
+  "organization_subscriptions_cloud_button" : "Cloud",
   "organizations-will-be-deleted" : "Diese Organisationen werden gelöscht",
   "organization_updated_message" : "Organisationseinstellungen aktualisiert",
   "organization_user_deleted" : "Benutzer aus der Organisation entfernt",
