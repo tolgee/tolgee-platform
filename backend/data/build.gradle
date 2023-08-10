@@ -119,7 +119,9 @@ dependencies {
     /**
      * Redisson
      */
-    implementation libs.redissonSpringBootStarter
+    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
+        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+    }
     implementation libs.redissonSpringData
 
     /**

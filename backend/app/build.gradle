@@ -108,7 +108,9 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation libs.micrometerPrometheus
 
-    testApi libs.redissonSpringBootStarter
+    testApi dependencies.create(libs.redissonSpringBootStarter.get()) {
+        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+    }
     testApi libs.redissonSpringData
 
     /**
