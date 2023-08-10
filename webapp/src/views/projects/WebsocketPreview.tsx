@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const WebsocketPreview = () => {
   const config = useConfig();
@@ -12,20 +12,17 @@ export const WebsocketPreview = () => {
   const jwtToken = useSelector(
     (state: AppState) => state.global.security.jwtToken
   );
+  const client = useGlobalContext((c) => c.client);
 
   useEffect(() => {
-    if (jwtToken) {
-      const client = WebsocketClient({
-        authentication: { jwtToken: jwtToken },
-        serverUrl: process.env.REACT_APP_API_URL,
-      });
+    if (jwtToken && client) {
       client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (data) => addMessage(JSON.stringify(data, undefined, 2))
       );
       return () => client.disconnect();
     }
-  }, [config, project, jwtToken]);
+  }, [config, project, jwtToken, client]);
 
   const [messages, setMessages] = useState([] as string[]);
 

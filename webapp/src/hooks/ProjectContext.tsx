@@ -3,10 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import {
-  BatchJobProgress,
-  WebsocketClient,
-} from 'tg.websocket-client/WebsocketClient';
+import { BatchJobProgress } from 'tg.websocket-client/WebsocketClient';
 import { AppState } from 'tg.store/index';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { GlobalError } from '../error/GlobalError';
@@ -15,6 +12,7 @@ import {
   BatchJobModel,
   BatchJobStatus,
 } from 'tg.views/projects/translations/BatchOperations/types';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 type BatchJobUpdateModel = {
   totalItems: number;
@@ -29,9 +27,9 @@ type Props = {
 
 export const [ProjectContext, useProjectActions, useProjectContext] =
   createProvider(({ id }: Props) => {
-    const [connected, setConnected] = useState<boolean>();
-
     const [knownJobs, setKnownJobs] = useState<number[]>([]);
+    const client = useGlobalContext((c) => c.client);
+    const connected = useGlobalContext((c) => c.clientConnected);
 
     const project = useApiQuery({
       url: '/v2/projects/{projectId}',
@@ -123,20 +121,13 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     changeHandlerRef.current = changeHandler;
 
     useEffect(() => {
-      if (jwtToken) {
-        const client = WebsocketClient({
-          authentication: { jwtToken: jwtToken },
-          serverUrl: process.env.REACT_APP_API_URL,
-          onConnected: () => setConnected(true),
-          onConnectionClose: () => setConnected(false),
-        });
-
+      if (jwtToken && client) {
         client.subscribe(`/projects/${id}/batch-job-progress`, (e) => {
           changeHandlerRef?.current(e);
         });
         return () => client.disconnect();
       }
-    }, [id, jwtToken]);
+    }, [id, jwtToken, client]);
 
     const { updatePreferredOrganization } = usePreferredOrganization();
 

@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Modification,
   TranslationsModifiedData,
-  WebsocketClient,
 } from 'tg.websocket-client/WebsocketClient';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const useWebsocketService = (
   translationService: ReturnType<typeof useTranslationsService>
@@ -19,6 +19,7 @@ export const useWebsocketService = (
   const jwtToken = useSelector(
     (state: AppState) => state.global.security.jwtToken
   );
+  const client = useGlobalContext((c) => c.client);
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({
@@ -72,11 +73,7 @@ export const useWebsocketService = (
   const eventQueue = useRef([] as TranslationsModifiedData[]);
 
   useEffect(() => {
-    if (jwtToken) {
-      const client = WebsocketClient({
-        authentication: { jwtToken: jwtToken },
-        serverUrl: process.env.REACT_APP_API_URL,
-      });
+    if (jwtToken && client) {
       client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (event) => {
@@ -87,7 +84,7 @@ export const useWebsocketService = (
       );
       return () => client.disconnect();
     }
-  }, [config, project, jwtToken]);
+  }, [config, project, jwtToken, client]);
 
   return {
     setEventBlockers,
