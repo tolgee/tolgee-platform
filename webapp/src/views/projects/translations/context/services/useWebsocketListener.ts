@@ -6,6 +6,7 @@ import { AppState } from 'tg.store/index';
 import { useEffect } from 'react';
 import {
   Modification,
+  TranslationsModifiedData,
   WebsocketClient,
 } from 'tg.websocket-client/WebsocketClient';
 
@@ -19,6 +20,36 @@ export const useWebsocketListener = (
   );
 
   useEffect(() => {
+    function handler(event: TranslationsModifiedData) {
+      const translationUpdates = event.data?.translations?.map(
+        (translation) => ({
+          keyId: translation.relations.key.entityId,
+          language: translation.relations.language.data.tag,
+          value: getModifyingObject(translation.modifications),
+        })
+      );
+
+      if (translationUpdates) {
+        translationService.changeTranslations(translationUpdates);
+      }
+
+      const keyUpdates = event.data?.keys?.map((key) => ({
+        keyId: key.id,
+        value:
+          key.changeType == 'DEL'
+            ? { deleted: true }
+            : {
+                ...getModifyingObject(key.modifications, {
+                  name: 'keyName',
+                }),
+              },
+      }));
+
+      if (keyUpdates) {
+        translationService.updateTranslationKeys(keyUpdates);
+      }
+    }
+
     if (jwtToken) {
       const client = WebsocketClient({
         authentication: { jwtToken: jwtToken },
@@ -27,32 +58,9 @@ export const useWebsocketListener = (
       client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (event) => {
-          const translationUpdates = event.data?.translations?.map(
-            (translation) => ({
-              keyId: translation.relations.key.entityId,
-              language: translation.relations.language.data.tag,
-              value: getModifyingObject(translation.modifications),
-            })
-          );
-
-          if (translationUpdates) {
-            translationService.changeTranslations(translationUpdates);
-          }
-
-          const keyUpdates = event.data?.keys?.map((key) => ({
-            keyId: key.id,
-            value:
-              key.changeType == 'DEL'
-                ? { deleted: true }
-                : {
-                    ...getModifyingObject(key.modifications, {
-                      name: 'keyName',
-                    }),
-                  },
-          }));
-          if (keyUpdates) {
-            translationService.updateTranslationKeys(keyUpdates);
-          }
+          // arbitrary delay, so the socket event is not faster
+          // than response of http request
+          setTimeout(() => handler(event), 300);
         }
       );
       return () => client.disconnect();
