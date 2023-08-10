@@ -19,7 +19,7 @@ class RedisLockingConfiguration(
   val redissonClient: RedissonClient
 ) {
   @Bean
-  fun getLockingProvider(): LockingProvider {
+  fun redisLockingProvider(): LockingProvider {
     return RedissonLockingProvider(redissonClient)
   }
 }

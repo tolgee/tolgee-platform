@@ -14,7 +14,7 @@ import javax.sql.DataSource
 @ConditionalOnProperty(name = ["tolgee.postgres-autostart.enabled"], havingValue = "true")
 class PostgresAutoStartConfiguration(
   val postgresAutostartProperties: PostgresAutostartProperties,
-  val postgresRunnerFactory: PostgresRunnerFactory
+  val postgresRunnerFactory: PostgresRunnerFactory,
 ) {
 
   private var _dataSource: DataSource? = null
