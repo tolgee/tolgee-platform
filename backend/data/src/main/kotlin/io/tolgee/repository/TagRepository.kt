@@ -7,6 +7,7 @@ import io.tolgee.model.key.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
 interface TagRepository : JpaRepository<Tag, Long> {
@@ -56,4 +57,15 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun getTagsWithKeyMetas(tagIds: Iterable<Long>): List<Tag>
   fun findAllByProjectId(projectId: Long): List<Tag>
+
+  @Modifying(flushAutomatically = true)
+  @Query(
+    """
+    delete from Tag t 
+      where t.id in 
+        (select tag.id from Tag tag left join tag.keyMetas km group by tag.id having count(km) = 0)
+      and t.project.id = :projectId
+  """
+  )
+  fun deleteAllUnused(projectId: Long)
 }

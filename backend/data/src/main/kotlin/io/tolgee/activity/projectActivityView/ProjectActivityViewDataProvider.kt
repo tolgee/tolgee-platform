@@ -23,7 +23,7 @@ import javax.persistence.EntityManager
 import javax.persistence.criteria.Predicate
 
 class ProjectActivityViewDataProvider(
-  applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
   private val projectId: Long,
   private val pageable: Pageable
 ) {
@@ -49,6 +49,7 @@ class ProjectActivityViewDataProvider(
   private lateinit var allRelationData: Map<Long, List<ActivityDescribingEntity>>
   private lateinit var rawModifiedEntities: List<ActivityModifiedEntity>
   private lateinit var entityExistences: Map<Pair<String, Long>, Boolean>
+  private lateinit var params: Map<Long, Any?>
 
   fun getProjectActivity(): Page<ProjectActivityView> {
     prepareData()
@@ -66,7 +67,8 @@ class ProjectActivityViewDataProvider(
         authorDeleted = author?.deletedAt != null,
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
-        counts = counts[revision.id]
+        counts = counts[revision.id],
+        params = params[revision.id]
       )
     }
 
@@ -86,8 +88,27 @@ class ProjectActivityViewDataProvider(
 
     modifiedEntities = this.getModifiedEntities()
 
+    params = getParams()
+
     authors = getAuthors(revisions)
+
     counts = getCounts()
+  }
+
+  private fun getParams(): Map<Long, Any?> {
+    val result = mutableMapOf<Long, Any?>()
+
+    revisions
+      .filter { it.type?.paramsProvider != null }
+      .groupBy { it.type?.paramsProvider }
+      .forEach { (providerClass, revisions) ->
+        providerClass ?: return@forEach
+        val revisionIds = revisions.map { it.id }
+        applicationContext.getBean(providerClass.java)
+          .provide(revisionIds).forEach(result::put)
+      }
+
+    return result
   }
 
   private fun getCounts(): MutableMap<Long, MutableMap<String, Long>> {

@@ -24,7 +24,8 @@ class TolgeeTranslationProvider(
         params.keyName,
         params.sourceLanguageTag,
         params.targetLanguageTag,
-        params.metadataOrThrow()
+        params.metadataOrThrow(),
+        params.isBatch
       )
     )
   }

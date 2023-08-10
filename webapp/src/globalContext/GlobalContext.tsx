@@ -1,14 +1,40 @@
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { createProvider } from 'tg.fixtures/createProvider';
+import { components } from 'tg.service/apiSchema.generated';
+import { AppState } from 'tg.store/index';
+import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
+
 import { useOrganizationUsageService } from './useOrganizationUsageService';
 import { useInitialDataService } from './useInitialDataService';
 import { globalContext } from './globalActions';
-import { createProviderNew } from 'tg.fixtures/createProviderNew';
-import { components } from 'tg.service/apiSchema.generated';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
 export const [GlobalProvider, useGlobalActions, useGlobalContext] =
-  createProviderNew(() => {
+  createProvider(() => {
+    const [clientConnected, setClientConnected] = useState<boolean>();
+    const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
     const initialData = useInitialDataService();
+
+    const jwtToken = useSelector(
+      (state: AppState) => state.global.security.jwtToken
+    );
+
+    useEffect(() => {
+      if (jwtToken) {
+        const newClient = WebsocketClient({
+          authentication: { jwtToken: jwtToken },
+          serverUrl: process.env.REACT_APP_API_URL,
+          onConnected: () => setClientConnected(true),
+          onConnectionClose: () => setClientConnected(false),
+        });
+        setClient(newClient);
+        return () => {
+          newClient.disconnect();
+        };
+      }
+    }, [jwtToken]);
 
     const organizationUsage = useOrganizationUsageService({
       organization: initialData.data.preferredOrganization,
@@ -43,6 +69,8 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       isFetching: initialData.isFetching,
       isLoading: initialData.isLoading,
       organizationUsage: organizationUsage.data,
+      client,
+      clientConnected,
     };
 
     return [contextData, actions];

@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Entity
 import javax.persistence.OneToOne
 
@@ -11,4 +12,7 @@ class AutoTranslationConfig : StandardAuditModel() {
   var usingTm: Boolean = false
 
   var usingPrimaryMtService: Boolean = false
+
+  @ColumnDefault("false")
+  var enableForImport: Boolean = false
 }

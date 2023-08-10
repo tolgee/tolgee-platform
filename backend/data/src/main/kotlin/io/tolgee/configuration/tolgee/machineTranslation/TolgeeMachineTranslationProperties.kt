@@ -6,5 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 open class TolgeeMachineTranslationProperties(
   override var defaultEnabled: Boolean = true,
   override var defaultPrimary: Boolean = false,
-  var url: String? = null
+  var url: String? = null,
 ) : MachineTranslationServiceProperties

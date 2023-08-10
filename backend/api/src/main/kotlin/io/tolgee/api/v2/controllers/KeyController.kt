@@ -90,8 +90,10 @@ class KeyController(
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
     }
 
-    dto.translations?.keys?.let { languageTags ->
-      securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+    dto.translations?.filterValues { !it.isNullOrEmpty() }?.keys?.let { languageTags ->
+      if (languageTags.isNotEmpty()) {
+        securityService.checkLanguageTranslatePermissionByTag(projectHolder.project.id, languageTags)
+      }
     }
 
     val key = keyService.create(projectHolder.projectEntity, dto)

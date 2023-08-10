@@ -79,7 +79,7 @@ dependencies {
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
     implementation "org.springframework.boot:spring-boot-starter-batch"
-    implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
 
     /**
      * TESTING
@@ -95,6 +95,7 @@ dependencies {
     testImplementation("io.socket:socket.io-client:1.0.1")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation libs.sendInBlue
+    testImplementation "org.springframework.boot:spring-boot-starter-websocket"
 
     /**
      * MISC
@@ -105,8 +106,12 @@ dependencies {
     implementation libs.amazonSTS
     implementation libs.icu4j
     implementation libs.jacksonModuleKotlin
-    implementation libs.redissonSpringBootStarter
-    implementation libs.redissonSpringData
+    implementation libs.micrometerPrometheus
+
+    testApi dependencies.create(libs.redissonSpringBootStarter.get()) {
+        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+    }
+    testApi libs.redissonSpringData
 
     /**
      * KOTLIN
@@ -167,7 +172,9 @@ dependencies {
 test {
     useJUnitPlatform()
     maxHeapSize = "2048m"
-    //maxParallelForks = (int) (Runtime.runtime.availableProcessors() / 2 + 1)
+    testLogging {
+        events = ["passed", "failed", "skipped"]
+    }
 }
 
 task runContextRecreatingTests(type: Test, group: 'verification') {
@@ -179,7 +186,14 @@ task runContextRecreatingTests(type: Test, group: 'verification') {
 
 task runStandardTests(type: Test, group: 'verification') {
     useJUnitPlatform {
-        excludeTags "contextRecreating"
+        excludeTags "contextRecreating", "websocket"
+    }
+    maxHeapSize = "8000m"
+}
+
+task runWebsocketTests(type: Test, group: 'verification') {
+    useJUnitPlatform {
+        includeTags "websocket"
     }
     maxHeapSize = "8000m"
 }

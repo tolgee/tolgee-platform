@@ -48,10 +48,26 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
+@SpringBootTest(
+//  exclude = [
+//    CompositeMeterRegistryAutoConfiguration::class,
+//    DataSourcePoolMetricsAutoConfiguration::class,
+//    DiskSpaceHealthContributorAutoConfiguration::class,
+//    InfoContributorAutoConfiguration::class,
+//    JmxAutoConfiguration::class,
+//    JvmMetricsAutoConfiguration::class,
+//    JmxEndpointAutoConfiguration::class,
+//    LdapAutoConfiguration::class,
+//    LiquibaseEndpointAutoConfiguration::class,
+//    MetricsEndpointAutoConfiguration::class,
+//    StartupTimeMetricsListenerAutoConfiguration::class,
+//    TomcatMetricsAutoConfiguration::class,
+//  ]
+)
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -169,7 +185,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var applicationContext: ApplicationContext
 
   @Autowired
-  lateinit var mtCreditBucketService: MtCreditBucketService
+  open lateinit var mtCreditBucketService: MtCreditBucketService
 
   @Autowired
   lateinit var mtService: MtService
@@ -236,11 +252,11 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     internalProperties.fakeMtProviders = false
   }
 
-  fun <T> executeInNewTransaction(fn: () -> T): T {
+  fun <T> executeInNewTransaction(fn: (ts: TransactionStatus) -> T): T {
     return io.tolgee.util.executeInNewTransaction(
-      platformTransactionManager,
-      TransactionDefinition.ISOLATION_DEFAULT,
-      fn
+      transactionManager = platformTransactionManager,
+      fn = fn,
+      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
     )
   }
 }

@@ -3,6 +3,7 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
@@ -27,14 +28,18 @@ class ActivityFilter(
     filterChain: FilterChain
   ) {
 
-    val activityAnnotation = getActivityAnnotation(request)
+    try {
+      val activityAnnotation = getActivityAnnotation(request)
 
-    if (activityAnnotation != null) {
-      activityHolder.activity = activityAnnotation.activity
+      if (activityAnnotation != null) {
+        activityHolder.activity = activityAnnotation.activity
+      }
+
+      assignUtmData(request)
+      assignSdkInfo(request)
+    } catch (e: ScopeNotActiveException) {
+      logger.debug("Activity filter called outside of request scope")
     }
-
-    assignUtmData(request)
-    assignSdkInfo(request)
 
     filterChain.doFilter(request, response)
   }

@@ -97,6 +97,8 @@ export const formerUserTestData = generateTestDataObject('former-user');
 
 export const namespaces = generateTestDataObject('namespaces');
 
+export const batchJobs = generateTestDataObject('batch-jobs');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>

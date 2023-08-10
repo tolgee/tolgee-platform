@@ -63,6 +63,7 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
         initialValues={{
           usingTranslationMemory: settings.data.usingTranslationMemory,
           usingMachineTranslation: settings.data.usingMachineTranslation,
+          enableForImport: settings.data.enableForImport,
         }}
         enableReinitialize={true}
         onSubmit={() => {}}
@@ -76,6 +77,18 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
           return (
             <StyledSettings>
               <FormControlLabel
+                name="usingMachineTranslation"
+                data-cy="languages-auto-machine-translation"
+                label={t(
+                  'project_languages_new_keys_machine_translations_switch',
+                  'Enable machine translation with primary provider'
+                )}
+                checked={form.values.usingMachineTranslation}
+                onChange={form.handleChange}
+                control={<Checkbox />}
+                disabled={!mtEnabled}
+              />
+              <FormControlLabel
                 name="usingTranslationMemory"
                 data-cy="languages-auto-translation-memory"
                 label={t(
@@ -87,16 +100,15 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
                 control={<Checkbox />}
               />
               <FormControlLabel
-                name="usingMachineTranslation"
-                data-cy="languages-auto-machine-translation"
+                name="enableForImport"
+                data-cy="languages-auto-for-import"
                 label={t(
-                  'project_languages_new_keys_machine_translations_switch',
-                  'Enable machine translation with primary provider'
+                  'project_languages_auto_translation_enable_for_import_switch',
+                  'Enable for import'
                 )}
-                checked={form.values.usingMachineTranslation}
+                checked={form.values.enableForImport}
                 onChange={form.handleChange}
                 control={<Checkbox />}
-                disabled={!mtEnabled}
               />
             </StyledSettings>
           );

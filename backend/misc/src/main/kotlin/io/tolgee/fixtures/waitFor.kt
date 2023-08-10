@@ -17,8 +17,8 @@ fun waitFor(timeout: Long = 10000, pollTime: Long = 10, fn: () -> Boolean) {
   }
 }
 
-class WaitNotSatisfiedException : Exception()
-class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : Exception(throwable)
+class WaitNotSatisfiedException : RuntimeException()
+class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : RuntimeException(throwable)
 
 fun waitForNotThrowing(
   throwableClass: KClass<out Throwable> = Throwable::class,

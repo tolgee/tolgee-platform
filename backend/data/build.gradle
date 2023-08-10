@@ -106,6 +106,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
 
 
     /**
@@ -114,6 +115,14 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     kapt "org.hibernate:hibernate-jpamodelgen"
+
+    /**
+     * Redisson
+     */
+    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
+        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+    }
+    implementation libs.redissonSpringData
 
     /**
      * Liquibase
@@ -167,6 +176,7 @@ dependencies {
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
     implementation libs.postHog
+    implementation libs.micrometerPrometheus
 
     /**
      * Google translation API

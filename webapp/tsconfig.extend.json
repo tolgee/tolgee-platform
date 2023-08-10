@@ -13,7 +13,8 @@
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
       "tg.translationTools/*": ["translationTools/*"],
-      "tg.ee/*": ["ee/*"]
+      "tg.ee/*": ["ee/*"],
+      "tg.websocket-client/*": ["websocket-client/*"]
     }
   }
 }

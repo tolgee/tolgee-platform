@@ -84,4 +84,8 @@ class TranslationCommentService(
   ): TranslationComment {
     return translationCommentRepository.save(entity)
   }
+
+  fun deleteByTranslationIdIn(ids: Collection<Long>) {
+    return translationCommentRepository.deleteByTranslationIdIn(ids)
+  }
 }

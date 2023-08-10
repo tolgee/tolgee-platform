@@ -1,4 +1,6 @@
 spring:
+  autoconfigure:
+    exclude: org.redisson.spring.starter.RedissonAutoConfiguration, org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   data:
     redis:
       repositories:
@@ -29,39 +31,6 @@ tolgee:
     enabled: false
   postgres-autostart:
     enabled: true
-  #    jwt-secret-file: /<user home>/.tolgee/jwt.secret
-  #    jwt-secret: some long string
-  #    jwt-expiration: 604800000
-  #    native-enabled: true
-  #    registrations-allowed: false
-  #    initial-username: "admin"
-  #    initial-password: "admin"
-  #    github:
-  #      client-id: <client id obtained from github>
-  #      client-secret: <client secret obtained from github>
-  #      authorization-url: "https://github.com/login/oauth/access_token"
-  #      user-url: "https://api.github.com/user"
-  #    ldap: ##experimental feature
-  #      base-dn:
-  #      enabled:
-  #      port:
-  #      principal-password:
-  #      security-principal:
-  #      urls:
-  #      user-dn-pattern:
-  #  smtp:
-  #    from:
-  #    host:
-  #    password:
-  #    smtp-auth:
-  #    smtp-port:
-  #    ssl-enabled:
-  #    tls-enabled:
-  #    tls-required:
-  #    username:
-  #  sentry:
-  #    enabled: false
-  #    dsn:
   cache:
     enabled: true
     use-redis: false
@@ -83,4 +52,8 @@ management:
       enabled: false
     mail:
       enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 

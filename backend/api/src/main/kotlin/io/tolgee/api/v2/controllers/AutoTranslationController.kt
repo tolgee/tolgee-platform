@@ -71,11 +71,12 @@ When no languages provided, it translates only untranslated languages."""
       throw BadRequestException(Message.CANNOT_TRANSLATE_BASE_LANGUAGE)
     }
 
-    autoTranslationService.autoTranslate(
+    autoTranslationService.autoTranslateSync(
       key = key,
-      languageTags = languages,
+      languageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
-      useMachineTranslation = useMachineTranslation ?: false
+      useMachineTranslation = useMachineTranslation ?: false,
+      isBatch = true
     )
   }
 

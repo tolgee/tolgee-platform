@@ -44,6 +44,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
 
     implementation(project(':data'))
     implementation(project(':misc'))
@@ -57,8 +58,9 @@ dependencies {
     implementation libs.springDocOpenApiKotlin
     implementation libs.springDocOpenApiDataRest
     implementation libs.springDocOpenApiHateoas
-
-    implementation libs.redissonSpringBootStarter
+    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
+        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+    }
     implementation libs.redissonSpringData
 
     /**

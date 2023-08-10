@@ -41,7 +41,8 @@ export type EntityEnum =
   | 'TranslationComment'
   | 'Screenshot'
   | 'Project'
-  | 'Namespace';
+  | 'Namespace'
+  | 'Params';
 
 export type FieldTypeEnum =
   | 'text'
@@ -52,7 +53,13 @@ export type FieldTypeEnum =
   | 'language_flag'
   | 'project_language'
   | 'namespace'
-  | 'outdated';
+  | 'outdated'
+  | 'batch_language_ids'
+  | 'batch_language_id'
+  | 'batch_key_tag_list'
+  | 'batch_namespace'
+  | 'batch_translation_state'
+  | 'batch_boolean';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -130,4 +137,5 @@ export type ActivityOptions = {
   description?: (data: ProjectActivityModel) => string;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];
+  compactFieldCount?: number;
 };

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import ReactList from 'react-list';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { createProviderNew } from 'tg.fixtures/createProviderNew';
+import { createProvider } from 'tg.fixtures/createProvider';
 import { container } from 'tsyringe';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useTranslationsService } from './services/useTranslationsService';
@@ -29,7 +29,7 @@ import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
-import { useWebsocketListener } from './services/useWebsocketListener';
+import { useWebsocketService } from './services/useWebsocketService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
@@ -48,7 +48,7 @@ export const [
   TranslationsContextProvider,
   useTranslationsActions,
   useTranslationsSelector,
-] = createProviderNew((props: Props) => {
+] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
@@ -91,7 +91,7 @@ export const [
     baseLang: props.baseLang,
   });
 
-  useWebsocketListener(translationService);
+  const { setEventBlockers } = useWebsocketService(translationService);
 
   const viewRefs = useRefsService();
 
@@ -232,6 +232,7 @@ export const [
     refetchTranslations() {
       return translationService.refetchTranslations();
     },
+    setEventBlockers,
   };
 
   const dataReady = Boolean(

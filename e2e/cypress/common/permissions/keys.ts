@@ -1,9 +1,9 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
-import { createKey } from '../apiCalls/common';
+import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
-import { assertMessage, confirmStandard } from '../shared';
+import { confirmStandard } from '../shared';
 import { createTag } from '../tags';
-import { editCell } from '../translations';
+import { createTranslation, editCell } from '../translations';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
 
 export function testKeys(info: ProjectInfo) {
@@ -60,13 +60,11 @@ export function testKeys(info: ProjectInfo) {
   }
 
   if (scopes.includes('keys.create')) {
-    createKey(info.project.id, 'new_test_key', { en: 'Test translation' });
+    createTranslation('new_test_key');
   }
 
   if (scopes.includes('keys.delete')) {
     cy.gcy('translations-row-checkbox').first().click();
-    cy.gcy('translations-delete-button').click();
-    confirmStandard();
-    assertMessage('Translations deleted!');
+    deleteSelected();
   }
 }

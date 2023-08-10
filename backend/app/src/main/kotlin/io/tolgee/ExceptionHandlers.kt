@@ -17,6 +17,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.validation.BindException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.HttpRequestMethodNotSupportedException
@@ -74,6 +75,24 @@ class ExceptionHandlers {
     }
     return ResponseEntity(
       Collections.singletonMap<String, Map<String, List<String>>>(ValidationErrorType.CUSTOM_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST
+    )
+  }
+
+  @ExceptionHandler(BindException::class)
+  fun handleBindExceptions(
+    ex: BindException
+  ): ResponseEntity<MutableMap<String, Map<String, String>>> {
+    val errors: MutableMap<String, String> = HashMap()
+
+    ex.bindingResult.allErrors.forEach { error: ObjectError ->
+      val fieldName = (error as FieldError).field
+      val errorMessage = error.getDefaultMessage()
+      errors[fieldName] = errorMessage ?: ""
+    }
+
+    return ResponseEntity(
+      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors),
       HttpStatus.BAD_REQUEST
     )
   }
