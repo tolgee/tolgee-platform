@@ -29,7 +29,7 @@ import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
-import { useWebsocketListener } from './services/useWebsocketListener';
+import { useWebsocketService } from './services/useWebsocketService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
@@ -91,7 +91,7 @@ export const [
     baseLang: props.baseLang,
   });
 
-  useWebsocketListener(translationService);
+  const { setEventBlockers } = useWebsocketService(translationService);
 
   const viewRefs = useRefsService();
 
@@ -232,6 +232,7 @@ export const [
     refetchTranslations() {
       return translationService.refetchTranslations();
     },
+    setEventBlockers,
   };
 
   const dataReady = Boolean(
