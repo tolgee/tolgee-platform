@@ -17,7 +17,7 @@ export const useIsAdmin = () =>
 export const usePreferredOrganization = () => {
   const { updatePreferredOrganization } = useGlobalActions();
   const preferredOrganization = useGlobalContext(
-    (c) => c.preferredOrganization
+    (c) => c.preferredOrganization!
   );
   const isFetching = useGlobalContext((c) => c.isFetching);
 
