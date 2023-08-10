@@ -162,7 +162,6 @@ class MtServiceManager(
   private fun getFaked(
     params: TranslationParams
   ): TranslateResult {
-    Thread.sleep(200)
     return TranslateResult(
       translatedText = "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
