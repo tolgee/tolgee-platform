@@ -1,14 +1,13 @@
 import { useTranslationsService } from './useTranslationsService';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
-import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
 import { useEffect, useRef, useState } from 'react';
 import {
   Modification,
   TranslationsModifiedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useDebouncedCallback } from 'use-debounce/lib';
 
 export const useWebsocketService = (
   translationService: ReturnType<typeof useTranslationsService>
@@ -16,9 +15,6 @@ export const useWebsocketService = (
   const [eventBlockers, setEventBlockers] = useState(0);
   const config = useConfig();
   const project = useProject();
-  const jwtToken = useSelector(
-    (state: AppState) => state.global.security.jwtToken
-  );
   const client = useGlobalContext((c) => c.client);
 
   function updateTranslations(event: TranslationsModifiedData) {
@@ -49,41 +45,46 @@ export const useWebsocketService = (
     }
   }
 
-  function handleEvent(event: TranslationsModifiedData) {
-    if (eventBlockers > 0) {
-      eventQueue.current.push(event);
-    } else {
-      updateTranslations(event);
-    }
-  }
+  const eventQueue = useRef([] as TranslationsModifiedData[]);
+
+  const handleQueue = () => {
+    eventQueue.current.forEach((e) => {
+      updateTranslations(e);
+    });
+    eventQueue.current = [];
+  };
 
   // process the blocked events, when the blocker is gone
   useEffect(() => {
     if (eventBlockers <= 0) {
-      eventQueue.current.forEach((e) => {
-        updateTranslations(e);
-      });
-      eventQueue.current = [];
+      handleQueue();
     }
   }, [eventBlockers]);
 
-  const handerRef = useRef(handleEvent);
-  handerRef.current = handleEvent;
+  const handerRef = useRef(handleQueue);
+  handerRef.current = handleQueue;
 
-  const eventQueue = useRef([] as TranslationsModifiedData[]);
+  const handleQueueDelayed = useDebouncedCallback(
+    () => {
+      handerRef.current();
+    },
+    100,
+    { maxWait: 100 }
+  );
 
   useEffect(() => {
-    if (jwtToken && client) {
+    if (client) {
       return client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (event) => {
           // arbitrary delay, so the socket event is not faster
           // than response of http request
-          setTimeout(() => handerRef.current(event), 100);
+          eventQueue.current.push(event);
+          handleQueueDelayed();
         }
       );
     }
-  }, [config, project, jwtToken, client]);
+  }, [config, project, client]);
 
   return {
     setEventBlockers,
