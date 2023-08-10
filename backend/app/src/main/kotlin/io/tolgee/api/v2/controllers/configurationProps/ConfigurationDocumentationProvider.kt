@@ -134,7 +134,8 @@ class ConfigurationDocumentationProvider {
       description = docProperty.description.nullIfEmpty,
       defaultValue = docProperty.defaultValue.nullIfEmpty,
       defaultExplanation = docProperty.defaultExplanation.nullIfEmpty,
-      removedIn = docProperty.removedIn.nullIfEmpty
+      removedIn = docProperty.removedIn.nullIfEmpty,
+      removalReason = docProperty.removalReason.nullIfEmpty,
     )
   }
 }

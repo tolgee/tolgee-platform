@@ -92,25 +92,30 @@ class JwtService(
    * Validates a token for a given user.
    *
    * @param token The JWT token to validate.
-   * @param needsSuper Whether the token needs to be super-powered.
-   * @return The authenticated user account.
+   * @return The authentication information.
    * @throws AuthenticationException The token is invalid or expired.
    */
-  fun validateToken(token: String, needsSuper: Boolean = false): UserAccount {
+  fun validateToken(token: String): TolgeeAuthentication {
     val jws = parseJwt(token)
     if (jws.body.audience != JWT_TOKEN_AUDIENCE) {
       // This is not a token - possibly a ticket or something else.
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    if (needsSuper) {
-      val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
-      if (steClaim == null || steClaim < currentDateProvider.date.time) {
-        throw AuthenticationException(Message.EXPIRED_SUPER_JWT_TOKEN)
-      }
-    }
+    val account = validateJwt(jws.body)
 
-    return validateJwt(jws.body)
+    val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
+    val hasSuperPowers =  steClaim != null && steClaim > currentDateProvider.date.time
+
+    return TolgeeAuthentication(
+      token,
+      account,
+      TolgeeAuthenticationDetails(
+        hasSuperPowers,
+        false,
+        null,
+      ),
+    )
   }
 
   /**

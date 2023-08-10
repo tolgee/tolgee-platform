@@ -1,0 +1,93 @@
+/**
+ * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.tolgee.security.authentication
+
+import io.tolgee.model.UserAccount
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.mockito.Mockito
+import org.springframework.mock.web.MockFilterChain
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.security.core.context.SecurityContextHolder
+
+class AuthenticationDisabledFilterTest {
+  companion object {
+    const val TEST_USER_ID = 1337L
+    const val TEST_INITIAL_USER_NAME = "admin"
+  }
+
+  private val authProperties = Mockito.mock(AuthenticationProperties::class.java)
+
+  private val userAccountService = Mockito.mock(UserAccountService::class.java)
+
+  private val userAccount = Mockito.mock(UserAccount::class.java)
+
+  private val authenticationDisabledFilter = AuthenticationDisabledFilter(authProperties, userAccountService)
+
+  @BeforeEach
+  fun setupMocksAndSecurityCtx() {
+    Mockito.`when`(authProperties.enabled).thenReturn(false)
+    Mockito.`when`(authProperties.initialUsername).thenReturn("admin")
+
+    Mockito.`when`(userAccountService.findActive(TEST_INITIAL_USER_NAME)).thenReturn(userAccount)
+
+    Mockito.`when`(userAccount.id).thenReturn(TEST_USER_ID)
+    Mockito.`when`(userAccount.username).thenReturn(TEST_INITIAL_USER_NAME)
+
+    SecurityContextHolder.getContext().authentication = null
+  }
+
+  @AfterEach
+  fun resetMocks() {
+    Mockito.reset(authProperties, userAccountService)
+  }
+
+  @Test
+  fun `it does not require authentication to go through`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+
+    assertDoesNotThrow { authenticationDisabledFilter.doFilter(req, res, chain) }
+
+    val ctx = SecurityContextHolder.getContext()
+    assertThat(ctx.authentication).isNotNull
+
+    val auth = ctx.authentication as TolgeeAuthentication
+    assertThat(auth.principal.id).isEqualTo(TEST_USER_ID)
+    assertThat(auth.principal.username).isEqualTo(TEST_INITIAL_USER_NAME)
+  }
+
+  @Test
+  fun `it does not authenticate when authentication is enabled`() {
+    Mockito.`when`(authProperties.enabled).thenReturn(true)
+
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+
+    assertDoesNotThrow { authenticationDisabledFilter.doFilter(req, res, chain) }
+
+    val ctx = SecurityContextHolder.getContext()
+    assertThat(ctx.authentication).isNull()
+  }
+}

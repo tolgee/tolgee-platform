@@ -22,6 +22,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
 import java.security.Key
@@ -36,7 +37,6 @@ class JwtServiceTest {
     const val SUPER_JWT_LIFETIME = 30 * 1000L // 30 seconds
     const val JWT_LIFETIME = 60 * 1000L // 60 seconds
   }
-
   private val testSigningKey: Key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
   private val authenticationProperties: AuthenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
@@ -79,10 +79,10 @@ class JwtServiceTest {
   @Test
   fun `it generates and understands tokens`() {
     val token = jwtService.emitToken(TEST_USER_ID)
-    val authenticatedUser = jwtService.validateToken(token)
+    val auth = jwtService.validateToken(token)
 
-    Assertions.assertEquals(TEST_USER_ID, authenticatedUser.id)
-    Assertions.assertEquals(TEST_USER_EMAIL, authenticatedUser.username)
+    assertThat(auth.principal.id).isEqualTo(TEST_USER_ID)
+    assertThat(auth.principal.username).isEqualTo(TEST_USER_EMAIL)
   }
 
   @Test
@@ -90,20 +90,31 @@ class JwtServiceTest {
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
     val authenticatedUser = jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA)
 
-    Assertions.assertEquals(TEST_USER_ID, authenticatedUser.id)
-    Assertions.assertEquals(TEST_USER_EMAIL, authenticatedUser.username)
+    assertThat(authenticatedUser.id).isEqualTo(TEST_USER_ID)
+    assertThat(authenticatedUser.username).isEqualTo(TEST_USER_EMAIL)
   }
 
   @Test
-  fun `it validates the super powers of tokens when required`() {
+  fun `it stores the super powers of tokens when it has them`() {
     val token = jwtService.emitToken(TEST_USER_ID)
     val superToken = jwtService.emitToken(TEST_USER_ID, true)
 
-    assertDoesNotThrow { jwtService.validateToken(token) }
-    assertThrows<AuthenticationException> { jwtService.validateToken(token, true) }
+    val auth = jwtService.validateToken(token)
+    val superAuth = jwtService.validateToken(superToken)
 
-    assertDoesNotThrow { jwtService.validateToken(superToken) }
-    assertDoesNotThrow { jwtService.validateToken(superToken, true) }
+    assertThat(auth.details.isSuperToken).isFalse()
+    assertThat(superAuth.details.isSuperToken).isTrue()
+  }
+
+  @Test
+  fun `it ignores super powers when they are expired`() {
+    val now = currentDateProvider.date.time
+    val superToken = jwtService.emitToken(TEST_USER_ID, true)
+
+    Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
+
+    val superAuth = jwtService.validateToken(superToken)
+    assertThat(superAuth.details.isSuperToken).isFalse()
   }
 
   @Test
@@ -117,25 +128,13 @@ class JwtServiceTest {
   @Test
   fun `it rejects expired tokens, expired super powers, and expired tickets`() {
     val now = currentDateProvider.date.time
-
     val token = jwtService.emitToken(TEST_USER_ID)
-    val superToken = jwtService.emitToken(TEST_USER_ID, true)
 
     assertDoesNotThrow { jwtService.validateToken(token) }
-    assertDoesNotThrow { jwtService.validateToken(superToken) }
-    assertDoesNotThrow { jwtService.validateToken(superToken, true) }
-
-    Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
-
-    assertDoesNotThrow { jwtService.validateToken(token) }
-    assertDoesNotThrow { jwtService.validateToken(superToken) }
-    assertThrows<AuthenticationException> { jwtService.validateToken(superToken, true) }
 
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + JWT_LIFETIME + 1000))
 
     assertThrows<AuthenticationException> { jwtService.validateToken(token) }
-    assertThrows<AuthenticationException> { jwtService.validateToken(superToken) }
-    assertThrows<AuthenticationException> { jwtService.validateToken(superToken, true) }
   }
 
   @Test

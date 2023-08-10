@@ -35,7 +35,6 @@ class RateLimitService(
   private val currentDateProvider: CurrentDateProvider,
   private val rateLimitProperties: RateLimitProperties,
 ) {
-
   private val cache: Cache by lazy { cacheManager.getCache(Caches.RATE_LIMITS) }
 
   /**
@@ -73,7 +72,8 @@ class RateLimitService(
    * @return The applicable rate limit policy, if any.
    */
   fun getGlobalIpRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
-    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return null
     if (!rateLimitProperties.globalLimits) return null
 
     return RateLimitPolicy(
@@ -92,7 +92,8 @@ class RateLimitService(
    * @return The applicable rate limit policy, if any.
    */
   fun getGlobalUserRateLimitPolicy(request: HttpServletRequest, account: UserAccount): RateLimitPolicy? {
-    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return null
     if (!rateLimitProperties.globalLimits) return null
 
     return RateLimitPolicy(
@@ -112,8 +113,13 @@ class RateLimitService(
    * @param account The authenticated account, if authenticated.
    * @return The applicable rate limit policy, if any.
    */
-  fun getEndpointRateLimit(request: HttpServletRequest, account: UserAccount?, handler: HandlerMethod): RateLimitPolicy? {
-    if (!rateLimitProperties.enabled) return null // TODO: remove for Tolgee 4 release
+  fun getEndpointRateLimit(
+    request: HttpServletRequest,
+    account: UserAccount?,
+    handler: HandlerMethod
+  ): RateLimitPolicy? {
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return null
 
     val annotation = AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
       ?: return null
@@ -152,6 +158,25 @@ class RateLimitService(
       annotation.limit,
       annotation.windowSize,
       false,
+    )
+  }
+
+  /**
+   * Returns the per-ip rate limit policy applicable to the authentication phase.
+   *
+   * @param request The HTTP request.
+   * @return The applicable rate limit policy, if any.
+   */
+  fun getIpAuthRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return null
+    if (!rateLimitProperties.authenticationLimits) return null
+
+    return RateLimitPolicy(
+      "global.ip.${request.remoteAddr}::auth",
+      5,
+      1000,
+      true,
     )
   }
 

@@ -6,6 +6,7 @@ package io.tolgee.constants
 import java.util.*
 
 enum class Message {
+  UNAUTHENTICATED,
   API_KEY_NOT_FOUND,
   BAD_CREDENTIALS,
   MFA_ENABLED,

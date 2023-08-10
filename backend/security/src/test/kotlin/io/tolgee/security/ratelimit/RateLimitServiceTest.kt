@@ -19,7 +19,7 @@ package io.tolgee.security.ratelimit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.model.UserAccount
-import org.assertj.core.api.Assertions
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -85,11 +85,11 @@ class RateLimitServiceTest {
     rateLimitService.consumeBucket(testPolicy)
     rateLimitService.consumeBucket(testPolicy)
     val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
-    Assertions.assertThat(ex1.retryAfter).isEqualTo(1000)
+    assertThat(ex1.retryAfter).isEqualTo(1000)
 
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 500))
     val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
-    Assertions.assertThat(ex2.retryAfter).isEqualTo(500)
+    assertThat(ex2.retryAfter).isEqualTo(500)
 
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 2_000))
     rateLimitService.consumeBucket(testPolicy)
@@ -105,8 +105,8 @@ class RateLimitServiceTest {
     val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucketUnless(testPolicy) { false } }
     val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucketUnless(testPolicy) { true } }
 
-    Assertions.assertThat(ex1.retryAfter).isEqualTo(1000)
-    Assertions.assertThat(ex2.retryAfter).isEqualTo(1000)
+    assertThat(ex1.retryAfter).isEqualTo(1000)
+    assertThat(ex2.retryAfter).isEqualTo(1000)
   }
 
   @Test
@@ -114,10 +114,10 @@ class RateLimitServiceTest {
     val fakeRequest = makeFakeGenericRequest()
     val policy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
 
-    Assertions.assertThat(policy).isNotNull
-    Assertions.assertThat(policy?.bucketName).isEqualTo("global.ip.127.0.0.1")
-    Assertions.assertThat(policy?.limit).isEqualTo(TEST_IP_LIMIT)
-    Assertions.assertThat(policy?.windowSize).isEqualTo(TEST_IP_WINDOW)
+    assertThat(policy).isNotNull
+    assertThat(policy?.bucketName).isEqualTo("global.ip.127.0.0.1")
+    assertThat(policy?.limit).isEqualTo(TEST_IP_LIMIT)
+    assertThat(policy?.windowSize).isEqualTo(TEST_IP_WINDOW)
   }
 
   @Test
@@ -125,10 +125,19 @@ class RateLimitServiceTest {
     val fakeRequest = makeFakeGenericRequest()
     val policy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount)
 
-    Assertions.assertThat(policy).isNotNull
-    Assertions.assertThat(policy?.bucketName).isEqualTo("global.user.$TEST_USER_ID")
-    Assertions.assertThat(policy?.limit).isEqualTo(TEST_USER_LIMIT)
-    Assertions.assertThat(policy?.windowSize).isEqualTo(TEST_USER_WINDOW)
+    assertThat(policy).isNotNull
+    assertThat(policy?.bucketName).isEqualTo("global.user.$TEST_USER_ID")
+    assertThat(policy?.limit).isEqualTo(TEST_USER_LIMIT)
+    assertThat(policy?.windowSize).isEqualTo(TEST_USER_WINDOW)
+  }
+
+  @Test
+  fun `rate limit bucket is correctly defined for global auth rate limit`() {
+    val fakeRequest = makeFakeGenericRequest()
+    val policy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
+
+    assertThat(policy).isNotNull
+    assertThat(policy?.bucketName).isEqualTo("global.ip.127.0.0.1::auth")
   }
 
   @Test
@@ -143,15 +152,15 @@ class RateLimitServiceTest {
     val policy1 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerWithoutBucket)
     val policy2 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerWithBucket)
 
-    Assertions.assertThat(noPolicy).isNull()
-    Assertions.assertThat(policy1).isNotNull
-    Assertions.assertThat(policy2).isNotNull
+    assertThat(noPolicy).isNull()
+    assertThat(policy1).isNotNull
+    assertThat(policy2).isNotNull
 
-    Assertions.assertThat(policy1?.limit).isEqualTo(2)
-    Assertions.assertThat(policy2?.limit).isEqualTo(2)
+    assertThat(policy1?.limit).isEqualTo(2)
+    assertThat(policy2?.limit).isEqualTo(2)
 
-    Assertions.assertThat(policy1?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
-    Assertions.assertThat(policy2?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.uwu")
+    assertThat(policy1?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
+    assertThat(policy2?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.uwu")
   }
 
   @Test
@@ -178,15 +187,15 @@ class RateLimitServiceTest {
     val policyWithoutMajor1 = rateLimitService.getEndpointRateLimit(fakeRequest1, null, handlerWithoutMajor)
     val policyWithoutMajor2 = rateLimitService.getEndpointRateLimit(fakeRequest2, null, handlerWithoutMajor)
 
-    Assertions.assertThat(policyWithMajor1).isNotNull
-    Assertions.assertThat(policyWithMajor2).isNotNull
-    Assertions.assertThat(policyWithMajor3).isNotNull
-    Assertions.assertThat(policyWithoutMajor1).isNotNull
-    Assertions.assertThat(policyWithoutMajor2).isNotNull
+    assertThat(policyWithMajor1).isNotNull
+    assertThat(policyWithMajor2).isNotNull
+    assertThat(policyWithMajor3).isNotNull
+    assertThat(policyWithoutMajor1).isNotNull
+    assertThat(policyWithoutMajor2).isNotNull
 
-    Assertions.assertThat(policyWithMajor1?.bucketName).isNotEqualTo(policyWithMajor2?.bucketName)
-    Assertions.assertThat(policyWithoutMajor1?.bucketName).isEqualTo(policyWithoutMajor2?.bucketName)
-    Assertions.assertThat(policyWithMajor2?.bucketName).isEqualTo(policyWithMajor3?.bucketName)
+    assertThat(policyWithMajor1?.bucketName).isNotEqualTo(policyWithMajor2?.bucketName)
+    assertThat(policyWithoutMajor1?.bucketName).isEqualTo(policyWithoutMajor2?.bucketName)
+    assertThat(policyWithMajor2?.bucketName).isEqualTo(policyWithMajor3?.bucketName)
   }
 
   @Test
@@ -197,11 +206,11 @@ class RateLimitServiceTest {
     val policy1 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handler)
     val policy2 = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handler)
 
-    Assertions.assertThat(policy1).isNotNull
-    Assertions.assertThat(policy2).isNotNull
+    assertThat(policy1).isNotNull
+    assertThat(policy2).isNotNull
 
-    Assertions.assertThat(policy1?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
-    Assertions.assertThat(policy2?.bucketName).isEqualTo("endpoint.user.1337.GET /fake/route")
+    assertThat(policy1?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
+    assertThat(policy2?.bucketName).isEqualTo("endpoint.user.1337.GET /fake/route")
   }
 
   @Test
@@ -217,11 +226,13 @@ class RateLimitServiceTest {
     val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount)
     val genericEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerGeneric)
     val authEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerAuth)
+    val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    Assertions.assertThat(globalIpPolicy).isNull()
-    Assertions.assertThat(globalUserPolicy).isNull()
-    Assertions.assertThat(genericEndpointPolicy).isNotNull
-    Assertions.assertThat(authEndpointPolicy).isNotNull
+    assertThat(globalIpPolicy).isNull()
+    assertThat(globalUserPolicy).isNull()
+    assertThat(genericEndpointPolicy).isNotNull
+    assertThat(authEndpointPolicy).isNotNull
+    assertThat(authPolicy).isNotNull
   }
 
   @Test
@@ -237,11 +248,13 @@ class RateLimitServiceTest {
     val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount)
     val genericEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerGeneric)
     val authEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerAuth)
+    val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    Assertions.assertThat(globalIpPolicy).isNotNull
-    Assertions.assertThat(globalUserPolicy).isNotNull
-    Assertions.assertThat(genericEndpointPolicy).isNull()
-    Assertions.assertThat(authEndpointPolicy).isNotNull
+    assertThat(globalIpPolicy).isNotNull
+    assertThat(globalUserPolicy).isNotNull
+    assertThat(genericEndpointPolicy).isNull()
+    assertThat(authEndpointPolicy).isNotNull
+    assertThat(authPolicy).isNotNull
   }
 
   @Test
@@ -257,11 +270,13 @@ class RateLimitServiceTest {
     val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount)
     val genericEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerGeneric)
     val authEndpointPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, userAccount, handlerAuth)
+    val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    Assertions.assertThat(globalIpPolicy).isNotNull
-    Assertions.assertThat(globalUserPolicy).isNotNull
-    Assertions.assertThat(genericEndpointPolicy).isNotNull
-    Assertions.assertThat(authEndpointPolicy).isNull()
+    assertThat(globalIpPolicy).isNotNull
+    assertThat(globalUserPolicy).isNotNull
+    assertThat(genericEndpointPolicy).isNotNull
+    assertThat(authEndpointPolicy).isNull()
+    assertThat(authPolicy).isNull()
   }
 
   // --- HELPERS

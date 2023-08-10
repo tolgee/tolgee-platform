@@ -43,6 +43,7 @@ dependencies {
 
     implementation(project(':data'))
     implementation(project(':misc'))
+    testImplementation(project(':testing'))
 
     /**
      * SPRING DOC
