@@ -102,8 +102,8 @@ class JwtServiceTest {
     val auth = jwtService.validateToken(token)
     val superAuth = jwtService.validateToken(superToken)
 
-    assertThat(auth.details.isSuperToken).isFalse()
-    assertThat(superAuth.details.isSuperToken).isTrue()
+    assertThat(auth.details?.isSuperToken).isFalse()
+    assertThat(superAuth.details?.isSuperToken).isTrue()
   }
 
   @Test
@@ -114,7 +114,7 @@ class JwtServiceTest {
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
 
     val superAuth = jwtService.validateToken(superToken)
-    assertThat(superAuth.details.isSuperToken).isFalse()
+    assertThat(superAuth.details?.isSuperToken).isFalse()
   }
 
   @Test

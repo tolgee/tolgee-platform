@@ -18,15 +18,7 @@ package io.tolgee.security.authentication
 
 data class TolgeeAuthenticationDetails(
   /**
-   * Whether the credentials are a valid Super JWT Token
+   * Whether the user is super-authenticated
    */
-  val isSuperToken: Boolean,
-  /**
-   * Whether the credentials used are an API Key (PAK or PAT)
-   */
-  val isApiKey: Boolean,
-  /**
-   * ID of the project the credentials are limited to. Only applicable for PAK tokens.
-   */
-  val projectIdScope: Long?
+  val isSuperToken: Boolean
 )

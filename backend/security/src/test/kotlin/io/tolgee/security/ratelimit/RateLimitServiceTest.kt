@@ -46,9 +46,8 @@ class RateLimitServiceTest {
     const val TEST_USER_ID = 1337L
   }
 
-  // TODO: use an internal fake cache manager that uses thread-local caches - this would allow these tests to be run in parallel
   private val cacheManager = ConcurrentMapCacheManager()
-  // TODO: use an internal fake locking provider that uses thread-local locks - same reason as above
+
   private val lockingProvider = TestLockingProvider()
 
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)

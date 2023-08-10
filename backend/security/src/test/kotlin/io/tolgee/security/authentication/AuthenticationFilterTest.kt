@@ -68,11 +68,7 @@ class AuthenticationFilterTest {
         TolgeeAuthentication(
           "uwu",
           userAccount,
-          TolgeeAuthenticationDetails(
-            isSuperToken = false,
-            isApiKey = false,
-            projectIdScope = null,
-          ),
+          null,
         )
       )
 

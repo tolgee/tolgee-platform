@@ -41,13 +41,9 @@ class AuthenticationDisabledFilter(
   ) {
     // Set the initial user as current user, always.
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      "",
+      null,
       initialUser,
-      TolgeeAuthenticationDetails(
-        isSuperToken = true,
-        isApiKey = false,
-        projectIdScope = null,
-      )
+      TolgeeAuthenticationDetails(true)
     )
 
     filterChain.doFilter(request, response)

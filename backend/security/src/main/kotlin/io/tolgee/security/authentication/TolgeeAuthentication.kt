@@ -21,9 +21,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 
 class TolgeeAuthentication(
-  private val credentials: String,
+  private val credentials: Any?,
   private val userAccount: UserAccount,
-  private val details: TolgeeAuthenticationDetails,
+  private val details: TolgeeAuthenticationDetails?,
 ) : Authentication {
   override fun getName(): String {
     return userAccount.username
@@ -33,11 +33,11 @@ class TolgeeAuthentication(
     return emptyList()
   }
 
-  override fun getCredentials(): String {
+  override fun getCredentials(): Any? {
     return credentials
   }
 
-  override fun getDetails(): TolgeeAuthenticationDetails {
+  override fun getDetails(): TolgeeAuthenticationDetails? {
     return details
   }
 

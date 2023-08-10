@@ -108,13 +108,9 @@ class JwtService(
     val hasSuperPowers =  steClaim != null && steClaim > currentDateProvider.date.time
 
     return TolgeeAuthentication(
-      token,
+      jws,
       account,
-      TolgeeAuthenticationDetails(
-        hasSuperPowers,
-        false,
-        null,
-      ),
+      TolgeeAuthenticationDetails(hasSuperPowers)
     )
   }
 
