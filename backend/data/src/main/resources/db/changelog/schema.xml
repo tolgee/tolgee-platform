@@ -2256,6 +2256,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431778-1">
+        <validCheckSum>ANY</validCheckSum>
         <sql dbms="postgresql">
             CREATE
             EXTENSION IF NOT EXISTS unaccent;
@@ -2397,6 +2398,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-0">
+        <validCheckSum>ANY</validCheckSum>
         <sql>
             create unique index permission_null_idx on permission (organization_id);
             insert into permission (id, type, organization_id, created_at, updated_at)
