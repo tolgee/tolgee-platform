@@ -2,6 +2,7 @@ build
 *.iml
 **/application-dev.properties
 **/application-dev.yaml
+**/application-dev-*.yaml
 **/application-local.yaml
 **/application-postgres.yaml
 **/application-testing.yaml
@@ -61,3 +62,4 @@ backend/app/src/main/resources/application-js-e2e.properties
 
 /backend/*/build
 /backend/*/out
+

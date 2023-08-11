@@ -1,6 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.LockingProvider
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.events.OnConsumePayAsYouGoMtCredits
@@ -17,6 +18,7 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.util.*
+import javax.persistence.EntityManager
 import javax.transaction.Transactional
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -27,20 +29,26 @@ class MtCreditBucketService(
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
   private val organizationService: OrganizationService,
-  private val eventPublisher: ApplicationEventPublisher
+  private val eventPublisher: ApplicationEventPublisher,
+  private val lockingProvider: LockingProvider,
+  private val entityManager: EntityManager
 ) : Logging {
   @OptIn(ExperimentalTime::class)
-  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
+  @Transactional(dontRollbackOn = [OutOfCreditsException::class], value = Transactional.TxType.REQUIRES_NEW)
   fun consumeCredits(project: Project, amount: Int) {
-    val time = measureTime {
-      val bucket = findOrCreateBucket(project)
-      consumeCredits(bucket, amount)
+    lockingProvider.withLocking("consumeCredits-${project.organizationOwner.id}") {
+      val time = measureTime {
+        val bucket = findOrCreateBucket(project)
+        if (bucket.id != 0L) {
+          entityManager.refresh(bucket)
+        }
+        consumeCredits(bucket, amount)
+      }
+      logger.debug("Consumed $amount credits in $time")
     }
-    logger.debug("Consumed $amount credits in $time")
   }
 
-  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
-  fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
+  private fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
 
     // The check for sufficient credit amount (bucket, extra credits, pay as you go spending limit)
@@ -83,6 +91,10 @@ class MtCreditBucketService(
   }
 
   private fun MtCreditBucket.consumeSufficientCredits(amount: Int, organizationId: Long) {
+    logger.debug(
+      "Consuming $amount credits for organization $organizationId, " +
+        "credits: $credits, extraCredits: $extraCredits"
+    )
     if (this.credits >= amount) {
       this.credits -= amount
       return

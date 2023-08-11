@@ -522,6 +522,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     }
 
     assertJobStateCacheCleared(job)
+    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isNull()
   }
 
   private fun assertJobStateCacheCleared(job: BatchJob) {
