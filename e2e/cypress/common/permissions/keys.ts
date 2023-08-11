@@ -48,6 +48,7 @@ export function testKeys(info: ProjectInfo) {
       cy.gcy('add-box').should('be.visible');
     }
     // close popup
+    cy.waitForDom();
     cy.get('body').click(0, 0);
   }
 
