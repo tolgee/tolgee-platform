@@ -1,3 +1,12 @@
+## [3.26.1](https://github.com/tolgee/tolgee-platform/compare/v3.26.0...v3.26.1) (2023-08-11)
+
+
+### Bug Fixes
+
+* Activity Error handling ([#1854](https://github.com/tolgee/tolgee-platform/issues/1854)) ([6f8637d](https://github.com/tolgee/tolgee-platform/commit/6f8637dd6c5a6bb44af7431a4a57ec5d5bbb9ada))
+* Ignore checksum for re-formatted schema SQL change sets ([#1856](https://github.com/tolgee/tolgee-platform/issues/1856)) ([4d4a55c](https://github.com/tolgee/tolgee-platform/commit/4d4a55ce80c86b032350581b2b16db3b0750b3c7))
+* Set default instance batch concurrency to 1 ([#1857](https://github.com/tolgee/tolgee-platform/issues/1857)) ([d28f705](https://github.com/tolgee/tolgee-platform/commit/d28f705552cb155fa42fff46fc414c5f76ce337b))
+
 # [3.26.0](https://github.com/tolgee/tolgee-platform/compare/v3.25.4...v3.26.0) (2023-08-10)
 
 
