@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.PermissionTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class V2ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }

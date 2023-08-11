@@ -10,6 +10,7 @@ import io.tolgee.dtos.ProjectPermissionData
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
+@LongRunningTest
 class LanguageDeletePermissionTest : AbstractSpringTest() {
 
   lateinit var testData: LanguagePermissionsTestData

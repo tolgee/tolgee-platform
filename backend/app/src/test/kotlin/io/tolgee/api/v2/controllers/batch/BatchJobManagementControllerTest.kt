@@ -27,7 +27,7 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.translation.AutoTranslationService
-import io.tolgee.testing.ContextRecreatingTest
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -53,8 +53,8 @@ import javax.transaction.Transactional
 import kotlin.coroutines.CoroutineContext
 
 @AutoConfigureMockMvc
-@ContextRecreatingTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@LongRunningTest
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
 
   lateinit var testData: BatchJobsTestData

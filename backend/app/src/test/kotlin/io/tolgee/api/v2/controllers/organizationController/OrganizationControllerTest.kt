@@ -15,6 +15,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun `returns all`() {

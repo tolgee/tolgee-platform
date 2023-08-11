@@ -17,6 +17,7 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
+@LongRunningTest
 class ProjectServiceTest : AbstractSpringTest() {
 
   @Autowired

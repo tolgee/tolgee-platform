@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,6 +20,7 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TranslationsTestData

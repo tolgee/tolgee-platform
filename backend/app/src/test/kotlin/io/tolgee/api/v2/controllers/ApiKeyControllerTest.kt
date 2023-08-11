@@ -13,6 +13,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -25,6 +26,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class ApiKeyControllerTest : AuthorizedControllerTest() {
 
   lateinit var testData: ApiKeysTestData

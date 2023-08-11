@@ -23,6 +23,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -49,6 +50,7 @@ import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
 import kotlin.system.measureTimeMillis
 
+@LongRunningTest
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 

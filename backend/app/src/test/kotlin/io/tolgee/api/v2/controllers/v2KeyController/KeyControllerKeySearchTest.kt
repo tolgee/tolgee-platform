@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.KeySearchTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -19,6 +20,7 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource

@@ -4,12 +4,14 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.LongRunningTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class OpenApiTest : AbstractControllerTest() {
 
   @Test

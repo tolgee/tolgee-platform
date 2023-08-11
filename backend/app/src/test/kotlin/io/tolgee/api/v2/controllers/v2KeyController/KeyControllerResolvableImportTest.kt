@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.generateImage
@@ -22,6 +23,7 @@ import kotlin.properties.Delegates
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: ResolvableImportTestData

@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.testing.LongRunningTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@LongRunningTest
 class KeyControllerLanguagePermissionTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: LanguagePermissionsTestData

@@ -67,6 +67,7 @@ jobs:
             "server-app:runContextRecreatingTests",
             "server-app:runStandardTests",
             "server-app:runWebsocketTests",
+            "server-app:runLongRunningTests",
             "ee-test:test",
             "data:test",
           ]
