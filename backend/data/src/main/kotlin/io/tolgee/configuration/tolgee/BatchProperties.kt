@@ -7,5 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @DocProperty(description = "Configuration of batch operations.", displayName = "Batch operations")
 class BatchProperties {
   @DocProperty(description = "How many parallel jobs can be run at once on single Tolgee instance")
-  var concurrency: Int = 10
+  var concurrency: Int = 1
 }
