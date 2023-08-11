@@ -10,6 +10,7 @@ import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -18,13 +19,16 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.security.project_auth.ProjectNotSelectedException
 import org.hibernate.Transaction
+import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.internal.AbstractPersistentCollection
+import org.hibernate.event.spi.EventSource
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.io.Serializable
+import javax.persistence.EntityManager
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -194,8 +198,8 @@ class InterceptedEventsManager(
   private val activityRevision: ActivityRevision
     get() {
       if (!activityHolder.activityRevision.isInitializedByInterceptor) {
-        activityHolder.activityRevision.isInitializedByInterceptor = true
         activityHolder.activityRevision.also { revision ->
+          revision.isInitializedByInterceptor = true
           revision.authorId = userAccount?.id
           try {
             revision.projectId = projectHolder.project.id
@@ -205,10 +209,40 @@ class InterceptedEventsManager(
           }
           revision.type = activityHolder.activity
         }
+
+        entityManager.unwrap(EventSource::class.java).actionQueue.registerProcess(
+          BeforeTransactionCompletionProcess {
+            if (it.transaction.isActive) {
+              if (!activityHolder.enableAutoCompletion) {
+                return@BeforeTransactionCompletionProcess
+              }
+              val activityRevision = activityHolder.activityRevision
+              if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null) return@BeforeTransactionCompletionProcess
+              logger.debug("Publishing project activity event")
+              try {
+                applicationContext.publishEvent(
+                  OnProjectActivityEvent(
+                    activityRevision,
+                    activityHolder.modifiedEntities,
+                    activityHolder.organizationId,
+                    activityHolder.utmData,
+                    activityHolder.sdkInfo
+                  )
+                )
+              } catch (e: Throwable) {
+                logger.error("Error while publishing project activity event", e)
+                throw e
+              }
+            }
+          }
+        )
       }
 
       return activityHolder.activityRevision
     }
+
+  private val entityManager: EntityManager
+    get() = applicationContext.getBean(EntityManager::class.java)
 
   private val userAccount: UserAccountDto?
     get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull
