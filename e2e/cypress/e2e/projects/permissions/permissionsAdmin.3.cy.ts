@@ -1,15 +1,16 @@
 import {
   checkPermissions,
   RUN,
+  SKIP,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 
-describe('Permissions admin', () => {
+describe('Permissions admin 3', () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       checkPermissions(projectInfo, {
-        'project-menu-item-dashboard': RUN,
-        'project-menu-item-translations': RUN,
+        'project-menu-item-dashboard': SKIP,
+        'project-menu-item-translations': SKIP,
         'project-menu-item-settings': RUN,
         'project-menu-item-languages': RUN,
         'project-menu-item-members': RUN,

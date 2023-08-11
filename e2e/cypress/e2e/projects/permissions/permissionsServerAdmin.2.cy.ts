@@ -3,6 +3,7 @@ import { HOST } from '../../../common/constants';
 import {
   checkPermissions,
   RUN,
+  SKIP,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 import {
@@ -10,7 +11,7 @@ import {
   visitProjectDashboard,
 } from '../../../common/shared';
 
-describe('Permissions admin', () => {
+describe('Permissions admin 2', () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
@@ -33,14 +34,14 @@ describe('Permissions admin', () => {
       // check that admin has correct access to everything
       visitProjectDashboard(projectInfo.project.id);
       checkPermissions(projectInfo, {
-        'project-menu-item-dashboard': RUN,
+        'project-menu-item-dashboard': SKIP,
         'project-menu-item-translations': RUN,
-        'project-menu-item-settings': RUN,
-        'project-menu-item-languages': RUN,
-        'project-menu-item-members': RUN,
-        'project-menu-item-import': RUN,
-        'project-menu-item-export': RUN,
-        'project-menu-item-integrate': RUN,
+        'project-menu-item-settings': SKIP,
+        'project-menu-item-languages': SKIP,
+        'project-menu-item-members': SKIP,
+        'project-menu-item-import': SKIP,
+        'project-menu-item-export': SKIP,
+        'project-menu-item-integrate': SKIP,
       });
     });
   });
