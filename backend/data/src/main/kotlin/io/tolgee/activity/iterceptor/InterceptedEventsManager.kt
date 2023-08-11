@@ -1,6 +1,7 @@
 package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -197,53 +198,72 @@ class InterceptedEventsManager(
 
   private val activityRevision: ActivityRevision
     get() {
-      if (!activityHolder.activityRevision.isInitializedByInterceptor) {
-        activityHolder.activityRevision.also { revision ->
-          revision.isInitializedByInterceptor = true
-          revision.authorId = userAccount?.id
-          try {
-            revision.projectId = projectHolder.project.id
-            activityHolder.organizationId = projectHolder.project.organizationOwnerId
-          } catch (e: ProjectNotSelectedException) {
-            logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
-          }
-          revision.type = activityHolder.activity
-        }
-
-        entityManager.unwrap(EventSource::class.java).actionQueue.registerProcess(
-          BeforeTransactionCompletionProcess {
-            if (it.transaction.isActive) {
-              if (!activityHolder.enableAutoCompletion) {
-                return@BeforeTransactionCompletionProcess
-              }
-              val activityRevision = activityHolder.activityRevision
-              if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null)
-                return@BeforeTransactionCompletionProcess
-              logger.debug("Publishing project activity event")
-              try {
-                applicationContext.publishEvent(
-                  OnProjectActivityEvent(
-                    activityRevision,
-                    activityHolder.modifiedEntities,
-                    activityHolder.organizationId,
-                    activityHolder.utmData,
-                    activityHolder.sdkInfo
-                  )
-                )
-              } catch (e: Throwable) {
-                logger.error("Error while publishing project activity event", e)
-                throw e
-              }
-            }
-          }
-        )
-      }
-
+      initActivityHolder()
       return activityHolder.activityRevision
     }
 
+  fun initActivityHolder() {
+    if (!activityHolder.activityRevision.isInitializedByInterceptor) {
+      initializeActivityRevision()
+      registerBeforeCompletion()
+    }
+  }
+
+  private fun initializeActivityRevision() {
+    activityHolder.activityRevision.also { revision ->
+      revision.isInitializedByInterceptor = true
+      revision.authorId = userAccount?.id
+      try {
+        revision.projectId = projectHolder.project.id
+        activityHolder.organizationId = projectHolder.project.organizationOwnerId
+      } catch (e: ProjectNotSelectedException) {
+        logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
+      }
+      revision.type = activityHolder.activity
+    }
+  }
+
+  private fun registerBeforeCompletion() {
+    entityManager.unwrap(EventSource::class.java).actionQueue.registerProcess(
+      BeforeTransactionCompletionProcess {
+        if (it.transaction.isActive) {
+          if (!activityHolder.enableAutoCompletion) {
+            return@BeforeTransactionCompletionProcess
+          }
+          val activityRevision = activityHolder.activityRevision
+          if (!activityRevision.isInitializedByInterceptor)
+            return@BeforeTransactionCompletionProcess
+          logger.debug("Publishing project activity event")
+          try {
+            publishOnActivityEvent(activityRevision)
+            activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
+            activityHolder.afterActivityFlushed?.invoke()
+          } catch (e: Throwable) {
+            logger.error("Error while publishing project activity event", e)
+            throw e
+          }
+        }
+      }
+    )
+  }
+
+  private fun publishOnActivityEvent(activityRevision: ActivityRevision) {
+    applicationContext.publishEvent(
+      OnProjectActivityEvent(
+        activityRevision,
+        activityHolder.modifiedEntities,
+        activityHolder.organizationId,
+        activityHolder.utmData,
+        activityHolder.sdkInfo
+      )
+    )
+  }
+
   private val entityManager: EntityManager
     get() = applicationContext.getBean(EntityManager::class.java)
+
+  private val activityService: ActivityService
+    get() = applicationContext.getBean(ActivityService::class.java)
 
   private val userAccount: UserAccountDto?
     get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull

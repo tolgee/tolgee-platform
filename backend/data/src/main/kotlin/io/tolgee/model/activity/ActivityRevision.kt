@@ -100,9 +100,6 @@ class ActivityRevision : java.io.Serializable {
   @OneToOne(fetch = FetchType.LAZY)
   var batchJob: BatchJob? = null
 
-  @Transient
-  var afterFlush: (() -> Unit)? = null
-
   /**
    * The instance is created in the Holder by default, but it is not initialized by the interceptor,
    * so projectId and authorId might be null.

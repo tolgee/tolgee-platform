@@ -38,8 +38,7 @@ class BatchJobActivityFinalizer(
   }
 
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
-    val activityRevision = activityHolder.activityRevision
-    activityRevision.afterFlush = afterFlush@{
+    activityHolder.afterActivityFlushed = afterFlush@{
       try {
         logger.debug("Finalizing activity for job ${job.id} (after flush)")
         waitForOtherChunksToComplete(job)

@@ -63,12 +63,11 @@ class BatchJobActionService(
     concurrentExecutionLauncher.run { executionItem, coroutineContext ->
       var retryExecution: BatchJobChunkExecution? = null
       try {
-        val execution = catchingExceptions(executionItem) { onBeforeTransactionCompletionError ->
+        val execution = catchingExceptions(executionItem) {
           executeInNewTransaction(
             transactionManager,
             isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
           ) { transactionStatus ->
-            activityHolder.onBeforeTransactionCompletionError = onBeforeTransactionCompletionError
 
             val lockedExecution = getPendingUnlockedExecutionItem(executionItem)
               ?: return@executeInNewTransaction null
@@ -156,15 +155,10 @@ class BatchJobActionService(
 
   private inline fun <reified T> catchingExceptions(
     executionItem: ExecutionQueueItem,
-    fn: ((Throwable) -> Unit) -> T
+    fn: () -> T
   ): T? {
     return try {
-      var beforeTransactionCompletionError: Throwable? = null
-      val onBeforeTransactionCompletionError: (Throwable) -> Unit =
-        { beforeTransactionCompletionError = it }
-      val result = fn(onBeforeTransactionCompletionError)
-      beforeTransactionCompletionError?.let { throw it }
-      result
+      fn()
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
