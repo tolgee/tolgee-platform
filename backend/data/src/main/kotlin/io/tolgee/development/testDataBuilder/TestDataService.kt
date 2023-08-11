@@ -118,6 +118,7 @@ class TestDataService(
         userAccountService.delete(user)
       }
     }
+
     builder.data.organizations.forEach { organizationBuilder ->
       organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
     }

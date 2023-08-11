@@ -32,7 +32,6 @@ class ActivityService(
     mergedActivityRevision.persistModifiedEntities()
 
     entityManager.flush()
-    mergedActivityRevision.afterFlush?.invoke()
 
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }

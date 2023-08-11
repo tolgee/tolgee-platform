@@ -21,14 +21,14 @@ class ActivityHolderConfig {
   @ConditionalOnMissingBean
   @Qualifier("transactionActivityHolder")
   fun transactionActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder()
+    return ActivityHolder(applicationContext)
   }
 
   @Bean
   @RequestScope
   @Qualifier("requestActivityHolder")
   fun requestActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder()
+    return ActivityHolder(applicationContext)
   }
 
   @Bean

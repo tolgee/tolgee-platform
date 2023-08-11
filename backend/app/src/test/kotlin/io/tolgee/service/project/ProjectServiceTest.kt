@@ -171,7 +171,7 @@ class ProjectServiceTest : AbstractSpringTest() {
     }
 
     executeInNewTransaction(platformTransactionManager) {
-      projectService.deleteProject(projectService.get(testData.projectBuilder.self.id).id)
+      projectService.deleteProject(testData.projectBuilder.self.id)
     }
 
     executeInNewTransaction {

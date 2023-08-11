@@ -1,12 +1,14 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.iterceptor.InterceptedEventsManager
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import org.springframework.context.ApplicationContext
 import kotlin.reflect.KClass
 
-open class ActivityHolder {
+open class ActivityHolder(val applicationContext: ApplicationContext) {
   open var activity: ActivityType? = null
     set(value) {
       field = value
@@ -37,7 +39,11 @@ open class ActivityHolder {
 
   open var enableAutoCompletion: Boolean = true
 
-  open var onBeforeTransactionCompletionError: ((throwable: Throwable) -> Unit)? = null
+  open var afterActivityFlushed: (() -> Unit)? = null
+    set(value) {
+      this.applicationContext.getBean(InterceptedEventsManager::class.java).initActivityHolder()
+      field = value
+    }
 }
 
 typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

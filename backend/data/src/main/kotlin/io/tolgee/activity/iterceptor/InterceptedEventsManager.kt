@@ -1,6 +1,7 @@
 package io.tolgee.activity.iterceptor
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.ActivityService
 import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -10,6 +11,7 @@ import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -18,13 +20,16 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.security.project_auth.ProjectNotSelectedException
 import org.hibernate.Transaction
+import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.internal.AbstractPersistentCollection
+import org.hibernate.event.spi.EventSource
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.io.Serializable
+import javax.persistence.EntityManager
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -193,22 +198,72 @@ class InterceptedEventsManager(
 
   private val activityRevision: ActivityRevision
     get() {
-      if (!activityHolder.activityRevision.isInitializedByInterceptor) {
-        activityHolder.activityRevision.isInitializedByInterceptor = true
-        activityHolder.activityRevision.also { revision ->
-          revision.authorId = userAccount?.id
-          try {
-            revision.projectId = projectHolder.project.id
-            activityHolder.organizationId = projectHolder.project.organizationOwnerId
-          } catch (e: ProjectNotSelectedException) {
-            logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
-          }
-          revision.type = activityHolder.activity
-        }
-      }
-
+      initActivityHolder()
       return activityHolder.activityRevision
     }
+
+  fun initActivityHolder() {
+    if (!activityHolder.activityRevision.isInitializedByInterceptor) {
+      initializeActivityRevision()
+      registerBeforeCompletion()
+    }
+  }
+
+  private fun initializeActivityRevision() {
+    activityHolder.activityRevision.also { revision ->
+      revision.isInitializedByInterceptor = true
+      revision.authorId = userAccount?.id
+      try {
+        revision.projectId = projectHolder.project.id
+        activityHolder.organizationId = projectHolder.project.organizationOwnerId
+      } catch (e: ProjectNotSelectedException) {
+        logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
+      }
+      revision.type = activityHolder.activity
+    }
+  }
+
+  private fun registerBeforeCompletion() {
+    entityManager.unwrap(EventSource::class.java).actionQueue.registerProcess(
+      BeforeTransactionCompletionProcess {
+        if (it.transaction.isActive) {
+          if (!activityHolder.enableAutoCompletion) {
+            return@BeforeTransactionCompletionProcess
+          }
+          val activityRevision = activityHolder.activityRevision
+          if (!activityRevision.isInitializedByInterceptor)
+            return@BeforeTransactionCompletionProcess
+          logger.debug("Publishing project activity event")
+          try {
+            publishOnActivityEvent(activityRevision)
+            activityService.storeActivityData(activityRevision, activityHolder.modifiedEntities)
+            activityHolder.afterActivityFlushed?.invoke()
+          } catch (e: Throwable) {
+            logger.error("Error while publishing project activity event", e)
+            throw e
+          }
+        }
+      }
+    )
+  }
+
+  private fun publishOnActivityEvent(activityRevision: ActivityRevision) {
+    applicationContext.publishEvent(
+      OnProjectActivityEvent(
+        activityRevision,
+        activityHolder.modifiedEntities,
+        activityHolder.organizationId,
+        activityHolder.utmData,
+        activityHolder.sdkInfo
+      )
+    )
+  }
+
+  private val entityManager: EntityManager
+    get() = applicationContext.getBean(EntityManager::class.java)
+
+  private val activityService: ActivityService
+    get() = applicationContext.getBean(ActivityService::class.java)
 
   private val userAccount: UserAccountDto?
     get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull
