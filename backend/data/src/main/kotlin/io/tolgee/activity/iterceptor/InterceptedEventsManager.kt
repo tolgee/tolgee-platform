@@ -217,7 +217,8 @@ class InterceptedEventsManager(
                 return@BeforeTransactionCompletionProcess
               }
               val activityRevision = activityHolder.activityRevision
-              if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null) return@BeforeTransactionCompletionProcess
+              if (!activityRevision.isInitializedByInterceptor && activityRevision.afterFlush == null)
+                return@BeforeTransactionCompletionProcess
               logger.debug("Publishing project activity event")
               try {
                 applicationContext.publishEvent(
