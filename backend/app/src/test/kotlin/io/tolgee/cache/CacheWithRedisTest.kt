@@ -42,6 +42,6 @@ class CacheWithRedisTest : AbstractCacheTest() {
 
   @Test
   fun `it has proper cache manager`() {
-    assertThat(cacheManager).isInstanceOf(RedissonSpringCacheManager::class.java)
+    assertThat(unwrappedCacheManager).isInstanceOf(RedissonSpringCacheManager::class.java)
   }
 }
