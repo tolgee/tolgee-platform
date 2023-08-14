@@ -4,6 +4,7 @@ import {
   openBatchOperationMenu,
   selectAll,
 } from '../batchOperations';
+import { visitTranslations } from '../translations';
 import { getLanguageName, ProjectInfo } from './shared';
 
 function checkSourceLanguages(languages: number[], projectInfo: ProjectInfo) {
@@ -52,6 +53,7 @@ function checkOperationsAccessibility(
 export function testBatchOperations(projectInfo: ProjectInfo) {
   const { viewLanguageIds, translateLanguageIds, stateChangeLanguageIds } =
     projectInfo.project.computedPermission;
+  visitTranslations(projectInfo.project.id);
   selectAll();
   openBatchOperationMenu();
   checkOperationsAccessibility(
