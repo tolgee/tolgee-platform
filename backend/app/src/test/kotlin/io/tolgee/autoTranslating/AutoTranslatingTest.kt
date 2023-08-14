@@ -174,7 +174,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   private fun waitForSpanishTranslationSet(keyName: String) {
-    waitForNotThrowing {
+    waitForNotThrowing(pollTime = 200) {
       transactionTemplate.execute {
         val translations = keyService
           .get(testData.project.id, keyName, null)

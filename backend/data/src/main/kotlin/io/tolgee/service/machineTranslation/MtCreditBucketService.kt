@@ -13,10 +13,12 @@ import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRep
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMonths
+import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
 import javax.persistence.EntityManager
 import javax.transaction.Transactional
@@ -31,22 +33,22 @@ class MtCreditBucketService(
   private val organizationService: OrganizationService,
   private val eventPublisher: ApplicationEventPublisher,
   private val lockingProvider: LockingProvider,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val transactionManager: PlatformTransactionManager,
 ) : Logging {
-  @OptIn(ExperimentalTime::class)
-  @Transactional(dontRollbackOn = [OutOfCreditsException::class], value = Transactional.TxType.REQUIRES_NEW)
   fun consumeCredits(project: Project, amount: Int) {
-    lockingProvider.withLocking("consumeCredits-${project.organizationOwner.id}") {
-      val time = measureTime {
-        val bucket = findOrCreateBucket(project)
-        if (bucket.id != 0L) {
-          entityManager.refresh(bucket)
+    lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+      tryUntilItDoesntBreakConstraint {
+        executeInNewTransaction(transactionManager) {
+          val bucket = findOrCreateBucket(project)
+          consumeCredits(bucket, amount)
+          entityManager.flush()
         }
-        consumeCredits(bucket, amount)
       }
-      logger.debug("Consumed $amount credits in $time")
     }
   }
+
+  private fun getMtCreditBucketLockName(project: Project) = "mt-credit-lock-${project.organizationOwner.id}"
 
   private fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
@@ -65,15 +67,20 @@ class MtCreditBucketService(
   @OptIn(ExperimentalTime::class)
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun checkPositiveBalance(project: Project) {
-    val time = measureTime {
-      val bucket = findOrCreateBucket(project)
-      checkPositiveBalance(bucket)
+    lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+      tryUntilItDoesntBreakConstraint {
+        executeInNewTransaction(transactionManager) {
+          val time = measureTime {
+            val bucket = findOrCreateBucket(project)
+            checkPositiveBalance(bucket)
+          }
+          logger.debug("Checked for positive credits in $time")
+        }
+      }
     }
-    logger.debug("Checked for positive credits in $time")
   }
 
-  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
-  fun checkPositiveBalance(bucket: MtCreditBucket) {
+  private fun checkPositiveBalance(bucket: MtCreditBucket) {
     val totalBalance = getTotalBalance(bucket)
 
     if (totalBalance <= 0) {
@@ -177,7 +184,7 @@ class MtCreditBucketService(
     return mtCreditBucketSizeProvider.getSize(organization)
   }
 
-  fun refillIfItsTime(bucket: MtCreditBucket) {
+  private fun refillIfItsTime(bucket: MtCreditBucket) {
     if (bucket.getNextRefillDate() <= currentDateProvider.date) {
       refillBucket(bucket)
     }
