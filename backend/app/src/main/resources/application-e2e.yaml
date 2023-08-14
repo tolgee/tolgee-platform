@@ -53,6 +53,8 @@ tolgee:
       secretKey: mock
   telemetry:
     enabled: false
+  batch:
+    concurrency: 10
 server:
   port: 8201
   error:
