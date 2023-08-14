@@ -3,7 +3,7 @@ spring:
     exclude:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-#  jpa:
+  jpa:
 #    show-sql: true
     properties:
       hibernate:
