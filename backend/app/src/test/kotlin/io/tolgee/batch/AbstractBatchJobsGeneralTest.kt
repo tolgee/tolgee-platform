@@ -429,44 +429,62 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val thirdExecution = executions[job1.id]!![1]
     val fourthExecution = executions[job2.id]!![1]
 
+    batchJobChunkExecutionQueue.size.assert.isEqualTo(4)
+
+    logger.debug("Clearing queue")
     batchJobChunkExecutionQueue.clear()
 
+    batchJobChunkExecutionQueue.size.assert.isEqualTo(0)
+
+    logger.debug("Starting the job launcher")
     batchJobConcurrentLauncher.pause = false
 
+    logger.debug("Adding the first execution to the queue $firstExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
 
+    logger.debug("Waiting for the first execution to finish")
     waitFor(pollTime = 1000) {
       batchJobService.getExecution(firstExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
     }
+
+    logger.debug("Verify job is locked")
     // The first job is now locked
     batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job1.id)
 
+    logger.debug("Adding the second execution to the queue $secondExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
 
+    logger.debug("Verifies it tries to acquire the second job but it can't since the first job is locked")
     waitForNotThrowing {
       // it tries to lock the second job but it can't since the first job is locked
       verify(batchJobProjectLockingManager, atLeast(1))
         .canRunBatchJobOfExecution(eq(job2.id))
     }
 
+    logger.debug("Asserts the second job is still pending")
     // it doesn't run the second execution since the first job is locked
     Thread.sleep(1000)
     batchJobService.getExecution(secondExecution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
 
+    logger.debug("Adding the third execution to the queue $thirdExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(thirdExecution))
 
+    logger.debug("Verify the third execution is successful")
     // second and last execution of job1 is done, so the second job is locked now
     waitFor(pollTime = 1000) {
       batchJobService.getExecution(thirdExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
     }
 
+    logger.debug("Verify the first job is successful")
     job1.waitForCompleted().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
 
+    logger.debug("Verify it unlocks the first job")
     waitForNotThrowing {
       // the project was unlocked before job2 acquired the job
       verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id), eq(job1.id))
     }
 
+    logger.debug("Verify the second job is locked")
     waitForNotThrowing(pollTime = 1000) {
       batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job2.id)
     }
