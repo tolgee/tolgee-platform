@@ -7,7 +7,6 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
-import io.tolgee.util.withTimeoutRetrying
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.http.ResponseEntity
@@ -66,20 +65,18 @@ abstract class AbstractE2eDataController {
 
   @GetMapping(value = ["/clean"])
   open fun cleanup(): Any? {
-    return withTimeoutRetrying(5000, 5) {
-      tryUntilItDoesntBreakConstraint {
-        return@tryUntilItDoesntBreakConstraint executeInNewTransaction(
-          transactionManager,
-          TransactionDefinition.ISOLATION_SERIALIZABLE
-        ) {
-          entityManager.clear()
-          try {
-            testDataService.cleanTestData(this.testData)
-          } catch (e: FileNotFoundException) {
-            return@executeInNewTransaction ResponseEntity.internalServerError().body(e.stackTraceToString())
-          }
-          return@executeInNewTransaction null
+    return tryUntilItDoesntBreakConstraint {
+      executeInNewTransaction(
+        transactionManager,
+        TransactionDefinition.ISOLATION_SERIALIZABLE
+      ) {
+        entityManager.clear()
+        try {
+          testDataService.cleanTestData(this.testData)
+        } catch (e: FileNotFoundException) {
+          return@executeInNewTransaction ResponseEntity.internalServerError().body(e.stackTraceToString())
         }
+        return@executeInNewTransaction null
       }
     }
   }

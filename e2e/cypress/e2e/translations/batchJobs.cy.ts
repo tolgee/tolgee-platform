@@ -73,9 +73,6 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   it('will clear translations', () => {
     selectAll();
     selectOperation('Clear translations');
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
     selectLanguage('English');
     cy.gcy('translations-table-cell-translation-text')
       .contains('en')
@@ -95,20 +92,15 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
 
     selectAll();
     selectOperation('Mark as translated');
-    selectLanguage();
+    selectLanguage('English');
     executeBatchOperation();
     assertHasState('en', 'Translated');
   });
 
-  it('will pretranslate with TM', () => {
+  it('will pre-translate with TM', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Pre-translate by TM');
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
-    cy.gcy('translations-language-select-item').contains('German').click();
-    cy.get('body').click(0, 0);
-    cy.gcy('translations-language-select-item').should('not.be.visible');
+    selectLanguage();
     executeBatchOperation();
   });
 
@@ -151,5 +143,5 @@ function selectLanguage(language = 'German') {
     .click();
   cy.gcy('translations-language-select-item').contains(language).click();
   cy.get('body').click(0, 0);
-  cy.gcy('translations-language-select-item').should('not.be.visible');
+  cy.gcy('translations-language-select-item').should('not.exist');
 }

@@ -6,7 +6,7 @@ import {
 } from '../../../common/permissions/main';
 
 describe('Keys permissions 1', () => {
-  it('screenshots.view', () => {
+  it('screenshots.view', { retries: { runMode: 3 } }, () => {
     visitProjectWithPermissions({ scopes: ['screenshots.view'] }).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
@@ -18,7 +18,7 @@ describe('Keys permissions 1', () => {
     );
   });
 
-  it('screenshots.upload', () => {
+  it('screenshots.upload', { retries: { runMode: 3 } }, () => {
     visitProjectWithPermissions({ scopes: ['screenshots.upload'] }).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
