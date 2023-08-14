@@ -76,8 +76,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('batch-operations-section')
       .findDcy('translations-language-select-form-control')
       .click();
-    cy.gcy('translations-language-select-item').contains('English').click();
-    cy.get('body').click(0, 0);
+    selectLanguage('English');
     cy.gcy('translations-table-cell-translation-text')
       .contains('en')
       .should('exist');
@@ -90,21 +89,13 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   it('will change state to reviewed and back to translated', () => {
     selectAll();
     selectOperation('Mark as reviewed');
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
-    cy.gcy('translations-language-select-item').contains('English').click();
-    cy.get('body').click(0, 0);
+    selectLanguage('English');
     executeBatchOperation();
     assertHasState('en', 'Reviewed');
 
     selectAll();
     selectOperation('Mark as translated');
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
-    cy.gcy('translations-language-select-item').contains('English').click();
-    cy.get('body').click(0, 0);
+    selectLanguage();
     executeBatchOperation();
     assertHasState('en', 'Translated');
   });
@@ -117,17 +108,14 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       .click();
     cy.gcy('translations-language-select-item').contains('German').click();
     cy.get('body').click(0, 0);
+    cy.gcy('translations-language-select-item').should('not.be.visible');
     executeBatchOperation();
   });
 
   it('will Machine translate', () => {
     cy.gcy('translations-row-checkbox').first().click();
     selectOperation('Machine translation');
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
-    cy.gcy('translations-language-select-item').contains('German').click();
-    cy.get('body').click(0, 0);
+    selectLanguage();
     executeBatchOperation();
     getCell('en translated with GOOGLE from en to de').should('be.visible');
     cy.gcy('translations-auto-translated-indicator').should('exist');
@@ -140,11 +128,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('batch-operation-copy-source-select-item')
       .contains('English')
       .click();
-    cy.gcy('batch-operations-section')
-      .findDcy('translations-language-select-form-control')
-      .click();
-    cy.gcy('translations-language-select-item').contains('German').click();
-    cy.get('body').click(0, 0);
+    selectLanguage();
     executeBatchOperation();
     cy.gcy('translations-row')
       .eq(1)
@@ -160,3 +144,12 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     visitTranslations(project.id);
   };
 });
+
+function selectLanguage(language = 'German') {
+  cy.gcy('batch-operations-section')
+    .findDcy('translations-language-select-form-control')
+    .click();
+  cy.gcy('translations-language-select-item').contains(language).click();
+  cy.get('body').click(0, 0);
+  cy.gcy('translations-language-select-item').should('not.be.visible');
+}
