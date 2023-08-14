@@ -460,7 +460,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     waitForNotThrowing {
       // the project was unlocked before job2 acquired the job
-      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id))
+      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id), eq(job1.id))
     }
 
     waitForNotThrowing(pollTime = 1000) {

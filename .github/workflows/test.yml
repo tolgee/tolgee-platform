@@ -106,7 +106,7 @@ jobs:
 
 
       - name: Run backend tests
-        run: ./gradlew ${{ matrix.command }}
+        run: ./gradlew ${{ matrix.command }} && ./gradlew ${{ matrix.command }} && ./gradlew ${{ matrix.command }} && ./gradlew ${{ matrix.command }} && ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
 

@@ -133,12 +133,11 @@ class BatchJobActionService(
 
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      batchJobProjectLockingManager.finalizeIfCompleted(executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is not pending, skipping")
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       batchJobProjectLockingManager.finalizeIfCompleted(executionItem.jobId)
       return null
     }
@@ -216,7 +215,7 @@ class BatchJobActionService(
   }
 
   fun cancelLocalJob(jobId: Long) {
-    batchJobChunkExecutionQueue.cancelJob(jobId)
+    batchJobChunkExecutionQueue.removeJobExecutions(jobId)
     concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
       it.value.second.cancel()
     }

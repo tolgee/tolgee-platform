@@ -3,8 +3,8 @@ spring:
     exclude:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-  jpa:
-    show-sql: true
+#  jpa:
+#    show-sql: true
     properties:
       hibernate:
         jdbc:
@@ -32,9 +32,7 @@ spring:
   jmx:
     enabled: false
   datasource:
-    hikari:
-      maximum-pool-size: 100
-    maximum-pool-size: 15
+    maximum-pool-size: 100
 tolgee:
   postgres-autostart:
     enabled: true
