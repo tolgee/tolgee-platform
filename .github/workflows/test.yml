@@ -194,7 +194,7 @@ jobs:
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        run: ./gradlew runE2e
+        run: ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
