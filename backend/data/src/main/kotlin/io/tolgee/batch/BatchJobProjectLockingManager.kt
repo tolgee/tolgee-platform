@@ -47,14 +47,15 @@ class BatchJobProjectLockingManager(
   }
 
   fun unlockJobForProject(projectId: Long, jobId: Long) {
-    logger.debug("Unlocking job: $jobId for project $projectId")
-    val lockedJobId = getMap()[projectId]
-    if (lockedJobId == jobId) {
+    getMap().compute(projectId) { _, lockedJobId ->
       logger.debug("Unlocking job: $jobId for project $projectId")
-      getMap().remove(projectId)
-      return
+      if (lockedJobId == jobId) {
+        logger.debug("Unlocking job: $jobId for project $projectId")
+        return@compute 0L
+      }
+      logger.debug("Job: $jobId for project $projectId is not locked")
+      return@compute lockedJobId
     }
-    logger.debug("Job: $jobId for project $projectId is not locked")
   }
 
   fun getMap(): ConcurrentMap<Long, Long?> {
@@ -124,25 +125,5 @@ class BatchJobProjectLockingManager(
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {
     return redissonClient.getMap("project_batch_job_locks")
-  }
-
-  /**
-   * It can happen that some other thread or instance will try to
-   * execute execution of already completed job
-   *
-   * The execution is skipped, since it's not pending, but
-   * we have to unlock the project, otherwise it will be locked forever
-   */
-  fun finalizeIfCompleted(jobId: Long) {
-    val cached = batchJobStateProvider.getCached(jobId)
-    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
-    val isCompleted = cached?.all { it.value.status.completed } ?: batchJobService.getJobDto(jobId).status.completed
-    if (isCompleted) {
-      val jobDto = batchJobService.getJobDto(jobId)
-      logger.debug("Job $jobId is completed, unlocking project, removing job state")
-      queue.removeJobExecutions(jobId)
-      unlockJobForProject(jobDto.projectId, jobId)
-      batchJobStateProvider.removeJobState(jobId)
-    }
   }
 }

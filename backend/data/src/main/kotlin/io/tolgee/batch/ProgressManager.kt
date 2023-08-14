@@ -19,17 +19,16 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
-import javax.persistence.EntityManager
 
 @Component
 class ProgressManager(
-  private val entityManager: EntityManager,
   private val eventPublisher: ApplicationEventPublisher,
   private val transactionManager: PlatformTransactionManager,
   private val batchJobService: BatchJobService,
   private val batchJobStateProvider: BatchJobStateProvider,
   private val cachingBatchJobService: CachingBatchJobService,
-  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
+  private val queue: BatchJobChunkExecutionQueue
 ) : Logging {
 
   /**
@@ -101,11 +100,14 @@ class ProgressManager(
     val state = batchJobStateProvider.updateState(execution.batchJob.id) {
       logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
       it.compute(execution.id) { _, v ->
-        v?.copy(transactionCommitted = true)
+        val state = batchJobStateProvider.getStateForExecution(execution)
+        state.transactionCommitted = true
+        state
       }
       it
     }
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
+    logger.debug("Is job ${execution.batchJob.id} completed: $isJobCompleted (execution: ${execution.id})")
     if (isJobCompleted) {
       onJobCompletedCommitted(execution)
     }
@@ -114,9 +116,10 @@ class ProgressManager(
   private fun onJobCompletedCommitted(execution: BatchJobChunkExecution) {
     batchJobStateProvider.removeJobState(execution.batchJob.id)
     val jobDto = batchJobService.getJobDto(execution.batchJob.id)
-    batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobDto.id)
     eventPublisher.publishEvent(OnBatchJobStatusUpdated(jobDto.id, jobDto.projectId, jobDto.status))
     cachingBatchJobService.evictJobCache(execution.batchJob.id)
+    batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobDto.id)
+    batchJobStateProvider.removeJobState(execution.batchJob.id)
   }
 
   fun handleJobStatus(
@@ -138,6 +141,7 @@ class ProgressManager(
 
     if (isAnyCancelled && !failOnly) {
       jobEntity.status = BatchJobStatus.CANCELLED
+      logger.debug("""Saving job with Cancelled status""")
       cachingBatchJobService.saveJob(jobEntity)
       eventPublisher.publishEvent(OnBatchJobCancelled(jobEntity.dto))
       return
@@ -185,6 +189,26 @@ class ProgressManager(
         logger.debug("""Updating job state to running ${job.id}""")
         cachingBatchJobService.setRunningState(job.id)
       }
+    }
+  }
+
+  /**
+   * It can happen that some other thread or instance will try to
+   * execute execution of already completed job
+   *
+   * The execution is skipped, since it's not pending, but
+   * we have to unlock the project, otherwise it will be locked forever
+   */
+  fun finalizeIfCompleted(jobId: Long) {
+    val cached = batchJobStateProvider.getCached(jobId)
+    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
+    val isCompleted = cached?.all { it.value.status.completed } ?: batchJobService.getJobDto(jobId).status.completed
+    if (isCompleted) {
+      val jobDto = batchJobService.getJobDto(jobId)
+      logger.debug("Job $jobId is completed, unlocking project, removing job state")
+      queue.removeJobExecutions(jobId)
+      batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobId)
+      batchJobStateProvider.removeJobState(jobId)
     }
   }
 

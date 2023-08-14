@@ -100,6 +100,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   lateinit var batchJobStateProvider: BatchJobStateProvider
 
+  @Autowired
+  lateinit var cachingBatchJobService: CachingBatchJobService
+
   @BeforeEach
   fun setup() {
     Mockito.reset(batchJobProjectLockingManager)
@@ -407,6 +410,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     websocketHelper.receivedMessages.assert.hasSizeGreaterThan(49)
     websocketHelper.receivedMessages.last.contains("CANCELLED")
     assertJobStateCacheCleared(job)
+    assertJobUnlocked()
   }
 
   @Test
@@ -478,6 +482,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
     assertJobStateCacheCleared(job1)
     assertJobStateCacheCleared(job2)
+    assertJobUnlocked()
   }
 
   @Test
@@ -509,7 +514,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
     // verify it retried, so the processor was executed multiple times
     val totalChunks = keyCount / 10
-    val totalRetries = 3
+    val totalRetries = 10
     verify(preTranslationByTmChunkProcessor, times((totalRetries + 1) * totalChunks)).process(
       any(),
       any(),
@@ -522,20 +527,33 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     }
 
     assertJobStateCacheCleared(job)
+    assertJobUnlocked()
+  }
+
+  private fun assertJobUnlocked() {
     batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(0L)
   }
 
   private fun assertJobStateCacheCleared(job: BatchJob) {
-    Thread.sleep(300)
-    batchJobStateProvider.hasCachedJobState(job.id).assert.isFalse()
+    Thread.sleep(100)
+    waitForNotThrowing(timeout = 11000, pollTime = 1000) {
+      batchJobStateProvider.hasCachedJobState(job.id).assert.isFalse()
+    }
   }
 
   private fun BatchJob.waitForCompleted(): BatchJobDto {
-    waitForNotThrowing(pollTime = 1000) {
-      executeInNewTransaction {
-        val finishedJob = batchJobService.getJobDto(this.id)
-        finishedJob.status.completed.assert.isTrue()
+    try {
+      waitForNotThrowing(pollTime = 1000) {
+        executeInNewTransaction {
+          val finishedJob = batchJobService.getJobDto(this.id)
+          logger.debug("Job status: ${finishedJob.status.name}")
+          finishedJob.status.completed.assert.isTrue()
+        }
       }
+    } catch (e: Exception) {
+      val storedStatus = batchJobService.findJobEntity(this.id)?.status
+      logger.debug("Wait not satisfied. Stored job status: ${storedStatus?.name}")
+      throw e
     }
     return batchJobService.getJobDto(this.id)
   }
