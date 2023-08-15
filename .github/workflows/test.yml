@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ main, release ]
+    branches: [main, release]
   pull_request:
 
 jobs:
@@ -57,23 +57,19 @@ jobs:
 
   backend-test:
     name: BT ‍🔎
-    needs: [ backend-build ]
+    needs: [backend-build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         command:
-          - run: "server-app:runContextRecreatingTests"
-            clean: "server-app:cleanRunContextRecreatingTests"
-          - run: "server-app:runStandardTests"
-            clean: "server-app:cleanRunStandardTests"
-          - run: "server-app:runWebsocketTests"
-            clean: "server-app:cleanRunWebsocketTests"
-          - run: "ee-test:test"
-            clean: "ee-test:cleanTest"
-          - run: "data:test"
-            clean: "data:cleanTest"
-
+          [
+            "server-app:runContextRecreatingTests",
+            "server-app:runStandardTests",
+            "server-app:runWebsocketTests",
+            "ee-test:test",
+            "data:test",
+          ]
     steps:
       - uses: actions/checkout@v3
 
@@ -110,24 +106,14 @@ jobs:
 
 
       - name: Run backend tests
-        run: | 
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
+        run: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
 
       - name: Get report name
         id: reportName
         run: |
-          reportName=${{ matrix.command.run }}
+          reportName=${{ matrix.command }}
           echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v3
@@ -138,14 +124,14 @@ jobs:
             ./**/build/reports/**/*
 
   e2e:
-    needs: [ frontend-build, backend-build, e2e-install-deps ]
+    needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-latest
     name: E2E testing ‍🔎
     strategy:
       fail-fast: false
       matrix:
-        total_jobs: [ 15 ]
-        job_index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ]
+        total_jobs: [15]
+        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
       - uses: actions/checkout@v3
 
@@ -208,7 +194,7 @@ jobs:
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        run: ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e && ./gradlew runE2e
+        run: ./gradlew runE2e
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}

@@ -16,6 +16,7 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.assert
@@ -25,8 +26,10 @@ import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
 import kotlinx.coroutines.ensureActive
+import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
@@ -315,6 +318,49 @@ class BatchJobTestUtil(
         author = testData.user,
         type = BatchJobType.DELETE_KEYS,
       )
+    }
+  }
+
+  fun waitForQueueSize(size: Int) {
+    waitForNotThrowing(pollTime = 50, timeout = 2000) {
+      batchJobChunkExecutionQueue.size.assert.isEqualTo(size)
+    }
+  }
+
+  fun waitForExecutionSuccess(execution: BatchJobChunkExecution) {
+    waitFor(pollTime = 1000) {
+      batchJobService.getExecution(execution.id).status == BatchJobChunkExecutionStatus.SUCCESS
+    }
+  }
+
+  fun verifyJobLocked(job: BatchJob) {
+    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job.id)
+  }
+
+  fun verifiedTriedToLockJob(jobId: Long) {
+    waitForNotThrowing {
+      verify(batchJobProjectLockingManager, atLeast(1))
+        .canRunBatchJobOfExecution(ArgumentMatchers.eq(jobId))
+    }
+  }
+
+  fun verifyExecutionPending(execution: BatchJobChunkExecution) {
+    batchJobService.getExecution(execution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+  }
+
+  fun verifyJobUnlocked(job: BatchJob) {
+    waitForNotThrowing {
+      // the project was unlocked before job2 acquired the job
+      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(
+        ArgumentMatchers.eq(job.project.id),
+        ArgumentMatchers.eq(job.id)
+      )
+    }
+  }
+
+  fun verifyProjectJobLockReleased() {
+    waitFor(pollTime = 200, timeout = 1000) {
+      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
     }
   }
 

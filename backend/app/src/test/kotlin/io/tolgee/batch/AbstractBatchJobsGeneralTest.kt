@@ -7,23 +7,15 @@ import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
-import io.tolgee.fixtures.waitFor
-import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
-import org.mockito.kotlin.atLeast
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
@@ -206,13 +198,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   @Test
   fun `it locks the single job for project`() {
-    logger.info("Running test: it locks the single job for project")
     currentDateProvider.forcedDate = null
-
-    logger.debug("Pausing the job launcher")
     batchJobConcurrentLauncher.pause = true
 
-    logger.debug("Running the jobs")
     val job1 = util.runChunkedJob(20)
     val job2 = util.runChunkedJob(20)
 
@@ -223,77 +211,33 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val thirdExecution = executions[job1.id]!![1]
     val fourthExecution = executions[job2.id]!![1]
 
-    waitForNotThrowing(pollTime = 50, timeout = 2000) {
-      batchJobChunkExecutionQueue.size.assert.isEqualTo(4)
-    }
-
-    logger.debug("Clearing queue")
+    util.waitForQueueSize(4)
     batchJobChunkExecutionQueue.clear()
-
-    batchJobChunkExecutionQueue.size.assert.isEqualTo(0)
-
-    logger.debug("Starting the job launcher")
+    util.waitForQueueSize(0)
     batchJobConcurrentLauncher.pause = false
 
-    logger.debug("Adding the first execution to the queue $firstExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(firstExecution))
+    util.waitForExecutionSuccess(firstExecution)
+    util.verifyJobLocked(job1)
 
-    logger.debug("Waiting for the first execution to finish")
-    waitFor(pollTime = 1000) {
-      batchJobService.getExecution(firstExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
-    }
-
-    logger.debug("Verify job is locked")
-    // The first job is now locked
-    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job1.id)
-
-    logger.debug("Adding the second execution to the queue $secondExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(secondExecution))
-
-    logger.debug("Verifies it tries to acquire the second job but it can't since the first job is locked")
-    waitForNotThrowing {
-      // it tries to lock the second job but it can't since the first job is locked
-      verify(batchJobProjectLockingManager, atLeast(1))
-        .canRunBatchJobOfExecution(eq(job2.id))
-    }
-
-    logger.debug("Asserts the second job is still pending")
+    util.verifiedTriedToLockJob(job2.id)
     // it doesn't run the second execution since the first job is locked
-    Thread.sleep(1000)
-    batchJobService.getExecution(secondExecution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+    Thread.sleep(200)
+    util.verifyExecutionPending(secondExecution)
 
-    logger.debug("Adding the third execution to the queue $thirdExecution")
     batchJobChunkExecutionQueue.addToQueue(listOf(thirdExecution))
-
-    logger.debug("Verify the third execution is successful")
-    // second and last execution of job1 is done, so the second job is locked now
-    waitFor(pollTime = 1000) {
-      batchJobService.getExecution(thirdExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS
-    }
-
-    logger.debug("Verify the first job is successful")
+    util.waitForExecutionSuccess(thirdExecution)
     util.waitForJobSuccess(job1)
-
-    logger.debug("Verify it unlocks the first job")
-    waitForNotThrowing {
-      // the project was unlocked before job2 acquired the job
-      verify(batchJobProjectLockingManager, times(1)).unlockJobForProject(eq(job1.project.id), eq(job1.id))
-    }
-
-    logger.debug("Verify the second job is locked")
-    waitForNotThrowing(pollTime = 1000) {
-      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(job2.id)
-    }
+    util.verifyJobUnlocked(job1)
+    util.verifyJobLocked(job2)
 
     batchJobChunkExecutionQueue.addToQueue(listOf(fourthExecution))
+    util.waitForExecutionSuccess(fourthExecution)
+    util.verifyProjectJobLockReleased()
 
-    waitFor(pollTime = 1000) {
-      batchJobService.getExecution(fourthExecution.id).status == BatchJobChunkExecutionStatus.SUCCESS &&
-        batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
-    }
-
-    batchJobService.getJobDto(job1.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-    batchJobService.getJobDto(job2.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    util.waitForJobSuccess(job1)
+    util.waitForJobSuccess(job2)
     util.assertJobStateCacheCleared(job1)
     util.assertJobStateCacheCleared(job2)
     util.assertJobUnlocked()
