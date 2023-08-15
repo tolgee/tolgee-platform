@@ -1,3 +1,10 @@
+## [3.26.4](https://github.com/tolgee/tolgee-platform/compare/v3.26.3...v3.26.4) (2023-08-15)
+
+
+### Bug Fixes
+
+* make autoTranslate more reliable in tests ([#1865](https://github.com/tolgee/tolgee-platform/issues/1865)) ([4ef6368](https://github.com/tolgee/tolgee-platform/commit/4ef6368b1b684556f271aff1eee126ba7eb21a4a))
+
 ## [3.26.3](https://github.com/tolgee/tolgee-platform/compare/v3.26.2...v3.26.3) (2023-08-15)
 
 
