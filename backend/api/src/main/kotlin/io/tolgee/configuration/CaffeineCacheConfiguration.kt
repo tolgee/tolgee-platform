@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.caffeine.CaffeineCacheManager
+import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.core.RedisOperations
@@ -35,6 +36,6 @@ class CaffeineCacheConfiguration(val tolgeeProperties: TolgeeProperties) {
   fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
     val caffeineCacheManager = CaffeineCacheManager()
     caffeineCacheManager.setCaffeine(caffeine)
-    return caffeineCacheManager
+    return TransactionAwareCacheManagerProxy(caffeineCacheManager)
   }
 }

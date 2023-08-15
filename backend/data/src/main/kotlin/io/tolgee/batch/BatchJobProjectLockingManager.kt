@@ -10,6 +10,7 @@ import org.redisson.api.RedissonClient
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 /**
  * Only single job can be executed at the same time for one project.
@@ -22,7 +23,8 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
-  private val batchJobStateProvider: BatchJobStateProvider
+  private val batchJobStateProvider: BatchJobStateProvider,
+  private val queue: BatchJobChunkExecutionQueue
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
@@ -44,13 +46,23 @@ class BatchJobProjectLockingManager(
     }
   }
 
-  fun unlockJobForProject(projectId: Long) {
-    logger.debug("Unlocking project $projectId")
-    if (usingRedisProvider.areWeUsingRedis) {
-      getRedissonProjectLocks()[projectId] = 0L
-    } else {
-      localProjectLocks[projectId] = 0L
+  fun unlockJobForProject(projectId: Long, jobId: Long) {
+    getMap().compute(projectId) { _, lockedJobId ->
+      logger.debug("Unlocking job: $jobId for project $projectId")
+      if (lockedJobId == jobId) {
+        logger.debug("Unlocking job: $jobId for project $projectId")
+        return@compute 0L
+      }
+      logger.debug("Job: $jobId for project $projectId is not locked")
+      return@compute lockedJobId
     }
+  }
+
+  fun getMap(): ConcurrentMap<Long, Long?> {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return getRedissonProjectLocks()
+    }
+    return localProjectLocks
   }
 
   private fun tryLockWithRedisson(batchJobDto: BatchJobDto): Boolean {
@@ -113,24 +125,5 @@ class BatchJobProjectLockingManager(
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {
     return redissonClient.getMap("project_batch_job_locks")
-  }
-
-  /**
-   * It can happen that some other thread or instance will try to
-   * execute execution of already completed job
-   *
-   * The execution is skipped, since it's not pending, but
-   * we have to unlock the project, otherwise it will be locked forever
-   */
-  fun finalizeIfCompleted(jobId: Long) {
-    val cached = batchJobStateProvider.getCached(jobId)
-    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
-    val isCompleted = cached?.all { it.value.status.completed } ?: true
-    if (isCompleted) {
-      val jobDto = batchJobService.getJobDto(jobId)
-      logger.debug("Job $jobId is completed, unlocking project, removing job state")
-      unlockJobForProject(jobDto.projectId)
-      batchJobStateProvider.removeJobState(jobId)
-    }
   }
 }

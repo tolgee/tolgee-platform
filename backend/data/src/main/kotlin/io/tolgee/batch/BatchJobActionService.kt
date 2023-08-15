@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
@@ -47,7 +48,8 @@ class BatchJobActionService(
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
   private val activityHolder: ActivityHolder,
-  private val batchJobProjectLockingManager: BatchJobProjectLockingManager
+  private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
+  private val metrics: Metrics
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -66,7 +68,7 @@ class BatchJobActionService(
         val execution = catchingExceptions(executionItem) {
           executeInNewTransaction(
             transactionManager,
-            isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
+            isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED
           ) { transactionStatus ->
 
             val lockedExecution = getPendingUnlockedExecutionItem(executionItem)
@@ -102,7 +104,10 @@ class BatchJobActionService(
             return@executeInNewTransaction lockedExecution
           }
         }
-        execution?.let { progressManager.handleChunkCompletedCommitted(it) }
+        execution?.let {
+          logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
+          progressManager.handleChunkCompletedCommitted(it)
+        }
         addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
       } catch (e: Throwable) {
         progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
@@ -133,13 +138,12 @@ class BatchJobActionService(
 
     if (lockedExecution == null) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+      progressManager.finalizeIfCompleted(executionItem.jobId)
       return null
     }
     if (lockedExecution.status != BatchJobChunkExecutionStatus.PENDING) {
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is not pending, skipping")
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
-      batchJobProjectLockingManager.finalizeIfCompleted(executionItem.jobId)
+      progressManager.finalizeIfCompleted(executionItem.jobId)
       return null
     }
 
@@ -162,12 +166,14 @@ class BatchJobActionService(
     } catch (e: Throwable) {
       logger.error("Error processing chunk ${executionItem.chunkExecutionId}", e)
       Sentry.captureException(e, "Processing of chunk unexpectedly failed ${executionItem.chunkExecutionId}")
-      val maxRetries = 3
+      val maxRetries = 10
       if (++executionItem.managementErrorRetrials > maxRetries) {
         logger.error("Chunk ${executionItem.chunkExecutionId} failed $maxRetries times, failing...")
         failExecution(executionItem.chunkExecutionId, e)
+        metrics.batchJobManagementTotalFailureFailedCounter.increment()
         return null
       }
+      metrics.batchJobManagementFailureWithRetryCounter.increment()
       executionItem.executeAfter = currentDateProvider.date.addSeconds(2).time
       batchJobChunkExecutionQueue.addItemsToQueue(listOf(executionItem))
       null
@@ -216,7 +222,7 @@ class BatchJobActionService(
   }
 
   fun cancelLocalJob(jobId: Long) {
-    batchJobChunkExecutionQueue.cancelJob(jobId)
+    batchJobChunkExecutionQueue.removeJobExecutions(jobId)
     concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
       it.value.second.cancel()
     }

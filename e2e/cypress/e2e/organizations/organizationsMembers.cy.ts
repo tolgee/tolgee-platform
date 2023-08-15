@@ -33,9 +33,13 @@ describe('Organization Members', () => {
     });
   });
 
-  it('May change role to member to other owner', () => {
-    setGoldbergMember();
-  });
+  it(
+    'May change role to member to other owner',
+    { retries: { runMode: 3 } },
+    () => {
+      setGoldbergMember();
+    }
+  );
 
   it('Can remove other users', () => {
     gcy('global-paginated-list').within(() => {

@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.DataIntegrityViolationException
 import javax.persistence.PersistenceException
 
@@ -9,12 +10,14 @@ inline fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
   for (it in 1..100) {
     try {
       return fn()
-    } catch (e: DataIntegrityViolationException) {
-      repeats++
-      exception = e
-    } catch (e: PersistenceException) {
-      repeats++
-      exception = e
+    } catch (e: Exception) {
+      when (e) {
+        is DataIntegrityViolationException, is PersistenceException, is CannotAcquireLockException -> {
+          repeats++
+          exception = e
+        }
+        else -> throw e
+      }
     }
   }
 

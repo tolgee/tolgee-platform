@@ -18,6 +18,6 @@ import org.springframework.test.annotation.DirtiesContext
 class CacheWithoutRedisTest : AbstractCacheTest() {
   @Test
   fun `it has proper cache manager`() {
-    assertThat(cacheManager).isInstanceOf(CaffeineCacheManager::class.java)
+    assertThat(unwrappedCacheManager).isInstanceOf(CaffeineCacheManager::class.java)
   }
 }

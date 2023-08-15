@@ -47,6 +47,7 @@ class BatchJobChunkExecutionQueue(
 
   @Scheduled(fixedRate = 60000)
   fun populateQueue() {
+    logger.debug("Running scheduled populate queue")
     val data = entityManager.createQuery(
       """
           from BatchJobChunkExecution bjce
@@ -106,8 +107,10 @@ class BatchJobChunkExecutionQueue(
     this.addItemsToLocalQueue(items)
   }
 
-  fun cancelJob(jobId: Long) {
+  fun removeJobExecutions(jobId: Long) {
+    logger.debug("Removing job $jobId from queue, queue size: ${queue.size}")
     queue.removeIf { it.jobId == jobId }
+    logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
   }
 
   private fun BatchJobChunkExecution.toItem(

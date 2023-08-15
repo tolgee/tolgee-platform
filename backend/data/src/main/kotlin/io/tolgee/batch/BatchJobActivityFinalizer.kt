@@ -1,6 +1,5 @@
 package io.tolgee.batch
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
@@ -10,6 +9,7 @@ import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.event.EventListener
@@ -60,24 +60,31 @@ class BatchJobActivityFinalizer(
   }
 
   private fun waitForOtherChunksToComplete(job: BatchJobDto) {
-    try {
-      // how many executions are being committed in this transaction
-      val committedInThisTransactions = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 1
-      logger.debug("Committed chunks executions in this transaction: $committedInThisTransactions")
-      waitFor(20000) {
-        val committedChunks = batchJobStateProvider.get(job.id).values
-          .count { it.retry == false && it.transactionCommitted && it.status.completed }
-        logger.debug(
-          "Waiting for completed chunks and committed ($committedChunks) to be equal to all other chunks" +
-            " count (${job.totalChunks - committedInThisTransactions})"
-        )
-        committedChunks == job.totalChunks - committedInThisTransactions
-      }
-    } catch (e: WaitNotSatisfiedException) {
+    // how many executions are being committed in this transaction
+    val committedInThisTransactions = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 1
+    logger.debug("Committed chunks executions in this transaction: $committedInThisTransactions")
+
+    retryWaitingWithBatchJobResetting(job.id) {
+      val committedChunks = batchJobStateProvider.get(job.id).values
+        .count { it.retry == false && it.transactionCommitted && it.status.completed }
       logger.debug(
-        jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(batchJobStateProvider.get(job.id))
+        "Waiting for completed chunks and committed ($committedChunks) to be equal to all other chunks" +
+          " count (${job.totalChunks - committedInThisTransactions})"
       )
-      throw e
+      committedChunks == job.totalChunks - committedInThisTransactions
+    }
+  }
+
+  private fun retryWaitingWithBatchJobResetting(jobId: Long, fn: () -> Boolean) {
+    waitForNotThrowing(WaitNotSatisfiedException::class) {
+      try {
+        waitFor(2000) {
+          fn()
+        }
+      } catch (e: WaitNotSatisfiedException) {
+        batchJobStateProvider.removeJobState(jobId)
+        throw e
+      }
     }
   }
 

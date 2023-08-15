@@ -5,6 +5,8 @@ import io.tolgee.constants.Caches
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.repository.BatchJobRepository
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
@@ -18,7 +20,7 @@ class CachingBatchJobService(
   @Lazy
   private val batchJobService: BatchJobService,
   private val entityManager: EntityManager
-) {
+) : Logging {
 
   @Transactional
   @CacheEvict(
@@ -26,6 +28,7 @@ class CachingBatchJobService(
     key = "#result.id"
   )
   fun saveJob(batchJob: BatchJob): BatchJob {
+    logger.debug("Saving job ${batchJob.id}, status: ${batchJob.status}")
     return batchJobRepository.save(batchJob)
   }
 
@@ -35,6 +38,7 @@ class CachingBatchJobService(
     key = "#jobId"
   )
   fun setRunningState(jobId: Long) {
+    logger.debug("Setting running state for job $jobId")
     entityManager.createQuery("""update BatchJob set status = :status where id = :id and status = :pendingStatus""")
       .setParameter("status", BatchJobStatus.RUNNING)
       .setParameter("id", jobId)
@@ -48,6 +52,7 @@ class CachingBatchJobService(
   )
   fun findJobDto(id: Long): BatchJobDto? {
     val entity = batchJobService.findJobEntity(id) ?: return null
+    logger.debug("Getting batch job $id from database, status: ${entity.status}")
     return BatchJobDto.fromEntity(entity)
   }
 
