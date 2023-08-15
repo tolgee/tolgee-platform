@@ -1,5 +1,4 @@
 import { useTranslationsService } from './useTranslationsService';
-import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -13,7 +12,6 @@ export const useWebsocketService = (
   translationService: ReturnType<typeof useTranslationsService>
 ) => {
   const [eventBlockers, setEventBlockers] = useState(0);
-  const config = useConfig();
   const project = useProject();
   const client = useGlobalContext((c) => c.client);
 
@@ -48,17 +46,17 @@ export const useWebsocketService = (
   const eventQueue = useRef([] as TranslationsModifiedData[]);
 
   const handleQueue = () => {
-    eventQueue.current.forEach((e) => {
-      updateTranslations(e);
-    });
-    eventQueue.current = [];
+    if (eventBlockers <= 0) {
+      eventQueue.current.forEach((e) => {
+        updateTranslations(e);
+      });
+      eventQueue.current = [];
+    }
   };
 
   // process the blocked events, when the blocker is gone
   useEffect(() => {
-    if (eventBlockers <= 0) {
-      handleQueue();
-    }
+    handleQueue();
   }, [eventBlockers]);
 
   const handerRef = useRef(handleQueue);
@@ -84,7 +82,7 @@ export const useWebsocketService = (
         }
       );
     }
-  }, [config, project, client]);
+  }, [project, client]);
 
   return {
     setEventBlockers,
