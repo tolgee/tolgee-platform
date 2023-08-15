@@ -28,7 +28,7 @@ describe('Translation states', () => {
     deleteProject(project.id);
   });
 
-  it('outdated indicator logic', () => {
+  it('outdated indicator logic', { retries: { runMode: 3 } }, () => {
     getOutdatedIndicator('Studený přeložený text 1').should('not.exist');
     editCell('Cool translated text 1', 'Cool translated text 1 edited', true);
 

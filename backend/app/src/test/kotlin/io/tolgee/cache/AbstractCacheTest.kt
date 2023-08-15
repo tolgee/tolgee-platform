@@ -24,6 +24,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.cache.CacheManager
+import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -49,6 +51,12 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @Autowired
   @MockBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
+
+  val unwrappedCacheManager
+    get() = TransactionAwareCacheManagerProxy::class.java.getDeclaredField("targetCacheManager").run {
+      this.isAccessible = true
+      this.get(cacheManager) as CacheManager
+    }
 
   private final val paramsEnGoogle by lazy {
     mtServiceManager.getParams(
