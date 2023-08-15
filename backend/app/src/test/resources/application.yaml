@@ -81,6 +81,7 @@ logging:
     io.tolgee.batch.BatchJobActionService: DEBUG
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee: DEBUG
+    io.tolgee.batch.BatchJobConcurrentLauncher: TRACE
 #    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE

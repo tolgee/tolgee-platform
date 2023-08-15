@@ -11,6 +11,7 @@ import org.springframework.data.auditing.AuditingHandler
 import org.springframework.data.auditing.DateTimeProvider
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
+import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
@@ -70,6 +71,10 @@ class CurrentDateProvider(
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
     val parsed = ZonedDateTime.parse(dateString, formatter).toInstant().toEpochMilli()
     forcedDate = Date(parsed)
+  }
+
+  fun move(duration: Duration) {
+    forcedDate = Date(date.time + duration.toMillis())
   }
 
   val date: Date

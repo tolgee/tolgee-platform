@@ -63,7 +63,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   fun `removes from queue using event`() {
     jobConcurrentLauncher.pause = true
 
-    runChunkedJob(keyCount = 200)
+    util.runChunkedJob(keyCount = 200)
 
     waitForNotThrowing {
       val peek = batchJobChunkExecutionQueue.peek()
