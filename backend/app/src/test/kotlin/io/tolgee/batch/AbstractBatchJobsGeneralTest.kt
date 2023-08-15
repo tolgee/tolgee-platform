@@ -223,7 +223,9 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val thirdExecution = executions[job1.id]!![1]
     val fourthExecution = executions[job2.id]!![1]
 
-    batchJobChunkExecutionQueue.size.assert.isEqualTo(4)
+    waitForNotThrowing(pollTime = 50, timeout = 2000) {
+      batchJobChunkExecutionQueue.size.assert.isEqualTo(4)
+    }
 
     logger.debug("Clearing queue")
     batchJobChunkExecutionQueue.clear()
