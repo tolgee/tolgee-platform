@@ -127,6 +127,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       .findDcy('translations-language-select-form-control')
       .click();
     cy.gcy('translations-language-select-item').contains('German').click();
+    cy.waitForDom();
     cy.get('body').click(0, 0);
     executeBatchOperation();
     getCell('en translated with GOOGLE from en to de').should('be.visible');
