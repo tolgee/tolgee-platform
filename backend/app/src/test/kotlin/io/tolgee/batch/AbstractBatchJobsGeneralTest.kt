@@ -44,13 +44,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.test.annotation.DirtiesContext
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
 @WebsocketTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   private lateinit var testData: BatchJobsTestData
@@ -128,11 +126,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = Date(1687237928000)
     initWebsocketHelper()
+    batchJobConcurrentLauncher.pause = false
   }
 
   @AfterEach()
   fun teardown() {
     batchJobChunkExecutionQueue.clear()
+    batchJobConcurrentLauncher.pause = true
     currentDateProvider.forcedDate = null
     websocketHelper.stop()
   }
@@ -417,8 +417,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   fun `it locks the single job for project`() {
     logger.info("Running test: it locks the single job for project")
     currentDateProvider.forcedDate = null
+
+    logger.debug("Pausing the job launcher")
     batchJobConcurrentLauncher.pause = true
 
+    logger.debug("Running the jobs")
     val job1 = runChunkedJob(20)
     val job2 = runChunkedJob(20)
 
