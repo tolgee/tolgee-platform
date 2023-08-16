@@ -9,7 +9,7 @@ import javax.persistence.OptimisticLockException
 
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
-  isolationLevel: Int = TransactionDefinition.ISOLATION_DEFAULT,
+  isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
   fn: (ts: TransactionStatus) -> T
 ): T {

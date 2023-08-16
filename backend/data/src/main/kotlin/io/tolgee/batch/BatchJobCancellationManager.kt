@@ -16,7 +16,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 import javax.persistence.LockModeType
@@ -61,10 +60,7 @@ class BatchJobCancellationManager(
   }
 
   fun cancelJob(jobId: Long) {
-    val executions = executeInNewTransaction(
-      transactionManager = transactionManager,
-      isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
-    ) {
+    val executions = executeInNewTransaction(transactionManager) {
       entityManager.createNativeQuery("""SET enable_seqscan=off""")
       val executions = entityManager.createQuery(
         """

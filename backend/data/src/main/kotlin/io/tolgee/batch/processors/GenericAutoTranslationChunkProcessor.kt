@@ -8,6 +8,8 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.exceptions.PlanTranslationLimitExceeded
+import io.tolgee.exceptions.TranslationSpendingLimitExceeded
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.AutoTranslationService
@@ -69,6 +71,10 @@ class GenericAutoTranslationChunkProcessor(
           increaseFactor = 1,
           maxRetries = -1
         )
+      } catch (e: PlanTranslationLimitExceeded) {
+        throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
+      } catch (e: TranslationSpendingLimitExceeded) {
+        throw FailedDontRequeueException(Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED, successfulTargets, e)
       } catch (e: Throwable) {
         throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
       }
