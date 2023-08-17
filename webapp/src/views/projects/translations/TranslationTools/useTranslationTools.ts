@@ -85,6 +85,7 @@ export const useTranslationTools = ({
       'application/json': { ...data, services: fast },
     },
     fetchOptions: {
+      // error is displayed inside the popup
       disableAutoErrorHandle: false,
     },
     options: {
@@ -111,6 +112,7 @@ export const useTranslationTools = ({
       'application/json': { ...data, services: slow },
     },
     fetchOptions: {
+      // error is displayed inside the popup
       disableAutoErrorHandle: true,
     },
     options: {

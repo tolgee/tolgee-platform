@@ -38,7 +38,7 @@ export const SensitiveOperationAuthDialog = () => {
       },
     },
     fetchOptions: {
-      disableAuthRedirect: true,
+      disableAutoErrorHandle: true,
     },
   });
 

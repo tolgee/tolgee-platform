@@ -62,7 +62,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
     method: 'delete',
-    fetchOptions: { disable404Redirect: true },
     invalidatePrefix: '/v2/organizations/{organizationId}/invitations',
   });
 

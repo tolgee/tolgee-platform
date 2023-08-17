@@ -17,6 +17,7 @@ export const useApplyImportHelper = (
     url: '/v2/projects/{projectId}/import/apply',
     method: 'put',
     fetchOptions: {
+      // error is displayed on the page
       disableErrorNotification: true,
     },
   });
