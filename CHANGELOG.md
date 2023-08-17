@@ -1,3 +1,10 @@
+## [3.26.5](https://github.com/tolgee/tolgee-platform/compare/v3.26.4...v3.26.5) (2023-08-17)
+
+
+### Bug Fixes
+
+* Translation limit catching, fíxes & expose hikaricp metrics ([#1867](https://github.com/tolgee/tolgee-platform/issues/1867)) ([8159886](https://github.com/tolgee/tolgee-platform/commit/81598868879757de7b4267bb723c2bd5b247a638))
+
 ## [3.26.4](https://github.com/tolgee/tolgee-platform/compare/v3.26.3...v3.26.4) (2023-08-15)
 
 
