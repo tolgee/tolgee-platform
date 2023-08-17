@@ -18,7 +18,6 @@ import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 
 @Component
 class ProgressManager(
@@ -182,7 +181,7 @@ class ProgressManager(
   }
 
   fun handleJobRunning(id: Long) {
-    executeInNewTransaction(transactionManager, isolationLevel = TransactionDefinition.ISOLATION_DEFAULT) {
+    executeInNewTransaction(transactionManager) {
       logger.trace("""Fetching job $id""")
       val job = batchJobService.getJobDto(id)
       if (job.status == BatchJobStatus.PENDING) {

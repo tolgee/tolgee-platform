@@ -26,7 +26,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.UnexpectedRollbackException
 import javax.persistence.EntityManager
 import javax.persistence.LockModeType
@@ -66,10 +65,7 @@ class BatchJobActionService(
       var retryExecution: BatchJobChunkExecution? = null
       try {
         val execution = catchingExceptions(executionItem) {
-          executeInNewTransaction(
-            transactionManager,
-            isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED
-          ) { transactionStatus ->
+          executeInNewTransaction(transactionManager) { transactionStatus ->
 
             val lockedExecution = getPendingUnlockedExecutionItem(executionItem)
               ?: return@executeInNewTransaction null
