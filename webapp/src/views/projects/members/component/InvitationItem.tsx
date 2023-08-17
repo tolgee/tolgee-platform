@@ -6,7 +6,6 @@ import { Clear, Link } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
@@ -73,19 +72,11 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
     method: 'delete',
-    fetchOptions: { disableNotFoundHandling: true },
     invalidatePrefix: '/v2/projects/{projectId}/invitations',
   });
 
   const handleCancel = () => {
-    deleteInvitation.mutate(
-      { path: { invitationId: invitation.id } },
-      {
-        onError(e) {
-          messaging.error(parseErrorResponse(e));
-        },
-      }
-    );
+    deleteInvitation.mutate({ path: { invitationId: invitation.id } });
   };
 
   const handleGetLink = () => {

@@ -41,9 +41,6 @@ export const useImportDataHelper = () => {
     path: {
       projectId: project.id,
     },
-    fetchOptions: {
-      disableNotFoundHandling: true,
-    },
     query: { size: 1000 },
     options: {
       onSuccess(data) {
@@ -52,6 +49,8 @@ export const useImportDataHelper = () => {
       onError(error) {
         if ((error as any)?.code === 'resource_not_found') {
           setResult(undefined);
+        } else {
+          error.handleError?.();
         }
       },
     },
@@ -80,11 +79,10 @@ export const useImportDataHelper = () => {
               params={{ n: '100' }}
             />
           );
+        } else {
+          error.handleError?.();
         }
       },
-    },
-    fetchOptions: {
-      disableBadRequestHandling: true,
     },
   });
 
@@ -95,9 +93,6 @@ export const useImportDataHelper = () => {
       onSuccess(data) {
         setResult(undefined);
       },
-    },
-    fetchOptions: {
-      disableBadRequestHandling: true,
     },
   });
 

@@ -1,9 +1,5 @@
 import { container } from 'tsyringe';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useSelector } from 'react-redux';
-import { AppState } from 'tg.store/index';
-import { useUser } from 'tg.globalContext/helpers';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
 import {
   Box,
   Dialog,
@@ -12,9 +8,13 @@ import {
   Typography,
 } from '@mui/material';
 import { T } from '@tolgee/react';
+
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { AppState } from 'tg.store/index';
+import { useUser } from 'tg.globalContext/helpers';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { StandardForm } from './common/form/StandardForm';
 import { TextField } from './common/form/fields/TextField';
-import React from 'react';
 
 type Value = { otp?: string; password?: string };
 
@@ -38,7 +38,7 @@ export const SensitiveOperationAuthDialog = () => {
       },
     },
     fetchOptions: {
-      disableAuthHandling: true,
+      disableAuthRedirect: true,
     },
   });
 

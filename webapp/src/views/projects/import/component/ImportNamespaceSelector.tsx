@@ -29,7 +29,7 @@ export const ImportNamespaceSelector = ({
     method: 'get',
     path: { projectId: project.id },
     fetchOptions: {
-      disableNotFoundHandling: true,
+      disable404Redirect: true,
     },
   });
 

@@ -17,7 +17,6 @@ import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -25,7 +24,6 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -163,12 +161,6 @@ export const KeyEditForm: React.FC = () => {
                 })
               );
               refetchUsage();
-            },
-            onError(e) {
-              const parsed = parseErrorResponse(e);
-              parsed.forEach((error) =>
-                messaging.error(<TranslatedError code={error} />)
-              );
             },
           }
         );

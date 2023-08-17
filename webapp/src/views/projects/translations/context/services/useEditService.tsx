@@ -14,9 +14,7 @@ import { useRefsService } from './useRefsService';
 import { confirmation } from 'tg.hooks/confirmation';
 import { MessageService } from 'tg.service/MessageService';
 import { AfterCommand, ChangeValue, Direction, Edit, SetEdit } from '../types';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useProject } from 'tg.hooks/useProject';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
@@ -195,47 +193,39 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       // key can't be empty
       return messaging.error(<T keyName="global_empty_value" />);
     }
-    try {
-      if (language) {
-        // update translation
-        const result = await mutateTranslation(
-          {
-            ...data,
-            value: value as string,
-            keyId,
-            language,
-          },
-          translations.selectedLanguages
-        );
-
-        if (result) {
-          Object.entries(result.translations).forEach(([lang, translation]) =>
-            translations.changeTranslations([
-              { keyId, language: lang, value: translation },
-            ])
-          );
-        }
-      } else {
-        // update key
-        await mutateTranslationKey({
+    if (language) {
+      // update translation
+      const result = await mutateTranslation(
+        {
           ...data,
           value: value as string,
           keyId,
           language,
-        });
-        translations.updateTranslationKeys([
-          { keyId, value: { keyName: value } },
-        ]);
-      }
-      doAfterCommand(data.after);
-      data.onSuccess?.();
-    } catch (e) {
-      const parsed = parseErrorResponse(e);
-      parsed.forEach((error) =>
-        messaging.error(<TranslatedError code={error} />)
+        },
+        translations.selectedLanguages
       );
+
+      if (result) {
+        Object.entries(result.translations).forEach(([lang, translation]) =>
+          translations.changeTranslations([
+            { keyId, language: lang, value: translation },
+          ])
+        );
+      }
+    } else {
+      // update key
+      await mutateTranslationKey({
+        ...data,
+        value: value as string,
+        keyId,
+        language,
+      });
+      translations.updateTranslationKeys([
+        { keyId, value: { keyName: value } },
+      ]);
     }
-    return;
+    doAfterCommand(data.after);
+    data.onSuccess?.();
   };
 
   const doAfterCommand = (command?: AfterCommand) => {

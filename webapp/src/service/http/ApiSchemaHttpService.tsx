@@ -2,7 +2,6 @@ import { singleton } from 'tsyringe';
 
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
-import { MessageService } from '../MessageService';
 import { TokenService } from '../TokenService';
 import { paths } from '../apiSchema.generated';
 
@@ -12,10 +11,9 @@ import { ApiHttpService, RequestOptions } from './ApiHttpService';
 export class ApiSchemaHttpService extends ApiHttpService {
   constructor(
     tokenService: TokenService,
-    messageService: MessageService,
     redirectionActions: RedirectionActions
   ) {
-    super(tokenService, messageService, redirectionActions);
+    super(tokenService, redirectionActions);
   }
 
   apiUrl = process.env.REACT_APP_API_URL as string;

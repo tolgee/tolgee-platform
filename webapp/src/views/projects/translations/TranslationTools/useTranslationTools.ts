@@ -85,7 +85,7 @@ export const useTranslationTools = ({
       'application/json': { ...data, services: fast },
     },
     fetchOptions: {
-      disableBadRequestHandling: true,
+      disableAutoErrorHandle: false,
     },
     options: {
       keepPreviousData: true,
@@ -111,7 +111,7 @@ export const useTranslationTools = ({
       'application/json': { ...data, services: slow },
     },
     fetchOptions: {
-      disableBadRequestHandling: true,
+      disableAutoErrorHandle: true,
     },
     options: {
       keepPreviousData: true,

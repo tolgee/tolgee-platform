@@ -42,9 +42,6 @@ export const NamespaceRenameDialog: React.FC<Props> = ({
   const namespaceUpdate = useApiMutation({
     url: '/v2/projects/{projectId}/namespaces/{id}',
     method: 'put',
-    fetchOptions: {
-      disableBadRequestHandling: true,
-    },
     invalidatePrefix: '/v2/projects/{projectId}/',
     options: {
       onSuccess() {

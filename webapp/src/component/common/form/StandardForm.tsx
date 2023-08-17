@@ -7,15 +7,14 @@ import { FormikHelpers } from 'formik/dist/types';
 import { useHistory } from 'react-router-dom';
 import { ObjectSchema } from 'yup';
 
-import { ErrorResponseDto } from 'tg.service/response.types';
-
 import LoadingButton from './LoadingButton';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
+import { ApiError } from 'tg.service/http/ApiError';
 
 export interface LoadableType {
   loading?: boolean;
   isLoading?: boolean;
-  error?: ErrorResponseDto | null;
+  error?: ApiError | null;
 }
 
 interface FormProps<T> {

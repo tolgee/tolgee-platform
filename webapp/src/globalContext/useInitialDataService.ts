@@ -93,7 +93,7 @@ export const useInitialDataService = () => {
     preferredOrganizationLoadable.isLoading;
 
   if (initialData.error) {
-    throw new Error(initialData.error.message || initialData.error);
+    throw initialData.error;
   }
 
   return {
