@@ -1,3 +1,10 @@
+## [3.26.6](https://github.com/tolgee/tolgee-platform/compare/v3.26.5...v3.26.6) (2023-08-17)
+
+
+### Bug Fixes
+
+* The spending limit exception messages ([#1868](https://github.com/tolgee/tolgee-platform/issues/1868)) ([0a2d171](https://github.com/tolgee/tolgee-platform/commit/0a2d171be02d5327d95a9da1213525f0e10e0d1b))
+
 ## [3.26.5](https://github.com/tolgee/tolgee-platform/compare/v3.26.4...v3.26.5) (2023-08-17)
 
 
