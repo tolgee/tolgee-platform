@@ -168,6 +168,7 @@ export const Hierarchy: React.FC<Props> = ({
         >
           <FormControlLabel
             permissions-scope={structure.value}
+            data-cy="permissions-advanced-item"
             control={
               <Checkbox
                 data-cy="permissions-advanced-checkbox"

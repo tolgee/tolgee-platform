@@ -1,6 +1,5 @@
 import { FunctionComponent, useMemo } from 'react';
 import {
-  CircularProgress,
   FormControlProps,
   FormGroup,
   FormHelperText,
@@ -14,6 +13,7 @@ import {
 } from 'tg.ee/PermissionsAdvanced/usePermissionsStructure';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { PermissionAdvancedState } from 'tg.component/PermissionsSettings/types';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 interface CheckBoxGroupMultiSelectProps {
   name: string;
@@ -52,7 +52,7 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
         {props.label}
       </FormLabel>
       {dependenciesLoadable.isLoading ? (
-        <CircularProgress />
+        <SpinnerProgress />
       ) : (
         limitedStructure.map((structureItem, i) => (
           <Hierarchy
