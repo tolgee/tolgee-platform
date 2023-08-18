@@ -4,7 +4,6 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { WeaponSelector } from 'tg.views/projects/integrate/component/WeaponSelector';
-import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { ApiKeySelector } from 'tg.views/projects/integrate/component/ApiKeySelector';
 import { MdxProvider } from 'tg.component/MdxProvider';
 import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState';

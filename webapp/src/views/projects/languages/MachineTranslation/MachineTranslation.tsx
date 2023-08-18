@@ -54,8 +54,6 @@ export const MachineTranslation = () => {
     onReset: () => setFormInstance((i) => i + 1),
   });
 
-  const isFetching = settings.isFetching || languages.isFetching;
-
   const isUpdating = updateSettings.isLoading;
 
   const formatLangSettings = (

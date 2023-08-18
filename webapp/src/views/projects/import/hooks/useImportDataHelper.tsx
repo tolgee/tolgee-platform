@@ -1,5 +1,4 @@
 import { useProject } from 'tg.hooks/useProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import create from 'zustand';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';

@@ -44,7 +44,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const { selectLanguages } = useTranslationsActions();
   const history = useHistory();
 
-  const isFetching = useTranslationsSelector((c) => c.isFetching);
   const translations = useTranslationsSelector((c) => c.translations);
   const selectedLanguages = useTranslationsSelector(
     (c) => c.selectedLanguages

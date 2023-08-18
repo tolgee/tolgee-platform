@@ -24,7 +24,7 @@ const RevokePermissionsButton = (props: {
   const { satisfiesPermission } = useProjectPermissions();
   const canEditMembers = satisfiesPermission('members.edit');
 
-  const { leave, isLeaving } = useLeaveProject();
+  const { leave } = useLeaveProject();
 
   const revokeAccess = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/revoke-access',
