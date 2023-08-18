@@ -12,6 +12,7 @@ import { TranslationMemory } from './TranslationMemory';
 import { MachineTranslation } from './MachineTranslation';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useConfig } from 'tg.globalContext/helpers';
+import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
@@ -60,6 +61,8 @@ const TranslationTools = React.memo(function TranslationTools({
   const numberOfItems = mtEnabled ? 2 : 1;
 
   const gridTemplateColumns = isVertical ? '1fr' : '1fr '.repeat(numberOfItems);
+
+  useLoadingRegister(data.isFetching);
 
   return (
     <StyledContainer style={{ width }}>

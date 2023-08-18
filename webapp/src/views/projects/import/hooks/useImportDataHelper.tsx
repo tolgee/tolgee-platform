@@ -96,8 +96,6 @@ export const useImportDataHelper = () => {
     },
   });
 
-  useGlobalLoading(addFilesMutation.isLoading || resultLoadable.isLoading);
-
   const onNewFiles = async (files: File[]) => {
     addFilesMutation.mutate({
       path: {
@@ -118,8 +116,6 @@ export const useImportDataHelper = () => {
         projectId: project.id,
       },
     });
-
-  useGlobalLoading(cancelMutation.isLoading);
 
   return {
     onNewFiles,

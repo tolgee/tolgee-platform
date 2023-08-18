@@ -25,6 +25,7 @@ export const GlobalLoading: React.FC = () => {
 export const LoadingProvider: React.FC = (props) => {
   const [loading, setLoading] = useState(0);
   const [spinners, setSpinners] = useState(0);
+  console.log({ loading, spinners });
   return (
     <LoadingContext.Provider value={{ loading, spinners }}>
       <LoadingSetterContext.Provider value={{ setLoading, setSpinners }}>

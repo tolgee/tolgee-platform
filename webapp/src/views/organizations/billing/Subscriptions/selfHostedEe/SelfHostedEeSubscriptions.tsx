@@ -12,7 +12,6 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { SelfHostedEePlan } from './SelfHostedEePlan';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
 import { BillingPeriodType } from '../cloud/Plans/PeriodSwitch';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 
@@ -109,8 +108,6 @@ export const SelfHostedEeSubscriptions = () => {
     plansLoadable.isLoading ||
     activeSubscriptionsLoadable.isLoading ||
     refreshSubscriptions.isLoading;
-
-  useGlobalLoading(loading);
 
   if (loading) {
     return null;

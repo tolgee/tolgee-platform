@@ -15,7 +15,6 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Scopes } from 'tg.fixtures/permissions';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 type EditApiKeyDTO = components['schemas']['V2EditApiKeyDto'];
 
@@ -107,12 +106,6 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       description: apiKeyLoadable.data?.description,
     };
   };
-
-  useGlobalLoading(
-    availableScopesLoadable.isLoading ||
-      apiKeyLoadable.isLoading ||
-      projectLoadable.isLoading
-  );
 
   return (
     <Dialog

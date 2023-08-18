@@ -11,7 +11,6 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useLeaveProject } from 'tg.views/projects/useLeaveProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const messageService = container.resolve(MessageService);
@@ -65,8 +64,6 @@ const RevokePermissionsButton = (props: {
       });
     }
   };
-
-  useGlobalLoading(isLeaving || revokeAccess.isLoading);
 
   let isDisabled = false;
   let tooltip = undefined as ReactElement | undefined;

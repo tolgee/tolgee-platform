@@ -1,9 +1,10 @@
 import clsx from 'clsx';
-import { Box, CircularProgress, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { Close } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useOperationCancel } from './useOperationCancel';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 

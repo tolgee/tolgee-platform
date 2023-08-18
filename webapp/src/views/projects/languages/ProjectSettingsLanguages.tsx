@@ -10,7 +10,6 @@ import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguag
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { AutoTranslations } from './AutoTranslations/AutoTranslations';
@@ -45,8 +44,6 @@ export const ProjectSettingsLanguages = () => {
   const mtEnabled = Object.values(
     config?.machineTranslationServices.services
   ).some(({ enabled }) => enabled);
-
-  useGlobalLoading(languagesLoadable.isLoading);
 
   return (
     <Box mb={6}>

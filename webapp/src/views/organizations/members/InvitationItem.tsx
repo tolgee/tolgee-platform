@@ -7,7 +7,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrgRoleTranslation } from 'tg.translationTools/useOrgRoleTranslation';
 
 const messaging = container.resolve(MessageService);
@@ -77,8 +76,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
     );
     messaging.success(<T keyName="invite_user_invitation_copy_success" />);
   };
-
-  useGlobalLoading(deleteInvitation.isLoading);
 
   return (
     <StyledListItem data-cy="organization-invitation-item">

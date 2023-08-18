@@ -8,7 +8,6 @@ import {
   IconButton,
   Tooltip,
   styled,
-  CircularProgress,
   Typography,
   Button,
 } from '@mui/material';
@@ -20,6 +19,7 @@ import { OrganizationItem } from './OrganizationItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

@@ -21,7 +21,6 @@ import { FieldLabel } from 'tg.component/FormField';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
@@ -167,8 +166,6 @@ export const KeyEditForm: React.FC = () => {
       },
     });
   };
-
-  useGlobalLoading(updateNamespace.isLoading);
 
   return translation ? (
     <StyledContainer>

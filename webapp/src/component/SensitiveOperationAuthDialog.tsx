@@ -15,6 +15,7 @@ import { useUser } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { StandardForm } from './common/form/StandardForm';
 import { TextField } from './common/form/fields/TextField';
+import { useLoadingRegister } from './GlobalLoading';
 
 type Value = { otp?: string; password?: string };
 
@@ -24,6 +25,8 @@ export const SensitiveOperationAuthDialog = () => {
     (s: AppState) => s.global.requestSuperJwtAfterActions
   );
   const user = useUser();
+
+  const dialogOpen = afterActions.length > 0;
 
   const superTokenMutation = useApiMutation({
     url: '/v2/user/generate-super-token',
@@ -42,6 +45,10 @@ export const SensitiveOperationAuthDialog = () => {
     },
   });
 
+  // prevent loading indicator as original requests are pending in the background
+  // but we are not interested in those
+  useLoadingRegister(dialogOpen && !superTokenMutation.isLoading);
+
   const onCancel = () => {
     afterActions.forEach((action) => {
       action.onCancel();
@@ -50,10 +57,7 @@ export const SensitiveOperationAuthDialog = () => {
   };
 
   return (
-    <Dialog
-      open={afterActions.length > 0}
-      data-cy="sensitive-protection-dialog"
-    >
+    <Dialog open={dialogOpen} data-cy="sensitive-protection-dialog">
       <DialogTitle>
         <T keyName="sensitive-authentication-dialog-title" />
       </DialogTitle>

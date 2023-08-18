@@ -11,6 +11,7 @@ import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState
 import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
@@ -80,7 +81,7 @@ export const IntegrateView: FunctionComponent = () => {
             <T keyName="integrate_step_integrate" />
           </StepLabel>
           <StepContent>
-            <React.Suspense fallback={<BoxLoading />}>
+            <React.Suspense fallback={<FullPageLoading />}>
               {selectedWeapon && selectedApiKey && (
                 <Box data-cy="integrate-guide" mb={12}>
                   <MdxProvider

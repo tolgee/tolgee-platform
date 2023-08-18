@@ -1,9 +1,10 @@
 import { ComponentProps, default as React, FunctionComponent } from 'react';
-import { Box, CircularProgress, Fade, styled } from '@mui/material';
+import { Box, Fade, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage, SadEmotionMessageProps } from './SadEmotionMessage';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 const ProgressWrapper = styled('div')`
   position: absolute;

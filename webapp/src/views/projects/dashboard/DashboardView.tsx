@@ -5,7 +5,6 @@ import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
@@ -104,13 +103,6 @@ export const DashboardView = () => {
     activityLoadable.isLoading ||
     statsLoadable.isLoading ||
     dailyActivityLoadable.isLoading;
-
-  const anythingFetching =
-    activityLoadable.isFetching ||
-    statsLoadable.isFetching ||
-    dailyActivityLoadable.isFetching;
-
-  useGlobalLoading(anythingFetching);
 
   return (
     <ProjectLanguagesProvider>

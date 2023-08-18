@@ -1,16 +1,11 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import {
-  Box,
-  BoxProps,
-  CircularProgress,
-  IconButton,
-  styled,
-} from '@mui/material';
+import { Box, BoxProps, IconButton, styled } from '@mui/material';
 import { green } from '@mui/material/colors';
 import { KeyboardArrowUp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 type Props = {
   text?: string;

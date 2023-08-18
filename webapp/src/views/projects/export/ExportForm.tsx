@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { useTranslate } from '@tolgee/react';
-import { Box, CircularProgress, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -14,6 +14,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
 import { NestedSelector } from './NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 export const exportableStates = Object.keys(translationStates);
 

@@ -8,7 +8,6 @@ import { usePermissionTranslation } from 'tg.translationTools/usePermissionTrans
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
@@ -52,8 +51,6 @@ export const ProjectMembersView: FunctionComponent = () => {
   const canEditMembers = satisfiesPermission('members.edit');
 
   const translatePermission = usePermissionTranslation();
-
-  useGlobalLoading(invitationsLoadable.isFetching);
 
   const reportEvent = useReportEvent();
 

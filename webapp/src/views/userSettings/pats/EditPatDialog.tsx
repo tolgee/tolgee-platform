@@ -9,7 +9,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useRouteMatch } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const EditPatDialog: FunctionComponent = () => {
   const onDialogClose = () => {
@@ -25,8 +24,6 @@ export const EditPatDialog: FunctionComponent = () => {
     method: 'get',
     path: { id: id },
   });
-
-  useGlobalLoading(patLoadable.isLoading);
 
   const editMutable = useApiMutation({
     url: '/v2/pats/{id}',

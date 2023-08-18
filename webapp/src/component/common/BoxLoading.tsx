@@ -1,6 +1,6 @@
 import { default as React } from 'react';
 import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
+import { CircularProgress } from 'tg.component/CircularProgress';
 
 export function BoxLoading(props: React.ComponentProps<typeof Box>) {
   return (

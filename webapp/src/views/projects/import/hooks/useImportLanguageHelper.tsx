@@ -1,10 +1,8 @@
 import { useImportDataHelper } from './useImportDataHelper';
 import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
-import React from 'react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { components } from 'tg.service/apiSchema.generated';
 
 export const useImportLanguageHelper = (
@@ -42,9 +40,6 @@ export const useImportLanguageHelper = (
       },
     },
   });
-
-  useGlobalLoading(selectExistingMutation.isLoading);
-  useGlobalLoading(deleteMutation.isLoading);
 
   const onDelete = () => {
     confirmation({

@@ -7,7 +7,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
@@ -87,8 +86,6 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
     );
     messaging.success(<T keyName="invite_user_invitation_copy_success" />);
   };
-
-  useGlobalLoading(deleteInvitation.isLoading);
 
   return (
     <StyledListItem>
