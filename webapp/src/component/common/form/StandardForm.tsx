@@ -1,21 +1,20 @@
 import { default as React, ReactNode } from 'react';
 import { Box, Button, SxProps } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { T } from '@tolgee/react';
 import { Form, Formik, FormikProps } from 'formik';
 import { FormikHelpers } from 'formik/dist/types';
 import { useHistory } from 'react-router-dom';
 import { ObjectSchema } from 'yup';
 
-import { ErrorResponseDto } from 'tg.service/response.types';
-
 import LoadingButton from './LoadingButton';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
+import { ApiError } from 'tg.service/http/ApiError';
 
 export interface LoadableType {
   loading?: boolean;
   isLoading?: boolean;
-  error?: ErrorResponseDto | null;
+  error?: ApiError | null;
 }
 
 interface FormProps<T> {
@@ -110,7 +109,7 @@ export function StandardForm<T>({
               )}
               {props.loading && (
                 <Box justifyContent="cetner">
-                  <CircularProgress />
+                  <SpinnerProgress />
                 </Box>
               )}
             </Form>

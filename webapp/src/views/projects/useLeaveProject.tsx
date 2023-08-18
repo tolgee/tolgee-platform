@@ -33,17 +33,12 @@ export const useLeaveProject = () => {
             );
             break;
           default:
-            messaging.error(
-              <T keyName="unexpected_error_message" params={{ code: e.code }} />
-            );
+            e.handleError?.();
         }
       },
       onSettled() {
         setIsLeaving(false);
       },
-    },
-    fetchOptions: {
-      disableBadRequestHandling: true,
     },
   });
 

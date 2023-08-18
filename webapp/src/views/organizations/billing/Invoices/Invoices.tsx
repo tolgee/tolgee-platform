@@ -6,7 +6,6 @@ import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasL
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useDateFormatter, useMoneyFormatter } from 'tg.hooks/useLocale';
 import { DownloadButton } from './DownloadButton';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useTranslate } from '@tolgee/react';
 import {
   StyledBillingSection,
@@ -57,8 +56,6 @@ export const Invoices: FC = () => {
       keepPreviousData: true,
     },
   });
-
-  useGlobalLoading(invoicesLoadable.isFetching);
 
   return (
     <StyledBillingSection gridArea="invoices">

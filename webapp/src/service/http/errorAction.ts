@@ -1,6 +1,6 @@
 import { globalContext } from 'tg.globalContext/globalActions';
 
-export const errorCapture = (code: string) => {
+export const errorAction = (code: string) => {
   switch (code) {
     case 'plan_translation_limit_exceeded':
       globalContext.actions?.incrementPlanLimitErrors();

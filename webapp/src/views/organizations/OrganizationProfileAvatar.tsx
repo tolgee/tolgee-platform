@@ -16,6 +16,7 @@ export const OrganizationProfileAvatar: React.FC<Props> = ({ disabled }) => {
   const removeLoadable = useApiMutation({
     url: '/v2/organizations/{id}/avatar',
     method: 'delete',
+
     invalidatePrefix: '/v2/organizations',
   });
 

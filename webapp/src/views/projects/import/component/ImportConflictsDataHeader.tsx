@@ -13,7 +13,6 @@ import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const ImportConflictsDataHeader: FunctionComponent<{
   language: components['schemas']['ImportLanguageModel'];
@@ -54,9 +53,6 @@ export const ImportConflictsDataHeader: FunctionComponent<{
       },
     });
   };
-
-  useGlobalLoading(setKeepMutation.isLoading);
-  useGlobalLoading(setOverrideMutation.isLoading);
 
   const keepAllButton = (
     <Button

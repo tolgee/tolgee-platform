@@ -1,8 +1,8 @@
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { Box, CircularProgress } from '@mui/material';
 import { T } from '@tolgee/react';
-import React from 'react';
+import { Box } from '@mui/material';
+
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export const DeleteUserMessages = () => {
   const singleOwnerOrganizations = useApiQuery({
@@ -10,10 +10,8 @@ export const DeleteUserMessages = () => {
     method: 'get',
   });
 
-  useGlobalLoading(singleOwnerOrganizations.isFetching);
-
   if (singleOwnerOrganizations.isLoading) {
-    return <CircularProgress />;
+    return <SpinnerProgress />;
   }
 
   const organizations =

@@ -1,12 +1,11 @@
 import { ComponentProps, default as React, FunctionComponent } from 'react';
-import { Box, CircularProgress, Fade, styled } from '@mui/material';
+import { Box, Fade, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage, SadEmotionMessageProps } from './SadEmotionMessage';
-import { useLoadingRegister } from 'tg.component/GlobalLoading';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 const ProgressWrapper = styled('div')`
-  position: absolute;
   display: flex;
   top: 0px;
   height: ${(props: any) => props.height || '400px'};
@@ -28,8 +27,6 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
   wrapperProps,
   ...otherProps
 }) => {
-  useLoadingRegister(loading);
-
   wrapperProps = {
     ...wrapperProps,
     py: wrapperProps?.py || 8,
@@ -46,7 +43,7 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
       </Fade>
       <Fade in={loading} mountOnEnter unmountOnExit>
         <ProgressWrapper>
-          <CircularProgress />
+          <SpinnerProgress />
         </ProgressWrapper>
       </Fade>
     </Box>

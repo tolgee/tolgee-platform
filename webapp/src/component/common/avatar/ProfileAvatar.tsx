@@ -9,9 +9,7 @@ import { AvatarImg } from './AvatarImg';
 import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
 import { useConfig } from 'tg.globalContext/helpers';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { components } from 'tg.service/apiSchema.generated';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 export type AvatarOwner = {
   name?: string;
@@ -152,16 +150,7 @@ export const ProfileAvatar: FC<{
           setAvatarMenuAnchorEl(undefined);
         }}
         onRemove={async () => {
-          try {
-            await props.onRemove();
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-            const parsed = parseErrorResponse(e);
-            parsed.forEach((error) =>
-              messageService.error(<TranslatedError code={error} />)
-            );
-          }
+          await props.onRemove();
           setAvatarMenuAnchorEl(undefined);
         }}
         onClose={() => setAvatarMenuAnchorEl(undefined)}

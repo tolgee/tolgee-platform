@@ -3,7 +3,6 @@ import { Formik, FormikProps } from 'formik';
 import { Checkbox, FormControlLabel, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useAutoTranslateSettings } from './useAutoTranslateSettings';
 
@@ -48,8 +47,6 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
   useEffect(() => {
     formRef.current?.resetForm();
   }, [settings.data]);
-
-  useGlobalLoading(settings.isFetching);
 
   const isUpdating = updateSettings.isLoading;
 

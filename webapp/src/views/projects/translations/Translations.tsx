@@ -16,7 +16,6 @@ import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsSho
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { useColumnsContext } from './context/ColumnsContext';
@@ -67,8 +66,6 @@ export const Translations = () => {
     setSearchImmediate('');
     setFilters({});
   };
-
-  useGlobalLoading(isFetching || isLoading);
 
   const renderPlaceholder = () =>
     memoizedFiltersOrSearchApplied ? (

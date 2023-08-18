@@ -27,6 +27,7 @@ export const ProjectCreateView: FunctionComponent = () => {
   const createProjectLoadable = useApiMutation({
     url: '/v2/projects',
     method: 'post',
+    fetchOptions: { disableErrorNotification: true },
   });
   const { t } = useTranslate();
   const { preferredOrganization, updatePreferredOrganization } =

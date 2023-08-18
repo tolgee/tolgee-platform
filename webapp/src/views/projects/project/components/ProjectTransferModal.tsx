@@ -57,7 +57,7 @@ export const ProjectTransferModal: FC<{
           messaging.success(<T keyName="project_transferred_message" />);
         },
         onError(e) {
-          throw new Error(e);
+          throw e;
         },
       }
     );

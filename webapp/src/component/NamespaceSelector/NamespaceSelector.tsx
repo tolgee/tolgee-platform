@@ -26,9 +26,6 @@ export const NamespaceSelector: React.FC<Props> = ({
     url: '/v2/projects/{projectId}/used-namespaces',
     method: 'get',
     path: { projectId: project.id },
-    fetchOptions: {
-      disableNotFoundHandling: true,
-    },
     options: {
       enabled: !namespaceData,
     },

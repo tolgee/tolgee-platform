@@ -19,7 +19,9 @@ const StyledSmoothProgress = styled(SmoothProgress)`
 export const GlobalLoading: React.FC = () => {
   const { loading, spinners } = useContext(LoadingContext);
 
-  return <StyledSmoothProgress loading={Boolean(loading && spinners === 0)} />;
+  return (
+    <StyledSmoothProgress loading={Boolean(loading && spinners === 0)} global />
+  );
 };
 
 export const LoadingProvider: React.FC = (props) => {

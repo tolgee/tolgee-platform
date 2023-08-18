@@ -1,7 +1,6 @@
 import { styled, Tooltip, Checkbox, Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useProjectActions } from 'tg.hooks/ProjectContext';
 
 import {
@@ -142,8 +141,6 @@ export const BatchOperations = ({ open, onClose }: Props) => {
     setOperation(undefined);
     onClose();
   }
-
-  useGlobalLoading(isLoading);
 
   return (
     <>

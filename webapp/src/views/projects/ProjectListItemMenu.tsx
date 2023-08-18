@@ -7,7 +7,6 @@ import { MoreVert } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLeaveProject } from './useLeaveProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const ProjectListItemMenu: FC<{
   projectId: number;
@@ -16,13 +15,11 @@ export const ProjectListItemMenu: FC<{
 }> = (props) => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { leave, isLeaving } = useLeaveProject();
+  const { leave } = useLeaveProject();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
-  useGlobalLoading(isLeaving);
 
   return (
     <>

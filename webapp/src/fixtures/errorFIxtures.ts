@@ -1,36 +1,20 @@
-const standardValidationProp = 'STANDARD_VALIDATION';
-const customValidationProp = 'CUSTOM_VALIDATION';
+import { ApiError } from 'tg.service/http/ApiError';
 
-const isStandardValidationError = (error) => {
-  // eslint-disable-next-line no-prototype-builtins
-  return error.hasOwnProperty(standardValidationProp);
-};
-
-const isCustomValidationError = (error) => {
-  // eslint-disable-next-line no-prototype-builtins
-  return error.hasOwnProperty(customValidationProp);
-};
-
-const isErrorResponseDTO = (error) => {
-  // eslint-disable-next-line no-prototype-builtins
-  return error.hasOwnProperty('code');
-};
-
-export const parseErrorResponse = (errorData): string[] => {
-  if (isStandardValidationError(errorData)) {
-    return Object.keys(errorData[standardValidationProp]).map(
-      (k) => k + '->' + errorData[standardValidationProp][k]
+export const parseErrorResponse = (errorData: ApiError): string[] => {
+  if (errorData.STANDARD_VALIDATION) {
+    return Object.keys(errorData.STANDARD_VALIDATION).map(
+      (k) => k + '->' + errorData.STANDARD_VALIDATION?.[k]
     );
   }
 
-  if (isCustomValidationError(errorData)) {
+  if (errorData.CUSTOM_VALIDATION) {
     //todo pretty print message with params
-    return Object.keys(errorData[customValidationProp]);
+    return Object.keys(errorData.CUSTOM_VALIDATION);
   }
 
-  if (isErrorResponseDTO(errorData)) {
+  if (errorData.code) {
     return [errorData.code];
   }
 
-  return errorData && ['Unexpected error'];
+  return ['unexpected_error_occurred'];
 };

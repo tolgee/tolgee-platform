@@ -74,7 +74,6 @@ export const TagInput: React.FC<Props> = ({
       cacheTime: 0,
       keepPreviousData: true,
     },
-    fetchOptions: { disableNotFoundHandling: true },
   });
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {

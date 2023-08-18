@@ -13,7 +13,6 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { FullPageLoading } from '../common/FullPageLoading';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 interface AcceptInvitationHandlerProps {}
 
@@ -49,9 +48,7 @@ const AcceptInvitationHandler: FunctionComponent<
             refetchInitialData();
             messaging.success(<T keyName="invitation_code_accepted" />);
           },
-          onError(e) {
-            messaging.error(<TranslatedError code={e.code} />);
-          },
+
           onSettled() {
             redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
           },

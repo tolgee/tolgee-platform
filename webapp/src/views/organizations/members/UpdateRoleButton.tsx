@@ -8,10 +8,8 @@ import { useUser } from 'tg.globalContext/helpers';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
 import { useOrganization } from '../useOrganization';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messagingService = container.resolve(MessageService);
 
@@ -42,11 +40,6 @@ export const UpdateRoleButton: FunctionComponent<{
                 <T keyName="organization_role_changed_message" />
               );
               queryClient.invalidateQueries([]);
-            },
-            onError(e) {
-              parseErrorResponse(e).forEach((err) =>
-                messagingService.error(<TranslatedError code={err} />)
-              );
             },
           }
         ),

@@ -19,7 +19,6 @@ import { BaseAdministrationView } from './components/BaseAdministrationView';
 import { Link } from 'react-router-dom';
 import { Delete } from '@mui/icons-material';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 
@@ -59,8 +58,6 @@ export const AdministrationEePlansView = () => {
         ),
     });
   }
-
-  useGlobalLoading(deletePlanLoadable.isLoading || plansLoadable.isFetching);
 
   return (
     <DashboardPage>

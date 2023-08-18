@@ -59,7 +59,7 @@ export const SignUpView: FunctionComponent = () => {
     url: `/api/public/sign_up`,
     method: 'post',
     fetchOptions: {
-      disableBadRequestHandling: true,
+      disableAutoErrorHandle: true,
     },
   });
 

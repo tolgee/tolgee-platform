@@ -1,6 +1,7 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -33,7 +34,7 @@ export const AdministrationCloudPlanEditView = () => {
   });
 
   if (planLoadable.isLoading) {
-    return <CircularProgress />;
+    return <SpinnerProgress />;
   }
 
   const planData = planLoadable.data;
