@@ -5,7 +5,7 @@ import { KeyboardArrowUp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 type Props = {
   text?: string;
@@ -106,7 +106,7 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
           p={1}
           data-cy="import-resolution-dialog-translation-loading"
         >
-          <CircularProgress size={20} />
+          <SpinnerProgress size={20} />
         </StyledLoading>
       )}
       {props.loaded && (

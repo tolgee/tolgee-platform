@@ -2,7 +2,7 @@ import { T } from '@tolgee/react';
 import { Box } from '@mui/material';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export const DeleteUserMessages = () => {
   const singleOwnerOrganizations = useApiQuery({
@@ -11,7 +11,7 @@ export const DeleteUserMessages = () => {
   });
 
   if (singleOwnerOrganizations.isLoading) {
-    return <CircularProgress />;
+    return <SpinnerProgress />;
   }
 
   const organizations =

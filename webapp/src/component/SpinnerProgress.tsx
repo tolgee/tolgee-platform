@@ -3,7 +3,7 @@ import { useLoadingRegister } from './GlobalLoading';
 
 type Props = React.ComponentProps<typeof MuiCircularProgress>;
 
-export const CircularProgress = (props: Props) => {
+export const SpinnerProgress = (props: Props) => {
   useLoadingRegister(true);
   return <MuiCircularProgress {...props} />;
 };

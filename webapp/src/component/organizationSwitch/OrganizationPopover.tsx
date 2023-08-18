@@ -19,7 +19,7 @@ import { OrganizationItem } from './OrganizationItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -221,7 +221,7 @@ export const OrganizationPopover: React.FC<Props> = ({
                   endAdornment={
                     organizationsLoadable.isFetching ? (
                       <StyledProgressContainer>
-                        <CircularProgress size={18} data-cy="global-loading" />
+                        <SpinnerProgress size={18} data-cy="global-loading" />
                       </StyledProgressContainer>
                     ) : undefined
                   }

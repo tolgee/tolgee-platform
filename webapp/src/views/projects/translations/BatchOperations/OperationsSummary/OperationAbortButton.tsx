@@ -4,7 +4,7 @@ import { Close } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useOperationCancel } from './useOperationCancel';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -44,7 +44,7 @@ export function OperationAbortButton({ operation }: Props) {
       {!loading ? (
         <Close fontSize="small" color="inherit" />
       ) : (
-        <CircularProgress size={18} />
+        <SpinnerProgress size={18} />
       )}
     </AbortButton>
   );

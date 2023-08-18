@@ -14,7 +14,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
 import { NestedSelector } from './NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export const exportableStates = Object.keys(translationStates);
 
@@ -140,7 +140,7 @@ export const ExportForm = () => {
   if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
     return (
       <Box mt={2} justifyContent="center" display="flex">
-        <CircularProgress />
+        <SpinnerProgress />
       </Box>
     );
   }

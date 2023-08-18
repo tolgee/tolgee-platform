@@ -1,6 +1,6 @@
 import { default as React, ReactNode } from 'react';
 import { Box, Button, SxProps } from '@mui/material';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { T } from '@tolgee/react';
 import { Form, Formik, FormikProps } from 'formik';
 import { FormikHelpers } from 'formik/dist/types';
@@ -109,7 +109,7 @@ export function StandardForm<T>({
               )}
               {props.loading && (
                 <Box justifyContent="cetner">
-                  <CircularProgress />
+                  <SpinnerProgress />
                 </Box>
               )}
             </Form>

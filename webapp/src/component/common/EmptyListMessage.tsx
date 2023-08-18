@@ -3,7 +3,7 @@ import { Box, Fade, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage, SadEmotionMessageProps } from './SadEmotionMessage';
-import { CircularProgress } from 'tg.component/CircularProgress';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 const ProgressWrapper = styled('div')`
   display: flex;
@@ -43,7 +43,7 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
       </Fade>
       <Fade in={loading} mountOnEnter unmountOnExit>
         <ProgressWrapper>
-          <CircularProgress />
+          <SpinnerProgress />
         </ProgressWrapper>
       </Fade>
     </Box>
