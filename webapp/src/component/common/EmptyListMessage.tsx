@@ -3,11 +3,9 @@ import { Box, Fade, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage, SadEmotionMessageProps } from './SadEmotionMessage';
-import { useLoadingRegister } from 'tg.component/GlobalLoading';
 import { CircularProgress } from 'tg.component/CircularProgress';
 
 const ProgressWrapper = styled('div')`
-  position: absolute;
   display: flex;
   top: 0px;
   height: ${(props: any) => props.height || '400px'};
@@ -29,8 +27,6 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
   wrapperProps,
   ...otherProps
 }) => {
-  useLoadingRegister(loading);
-
   wrapperProps = {
     ...wrapperProps,
     py: wrapperProps?.py || 8,
