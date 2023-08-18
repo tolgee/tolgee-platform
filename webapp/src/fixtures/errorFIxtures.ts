@@ -16,5 +16,5 @@ export const parseErrorResponse = (errorData: ApiError): string[] => {
     return [errorData.code];
   }
 
-  return errorData && ['Unexpected error'];
+  return ['unexpected_error_occurred'];
 };
