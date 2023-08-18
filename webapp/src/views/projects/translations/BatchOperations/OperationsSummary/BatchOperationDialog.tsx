@@ -21,6 +21,7 @@ import { END_STATUSES, useStatusColor } from './utils';
 import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOperationTypeTranslation';
 import { useOperationCancel } from './useOperationCancel';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 type Props = {
   operation: BatchJobModel;
@@ -57,6 +58,9 @@ export const BatchOperationDialog = ({
     data.status === 'RUNNING' && data.progress === data.totalItems;
 
   const isFinished = END_STATUSES.includes(data.status);
+
+  // supress other loadings
+  useLoadingRegister(!isFinished);
 
   const { cancelable, handleCancel, loading } = useOperationCancel({
     operation: data,
