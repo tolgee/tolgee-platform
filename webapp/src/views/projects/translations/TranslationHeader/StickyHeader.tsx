@@ -8,11 +8,11 @@ import {
 } from '../context/HeaderNsContext';
 import { NamespaceContent } from '../Namespace/NamespaceContent';
 import { useColumnsContext } from '../context/ColumnsContext';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
   position: sticky;
   box-sizing: border-box;
-  top: 50px;
   margin: -12px -5px -10px -5px;
   margin-left: ${({ theme }) => theme.spacing(-2)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
@@ -61,6 +61,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
   const columnSizes = useColumnsContext((c) => c.columnSizes);
+  const topBannerHeight = useGlobalContext((c) => c.topBanner.height);
 
   useEffect(() => {
     setTopBarHeight(height + (topBarHidden ? 0 : 50));
@@ -70,10 +71,11 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
     <>
       <StyledContainer
         style={{
+          top: 50 + topBannerHeight,
           height: height + 5,
           transform: topBarHidden
-            ? 'translate(0px, -55px)'
-            : 'translate(0px, 0px)',
+            ? `translate(0px, -55px)`
+            : `translate(0px, 0px)`,
         }}
       >
         <StyledControls style={{ height }}>{children}</StyledControls>
@@ -89,7 +91,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
       </StyledContainer>
       <StyledShadow
         style={{
-          top: 55 + height,
+          top: 55 + height + topBannerHeight,
           transform: topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,

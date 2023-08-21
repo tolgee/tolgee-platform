@@ -4,10 +4,8 @@ import { Box, styled } from '@mui/material';
 import { TopBar } from './TopBar/TopBar';
 import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
-
-const StyledAppBarSpacer = styled('div')(
-  ({ theme }) => theme.mixins.toolbar as any
-);
+import { TopBanner } from './TopBanner';
+import { TopSpacer } from './TopSpacer';
 
 type Props = {
   topBarAutoHide?: boolean;
@@ -37,6 +35,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
 
   return (
     <>
+      <TopBanner />
       {(isAdminAccess || isDebuggingCustomerAccount) && (
         <AdminFrame data-cy="administration-frame" />
       )}
@@ -51,7 +50,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
           isAdminAccess={isAdminAccess}
           isDebuggingCustomerAccount={isDebuggingCustomerAccount}
         />
-        <StyledAppBarSpacer />
+        <TopSpacer />
         <Box
           component="main"
           position="relative"
