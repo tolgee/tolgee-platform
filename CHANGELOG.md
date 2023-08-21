@@ -1,3 +1,10 @@
+# [3.28.0](https://github.com/tolgee/tolgee-platform/compare/v3.27.0...v3.28.0) (2023-08-21)
+
+
+### Features
+
+* use scopes hierarchy for api key modal ([#1870](https://github.com/tolgee/tolgee-platform/issues/1870)) ([86d1f1f](https://github.com/tolgee/tolgee-platform/commit/86d1f1f7514cea1c857fc33ebc2ebe855dafec95))
+
 # [3.27.0](https://github.com/tolgee/tolgee-platform/compare/v3.26.6...v3.27.0) (2023-08-21)
 
 
