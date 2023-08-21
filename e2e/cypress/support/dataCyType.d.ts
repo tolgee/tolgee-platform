@@ -108,7 +108,6 @@ declare namespace DataCy {
         "billing-usage-table" |
         "billing_period_annual" |
         "checkbox-group-multiselect" |
-        "checkbox-group-multiselect-item" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
@@ -290,6 +289,7 @@ declare namespace DataCy {
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
         "permissions-advanced-checkbox" |
+        "permissions-advanced-item" |
         "permissions-language-menu-button" |
         "permissions-menu" |
         "permissions-menu-basic" |
