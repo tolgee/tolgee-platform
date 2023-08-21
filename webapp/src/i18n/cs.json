@@ -732,7 +732,7 @@
   "project_dashboard_translations_percent" : "{percent, number, :: %}",
   "project_deleted_message" : "Projekt byl odstraněn!",
   "project_integrate_title" : "Integrovat",
-  "project_languages_auto_translation_enable_for_import_switch" : "Povolit pro import",
+  "project_languages_auto_translation_enable_for_import_switch" : "Automaticky překládat importované položky",
   "project_languages_base_language" : "Základní jazyk",
   "project_languages_default_providers" : "Výchozí poskytovatelé",
   "project_languages_default_provider_short" : "Výchozí",

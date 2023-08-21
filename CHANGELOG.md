@@ -1,3 +1,10 @@
+# [3.27.0](https://github.com/tolgee/tolgee-platform/compare/v3.26.6...v3.27.0) (2023-08-21)
+
+
+### Features
+
+* improve error and loading handling ([#1869](https://github.com/tolgee/tolgee-platform/issues/1869)) ([980ed6e](https://github.com/tolgee/tolgee-platform/commit/980ed6e959b31fc658bcb76f0ee2b7af69ffa89c))
+
 ## [3.26.6](https://github.com/tolgee/tolgee-platform/compare/v3.26.5...v3.26.6) (2023-08-17)
 
 

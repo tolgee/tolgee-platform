@@ -732,7 +732,7 @@
   "project_dashboard_translations_percent" : "{percent, number,::%}",
   "project_deleted_message" : "Projekt gelöscht!",
   "project_integrate_title" : "Integrieren",
-  "project_languages_auto_translation_enable_for_import_switch" : "Für Import aktivieren",
+  "project_languages_auto_translation_enable_for_import_switch" : "Automatisch übersetzen importierter Elemente",
   "project_languages_base_language" : "Basissprache",
   "project_languages_default_providers" : "Standardanbieter",
   "project_languages_default_provider_short" : "Standard",
