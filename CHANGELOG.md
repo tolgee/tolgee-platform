@@ -1,3 +1,10 @@
+## [3.28.1](https://github.com/tolgee/tolgee-platform/compare/v3.28.0...v3.28.1) (2023-08-22)
+
+
+### Bug Fixes
+
+* Clean job queue using scheduled task ([#1873](https://github.com/tolgee/tolgee-platform/issues/1873)) ([dd0fe83](https://github.com/tolgee/tolgee-platform/commit/dd0fe83deb36364a0687df65c25f6f40abaffaa0))
+
 # [3.28.0](https://github.com/tolgee/tolgee-platform/compare/v3.27.0...v3.28.0) (2023-08-21)
 
 
