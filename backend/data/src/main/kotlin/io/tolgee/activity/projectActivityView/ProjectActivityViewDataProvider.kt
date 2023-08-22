@@ -1,5 +1,6 @@
 package io.tolgee.activity.projectActivityView
 
+import io.sentry.Sentry
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.EntityDescriptionRef
@@ -80,6 +81,7 @@ class ProjectActivityViewDataProvider(
     revisionIds = revisions.map { it.id }.toList()
 
     allDataReturningEventTypes = ActivityType.values().filter { !it.onlyCountsInList }
+
     allRelationData = getAllowedRevisionRelations(revisionIds, allDataReturningEventTypes)
 
     rawModifiedEntities = getModifiedEntitiesRaw()
@@ -144,12 +146,18 @@ class ProjectActivityViewDataProvider(
 
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
     return rawModifiedEntities.map { modifiedEntity ->
-      val relations = modifiedEntity.describingRelations?.map { relationEntry ->
-        relationEntry.key to extractCompressedRef(
-          relationEntry.value,
-          allRelationData[modifiedEntity.activityRevision.id]!!
-        )
-      }?.toMap()
+      val relations = modifiedEntity.describingRelations
+        ?.mapNotNull relationsOfEntityMap@{ relationEntry ->
+          relationEntry.key to extractCompressedRef(
+            relationEntry.value,
+            allRelationData[modifiedEntity.activityRevision.id] ?: let {
+              Sentry.captureException(
+                IllegalStateException("No relation data for revision ${modifiedEntity.activityRevision.id}")
+              )
+              return@relationsOfEntityMap null
+            }
+          )
+        }?.toMap()
       ModifiedEntityView(
         activityRevision = modifiedEntity.activityRevision,
         entityClass = modifiedEntity.entityClass,
