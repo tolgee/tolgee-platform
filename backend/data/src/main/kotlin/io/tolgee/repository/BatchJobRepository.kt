@@ -67,4 +67,32 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
   )
   fun getErrorMessages(jobIds: List<Long>): List<JobErrorMessagesView>
   fun findAllByProjectId(projectId: Long): List<BatchJob>
+
+  @Query(
+    """
+    select j from BatchJob j
+    where j.id in :lockedJobIds 
+      and j.status in :completedStatuses 
+      and j.updatedAt < :before
+  """
+  )
+  fun getCompletedJobs(
+    lockedJobIds: Iterable<Long>,
+    before: Date,
+    completedStatuses: List<BatchJobStatus> = BatchJobStatus.values().filter { it.completed }
+  ): List<BatchJob>
+
+  @Query(
+    """
+    select j from BatchJob j
+    join BatchJobChunkExecution bjce on bjce.batchJob.id = j.id
+    where j.id in :jobIds
+    group by j.id
+    having max(bjce.updatedAt) < :before
+  """
+  )
+  fun getStuckJobs(
+    jobIds: MutableSet<Long>,
+    before: Date,
+  ): List<BatchJob>
 }

@@ -1,7 +1,6 @@
 package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
-import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -23,8 +22,6 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
-  private val batchJobStateProvider: BatchJobStateProvider,
-  private val queue: BatchJobChunkExecutionQueue
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
@@ -125,5 +122,9 @@ class BatchJobProjectLockingManager(
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {
     return redissonClient.getMap("project_batch_job_locks")
+  }
+
+  fun getLockedJobIds(): Set<Long> {
+    return getMap().values.filterNotNull().toSet()
   }
 }

@@ -123,4 +123,8 @@ class BatchJobStateProvider(
       }.keys
     getStatesMap().keys.removeAll(toRemove)
   }
+
+  fun getCachedJobIds(): MutableSet<Long> {
+    return getStatesMap().keys
+  }
 }

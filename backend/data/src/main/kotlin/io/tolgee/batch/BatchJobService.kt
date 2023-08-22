@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigInteger
+import java.util.*
 import javax.persistence.EntityManager
 
 @Service
@@ -299,5 +300,12 @@ class BatchJobService(
     )
       .setParameter("id", id)
       .singleResult ?: throw NotFoundException()
+  }
+
+  fun getJobsCompletedBefore(lockedJobIds: Iterable<Long>, before: Date): List<BatchJob> =
+    batchJobRepository.getCompletedJobs(lockedJobIds, before)
+
+  fun getStuckJobs(jobIds: MutableSet<Long>): List<BatchJob> {
+    return batchJobRepository.getStuckJobs(jobIds, currentDateProvider.date.addMinutes(-2))
   }
 }
