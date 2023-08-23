@@ -54,7 +54,12 @@ class RateLimitServiceTest {
 
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
-  private val rateLimitService = RateLimitService(cacheManager, lockingProvider, currentDateProvider, rateLimitProperties)
+  private val rateLimitService = RateLimitService(
+    cacheManager,
+    lockingProvider,
+    currentDateProvider,
+    rateLimitProperties,
+  )
 
   private val userAccount = Mockito.mock(UserAccount::class.java)
 
@@ -146,20 +151,25 @@ class RateLimitServiceTest {
     val handlerWithoutLimit = HandlerMethod("", FakeController::fakeHandlerWithoutRateLimit.javaMethod!!)
     val handlerWithoutBucket = HandlerMethod("", FakeController::fakeHandler.javaMethod!!)
     val handlerWithBucket = HandlerMethod("", FakeController::fakeHandlerWithExplicitBucket.javaMethod!!)
+    val handlerInherit = HandlerMethod("", FakeController::fakeHandlerInherit.javaMethod!!)
 
     val noPolicy = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerWithoutLimit)
     val policy1 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerWithoutBucket)
     val policy2 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerWithBucket)
+    val policy3 = rateLimitService.getEndpointRateLimit(fakeRequest, null, handlerInherit)
 
     assertThat(noPolicy).isNull()
     assertThat(policy1).isNotNull
     assertThat(policy2).isNotNull
+    assertThat(policy3).isNotNull
 
     assertThat(policy1?.limit).isEqualTo(2)
     assertThat(policy2?.limit).isEqualTo(2)
+    assertThat(policy3?.limit).isEqualTo(2)
 
     assertThat(policy1?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
     assertThat(policy2?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.uwu")
+    assertThat(policy3?.bucketName).isEqualTo("endpoint.ip.127.0.0.1.GET /fake/route")
   }
 
   @Test
@@ -293,6 +303,9 @@ class RateLimitServiceTest {
     override fun getLock(name: String): Lock = lock
   }
 
+  @RateLimited(2)
+  annotation class InheritedRateLimit
+
   class FakeController {
     @RateLimited(2)
     fun fakeHandler() {}
@@ -307,5 +320,8 @@ class RateLimitServiceTest {
 
     @RateLimited(2, isAuthentication = true)
     fun fakeAuthHandler() {}
+
+    @InheritedRateLimit
+    fun fakeHandlerInherit() {}
   }
 }

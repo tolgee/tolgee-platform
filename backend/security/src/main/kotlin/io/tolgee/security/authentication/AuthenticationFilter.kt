@@ -18,7 +18,6 @@ package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.security.ratelimit.RateLimitProperties
 import io.tolgee.security.ratelimit.RateLimitService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -35,19 +34,13 @@ class AuthenticationFilter(
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
     val policy = rateLimitService.getIpAuthRateLimitPolicy(request)
-    var succeed = false
 
     if (policy == null) {
-      succeed = doAuthenticate(request)
+      doAuthenticate(request)
     } else {
       rateLimitService.consumeBucketUnless(policy) {
-        succeed = doAuthenticate(request)
-        succeed
+        doAuthenticate(request)
       }
-    }
-
-    if (!succeed) {
-      throw AuthenticationException(Message.UNAUTHENTICATED)
     }
 
     filterChain.doFilter(request, response)
@@ -59,15 +52,19 @@ class AuthenticationFilter(
 
   private fun doAuthenticate(request: HttpServletRequest): Boolean {
     val authorization = request.getHeader("Authorization")
-    if (authorization?.startsWith("Bearer ") == true) {
-      val auth = jwtService.validateToken(authorization.substring(7))
-      SecurityContextHolder.getContext().authentication = auth
-      return true
+    if (authorization != null) {
+      if (authorization.startsWith("Bearer ")) {
+        val auth = jwtService.validateToken(authorization.substring(7))
+        SecurityContextHolder.getContext().authentication = auth
+        return true
+      }
+
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
     val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
     if (apiKey != null) {
-      TODO("API Key validation")
+      TODO("API Key validation: not implemented yet")
     }
 
     return false

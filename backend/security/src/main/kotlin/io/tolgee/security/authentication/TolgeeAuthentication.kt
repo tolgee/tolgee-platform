@@ -19,6 +19,7 @@ package io.tolgee.security.authentication
 import io.tolgee.model.UserAccount
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 class TolgeeAuthentication(
   private val credentials: Any?,
@@ -30,7 +31,14 @@ class TolgeeAuthentication(
   }
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
-    return emptyList()
+    return when (userAccount.role) {
+      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority("ROLE_USER"))
+      UserAccount.Role.ADMIN -> listOf(
+        SimpleGrantedAuthority("ROLE_USER"),
+        SimpleGrantedAuthority("ROLE_ADMIN")
+      )
+      null -> emptyList()
+    }
   }
 
   override fun getCredentials(): Any? {
@@ -50,6 +58,6 @@ class TolgeeAuthentication(
   }
 
   override fun setAuthenticated(isAuthenticated: Boolean) {
-    throw IllegalArgumentException()
+    throw IllegalArgumentException("Implementation is immutable")
   }
 }

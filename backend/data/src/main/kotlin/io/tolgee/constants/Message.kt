@@ -7,6 +7,7 @@ import java.util.*
 
 enum class Message {
   UNAUTHENTICATED,
+  API_ACCESS_FORBIDDEN,
   API_KEY_NOT_FOUND,
   BAD_CREDENTIALS,
   MFA_ENABLED,

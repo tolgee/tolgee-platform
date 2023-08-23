@@ -75,7 +75,11 @@ class JwtService(
    * @param expiresAfter Amount of milliseconds after which the ticket will be expired.
    * @return A ticket.
    */
-  fun emitTicket(userAccountId: Long, ticketType: TicketType, expiresAfter: Long = DEFAULT_TICKET_EXPIRATION_TIME): String {
+  fun emitTicket(
+    userAccountId: Long,
+    ticketType: TicketType,
+    expiresAfter: Long = DEFAULT_TICKET_EXPIRATION_TIME,
+  ): String {
     val now = currentDateProvider.date
 
     return Jwts.builder()
@@ -105,7 +109,7 @@ class JwtService(
     val account = validateJwt(jws.body)
 
     val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
-    val hasSuperPowers =  steClaim != null && steClaim > currentDateProvider.date.time
+    val hasSuperPowers = steClaim != null && steClaim > currentDateProvider.date.time
 
     return TolgeeAuthentication(
       jws,

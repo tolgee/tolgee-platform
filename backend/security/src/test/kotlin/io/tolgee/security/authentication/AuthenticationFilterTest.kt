@@ -86,19 +86,6 @@ class AuthenticationFilterTest {
   }
 
   @Test
-  fun `it requires authentication to perform requests`() {
-    val req = MockHttpServletRequest()
-    val res = MockHttpServletResponse()
-    val chain = MockFilterChain()
-
-    assertThrows<AuthenticationException> { authenticationFilter.doFilter(req, res, chain) }
-
-    chain.reset()
-    Mockito.`when`(authProperties.enabled).thenReturn(false)
-    assertDoesNotThrow { authenticationFilter.doFilter(req, res, chain) }
-  }
-
-  @Test
   fun `it does not filter when auth is disabled`() {
     Mockito.`when`(authProperties.enabled).thenReturn(false)
     val req = MockHttpServletRequest()

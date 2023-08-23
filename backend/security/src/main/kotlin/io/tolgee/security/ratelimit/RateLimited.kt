@@ -20,7 +20,7 @@ package io.tolgee.security.ratelimit
  * Enables rate limiting on a specific route in addition to the global rate limit.
  * Has no effect when rate limiting is disabled in server configuration.
  */
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 annotation class RateLimited(
   /**
    * Maximum amount of requests that can be made during the window interval.

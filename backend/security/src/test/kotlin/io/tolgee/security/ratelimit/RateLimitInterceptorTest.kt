@@ -2,7 +2,6 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
-import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
 import org.junit.jupiter.api.AfterEach

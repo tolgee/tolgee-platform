@@ -37,6 +37,7 @@ class JwtServiceTest {
     const val SUPER_JWT_LIFETIME = 30 * 1000L // 30 seconds
     const val JWT_LIFETIME = 60 * 1000L // 60 seconds
   }
+
   private val testSigningKey: Key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
   private val authenticationProperties: AuthenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
@@ -164,8 +165,10 @@ class JwtServiceTest {
   @Test
   fun `it rejects invalid tokens and tickets`() {
     val invalidToken = "this certainly does not look like a token to me!"
-    val badToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9.kn_amo5h7__tlveBus_215x3Zq9UGFI6O_QpJ2rKi9o"
-    val noSigToken = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9"
+    val badToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+      "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9.kn_amo5h7__tlveBus_215x3Zq9UGFI6O_QpJ2rKi9o"
+    val noSigToken = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0." +
+      "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9"
     val token = jwtService.emitToken(TEST_USER_ID)
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
 

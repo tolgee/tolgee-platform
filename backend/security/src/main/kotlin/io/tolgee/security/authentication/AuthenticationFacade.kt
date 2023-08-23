@@ -22,12 +22,13 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.Scope
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade {
+  internal var _authenticatedProject: Project? = null
+
   val authentication: TolgeeAuthentication
     get() = SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
       ?: throw AuthenticationException(Message.UNAUTHENTICATED)
@@ -35,30 +36,15 @@ class AuthenticationFacade {
   val authenticatedUser: UserAccount
     get() = authentication.principal
 
+  val authenticatedProject: Project
+    get() = _authenticatedProject
+      ?: throw IllegalStateException("No authenticated project.")
+
   val isUserSuperAuthenticated: Boolean
     get() = authentication.details?.isSuperToken == true
 
   val isApiAuthentication: Boolean
     get() = authentication.credentials is ApiKey || authentication.credentials is Pat
-
-  val projectScope: Project?
-    get() {
-      val credentials = authentication.credentials
-      if (credentials is ApiKey) {
-        return credentials.project
-      }
-
-      return null
-    }
-
-  val limitedPermissions: Set<Scope>?
-    get() {
-      val credentials = authentication.credentials
-      if (credentials is ApiKey) {
-        return credentials.scopesEnum
-      }
-      return null
-    }
 
   val isProjectApiKeyAuth: Boolean
     get() = authentication.credentials is ApiKey

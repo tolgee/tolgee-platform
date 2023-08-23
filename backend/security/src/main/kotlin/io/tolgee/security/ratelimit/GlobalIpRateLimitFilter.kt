@@ -16,7 +16,6 @@
 
 package io.tolgee.security.ratelimit
 
-import io.tolgee.security.ratelimit.RateLimitService
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import javax.servlet.FilterChain

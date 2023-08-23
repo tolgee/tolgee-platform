@@ -3,7 +3,6 @@ package io.tolgee.security.authentication
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.configuration.tolgee.E2eRuntimeMutable
-import org.checkerframework.checker.units.qual.Length
 import org.springframework.boot.context.properties.ConfigurationProperties
 import javax.validation.constraints.Size
 
@@ -39,10 +38,10 @@ class AuthenticationProperties(
 
   @DocProperty(
     description = "Secret used to sign JWT authentication tokens with. It will be generated" +
-    " automatically, if not provided. You will be fine with 64 characters long random string.\n\n" +
-    ":::warning\n" +
-    "If running multiple replicas, it's required to set it or otherwise you will be constantly logged out.\n" +
-    ":::"
+      " automatically, if not provided. You will be fine with 64 characters long random string.\n\n" +
+      ":::warning\n" +
+      "If running multiple replicas, it's required to set it or otherwise you will be constantly logged out.\n" +
+      ":::"
   )
   @Size(min = 32)
   val jwtSecret: String? = null,
