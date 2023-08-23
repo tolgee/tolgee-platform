@@ -151,7 +151,7 @@ export const colors = {
       text: '#efefef',
     },
     topBanner: {
-      background: '#225C4B',
+      background: '#304c72',
     },
   },
 } as const;

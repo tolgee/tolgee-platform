@@ -17,6 +17,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
     const initialData = useInitialDataService();
     const [topBannerHeight, setTopBannerHeight] = useState(0);
+    const [topBannerContent, setTopBannerContent] = useState(
+      'Hey, here is a really, really, really long thing.'
+    );
 
     const jwtToken = useSelector(
       (state: AppState) => state.global.security.jwtToken
@@ -62,6 +65,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
         return organizationUsage.incrementSpendingLimitErrors();
       },
       setTopBannerHeight,
+      dismissTopBanner: () => {
+        setTopBannerContent('');
+      },
     };
 
     globalContext.actions = actions;
@@ -75,7 +81,7 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       clientConnected,
       topBanner: {
         height: topBannerHeight,
-        content: 'Hey, here is a new feature!!!',
+        content: topBannerContent,
       },
     };
 
