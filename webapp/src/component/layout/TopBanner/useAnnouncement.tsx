@@ -13,7 +13,7 @@ export function useAnnouncement() {
       case 'FEATURE_BATCH_OPERATIONS':
         return (
           <Announcement
-            content={t('annoucement_feature_batch_operations')}
+            content={t('announcement_feature_batch_operations')}
             link="https://tolgee.io/platform/translation_keys/batch_operations"
           />
         );

@@ -6,14 +6,10 @@ import java.time.ZoneOffset
 
 class AnnouncementDto (
   val type: Announcement,
-  val until: Long
 ) {
   companion object {
     fun fromEntity(announcementEnum: Announcement): AnnouncementDto {
-      return AnnouncementDto(
-        type = announcementEnum,
-        until = announcementEnum.until.toEpochSecond(ZoneOffset.UTC) * 1000
-      )
+      return AnnouncementDto(type = announcementEnum)
     }
   }
 }

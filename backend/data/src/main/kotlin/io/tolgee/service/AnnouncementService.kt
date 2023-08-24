@@ -1,16 +1,20 @@
 package io.tolgee.service
 
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.dtos.response.AnnouncementDto
 import io.tolgee.model.DismissedAnnouncement
 import io.tolgee.model.enums.Announcement
 import io.tolgee.repository.AnnouncementRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class AnnouncementService (
   private val announcementRepository: AnnouncementRepository,
   private val authenticationFacade: AuthenticationFacade,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   fun getAnnouncement(): Announcement? {
     val lastAnnouncement = Announcement.values().last()
@@ -22,7 +26,10 @@ class AnnouncementService (
       0L
     }
 
-    if (dismissedCount == 0L && lastAnnouncement.until.isAfter(LocalDateTime.now()) ) {
+    val now = currentDateProvider.date.time
+    val until = lastAnnouncement.until
+
+    if (dismissedCount == 0L && now < until) {
       return lastAnnouncement
     }
     return null

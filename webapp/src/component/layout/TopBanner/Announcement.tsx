@@ -1,28 +1,34 @@
 import { styled, Link as MuiLink } from '@mui/material';
-import { ContentNoticeIcon } from 'tg.component/CustomIcons';
+import { useTranslate } from '@tolgee/react';
+import { TadaIcon } from 'tg.component/CustomIcons';
 
 type Props = {
   content: string;
   link?: string;
 };
 
-const StyledLink = styled(MuiLink)`
+const StyledContent = styled('div')`
   display: flex;
   gap: 12px;
-  color: ${({ theme }) => theme.palette.text.primary};
-  font-size: 12px;
   align-items: center;
 `;
 
-const StyledContentNoticeIcon = styled(ContentNoticeIcon)`
-  color: ${({ theme }) => theme.palette.topBanner.icon};
+const StyledMuiLink = styled(MuiLink)`
+  color: ${({ theme }) => theme.palette.topBanner.linkText};
+  text-decoration: underline;
 `;
 
 export const Announcement = ({ content, link }: Props) => {
+  const { t } = useTranslate();
   return (
-    <StyledLink href={link} target="_blank" rel="noopener noreferrer">
-      <StyledContentNoticeIcon />
+    <StyledContent>
+      <TadaIcon />
       <div>{content}</div>
-    </StyledLink>
+      {link && (
+        <StyledMuiLink href={link} rel="noopener noreferrer" target="_blank">
+          {t('announcement_general_link_text')}
+        </StyledMuiLink>
+      )}
+    </StyledContent>
   );
 };

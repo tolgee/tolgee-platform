@@ -18,6 +18,9 @@ const StyledContainer = styled('div')`
   width: 100%;
   background: ${({ theme }) => theme.palette.topBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
+  color: ${({ theme }) => theme.palette.topBanner.mainText};
+  font-size: 15px;
+  font-weight: 700;
 `;
 
 const StyledContent = styled('div')`

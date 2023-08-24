@@ -1,8 +1,14 @@
 package io.tolgee.model.enums
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 
-enum class Announcement(val until: LocalDateTime) {
-  FEATURE_BATCH_OPERATIONS(LocalDateTime.of(2023, 9, 1, 0, 0)),
+fun parseTime(datetime: String): Long {
+  val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z")
+  return ZonedDateTime.parse(datetime, formatter).toInstant().toEpochMilli()
+}
+
+enum class Announcement(val until: Long) {
+  FEATURE_BATCH_OPERATIONS(parseTime("2023-09-10 00:00 UTC")),
 }
