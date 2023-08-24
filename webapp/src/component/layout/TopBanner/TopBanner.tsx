@@ -59,14 +59,16 @@ export function TopBanner() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  if (!bannerType) {
+  const announcement = bannerType && getAnnouncement(bannerType);
+
+  if (!announcement) {
     return null;
   }
 
   return (
     <StyledContainer ref={bannerRef}>
       <div />
-      <StyledContent>{getAnnouncement(bannerType)}</StyledContent>
+      <StyledContent>{announcement}</StyledContent>
       <StyledCloseButton role="button" tabIndex={0} onClick={dismissTopBanner}>
         <Close />
       </StyledCloseButton>
