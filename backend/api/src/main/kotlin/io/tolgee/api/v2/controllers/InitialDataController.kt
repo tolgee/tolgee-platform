@@ -3,12 +3,10 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.PreferredOrganizationFacade
-import io.tolgee.dtos.response.AnnouncementDto
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.hateoas.InitialDataModel
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.AnnouncementService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

@@ -5,9 +5,9 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@IdClass(DismissedAnnouncementId::class)  // Reference to the IdClass
+@IdClass(DismissedAnnouncementId::class) // Reference to the IdClass
 @Table()
-class DismissedAnnouncement (
+class DismissedAnnouncement(
   @Id
   @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount,
@@ -16,4 +16,3 @@ class DismissedAnnouncement (
   @Enumerated(EnumType.STRING)
   var announcement: Announcement
 ) : Serializable
-

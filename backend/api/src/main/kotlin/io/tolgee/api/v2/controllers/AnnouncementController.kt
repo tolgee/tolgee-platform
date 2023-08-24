@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/announcement",
   ]
 )
-@Tag(name ="New features announcements")
-class AnnouncementController (
+@Tag(name = "New features announcements")
+class AnnouncementController(
   private val announcementService: AnnouncementService
 ) : IController {
   @GetMapping("")

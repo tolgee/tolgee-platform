@@ -3,7 +3,6 @@ package io.tolgee.model.enums
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-
 fun parseTime(datetime: String): Long {
   val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z")
   return ZonedDateTime.parse(datetime, formatter).toInstant().toEpochMilli()
