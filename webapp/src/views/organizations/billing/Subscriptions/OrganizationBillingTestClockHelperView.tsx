@@ -163,26 +163,25 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
             onChange={(e) => setStringValue(e.target.value)}
             value={stringValue}
           />
-          <br />
-          <LoadingButton
-            disabled={value !== parseStringValue()}
-            loading={moveMutation.isLoading}
-            onClick={moveClock}
-            color="primary"
-            variant="contained"
-          >
-            Move clock!
-          </LoadingButton>
-          <br />
-          <LoadingButton
-            disabled={value !== parseStringValue()}
-            loading={resetMutation.isLoading}
-            onClick={resetClock}
-            color="secondary"
-            variant="contained"
-          >
-            Reset
-          </LoadingButton>
+          <Box display="flex" gap={1} justifyContent="end" mt={2}>
+            <LoadingButton
+              loading={resetMutation.isLoading}
+              onClick={resetClock}
+              variant="contained"
+              color="secondary"
+            >
+              Reset
+            </LoadingButton>
+            <LoadingButton
+              disabled={value !== parseStringValue()}
+              loading={moveMutation.isLoading}
+              onClick={moveClock}
+              color="primary"
+              variant="contained"
+            >
+              Move clock!
+            </LoadingButton>
+          </Box>
         </>
       )}
     </BaseOrganizationSettingsView>
