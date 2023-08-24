@@ -13,6 +13,13 @@ const StyledContent = styled('div')`
   align-items: center;
 `;
 
+const StyledWrappableContent = styled('div')`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
 const StyledMuiLink = styled(MuiLink)`
   color: ${({ theme }) => theme.palette.topBanner.linkText};
   text-decoration: underline;
@@ -21,14 +28,16 @@ const StyledMuiLink = styled(MuiLink)`
 export const Announcement = ({ content, link }: Props) => {
   const { t } = useTranslate();
   return (
-    <StyledContent>
-      <TadaIcon />
-      <div>{content}</div>
+    <StyledWrappableContent>
+      <StyledContent>
+        <TadaIcon />
+        <div>{content}</div>
+      </StyledContent>
       {link && (
         <StyledMuiLink href={link} rel="noopener noreferrer" target="_blank">
           {t('announcement_general_link_text')}
         </StyledMuiLink>
       )}
-    </StyledContent>
+    </StyledWrappableContent>
   );
 };
