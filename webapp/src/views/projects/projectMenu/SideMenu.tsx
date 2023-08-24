@@ -21,7 +21,7 @@ const StyledMenuFixed = styled('menu')`
 `;
 
 export const SideMenu: React.FC = ({ children }) => {
-  const topBannerHeight = useGlobalContext((c) => c.topBanner.height);
+  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
 
   return (
     <StyledMenuWrapper>

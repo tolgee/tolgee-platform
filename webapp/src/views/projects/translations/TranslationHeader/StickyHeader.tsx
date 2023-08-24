@@ -61,7 +61,7 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
   const columnSizes = useColumnsContext((c) => c.columnSizes);
-  const topBannerHeight = useGlobalContext((c) => c.topBanner.height);
+  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
 
   useEffect(() => {
     setTopBarHeight(height + (topBarHidden ? 0 : 50));

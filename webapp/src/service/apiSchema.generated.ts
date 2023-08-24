@@ -327,6 +327,10 @@ export interface paths {
     get: operations["allByUser"];
     post: operations["create_10"];
   };
+  "/v2/announcement/dismiss": {
+    /** Dismiss current announcement for current user */
+    post: operations["dismiss"];
+  };
   "/api/public/validate_email": {
     post: operations["validateEmail"];
   };
@@ -505,6 +509,10 @@ export interface paths {
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
+  };
+  "/v2/announcement": {
+    /** Get latest announcement */
+    get: operations["getLatest"];
   };
   "/v2/administration/users": {
     get: operations["getUsers"];
@@ -1201,15 +1209,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1342,17 +1350,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
-      description: string;
-      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      username?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1886,6 +1894,11 @@ export interface components {
         | "translations.batch-machine";
       requires: components["schemas"]["HierarchyItem"][];
     };
+    AnnouncementDto: {
+      type: "FEATURE_BATCH_OPERATIONS";
+      /** Format: int64 */
+      until: number;
+    };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1897,6 +1910,7 @@ export interface components {
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       languageTag?: string;
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
+      announcement?: components["schemas"]["AnnouncementDto"];
     };
     MtServiceDTO: {
       enabled: boolean;
@@ -1942,17 +1956,17 @@ export interface components {
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2054,8 +2068,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -2063,8 +2077,8 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      namespace?: string;
       translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2201,6 +2215,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2213,7 +2228,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2509,15 +2523,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2636,17 +2650,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
-      description: string;
-      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      username?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -6315,6 +6329,25 @@ export interface operations {
       };
     };
   };
+  /** Dismiss current announcement for current user */
+  dismiss: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   validateEmail: {
     responses: {
       /** OK */
@@ -8033,6 +8066,29 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Get latest announcement */
+  getLatest: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["AnnouncementDto"];
         };
       };
       /** Bad Request */

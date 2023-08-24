@@ -4,6 +4,7 @@ import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
+import { useAnnouncement } from './useAnnouncement';
 
 import { Close } from '@mui/icons-material';
 
@@ -13,7 +14,7 @@ const StyledContainer = styled('div')`
   left: 0px;
   right: 0px;
   display: grid;
-  grid-template-columns: 36px 1fr 36px;
+  grid-template-columns: 50px 1fr 50px;
   width: 100%;
   background: ${({ theme }) => theme.palette.topBanner.background};
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
@@ -21,7 +22,9 @@ const StyledContainer = styled('div')`
 
 const StyledContent = styled('div')`
   text-align: center;
-  padding: 3px 15px;
+  padding: 8px 15px;
+  display: flex;
+  justify-content: center;
 `;
 
 const StyledCloseButton = styled('div')`
@@ -31,17 +34,19 @@ const StyledCloseButton = styled('div')`
   justify-self: center;
   padding: 2px;
   cursor: pointer;
-  margin: 2px 4px;
+  margin: 6px 18px;
 `;
 
 export function TopBanner() {
-  const bannerContent = useGlobalContext((c) => c.topBanner?.content);
+  const bannerType = useGlobalContext((c) => c.announcement?.type);
   const { setTopBannerHeight, dismissTopBanner } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
 
+  const getAnnouncement = useAnnouncement();
+
   useEffect(() => {
     setTopBannerHeight(bannerRef.current?.offsetHeight || 0);
-  }, [bannerContent]);
+  }, [bannerType]);
 
   useEffect(() => {
     function handler() {
@@ -51,14 +56,14 @@ export function TopBanner() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  if (!bannerContent) {
+  if (!bannerType) {
     return null;
   }
 
   return (
     <StyledContainer ref={bannerRef}>
       <div />
-      <StyledContent>{bannerContent}</StyledContent>
+      <StyledContent>{getAnnouncement(bannerType)}</StyledContent>
       <StyledCloseButton role="button" tabIndex={0} onClick={dismissTopBanner}>
         <Close />
       </StyledCloseButton>

@@ -6,7 +6,7 @@ const StyledAppBarSpacer = styled('div')(
 );
 
 export function TopSpacer() {
-  const topBannerHeight = useGlobalContext((c) => c.topBanner.height);
+  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
 
   return <StyledAppBarSpacer sx={{ marginTop: topBannerHeight + 'px' }} />;
 }

@@ -79,7 +79,7 @@ export const TopBar: React.FC<Props> = ({
 
   const trigger = useTopBarHidden() && autoHide;
 
-  const topBannerSize = useGlobalContext((c) => c.topBanner.height);
+  const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
 
   const { mode, setMode } = useThemeContext();
 

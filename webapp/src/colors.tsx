@@ -44,6 +44,7 @@ export type Marker = {
 
 export type TopBanner = {
   background: string;
+  icon: string;
 };
 
 export const colors = {
@@ -91,6 +92,7 @@ export const colors = {
     },
     topBanner: {
       background: '#E6FAF0',
+      icon: '#33D589',
     },
   },
   dark: {
@@ -152,6 +154,7 @@ export const colors = {
     },
     topBanner: {
       background: '#304c72',
+      icon: '#dddddd',
     },
   },
 } as const;

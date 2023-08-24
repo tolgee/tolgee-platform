@@ -149,6 +149,7 @@ const getTheme = (mode: PaletteMode) => {
       marker: c.marker,
       topBanner: {
         background: c.topBanner.background,
+        icon: c.topBanner.icon,
       },
     },
     mixins: {

@@ -4,7 +4,7 @@ import { Box, styled } from '@mui/material';
 import { TopBar } from './TopBar/TopBar';
 import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
-import { TopBanner } from './TopBanner';
+import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
 
 type Props = {
