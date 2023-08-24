@@ -99,7 +99,9 @@ class MtService(
     publishBeforeEvent(project)
 
     checkTextLength(baseTranslationText)
-    val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id }, project)
+    val targetLanguageIds = targetLanguages.map { it.id }
+
+    val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguageIds, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
     val serviceIndexedLanguagesMap = targetLanguages
@@ -111,7 +113,7 @@ class MtService(
 
     val metadata = getMetadata(
       baseLanguage,
-      targetLanguages.filter { primaryServices[it.id]?.usesMetadata == true },
+      targetLanguages.filter { primaryServices[it.id]?.serviceType?.usesMetadata == true },
       baseTranslationText,
       keyId,
       true,
@@ -160,12 +162,13 @@ class MtService(
     publishBeforeEvent(project)
 
     checkTextLength(baseTranslationText)
-    val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
-    checkServices(desired = services, enabled = enabledServices)
-    val servicesToUse = services ?: enabledServices
+    val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguage.id)
+    val servicesToUse = enabledServices.filter { services?.contains(it.serviceType) ?: true }
+      .toSet()
+    checkServices(desired = services?.toSet(), enabled = enabledServices.map { it.serviceType })
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
-    val anyNeedsMetadata = enabledServices.any { it.usesMetadata }
+    val anyNeedsMetadata = enabledServices.any { it.serviceType.usesMetadata }
 
     val metadata =
       getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata)
@@ -179,7 +182,7 @@ class MtService(
         keyName = keyName,
         sourceLanguageTag = baseLanguage.tag,
         targetLanguageTag = targetLanguage.tag,
-        services = servicesToUse,
+        serviceInfos = servicesToUse,
         metadata = metadata,
         isBatch = false
       )
@@ -188,9 +191,9 @@ class MtService(
 
     publishAfterEvent(project, actualPrice)
 
-    return results.map { (serviceName, translated) ->
+    return results.map { (serviceInfo, translated) ->
       translated.translatedText = translated.translatedText?.replaceParams(prepared.params)
-      serviceName to translated
+      serviceInfo.serviceType to translated
     }.toMap()
   }
 

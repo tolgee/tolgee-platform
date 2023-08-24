@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column

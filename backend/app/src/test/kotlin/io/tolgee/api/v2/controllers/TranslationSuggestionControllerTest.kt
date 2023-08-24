@@ -137,6 +137,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
         any(),
         any(),
+        any()
       )
     ).thenReturn("Translated with DeepL")
 

@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2ProjectsController
+package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
@@ -10,6 +10,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.mtServiceConfig.Formality
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthControllerTest() {
+class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   lateinit var testData: MtSettingsTestData
 
@@ -60,23 +62,48 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.englishLanguage.id,
             primaryService = MtServiceType.GOOGLE,
-            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+            enabledServicesInfo = setOf(
+              MtServiceInfo(MtServiceType.GOOGLE, null),
+              MtServiceInfo(MtServiceType.AWS, Formality.DEFAULT)
+            )
           )
         )
       )
     ).andIsOk.andAssertThatJson {
       node("_embedded.languageConfigs") {
+        node("[0]") {
+          node("targetLanguageId").isNull()
+          node("primaryService").isEqualTo("GOOGLE")
+          node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
+          node("enabledServicesInfo") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formality").isNull()
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formality").isEqualTo("DEFAULT")
+            }
+          }
+        }
         node("[1]") {
           node("targetLanguageId").isValidId
           node("targetLanguageTag").isEqualTo("en")
           node("targetLanguageName").isEqualTo("English")
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
-        }
-        node("[0]") {
-          node("targetLanguageId").isNull()
-          node("primaryService").isEqualTo("GOOGLE")
-          node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
+          node("enabledServicesInfo") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formality").isNull()
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formality").isEqualTo("DEFAULT")
+            }
+          }
         }
       }
     }
