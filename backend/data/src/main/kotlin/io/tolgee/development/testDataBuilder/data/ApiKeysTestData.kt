@@ -6,6 +6,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import java.util.*
 
 class ApiKeysTestData : BaseTestData() {
@@ -15,6 +17,10 @@ class ApiKeysTestData : BaseTestData() {
   lateinit var frantasPat: Pat
   lateinit var usersKey: ApiKey
   lateinit var expiredKey: ApiKey
+
+  lateinit var frantasLocalizationKey: Key
+  lateinit var frantasTranslation: Translation
+  lateinit var usersKeyFrantasProject: ApiKey
 
   init {
     this.root.apply {
@@ -50,6 +56,24 @@ class ApiKeysTestData : BaseTestData() {
         addPermission {
           user = this@ApiKeysTestData.user
           type = ProjectPermissionType.MANAGE
+        }
+
+        addApiKey {
+          key = "test_api_key_user"
+          scopesEnum = Scope.values().toMutableSet()
+          userAccount = this@ApiKeysTestData.user
+          usersKeyFrantasProject = this
+        }
+
+        addKey {
+          name = "test-key"
+          frantasLocalizationKey = this
+        }.build {
+          addTranslation {
+            text = "test translation"
+            language = addEnglish().self
+            frantasTranslation = this
+          }
         }
       }
     }

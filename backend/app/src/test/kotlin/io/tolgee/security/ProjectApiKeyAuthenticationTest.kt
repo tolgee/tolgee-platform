@@ -4,11 +4,7 @@ import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
@@ -26,6 +22,9 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
 
   @Autowired
   private lateinit var currentDateProvider: CurrentDateProvider
+
+  @Autowired
+  private lateinit var jwtProvider: JwtTokenProvider
 
   @Test
   fun after() {
@@ -139,6 +138,39 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
       "/v2/projects/${testData.frantasProject.id}",
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_---aaajsjs")
+      }
+    ).andIsForbidden
+  }
+
+  @Test
+  fun `permissions get correctly revoked when the user no longer have them`() {
+    val testData = ApiKeysTestData()
+    testDataService.saveTestData(testData.root)
+
+    performPut(
+      "/v2/projects/${testData.frantasProject.id}/translations/${testData.frantasTranslation.id}/set-state/REVIEWED",
+      null,
+      HttpHeaders().apply {
+        add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKeyFrantasProject.encodedKey)
+      }
+    ).andIsOk
+
+    // Revoke user permissions
+    val tokenFrantisek = jwtProvider.generateToken(testData.frantisekDobrota.id, true)
+    performPut(
+      "/v2/projects/${testData.frantasProject.id}/users/${testData.user.id}/set-permissions/VIEW",
+      null,
+      HttpHeaders().apply {
+        add("Authorization", "Bearer $tokenFrantisek")
+      }
+    ).andIsOk
+
+    // Test if PAK is no longer able to set state
+    performPut(
+      "/v2/projects/${testData.frantasProject.id}/translations/${testData.frantasTranslation.id}/set-state/TRANSLATED",
+      null,
+      HttpHeaders().apply {
+        add(API_KEY_HEADER_NAME, "tgpak_" + testData.usersKeyFrantasProject.encodedKey)
       }
     ).andIsForbidden
   }
