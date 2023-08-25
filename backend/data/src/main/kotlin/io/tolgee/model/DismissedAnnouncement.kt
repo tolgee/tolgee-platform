@@ -5,8 +5,7 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@IdClass(DismissedAnnouncementId::class) // Reference to the IdClass
-@Table()
+@IdClass(DismissedAnnouncementId::class)
 class DismissedAnnouncement(
   @Id
   @ManyToOne(fetch = FetchType.LAZY)

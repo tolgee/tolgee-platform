@@ -1,45 +1,56 @@
 package io.tolgee.service
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Caches
 import io.tolgee.model.DismissedAnnouncement
 import io.tolgee.model.enums.Announcement
 import io.tolgee.repository.AnnouncementRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.security.UserAccountService
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
 class AnnouncementService(
   private val announcementRepository: AnnouncementRepository,
-  private val authenticationFacade: AuthenticationFacade,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val userAccountService: UserAccountService,
 ) {
-  fun getAnnouncement(): Announcement? {
-    val lastAnnouncement = Announcement.values().last()
-    val user = this.authenticationFacade.userAccountOrNull
 
-    val dismissedCount = if (user !== null) {
-      announcementRepository.getDismissed(user.id, lastAnnouncement)
-    } else {
-      0L
-    }
-
-    val now = currentDateProvider.date.time
-    val until = lastAnnouncement.until
-
-    if (dismissedCount == 0L && now < until) {
-      return lastAnnouncement
-    }
-    return null
+  @Cacheable(
+    cacheNames = [Caches.DISMISSED_ANNOUNCEMENT],
+    key = "{#announcement, #userId}"
+  )
+  fun isAnnouncementDismissed(announcement: Announcement, userId: Long): Boolean {
+    return announcementRepository.isDismissed(userId, announcement)
   }
 
-  fun dismissAnnouncement() {
-    val announcement = getAnnouncement()
-    val user = this.authenticationFacade.userAccountEntity
-
-    if (announcement !== null) {
+  @CacheEvict(
+    cacheNames = [Caches.DISMISSED_ANNOUNCEMENT],
+    key = "{#announcement, #userId}"
+  )
+  fun dismissAnnouncement(announcement: Announcement, userId: Long) {
+    val user = this.userAccountService.get(userId)
+    if (!isAnnouncementDismissed(announcement, user.id)) {
       announcementRepository.save(
         DismissedAnnouncement(announcement = announcement, user = user)
       )
     }
+  }
+
+  fun getLastAnnouncement(): Announcement {
+    return Announcement.values().last()
+  }
+
+  fun isAnnouncementExpired(announcement: Announcement): Boolean {
+    val lastAnnouncement = Announcement.values().last()
+
+    val now = currentDateProvider.date.time
+    val until = lastAnnouncement.until
+
+    if (now < until) {
+      return false
+    }
+    return true
   }
 }
