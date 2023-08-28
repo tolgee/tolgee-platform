@@ -5,7 +5,13 @@ import java.time.format.DateTimeFormatter
 
 @Suppress("unused")
 enum class Announcement(val until: Long) {
-  FEATURE_BATCH_OPERATIONS(parseTime("2023-09-10 00:00 UTC")),
+  FEATURE_BATCH_OPERATIONS(parseTime("2023-09-10 00:00 UTC"));
+
+  companion object {
+    fun getLast(): Announcement {
+      return Announcement.values().last()
+    }
+  }
 }
 
 private fun parseTime(datetime: String): Long {

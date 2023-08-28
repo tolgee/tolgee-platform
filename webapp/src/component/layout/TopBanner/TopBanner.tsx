@@ -68,10 +68,15 @@ export function TopBanner() {
   }
 
   return (
-    <StyledContainer ref={bannerRef}>
+    <StyledContainer ref={bannerRef} data-cy="top-banner">
       <div />
-      <StyledContent>{announcement}</StyledContent>
-      <StyledCloseButton role="button" tabIndex={0} onClick={dismissTopBanner}>
+      <StyledContent data-cy="top-banner-content">{announcement}</StyledContent>
+      <StyledCloseButton
+        role="button"
+        tabIndex={0}
+        onClick={dismissTopBanner}
+        data-cy="top-banner-dismiss-button"
+      >
         <Close />
       </StyledCloseButton>
     </StyledContainer>

@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.response.AnnouncementDto
+import io.tolgee.model.enums.Announcement
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.AnnouncementService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -26,7 +27,7 @@ class AnnouncementController(
   @GetMapping("")
   @Operation(description = "Get latest announcement")
   fun getLatest(): AnnouncementDto? {
-    val announcement = announcementService.getLastAnnouncement()
+    val announcement = Announcement.getLast()
     val user = authenticationFacade.userAccount
     if (this.announcementService.isAnnouncementExpired(announcement)) {
       return null
@@ -40,8 +41,8 @@ class AnnouncementController(
   @PostMapping("dismiss")
   @Operation(description = "Dismiss current announcement for current user")
   fun dismiss() {
-    val lastAnnouncement = announcementService.getLastAnnouncement()
+    val announcement = Announcement.getLast()
     val user = authenticationFacade.userAccount
-    announcementService.dismissAnnouncement(lastAnnouncement, user.id)
+    announcementService.dismissAnnouncement(announcement, user.id)
   }
 }

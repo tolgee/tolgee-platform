@@ -38,12 +38,8 @@ class AnnouncementService(
     }
   }
 
-  fun getLastAnnouncement(): Announcement {
-    return Announcement.values().last()
-  }
-
   fun isAnnouncementExpired(announcement: Announcement): Boolean {
-    val lastAnnouncement = Announcement.values().last()
+    val lastAnnouncement = Announcement.getLast()
 
     val now = currentDateProvider.date.time
     val until = lastAnnouncement.until

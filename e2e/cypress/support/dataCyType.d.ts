@@ -378,6 +378,9 @@ declare namespace DataCy {
         "spending-limit-exceeded-popover" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "top-banner" |
+        "top-banner-content" |
+        "top-banner-dismiss-button" |
         "transfer-project-apply-button" |
         "translation-create-key-input" |
         "translation-create-namespace-input" |
