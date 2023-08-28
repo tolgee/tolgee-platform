@@ -2,7 +2,6 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityService
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties

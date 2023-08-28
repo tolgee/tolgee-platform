@@ -47,5 +47,4 @@ class AnnouncementControllerTest() : AuthorizedControllerTest() {
       node("announcement").isNull()
     }
   }
-
 }
