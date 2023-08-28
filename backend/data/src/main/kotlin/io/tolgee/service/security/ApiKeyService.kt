@@ -14,6 +14,8 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.PROJECT_API_KEY_PREFIX
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -22,6 +24,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class ApiKeyService(
@@ -29,8 +32,9 @@ class ApiKeyService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
-  private val permissionService: PermissionService
-) {
+  private val permissionService: PermissionService,
+  private val entityManager: EntityManager
+) : Logging {
   fun create(
     userAccount: UserAccount,
     scopes: Set<Scope>,
@@ -136,18 +140,17 @@ class ApiKeyService(
   }
 
   fun decodeKey(raw: String): DecodedApiKey? {
-    try {
+    return try {
       val decoded = BaseEncoding.base32().omitPadding().lowerCase().decode(raw).decodeToString()
-
       val (projectId, key) = decoded.split("_".toRegex(), 2)
-      return DecodedApiKey(projectId.toLong(), key)
+      DecodedApiKey(projectId.toLong(), key)
     } catch (e: IllegalArgumentException) {
-      return null
+      null
     } catch (e: IndexOutOfBoundsException) {
-      return null
+      null
     } catch (e: Exception) {
       Sentry.captureException(e)
-      return null
+      null
     }
   }
 
@@ -155,6 +158,7 @@ class ApiKeyService(
   @Transactional
   fun updateLastUsedAsync(apiKey: ApiKey) {
     runSentryCatching {
+      logTransactionIsolation()
       updateLastUsed(apiKey)
     }
   }
@@ -190,6 +194,14 @@ class ApiKeyService(
 
     // probably legacy project api key without any prefix
     return rawWithPossiblePrefix
+  }
+
+  private fun logTransactionIsolation() {
+    if (logger.isDebugEnabled) {
+      val isolationLevel = entityManager.createNativeQuery("show transaction_isolation")
+        .singleResult as String
+      logger.debug("Transaction isolation level: $isolationLevel")
+    }
   }
 
   class DecodedApiKey(
