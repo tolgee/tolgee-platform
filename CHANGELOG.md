@@ -1,3 +1,10 @@
+## [3.28.2](https://github.com/tolgee/tolgee-platform/compare/v3.28.1...v3.28.2) (2023-08-28)
+
+
+### Bug Fixes
+
+* revoke scopes to API keys if they've been revoked to the user ([#1877](https://github.com/tolgee/tolgee-platform/issues/1877)) ([8c3e63a](https://github.com/tolgee/tolgee-platform/commit/8c3e63a66f2769c517ba7f1cb541bdc02e83ad28))
+
 ## [3.28.1](https://github.com/tolgee/tolgee-platform/compare/v3.28.0...v3.28.1) (2023-08-22)
 
 
