@@ -1,3 +1,10 @@
+## [3.28.3](https://github.com/tolgee/tolgee-platform/compare/v3.28.2...v3.28.3) (2023-08-28)
+
+
+### Bug Fixes
+
+* Debug log transaction isolation when setting API key ([#1880](https://github.com/tolgee/tolgee-platform/issues/1880)) ([1a9acc9](https://github.com/tolgee/tolgee-platform/commit/1a9acc96fc77c318142677395d9d0cbe124a527a))
+
 ## [3.28.2](https://github.com/tolgee/tolgee-platform/compare/v3.28.1...v3.28.2) (2023-08-28)
 
 
