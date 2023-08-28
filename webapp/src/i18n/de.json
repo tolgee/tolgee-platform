@@ -446,7 +446,7 @@
   "import-successful-message" : "Import erfolgreich",
   "import_translations_title" : "Übersetzungen importieren",
   "integrate-api-key-hidden-description" : "<Nur neue Schlüssel können angezeigt werden>",
-  "integrate_choose_your_weapon" : "Wählen Sie Ihre Waffe",
+  "integrate_choose_your_weapon" : "Wählen Sie Ihre Plattform",
   "integrate_guides_go_to_docs" : "Zur Dokumentation gehen",
   "integrate-initial-api-key-description-value" : "Mein Integrations-API-Schlüssel",
   "integrate_step_integrate" : "Integrieren",
