@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 import java.io.Serializable
 
 @Service
-class SecurityService @Autowired constructor(
+class SecurityService (
   private val authenticationFacade: AuthenticationFacade,
   private val languageService: LanguageService
 ) {
@@ -68,7 +68,6 @@ class SecurityService @Autowired constructor(
     allowedScopes: Array<Scope>
   ) {
     if (!allowedScopes.contains(requiredScope)) {
-      @Suppress("UNCHECKED_CAST")
       throw PermissionException(
         Message.OPERATION_NOT_PERMITTED,
         listOf(requiredScope.value) as List<Serializable>

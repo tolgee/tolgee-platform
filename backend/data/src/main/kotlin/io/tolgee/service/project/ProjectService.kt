@@ -49,7 +49,7 @@ import javax.persistence.EntityManager
 
 @Transactional
 @Service
-class ProjectService constructor(
+class ProjectService (
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,

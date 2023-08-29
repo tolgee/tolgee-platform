@@ -48,6 +48,25 @@ class OrganizationRoleService(
   fun canUserView(userId: Long, organizationId: Long) =
     this.organizationRepository.canUserView(userId, organizationId)
 
+  /**
+   * Verifies the user has a role equal or higher than a given role.
+   *
+   * @param userId The user to check.
+   * @param organizationId The organization to check role in.
+   * @param role The minimum role the user should have.
+   * @return Whether the user has at least the [role] role in the organization.
+   */
+  fun isUserOfRole(userId: Long, organizationId: Long, role: OrganizationRoleType): Boolean {
+    // The use of a when here is an intentional code design choice.
+    // If a new role gets added, this will not compile and will need to be addressed.
+    return when (role) {
+      OrganizationRoleType.MEMBER ->
+        isUserMemberOrOwner(userId, organizationId)
+      OrganizationRoleType.OWNER ->
+        isUserOwner(userId, organizationId)
+    }
+  }
+
   fun checkUserIsOwner(userId: Long, organizationId: Long) {
     val isServerAdmin = userAccountService.get(userId).role == UserAccount.Role.ADMIN
     if (this.isUserOwner(userId, organizationId) || isServerAdmin) return else throw PermissionException()
@@ -71,18 +90,12 @@ class OrganizationRoleService(
 
   fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
     val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-    if (role != null) {
-      return true
-    }
-    return false
+    return role != null
   }
 
   fun isUserOwner(userId: Long, organizationId: Long): Boolean {
     val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-    if (role?.type == OrganizationRoleType.OWNER) {
-      return true
-    }
-    return false
+    return role?.type == OrganizationRoleType.OWNER
   }
 
   fun find(id: Long): OrganizationRole? {
