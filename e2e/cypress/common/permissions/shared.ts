@@ -26,6 +26,10 @@ export function getProjectInfo(projectId: number) {
   );
 }
 
+export function getLanguageName(languages: LanguageModel[], id: number) {
+  return languages.find((l) => l.id === id).name;
+}
+
 export function getLanguageId(languages: LanguageModel[], tag: string) {
   return languages.find((l) => l.tag === tag)?.id;
 }

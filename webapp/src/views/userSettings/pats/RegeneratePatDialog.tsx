@@ -15,7 +15,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 import { useRouteMatch } from 'react-router-dom';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 type RevealedPatModel = components['schemas']['RevealedPatModel'];
 type RegeneratePatDto = components['schemas']['RegeneratePatDto'];
@@ -36,8 +35,6 @@ export const RegeneratePatDialog: FunctionComponent<{
     method: 'get',
     path: { id: id },
   });
-
-  useGlobalLoading(patLoadable.isLoading);
 
   const regenerateMutation = useApiMutation({
     url: '/v2/pats/{id}/regenerate',

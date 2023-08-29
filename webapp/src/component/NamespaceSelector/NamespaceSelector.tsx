@@ -26,9 +26,6 @@ export const NamespaceSelector: React.FC<Props> = ({
     url: '/v2/projects/{projectId}/used-namespaces',
     method: 'get',
     path: { projectId: project.id },
-    fetchOptions: {
-      disableNotFoundHandling: true,
-    },
     options: {
       enabled: !namespaceData,
     },
@@ -85,7 +82,7 @@ export const NamespaceSelector: React.FC<Props> = ({
         onSelect={onChange}
         items={existingOptions}
         value={value || ''}
-        SelectProps={{ size: 'small' }}
+        SelectProps={{ size: 'small', ...SearchSelectProps?.SelectProps }}
       />
       {Boolean(dialogOpen) && (
         <NamespaceNewDialog

@@ -7,10 +7,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useUpdateBasePermissions } from './useUpdateBasePermissions';
 import { PermissionSettingsState } from 'tg.component/PermissionsSettings/types';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -19,7 +16,6 @@ const messageService = container.resolve(MessageService);
 export const OrganizationBasePermissionMenu: FunctionComponent<{
   organization: OrganizationModel;
 }> = ({ organization }) => {
-  const messages = useMessage();
   const { t } = useTranslate();
 
   const { updatePermissions } = useUpdateBasePermissions({
@@ -46,16 +42,8 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
   async function handleSubmit(data: PermissionSettingsState) {
     await confirm();
 
-    try {
-      await updatePermissions(data);
-      messageService.success(
-        <T keyName="organization_member_privileges_set" />
-      );
-    } catch (e) {
-      parseErrorResponse(e).forEach((err) =>
-        messages.error(<TranslatedError code={err} />)
-      );
-    }
+    await updatePermissions(data);
+    messageService.success(<T keyName="organization_member_privileges_set" />);
   }
 
   return (

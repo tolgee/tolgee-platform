@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.user_account
 
 import io.tolgee.api.v2.controllers.V2UserController
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -21,6 +22,18 @@ class SimpleUserAccountModelAssembler(
       name = entity.name,
       avatar = avatar,
       deleted = entity.deletedAt != null
+    )
+  }
+
+  fun toModel(dto: UserAccountDto): SimpleUserAccountModel {
+    val avatar = avatarService.getAvatarLinks(dto.avatarHash)
+
+    return SimpleUserAccountModel(
+      id = dto.id,
+      username = dto.username,
+      name = dto.name,
+      avatar = avatar,
+      deleted = dto.deleted
     )
   }
 }

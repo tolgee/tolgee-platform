@@ -1,15 +1,12 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
-import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
-import { Box, CircularProgress, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { MessageService } from 'tg.service/MessageService';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { StateSelector } from './StateSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { FORMATS, FormatSelector } from './FormatSelector';
@@ -17,9 +14,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NsSelector } from './NsSelector';
 import { NestedSelector } from './NestedSelector';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-
-const messaging = container.resolve(MessageService);
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 export const exportableStates = Object.keys(translationStates);
 
@@ -92,7 +87,7 @@ export const ExportForm = () => {
     method: 'get',
     path: { projectId: project.id },
     fetchOptions: {
-      disableNotFoundHandling: true,
+      disable404Redirect: true,
     },
   });
 
@@ -145,7 +140,7 @@ export const ExportForm = () => {
   if (languagesLoadable.isFetching || namespacesLoadable.isFetching) {
     return (
       <Box mt={2} justifyContent="center" display="flex">
-        <CircularProgress />
+        <SpinnerProgress />
       </Box>
     );
   }
@@ -210,11 +205,6 @@ export const ExportForm = () => {
                 a.download = values.languages[0] + '.xliff';
               }
               a.click();
-            },
-            onError(error) {
-              parseErrorResponse(error).map((e) =>
-                messaging.error(<TranslatedError code={e} />)
-              );
             },
             onSettled() {
               actions.setSubmitting(false);

@@ -2256,6 +2256,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1665492431778-1">
+        <validCheckSum>ANY</validCheckSum>
         <sql dbms="postgresql">
             CREATE
             EXTENSION IF NOT EXISTS unaccent;
@@ -2268,11 +2269,11 @@
             LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS
             $func$
             SELECT public.unaccent('public.unaccent', $1)
-            $func$;
+                       $func$;
 
-            CREATE INDEX translation_text_unaccent_gin_trgm_index ON translation USING GIN ( lower(f_unaccent(text)) gin_trgm_ops);
-            CREATE INDEX key_name_unaccent_gin_trgm_index ON key USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
-            CREATE INDEX namespace_name_unaccent_gin_trgm_index ON namespace USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
+            CREATE INDEX translation_text_unaccent_gin_trgm_index ON translation USING GIN ( lower (f_unaccent(text)) gin_trgm_ops);
+            CREATE INDEX key_name_unaccent_gin_trgm_index ON key USING GIN (lower (f_unaccent(name)) gin_trgm_ops);
+            CREATE INDEX namespace_name_unaccent_gin_trgm_index ON namespace USING GIN (lower (f_unaccent(name)) gin_trgm_ops);
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1674571952168-1">
@@ -2388,7 +2389,8 @@
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1678365585479-1">
-        <addUniqueConstraint columnNames="project_id, name" constraintName="UKsyjijfmo4txo7n7qvpu5so0ej" tableName="tag"/>
+        <addUniqueConstraint columnNames="project_id, name" constraintName="UKsyjijfmo4txo7n7qvpu5so0ej"
+                             tableName="tag"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-1">
         <addColumn tableName="permission">
@@ -2396,8 +2398,9 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-0">
+        <validCheckSum>ANY</validCheckSum>
         <sql>
-            create unique index permission_null_idx on permission(organization_id);
+            create unique index permission_null_idx on permission (organization_id);
             insert into permission (id, type, organization_id, created_at, updated_at)
             select nextval('permission_id_seq'), base_permissions, id, current_date, current_date
             from organization;
@@ -2409,7 +2412,10 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1669390300780-3">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="permission" constraintName="FKodqlqlhjgsfwnq418388o4vy7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="permission"
+                                 constraintName="FKodqlqlhjgsfwnq418388o4vy7" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1670236174754-1">
         <dropColumn columnName="base_permissions" tableName="organization"/>
@@ -2435,16 +2441,29 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1672937726613-3">
-        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_view_languages" constraintName="FK47vi2uyggca3biukk3ioigqsb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_view_languages"
+                                 constraintName="FK47vi2uyggca3biukk3ioigqsb" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1672937726613-4">
-        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_state_change_languages" constraintName="FKbey9cdt2e6bhl7kp0u5ojguwp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_state_change_languages"
+                                 constraintName="FKbey9cdt2e6bhl7kp0u5ojguwp" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1672937726613-5">
-        <addForeignKeyConstraint baseColumnNames="view_languages_id" baseTableName="permission_view_languages" constraintName="FKc75c8vhx7rx4ls4oqh373lsv7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="view_languages_id" baseTableName="permission_view_languages"
+                                 constraintName="FKc75c8vhx7rx4ls4oqh373lsv7" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1672937726613-6">
-        <addForeignKeyConstraint baseColumnNames="state_change_languages_id" baseTableName="permission_state_change_languages" constraintName="FKpxsgkx94rrmdmqocvliirtevo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="state_change_languages_id"
+                                 baseTableName="permission_state_change_languages"
+                                 constraintName="FKpxsgkx94rrmdmqocvliirtevo" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1673863874294-2">
         <sql>
@@ -2458,15 +2477,19 @@
                     when scopes_enum = 5 then 'SCREENSHOTS_VIEW'
                     when scopes_enum = 6 then 'ACTIVITY_VIEW'
                     when scopes_enum = 7 then 'LANGUAGES_EDIT'
-                end;
+            end;
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1673863874294-3">
         <sql>
             insert into api_key_scopes_enum (api_key_id, scopes_enum)
-            select api_key_id, 'KEYS_CREATE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+            select api_key_id, 'KEYS_CREATE'
+            from api_key_scopes_enum
+            where scopes_enum = 'KEYS_EDIT';
             insert into api_key_scopes_enum (api_key_id, scopes_enum)
-            select api_key_id, 'KEYS_DELETE' from api_key_scopes_enum where scopes_enum = 'KEYS_EDIT';
+            select api_key_id, 'KEYS_DELETE'
+            from api_key_scopes_enum
+            where scopes_enum = 'KEYS_EDIT';
         </sql>
     </changeSet>
     <changeSet author="jenik (generated)" id="1678110170883-1">
@@ -2483,7 +2506,8 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1683039181425-1">
-        <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false" tableName="translation"/>
+        <addDefaultValue columnDataType="boolean" columnName="outdated" defaultValueBoolean="false"
+                         tableName="translation"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1685370826729-1">
         <createIndex indexName="IDXeq2y9mghytirkcofquanv5frf" tableName="namespace">
@@ -2534,5 +2558,129 @@
             </column>
             <column name="instance_id" type="VARCHAR(255)"/>
         </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-1">
+        <createTable tableName="tolgee_batch_job">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tolgee_batch_jobPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_size" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="params" type="JSONB"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="target" type="JSONB"/>
+            <column name="total_chunks" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_items" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="author_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-2">
+        <createTable tableName="tolgee_batch_job_chunk_execution">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tolgee_batch_job_chunk_executionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_number" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_message" type="VARCHAR(255)"/>
+            <column name="exception" type="TEXT"/>
+            <column name="execute_after" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column defaultValueBoolean="false" name="retry" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="success_targets" type="JSONB"/>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-3">
+        <addColumn tableName="activity_revision">
+            <column name="batch_job_chunk_execution_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-4">
+        <addColumn tableName="activity_revision">
+            <column name="batch_job_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-5">
+        <createIndex indexName="IDX1q8dova3ub0sb98ekpacta450" tableName="tolgee_batch_job_chunk_execution">
+            <column name="chunk_number"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-6">
+        <createIndex indexName="IDXfgked62ynn0kliu5q9wup1d5g" tableName="tolgee_batch_job_chunk_execution">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-7">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="tolgee_batch_job" constraintName="FKettsnugxew2f00b76d42nx5e9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-8">
+        <addForeignKeyConstraint baseColumnNames="batch_job_chunk_execution_id" baseTableName="activity_revision" constraintName="FKfbqp00d229lcid6aa72pgrvj5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tolgee_batch_job_chunk_execution" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-9">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="tolgee_batch_job_chunk_execution" constraintName="FKj4w92ovn1w1wyfw6cd0hf22wc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tolgee_batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-10">
+        <addForeignKeyConstraint baseColumnNames="batch_job_id" baseTableName="activity_revision" constraintName="FKnguyp4985yuoj8xuqsrd12b5y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tolgee_batch_job" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690466722895-11">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="tolgee_batch_job" constraintName="FKrt8ahtsfk7phco5o4p5x7kaog" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690707891775-1">
+        <addColumn tableName="tolgee_batch_job_chunk_execution">
+            <column name="error_key" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690707891775-2">
+        <renameColumn tableName="tolgee_batch_job_chunk_execution" oldColumnName="exception" newColumnName="stack_trace"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-1">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="job_character" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690803535598-2">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="max_per_job_concurrency" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1690984220965-1">
+        <addColumn tableName="auto_translation_config">
+            <column name="enable_for_import" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1691069582950-1">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="hidden" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

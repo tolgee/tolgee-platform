@@ -7,6 +7,8 @@ import Chainable = Cypress.Chainable;
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
 
+type ImportKeysItemDto = components['schemas']['ImportKeysItemDto'];
+
 let token = null;
 
 export const v2apiFetch = (
@@ -94,6 +96,13 @@ export const login = (
       token = res.body.accessToken;
       window.localStorage.setItem('jwtToken', token);
     });
+};
+
+export const importData = (projectId: number, data: ImportKeysItemDto[]) => {
+  return v2apiFetch(`projects/${projectId}/keys/import`, {
+    method: 'post',
+    body: JSON.stringify({ keys: data }),
+  });
 };
 
 export const logout = () => {

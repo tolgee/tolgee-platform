@@ -3,7 +3,6 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const RefreshButton = () => {
   const { t } = useTranslate();
@@ -25,8 +24,6 @@ export const RefreshButton = () => {
       }
     );
   }
-
-  useGlobalLoading(refreshMutation.isLoading);
 
   return (
     <Box

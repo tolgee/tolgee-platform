@@ -14,6 +14,7 @@ import { container } from 'tsyringe';
 
 import { paths } from '../apiSchema.generated';
 import { paths as billingPaths } from '../billingApiSchema.generated';
+import { ApiError } from './ApiError';
 
 import { RequestOptions } from './ApiHttpService';
 import {
@@ -32,7 +33,7 @@ export type QueryProps<
   url: Url;
   method: Method;
   fetchOptions?: RequestOptions;
-  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>>;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError>;
 } & RequestParamsType<Url, Method, Paths>;
 
 export type InfiniteQueryProps<
@@ -43,7 +44,10 @@ export type InfiniteQueryProps<
   url: Url;
   method: Method;
   fetchOptions?: RequestOptions;
-  options?: UseInfiniteQueryOptions<ResponseContent<Url, Method, Paths>>;
+  options?: UseInfiniteQueryOptions<
+    ResponseContent<Url, Method, Paths>,
+    ApiError
+  >;
 } & RequestParamsType<Url, Method, Paths>;
 
 export type MutationProps<
@@ -56,7 +60,7 @@ export type MutationProps<
   fetchOptions?: RequestOptions;
   options?: UseMutationOptions<
     ResponseContent<Url, Method, Paths>,
-    any,
+    ApiError,
     RequestParamsType<Url, Method, Paths>
   >;
   invalidatePrefix?: string;
@@ -70,16 +74,15 @@ export const useApiInfiniteQuery = <
   props: InfiniteQueryProps<Url, Method, Paths>
 ) => {
   const { url, method, fetchOptions, options, ...request } = props;
-  return useInfiniteQuery<ResponseContent<Url, Method, Paths>, any>(
+  return useInfiniteQuery<ResponseContent<Url, Method, Paths>, ApiError>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ pageParam }) => {
-      return apiHttpService.schemaRequest<Url, Method, Paths>(
-        url,
-        method,
-        fetchOptions
-      )(pageParam || request);
+      return apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+        ...fetchOptions,
+        disableAutoErrorHandle: true,
+      })(pageParam || request);
     },
-    options
+    autoErrorHandling(options, Boolean(fetchOptions?.disableAutoErrorHandle))
   );
 };
 
@@ -92,16 +95,36 @@ export const useApiQuery = <
 ) => {
   const { url, method, fetchOptions, options, ...request } = props;
 
-  return useQuery<ResponseContent<Url, Method, Paths>, any>(
+  return useQuery<ResponseContent<Url, Method, Paths>, ApiError>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ signal }) =>
       apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
         signal,
         ...fetchOptions,
+        disableAutoErrorHandle: true,
       })(request),
-    options
+    autoErrorHandling(
+      options as UseQueryOptions<any, ApiError>,
+      Boolean(fetchOptions?.disableAutoErrorHandle)
+    )
   );
 };
+
+function autoErrorHandling(
+  options: UseQueryOptions<any, ApiError> | undefined,
+  disabled: boolean
+) {
+  return {
+    ...options,
+    onError: (err) => {
+      if (options?.onError) {
+        options.onError(err);
+      } else if (err && !disabled) {
+        (err as ApiError).handleError?.();
+      }
+    },
+  };
+}
 
 export const useApiMutation = <
   Url extends keyof Paths,
@@ -114,39 +137,56 @@ export const useApiMutation = <
   const { url, method, fetchOptions, options, invalidatePrefix } = props;
   const mutation = useMutation<
     ResponseContent<Url, Method, Paths>,
-    any,
+    ApiError,
     RequestParamsType<Url, Method, Paths>
   >(
     (request) =>
-      apiHttpService.schemaRequest<Url, Method, Paths>(
-        url,
-        method,
-        fetchOptions
-      )(request),
+      apiHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+        ...fetchOptions,
+        disableAutoErrorHandle: true,
+      })(request),
     options
   );
 
   // inject custom onSuccess
-  const customOptions = (options) => ({
+  const customOptions = (
+    options: UseQueryOptions<any, ApiError> | undefined
+  ) => ({
     ...options,
-    onSuccess: (...args) => {
+    onSuccess: (data) => {
       if (invalidatePrefix !== undefined) {
         invalidateUrlPrefix(queryClient, invalidatePrefix);
       }
-      options?.onSuccess?.(...args);
+      options?.onSuccess?.(data);
     },
   });
 
   const mutate = useCallback<typeof mutation.mutate>(
     (variables, options) => {
-      return mutation.mutate(variables, customOptions(options));
+      return mutation.mutate(
+        variables,
+        autoErrorHandling(
+          customOptions(options as any),
+          Boolean(
+            fetchOptions?.disableAutoErrorHandle || props.options?.onError
+          )
+        )
+      );
     },
     [mutation.mutate]
   );
 
   const mutateAsync = useCallback<typeof mutation.mutateAsync>(
     (variables, options) => {
-      return mutation.mutateAsync(variables, customOptions(options));
+      return mutation.mutateAsync(
+        variables,
+        autoErrorHandling(
+          customOptions(options as any),
+          Boolean(
+            fetchOptions?.disableAutoErrorHandle || props.options?.onError
+          )
+        )
+      );
     },
     [mutation.mutateAsync]
   );

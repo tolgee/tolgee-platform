@@ -15,4 +15,14 @@ class SimpleLockingProvider : LockingProvider {
   override fun getLock(name: String): Lock {
     return map.getOrPut(name) { ReentrantLock() }
   }
+
+  override fun <T> withLocking(name: String, fn: () -> T): T {
+    val lock = this.getLock(name)
+    lock.lock()
+    try {
+      return fn()
+    } finally {
+      lock.unlock()
+    }
+  }
 }

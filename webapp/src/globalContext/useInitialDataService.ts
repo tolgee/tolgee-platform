@@ -14,6 +14,7 @@ type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
 
 export const useInitialDataService = () => {
+  const [organizationLoading, setOrganizationLoading] = useState(false);
   const actions = container.resolve(GlobalActions);
   const tolgee = useTolgee();
 
@@ -67,14 +68,19 @@ export const useInitialDataService = () => {
 
   const updatePreferredOrganization = async (organizationId: number) => {
     if (organizationId !== preferredOrganization?.id) {
-      // set preffered organization
-      await setPreferredOrganization.mutateAsync({
-        path: { organizationId },
-      });
+      setOrganizationLoading(true);
+      try {
+        // set preffered organization
+        await setPreferredOrganization.mutateAsync({
+          path: { organizationId },
+        });
 
-      // load new preferred organization
-      const data = await preferredOrganizationLoadable.mutateAsync({});
-      setOrganization(data);
+        // load new preferred organization
+        const data = await preferredOrganizationLoadable.mutateAsync({});
+        setOrganization(data);
+      } finally {
+        setOrganizationLoading(false);
+      }
     }
   };
 
@@ -90,10 +96,11 @@ export const useInitialDataService = () => {
   const isFetching =
     initialData.isFetching ||
     setPreferredOrganization.isLoading ||
-    preferredOrganizationLoadable.isLoading;
+    preferredOrganizationLoadable.isLoading ||
+    organizationLoading;
 
   if (initialData.error) {
-    throw new Error(initialData.error.message || initialData.error);
+    throw initialData.error;
   }
 
   return {

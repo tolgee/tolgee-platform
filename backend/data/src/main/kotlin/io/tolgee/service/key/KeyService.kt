@@ -87,6 +87,9 @@ class KeyService(
   fun create(project: Project, dto: CreateKeyDto): Key {
     val key = create(project, dto.name, dto.namespace)
     dto.translations?.let {
+      if (it.isEmpty()) {
+        return@let
+      }
       translationService.setForKey(key, it)
     }
 
@@ -100,6 +103,7 @@ class KeyService(
   }
 
   private fun storeScreenshots(dto: CreateKeyDto, key: Key) {
+    @Suppress("DEPRECATION")
     val screenshotUploadedImageIds = dto.screenshotUploadedImageIds
     val screenshots = dto.screenshots
 
@@ -163,6 +167,27 @@ class KeyService(
     return key
   }
 
+  @Transactional
+  fun setNamespace(keyIds: List<Long>, namespace: String?) {
+    val keys = keyRepository.getKeysWithNamespaces(keyIds)
+    val projectId = keys.map { it.project.id }.distinct().singleOrNull() ?: return
+    val namespaceEntity = namespaceService.findOrCreate(namespace, projectId)
+
+    val oldNamespaces = keys.map {
+      val oldNamespace = it.namespace
+      it.namespace = namespaceEntity
+      oldNamespace
+    }
+
+    val modifiedNamespaces = oldNamespaces
+      .filter { it?.name != namespace }
+      .filterNotNull()
+      .distinctBy { it.id }
+
+    namespaceService.deleteIfUnused(modifiedNamespaces)
+    keyRepository.saveAll(keys)
+  }
+
   fun checkKeyNotExisting(projectId: Long, name: String, namespace: String?) {
     if (findOptional(projectId, name, namespace).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
@@ -184,16 +209,17 @@ class KeyService(
     translationService.deleteAllByKeys(ids)
     keyMetaService.deleteAllByKeyIdIn(ids)
     screenshotService.deleteAllByKeyId(ids)
-    val keys = keyRepository.findAllByIdIn(ids)
+    val keys = keyRepository.findAllByIdInForDelete(ids)
     val namespaces = keys.map { it.namespace }
     keyRepository.deleteAllByIdIn(keys.map { it.id })
     namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
+  @Transactional
   fun deleteAllByProject(projectId: Long) {
     val ids = keyRepository.getIdsByProjectId(projectId)
     keyMetaService.deleteAllByKeyIdIn(ids)
-    keyRepository.deleteAllByIdIn(ids)
+    this.deleteMultiple(ids)
   }
 
   @Autowired
@@ -242,4 +268,9 @@ class KeyService(
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Key> = keyRepository.getAllByProjectId(projectId, pageable)
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
+  fun getKeysWithTagsById(keysIds: Iterable<Long>): Set<Key> = keyRepository.getWithTagsByIds(keysIds)
+
+  fun find(id: List<Long>): List<Key> {
+    return keyRepository.findAllByIdIn(id)
+  }
 }

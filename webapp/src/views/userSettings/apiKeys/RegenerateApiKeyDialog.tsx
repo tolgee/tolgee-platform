@@ -10,7 +10,6 @@ import { redirect } from 'tg.hooks/redirect';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { ExpirationDateField } from 'tg.component/common/form/epirationField/ExpirationDateField';
 import { useExpirationDateOptions } from 'tg.component/common/form/epirationField/useExpirationDateOptions';
 
@@ -64,7 +63,6 @@ export const RegenerateApiKeyDialog: FunctionComponent<Props> = (props) => {
     };
   };
 
-  useGlobalLoading(apiKeyLoadable.isLoading);
   const expirationDateOptions = useExpirationDateOptions();
 
   return (

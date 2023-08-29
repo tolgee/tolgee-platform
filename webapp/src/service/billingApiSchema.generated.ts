@@ -117,9 +117,13 @@ export interface components {
     };
     Links: { [key: string]: components["schemas"]["Link"] };
     PlanIncludedUsageModel: {
+      /** Format: int64 */
       seats: number;
+      /** Format: int64 */
       translationSlots: number;
+      /** Format: int64 */
       translations: number;
+      /** Format: int64 */
       mtCredits: number;
     };
     PlanPricesModel: {
@@ -130,6 +134,7 @@ export interface components {
       subscriptionYearly: number;
     };
     SelfHostedEePlanModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       public: boolean;
@@ -150,10 +155,14 @@ export interface components {
       hasYearlyPrice: boolean;
     };
     SelfHostedEeSubscriptionModel: {
+      /** Format: int64 */
       id: number;
+      /** Format: int64 */
       currentPeriodStart?: number;
+      /** Format: int64 */
       currentPeriodEnd?: number;
       currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
       createdAt: number;
       plan: components["schemas"]["SelfHostedEePlanModel"];
       status:
@@ -167,6 +176,7 @@ export interface components {
       estimatedCosts?: number;
     };
     CloudPlanModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       free: boolean;
@@ -189,17 +199,24 @@ export interface components {
       public: boolean;
     };
     CloudSubscriptionModel: {
+      /** Format: int64 */
       organizationId: number;
       plan: components["schemas"]["CloudPlanModel"];
+      /** Format: int64 */
       currentPeriodStart?: number;
+      /** Format: int64 */
       currentPeriodEnd?: number;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       cancelAtPeriodEnd: boolean;
       estimatedCosts?: number;
+      /** Format: int64 */
       createdAt: number;
     };
     UpdateSubscriptionPrepareRequest: {
-      /** Id of the subscription plan */
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
@@ -213,12 +230,16 @@ export interface components {
       total: number;
       amountDue: number;
       updateToken: string;
+      /** Format: int64 */
       prorationDate: number;
       endingBalance: number;
     };
     PlanIncludedUsageRequest: {
+      /** Format: int64 */
       seats: number;
+      /** Format: int64 */
       translations: number;
+      /** Format: int64 */
       mtCredits: number;
     };
     PlanPricesRequest: {
@@ -247,12 +268,16 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       public: boolean;
       stripeProductId: string;
+      /** Format: date-time */
       notAvailableBefore?: string;
+      /** Format: date-time */
       availableUntil?: string;
+      /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
     };
     SelfHostedEePlanAdministrationModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       public: boolean;
@@ -294,12 +319,16 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       public: boolean;
       stripeProductId: string;
+      /** Format: date-time */
       notAvailableBefore?: string;
+      /** Format: date-time */
       availableUntil?: string;
+      /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
     };
     CloudPlanAdministrationModel: {
+      /** Format: int64 */
       id: number;
       name: string;
       free: boolean;
@@ -324,7 +353,10 @@ export interface components {
       forOrganizationIds: number[];
     };
     CloudSubscribeRequest: {
-      /** Id of the subscription plan */
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
@@ -332,12 +364,17 @@ export interface components {
       url: string;
     };
     SelfHostedEeSubscribeRequest: {
-      /** Id of the subscription plan */
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
     BuyMoreCreditsRequest: {
+      /** Format: int64 */
       priceId: number;
+      /** Format: int64 */
       amount: number;
     };
     BuyMoreCreditsModel: {
@@ -354,8 +391,10 @@ export interface components {
       };
     };
     MtCreditsPriceModel: {
+      /** Format: int64 */
       id: number;
       price: number;
+      /** Format: int64 */
       amount: number;
     };
     AverageProportionalUsageItemModel: {
@@ -366,13 +405,16 @@ export interface components {
     };
     SumUsageItemModel: {
       total: number;
+      /** Format: int64 */
       unusedQuantity: number;
+      /** Format: int64 */
       usedQuantity: number;
+      /** Format: int64 */
       usedQuantityOverPlan: number;
     };
     UsageModel: {
       subscriptionPrice?: number;
-      /** Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       translations: components["schemas"]["AverageProportionalUsageItemModel"];
@@ -385,21 +427,27 @@ export interface components {
       };
     };
     InvoiceModel: {
+      /** Format: int64 */
       id: number;
-      /** The number on the invoice */
+      /** @description The number on the invoice */
       number: string;
+      /** Format: int64 */
       createdAt: number;
-      /** The Total amount with tax */
+      /** @description The Total amount with tax */
       total: number;
       taxRatePercentage?: number;
-      /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
+      /** @description Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
       pdfReady: boolean;
       hasUsage: boolean;
     };
     PageMetadata: {
+      /** Format: int64 */
       size?: number;
+      /** Format: int64 */
       totalElements?: number;
+      /** Format: int64 */
       totalPages?: number;
+      /** Format: int64 */
       number?: number;
     };
     PagedModelInvoiceModel: {
@@ -431,6 +479,7 @@ export interface components {
     StripeProductModel: {
       id: string;
       name: string;
+      /** Format: int64 */
       created: number;
     };
     CollectionModelSelfHostedEePlanAdministrationModel: {
@@ -438,6 +487,7 @@ export interface components {
         plans?: components["schemas"]["SelfHostedEePlanAdministrationModel"][];
       };
     };
+    /** @example Links to avatar images */
     Avatar: {
       large: string;
       thumbnail: string;
@@ -449,7 +499,10 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     PermissionModel: {
-      /** Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type. */
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -471,25 +524,40 @@ export interface components {
         | "keys.delete"
         | "keys.create"
       )[];
-      /** The user's permission type. This field is null if uses granular permissions */
+      /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * Deprecated (use translateLanguageIds).
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
        */
       permittedLanguageIds?: number[];
-      /** List of languages user can translate to. If null, all languages editing is permitted. */
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
       translateLanguageIds?: number[];
-      /** List of languages user can view. If null, all languages view is permitted. */
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
       viewLanguageIds?: number[];
-      /** List of languages user can change state to. If null, changing state of all language values is permitted. */
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
       stateChangeLanguageIds?: number[];
     };
     SimpleOrganizationModel: {
+      /** Format: int64 */
       id: number;
+      /** @example Beautiful organization */
       name: string;
+      /** @example btforg */
       slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];

@@ -56,7 +56,7 @@ jobs:
             ~/backend-development.tgz
 
   backend-test:
-    name: Backend testing ‍🔎
+    name: BT ‍🔎
     needs: [backend-build]
     runs-on: ubuntu-latest
     strategy:
@@ -66,6 +66,7 @@ jobs:
           [
             "server-app:runContextRecreatingTests",
             "server-app:runStandardTests",
+            "server-app:runWebsocketTests",
             "ee-test:test",
             "data:test",
           ]
@@ -129,8 +130,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        total_jobs: [10]
-        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        total_jobs: [15]
+        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
       - uses: actions/checkout@v3
 

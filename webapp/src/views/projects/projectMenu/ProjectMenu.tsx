@@ -28,10 +28,7 @@ export const ProjectMenu = ({ id }) => {
   const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewUsers =
     config.authentication && satisfiesPermission('members.view');
-  const canImport =
-    canViewKeys &&
-    (satisfiesPermission('translations.edit') ||
-      satisfiesPermission('keys.edit'));
+  const canImport = canViewKeys && satisfiesPermission('translations.edit');
   const canIntegrate = canViewKeys;
 
   const { t } = useTranslate();

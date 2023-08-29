@@ -1,23 +1,25 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.activity.iterceptor.InterceptedEventsManager
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.util.Logging
 import org.springframework.context.ApplicationContext
-import javax.annotation.PreDestroy
 import kotlin.reflect.KClass
 
-open class ActivityHolder(
-  private val applicationContext: ApplicationContext
-) : Logging {
+open class ActivityHolder(val applicationContext: ApplicationContext) {
   open var activity: ActivityType? = null
+    set(value) {
+      field = value
+      activityRevision.type = value
+    }
 
   open var meta: MutableMap<String, Any?> = mutableMapOf()
 
-  open var activityRevision: ActivityRevision? = null
+  open val activityRevision: ActivityRevision by lazy {
+    ActivityRevision()
+  }
 
   open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
 
@@ -26,20 +28,22 @@ open class ActivityHolder(
   open var organizationId: Long? = null
 
   open var utmData: UtmData = null
-  open var sdkInfo: Map<String, String?>? = null
 
-  @PreDestroy
-  open fun preDestroy() {
-    if (!transactionRollbackOnly) {
-      applicationContext.publishEvent(OnProjectActivityEvent(this))
-    }
-  }
+  open var sdkInfo: Map<String, String?>? = null
 
   /**
    * This field stores all modified entities, it's stored before the transaction is committed
    */
   open var modifiedEntities:
-    MutableMap<
-      KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>
-      > = mutableMapOf()
+    ModifiedEntitiesType = mutableMapOf()
+
+  open var enableAutoCompletion: Boolean = true
+
+  open var afterActivityFlushed: (() -> Unit)? = null
+    set(value) {
+      this.applicationContext.getBean(InterceptedEventsManager::class.java).initActivityHolder()
+      field = value
+    }
 }
+
+typealias ModifiedEntitiesType = MutableMap<KClass<out EntityWithId>, MutableMap<Long, ActivityModifiedEntity>>

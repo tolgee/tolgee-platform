@@ -28,6 +28,10 @@ enum class Scope(
   KEYS_VIEW("keys.view"),
   KEYS_DELETE("keys.delete"),
   KEYS_CREATE("keys.create"),
+  BATCH_JOBS_VIEW("batch-jobs.view"),
+  BATCH_JOBS_CANCEL("batch-jobs.cancel"),
+  BATCH_PRE_TRANSLATE_BY_TM("translations.batch-by-tm"),
+  BATCH_MACHINE_TRANSLATE("translations.batch-machine"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -36,14 +40,15 @@ enum class Scope(
     private val keysView = HierarchyItem(KEYS_VIEW)
     private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))
     private val screenshotsView = HierarchyItem(SCREENSHOTS_VIEW, listOf(keysView))
+    private val translationsEdit = HierarchyItem(
+      TRANSLATIONS_EDIT,
+      listOf(translationsView)
+    )
 
     val hierarchy = HierarchyItem(
       ADMIN,
       listOf(
-        HierarchyItem(
-          TRANSLATIONS_EDIT,
-          listOf(translationsView)
-        ),
+        translationsEdit,
         HierarchyItem(
           KEYS_EDIT,
           listOf(
@@ -94,7 +99,11 @@ enum class Scope(
         HierarchyItem(
           TRANSLATIONS_STATE_EDIT,
           listOf(HierarchyItem(TRANSLATIONS_VIEW))
-        )
+        ),
+        HierarchyItem(BATCH_JOBS_VIEW),
+        HierarchyItem(BATCH_JOBS_CANCEL),
+        HierarchyItem(BATCH_PRE_TRANSLATE_BY_TM, listOf(translationsEdit)),
+        HierarchyItem(BATCH_MACHINE_TRANSLATE, listOf(translationsEdit))
       )
     )
 

@@ -17,12 +17,9 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Button } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { FieldError } from 'tg.component/FormField';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -70,14 +67,10 @@ export const KeyEditModal: React.FC<Props> = ({
   const { t } = useTranslate();
   const project = useProject();
   const { updateKey } = useTranslationsActions();
-  const messaging = useMessage();
 
   const updateKeyLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{id}/complex-update',
     method: 'put',
-    fetchOptions: {
-      disableBadRequestHandling: true,
-    },
   });
 
   return (
@@ -107,9 +100,7 @@ export const KeyEditModal: React.FC<Props> = ({
               if (e.STANDARD_VALIDATION) {
                 helpers.setErrors(e.STANDARD_VALIDATION);
               } else {
-                parseErrorResponse(e).forEach((message) =>
-                  messaging.error(<TranslatedError code={message} />)
-                );
+                e.handleError?.();
               }
             },
           }

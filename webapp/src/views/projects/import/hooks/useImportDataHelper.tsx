@@ -1,5 +1,4 @@
 import { useProject } from 'tg.hooks/useProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import create from 'zustand';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -41,9 +40,6 @@ export const useImportDataHelper = () => {
     path: {
       projectId: project.id,
     },
-    fetchOptions: {
-      disableNotFoundHandling: true,
-    },
     query: { size: 1000 },
     options: {
       onSuccess(data) {
@@ -52,6 +48,8 @@ export const useImportDataHelper = () => {
       onError(error) {
         if ((error as any)?.code === 'resource_not_found') {
           setResult(undefined);
+        } else {
+          error.handleError?.();
         }
       },
     },
@@ -80,11 +78,10 @@ export const useImportDataHelper = () => {
               params={{ n: '100' }}
             />
           );
+        } else {
+          error.handleError?.();
         }
       },
-    },
-    fetchOptions: {
-      disableBadRequestHandling: true,
     },
   });
 
@@ -96,12 +93,7 @@ export const useImportDataHelper = () => {
         setResult(undefined);
       },
     },
-    fetchOptions: {
-      disableBadRequestHandling: true,
-    },
   });
-
-  useGlobalLoading(addFilesMutation.isLoading || resultLoadable.isLoading);
 
   const onNewFiles = async (files: File[]) => {
     addFilesMutation.mutate({
@@ -123,8 +115,6 @@ export const useImportDataHelper = () => {
         projectId: project.id,
       },
     });
-
-  useGlobalLoading(cancelMutation.isLoading);
 
   return {
     onNewFiles,

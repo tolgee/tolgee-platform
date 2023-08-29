@@ -8,14 +8,13 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS } from 'tg.constants/links';
 import { MessageService } from 'tg.service/MessageService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { FormBody } from './FormBody';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { useTranslationsWebsocketBlocker } from '../context/useTranslationsWebsocketBlocker';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -56,6 +55,8 @@ export const KeyCreateForm: React.FC<Props> = ({
     method: 'post',
   });
 
+  useTranslationsWebsocketBlocker(createKey.isLoading);
+
   const handleSubmit = (values: ValuesCreateType) => {
     return createKey.mutateAsync(
       {
@@ -67,11 +68,6 @@ export const KeyCreateForm: React.FC<Props> = ({
           messaging.success(<T keyName="translations_key_created" />);
           onSuccess?.(data);
           refetchUsage();
-        },
-        onError(e) {
-          parseErrorResponse(e).forEach((message) =>
-            messaging.error(<TranslatedError code={message} />)
-          );
         },
       }
     );
@@ -96,7 +92,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         name: keyName,
         translations: translationValues,
         tags: [],
-        namespace: namespace,
+        namespace,
       }}
       onSubmit={handleSubmit}
       validationSchema={Yup.object().shape({

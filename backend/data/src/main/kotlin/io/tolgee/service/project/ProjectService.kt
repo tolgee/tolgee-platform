@@ -1,6 +1,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.BatchJobService
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -58,7 +59,9 @@ class ProjectService (
   private val avatarService: AvatarService,
   private val activityHolder: ActivityHolder,
   @Lazy
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
+  @Lazy
+  private val batchJobService: BatchJobService
 ) {
   @set:Autowired
   @set:Lazy
@@ -233,6 +236,7 @@ class ProjectService (
     languageService.deleteAllByProject(project.id)
     keyService.deleteAllByProject(project.id)
     avatarService.unlinkAvatarFiles(project)
+    batchJobService.deleteAllByProjectId(project.id)
     projectRepository.delete(project)
   }
 

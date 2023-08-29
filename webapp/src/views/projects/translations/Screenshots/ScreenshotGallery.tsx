@@ -22,7 +22,6 @@ import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { ScreenshotProps } from 'tg.component/ScreenshotWithLabels';
 
@@ -247,8 +246,6 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     }
     validateAndUpload(toUpload);
   }
-
-  useGlobalLoading(uploadLoadable.isLoading || deleteLoadable.isLoading);
 
   const loadingSkeleton = uploadLoadable.isLoading ? (
     <Skeleton variant="rectangular" width={100} height={100} />

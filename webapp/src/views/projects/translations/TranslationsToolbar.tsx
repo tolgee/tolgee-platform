@@ -7,7 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
-import { TranslationsSelection } from './TranslationsSelection';
+import { BatchOperations } from './BatchOperations/BatchOperations';
 
 const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.drawer};
@@ -16,7 +16,7 @@ const StyledContainer = styled('div')`
   align-items: stretch;
   justify-content: space-between;
   bottom: 0px;
-  right: 0px;
+  left: 44px;
   pointer-events: none;
 `;
 
@@ -139,7 +139,11 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
       onPointerLeave={handlePointerLeave}
     >
       <StyledShortcutsContainer>
-        {selectionOpen ? <TranslationsSelection /> : <TranslationsShortcuts />}
+        <BatchOperations
+          open={selectionOpen}
+          onClose={() => setIsMouseOver(false)}
+        />
+        {!selectionOpen && <TranslationsShortcuts />}
       </StyledShortcutsContainer>
       <StyledCounterContainer
         className={clsx({

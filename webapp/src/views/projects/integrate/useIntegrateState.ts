@@ -4,7 +4,6 @@ import { Guide } from 'tg.views/projects/integrate/types';
 import { components } from 'tg.service/apiSchema.generated';
 import { useEffect, useState } from 'react';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import * as Sentry from '@sentry/browser';
 
 const LOCALSTORAGE_MEMORY_NAME = 'tolgee_integrate_memory';
@@ -63,7 +62,6 @@ export const useIntegrateState = () => {
     },
   });
 
-  useGlobalLoading(keysLoadable.isLoading);
   const keys = keysLoadable.data?._embedded?.apiKeys;
 
   useEffect(() => {

@@ -43,6 +43,17 @@ interface KeyRepository : JpaRepository<Key, Long> {
   fun deleteAllByIdIn(ids: Collection<Long>)
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
+  @Query(
+    """
+      from Key k 
+      left join fetch k.namespace 
+      left join fetch k.keyMeta 
+      left join fetch k.keyScreenshotReferences 
+      where k.id in :ids
+    """
+  )
+  fun findAllByIdInForDelete(ids: Collection<Long>): List<Key>
+
   @Query("from Key k join fetch k.project left join fetch k.keyMeta where k.id in :ids")
   fun findWithProjectsAndMetas(ids: Set<Long>): List<Key>
 
@@ -113,4 +124,30 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """
   )
   fun getWithTags(keys: Set<Key>): List<Key>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.keyMeta km
+    left join fetch km.tags
+    where k.id in :keyIds
+  """
+  )
+  fun getWithTagsByIds(keyIds: Iterable<Long>): Set<Key>
+
+  @Query(
+    """
+    select k.project.id from Key k where k.id in :keysIds
+  """
+  )
+  fun getProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.namespace
+    where k.id in :keyIds
+  """
+  )
+  fun getKeysWithNamespaces(keyIds: List<Long>): List<Key>
 }

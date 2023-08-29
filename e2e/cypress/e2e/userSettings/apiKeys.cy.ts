@@ -1,5 +1,4 @@
 import {
-  allScopes,
   assertMessage,
   clickAdd,
   confirmStandard,
@@ -7,10 +6,7 @@ import {
   getPopover,
   selectInSelect,
 } from '../../common/shared';
-import {
-  getAnyContainingText,
-  getClosestContainingText,
-} from '../../common/xPath';
+import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import { login } from '../../common/apiCalls/common';
 import { Scope } from '../../common/types';
@@ -46,8 +42,10 @@ describe('API keys', () => {
       .closestDcy('api-key-list-item')
       .findDcy('api-key-list-item-description')
       .click();
-    cy.gcy('api-keys-create-edit-dialog').contains('translations.edit').click();
-    cy.gcy('api-keys-create-edit-dialog').contains('keys.edit').click();
+
+    cy.gcy('permissions-advanced-item').contains('Admin').click();
+
+    getPermissionItem('keys.edit').click();
     const newDescription = 'Brand new description';
     cy.gcy('generate-api-key-dialog-description-input')
       .clear()
@@ -95,19 +93,35 @@ const visit = () => {
   cy.visit(HOST + '/account/apiKeys');
 };
 
+const unselectAll = () => {
+  cy.gcy('permissions-advanced-item').contains('Admin').click();
+  cy.gcy('permissions-advanced-item').contains('Edit languages').click();
+
+  cy.gcy('permissions-advanced-item').contains('View activity').click();
+  cy.gcy('permissions-advanced-item').contains('Edit project').click();
+  cy.gcy('permissions-advanced-item').contains('Members').click();
+  cy.gcy('permissions-advanced-item').contains('Batch operations').click();
+  cy.gcy('permissions-advanced-item').contains('Screenshots').click();
+
+  cy.gcy('permissions-advanced-item').contains('Translations').click();
+  cy.gcy('permissions-advanced-item').contains('Keys').click();
+};
+
+const getPermissionItem = (scope: Scope) => {
+  return cy.get(`[aria-label="${scope}"]`);
+};
+
 const create = (project: string, scopes: Scope[], description) => {
   clickAdd();
   cy.waitForDom();
   cy.gcy('generate-api-key-dialog-description-input').type(description);
   cy.gcy('global-form-select').click();
   getPopover().contains(project).click();
-  const toRemove = new Set(allScopes);
-  scopes.forEach((s) => toRemove.delete(s));
-  toRemove.forEach((s) => {
-    cy.contains('Generate Project API key')
-      .xpath(getClosestContainingText(s))
-      .click();
+  unselectAll();
+  scopes.forEach((s) => {
+    getPermissionItem(s).click();
   });
+
   cy.xpath(getAnyContainingText('Save', 'button')).click();
   cy.waitForDom();
   cy.contains(description)

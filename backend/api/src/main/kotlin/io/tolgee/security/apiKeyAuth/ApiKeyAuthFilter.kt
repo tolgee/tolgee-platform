@@ -51,6 +51,7 @@ class ApiKeyAuthFilter(
               ?: emptySet()
 
             try {
+              securityService.fixInvalidApiKeyWhenRequired(apiKeyEntity)
               securityService.checkApiKeyScopes(scopes, apiKeyEntity)
               projectHolder.project = ProjectDto.fromEntity(apiKeyEntity.project)
               apiKeyService.updateLastUsedAsync(apiKeyEntity)

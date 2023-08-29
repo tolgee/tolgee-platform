@@ -73,12 +73,19 @@ class MtService(
     )
   }
 
-  fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
+  fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>, isBatch: Boolean):
     List<TranslateResult?> {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
       ?: return targetLanguages.map { null }
-    return getPrimaryMachineTranslations(key.project, baseTranslationText, key.id, baseLanguage, targetLanguages)
+    return getPrimaryMachineTranslations(
+      key.project,
+      baseTranslationText,
+      key.id,
+      baseLanguage,
+      targetLanguages,
+      isBatch
+    )
   }
 
   private fun getPrimaryMachineTranslations(
@@ -86,7 +93,8 @@ class MtService(
     baseTranslationText: String,
     keyId: Long?,
     baseLanguage: Language,
-    targetLanguages: List<Language>
+    targetLanguages: List<Language>,
+    isBatch: Boolean
   ): List<TranslateResult?> {
     publishBeforeEvent(project)
 
@@ -119,7 +127,8 @@ class MtService(
             baseLanguage.tag,
             languageIdxPairs.map { it.second.tag },
             service,
-            metadata = metadata
+            metadata = metadata,
+            isBatch = isBatch
           )
 
           val withReplacedParams = translateResults.map { translateResult ->
@@ -171,7 +180,8 @@ class MtService(
         sourceLanguageTag = baseLanguage.tag,
         targetLanguageTag = targetLanguage.tag,
         services = servicesToUse,
-        metadata = metadata
+        metadata = metadata,
+        isBatch = false
       )
 
     val actualPrice = results.entries.sumOf { it.value.actualPrice }

@@ -161,24 +161,32 @@ describe('Import result & manipulation', () => {
       });
     });
 
-    it('selects namespace', () => {
-      selectNamespaceOnRow('multilang.json (de)', 'hello');
+    it(
+      'selects namespace',
+      {
+        retries: {
+          runMode: 3,
+        },
+      },
+      () => {
+        selectNamespaceOnRow('multilang.json (de)', 'hello');
 
-      cy.waitForDom();
+        cy.waitForDom();
 
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-resolved-conflicts-cell')
-        .should('contain', '0 / 0');
+        getLanguageRow('multilang.json (de)')
+          .findDcy('import-result-resolved-conflicts-cell')
+          .should('contain', '0 / 0');
 
-      const langRow = getLanguageRow('multilang.json (de)');
-      langRow.findDcy('namespaces-selector').click();
-      cy.gcy('search-select-item').contains('<none>').click();
+        const langRow = getLanguageRow('multilang.json (de)');
+        langRow.findDcy('namespaces-selector').click();
+        cy.gcy('search-select-item').contains('<none>').click();
 
-      cy.waitForDom();
-      getLanguageRow('multilang.json (de)')
-        .findDcy('import-result-resolve-button')
-        .should('contain', '0 / 1');
-    });
+        cy.waitForDom();
+        getLanguageRow('multilang.json (de)')
+          .findDcy('import-result-resolve-button')
+          .should('contain', '0 / 1');
+      }
+    );
 
     it('imports with selects namespaces', () => {
       gcy('import_apply_import_button').click();

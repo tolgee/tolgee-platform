@@ -98,29 +98,31 @@ export const Usage: FC = () => {
       <>{children}</>
     );
 
+  if (!progressData || !showStats) {
+    return null;
+  }
+
   return (
     <StyledContainer
       sx={{ zIndex: trigger ? 999999 : undefined }}
       id={USAGE_ELEMENT_ID}
     >
-      {progressData && showStats && (
-        <OptionalLink>
-          <Tooltip
-            title={
-              <StyledTitle>
-                <UsageDetailed {...progressData} />
-              </StyledTitle>
-            }
-          >
-            <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
-              <CircularBillingProgress
-                canGoOver={progressData.isPayAsYouGo}
-                percent={progressData.moreCriticalProgress}
-              />
-            </StyledContent>
-          </Tooltip>
-        </OptionalLink>
-      )}
+      <OptionalLink>
+        <Tooltip
+          title={
+            <StyledTitle>
+              <UsageDetailed {...progressData} />
+            </StyledTitle>
+          }
+        >
+          <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
+            <CircularBillingProgress
+              canGoOver={progressData.isPayAsYouGo}
+              percent={progressData.moreCriticalProgress}
+            />
+          </StyledContent>
+        </Tooltip>
+      </OptionalLink>
     </StyledContainer>
   );
 };

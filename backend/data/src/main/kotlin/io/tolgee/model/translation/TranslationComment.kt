@@ -10,6 +10,7 @@ import io.tolgee.model.enums.TranslationCommentState
 import org.hibernate.validator.constraints.Length
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType.LAZY
 import javax.persistence.Index
 import javax.persistence.ManyToOne
 import javax.persistence.Table
@@ -35,6 +36,6 @@ class TranslationComment(
   @ManyToOne
   var translation: Translation
 ) : StandardAuditModel() {
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = LAZY)
   lateinit var author: UserAccount
 }

@@ -73,6 +73,15 @@ export function useErrorTranslation() {
         return t('seats_spending_limit_exceeded');
       case 'mt_service_not_enabled':
         return t('mt_service_not_enabled');
+      case 'out_of_credits':
+        return t('out_of_credits');
+      case 'key_exists_in_namespace':
+        return t('key_exists_in_namespace');
+      case 'translation_api_rate_limit':
+        return t('translation_api_rate_limit');
+      case 'translation_failed':
+        return t('translation_failed');
+
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':
         return t('authentication_cancelled');

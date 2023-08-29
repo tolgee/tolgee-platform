@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Field } from '../types';
 import { ActivityUser } from '../ActivityUser';
 import { ActivityDetailDialog } from '../ActivityDetail/ActivityDetailDialog';
+import { actionsConfiguration } from '../configuration';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
 
@@ -88,8 +89,11 @@ export const ActivityCompact = ({ data, diffEnabled }: Props) => {
 
   const limitedFields: Field[] = [];
 
+  const maxFields =
+    actionsConfiguration[data.type]?.compactFieldCount || MAX_FIELDS;
+
   activity.entities.slice(0, MAX_ENTITIES).forEach((e) => {
-    e.fields.slice(0, MAX_FIELDS).forEach((f) => {
+    e.fields.slice(0, maxFields).forEach((f) => {
       limitedFields.push(f);
     });
   });
@@ -102,7 +106,7 @@ export const ActivityCompact = ({ data, diffEnabled }: Props) => {
       <StyledContent data-cy="activity-compact">
         <ActivityTitle activity={activity} />
         <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
-        {fieldsNum > 1 && (
+        {fieldsNum > maxFields && (
           <StyledMoreIndicator onClick={() => setDetailOpen(true)}>
             ...
           </StyledMoreIndicator>

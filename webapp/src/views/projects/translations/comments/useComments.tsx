@@ -11,8 +11,6 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 type PagedModelTranslationCommentModel =
@@ -170,12 +168,6 @@ export const useComments = ({
       )
       .then(() => {
         refreshKeyData(keyId);
-      })
-      .catch((e) => {
-        const parsed = parseErrorResponse(e);
-        parsed.forEach((error) =>
-          messaging.error(<TranslatedError code={error} />)
-        );
       });
   };
 

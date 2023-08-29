@@ -1,4 +1,5 @@
 {
+  "access_revoked_message" : "Доступ аннулирован",
   "account-deleted-message" : "Аккаунт удален",
   "account-security-mfa" : "Двухфакторная аутентификация",
   "account-security-mfa-disabled-success" : "Двухфакторная аутентификация отключена.",

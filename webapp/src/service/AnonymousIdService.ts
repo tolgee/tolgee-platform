@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const ANONYMOUS_ID_LOCAL_STORAGE_KEY = 'anonymousUserId';
 
 export const AnonymousIdService = {
@@ -10,10 +12,7 @@ export const AnonymousIdService = {
     }
   },
   reset() {
-    return localStorage.setItem(
-      ANONYMOUS_ID_LOCAL_STORAGE_KEY,
-      crypto.randomUUID()
-    );
+    return localStorage.setItem(ANONYMOUS_ID_LOCAL_STORAGE_KEY, uuidv4());
   },
   dispose() {
     return localStorage.removeItem(ANONYMOUS_ID_LOCAL_STORAGE_KEY);

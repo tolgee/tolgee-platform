@@ -5,9 +5,9 @@ import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchF
 import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { BaseViewAddButton } from './BaseViewAddButton';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export interface BaseViewProps {
   windowTitle: string;

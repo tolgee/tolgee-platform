@@ -20,12 +20,10 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { useOrganization } from '../useOrganization';
 import { RoleMenu } from 'tg.component/security/RoleMenu';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messaging = container.resolve(MessageService);
 
@@ -104,11 +102,6 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   );
                 }
                 onClose();
-              },
-              onError(e) {
-                parseErrorResponse(e).forEach((e) =>
-                  messaging.error(<TranslatedError code={e} />)
-                );
               },
             }
           );

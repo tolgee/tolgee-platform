@@ -320,7 +320,8 @@ V2ProjectsController(
     val config = autoTranslateService.getConfig(projectHolder.projectEntity)
     return AutoTranslationSettingsDto(
       usingTranslationMemory = config.usingTm,
-      usingMachineTranslation = config.usingPrimaryMtService
+      usingMachineTranslation = config.usingPrimaryMtService,
+      enableForImport = config.enableForImport,
     )
   }
 }

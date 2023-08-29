@@ -1,7 +1,6 @@
-import React, { ComponentProps, FunctionComponent } from 'react';
+import { ComponentProps, FunctionComponent } from 'react';
 import { Box, Button } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import { useLoadingRegister } from 'tg.component/GlobalLoading';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 const LoadingButton: FunctionComponent<
   ComponentProps<typeof Button> & { loading?: boolean }
@@ -9,8 +8,6 @@ const LoadingButton: FunctionComponent<
   const { disabled, children, loading, ...otherProps } = props;
 
   const isDisabled = loading || disabled;
-
-  useLoadingRegister(loading);
 
   return (
     <Button disabled={isDisabled} {...otherProps}>
@@ -26,7 +23,7 @@ const LoadingButton: FunctionComponent<
           justifyContent="center"
           data-cy="global-loading"
         >
-          <CircularProgress size={20} />
+          <SpinnerProgress size={20} />
         </Box>
       )}
       {children}

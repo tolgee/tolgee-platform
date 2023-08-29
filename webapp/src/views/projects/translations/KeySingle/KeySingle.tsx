@@ -5,7 +5,6 @@ import { useHistory } from 'react-router-dom';
 
 import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -45,7 +44,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const { selectLanguages } = useTranslationsActions();
   const history = useHistory();
 
-  const isFetching = useTranslationsSelector((c) => c.isFetching);
   const translations = useTranslationsSelector((c) => c.translations);
   const selectedLanguages = useTranslationsSelector(
     (c) => c.selectedLanguages
@@ -64,8 +62,6 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const { height: bottomPanelHeight } = useBottomPanel();
 
   const keyExists = translation && (keyName || keyId);
-
-  useGlobalLoading(isFetching);
 
   return languages && selectedLanguages && translations ? (
     <BaseProjectView

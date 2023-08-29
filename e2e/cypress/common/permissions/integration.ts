@@ -5,6 +5,6 @@ export function testIntegration({ project }: ProjectInfo) {
   cy.gcy('integrate-weapon-selector-button').contains('React').click();
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
-  cy.gcy('checkbox-group-multiselect-item').should('exist');
+  cy.gcy('permissions-advanced-checkbox').should('exist');
   cy.get('body').click(0, 0);
 }

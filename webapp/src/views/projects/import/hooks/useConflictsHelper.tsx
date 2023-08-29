@@ -1,5 +1,4 @@
 import { useProject } from 'tg.hooks/useProject';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const useConflictsHelper = (props: {
@@ -32,9 +31,6 @@ export const useConflictsHelper = (props: {
       projectId: project.id,
     },
   });
-
-  useGlobalLoading(conflictsLoadable.isFetching);
-  useGlobalLoading(languageLoadable.isFetching);
 
   return {
     conflictsLoadable,

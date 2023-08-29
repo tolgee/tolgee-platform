@@ -3,7 +3,6 @@ import { Formik, FormikProps } from 'formik';
 import { Checkbox, FormControlLabel, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useAutoTranslateSettings } from './useAutoTranslateSettings';
 
@@ -49,8 +48,6 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
     formRef.current?.resetForm();
   }, [settings.data]);
 
-  useGlobalLoading(settings.isFetching);
-
   const isUpdating = updateSettings.isLoading;
 
   return settings.data ? (
@@ -63,6 +60,7 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
         initialValues={{
           usingTranslationMemory: settings.data.usingTranslationMemory,
           usingMachineTranslation: settings.data.usingMachineTranslation,
+          enableForImport: settings.data.enableForImport,
         }}
         enableReinitialize={true}
         onSubmit={() => {}}
@@ -76,6 +74,18 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
           return (
             <StyledSettings>
               <FormControlLabel
+                name="usingMachineTranslation"
+                data-cy="languages-auto-machine-translation"
+                label={t(
+                  'project_languages_new_keys_machine_translations_switch',
+                  'Enable machine translation with primary provider'
+                )}
+                checked={form.values.usingMachineTranslation}
+                onChange={form.handleChange}
+                control={<Checkbox />}
+                disabled={!mtEnabled}
+              />
+              <FormControlLabel
                 name="usingTranslationMemory"
                 data-cy="languages-auto-translation-memory"
                 label={t(
@@ -87,16 +97,15 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
                 control={<Checkbox />}
               />
               <FormControlLabel
-                name="usingMachineTranslation"
-                data-cy="languages-auto-machine-translation"
+                name="enableForImport"
+                data-cy="languages-auto-for-import"
                 label={t(
-                  'project_languages_new_keys_machine_translations_switch',
-                  'Enable machine translation with primary provider'
+                  'project_languages_auto_translation_enable_for_import_switch',
+                  'Enable for import'
                 )}
-                checked={form.values.usingMachineTranslation}
+                checked={form.values.enableForImport}
                 onChange={form.handleChange}
                 control={<Checkbox />}
-                disabled={!mtEnabled}
               />
             </StyledSettings>
           );

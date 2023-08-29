@@ -42,11 +42,23 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTag: String,
     services: Collection<MtServiceType>,
-    metadata: Metadata?
+    metadata: Metadata?,
+    isBatch: Boolean
   ): Map<MtServiceType, TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       services.map { service ->
-        async { service to translate(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, service, metadata) }
+        async {
+          service to translate(
+            text = text,
+            textRaw = textRaw,
+            keyName = keyName,
+            sourceLanguageTag = sourceLanguageTag,
+            targetLanguageTag = targetLanguageTag,
+            serviceType = service,
+            metadata = metadata,
+            isBatch = isBatch
+          )
+        }
       }.awaitAll().toMap()
     }
   }
@@ -66,6 +78,7 @@ class MtServiceManager(
 
   fun translate(params: TranslationParams): TranslateResult {
     if (internalProperties.fakeMtProviders) {
+      logger.debug("Fake MT provider is enabled")
       return getFaked(params)
     }
 
@@ -83,7 +96,8 @@ class MtServiceManager(
             params.keyName,
             params.sourceLanguageTag,
             params.targetLanguageTag,
-            params.metadata
+            params.metadata,
+            params.isBatch
           )
         )
 
@@ -98,6 +112,21 @@ class MtServiceManager(
 
       return translateResult
     } catch (e: Exception) {
+      handleSilentFail(params, e)
+      TranslateResult(
+        null,
+        null,
+        0,
+        params.serviceType
+      )
+    }
+  }
+
+  private fun handleSilentFail(params: TranslationParams, e: Exception) {
+    val silentFail = !params.isBatch
+    if (!silentFail) {
+      throw e
+    } else {
       logger.error(
         """An exception occurred while translating 
             |text "${params.text}" 
@@ -107,12 +136,6 @@ class MtServiceManager(
       )
       logger.error(e.stackTraceToString())
       Sentry.captureException(e)
-      TranslateResult(
-        null,
-        null,
-        0,
-        params.serviceType
-      )
     }
   }
 
@@ -123,7 +146,8 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTag: String,
     serviceType: MtServiceType,
-    metadata: Metadata? = null
+    metadata: Metadata? = null,
+    isBatch: Boolean
   ) = TranslationParams(
     text = text,
     textRaw = textRaw,
@@ -131,7 +155,8 @@ class MtServiceManager(
     targetLanguageTag = targetLanguageTag,
     serviceType = serviceType,
     metadata = metadata,
-    keyName = keyName
+    keyName = keyName,
+    isBatch = isBatch
   )
 
   private fun getFaked(
@@ -167,9 +192,10 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTag: String,
     serviceType: MtServiceType,
-    metadata: Metadata? = null
+    metadata: Metadata? = null,
+    isBatch: Boolean = false
   ): TranslateResult {
-    val params = getParams(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, serviceType, metadata)
+    val params = getParams(text, textRaw, keyName, sourceLanguageTag, targetLanguageTag, serviceType, metadata, isBatch)
 
     return translate(params)
   }
@@ -184,7 +210,8 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
     service: MtServiceType,
-    metadata: Map<String, Metadata>? = null
+    metadata: Map<String, Metadata>? = null,
+    isBatch: Boolean
   ): List<TranslateResult> {
     return if (!internalProperties.fakeMtProviders) {
       translateToMultipleTargets(
@@ -194,10 +221,12 @@ class MtServiceManager(
         text = text,
         sourceLanguageTag = sourceLanguageTag,
         targetLanguageTags = targetLanguageTags,
-        metadata = metadata
+        metadata = metadata,
+        isBatch = isBatch
       )
     } else targetLanguageTags.map {
-      getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null))
+      logger.debug("Fake MT provider is enabled")
+      getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null, isBatch))
     }
   }
 
@@ -208,7 +237,8 @@ class MtServiceManager(
     keyName: String?,
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
-    metadata: Map<String, Metadata>? = null
+    metadata: Map<String, Metadata>? = null,
+    isBatch: Boolean
   ): List<TranslateResult> {
     return runBlocking(Dispatchers.IO) {
       targetLanguageTags.map { targetLanguageTag ->
@@ -220,7 +250,8 @@ class MtServiceManager(
             sourceLanguageTag,
             targetLanguageTag,
             serviceType,
-            metadata?.get(targetLanguageTag)
+            metadata?.get(targetLanguageTag),
+            isBatch
           )
         }
       }.awaitAll()

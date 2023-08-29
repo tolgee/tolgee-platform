@@ -1,3 +1,103 @@
+## [3.28.3](https://github.com/tolgee/tolgee-platform/compare/v3.28.2...v3.28.3) (2023-08-28)
+
+
+### Bug Fixes
+
+* Debug log transaction isolation when setting API key ([#1880](https://github.com/tolgee/tolgee-platform/issues/1880)) ([1a9acc9](https://github.com/tolgee/tolgee-platform/commit/1a9acc96fc77c318142677395d9d0cbe124a527a))
+
+## [3.28.2](https://github.com/tolgee/tolgee-platform/compare/v3.28.1...v3.28.2) (2023-08-28)
+
+
+### Bug Fixes
+
+* revoke scopes to API keys if they've been revoked to the user ([#1877](https://github.com/tolgee/tolgee-platform/issues/1877)) ([8c3e63a](https://github.com/tolgee/tolgee-platform/commit/8c3e63a66f2769c517ba7f1cb541bdc02e83ad28))
+
+## [3.28.1](https://github.com/tolgee/tolgee-platform/compare/v3.28.0...v3.28.1) (2023-08-22)
+
+
+### Bug Fixes
+
+* Clean job queue using scheduled task ([#1873](https://github.com/tolgee/tolgee-platform/issues/1873)) ([dd0fe83](https://github.com/tolgee/tolgee-platform/commit/dd0fe83deb36364a0687df65c25f6f40abaffaa0))
+
+# [3.28.0](https://github.com/tolgee/tolgee-platform/compare/v3.27.0...v3.28.0) (2023-08-21)
+
+
+### Features
+
+* use scopes hierarchy for api key modal ([#1870](https://github.com/tolgee/tolgee-platform/issues/1870)) ([86d1f1f](https://github.com/tolgee/tolgee-platform/commit/86d1f1f7514cea1c857fc33ebc2ebe855dafec95))
+
+# [3.27.0](https://github.com/tolgee/tolgee-platform/compare/v3.26.6...v3.27.0) (2023-08-21)
+
+
+### Features
+
+* improve error and loading handling ([#1869](https://github.com/tolgee/tolgee-platform/issues/1869)) ([980ed6e](https://github.com/tolgee/tolgee-platform/commit/980ed6e959b31fc658bcb76f0ee2b7af69ffa89c))
+
+## [3.26.6](https://github.com/tolgee/tolgee-platform/compare/v3.26.5...v3.26.6) (2023-08-17)
+
+
+### Bug Fixes
+
+* The spending limit exception messages ([#1868](https://github.com/tolgee/tolgee-platform/issues/1868)) ([0a2d171](https://github.com/tolgee/tolgee-platform/commit/0a2d171be02d5327d95a9da1213525f0e10e0d1b))
+
+## [3.26.5](https://github.com/tolgee/tolgee-platform/compare/v3.26.4...v3.26.5) (2023-08-17)
+
+
+### Bug Fixes
+
+* Translation limit catching, fíxes & expose hikaricp metrics ([#1867](https://github.com/tolgee/tolgee-platform/issues/1867)) ([8159886](https://github.com/tolgee/tolgee-platform/commit/81598868879757de7b4267bb723c2bd5b247a638))
+
+## [3.26.4](https://github.com/tolgee/tolgee-platform/compare/v3.26.3...v3.26.4) (2023-08-15)
+
+
+### Bug Fixes
+
+* make autoTranslate more reliable in tests ([#1865](https://github.com/tolgee/tolgee-platform/issues/1865)) ([4ef6368](https://github.com/tolgee/tolgee-platform/commit/4ef6368b1b684556f271aff1eee126ba7eb21a4a))
+
+## [3.26.3](https://github.com/tolgee/tolgee-platform/compare/v3.26.2...v3.26.3) (2023-08-15)
+
+
+### Bug Fixes
+
+* Batch operations fixes ([dcbd4d2](https://github.com/tolgee/tolgee-platform/commit/dcbd4d2f3a56a800a1dce919d0cb21dc16bb4e86))
+
+## [3.26.2](https://github.com/tolgee/tolgee-platform/compare/v3.26.1...v3.26.2) (2023-08-14)
+
+
+### Bug Fixes
+
+* Batch operation fixes ([#1863](https://github.com/tolgee/tolgee-platform/issues/1863)) ([3387183](https://github.com/tolgee/tolgee-platform/commit/338718387c84ad94c9d6caaba604568043731407))
+
+## [3.26.1](https://github.com/tolgee/tolgee-platform/compare/v3.26.0...v3.26.1) (2023-08-11)
+
+
+### Bug Fixes
+
+* Activity Error handling ([#1854](https://github.com/tolgee/tolgee-platform/issues/1854)) ([6f8637d](https://github.com/tolgee/tolgee-platform/commit/6f8637dd6c5a6bb44af7431a4a57ec5d5bbb9ada))
+* Ignore checksum for re-formatted schema SQL change sets ([#1856](https://github.com/tolgee/tolgee-platform/issues/1856)) ([4d4a55c](https://github.com/tolgee/tolgee-platform/commit/4d4a55ce80c86b032350581b2b16db3b0750b3c7))
+* Set default instance batch concurrency to 1 ([#1857](https://github.com/tolgee/tolgee-platform/issues/1857)) ([d28f705](https://github.com/tolgee/tolgee-platform/commit/d28f705552cb155fa42fff46fc414c5f76ce337b))
+
+# [3.26.0](https://github.com/tolgee/tolgee-platform/compare/v3.25.4...v3.26.0) (2023-08-10)
+
+
+### Features
+
+* Batch operations ([#1793](https://github.com/tolgee/tolgee-platform/issues/1793)) ([d54a56b](https://github.com/tolgee/tolgee-platform/commit/d54a56bc44ee83d516db9d356a75281b2eb3ed77))
+
+## [3.25.4](https://github.com/tolgee/tolgee-platform/compare/v3.25.3...v3.25.4) (2023-08-08)
+
+
+### Bug Fixes
+
+* Missing crypto.randomUUID() ([#1849](https://github.com/tolgee/tolgee-platform/issues/1849)) ([4dcd435](https://github.com/tolgee/tolgee-platform/commit/4dcd4350cb1600c4f0979e4f4ee55383dfae381e))
+
+## [3.25.3](https://github.com/tolgee/tolgee-platform/compare/v3.25.2...v3.25.3) (2023-08-07)
+
+
+### Bug Fixes
+
+* swapped description ([#1845](https://github.com/tolgee/tolgee-platform/issues/1845)) ([f2eeed9](https://github.com/tolgee/tolgee-platform/commit/f2eeed9dd20c953dcce7b86f40d972d6831a387b))
+
 ## [3.25.2](https://github.com/tolgee/tolgee-platform/compare/v3.25.1...v3.25.2) (2023-08-03)
 
 

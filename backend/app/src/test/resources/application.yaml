@@ -1,6 +1,10 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         jdbc:
@@ -27,6 +31,8 @@ spring:
       initialize-schema: always
   jmx:
     enabled: false
+  datasource:
+    maximum-pool-size: 100
 tolgee:
   postgres-autostart:
     enabled: true
@@ -67,9 +73,11 @@ tolgee:
   telemetry:
     enabled: false
     server: http://localhost:8080
+  batch:
+    concurrency: 10
 logging:
   level:
     io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
-#    org.springframework.orm.jpa: DEBUG
-#    org.springframework.transaction: DEBUG
-#    org.hibernate.type: TRACE
+    io.tolgee.batch.BatchJobActionService: DEBUG
+    io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
+    io.tolgee: DEBUG

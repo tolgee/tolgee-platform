@@ -4,7 +4,6 @@ import { T } from '@tolgee/react';
 import { BillingPlans } from './Plans/BillingPlans';
 import { Credits } from './Plans/Credits/Credits';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useOrganization } from '../../../useOrganization';
 import { BillingPeriodType } from './Plans/PeriodSwitch';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
@@ -58,8 +57,6 @@ export const CloudSubscriptions = () => {
       },
     },
   });
-
-  useGlobalLoading(activeSubscription.isLoading || plansLoadable.isLoading);
 
   const reportEvent = useReportEvent();
 

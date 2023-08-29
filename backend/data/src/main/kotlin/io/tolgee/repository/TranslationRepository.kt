@@ -48,7 +48,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   fun getAllByLanguageId(languageId: Long): List<Translation>
 
-  @Query("from Translation t join fetch t.key k left join fetch k.keyMeta where t.key.id in :keyIds")
+  @Query(
+    """from Translation t 
+    join fetch t.key k 
+    left join fetch k.keyMeta 
+    left join fetch t.comments
+    where t.key.id in :keyIds"""
+  )
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
@@ -91,7 +97,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
       select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
-      similarity(baseTranslation.text, :baseTranslationText) as similarity
+      1 as similarity
       from Translation baseTranslation
       join baseTranslation.key key
       join Translation target on 
@@ -100,9 +106,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = :baseLanguage and
-        similarity(baseTranslation.text, :baseTranslationText) = 1 and
+        baseTranslation.text = :baseTranslationText and
         key <> :key
-      order by similarity desc
       """
   )
   fun getTranslationMemoryValue(
@@ -157,4 +162,5 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getForKeys(keys: List<Long>, languageTags: List<String>): List<Translation>
 
   fun findAllByKeyIdInAndLanguageIdIn(keysIds: List<Long>, languagesIds: List<Long>): List<Translation>
+  fun getAllByKeyIdInAndLanguageIdIn(keyIds: List<Long>, languageIds: List<Long>): List<Translation>
 }

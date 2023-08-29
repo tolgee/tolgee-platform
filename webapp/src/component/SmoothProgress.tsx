@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { styled } from '@mui/material';
 import clsx from 'clsx';
+import { useLoadingRegister } from './GlobalLoading';
 
 const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
   height: 4px;
@@ -22,12 +23,18 @@ const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
 type Props = {
   loading: boolean;
   className?: string;
+  global?: boolean;
 };
 
-export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
+export const SmoothProgress: React.FC<Props> = ({
+  loading,
+  className,
+  global,
+}) => {
   const [stateLoading, setStateLoading] = useState(false);
   const [smoothedLoading] = useDebounce(stateLoading, 100);
   const [progress, setProgress] = useState(0);
+  useLoadingRegister(!global && loading);
   useEffect(() => {
     setStateLoading(Boolean(loading));
     if (loading) {

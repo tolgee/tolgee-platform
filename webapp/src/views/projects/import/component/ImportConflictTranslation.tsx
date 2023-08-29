@@ -1,16 +1,11 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import {
-  Box,
-  BoxProps,
-  CircularProgress,
-  IconButton,
-  styled,
-} from '@mui/material';
+import { Box, BoxProps, IconButton, styled } from '@mui/material';
 import { green } from '@mui/material/colors';
 import { KeyboardArrowUp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 type Props = {
   text?: string;
@@ -111,7 +106,7 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
           p={1}
           data-cy="import-resolution-dialog-translation-loading"
         >
-          <CircularProgress size={20} />
+          <SpinnerProgress size={20} />
         </StyledLoading>
       )}
       {props.loaded && (

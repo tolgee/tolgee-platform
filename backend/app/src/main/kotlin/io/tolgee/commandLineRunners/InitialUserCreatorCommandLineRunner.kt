@@ -11,17 +11,18 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
-import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
 @Component
+@Order(0)
 class InitialUserCreatorCommandLineRunner(
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationService: OrganizationService
 ) :
-  CommandLineRunner, ApplicationListener<ContextClosedEvent>, Ordered {
+  CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun run(vararg args: String) {
@@ -49,9 +50,5 @@ class InitialUserCreatorCommandLineRunner(
 
   override fun onApplicationEvent(event: ContextClosedEvent) {
     // we don't need this
-  }
-
-  override fun getOrder(): Int {
-    return 0
   }
 }

@@ -3,7 +3,6 @@ import { styled } from '@mui/material';
 import { Formik, FormikProps } from 'formik';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { StyledLanguageTable } from '../tableStyles';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
@@ -54,10 +53,6 @@ export const MachineTranslation = () => {
     // completely reset form (by creating new instance)
     onReset: () => setFormInstance((i) => i + 1),
   });
-
-  const isFetching = settings.isFetching || languages.isFetching;
-
-  useGlobalLoading(isFetching);
 
   const isUpdating = updateSettings.isLoading;
 

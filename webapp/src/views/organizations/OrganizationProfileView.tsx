@@ -21,7 +21,6 @@ import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { useIsAdmin } from 'tg.globalContext/helpers';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -104,9 +103,6 @@ export const OrganizationProfileView: FunctionComponent = () => {
               );
               await refetchInitialData();
               history.push(LINKS.PROJECTS.build());
-            },
-            onError(e) {
-              messageService.error(<TranslatedError code={e.code} />);
             },
           }
         ),

@@ -42,7 +42,9 @@ type Props = {
   className?: string;
   autoFocus?: boolean;
   existing?: string[];
+  filtered?: string[];
   placeholder?: string;
+  noNew?: boolean;
 };
 
 export const TagInput: React.FC<Props> = ({
@@ -51,7 +53,9 @@ export const TagInput: React.FC<Props> = ({
   className,
   autoFocus,
   existing,
+  filtered,
   placeholder,
+  noNew,
 }) => {
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
@@ -70,7 +74,6 @@ export const TagInput: React.FC<Props> = ({
       cacheTime: 0,
       keepPreviousData: true,
     },
-    fetchOptions: { disableNotFoundHandling: true },
   });
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -104,17 +107,23 @@ export const TagInput: React.FC<Props> = ({
         PopperComponent={CustomPopper}
         options={options}
         filterOptions={(options) => {
-          const filtered = options.filter((o) =>
-            o.value.toLowerCase().startsWith(search.toLowerCase())
+          const result = options.filter(
+            (o) =>
+              !filtered?.includes(o.value) &&
+              o.value.toLowerCase().startsWith(search.toLowerCase())
           );
-          if (search !== '' && !options.find((item) => item.value === search)) {
-            filtered.push({
+          if (
+            !noNew &&
+            search !== '' &&
+            !options.find((item) => item.value === search)
+          ) {
+            result.push({
               value: search,
               label: '',
               new: true,
             });
           }
-          return filtered;
+          return result;
         }}
         inputValue={value}
         onInputChange={(_, value) => {

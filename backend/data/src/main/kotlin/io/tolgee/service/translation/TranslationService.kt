@@ -41,7 +41,8 @@ class TranslationService(
   private val tolgeeProperties: TolgeeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val translationViewDataProvider: TranslationViewDataProvider,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val translationCommentService: TranslationCommentService
 ) {
   @set:Autowired
   @set:Lazy
@@ -218,6 +219,7 @@ class TranslationService(
 
   fun deleteByIdIn(ids: Collection<Long>) {
     importService.onExistingTranslationsRemoved(ids)
+    translationCommentService.deleteByTranslationIdIn(ids)
     translationRepository.deleteByIdIn(ids)
   }
 
@@ -367,5 +369,63 @@ class TranslationService(
     languageIds: List<Long>
   ): List<Translation> {
     return translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+  }
+
+  @Transactional
+  fun setState(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
+    val translations = getTargetTranslations(keyIds, languageIds)
+    translations.forEach { it.state = state }
+    saveAll(translations)
+  }
+
+  fun getTranslations(
+    keyIds: List<Long>,
+    languageIds: List<Long>
+  ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+
+  fun clear(keyIds: List<Long>, languageIds: List<Long>) {
+    val translations = getTargetTranslations(keyIds, languageIds)
+    translations.forEach {
+      it.state = TranslationState.UNTRANSLATED
+      it.text = null
+      it.outdated = false
+      it.mtProvider = null
+      it.auto = false
+    }
+    saveAll(translations)
+  }
+
+  fun copy(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
+    val sourceTranslations = getTargetTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
+    val targetTranslations = getTargetTranslations(keyIds, targetLanguageIds).onEach {
+      it.text = sourceTranslations[it.key.id]?.text
+      if (!it.text.isNullOrEmpty()) {
+        it.state = TranslationState.TRANSLATED
+      }
+      it.auto = false
+      it.mtProvider = null
+      it.outdated = false
+    }
+    saveAll(targetTranslations)
+  }
+
+  private fun getTargetTranslations(
+    keyIds: List<Long>,
+    targetLanguageIds: List<Long>
+  ): List<Translation> {
+    val existing = getTranslations(keyIds, targetLanguageIds)
+    val existingMap = existing.groupBy { it.key.id }
+      .map { entry ->
+        entry.key to
+          entry.value.associateBy { translation -> translation.language.id }
+      }.toMap()
+    return keyIds.flatMap { keyId ->
+      targetLanguageIds.map { languageId ->
+        existingMap[keyId]?.get(languageId) ?: getOrCreate(
+          entityManager.getReference(Key::class.java, keyId),
+          entityManager.getReference(Language::class.java, languageId)
+        )
+      }
+    }
   }
 }

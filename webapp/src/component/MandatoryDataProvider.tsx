@@ -6,13 +6,22 @@ import { useGlobalLoading } from './GlobalLoading';
 import { PostHog } from 'posthog-js';
 import { getUtmParams } from 'tg.fixtures/utmCookie';
 import { useIdentify } from 'tg.hooks/useIdentify';
+import { useIsFetching, useIsMutating } from 'react-query';
 
 const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
-  const isLoading = useGlobalContext((v) => v.isLoading);
-  const isFetching = useGlobalContext((v) => v.isFetching);
+
+  const isLoading = useGlobalContext((c) => c.isLoading);
+  const isFetching = useGlobalContext((c) => c.isFetching);
+
+  const isGloballyFetching = useIsFetching();
+  const isGloballyMutating = useIsMutating();
+
+  useGlobalLoading(
+    Boolean(isGloballyFetching || isGloballyMutating || isFetching)
+  );
 
   useIdentify(userData?.id);
 
@@ -69,8 +78,6 @@ export const MandatoryDataProvider = (props: any) => {
       });
     }
   }, [userData?.id]);
-
-  useGlobalLoading(isFetching || isLoading);
 
   if (isLoading) {
     return null;
