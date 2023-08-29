@@ -16,9 +16,14 @@
 
 package io.tolgee.security.authentication
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.security.PAT_PREFIX
+import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PatService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -29,8 +34,11 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class AuthenticationFilter(
   private val authenticationProperties: AuthenticationProperties,
+  private val currentDateProvider: CurrentDateProvider,
   private val rateLimitService: RateLimitService,
   private val jwtService: JwtService,
+  private val apiKeyService: ApiKeyService,
+  private val patService: PatService,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
     val policy = rateLimitService.getIpAuthRateLimitPolicy(request)
@@ -64,9 +72,51 @@ class AuthenticationFilter(
 
     val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
     if (apiKey != null) {
-      TODO("API Key validation: not implemented yet")
+      if (apiKey.startsWith(PROJECT_API_KEY_PREFIX)) {
+        pakAuth(apiKey)
+        return true
+      }
+
+      if (apiKey.startsWith(PAT_PREFIX)) {
+        patAuth(apiKey)
+        return true
+      }
+
+      throw AuthenticationException(Message.INVALID_API_KEY)
     }
 
     return false
+  }
+
+  private fun pakAuth(key: String) {
+    val hash = apiKeyService.hashKey(key)
+    val pak = apiKeyService.find(hash)
+      ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
+
+    if (pak.expiresAt?.before(currentDateProvider.date) == true) {
+      throw AuthenticationException(Message.PROJECT_API_KEY_EXPIRED)
+    }
+
+    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
+      pak,
+      pak.userAccount,
+      TolgeeAuthenticationDetails(false)
+    )
+  }
+
+  private fun patAuth(key: String) {
+    val hash = patService.hashToken(key)
+    val pat = patService.find(hash)
+      ?: throw AuthenticationException(Message.INVALID_PAT)
+
+    if (pat.expiresAt?.before(currentDateProvider.date) == true) {
+      throw AuthenticationException(Message.PAT_EXPIRED)
+    }
+
+    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
+      pat,
+      pat.userAccount,
+      TolgeeAuthenticationDetails(false)
+    )
   }
 }

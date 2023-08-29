@@ -53,6 +53,7 @@ class RateLimitService(
   /**
    * Consumes a token from the provided rate limit policy unless a condition is met.
    * The bucket must contain at least 1 token even if the condition would evaluate to true.
+   * The condition can throw, and the result will be considered "false".
    *
    * @param policy The rate limit policy.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
@@ -61,7 +62,14 @@ class RateLimitService(
     lockingProvider.withLocking("tolgee.ratelimit.${policy.bucketName}") {
       val bucket = cache.get(policy.bucketName, Bucket::class.java)
       val consumed = doConsumeBucket(policy, bucket)
-      if (!cond()) cache.put(policy.bucketName, consumed)
+      try {
+        if (!cond()) {
+          cache.put(policy.bucketName, consumed)
+        }
+      } catch (e: Exception) {
+        cache.put(policy.bucketName, consumed)
+        throw e
+      }
     }
   }
 

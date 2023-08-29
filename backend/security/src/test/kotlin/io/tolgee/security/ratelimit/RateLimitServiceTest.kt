@@ -114,6 +114,22 @@ class RateLimitServiceTest {
   }
 
   @Test
+  fun `it conditionally applies rate limit policies correctly when throwing exceptions`() {
+    val testPolicy = RateLimitPolicy("test_policy", 2, 1_000, false)
+
+    assertThrows<TestException> { rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() } }
+    rateLimitService.consumeBucketUnless(testPolicy) { true }
+    assertThrows<TestException> { rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() } }
+    val ex1 = assertThrows<RateLimitedException> {
+      rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() }
+    }
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucketUnless(testPolicy) { true } }
+
+    assertThat(ex1.retryAfter).isEqualTo(1000)
+    assertThat(ex2.retryAfter).isEqualTo(1000)
+  }
+
+  @Test
   fun `rate limit bucket is correctly defined for global public rate limit`() {
     val fakeRequest = makeFakeGenericRequest()
     val policy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
@@ -305,6 +321,8 @@ class RateLimitServiceTest {
 
   @RateLimited(2)
   annotation class InheritedRateLimit
+
+  class TestException: Exception()
 
   class FakeController {
     @RateLimited(2)
