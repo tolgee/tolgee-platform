@@ -4,6 +4,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
+import io.tolgee.model.mtServiceConfig.Formality
 import net.datafaker.Faker
 import java.util.*
 
@@ -129,19 +130,30 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun enableAWS() {
+  fun enableAWS(formality: Formality = Formality.DEFAULT) {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
       this.enabledServices = mutableSetOf(MtServiceType.AWS)
       this.primaryService = MtServiceType.AWS
+      this.awsFormality = formality
     }
   }
 
-  fun enableTolgee() {
+  fun enableDeepL(formality: Formality = Formality.DEFAULT) {
+    projectBuilder.addMtServiceConfig {
+      this.targetLanguage = germanLanguage
+      this.enabledServices = mutableSetOf(MtServiceType.DEEPL)
+      this.primaryService = MtServiceType.DEEPL
+      this.deeplFormality = formality
+    }
+  }
+
+  fun enableTolgee(formality: Formality = Formality.DEFAULT) {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
       this.enabledServices = mutableSetOf(MtServiceType.TOLGEE)
       this.primaryService = MtServiceType.TOLGEE
+      this.tolgeeFormality = formality
     }
   }
 

@@ -6,7 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
 
 @Suppress("unused")
-@Relation(collectionRelation = "languageConfigs", itemRelation = "languageConfig")
+@Relation(collectionRelation = "languageInfos", itemRelation = "languageInfo")
 class LanguageInfoModel(
   val languageId: Long,
   val languageTag: String,

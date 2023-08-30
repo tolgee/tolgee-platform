@@ -6,10 +6,12 @@ import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.Language
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -111,6 +113,31 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it validates the config`() {
+    performSet(null, MtServiceType.AWS, Formality.FORMAL).andIsOk
+    performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
+    performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+    performSet(testData.englishLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+  }
+
+  private fun performSet(language: Language?, mtServiceType: MtServiceType, formality: Formality) = performAuthPut(
+    "/v2/projects/${project.id}/machine-translation-service-settings",
+    SetMachineTranslationSettingsDto(
+      listOf(
+        MachineTranslationLanguagePropsDto(
+          targetLanguageId = language?.id,
+          primaryService = MtServiceType.GOOGLE,
+          enabledServicesInfo = setOf(
+            MtServiceInfo(mtServiceType, formality)
+          )
+        )
+      )
+    )
+  )
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it removes service from the configuration`() {
     performAuthPut(
       "/v2/projects/${project.id}/machine-translation-service-settings",
@@ -144,6 +171,32 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           node("targetLanguageName").isEqualTo("German")
           node("primaryService").isEqualTo("AWS")
           node("enabledServices").isArray.isEqualTo("""[ "AWS" ]""")
+        }
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it returns the info`() {
+    performAuthGet(
+      "/v2/projects/${project.id}/machine-translation-language-info"
+    ).andPrettyPrint.andAssertThatJson {
+      node("_embedded.languageInfos") {
+        isArray
+        node("[1]") {
+          node("languageTag").isEqualTo("de")
+          node("supportedServices") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formalitySupported").isEqualTo(false)
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formalitySupported").isEqualTo(true)
+            }
+          }
         }
       }
     }

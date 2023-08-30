@@ -65,7 +65,7 @@ class MachineTranslationSettingsController(
           it.language.tag,
           supportedServices = it.supportedServices
         )
-      }
+      }.sortedBy { it.languageId }
     )
   }
 }

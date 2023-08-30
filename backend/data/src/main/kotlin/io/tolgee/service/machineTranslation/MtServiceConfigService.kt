@@ -252,7 +252,7 @@ class MtServiceConfigService(
   fun getLanguageInfo(project: ProjectDto): List<MtLanguageInfo> {
     return languageService.findAll(project.id).map { language ->
       val supportedServices =
-        services.filter { it.value.second.isLanguageSupported(language.tag) }.map {
+        services.filter { it.value.second.isLanguageSupported(language.tag) && it.value.second.isEnabled }.map {
           MtSupportedService(it.key, it.value.second.isLanguageFormalitySupported(language.tag))
         }
       MtLanguageInfo(language = language, supportedServices)

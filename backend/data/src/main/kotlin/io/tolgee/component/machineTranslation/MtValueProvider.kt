@@ -9,7 +9,7 @@ interface MtValueProvider {
 
   fun isLanguageSupported(tag: String): Boolean {
     val suitableTag = getSuitableTag(tag) ?: return false
-    return supportedLanguages?.contains(suitableTag) ?: false
+    return supportedLanguages?.contains(suitableTag) ?: true
   }
 
   fun isLanguageFormalitySupported(tag: String): Boolean {

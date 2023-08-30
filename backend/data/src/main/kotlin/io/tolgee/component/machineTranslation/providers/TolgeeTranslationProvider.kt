@@ -40,4 +40,7 @@ class TolgeeTranslationProvider(
 
   override val supportedLanguages = null
   override val formalitySupportingLanguages = null
+
+  override fun isLanguageSupported(tag: String): Boolean = true
+  override fun isLanguageFormalitySupported(tag: String): Boolean = true
 }
