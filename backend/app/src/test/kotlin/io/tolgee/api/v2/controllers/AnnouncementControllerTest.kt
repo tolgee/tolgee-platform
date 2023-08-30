@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,11 @@ class AnnouncementControllerTest() : AuthorizedControllerTest() {
     testData = ProjectsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+  }
+
+  @AfterEach
+  fun cleanup() {
+    currentDateProvider.forcedDate = null
   }
 
   @Test
