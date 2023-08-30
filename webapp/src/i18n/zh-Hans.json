@@ -1,3 +1,4 @@
 {
-  "account-deleted-message" : "帐户已删除"
+  "account-deleted-message" : "帐户已删除",
+  "namespace_rename_placeholder" : "新名称..."
 }

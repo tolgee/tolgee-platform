@@ -326,6 +326,7 @@
   "missing_callback_url" : "Falta el ajuste de URL de devolución de llamada.",
   "namespace_default" : "<por defecto>",
   "namespace_menu_rename" : "Cambiar el nombre de namespace",
+  "namespace_rename_placeholder" : "Nuevo nombre...",
   "namespace_select_cancel" : "Cancelar",
   "namespace_select_confirm" : "Ok",
   "namespace_select_default" : "<por defecto>",

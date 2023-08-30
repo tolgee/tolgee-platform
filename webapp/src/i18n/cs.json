@@ -536,7 +536,7 @@
   "namespace_rename_confirm" : "Přejmenovat",
   "namespace_rename_confirmation_message" : "Opravdu chcete přejmenovat namespace? Ujistěte se, že tuto změnu reflektujete v překládané aplikaci.",
   "namespace_rename_confirmation_title" : "Jste si jistý?",
-  "namespace_rename_placeholder" : "Nový název ...",
+  "namespace_rename_placeholder" : "Nové jméno...",
   "namespace_rename_success" : "Namespace přejmenován",
   "namespace_rename_title" : "Přejmenovat namespace",
   "namespace_select_cancel" : "Zrušit",
