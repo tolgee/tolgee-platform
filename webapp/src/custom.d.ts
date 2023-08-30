@@ -1,7 +1,14 @@
 import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
-import { Activity, BillingProgress, Editor, Emphasis, Marker } from './colors';
+import {
+  Activity,
+  BillingProgress,
+  Editor,
+  Emphasis,
+  Marker,
+  TopBanner,
+} from './colors';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
@@ -23,6 +30,7 @@ declare module '@mui/material/styles/createPalette' {
     billingPlan: PaletteColor;
     globalLoading: PaletteColor;
     marker: Marker;
+    topBanner: TopBanner;
   }
 
   interface PaletteOptions {
@@ -39,6 +47,7 @@ declare module '@mui/material/styles/createPalette' {
     billingPlan: PaletteColorOptions;
     globalLoading: PaletteColorOptions;
     marker: Marker;
+    topBanner: TopBanner;
   }
 }
 

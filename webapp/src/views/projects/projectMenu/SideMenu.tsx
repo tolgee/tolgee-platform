@@ -1,5 +1,6 @@
 import React from 'react';
 import { styled } from '@mui/material';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const MENU_WIDTH = 60;
 
@@ -20,9 +21,15 @@ const StyledMenuFixed = styled('menu')`
 `;
 
 export const SideMenu: React.FC = ({ children }) => {
+  const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
+
   return (
     <StyledMenuWrapper>
-      <StyledMenuFixed color="secondary" data-cy="project-menu-items">
+      <StyledMenuFixed
+        sx={{ top: topBannerHeight }}
+        color="secondary"
+        data-cy="project-menu-items"
+      >
         {children}
       </StyledMenuFixed>
     </StyledMenuWrapper>

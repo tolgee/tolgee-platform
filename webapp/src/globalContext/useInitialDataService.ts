@@ -12,6 +12,7 @@ import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
+type AnnouncementDto = components['schemas']['AnnouncementDto'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
@@ -22,6 +23,7 @@ export const useInitialDataService = () => {
     PrivateOrganizationModel | undefined
   >(undefined);
   const security = useSelector((state: AppState) => state.global.security);
+  const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
   const initialData = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
@@ -38,6 +40,7 @@ export const useInitialDataService = () => {
     if (data) {
       // set organization data only if missing
       setOrganization((org) => (org ? org : data.preferredOrganization));
+      setAnnouncement(data.announcement);
       if (data.languageTag) {
         // switch ui language, once user is signed in
         tolgee.changeLanguage(data.languageTag);
@@ -53,6 +56,12 @@ export const useInitialDataService = () => {
     }
   }, [Boolean(initialData.data)]);
 
+  useEffect(() => {
+    if (initialData.data) {
+      setAnnouncement(initialData.data.announcement);
+    }
+  }, [initialData.data]);
+
   const preferredOrganizationLoadable = useApiMutation({
     url: '/v2/preferred-organization',
     method: 'get',
@@ -61,6 +70,11 @@ export const useInitialDataService = () => {
   const setPreferredOrganization = useApiMutation({
     url: '/v2/user-preferences/set-preferred-organization/{organizationId}',
     method: 'put',
+  });
+
+  const dismissAnnouncementLoadable = useApiMutation({
+    url: '/v2/announcement/dismiss',
+    method: 'post',
   });
 
   const preferredOrganization =
@@ -89,6 +103,18 @@ export const useInitialDataService = () => {
     return initialData.refetch();
   };
 
+  const dismissAnnouncement = () => {
+    setAnnouncement(null);
+    dismissAnnouncementLoadable.mutate(
+      {},
+      {
+        onError() {
+          setAnnouncement(announcement);
+        },
+      }
+    );
+  };
+
   useOnUpdate(() => {
     refetchInitialData();
   }, [security.jwtToken]);
@@ -97,6 +123,7 @@ export const useInitialDataService = () => {
     initialData.isFetching ||
     setPreferredOrganization.isLoading ||
     preferredOrganizationLoadable.isLoading ||
+    dismissAnnouncementLoadable.isLoading ||
     organizationLoading;
 
   if (initialData.error) {
@@ -107,11 +134,13 @@ export const useInitialDataService = () => {
     data: {
       ...initialData.data!,
       preferredOrganization,
+      announcement,
     },
     isFetching,
     isLoading: initialData.isLoading,
 
     refetchInitialData,
     updatePreferredOrganization,
+    dismissAnnouncement,
   };
 };

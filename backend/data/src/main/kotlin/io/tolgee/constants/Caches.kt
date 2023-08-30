@@ -11,6 +11,7 @@ interface Caches {
     const val MACHINE_TRANSLATIONS = "machineTranslations"
     const val PROJECT_TRANSLATIONS_MODIFIED = "projectTranslationsModified"
     const val USAGE = "usage"
+    const val DISMISSED_ANNOUNCEMENT = "dismissedAnnouncement"
 
     val caches = listOf(
       USER_ACCOUNTS,
@@ -19,7 +20,8 @@ interface Caches {
       MACHINE_TRANSLATIONS,
       PROJECT_TRANSLATIONS_MODIFIED,
       BUSINESS_EVENT_THROTTLING,
-      USAGE
+      USAGE,
+      DISMISSED_ANNOUNCEMENT
     )
   }
 }
