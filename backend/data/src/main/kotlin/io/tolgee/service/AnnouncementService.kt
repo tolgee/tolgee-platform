@@ -39,14 +39,11 @@ class AnnouncementService(
   }
 
   fun isAnnouncementExpired(announcement: Announcement): Boolean {
-    val lastAnnouncement = Announcement.getLast()
+    val lastAnnouncement = Announcement.last
 
     val now = currentDateProvider.date.time
     val until = lastAnnouncement.until
 
-    if (now < until) {
-      return false
-    }
-    return true
+    return now >= until
   }
 }

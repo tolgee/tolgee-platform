@@ -27,7 +27,7 @@ class AnnouncementController(
   @GetMapping("")
   @Operation(description = "Get latest announcement")
   fun getLatest(): AnnouncementDto? {
-    val announcement = Announcement.getLast()
+    val announcement = Announcement.last
     val user = authenticationFacade.userAccount
     if (this.announcementService.isAnnouncementExpired(announcement)) {
       return null
@@ -41,7 +41,7 @@ class AnnouncementController(
   @PostMapping("dismiss")
   @Operation(description = "Dismiss current announcement for current user")
   fun dismiss() {
-    val announcement = Announcement.getLast()
+    val announcement = Announcement.last
     val user = authenticationFacade.userAccount
     announcementService.dismissAnnouncement(announcement, user.id)
   }

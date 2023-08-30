@@ -8,9 +8,10 @@ enum class Announcement(val until: Long) {
   FEATURE_BATCH_OPERATIONS(parseTime("2023-09-10 00:00 UTC"));
 
   companion object {
-    fun getLast(): Announcement {
-      return Announcement.values().last()
-    }
+    val last: Announcement
+      get() {
+        return Announcement.values().last()
+      }
   }
 }
 
