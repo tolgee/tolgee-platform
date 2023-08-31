@@ -52,7 +52,6 @@ class UserAccountService(
   private val passwordEncoder: PasswordEncoder,
   @Lazy
   private val organizationService: OrganizationService,
-  private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider
 ) {
@@ -75,6 +74,10 @@ class UserAccountService(
 
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
+  }
+
+  fun findInitialUser(): UserAccount? {
+    return userAccountRepository.findInitialUser()
   }
 
   fun get(id: Long): UserAccount {
@@ -148,20 +151,6 @@ class UserAccountService(
     val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
-
-  @get:Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "'implicit'")
-  val implicitUser: UserAccount
-    get() {
-      val username = "___implicit_user"
-      return executeInNewTransaction(transactionManager) {
-        userAccountRepository.findActive(username) ?: let {
-          val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
-          this.createUser(account)
-          this.organizationService.create(OrganizationDto(name = account.name), account)
-          account
-        }
-      }
-    }
 
   fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
     return userAccountRepository.findThirdByThirdParty(id, type)
@@ -298,7 +287,7 @@ class UserAccountService(
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username) {
-      if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+      if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
         throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
       }
 
@@ -317,7 +306,7 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
-    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+    if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 

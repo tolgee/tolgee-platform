@@ -18,7 +18,7 @@ class UserCredentialsService(
     val userAccount = userAccountService.findActive(username)
       ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
 
-    if (userAccount.accountType == UserAccount.AccountType.LDAP)
+    if (userAccount.accountType == UserAccount.AccountType.MANAGED)
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
 
     checkNativeUserCredentials(userAccount, password)

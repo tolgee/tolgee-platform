@@ -21,23 +21,20 @@ class InitialUserCreatorCommandLineRunner(
   private val userAccountService: UserAccountService,
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationService: OrganizationService
-) :
-  CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun run(vararg args: String) {
-    val initialUsername = properties.authentication.initialUsername
-    if (
-      properties.authentication.enabled &&
-      !userAccountService.isAnyUserAccount &&
-      userAccountService.findActive(initialUsername) == null
-    ) {
+    if (userAccountService.findInitialUser() == null) {
       logger.info("Creating initial user...")
+
+      val initialUsername = properties.authentication.initialUsername
       val initialPassword = initialPasswordManager.initialPassword
       val user = userAccountService.createUser(
         SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
         UserAccount.Role.ADMIN
       )
+
       organizationService.create(
         OrganizationDto(
           properties.authentication.initialUsername,

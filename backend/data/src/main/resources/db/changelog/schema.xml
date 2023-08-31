@@ -2683,4 +2683,25 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="cynthia (generated)" id="1693517732527-1">
+        <addColumn tableName="user_account">
+            <column name="is_initial_user" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="cynthia" id="1693517732527-2">
+        <sql dbms="postgresql">
+            UPDATE user_account
+            SET is_initial_user = true
+            LIMIT 1;
+        </sql>
+    </changeSet>
+    <changeSet author="cynthia" id="1693517732527-3">
+        <sql dbms="postgresql">
+            UPDATE user_account
+            SET account_type = 'MANAGED'
+            WHERE account_type = 'LDAP';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

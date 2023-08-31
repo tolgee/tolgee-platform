@@ -21,6 +21,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(id: Long): UserAccount?
 
+  @Query("from UserAccount ua where ua.is_initial_user = true")
+  fun findInitialUser(): UserAccount?
+
   @Modifying
   @Query(
     """update UserAccount ua 

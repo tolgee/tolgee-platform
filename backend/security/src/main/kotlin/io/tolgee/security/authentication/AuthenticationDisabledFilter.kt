@@ -32,9 +32,8 @@ class AuthenticationDisabledFilter(
   private val userAccountService: UserAccountService,
 ) : OncePerRequestFilter() {
   private val initialUser by lazy {
-    val account = userAccountService.findActive(authenticationProperties.initialUsername)
-      ?: throw IllegalStateException("Initial user does not exist")
-
+    val account = userAccountService.findInitialUser()
+      ?: throw IllegalStateException("Initial user does not exists")
     UserAccountDto.fromEntity(account)
   }
 

@@ -52,7 +52,7 @@ export const UserProfileView: FunctionComponent = () => {
 
   const history = useHistory();
   const config = useConfig();
-  const isManaged = user?.accountType === 'LDAP';
+  const isManaged = user?.accountType === 'MANAGED';
 
   if (!config.authentication) {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;

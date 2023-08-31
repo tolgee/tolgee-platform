@@ -27,7 +27,6 @@ import java.io.File
   classes = [Application::class],
   properties = [
     "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
-    "tolgee.authentication.create-initial-user=true",
     "tolgee.authentication.initial-username=johny"
   ]
 )

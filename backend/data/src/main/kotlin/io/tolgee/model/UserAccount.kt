@@ -85,8 +85,11 @@ data class UserAccount(
   @Column(name = "disabled_at")
   var disabledAt: Date? = null
 
+  @Column(name = "is_initial_user")
+  var isInitialUser: Boolean = false
+
   val isDeletable: Boolean
-    get() = this.accountType != AccountType.LDAP
+    get() = this.accountType != AccountType.MANAGED && !this.isInitialUser
 
   val isMfaEnabled: Boolean
     get() = this.totpKey?.isNotEmpty() ?: false
@@ -119,6 +122,6 @@ data class UserAccount(
   }
 
   enum class AccountType {
-    LOCAL, LDAP, THIRD_PARTY
+    LOCAL, MANAGED, THIRD_PARTY
   }
 }
