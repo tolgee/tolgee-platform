@@ -255,7 +255,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     val testData = LanguagePermissionsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.translateAllExplicitUser
-    performAuthGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
+    performGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
       .andPrettyPrint.andAssertThatJson {
         node("id").isValidId
         node("permittedLanguageIds")

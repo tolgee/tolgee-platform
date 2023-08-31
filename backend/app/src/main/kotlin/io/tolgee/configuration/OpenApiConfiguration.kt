@@ -9,7 +9,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
+import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -210,7 +210,7 @@ class OpenApiConfiguration {
           oldOperations.forEach { operation ->
             val handlers = operationHandlers
             val handler = operationHandlers[operation.operationId]
-            val annotation = handler?.getMethodAnnotation(AccessWithApiKey::class.java)
+            val annotation = handler?.getMethodAnnotation(AllowApiAccess::class.java)
 
             if (annotation != null) {
               val containsProjectIdParam = pathEntry.key

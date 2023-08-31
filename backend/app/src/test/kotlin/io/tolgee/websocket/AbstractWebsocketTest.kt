@@ -35,7 +35,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     prepareTestData()
     helper = WebsocketTestHelper(
       port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      jwtService.emitToken(testData.user.id),
       testData.projectBuilder.self.id
     )
     helper.listenForTranslationDataModified()
@@ -192,7 +192,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   fun `doesn't subscribe without permissions`() {
     val notPermittedSubscriptionHelper = WebsocketTestHelper(
       port,
-      jwtTokenProvider.generateToken(notPermittedUser.id).toString(),
+      jwtService.emitToken(notPermittedUser.id),
       testData.projectBuilder.self.id
     )
     notPermittedSubscriptionHelper.listenForTranslationDataModified()

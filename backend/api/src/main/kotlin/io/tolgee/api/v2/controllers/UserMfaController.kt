@@ -5,9 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.JwtTokenProvider
-import io.tolgee.security.patAuth.DenyPatAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.MfaService
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -23,32 +22,29 @@ import javax.validation.Valid
 class UserMfaController(
   private val authenticationFacade: AuthenticationFacade,
   private val mfaService: MfaService,
-  private val jwtTokenProvider: JwtTokenProvider
+  private val jwtService: JwtService,
 ) {
   @PutMapping("/totp")
   @Operation(summary = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  @DenyPatAccess
   fun enableMfa(@RequestBody @Valid dto: UserTotpEnableRequestDto): JwtAuthenticationResponse {
-    mfaService.enableTotpFor(authenticationFacade.userAccountEntity, dto)
+    mfaService.enableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtTokenProvider.generateToken(authenticationFacade.userAccountEntity.id).toString()
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
     )
   }
 
   @DeleteMapping("/totp")
   @Operation(summary = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.")
-  @DenyPatAccess
   fun disableMfa(@RequestBody @Valid dto: UserTotpDisableRequestDto): JwtAuthenticationResponse {
-    mfaService.disableTotpFor(authenticationFacade.userAccountEntity, dto)
+    mfaService.disableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtTokenProvider.generateToken(authenticationFacade.userAccountEntity.id).toString()
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
     )
   }
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerates multi-factor authentication recovery codes")
-  @DenyPatAccess
   fun regenerateRecoveryCodes(@RequestBody @Valid dto: UserMfaRecoveryRequestDto): List<String> {
-    return mfaService.regenerateRecoveryCodes(authenticationFacade.userAccountEntity, dto)
+    return mfaService.regenerateRecoveryCodes(authenticationFacade.authenticatedUserEntity, dto)
   }
 }

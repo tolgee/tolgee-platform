@@ -7,7 +7,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.hateoas.userPreferences.UserPreferencesModel
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserPreferencesService
@@ -31,7 +31,7 @@ class UserPreferencesController(
   @GetMapping("")
   @Operation(summary = "Get user's preferences")
   fun get(): UserPreferencesModel {
-    return userPreferencesService.findOrCreate(authenticationFacade.userAccount.id).let {
+    return userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id).let {
       UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization?.id)
     }
   }
@@ -41,7 +41,7 @@ class UserPreferencesController(
   fun setLanguage(
     @PathVariable languageTag: String
   ) {
-    userPreferencesService.setLanguage(languageTag, authenticationFacade.userAccountEntity)
+    userPreferencesService.setLanguage(languageTag, authenticationFacade.authenticatedUserEntity)
   }
 
   @PutMapping("/set-preferred-organization/{organizationId}")
@@ -51,6 +51,6 @@ class UserPreferencesController(
   ) {
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserCanView(organization.id)
-    userPreferencesService.setPreferredOrganization(organization, authenticationFacade.userAccountEntity)
+    userPreferencesService.setPreferredOrganization(organization, authenticationFacade.authenticatedUserEntity)
   }
 }

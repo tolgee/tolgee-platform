@@ -22,6 +22,8 @@ import software.amazon.awssdk.services.s3.model.S3Exception
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
+    "tolgee.authentication.jwt-secret=this is a predefined secret, so it doesn't attempt to " +
+      "get it from the S3 mock that doesn't exist yet :D",
     "tolgee.file-storage.s3.enabled=true",
     "tolgee.file-storage.s3.access-key=dummy_access_key",
     "tolgee.file-storage.s3.secret-key=dummy_secret_key",

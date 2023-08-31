@@ -16,6 +16,8 @@
 
 package io.tolgee.security.authentication
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.security.UserAccountService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -30,15 +32,13 @@ class AuthenticationDisabledFilter(
   private val userAccountService: UserAccountService,
 ) : OncePerRequestFilter() {
   private val initialUser by lazy {
-    userAccountService.findActive(authenticationProperties.initialUsername)
+    val account = userAccountService.findActive(authenticationProperties.initialUsername)
       ?: throw IllegalStateException("Initial user does not exist")
+
+    UserAccountDto.fromEntity(account)
   }
 
-  override fun doFilterInternal(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    filterChain: FilterChain,
-  ) {
+  override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
     // Set the initial user as current user, always.
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
       null,

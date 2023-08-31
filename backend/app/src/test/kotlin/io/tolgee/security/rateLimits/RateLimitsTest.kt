@@ -1,50 +1,56 @@
 package io.tolgee.security.rateLimits
 
-import io.tolgee.configuration.tolgee.RateLimitProperties
+import io.tolgee.constants.Caches
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsRateLimited
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cache.CacheManager
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
+    "tolgee.rate-limits.ip-request-limit=10",
+    "tolgee.rate-limits.ip-request-window=10000",
+    "tolgee.rate-limits.user-request-limit=15",
+    "tolgee.rate-limits.user-request-window=10000",
   ]
 )
-class RateLimitsTest : AbstractRateLimitsTest() {
-
-  @Autowired
-  lateinit var rateLimitProperties: RateLimitProperties
+class RateLimitsTest : AuthorizedControllerTest() {
+  @BeforeEach
+  fun clearCache() {
+    cacheManager.getCache(Caches.RATE_LIMITS)?.clear()
+  }
 
   @Test
   fun `ip request limit works`() {
-    testRateLimit("ip") { performGet("/api/public/configuration") }
+    (1..10).forEach { _ ->
+      performGet("/api/public/configuration").andIsOk
+    }
+    performGet("/api/public/configuration").andIsRateLimited
   }
 
   @Test
   fun `user request limit works`() {
-    testRateLimit("user_id") { performAuthGet("/v2/projects") }
+    (1..15).forEach { _ ->
+      performAuthGet("/v2/projects").andIsOk
+    }
+    performAuthGet("/v2/projects").andIsRateLimited
   }
 
   @Test
   fun `limits auth endpoints`() {
-    testRateLimit("auth_req_ip", expectedStatus = 401) {
-      performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p"))
+    (1..5).forEach { _ ->
+      performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p")).andIsUnauthorized
     }
-    testRateLimit("auth_req_ip") {
-      performPost("/api/public/reset_password_request?bla", mapOf("callbackUrl" to "a", "email" to "a@a.az"))
-    }
-  }
-
-  @Test
-  fun `can be disabled by property`() {
-    rateLimitProperties.enabled = false
-    testRateLimitDisabled("auth_req_ip", expectedStatus = 401) {
-      performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p"))
-    }
-    rateLimitProperties.enabled = true
+    performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p")).andIsRateLimited
   }
 }

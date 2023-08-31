@@ -8,7 +8,6 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -40,9 +39,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   @Autowired
   lateinit var batchJobActionService: BatchJobActionService
-
-  @Autowired
-  lateinit var jwtTokenProvider: JwtTokenProvider
 
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider

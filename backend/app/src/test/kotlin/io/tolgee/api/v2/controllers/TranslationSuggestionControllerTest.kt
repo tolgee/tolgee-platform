@@ -375,9 +375,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     testMtCreditConsumption()
 
     mockCurrentDate { Date().addMonths(1) }
+    loginAsUser(testData.user) // To refresh the JWT, or it'll be affected by the mocked date and auth will fail
     testMtCreditConsumption()
 
     mockCurrentDate { Date().addMonths(2) }
+    loginAsUser(testData.user) // To refresh the JWT, or it'll be affected by the mocked date and auth will fail
     testMtCreditConsumption()
   }
 

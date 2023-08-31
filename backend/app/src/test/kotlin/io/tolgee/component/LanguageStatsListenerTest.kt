@@ -4,7 +4,7 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction

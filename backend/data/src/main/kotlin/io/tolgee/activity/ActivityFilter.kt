@@ -3,7 +3,11 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.ScopeNotActiveException
+import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
+import org.springframework.core.Ordered
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
@@ -17,10 +21,14 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class ActivityFilter(
-  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  private val applicationContext: ApplicationContext,
   private val activityHolder: ActivityHolder,
   private val sdkInfoProvider: SdkInfoProvider
 ) : OncePerRequestFilter() {
+  // Lazy loading with @Lazy makes it throw a NPE :shrug:
+  private val requestMappingHandlerMapping: RequestMappingHandlerMapping by lazy {
+    applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping::class.java)
+  }
 
   override fun doFilterInternal(
     request: HttpServletRequest,

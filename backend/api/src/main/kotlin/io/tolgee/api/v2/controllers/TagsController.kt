@@ -11,10 +11,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.TagService
 import org.springdoc.api.annotations.ParameterObject
@@ -39,7 +39,7 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/",
+    "/v2/projects/{projectId:\\d+}/",
     "/v2/projects/"
   ]
 )
@@ -54,9 +54,9 @@ class TagsController(
 
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
+  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @AllowApiAccess
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     key.checkInProject()
@@ -65,9 +65,9 @@ class TagsController(
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
   @Operation(summary = "Removes tag with provided id from key with provided id")
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_TAGS_EDIT)
+  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @AllowApiAccess
   fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     val tag = tagService.find(tagId) ?: throw NotFoundException()
@@ -78,8 +78,8 @@ class TagsController(
 
   @GetMapping(value = ["tags"])
   @Operation(summary = "Returns project tags")
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun getAll(
     @RequestParam search: String? = null,
     @SortDefault("name") @ParameterObject pageable: Pageable

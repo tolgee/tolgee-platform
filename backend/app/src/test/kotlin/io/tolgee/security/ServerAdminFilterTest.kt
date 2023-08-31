@@ -4,7 +4,6 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.UserAccount
-import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

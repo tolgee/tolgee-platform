@@ -11,10 +11,10 @@ import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.user_account.PrivateUserAccountModel
 import io.tolgee.hateoas.user_account.PrivateUserAccountModelAssembler
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.JwtTokenProvider
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.patAuth.DenyPatAccess
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.JwtService
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationService
@@ -48,93 +48,88 @@ class V2UserController(
   private val organizationService: OrganizationService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val passwordEncoder: PasswordEncoder,
-  private val jwtTokenProvider: JwtTokenProvider,
-  private val mfaService: MfaService
+  private val jwtService: JwtService,
+  private val mfaService: MfaService,
 ) {
   @Operation(summary = "Returns current user's data.")
   @GetMapping("")
+  @AllowApiAccess
   fun getInfo(): PrivateUserAccountModel {
-    val userAccount = authenticationFacade.userAccountEntity
+    val userAccount = authenticationFacade.authenticatedUserEntity
     return privateUserAccountModelAssembler.toModel(userAccount)
   }
 
   @Operation(summary = "Deletes current user.")
   @DeleteMapping("")
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun delete() {
-    userAccountService.delete(authenticationFacade.userAccountEntity)
+    userAccountService.delete(authenticationFacade.authenticatedUserEntity)
   }
 
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
-  @DenyPatAccess
   fun updateUserOld(@RequestBody @Valid dto: UserUpdateRequestDto?): PrivateUserAccountModel = updateUser(dto)
 
   @PutMapping("")
   @Operation(summary = "Updates current user's data.")
-  @DenyPatAccess
   fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDto?): PrivateUserAccountModel {
-    val userAccount = userAccountService.update(authenticationFacade.userAccountEntity, dto!!)
+    val userAccount = userAccountService.update(authenticationFacade.authenticatedUserEntity, dto!!)
     return privateUserAccountModelAssembler.toModel(userAccount)
   }
 
   @PutMapping("/password")
   @Operation(summary = "Updates current user's password. Invalidates all previous sessions upon success.")
-  @DenyPatAccess
   fun updateUserPassword(@RequestBody @Valid dto: UserUpdatePasswordRequestDto?): JwtAuthenticationResponse {
-    userAccountService.updatePassword(authenticationFacade.userAccountEntity, dto!!)
+    userAccountService.updatePassword(authenticationFacade.authenticatedUserEntity, dto!!)
     return JwtAuthenticationResponse(
-      jwtTokenProvider.generateToken(authenticationFacade.userAccountEntity.id).toString()
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true)
     )
   }
 
   @PutMapping("/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads user's avatar.")
   @ResponseStatus(HttpStatus.OK)
-  @DenyPatAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
   ): PrivateUserAccountModel {
     imageUploadService.validateIsImage(avatar)
-    val entity = authenticationFacade.userAccountEntity
-    userAccountService.setAvatar(authenticationFacade.userAccountEntity, avatar.inputStream)
+    val entity = authenticationFacade.authenticatedUserEntity
+    userAccountService.setAvatar(entity, avatar.inputStream)
     return privateUserAccountModelAssembler.toModel(entity)
   }
 
   @DeleteMapping("/avatar")
   @Operation(summary = "Deletes user's avatar.")
   @ResponseStatus(HttpStatus.OK)
-  @DenyPatAccess
   fun removeAvatar(): PrivateUserAccountModel {
-    val entity = authenticationFacade.userAccountEntity
-    userAccountService.removeAvatar(authenticationFacade.userAccountEntity)
+    val entity = authenticationFacade.authenticatedUserEntity
+    userAccountService.removeAvatar(entity)
     return privateUserAccountModelAssembler.toModel(entity)
   }
 
   @GetMapping("/single-owned-organizations")
   @Operation(summary = "Returns all organizations owned only by current user")
   @ResponseStatus(HttpStatus.OK)
-  @DenyPatAccess
   fun getAllSingleOwnedOrganizations(): CollectionModel<SimpleOrganizationModel> {
-    val organizations = organizationService.getAllSingleOwnedByUser(authenticationFacade.userAccountEntity)
+    val organizations = organizationService.getAllSingleOwnedByUser(authenticationFacade.authenticatedUserEntity)
     return simpleOrganizationModelAssembler.toCollectionModel(organizations)
   }
 
   @PostMapping("/generate-super-token")
   @Operation(summary = "Generates new JWT token permitted to sensitive operations")
-  @DenyPatAccess
   fun getSuperToken(@RequestBody @Valid req: SuperTokenRequest): ResponseEntity<JwtAuthenticationResponse> {
-    if (authenticationFacade.userAccountEntity.isMfaEnabled) {
-      mfaService.checkMfa(authenticationFacade.userAccountEntity, req.otp)
+    val entity = authenticationFacade.authenticatedUserEntity
+    if (entity.isMfaEnabled) {
+      mfaService.checkMfa(entity, req.otp)
     } else {
       if (req.password.isNullOrBlank()) {
         throw AuthenticationException(Message.WRONG_CURRENT_PASSWORD)
       }
-      val matches = passwordEncoder.matches(req.password, authenticationFacade.userAccountEntity.password)
+      val matches = passwordEncoder.matches(req.password, entity.password)
       if (!matches) throw AuthenticationException(Message.WRONG_CURRENT_PASSWORD)
     }
 
-    val jwt = jwtTokenProvider.generateToken(authenticationFacade.userAccount.id, true).toString()
+    val jwt = jwtService.emitToken(entity.id, true)
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 }

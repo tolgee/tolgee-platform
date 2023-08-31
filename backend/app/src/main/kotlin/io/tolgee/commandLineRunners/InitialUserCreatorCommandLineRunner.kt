@@ -29,7 +29,6 @@ class InitialUserCreatorCommandLineRunner(
     val initialUsername = properties.authentication.initialUsername
     if (
       properties.authentication.enabled &&
-      properties.authentication.createInitialUser &&
       !userAccountService.isAnyUserAccount &&
       userAccountService.findActive(initialUsername) == null
     ) {

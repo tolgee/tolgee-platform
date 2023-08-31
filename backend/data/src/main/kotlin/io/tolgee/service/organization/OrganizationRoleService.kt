@@ -12,7 +12,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
@@ -35,9 +35,9 @@ class OrganizationRoleService(
 
   fun checkUserCanView(organizationId: Long) {
     checkUserCanView(
-      authenticationFacade.userAccount.id,
+      authenticationFacade.authenticatedUser.id,
       organizationId,
-      authenticationFacade.userAccount.role == UserAccount.Role.ADMIN
+      authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     )
   }
 
@@ -73,7 +73,7 @@ class OrganizationRoleService(
   }
 
   fun checkUserIsOwner(organizationId: Long) {
-    this.checkUserIsOwner(authenticationFacade.userAccount.id, organizationId)
+    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
@@ -85,7 +85,7 @@ class OrganizationRoleService(
   }
 
   fun checkUserIsMemberOrOwner(organizationId: Long) {
-    this.checkUserIsMemberOrOwner(this.authenticationFacade.userAccount.id, organizationId)
+    this.checkUserIsMemberOrOwner(this.authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
@@ -109,11 +109,11 @@ class OrganizationRoleService(
   }
 
   fun getType(organizationId: Long): OrganizationRoleType {
-    return getType(authenticationFacade.userAccount.id, organizationId)
+    return getType(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun findType(organizationId: Long): OrganizationRoleType? {
-    return findType(authenticationFacade.userAccount.id, organizationId)
+    return findType(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   fun findType(userId: Long, organizationId: Long): OrganizationRoleType? {
@@ -136,7 +136,7 @@ class OrganizationRoleService(
   }
 
   fun leave(organizationId: Long) {
-    this.removeUser(organizationId, authenticationFacade.userAccount.id)
+    this.removeUser(organizationId, authenticationFacade.authenticatedUser.id)
   }
 
   fun removeUser(organizationId: Long, userId: Long) {
@@ -174,7 +174,7 @@ class OrganizationRoleService(
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)
-    } ?: throw ValidationException(io.tolgee.constants.Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+    } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
   fun createForInvitation(
@@ -202,7 +202,7 @@ class OrganizationRoleService(
       .countAllByOrganizationIdAndTypeAndUserIdNot(
         id,
         OrganizationRoleType.OWNER,
-        authenticationFacade.userAccount.id
+        authenticationFacade.authenticatedUser.id
       ) > 0
   }
 

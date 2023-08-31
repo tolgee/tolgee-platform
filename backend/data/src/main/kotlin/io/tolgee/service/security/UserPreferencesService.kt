@@ -4,7 +4,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
 import io.tolgee.repository.UserPreferencesRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
@@ -48,7 +48,7 @@ class UserPreferencesService(
     return save(preferences)
   }
 
-  fun find(userAccountId: Long = authenticationFacade.userAccount.id): UserPreferences? {
+  fun find(userAccountId: Long = authenticationFacade.authenticatedUser.id): UserPreferences? {
     val preferences = userPreferencesRepository.findById(userAccountId).orElse(null) ?: return null
     preferences.tryRefreshPreferredOrganizationWhenNull()
     return preferences

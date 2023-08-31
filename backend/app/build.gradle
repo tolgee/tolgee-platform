@@ -166,6 +166,12 @@ dependencies {
      * API module
      */
     implementation(project(':api'))
+
+
+    /**
+     * API module
+     */
+    implementation(project(':security'))
 }
 
 test {

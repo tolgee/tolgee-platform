@@ -18,18 +18,15 @@ package io.tolgee.security.authorization
 
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.organization.OrganizationService
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
-import org.springframework.web.servlet.HandlerMapping
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -55,7 +52,7 @@ class OrganizationAuthorizationInterceptor(
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
-    val requiredRole = getRequiredRole(handler)
+    val requiredRole = getRequiredRole(request, handler)
     if (!organizationRoleService.canUserView(userId, organization.id)) {
       // Security consideration: if the user cannot see the organization, pretend it does not exist.
       throw NotFoundException()
@@ -68,13 +65,13 @@ class OrganizationAuthorizationInterceptor(
     return true
   }
 
-  private fun getRequiredRole(handler: HandlerMethod): OrganizationRoleType? {
+  private fun getRequiredRole(request: HttpServletRequest, handler: HandlerMethod): OrganizationRoleType? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val orgPermission = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationRole::class.java)
 
     if (defaultPerms == null && orgPermission == null) {
       // A permission policy MUST be explicitly defined.
-      throw RuntimeException("No permission policy have been set for this endpoint!")
+      throw RuntimeException("No permission policy have been set for URI ${request.requestURI}!")
     }
 
     if (defaultPerms != null && orgPermission != null) {
@@ -89,9 +86,5 @@ class OrganizationAuthorizationInterceptor(
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE
-  }
-
-  companion object {
-    val IS_SLUG_RE = "[a-z]".toRegex()
   }
 }

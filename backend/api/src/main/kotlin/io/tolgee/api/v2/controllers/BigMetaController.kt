@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.bigMeta.BigMetaService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,8 +29,8 @@ class BigMetaController(
 ) {
   @PostMapping("/big-meta")
   @Operation(summary = "Stores a bigMeta for a project")
-  @AccessWithApiKey
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun store(@RequestBody @Valid data: BigMetaDto) {
     bigMetaService.store(data, projectHolder.projectEntity)
   }

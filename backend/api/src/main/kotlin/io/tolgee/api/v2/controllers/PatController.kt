@@ -15,9 +15,9 @@ import io.tolgee.hateoas.pat.PatWithUserModelAssembler
 import io.tolgee.hateoas.pat.RevealedPatModel
 import io.tolgee.hateoas.pat.RevealedPatModelAssembler
 import io.tolgee.model.Pat
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.patAuth.DenyPatAccess
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.security.PatService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -54,7 +54,7 @@ class PatController(
     @ParameterObject pageable: Pageable
   ): PagedModel<PatModel> {
     return pagedResourcesAssembler.toModel(
-      patService.findAll(authenticationFacade.userAccount.id, pageable),
+      patService.findAll(authenticationFacade.authenticatedUser.id, pageable),
       patModelAssembler
     )
   }
@@ -71,10 +71,9 @@ class PatController(
   @PostMapping(value = [""])
   @Operation(summary = "Creates new Personal Access Token")
   @ResponseStatus(HttpStatus.CREATED)
-  @DenyPatAccess
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun create(@RequestBody @Valid dto: CreatePatDto): RevealedPatModel {
-    return revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.userAccountEntity))
+    return revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.authenticatedUserEntity))
   }
 
   @PutMapping(value = ["/{id:[0-9]+}/regenerate"])
@@ -82,8 +81,7 @@ class PatController(
     summary = "Regenerates Personal Access Token. " +
       "It generates new token value and updates its time of expiration."
   )
-  @DenyPatAccess
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun regenerate(
     @RequestBody @Valid dto: RegeneratePatDto,
     @PathVariable id: Long
@@ -94,8 +92,7 @@ class PatController(
 
   @PutMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Updates Personal Access Token")
-  @DenyPatAccess
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun update(
     @RequestBody @Valid dto: UpdatePatDto,
     @PathVariable id: Long
@@ -106,8 +103,7 @@ class PatController(
 
   @DeleteMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Deletes Personal Access Token")
-  @DenyPatAccess
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun delete(
     @PathVariable id: Long
   ) {
@@ -117,17 +113,18 @@ class PatController(
 
   @GetMapping(path = ["/current"])
   @Operation(summary = "Returns current Personal Access Token info")
+  @AllowApiAccess
   fun getCurrent(): PatWithUserModel {
-    if (!authenticationFacade.isPatAuthentication) {
+    if (!authenticationFacade.isPersonalAccessTokenAuth) {
       throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
     }
 
-    val pat = authenticationFacade.pat
+    val pat = authenticationFacade.personalAccessToken
     return patWithUserModelAssembler.toModel(pat)
   }
 
   private fun checkOwner(id: Long) {
-    if (patService.get(id).userAccount.id != authenticationFacade.userAccount.id) {
+    if (patService.get(id).userAccount.id != authenticationFacade.authenticatedUser.id) {
       throw PermissionException()
     }
   }

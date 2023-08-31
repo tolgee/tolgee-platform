@@ -310,7 +310,7 @@ class TestDataService(
     importService.saveAllFiles(importFiles)
     val fileIssues = importFiles.flatMap { it.issues }
     importService.saveAllFileIssues(fileIssues)
-    val params = fileIssues.flatMap { it.params ?: emptyList() }
+    val params = fileIssues.flatMap { it.params }
     importService.saveAllFileIssueParams(params)
     importService.saveTranslations(importFileBuilders.flatMap { it.data.importTranslations.map { it.self } })
     importService.saveLanguages(importFileBuilders.flatMap { it.data.importLanguages.map { it.self } })

@@ -9,8 +9,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import org.springframework.core.io.ClassPathResource
 
-class
-OrganizationBuilder(
+class OrganizationBuilder(
   val testDataBuilder: TestDataBuilder
 ) : BaseEntityDataBuilder<Organization, OrganizationBuilder>() {
   class DATA {

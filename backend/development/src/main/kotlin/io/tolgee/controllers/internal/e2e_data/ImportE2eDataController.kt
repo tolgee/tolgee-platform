@@ -5,7 +5,6 @@ import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.security.InternalController
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -21,7 +20,6 @@ import javax.persistence.EntityManager
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/import"])
 @Transactional
-@InternalController
 class ImportE2eDataController(
   private val importService: ImportService,
   private val entityManager: EntityManager,

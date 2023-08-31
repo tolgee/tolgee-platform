@@ -32,9 +32,10 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.patAuth.DenyPatAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
@@ -101,7 +102,7 @@ class OrganizationController(
   @Operation(summary = "Creates organization")
   fun create(@RequestBody @Valid dto: OrganizationDto): ResponseEntity<OrganizationModel> {
     if (!this.tolgeeProperties.authentication.userCanCreateOrganizations &&
-      authenticationFacade.userAccount.role != UserAccount.Role.ADMIN
+      authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
     ) {
       throw PermissionException()
     }
@@ -114,18 +115,18 @@ class OrganizationController(
 
   @GetMapping("/{id:[0-9]+}")
   @Operation(summary = "Returns organization by ID")
+  @UseDefaultPermissions
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
-    organizationRoleService.checkUserCanView(organization.id)
     val roleType = organizationRoleService.findType(id)
     return OrganizationView.of(organization, roleType).toModel()
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
   @Operation(summary = "Returns organization by address part")
+  @UseDefaultPermissions
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
-    organizationRoleService.checkUserCanView(organization.id)
     val roleType = organizationRoleService.findType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }
@@ -142,31 +143,29 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}")
   @Operation(summary = "Updates organization data")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun update(@PathVariable("id") id: Long, @RequestBody @Valid dto: OrganizationDto): OrganizationModel {
-    organizationRoleService.checkUserIsOwner(id)
     return this.organizationService.edit(id, editDto = dto).toModel()
   }
 
   @DeleteMapping("/{id:[0-9]+}")
   @Operation(summary = "Deletes organization and all its projects")
-  @NeedsSuperJwtToken
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun delete(@PathVariable("id") id: Long) {
-    organizationRoleService.checkUserIsOwner(id)
     organizationService.delete(id)
   }
 
   @GetMapping("/{id:[0-9]+}/users")
   @Operation(summary = "Returns all users in organization")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
+  @RequiresOrganizationRole
+  @RequiresSuperAuthentication
   fun getAllUsers(
     @PathVariable("id") id: Long,
     @ParameterObject @SortDefault(sort = ["name", "username"], direction = Sort.Direction.ASC) pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<UserAccountWithOrganizationRoleModel> {
-    organizationRoleService.checkUserIsMemberOrOwner(id)
     val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
     val userIds = allInOrganization.content.map { it.id }
     val projectsWithDirectPermission = projectService.getProjectsWithDirectPermissions(id, userIds)
@@ -181,7 +180,8 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}/leave")
   @Operation(summary = "Removes current user from organization")
-  @NeedsSuperJwtToken
+  @UseDefaultPermissions
+  @RequiresSuperAuthentication
   fun leaveOrganization(@PathVariable("id") id: Long) {
     organizationService.find(id)?.let {
       if (!organizationService.isThereAnotherOwner(id)) {
@@ -193,39 +193,38 @@ class OrganizationController(
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
   @Operation(summary = "Sets user role (Owner or Member)")
-  @NeedsSuperJwtToken
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun setUserRole(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
     @RequestBody dto: SetOrganizationRoleDto
   ) {
-    if (authenticationFacade.userAccount.id == userId) {
+    if (authenticationFacade.authenticatedUser.id == userId) {
       throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_ROLE)
     }
-    organizationRoleService.checkUserIsOwner(organizationId)
     organizationRoleService.setMemberRole(organizationId, userId, dto)
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
   @Operation(summary = "Removes user from organization")
-  @NeedsSuperJwtToken
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun removeUser(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long
   ) {
-    organizationRoleService.checkUserIsOwner(organizationId)
     organizationRoleService.removeUser(organizationId, userId)
   }
 
   @PutMapping("/{id:[0-9]+}/invite")
   @Operation(summary = "Generates user invitation link for organization")
-  @NeedsSuperJwtToken
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun inviteUser(
     @RequestBody @Valid dto: OrganizationInviteUserDto,
     @PathVariable("id") id: Long
   ): OrganizationInvitationModel {
-    organizationRoleService.checkUserIsOwner(id)
-
     val organization = organizationService.get(id)
 
     val invitation = invitationService.create(
@@ -242,11 +241,11 @@ class OrganizationController(
 
   @GetMapping("/{organizationId}/invitations")
   @Operation(summary = "Returns all invitations to organization")
-  @NeedsSuperJwtToken
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   fun getInvitations(@PathVariable("organizationId") id: Long):
     CollectionModel<OrganizationInvitationModel> {
     val organization = organizationService.find(id) ?: throw NotFoundException()
-    organizationRoleService.checkUserIsOwner(id)
     return invitationService.getForOrganization(organization).let {
       organizationInvitationModelAssembler.toCollectionModel(it)
     }
@@ -255,11 +254,11 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Uploads organizations avatar")
   @ResponseStatus(HttpStatus.OK)
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
     @PathVariable id: Long
   ): OrganizationModel {
-    organizationRoleService.checkUserIsOwner(id)
     imageUploadService.validateIsImage(avatar)
     val organization = organizationService.get(id)
     val roleType = organizationRoleService.getType(organization.id)
@@ -270,10 +269,10 @@ class OrganizationController(
   @DeleteMapping("/{id:[0-9]+}/avatar")
   @Operation(summary = "Deletes organization avatar")
   @ResponseStatus(HttpStatus.OK)
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun removeAvatar(
     @PathVariable id: Long
   ): OrganizationModel {
-    organizationRoleService.checkUserIsOwner(id)
     val organization = organizationService.get(id)
     val roleType = organizationRoleService.getType(organization.id)
     organizationService.removeAvatar(organization)
@@ -282,21 +281,21 @@ class OrganizationController(
 
   @PutMapping("/{organizationId:[0-9]+}/set-base-permissions/{permissionType}")
   @Operation(summary = "Sets organization base permission")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun setBasePermissions(
     @PathVariable organizationId: Long,
     @PathVariable permissionType: ProjectPermissionType,
   ) {
-    organizationRoleService.checkUserIsOwner(organizationId)
     organizationService.setBasePermission(organizationId, permissionType)
   }
 
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
   @Operation(description = "Returns current organization usage")
+  @RequiresOrganizationRole
   fun getUsage(
     @PathVariable organizationId: Long
   ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
-    organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
     val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
     val currentPayAsYouGoMtCredits = mtBucketSizeProvider.getUsedPayAsYouGoCredits(organization)

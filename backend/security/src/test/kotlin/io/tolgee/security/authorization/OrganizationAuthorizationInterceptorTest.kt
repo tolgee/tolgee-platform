@@ -16,11 +16,11 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Organization
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -47,7 +47,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   private val organization = Mockito.mock(Organization::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val organizationAuthenticationInterceptor = OrganizationAuthorizationInterceptor(
     authenticationFacade,

@@ -96,10 +96,13 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `returns daily activity`() {
     mockDate("2022-04-01")
+    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
     createActivity(1)
     mockDate("2022-04-05")
+    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
     createActivity(5)
     mockDate("2022-04-20")
+    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
     createActivity(2)
     performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson {
       isEqualTo(

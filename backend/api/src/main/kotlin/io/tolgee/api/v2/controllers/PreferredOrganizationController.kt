@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/preferred-organization"])
 @Tag(name = "Organizations")
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class PreferredOrganizationController(
   private val preferredOrganizationFacade: PreferredOrganizationFacade
 ) {

@@ -231,7 +231,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
-        jwtTokenProvider.resolveToken(token).superExpiration!!.assert.isGreaterThan(Date().time)
+        val authentication = jwtService.validateToken(token)
+        authentication.details?.isSuperToken == true
       }
     }
   }
@@ -248,7 +249,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
-        jwtTokenProvider.resolveToken(token).superExpiration!!.assert.isGreaterThan(Date().time)
+        val authentication = jwtService.validateToken(token)
+        authentication.details?.isSuperToken == true
       }
     }
   }

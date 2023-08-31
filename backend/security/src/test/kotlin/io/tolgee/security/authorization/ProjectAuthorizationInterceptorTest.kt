@@ -16,18 +16,18 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.project_auth.ProjectNotSelectedException
 import io.tolgee.service.security.SecurityService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +40,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
-import java.lang.Exception
 
 class ProjectAuthorizationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
@@ -49,9 +48,13 @@ class ProjectAuthorizationInterceptorTest {
 
   private val requestContextService = Mockito.mock(RequestContextService::class.java)
 
+  private val projectHolder = Mockito.mock(ProjectHolder::class.java)
+
   private val project = Mockito.mock(Project::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val projectDto = Mockito.mock(ProjectDto::class.java)
+
+  private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val apiKey = Mockito.mock(ApiKey::class.java)
 
@@ -59,6 +62,7 @@ class ProjectAuthorizationInterceptorTest {
     authenticationFacade,
     securityService,
     requestContextService,
+    projectHolder,
   )
 
   private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)
@@ -73,9 +77,10 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
 
-    Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(project)
+    Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(projectDto)
 
     Mockito.`when`(userAccount.id).thenReturn(1337L)
+    Mockito.`when`(projectDto.id).thenReturn(1337L)
     Mockito.`when`(project.id).thenReturn(1337L)
 
     Mockito.`when`(apiKey.project).thenReturn(project)
@@ -93,7 +98,6 @@ class ProjectAuthorizationInterceptorTest {
       apiKey,
     )
   }
-
 
   @Test
   fun `it has no effect on endpoints not specific to a single project`() {
@@ -193,7 +197,7 @@ class ProjectAuthorizationInterceptorTest {
   }
 
   @Test
-  fun `permissions work as intented when using implicit project id`() {
+  fun `permissions work as intended when using implicit project id`() {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
 

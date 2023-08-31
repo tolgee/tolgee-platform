@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.security.authentication.AuthenticationFacade
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import javax.servlet.FilterChain
@@ -24,12 +25,15 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class GlobalIpRateLimitFilter(
-  private val rateLimitService: RateLimitService
+  private val rateLimitService: RateLimitService,
+  private val authenticationFacade: AuthenticationFacade,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-    val policy = rateLimitService.getGlobalIpRateLimitPolicy(request)
-    if (policy != null) {
-      rateLimitService.consumeBucket(policy)
+    if (!authenticationFacade.isAuthenticated) {
+      val policy = rateLimitService.getGlobalIpRateLimitPolicy(request)
+      if (policy != null) {
+        rateLimitService.consumeBucket(policy)
+      }
     }
 
     filterChain.doFilter(request, response)

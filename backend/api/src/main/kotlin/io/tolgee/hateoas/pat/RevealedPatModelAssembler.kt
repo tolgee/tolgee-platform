@@ -16,7 +16,7 @@ class RevealedPatModelAssembler(
     val token = entity.token ?: throw IllegalStateException("Token not regenerated.")
     return RevealedPatModel(
       patModel = patModelAssembler.toModel(entity),
-      token = "${PAT_PREFIX}$token"
+      token = "$PAT_PREFIX$token"
     )
   }
 }

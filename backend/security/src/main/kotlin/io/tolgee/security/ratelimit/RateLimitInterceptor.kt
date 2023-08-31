@@ -16,28 +16,83 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.configuration.tolgee.RateLimitProperties
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.security.authentication.AuthenticationFacade
 import org.springframework.core.Ordered
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.HandlerMapping
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
 class RateLimitInterceptor(
-  private val rateLimitService: RateLimitService
+  private val authenticationFacade: AuthenticationFacade,
+  private val rateLimitProperties: RateLimitProperties,
+  private val rateLimitService: RateLimitService,
 ) : HandlerInterceptor, Ordered {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (handler !is HandlerMethod) {
       return super.preHandle(request, response, handler)
     }
 
-    val policy = rateLimitService.getEndpointRateLimit(request, null, handler)
+    val policy = extractEndpointRateLimit(request, authenticationFacade.authenticatedUserOrNull, handler)
     if (policy != null) {
       rateLimitService.consumeBucket(policy)
     }
 
     return true
+  }
+
+  fun extractEndpointRateLimit(
+    request: HttpServletRequest,
+    account: UserAccountDto?,
+    handler: HandlerMethod
+  ): RateLimitPolicy? {
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return null
+
+    val annotation = AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
+      ?: return null
+
+    if (
+      (!annotation.isAuthentication && !rateLimitProperties.endpointLimits) ||
+      (annotation.isAuthentication && !rateLimitProperties.authenticationLimits)
+    ) {
+      return null
+    }
+
+    val matchedPath = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE) as String
+    val pathVariablesMap = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
+
+    val id = if (account?.id != null) "user.${account.id}" else "ip.${request.remoteAddr}"
+    val pathVariables = pathVariablesMap.values.iterator()
+
+    var bucketName = "endpoint.$id.${annotation.bucketName.ifEmpty { "${request.method} $matchedPath" }}"
+
+    // Include route parameters to discriminate major routes, but not minor routes.
+    // Example: These are different
+    //  - /major/1/some-path -> "/major/{id}/some-path 1"
+    //  - /major/2/some-path -> "/major/{id}/some-path 2"
+    // However, for minor routes: These are the same
+    //  - /major/1/minor/1/some-path -> "/major/{id}/minor/{subId}/some-path 1"
+    //  - /major/1/minor/2/some-path -> "/major/{id}/minor/{subId}/some-path 1"
+
+    var i = 0
+    while (i < annotation.majorParametersToDiscriminate && pathVariables.hasNext()) {
+      bucketName += pathVariables.next()
+      i++
+    }
+
+    return RateLimitPolicy(
+      bucketName,
+      annotation.limit,
+      annotation.windowSize,
+      false,
+    )
   }
 
   override fun getOrder(): Int {

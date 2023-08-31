@@ -13,7 +13,6 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
-import io.tolgee.security.InternalController
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/projects"])
 @Transactional
-@InternalController
 class ProjectsE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,

@@ -17,7 +17,9 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.PROJECT_API_KEY_PREFIX
@@ -48,6 +50,7 @@ class AuthenticationFilter(
     } else {
       rateLimitService.consumeBucketUnless(policy) {
         doAuthenticate(request)
+        true
       }
     }
 
@@ -58,13 +61,13 @@ class AuthenticationFilter(
     return !authenticationProperties.enabled
   }
 
-  private fun doAuthenticate(request: HttpServletRequest): Boolean {
+  private fun doAuthenticate(request: HttpServletRequest) {
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val auth = jwtService.validateToken(authorization.substring(7))
         SecurityContextHolder.getContext().authentication = auth
-        return true
+        return
       }
 
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
@@ -72,24 +75,22 @@ class AuthenticationFilter(
 
     val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
     if (apiKey != null) {
-      if (apiKey.startsWith(PROJECT_API_KEY_PREFIX)) {
-        pakAuth(apiKey)
-        return true
-      }
-
       if (apiKey.startsWith(PAT_PREFIX)) {
         patAuth(apiKey)
-        return true
+        return
       }
 
-      throw AuthenticationException(Message.INVALID_API_KEY)
+      // Attempt PAK auth even if it doesn't have the prefix
+      // Might be a legacy key
+      pakAuth(apiKey)
     }
-
-    return false
   }
 
   private fun pakAuth(key: String) {
-    val hash = apiKeyService.hashKey(key)
+    val parsed = apiKeyService.parseApiKey(key)
+      ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
+
+    val hash = apiKeyService.hashKey(parsed)
     val pak = apiKeyService.find(hash)
       ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
@@ -97,15 +98,16 @@ class AuthenticationFilter(
       throw AuthenticationException(Message.PROJECT_API_KEY_EXPIRED)
     }
 
+    apiKeyService.updateLastUsedAsync(pak)
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
       pak,
-      pak.userAccount,
+      UserAccountDto.fromEntity(pak.userAccount),
       TolgeeAuthenticationDetails(false)
     )
   }
 
   private fun patAuth(key: String) {
-    val hash = patService.hashToken(key)
+    val hash = patService.hashToken(key.substring(PAT_PREFIX.length))
     val pat = patService.find(hash)
       ?: throw AuthenticationException(Message.INVALID_PAT)
 
@@ -113,9 +115,10 @@ class AuthenticationFilter(
       throw AuthenticationException(Message.PAT_EXPIRED)
     }
 
+    patService.updateLastUsedAsync(pat)
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
       pat,
-      pat.userAccount,
+      UserAccountDto.fromEntity(pat.userAccount),
       TolgeeAuthenticationDetails(false)
     )
   }

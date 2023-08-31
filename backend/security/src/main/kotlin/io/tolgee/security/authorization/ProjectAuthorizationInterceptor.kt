@@ -20,6 +20,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
@@ -39,6 +40,7 @@ class ProjectAuthorizationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
+  private val projectHolder: ProjectHolder,
 ) : HandlerInterceptor, Ordered {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (handler !is HandlerMethod) {
@@ -58,7 +60,8 @@ class ProjectAuthorizationInterceptor(
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
-    val requiredScopes = getRequiredScopes(handler)
+    projectHolder.project = project
+    val requiredScopes = getRequiredScopes(request, handler)
     val scopes =
       if (authenticationFacade.isProjectApiKeyAuth)
         authenticationFacade.projectApiKey.scopesEnum.toTypedArray()
@@ -70,12 +73,7 @@ class ProjectAuthorizationInterceptor(
       throw NotFoundException()
     }
 
-    if (requiredScopes == null) {
-      // No scopes required, abort here.
-      return true
-    }
-
-    requiredScopes.forEach {
+    requiredScopes?.forEach {
       if (!scopes.contains(it)) {
         throw PermissionException(
           Message.OPERATION_NOT_PERMITTED,
@@ -91,7 +89,7 @@ class ProjectAuthorizationInterceptor(
       }
 
       // Validate scopes set on the key
-      requiredScopes.forEach {
+      requiredScopes?.forEach {
         if (!authenticationFacade.projectApiKey.scopesEnum.contains(it)) {
           throw PermissionException(
             Message.OPERATION_NOT_PERMITTED,
@@ -104,13 +102,13 @@ class ProjectAuthorizationInterceptor(
     return true
   }
 
-  private fun getRequiredScopes(handler: HandlerMethod): Array<Scope>? {
+  private fun getRequiredScopes(request: HttpServletRequest, handler: HandlerMethod): Array<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val projectPerms = AnnotationUtils.getAnnotation(handler.method, RequiresProjectPermissions::class.java)
 
     if (defaultPerms == null && projectPerms == null) {
       // A permission policy MUST be explicitly defined.
-      throw RuntimeException("No permission policy have been set for this endpoint!")
+      throw RuntimeException("No permission policy have been set for URI ${request.requestURI}!")
     }
 
     if (defaultPerms != null && projectPerms != null) {

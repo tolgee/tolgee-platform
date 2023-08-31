@@ -4,7 +4,7 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -35,7 +35,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   lateinit var authorizedRequestPerformer: AuthorizedRequestPerformer
 
   @Autowired
-  lateinit var jwtTokenProvider: JwtTokenProvider
+  lateinit var jwtService: JwtService
 
   @AfterEach
   fun afterEach() {
@@ -58,7 +58,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     init(generateJwtToken(_userAccount!!.id))
   }
 
-  protected fun generateJwtToken(userAccountId: Long) = jwtTokenProvider.generateToken(userAccountId, true).toString()
+  protected fun generateJwtToken(userAccountId: Long) = jwtService.emitToken(userAccountId, true)
 
   fun refreshUser() {
     _userAccount = userAccountService.findActive(_userAccount!!.id)

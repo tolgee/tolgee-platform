@@ -2,7 +2,7 @@ package io.tolgee.websocket
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.Message
@@ -22,7 +22,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
-  private val jwtTokenProvider: JwtTokenProvider,
+  private val jwtService: JwtService,
   private val securityService: SecurityService,
 ) : WebSocketMessageBrokerConfigurer {
   override fun configureMessageBroker(config: MessageBrokerRegistry) {
@@ -35,12 +35,12 @@ class WebSocketConfig(
 
   override fun configureClientInboundChannel(registration: ChannelRegistration) {
     registration.interceptors(object : ChannelInterceptor {
-      override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
+      override fun preSend(message: Message<*>, channel: MessageChannel): Message<*> {
         val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
 
         if (accessor?.command == StompCommand.CONNECT) {
           val tokenString = accessor.getNativeHeader("jwtToken")?.firstOrNull()
-          accessor.user = jwtTokenProvider.getAuthentication(tokenString)
+          accessor.user = if (tokenString == null) null else jwtService.validateToken(tokenString)
         }
 
         if (accessor?.command == StompCommand.SUBSCRIBE) {

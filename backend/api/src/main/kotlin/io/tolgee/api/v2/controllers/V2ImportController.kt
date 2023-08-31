@@ -29,10 +29,10 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
@@ -89,19 +89,18 @@ class V2ImportController(
   private val securityService: SecurityService
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun addFiles(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams
   ): ImportAddFilesResultModel {
-    checkBaseImportPermissions()
     val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
     val errors = importService.addFiles(
       files = fileDtos,
       project = projectHolder.projectEntity,
-      userAccount = authenticationFacade.userAccountEntity,
+      userAccount = authenticationFacade.authenticatedUserEntity,
       params = params
     )
     return getImportAddFilesResultModel(errors)
@@ -119,55 +118,48 @@ class V2ImportController(
   }
 
   @PutMapping("/apply")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Imports the data prepared in previous step", summary = "Apply")
   @RequestActivity(ActivityType.IMPORT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun applyImport(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
     forceMode: ForceMode,
   ) {
     val projectId = projectHolder.project.id
-    checkBaseImportPermissions()
-    this.importService.import(projectId, authenticationFacade.userAccount.id, forceMode)
-  }
-
-  private fun checkBaseImportPermissions() {
-    securityService.checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
+    this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode)
   }
 
   @GetMapping("/result")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Returns the result of preparation.", summary = "Get result")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getImportResult(
     @ParameterObject pageable: Pageable
   ): PagedModel<ImportLanguageModel> {
-    checkBaseImportPermissions()
     val projectId = projectHolder.project.id
-    val userId = authenticationFacade.userAccount.id
+    val userId = authenticationFacade.authenticatedUser.id
     val languages = importService.getResult(projectId, userId, pageable)
     return pagedLanguagesResourcesAssembler.toModel(languages, importLanguageModelAssembler)
   }
 
   @GetMapping("/result/languages/{languageId}")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Returns language prepared to import.", summary = "Get import language")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
   ): ImportLanguageModel {
-    checkBaseImportPermissions()
     checkImportLanguageInProject(languageId)
     val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
     return importLanguageModelAssembler.toModel(language)
   }
 
   @GetMapping("/result/languages/{languageId}/translations")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Returns translations prepared to import.", summary = "Get translations")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getImportTranslations(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("languageId") languageId: Long,
@@ -185,146 +177,136 @@ class V2ImportController(
     @RequestParam("search") search: String? = null,
     @ParameterObject @SortDefault("keyName") pageable: Pageable
   ): PagedModel<ImportTranslationModel> {
-    checkBaseImportPermissions()
     checkImportLanguageInProject(languageId)
     val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
     return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
   }
 
   @DeleteMapping("")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Deletes prepared import data.", summary = "Delete")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun cancelImport() {
-    checkBaseImportPermissions()
-    this.importService.deleteImport(projectHolder.project.id, authenticationFacade.userAccount.id)
+    this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id)
   }
 
   @DeleteMapping("/result/languages/{languageId}")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(description = "Deletes language prepared to import.", summary = "Delete language")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
-    checkBaseImportPermissions()
     val language = checkImportLanguageInProject(languageId)
     this.importService.deleteLanguage(language)
   }
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Resolves translation conflict. The old translation will be overridden.",
     summary = "Resolve conflict (override)"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
   ) {
-    checkBaseImportPermissions()
     resolveTranslation(languageId, translationId, true)
   }
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Resolves translation conflict. The old translation will be kept.",
     summary = "Resolve conflict (keep existing)"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
   ) {
-    checkBaseImportPermissions()
     resolveTranslation(languageId, translationId, false)
   }
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Resolves all translation conflicts for provided language. The old translations will be overridden.",
     summary = "Resolve all translation conflicts (override)"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long
   ) {
-    checkBaseImportPermissions()
     resolveAllOfLanguage(languageId, true)
   }
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Resolves all translation conflicts for provided language. The old translations will be kept.",
     summary = "Resolve all translation conflicts (keep existing)"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
   ) {
-    checkBaseImportPermissions()
     resolveAllOfLanguage(languageId, false)
   }
 
   @PutMapping("/result/files/{fileId}/select-namespace")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Sets namespace for file to import.",
     summary = "Select namespace"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun selectNamespace(
     @PathVariable fileId: Long,
     @RequestBody req: SetFileNamespaceRequest,
     request: HttpServletRequest
   ) {
-    checkBaseImportPermissions()
     val file = checkFileFromProject(fileId)
     this.importService.selectNamespace(file, req.namespace)
   }
 
   @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Sets existing language to pair with language to import. " +
       "Data will be imported to selected existing language when applied.",
     summary = "Pair existing language"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun selectExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
     @PathVariable("existingLanguageId") existingLanguageId: Long,
   ) {
-    checkBaseImportPermissions()
     val existingLanguage = checkLanguageFromProject(existingLanguageId)
     val importLanguage = checkImportLanguageInProject(importLanguageId)
     this.importService.selectExistingLanguage(importLanguage, existingLanguage)
   }
 
   @PutMapping("/result/languages/{importLanguageId}/reset-existing")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Resets existing language paired with language to import.",
     summary = "Reset existing language pairing"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun resetExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
   ) {
-    checkBaseImportPermissions()
     val importLanguage = checkImportLanguageInProject(importLanguageId)
     this.importService.selectExistingLanguage(importLanguage, null)
   }
 
   @GetMapping("/result/files/{importFileId}/issues")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Returns issues for uploaded file.",
     summary = "Get file issues"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getImportFileIssues(
     @PathVariable("importFileId") importFileId: Long,
     @ParameterObject pageable: Pageable
@@ -335,17 +317,16 @@ class V2ImportController(
   }
 
   @GetMapping("/all-namespaces")
-  @AccessWithAnyProjectPermission()
-  @AccessWithApiKey()
   @Operation(
     description = "Returns all existing and imported namespaces",
     summary = "Get namespaces"
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getAllNamespaces(): CollectionModel<ImportNamespaceModel> {
-    checkBaseImportPermissions()
     val import = importService.get(
       projectId = projectHolder.project.id,
-      authorId = authenticationFacade.userAccount.id
+      authorId = authenticationFacade.authenticatedUser.id
     )
     val importNamespaces = importService.getAllNamespaces(import.id)
     val existingNamespaces = namespaceService.getAllInProject(projectId = projectHolder.project.id)
@@ -394,7 +375,7 @@ class V2ImportController(
   }
 
   private fun checkLanguageFromProject(languageId: Long): Language {
-    val existingLanguage = languageService.findById(languageId).orElse(null) ?: throw NotFoundException()
+    val existingLanguage = languageService.find(languageId) ?: throw NotFoundException()
     if (existingLanguage.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
     }

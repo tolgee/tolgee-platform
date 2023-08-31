@@ -8,7 +8,7 @@ import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.translation.TranslationCommentRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TranslationCommentService(
   private val translationCommentRepository: TranslationCommentRepository,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @Transactional
   fun create(
@@ -80,7 +80,7 @@ class TranslationCommentService(
 
   fun update(
     entity: TranslationComment,
-    updatedBy: UserAccount = authenticationFacade.userAccountEntity
+    updatedBy: UserAccount = authenticationFacade.authenticatedUserEntity
   ): TranslationComment {
     return translationCommentRepository.save(entity)
   }

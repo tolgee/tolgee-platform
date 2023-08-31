@@ -2,8 +2,10 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.security.AuthenticationProvider
+import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -28,8 +30,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
   }
 
   fun login() {
-    val provider = applicationContext.getBean(AuthenticationProvider::class.java)
-    SecurityContextHolder.getContext().authentication = provider.getAuthentication(importTestData.userAccount)
+    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
+      null,
+      UserAccountDto.fromEntity(importTestData.userAccount),
+      TolgeeAuthenticationDetails(false)
+    )
   }
 
   @Test

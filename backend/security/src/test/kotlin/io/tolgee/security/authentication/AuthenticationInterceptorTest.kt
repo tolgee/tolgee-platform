@@ -1,9 +1,9 @@
 package io.tolgee.security.authentication
 
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.model.UserAccount
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthenticationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade)
 
@@ -50,7 +50,7 @@ class AuthenticationInterceptorTest {
 
   @Test
   fun `it enforces the super JWT requirement`() {
-    mockMvc.perform(get("/requires-super-auth")).andIsUnauthorized
+    mockMvc.perform(get("/requires-super-auth")).andIsForbidden
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(true)
     mockMvc.perform(get("/requires-super-auth")).andIsOk
   }

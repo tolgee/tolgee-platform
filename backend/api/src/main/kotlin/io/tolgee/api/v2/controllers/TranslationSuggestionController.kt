@@ -14,9 +14,9 @@ import io.tolgee.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
@@ -53,11 +53,11 @@ class TranslationSuggestionController(
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
-    val targetLanguage = languageService.findById(dto.targetLanguageId)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    val targetLanguage = languageService.find(dto.targetLanguageId)
+      ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 
@@ -104,14 +104,14 @@ class TranslationSuggestionController(
     summary = "Suggests machine translations from translation memory." +
       "\n\nThe result is always sorted by similarity, so sorting is not supported."
   )
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun suggestTranslationMemory(
     @RequestBody @Valid dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable
   ): PagedModel<TranslationMemoryItemModel> {
-    val targetLanguage = languageService.findById(dto.targetLanguageId)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    val targetLanguage = languageService.find(dto.targetLanguageId)
+      ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 

@@ -9,6 +9,6 @@ open class PermissionException(
   message: io.tolgee.constants.Message = io.tolgee.constants.Message.OPERATION_NOT_PERMITTED,
   params: List<Serializable?>? = null
 ) : ErrorException(message, params) {
-  override val httpStatus: HttpStatus?
+  override val httpStatus: HttpStatus
     get() = HttpStatus.FORBIDDEN
 }

@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.security.authentication.AuthenticationFacade
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,10 +31,13 @@ import org.springframework.mock.web.MockHttpServletResponse
 class GlobalIpRateLimitFilterTest {
   private val rateLimitService = Mockito.mock(RateLimitService::class.java)
 
-  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService)
+  private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
+  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService, authenticationFacade)
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(false)
     Mockito.`when`(rateLimitService.getGlobalIpRateLimitPolicy(any()))
       .thenReturn(
         RateLimitPolicy("uwu", 5, 1000, false)

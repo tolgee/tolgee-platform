@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.security.InternalController
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/organizations"])
 @Transactional
-@InternalController
 class OrganizationE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,

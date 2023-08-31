@@ -17,7 +17,9 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
@@ -27,8 +29,8 @@ import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.checkerframework.checker.units.qual.Current
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -63,11 +65,15 @@ class AuthenticationFilterTest {
 
   private val patService = Mockito.mock(PatService::class.java)
 
+  private val userAccountService = Mockito.mock(UserAccountService::class.java)
+
   private val apiKey = Mockito.mock(ApiKey::class.java)
 
   private val pat = Mockito.mock(Pat::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val userAccountDto = Mockito.mock(UserAccountDto::class.java)
+
+  private val userAccount = Mockito.mock(UserAccount::class.java, Mockito.RETURNS_DEFAULTS)
 
   private val authenticationFilter = AuthenticationFilter(
     authProperties,
@@ -78,7 +84,7 @@ class AuthenticationFilterTest {
     patService,
   )
 
-  private val authenticationFacade = AuthenticationFacade()
+  private val authenticationFacade = AuthenticationFacade(userAccountService)
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {
@@ -102,7 +108,7 @@ class AuthenticationFilterTest {
       .thenReturn(
         TolgeeAuthentication(
           "uwu",
-          userAccount,
+          userAccountDto,
           null,
         )
       )
@@ -110,15 +116,19 @@ class AuthenticationFilterTest {
     Mockito.`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
       .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
 
+    Mockito.`when`(pakService.parseApiKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
+    Mockito.`when`(pakService.parseApiKey(TEST_INVALID_PAK)).thenReturn(TEST_INVALID_PAK)
     Mockito.`when`(pakService.hashKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
     Mockito.`when`(pakService.hashKey(TEST_INVALID_PAK)).thenReturn(TEST_INVALID_PAK)
     Mockito.`when`(pakService.find(Mockito.anyString())).thenReturn(null)
     Mockito.`when`(pakService.find(TEST_VALID_PAK)).thenReturn(apiKey)
 
-    Mockito.`when`(patService.hashToken(TEST_VALID_PAT)).thenReturn(TEST_VALID_PAT)
-    Mockito.`when`(patService.hashToken(TEST_INVALID_PAT)).thenReturn(TEST_INVALID_PAT)
+    Mockito.`when`(patService.hashToken("valid")).thenReturn(TEST_VALID_PAT)
+    Mockito.`when`(patService.hashToken("invalid")).thenReturn(TEST_INVALID_PAT)
     Mockito.`when`(patService.find(Mockito.anyString())).thenReturn(null)
     Mockito.`when`(patService.find(TEST_VALID_PAT)).thenReturn(pat)
+
+    Mockito.`when`(userAccountService.findActive(TEST_USER_ID)).thenReturn(userAccount)
 
     Mockito.`when`(apiKey.userAccount).thenReturn(userAccount)
     Mockito.`when`(apiKey.expiresAt).thenReturn(null)
@@ -126,6 +136,10 @@ class AuthenticationFilterTest {
     Mockito.`when`(pat.expiresAt).thenReturn(null)
 
     Mockito.`when`(userAccount.id).thenReturn(TEST_USER_ID)
+    Mockito.`when`(userAccount.name).thenReturn("")
+    Mockito.`when`(userAccount.username).thenReturn("")
+    Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
+    Mockito.`when`(userAccountDto.id).thenReturn(TEST_USER_ID)
 
     SecurityContextHolder.getContext().authentication = null
   }
@@ -169,7 +183,7 @@ class AuthenticationFilterTest {
 
     val ctx = SecurityContextHolder.getContext()
     assertThat(ctx.authentication).isNotNull
-    assertThat(authenticationFacade.authenticatedUser).isEqualTo(userAccount)
+    assertThat(authenticationFacade.authenticatedUser.id).isEqualTo(userAccount.id)
     assertThat(authenticationFacade.isApiAuthentication).isEqualTo(false)
     assertThat(authenticationFacade.isProjectApiKeyAuth).isEqualTo(false)
     assertThat(authenticationFacade.isPersonalAccessTokenAuth).isEqualTo(false)
@@ -201,7 +215,7 @@ class AuthenticationFilterTest {
 
     val ctx = SecurityContextHolder.getContext()
     assertThat(ctx.authentication).isNotNull
-    assertThat(authenticationFacade.authenticatedUser).isEqualTo(userAccount)
+    assertThat(authenticationFacade.authenticatedUser.id).isEqualTo(userAccount.id)
     assertThat(authenticationFacade.isApiAuthentication).isEqualTo(true)
     assertThat(authenticationFacade.isProjectApiKeyAuth).isEqualTo(true)
     assertThat(authenticationFacade.isPersonalAccessTokenAuth).isEqualTo(false)
@@ -242,7 +256,7 @@ class AuthenticationFilterTest {
 
     val ctx = SecurityContextHolder.getContext()
     assertThat(ctx.authentication).isNotNull
-    assertThat(authenticationFacade.authenticatedUser).isEqualTo(userAccount)
+    assertThat(authenticationFacade.authenticatedUser.id).isEqualTo(userAccount.id)
     assertThat(authenticationFacade.isApiAuthentication).isEqualTo(true)
     assertThat(authenticationFacade.isProjectApiKeyAuth).isEqualTo(false)
     assertThat(authenticationFacade.isPersonalAccessTokenAuth).isEqualTo(true)

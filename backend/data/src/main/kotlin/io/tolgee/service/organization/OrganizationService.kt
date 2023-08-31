@@ -13,7 +13,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
@@ -52,7 +52,7 @@ class OrganizationService(
   fun create(
     createDto: OrganizationDto,
   ): Organization {
-    return create(createDto, authenticationFacade.userAccountEntity)
+    return create(createDto, authenticationFacade.authenticatedUserEntity)
   }
 
   @Transactional
@@ -143,7 +143,7 @@ class OrganizationService(
     exceptOrganizationId: Long? = null
   ): Page<OrganizationView> {
     return organizationRepository.findAllPermitted(
-      userId = authenticationFacade.userAccount.id,
+      userId = authenticationFacade.authenticatedUser.id,
       pageable = pageable,
       roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
       search = search,

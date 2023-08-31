@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 )
 @OpenApiTag(name = "Scope Info", description = "Returns info about permission scopes")
 class ScopeInfoController : IController {
-
   @GetMapping(value = ["/hierarchy"])
   @Operation(summary = "Returns hierarchy of scopes")
   fun getHierarchy(

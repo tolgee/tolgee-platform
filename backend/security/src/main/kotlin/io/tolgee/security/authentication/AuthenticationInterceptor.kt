@@ -39,21 +39,37 @@ class AuthenticationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
-    val apiAccess = AnnotationUtils.getAnnotation(handler.method, AllowApiAccess::class.java)
-    val superAuth = AnnotationUtils.getAnnotation(handler.method, RequiresSuperAuthentication::class.java)
+    val allowApiAccess = AnnotationUtils.getAnnotation(handler.method, AllowApiAccess::class.java)
+    val requiresSuperAuth = requiresSuperAuthentication(request, handler)
 
-    if (apiAccess == null && authenticationFacade.isApiAuthentication) {
+    if (allowApiAccess == null && authenticationFacade.isApiAuthentication) {
       throw PermissionException(Message.API_ACCESS_FORBIDDEN)
     }
 
-    if (superAuth != null && !authenticationFacade.isUserSuperAuthenticated) {
-      throw AuthenticationException(Message.EXPIRED_SUPER_JWT_TOKEN)
+    if (allowApiAccess?.onlyPat == true && authenticationFacade.isProjectApiKeyAuth) {
+      throw PermissionException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
+
+    if (requiresSuperAuth && !authenticationFacade.isUserSuperAuthenticated) {
+      throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }
 
     return true
   }
 
+  private fun requiresSuperAuthentication(request: HttpServletRequest, handlerMethod: HandlerMethod): Boolean {
+    if (IS_ADMIN_RE.matches(request.requestURI)) return true
+    return AnnotationUtils.getAnnotation(handlerMethod.method, RequiresSuperAuthentication::class.java) != null
+  }
+
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE
+  }
+
+  companion object {
+    // Admin routes
+    // - /v2/administration/**
+    // - /v2/ee-license/**
+    val IS_ADMIN_RE = "^/v\\d+/(?:administration|ee-license).*$".toRegex()
   }
 }

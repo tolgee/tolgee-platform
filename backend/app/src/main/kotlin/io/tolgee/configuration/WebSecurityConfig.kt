@@ -1,98 +1,99 @@
+/**
+ * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.tolgee.configuration
 
-import io.tolgee.activity.ActivityFilter
-import io.tolgee.component.VersionFilter
-import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.security.DisabledAuthenticationFilter
-import io.tolgee.security.InternalDenyFilter
-import io.tolgee.security.JwtTokenFilter
-import io.tolgee.security.ServerAdminFilter
-import io.tolgee.security.apiKeyAuth.ApiKeyAuthFilter
-import io.tolgee.security.patAuth.PatAuthFilter
-import io.tolgee.security.project_auth.ProjectPermissionFilter
-import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
-import io.tolgee.security.rateLimits.RateLimitsFilterFactory
-import org.springframework.beans.factory.annotation.Autowired
+import io.tolgee.component.ExceptionHandlerFilter
+import io.tolgee.security.authentication.AuthenticationDisabledFilter
+import io.tolgee.security.authentication.AuthenticationFilter
+import io.tolgee.security.authentication.AuthenticationInterceptor
+import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
+import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
+import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
+import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
+import io.tolgee.security.ratelimit.RateLimitInterceptor
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.BeanIds
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-class WebSecurityConfig @Autowired constructor(
-  private val jwtTokenFilter: JwtTokenFilter,
-  private val configuration: TolgeeProperties,
-  private val apiKeyAuthFilter: ApiKeyAuthFilter,
-  private val internalDenyFilter: InternalDenyFilter,
-  private val projectPermissionFilter: ProjectPermissionFilter,
-  private val activityFilter: ActivityFilter,
-  private val disabledAuthenticationFilter: DisabledAuthenticationFilter,
-  private val rateLimitsFilterFactory: RateLimitsFilterFactory,
-  private val patAuthFilter: PatAuthFilter,
-  private val versionFilter: VersionFilter,
-  private val serverAdminFilter: ServerAdminFilter
-) : WebSecurityConfigurerAdapter() {
-  override fun configure(http: HttpSecurity) {
-    http
-      .csrf()
-      .disable()
-      .cors()
-      .and()
+@EnableWebSecurity
+class WebSecurityConfig(
+  private val authenticationFilter: AuthenticationFilter,
+  private val authenticationDisabledFilter: AuthenticationDisabledFilter,
+  private val globalIpRateLimitFilter: GlobalIpRateLimitFilter,
+  private val globalUserRateLimitFilter: GlobalUserRateLimitFilter,
+  private val rateLimitInterceptor: RateLimitInterceptor,
+  private val authenticationInterceptor: AuthenticationInterceptor,
+  private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
+  private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
+  private val exceptionHandlerFilter: ExceptionHandlerFilter,
+) : WebMvcConfigurer {
+  @Bean
+  fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
+    return httpSecurity.csrf().disable()
+      // -- Global configuration
       .headers()
-      .frameOptions().sameOrigin().and()
-      .addFilterBefore(versionFilter, UsernamePasswordAuthenticationFilter::class.java)
-      .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
-      .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
-      // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
-      .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
-      .addFilterBefore(patAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-      // this is used to authorize user's app calls with generated api key
-      .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-      .addFilterAfter(disabledAuthenticationFilter, ApiKeyAuthFilter::class.java)
-      .addFilterAfter(serverAdminFilter, DisabledAuthenticationFilter::class.java)
-      .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
-      .addFilterAfter(activityFilter, ProjectPermissionFilter::class.java)
-      .addFilterAfter(
-        rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.AFTER_AUTHORIZATION),
-        ProjectPermissionFilter::class.java
-      )
+      .referrerPolicy().policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN).and()
+      .xssProtection().block(true).and()
+      .contentTypeOptions().and()
+      .frameOptions().deny()
+      .and()
+      .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(authenticationDisabledFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .authorizeRequests()
-      .antMatchers(
-        "/api/public/**",
-        "/webjars/**",
-        "/swagger-ui.html",
-        "/swagger-resources/**",
-        "/v2/api-docs",
-        "/v2/public/**",
-      ).permitAll()
-      .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
-      .and().sessionManagement()
-      .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-    return
+      .antMatchers("/api/public/**", "/v2/public/**").permitAll()
+      .antMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
+      .antMatchers("/api/**", "/v2/**").authenticated()
+      .anyRequest().permitAll()
+      .and().build()
   }
 
-  override fun configure(auth: AuthenticationManagerBuilder) {
-    val ldapConfiguration = configuration.authentication.ldap
-    if (ldapConfiguration.enabled) {
-      auth
-        .ldapAuthentication()
-        .contextSource()
-        .url(ldapConfiguration.urls + ldapConfiguration.baseDn)
-        .managerDn(ldapConfiguration.securityPrincipal)
-        .managerPassword(ldapConfiguration.principalPassword)
-        .and()
-        .userDnPatterns(ldapConfiguration.userDnPattern)
-      return
-    }
+  @Bean
+  @Order(10)
+  @ConditionalOnProperty(value = ["tolgee.internal.controller-enabled"], havingValue = "false", matchIfMissing = true)
+  fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
+    return httpSecurity
+      .antMatcher("/internal/**")
+      .authorizeRequests()
+      .anyRequest()
+      .denyAll()
+      .and()
+      .build()
   }
 
-  @Bean(BeanIds.AUTHENTICATION_MANAGER)
-  override fun authenticationManagerBean(): AuthenticationManager {
-    return super.authenticationManagerBean()
+  override fun addInterceptors(registry: InterceptorRegistry) {
+    registry.addInterceptor(rateLimitInterceptor)
+    registry.addInterceptor(authenticationInterceptor)
+
+    registry.addInterceptor(organizationAuthorizationInterceptor)
+      .addPathPatterns("/v2/organizations/**")
+    registry.addInterceptor(projectAuthorizationInterceptor)
+      .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
   }
 }

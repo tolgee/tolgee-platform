@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authentication
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.model.UserAccount
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -51,6 +52,9 @@ class AuthenticationDisabledFilterTest {
     Mockito.`when`(userAccountService.findActive(TEST_INITIAL_USER_NAME)).thenReturn(userAccount)
 
     Mockito.`when`(userAccount.id).thenReturn(TEST_USER_ID)
+    Mockito.`when`(userAccount.name).thenReturn("")
+    Mockito.`when`(userAccount.username).thenReturn("")
+    Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
     Mockito.`when`(userAccount.username).thenReturn(TEST_INITIAL_USER_NAME)
 
     SecurityContextHolder.getContext().authentication = null

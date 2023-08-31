@@ -21,12 +21,11 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
@@ -66,14 +65,14 @@ class ApiKeyController(
 
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Creates new API key with provided scopes")
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun create(@RequestBody @Valid dto: CreateApiKeyDto): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
-    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
     return apiKeyService.create(
-      userAccount = authenticationFacade.userAccountEntity,
+      userAccount = authenticationFacade.authenticatedUserEntity,
       scopes = dto.scopes,
       project = project,
       expiresAt = dto.expiresAt,
@@ -85,9 +84,8 @@ class ApiKeyController(
 
   @Operation(summary = "Returns user's api keys")
   @GetMapping(path = ["/api-keys"])
-  @AccessWithAnyProjectPermission
   fun allByUser(pageable: Pageable, @RequestParam filterProjectId: Long?): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByUser(authenticationFacade.userAccount.id, filterProjectId, pageable)
+    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 
@@ -95,7 +93,7 @@ class ApiKeyController(
   @GetMapping(path = ["/api-keys/{keyId:[0-9]+}"])
   fun get(@PathVariable keyId: Long): ApiKeyModel {
     val apiKey = apiKeyService.findOptional(keyId).orElseThrow { NotFoundException() }
-    if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {
+    if (apiKey.userAccount.id != authenticationFacade.authenticatedUser.id) {
       securityService.checkProjectPermission(apiKey.project.id, Scope.ADMIN)
     }
     return apiKey.let { apiKeyModelAssembler.toModel(it) }
@@ -103,21 +101,24 @@ class ApiKeyController(
 
   @GetMapping(path = ["/api-keys/current"])
   @Operation(summary = "Returns current API key info")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun getCurrent(): ApiKeyWithLanguagesModel {
-    if (!authenticationFacade.isApiKeyAuthentication) {
+    if (!authenticationFacade.isProjectApiKeyAuth) {
       throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
     }
 
-    val apiKey = authenticationFacade.apiKey
+    val apiKey = authenticationFacade.projectApiKey
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
-      permittedLanguageIds = getProjectPermittedLanguages()?.toList()
+      permittedLanguageIds = getProjectPermittedLanguages(
+        apiKey.project.id,
+        authenticationFacade.authenticatedUser.id
+      )?.toList()
     )
   }
 
-  private fun getProjectPermittedLanguages(): Set<Long>? {
-    val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
+  private fun getProjectPermittedLanguages(projectId: Long, userId: Long): Set<Long>? {
+    val data = permissionService.getProjectPermissionData(projectId, userId)
     val languageIds = data.computedPermissions.translateLanguageIds
     if (languageIds.isNullOrEmpty()) {
       return null
@@ -127,7 +128,7 @@ class ApiKeyController(
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
   @Operation(summary = "Returns all API keys for project")
-  @AccessWithProjectPermission(Scope.ADMIN)
+  @RequiresProjectPermissions([ Scope.ADMIN ])
   fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
     return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
@@ -135,7 +136,7 @@ class ApiKeyController(
 
   @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Edits existing API key")
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun update(@RequestBody @Valid dto: V2EditApiKeyDto, @PathVariable apiKeyId: Long): ApiKeyModel {
     val apiKey = apiKeyService.get(apiKeyId)
     checkOwner(apiKey)
@@ -146,10 +147,9 @@ class ApiKeyController(
 
   @PutMapping(value = ["/api-keys/{apiKeyId:[0-9]+}/regenerate"])
   @Operation(
-    summary = "Regenerates API key. " +
-      "It generates new API key value and updates its time of expiration."
+    summary = "Regenerates API key. It generates new API key value and updates its time of expiration."
   )
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun regenerate(
     @RequestBody @Valid dto: RegenerateApiKeyDto,
     @PathVariable apiKeyId: Long
@@ -160,7 +160,7 @@ class ApiKeyController(
 
   @DeleteMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Deletes API key")
-  @NeedsSuperJwtToken
+  @RequiresSuperAuthentication
   fun delete(@PathVariable apiKeyId: Long) {
     val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     checkOwner(apiKey)
@@ -176,7 +176,7 @@ class ApiKeyController(
       securityService.checkProjectPermission(apiKey.project.id, Scope.ADMIN)
     } catch (e: PermissionException) {
       // users can delete their own api keys
-      if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {
+      if (apiKey.userAccount.id != authenticationFacade.authenticatedUser.id) {
         throw e
       }
     }

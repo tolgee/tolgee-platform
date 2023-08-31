@@ -16,7 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
-import io.tolgee.model.UserAccount
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.security.authentication.AuthenticationFacade
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
@@ -31,7 +31,7 @@ class GlobalUserRateLimitFilterTest {
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
-  private val userAccount = Mockito.mock(UserAccount::class.java)
+  private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val rateLimitFilter = GlobalUserRateLimitFilter(rateLimitService, authenticationFacade)
 
@@ -42,7 +42,9 @@ class GlobalUserRateLimitFilterTest {
         RateLimitPolicy("uwu", 5, 1000, false)
       )
 
+    Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(true)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
+    Mockito.`when`(userAccount.id).thenReturn(1337L)
   }
 
   @AfterEach
@@ -58,7 +60,7 @@ class GlobalUserRateLimitFilterTest {
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
 
-    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).getGlobalUserRateLimitPolicy(req, userAccount)
+    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).getGlobalUserRateLimitPolicy(req, userAccount.id)
     Mockito.verify(rateLimitService, Mockito.atLeastOnce()).consumeBucket(any())
   }
 
@@ -78,7 +80,7 @@ class GlobalUserRateLimitFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.getGlobalUserRateLimitPolicy(any(), eq(userAccount))).thenReturn(null)
+    Mockito.`when`(rateLimitService.getGlobalUserRateLimitPolicy(any(), eq(1337L))).thenReturn(null)
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
 
     Mockito.verify(rateLimitService, Mockito.never()).consumeBucket(any())

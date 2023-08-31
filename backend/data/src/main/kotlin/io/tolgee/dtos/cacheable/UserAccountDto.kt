@@ -2,6 +2,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.model.UserAccount
 import java.io.Serializable
+import java.util.Date
 
 data class UserAccountDto(
   val name: String,
@@ -10,7 +11,8 @@ data class UserAccountDto(
   val id: Long,
   val needsSuperJwt: Boolean,
   val avatarHash: String?,
-  val deleted: Boolean
+  val deleted: Boolean,
+  val tokensValidNotBefore: Date?,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) = UserAccountDto(
@@ -20,7 +22,8 @@ data class UserAccountDto(
       id = entity.id,
       needsSuperJwt = entity.needsSuperJwt,
       avatarHash = entity.avatarHash,
-      deleted = entity.deletedAt != null
+      deleted = entity.deletedAt != null,
+      tokensValidNotBefore = entity.tokensValidNotBefore,
     )
   }
 

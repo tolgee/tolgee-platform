@@ -48,6 +48,7 @@ dependencies {
 
     implementation(project(':data'))
     implementation(project(':misc'))
+    implementation(project(':security'))
     implementation(project(':ee-app'))
 
     /**

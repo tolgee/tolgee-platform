@@ -7,7 +7,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.cache.Cache
@@ -44,15 +44,17 @@ class BusinessEventPublisher(
     applicationEventPublisher.publishEvent(
       event.copy(
         utmData = event.utmData ?: getUtmData(),
-        userAccountId = event.userAccountId ?: event.userAccountDto?.id ?: authenticationFacade.userAccountOrNull?.id,
-        userAccountDto = event.userAccountDto ?: authenticationFacade.userAccountOrNull,
+        userAccountId = event.userAccountId
+          ?: event.userAccountDto?.id
+          ?: authenticationFacade.authenticatedUserOrNull?.id,
+        userAccountDto = event.userAccountDto ?: authenticationFacade.authenticatedUserOrNull,
         data = getDataWithSdkInfo(event.data)
       )
     )
   }
 
   fun publish(event: IdentifyRequest) {
-    authenticationFacade.userAccountOrNull?.id?.let { userId ->
+    authenticationFacade.authenticatedUserOrNull?.id?.let { userId ->
       applicationEventPublisher.publishEvent(
         OnIdentifyEvent(
           userAccountId = userId,

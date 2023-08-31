@@ -2,6 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -10,8 +11,9 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.AuthenticationProvider
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
@@ -34,7 +36,6 @@ class StartupImportService(
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
-  private val authenticationProvider: AuthenticationProvider,
   private val entityManager: EntityManager
 ) : Logging {
 
@@ -76,7 +77,12 @@ class StartupImportService(
     }.filterNotNull().toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
-    SecurityContextHolder.getContext().authentication = authenticationProvider.getAuthentication(userAccount)
+    // TODO: this is atrocious and needs to be avoided.
+    SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
+      null,
+      UserAccountDto.fromEntity(userAccount),
+      TolgeeAuthenticationDetails(false)
+    )
   }
 
   private fun isProjectExisting(projectName: String, organization: Organization) =

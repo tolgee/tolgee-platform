@@ -39,7 +39,6 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockBean
   override lateinit var projectRepository: ProjectRepository
 
-  @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
   @MockBean
   lateinit var permissionRepository: PermissionRepository

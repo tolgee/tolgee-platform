@@ -12,14 +12,14 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.Serializable
 
 @Service
-class SecurityService (
+class SecurityService(
   private val authenticationFacade: AuthenticationFacade,
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository
@@ -78,8 +78,12 @@ class SecurityService (
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
-    val apiKey = activeApiKey ?: return checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
-    return checkProjectPermission(projectId, requiredPermission, apiKey)
+    // Always check for the current user even if we're using an API key for security reasons.
+    // This prevents improper preservation of permissions.
+    checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
+
+    val apiKey = activeApiKey ?: return
+    checkProjectPermission(projectId, requiredPermission, apiKey)
   }
 
   fun checkLanguageViewPermissionByTag(projectId: Long, languageTags: Collection<String>) {
@@ -145,7 +149,7 @@ class SecurityService (
     }
     val usersPermission = permissionService.getProjectPermissionData(
       projectId,
-      authenticationFacade.userAccount.id
+      authenticationFacade.authenticatedUser.id
     )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -159,7 +163,7 @@ class SecurityService (
     try {
       val usersPermission = permissionService.getProjectPermissionData(
         projectId,
-        authenticationFacade.userAccount.id
+        authenticationFacade.authenticatedUser.id
       )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -233,14 +237,14 @@ class SecurityService (
   }
 
   fun checkScreenshotsUploadPermission(projectId: Long) {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.apiKey)
+    if (authenticationFacade.isProjectApiKeyAuth) {
+      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.projectApiKey)
     }
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
   }
 
   fun checkUserIsServerAdmin() {
-    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
       throw PermissionException()
     }
   }
@@ -276,8 +280,8 @@ class SecurityService (
   }
 
   private val activeUser: UserAccountDto
-    get() = authenticationFacade.userAccountOrNull ?: throw PermissionException()
+    get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException()
 
   private val activeApiKey: ApiKey?
-    get() = authenticationFacade.apiKeyOrNull
+    get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 }
