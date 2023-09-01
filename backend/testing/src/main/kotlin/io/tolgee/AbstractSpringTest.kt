@@ -8,6 +8,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.EmailVerificationRepository
@@ -188,7 +189,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   open lateinit var mtCreditBucketService: MtCreditBucketService
 
   @Autowired
-  lateinit var mtService: MtService
+  open lateinit var mtService: MtService
 
   @Autowired
   lateinit var mtServiceManager: MtServiceManager
@@ -233,22 +234,25 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     initialPassword = initialPasswordManager.initialPassword
   }
 
-  protected fun initMachineTranslationProperties(freeCreditsAmount: Long) {
+  protected fun initMachineTranslationProperties(
+    freeCreditsAmount: Long,
+    enabledServices: Set<MtServiceType> = setOf(MtServiceType.GOOGLE)
+  ) {
     machineTranslationProperties.freeCreditsAmount = freeCreditsAmount
     awsMachineTranslationProperties.accessKey = "dummy"
-    awsMachineTranslationProperties.defaultEnabled = false
+    awsMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.AWS)
     awsMachineTranslationProperties.secretKey = "dummy"
     googleMachineTranslationProperties.apiKey = "dummy"
-    googleMachineTranslationProperties.defaultEnabled = true
-    deeplMachineTranslationProperties.defaultEnabled = false
+    googleMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.GOOGLE)
+    deeplMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.DEEPL)
     deeplMachineTranslationProperties.authKey = "dummy"
-    azureCognitiveTranslationProperties.defaultEnabled = false
+    azureCognitiveTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.AZURE)
     azureCognitiveTranslationProperties.authKey = "dummy"
-    baiduMachineTranslationProperties.defaultEnabled = false
+    baiduMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.BAIDU)
     baiduMachineTranslationProperties.appId = "dummy"
     baiduMachineTranslationProperties.appSecret = "dummy"
     tolgeeMachineTranslationProperties.url = "http://localhost:8081"
-    tolgeeMachineTranslationProperties.defaultEnabled = false
+    tolgeeMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.TOLGEE)
     internalProperties.fakeMtProviders = false
   }
 

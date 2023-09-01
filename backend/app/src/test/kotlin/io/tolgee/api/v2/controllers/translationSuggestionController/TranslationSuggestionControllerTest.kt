@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation

@@ -21,6 +21,7 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class MtService(
@@ -56,17 +57,25 @@ class MtService(
     )
   }
 
+  @Transactional
   fun getMachineTranslations(
     project: Project,
-    baseTranslationText: String,
+    key: Key?,
+    baseTranslationText: String?,
     targetLanguage: Language,
     services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
+
+    val baseLanguageText = baseTranslationText ?: key?.let {
+      translationService.find(it, baseLanguage).orElse(null)?.text
+    }
+
     return getMachineTranslations(
       project = project,
-      baseTranslationText = baseTranslationText,
-      keyId = null,
+      baseTranslationText = baseLanguageText
+        ?: return null,
+      keyId = key?.id,
       baseLanguage = baseLanguage,
       targetLanguage = targetLanguage,
       services = services
@@ -162,13 +171,10 @@ class MtService(
     publishBeforeEvent(project)
 
     checkTextLength(baseTranslationText)
-    val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguage.id)
-    val servicesToUse = enabledServices.filter { services?.contains(it.serviceType) ?: true }
-      .toSet()
-    checkServices(desired = services?.toSet(), enabled = enabledServices.map { it.serviceType })
+    val servicesToUse = getServicesToUse(targetLanguage.id, services)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
-    val anyNeedsMetadata = enabledServices.any { it.serviceType.usesMetadata }
+    val anyNeedsMetadata = servicesToUse.any { it.serviceType.usesMetadata }
 
     val metadata =
       getMetadata(baseLanguage, targetLanguage, baseTranslationText, keyId, anyNeedsMetadata)
@@ -176,7 +182,7 @@ class MtService(
     val keyName = keyId?.let { keyService.get(it) }?.name
 
     val results = machineTranslationManager
-      .translateUsingAll(
+      .translate(
         text = prepared.text,
         textRaw = baseTranslationText,
         keyName = keyName,
@@ -195,6 +201,16 @@ class MtService(
       translated.translatedText = translated.translatedText?.replaceParams(prepared.params)
       serviceInfo.serviceType to translated
     }.toMap()
+  }
+
+  fun getServicesToUse(
+    targetLanguageId: Long,
+    desiredServices: Set<MtServiceType>?
+  ): Set<MtServiceInfo> {
+    val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguageId)
+    checkServices(desired = desiredServices?.toSet(), enabled = enabledServices.map { it.serviceType })
+    return enabledServices.filter { desiredServices?.contains(it.serviceType) ?: true }
+      .toSet()
   }
 
   private fun checkServices(desired: Set<MtServiceType>?, enabled: List<MtServiceType>) {

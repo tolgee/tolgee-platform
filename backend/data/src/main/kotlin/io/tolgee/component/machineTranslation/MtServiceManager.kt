@@ -36,7 +36,7 @@ class MtServiceManager(
   /**
    * Translates a text using All services
    */
-  fun translateUsingAll(
+  fun translate(
     text: String,
     textRaw: String,
     keyName: String?,
