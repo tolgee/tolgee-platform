@@ -26,7 +26,6 @@ import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order

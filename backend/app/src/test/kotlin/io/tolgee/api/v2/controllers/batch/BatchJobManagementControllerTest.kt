@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.batch.BatchJobActionService
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher

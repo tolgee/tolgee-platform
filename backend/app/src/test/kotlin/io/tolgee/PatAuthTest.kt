@@ -1,7 +1,12 @@
 package io.tolgee
 
 import io.tolgee.constants.Message
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.Pat
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat

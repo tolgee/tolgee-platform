@@ -19,9 +19,6 @@ package io.tolgee.security
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.model.ApiKey
-import io.tolgee.model.Organization
-import io.tolgee.model.Project
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService

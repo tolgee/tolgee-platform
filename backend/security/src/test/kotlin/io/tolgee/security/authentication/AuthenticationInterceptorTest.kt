@@ -3,7 +3,6 @@ package io.tolgee.security.authentication
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andIsUnauthorized
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

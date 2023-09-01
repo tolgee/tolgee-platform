@@ -26,31 +26,31 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class SecurityFilterConfiguration {
-    @Bean("filterRegistrationAuth")
-    fun authenticationFilter(filter: AuthenticationFilter): FilterRegistrationBean<*> {
-        val registration = FilterRegistrationBean(filter)
-        registration.isEnabled = false
-        return registration
-    }
+  @Bean("filterRegistrationAuth")
+  fun authenticationFilter(filter: AuthenticationFilter): FilterRegistrationBean<*> {
+    val registration = FilterRegistrationBean(filter)
+    registration.isEnabled = false
+    return registration
+  }
 
-    @Bean("filterRegistrationAuthDisabled")
-    fun authenticationDisabledFilter(filter: AuthenticationDisabledFilter): FilterRegistrationBean<*> {
-        val registration = FilterRegistrationBean(filter)
-        registration.isEnabled = false
-        return registration
-    }
+  @Bean("filterRegistrationAuthDisabled")
+  fun authenticationDisabledFilter(filter: AuthenticationDisabledFilter): FilterRegistrationBean<*> {
+    val registration = FilterRegistrationBean(filter)
+    registration.isEnabled = false
+    return registration
+  }
 
-    @Bean("filterRegistrationGlobalIpRateLimit")
-    fun globalIpRateLimitFilter(filter: GlobalIpRateLimitFilter): FilterRegistrationBean<*> {
-        val registration = FilterRegistrationBean(filter)
-        registration.isEnabled = false
-        return registration
-    }
+  @Bean("filterRegistrationGlobalIpRateLimit")
+  fun globalIpRateLimitFilter(filter: GlobalIpRateLimitFilter): FilterRegistrationBean<*> {
+    val registration = FilterRegistrationBean(filter)
+    registration.isEnabled = false
+    return registration
+  }
 
-    @Bean("filterRegistrationGlobalUserRateLimit")
-    fun globalUserRateLimitFilter(filter: GlobalUserRateLimitFilter): FilterRegistrationBean<*> {
-        val registration = FilterRegistrationBean(filter)
-        registration.isEnabled = false
-        return registration
-    }
+  @Bean("filterRegistrationGlobalUserRateLimit")
+  fun globalUserRateLimitFilter(filter: GlobalUserRateLimitFilter): FilterRegistrationBean<*> {
+    val registration = FilterRegistrationBean(filter)
+    registration.isEnabled = false
+    return registration
+  }
 }

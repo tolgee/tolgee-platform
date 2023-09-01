@@ -8,26 +8,18 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
-import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImplicitUserLegacyData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
-import io.tolgee.repository.ApiKeyRepository
-import io.tolgee.repository.PatRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.security.SecurityService
-import io.tolgee.service.security.UserAccountService
-import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
-import java.io.File
 
 @ContextRecreatingTest
 @SpringBootTest(

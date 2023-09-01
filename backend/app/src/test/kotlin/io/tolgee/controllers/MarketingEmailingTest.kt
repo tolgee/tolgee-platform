@@ -1,6 +1,5 @@
 package io.tolgee.controllers
 
-import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto

@@ -1,12 +1,10 @@
 package io.tolgee.security
 
-import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional

@@ -16,7 +16,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
@@ -25,7 +24,6 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
-import io.tolgee.util.executeInNewTransaction
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +35,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*

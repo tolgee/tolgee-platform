@@ -17,7 +17,6 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils

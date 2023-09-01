@@ -44,7 +44,8 @@ class AuthenticationProperties(
     description = "Whether authentication is enabled." +
       "When authentication is disabled, there are no login screen and no permission control." +
       "Users get automatically logged in as the administrator account of the Tolgee instance." +
-      "This is very useful, when you want to use Tolgee on your local machine, or you just want to test it."
+      "This is very useful, when you want to use Tolgee on your local machine, or you just want to test it.",
+    defaultExplanation = "when running with Java directly, `false` when running via Docker."
   )
   var enabled: Boolean = true,
 
@@ -91,7 +92,10 @@ class AuthenticationProperties(
   var needsEmailVerification: Boolean = false,
 
   @DocProperty(
-    description = "Username of initial user."
+    description = "Username of initial user.\n" +
+      ":::tip" +
+      "Tolgee will ask for an email instead of a username - don't worry, just give it the username specified here." +
+      ":::"
   )
   var initialUsername: String = "admin",
 

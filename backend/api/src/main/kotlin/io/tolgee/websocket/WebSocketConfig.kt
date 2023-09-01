@@ -1,6 +1,5 @@
 package io.tolgee.websocket
 
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
@@ -15,7 +14,6 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageHeaderAccessor
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer

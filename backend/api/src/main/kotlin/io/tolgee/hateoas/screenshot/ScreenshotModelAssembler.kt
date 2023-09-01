@@ -80,7 +80,7 @@ class ScreenshotModelAssembler(
         )
       )
 
-      filenameWithSignature = "$filenameWithSignature?token=${token}"
+      filenameWithSignature = "$filenameWithSignature?token=$token"
     }
 
     return filenameWithSignature

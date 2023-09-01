@@ -6,7 +6,6 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional

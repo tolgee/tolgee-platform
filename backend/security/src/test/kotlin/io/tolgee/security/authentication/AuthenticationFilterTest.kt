@@ -23,8 +23,6 @@ import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.ApiKey
-import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService

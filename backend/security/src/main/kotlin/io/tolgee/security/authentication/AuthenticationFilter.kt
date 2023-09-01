@@ -19,10 +19,8 @@ package io.tolgee.security.authentication
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
-import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService

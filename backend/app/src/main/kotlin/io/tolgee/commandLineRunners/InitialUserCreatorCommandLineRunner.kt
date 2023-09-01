@@ -3,7 +3,6 @@ package io.tolgee.commandLineRunners
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
-import io.tolgee.model.UserAccount
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService

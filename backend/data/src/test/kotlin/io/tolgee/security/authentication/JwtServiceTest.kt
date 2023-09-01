@@ -22,12 +22,10 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.UserAccount
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
-import java.security.Key
 import java.util.*
 
 class JwtServiceTest {

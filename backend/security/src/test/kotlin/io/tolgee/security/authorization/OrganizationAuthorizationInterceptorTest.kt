@@ -21,7 +21,6 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
