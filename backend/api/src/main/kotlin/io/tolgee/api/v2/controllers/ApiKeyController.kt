@@ -107,11 +107,12 @@ class ApiKeyController(
       throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
     }
 
-    val apiKey = authenticationFacade.projectApiKey
+    val apiKeyDto = authenticationFacade.projectApiKey
+    val apiKey = apiKeyService.get(apiKeyDto.id)
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = getProjectPermittedLanguages(
-        apiKey.project.id,
+        apiKeyDto.projectId,
         authenticationFacade.authenticatedUser.id
       )?.toList()
     )

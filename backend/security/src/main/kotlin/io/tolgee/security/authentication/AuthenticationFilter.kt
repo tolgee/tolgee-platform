@@ -26,6 +26,7 @@ import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -39,6 +40,7 @@ class AuthenticationFilter(
   private val currentDateProvider: CurrentDateProvider,
   private val rateLimitService: RateLimitService,
   private val jwtService: JwtService,
+  private val userAccountService: UserAccountService,
   private val apiKeyService: ApiKeyService,
   private val patService: PatService,
 ) : OncePerRequestFilter() {
@@ -91,34 +93,40 @@ class AuthenticationFilter(
       ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
     val hash = apiKeyService.hashKey(parsed)
-    val pak = apiKeyService.find(hash)
+    val pak = apiKeyService.findDto(hash)
       ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
     if (pak.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PROJECT_API_KEY_EXPIRED)
     }
 
-    apiKeyService.updateLastUsedAsync(pak)
+    val userAccount = userAccountService.findDto(pak.userAccountId)
+      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
       pak,
-      UserAccountDto.fromEntity(pak.userAccount),
+      userAccount,
       TolgeeAuthenticationDetails(false)
     )
   }
 
   private fun patAuth(key: String) {
     val hash = patService.hashToken(key.substring(PAT_PREFIX.length))
-    val pat = patService.find(hash)
+    val pat = patService.findDto(hash)
       ?: throw AuthenticationException(Message.INVALID_PAT)
 
     if (pat.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PAT_EXPIRED)
     }
 
-    patService.updateLastUsedAsync(pat)
+    val userAccount = userAccountService.findDto(pat.userAccountId)
+      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
       pat,
-      UserAccountDto.fromEntity(pat.userAccount),
+      userAccount,
       TolgeeAuthenticationDetails(false)
     )
   }

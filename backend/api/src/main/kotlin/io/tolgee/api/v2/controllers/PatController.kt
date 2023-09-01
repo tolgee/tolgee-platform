@@ -119,7 +119,8 @@ class PatController(
       throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
     }
 
-    val pat = authenticationFacade.personalAccessToken
+    val patDto = authenticationFacade.personalAccessToken
+    val pat = patService.get(patDto.id)
     return patWithUserModelAssembler.toModel(pat)
   }
 

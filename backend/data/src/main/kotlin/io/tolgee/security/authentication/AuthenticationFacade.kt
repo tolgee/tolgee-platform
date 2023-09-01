@@ -17,19 +17,23 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.cacheable.*
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.ApiKey
-import io.tolgee.model.Pat
-import io.tolgee.model.UserAccount
+import io.tolgee.model.*
+import io.tolgee.security.ProjectNotSelectedException
+import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade(
-  private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService,
+  private val projectService: ProjectService,
+  private val organizationService: OrganizationService,
 ) {
+  // -- GENERAL AUTHENTICATION INFO
   val isAuthenticated: Boolean
     get() = SecurityContextHolder.getContext().authentication is TolgeeAuthentication
 
@@ -37,6 +41,7 @@ class AuthenticationFacade(
     get() = SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
       ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
+  // -- CURRENT USER
   val authenticatedUser: UserAccountDto
     get() = authentication.principal
 
@@ -49,21 +54,52 @@ class AuthenticationFacade(
   val authenticatedUserEntityOrNull: UserAccount?
     get() = if (isAuthenticated) userAccountService.findActive(authenticatedUser.id) else null
 
+  // -- CURRENT ORGANIZATION
+  val targetOrganization: OrganizationDto
+    get() = targetOrganizationOrNull ?: throw IllegalStateException("No available organization")
+
+  val targetOrganizationOrNull: OrganizationDto?
+    get() = if (isAuthenticated) authentication.targetOrganization else null
+
+  val targetOrganizationEntity: Organization
+    get() = targetOrganizationEntityOrNull ?: throw IllegalStateException("No available organization")
+
+  val targetOrganizationEntityOrNull: Organization?
+    get() = targetOrganizationOrNull?.let { organizationService.find(it.id) }
+
+  // -- CURRENT PROJECT
+  val targetProject: ProjectDto
+    get() = targetProjectOrNull ?: throw ProjectNotSelectedException()
+
+  val targetProjectOrNull: ProjectDto?
+    get() = if (isAuthenticated) authentication.targetProject else null
+
+  val targetProjectEntity: Project
+    get() = targetProjectEntityOrNull ?: throw ProjectNotSelectedException()
+
+  val targetProjectEntityOrNull: Project?
+    get() = targetProjectOrNull?.let { projectService.find(it.id) }
+
+  // -- AUTHENTICATION METHOD AND DETAILS
   val isUserSuperAuthenticated: Boolean
     get() = if (isAuthenticated) authentication.details?.isSuperToken == true else false
 
   val isApiAuthentication: Boolean
-    get() = if (isAuthenticated) authentication.credentials is ApiKey || authentication.credentials is Pat else false
+    get() =
+      if (isAuthenticated)
+        authentication.credentials is ApiKeyDto || authentication.credentials is PatDto
+      else
+        false
 
   val isProjectApiKeyAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is ApiKey else false
+    get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
 
   val isPersonalAccessTokenAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is Pat else false
+    get() = if (isAuthenticated) authentication.credentials is PatDto else false
 
-  val projectApiKey: ApiKey
-    get() = authentication.credentials as ApiKey
+  val projectApiKey: ApiKeyDto
+    get() = authentication.credentials as ApiKeyDto
 
-  val personalAccessToken: Pat
-    get() = authentication.credentials as Pat
+  val personalAccessToken: PatDto
+    get() = authentication.credentials as PatDto
 }

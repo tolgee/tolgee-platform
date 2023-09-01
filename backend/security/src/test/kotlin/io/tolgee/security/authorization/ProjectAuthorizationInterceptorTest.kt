@@ -16,18 +16,19 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -56,10 +57,11 @@ class ProjectAuthorizationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val apiKey = Mockito.mock(ApiKey::class.java)
+  private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
   private val projectAuthenticationInterceptor = ProjectAuthorizationInterceptor(
     authenticationFacade,
+    Mockito.mock(OrganizationService::class.java),
     securityService,
     requestContextService,
     projectHolder,
@@ -83,8 +85,8 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(projectDto.id).thenReturn(1337L)
     Mockito.`when`(project.id).thenReturn(1337L)
 
-    Mockito.`when`(apiKey.project).thenReturn(project)
-    Mockito.`when`(apiKey.scopesEnum).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
+    Mockito.`when`(apiKey.projectId).thenReturn(project.id)
+    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
   }
 
   @AfterEach
@@ -169,7 +171,7 @@ class ProjectAuthorizationInterceptorTest {
 
     val fakeProject = Mockito.mock(Project::class.java)
     Mockito.`when`(fakeProject.id).thenReturn(7331L)
-    Mockito.`when`(apiKey.project).thenReturn(fakeProject)
+    Mockito.`when`(apiKey.projectId).thenReturn(fakeProject.id)
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
   }
@@ -189,7 +191,7 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it does not let scopes on the key work if the authenticated user does not have them`() {
-    Mockito.`when`(apiKey.scopesEnum).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
+    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
     Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_CREATE))
 
@@ -203,7 +205,7 @@ class ProjectAuthorizationInterceptorTest {
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk
 
-    Mockito.`when`(apiKey.scopesEnum).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
+    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
     Mockito.`when`(securityService.getProjectPermissionScopes(1337L, 1337L))
       .thenReturn(arrayOf(Scope.KEYS_VIEW))
 

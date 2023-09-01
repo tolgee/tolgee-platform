@@ -4,6 +4,10 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.Project
 import io.tolgee.service.project.ProjectService
 
+@Deprecated(
+  "This should be replaced with the AuthenticationFacade's provided context instead. " +
+    "Services should always prefer explicit arguments rather than automatically pulling values."
+)
 open class ProjectHolder(
   private val projectService: ProjectService
 ) {

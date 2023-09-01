@@ -16,6 +16,7 @@
 
 package io.tolgee.security
 
+import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.Organization
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -60,13 +61,13 @@ class RequestContextService(
     return projectService.findDto(id)
   }
 
-  private fun getTargetProjectImplicit(): ProjectDto {
+  private fun getTargetProjectImplicit(): ProjectDto? {
     // This method is the source of complexity for the global handling, but is itself quite simple. Oh, the irony!
     if (!authenticationFacade.isProjectApiKeyAuth) {
       throw ProjectNotSelectedException()
     }
 
-    return ProjectDto.fromEntity(authenticationFacade.projectApiKey.project)
+    return projectService.findDto(authenticationFacade.projectApiKey.projectId)
   }
 
   /**
@@ -75,7 +76,7 @@ class RequestContextService(
    *
    * @return The organization, or null if the request does not target a specific organization.
    */
-  fun getTargetOrganization(request: HttpServletRequest): Organization? {
+  fun getTargetOrganization(request: HttpServletRequest): OrganizationDto? {
     val pathVariablesMap = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
     if (pathVariablesMap.isEmpty()) {
       // This is possible if we're creating an org or listing all visible organizations.
@@ -85,10 +86,10 @@ class RequestContextService(
 
     val idOrSlug = pathVariablesMap.values.first() as String
     if (idOrSlug.contains(IS_SLUG_RE)) {
-      return organizationService.find(idOrSlug)
+      return organizationService.findDto(idOrSlug)
     }
 
-    return organizationService.find(idOrSlug.toLong())
+    return organizationService.findDto(idOrSlug.toLong())
   }
 
   companion object {

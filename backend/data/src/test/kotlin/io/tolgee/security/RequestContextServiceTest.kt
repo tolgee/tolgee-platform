@@ -16,6 +16,7 @@
 
 package io.tolgee.security
 
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Organization
@@ -51,7 +52,7 @@ class RequestContextServiceTest {
 
   private val organization = Mockito.mock(Organization::class.java)
 
-  private val apiKey = Mockito.mock(ApiKey::class.java)
+  private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
   private val requestContextService = RequestContextService(authenticationFacade, projectService, organizationService)
 
@@ -73,7 +74,7 @@ class RequestContextServiceTest {
     Mockito.`when`(organization.id).thenReturn(TEST_ORGANIZATION_ID)
     Mockito.`when`(organization.slug).thenReturn(TEST_ORGANIZATION_SLUG)
 
-    Mockito.`when`(apiKey.project).thenReturn(project)
+    Mockito.`when`(apiKey.projectId).thenReturn(project.id)
   }
 
   @AfterEach

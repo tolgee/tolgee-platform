@@ -101,12 +101,6 @@ class PatService(
     return patRepository.findAllByUserAccountId(userId, pageable)
   }
 
-  fun updateLastUsed(pat: Pat) {
-    // Cache eviction: Not necessary, last usage date is not cached
-    pat.lastUsedAt = currentDateProvider.date
-    patRepository.save(pat)
-  }
-
   private fun Pat.regenerateToken() {
     val token = generateToken()
     this.token = token
@@ -119,10 +113,15 @@ class PatService(
 
   @Async
   @Transactional
-  fun updateLastUsedAsync(pat: Pat) {
+  fun updateLastUsedAsync(patId: Long) {
     // Cache eviction: Not necessary, last usage date is not cached
     runSentryCatching {
-      updateLastUsed(pat)
+      updateLastUsed(patId)
     }
+  }
+
+  fun updateLastUsed(patId: Long) {
+    // Cache eviction: Not necessary, last usage date is not cached
+    patRepository.updateLastUsedById(patId, currentDateProvider.date)
   }
 }

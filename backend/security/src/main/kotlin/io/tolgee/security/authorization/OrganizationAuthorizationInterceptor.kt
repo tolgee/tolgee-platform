@@ -62,6 +62,7 @@ class OrganizationAuthorizationInterceptor(
       throw PermissionException()
     }
 
+    authenticationFacade.authentication.targetOrganization = organization
     return true
   }
 

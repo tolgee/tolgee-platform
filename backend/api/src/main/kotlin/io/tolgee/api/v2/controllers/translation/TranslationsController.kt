@@ -334,7 +334,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   private fun getScreenshots(keyIds: Collection<Long>): Map<Long, List<Screenshot>>? {
     if (
       !authenticationFacade.isProjectApiKeyAuth ||
-      authenticationFacade.projectApiKey.scopesEnum.contains(Scope.SCREENSHOTS_VIEW)
+      authenticationFacade.projectApiKey.scopes.contains(Scope.SCREENSHOTS_VIEW)
     ) {
       return screenshotService.getScreenshotsForKeys(keyIds)
     }

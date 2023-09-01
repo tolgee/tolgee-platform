@@ -2,6 +2,7 @@ package io.tolgee.service.security
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
@@ -42,11 +43,11 @@ class SecurityService(
       throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKey) {
+  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKeyDto) {
     checkProjectPermission(listOf(requiredScopes), apiKey)
   }
 
-  private fun checkProjectPermission(requiredScopes: List<Scope>, apiKey: ApiKey) {
+  private fun checkProjectPermission(requiredScopes: List<Scope>, apiKey: ApiKeyDto) {
     this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
@@ -214,7 +215,7 @@ class SecurityService(
     }
   }
 
-  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKey) {
+  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKeyDto) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
       if (!expandedScopes.toList().containsAll(scopes)) {
         throw PermissionException()
@@ -222,7 +223,7 @@ class SecurityService(
     }
   }
 
-  fun checkApiKeyScopes(scopes: Collection<Scope>, apiKey: ApiKey) {
+  fun checkApiKeyScopes(scopes: Collection<Scope>, apiKey: ApiKeyDto) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
       val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
       if (!hasRequiredPermission) {
@@ -231,8 +232,8 @@ class SecurityService(
     }
   }
 
-  private fun checkApiKeyScopes(apiKey: ApiKey, checkFn: (expandedScopes: Array<Scope>) -> Unit) {
-    val expandedScopes = Scope.expand(apiKey.scopesEnum)
+  private fun checkApiKeyScopes(apiKey: ApiKeyDto, checkFn: (expandedScopes: Array<Scope>) -> Unit) {
+    val expandedScopes = Scope.expand(apiKey.scopes)
     checkFn(expandedScopes)
   }
 
@@ -282,6 +283,6 @@ class SecurityService(
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException()
 
-  private val activeApiKey: ApiKey?
+  private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 }

@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -45,7 +46,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   private val requestContextService = Mockito.mock(RequestContextService::class.java)
 
-  private val organization = Mockito.mock(Organization::class.java)
+  private val organization = Mockito.mock(OrganizationDto::class.java)
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 

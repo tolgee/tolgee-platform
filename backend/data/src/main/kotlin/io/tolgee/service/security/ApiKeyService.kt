@@ -174,18 +174,17 @@ class ApiKeyService(
 
   @Async
   @Transactional
-  fun updateLastUsedAsync(apiKey: ApiKey) {
+  fun updateLastUsedAsync(apiKeyId: Long) {
     // Cache eviction: Not necessary, last used date is not cached
     runSentryCatching {
       logTransactionIsolation()
-      updateLastUsed(apiKey)
+      updateLastUsed(apiKeyId)
     }
   }
 
-  fun updateLastUsed(apiKey: ApiKey) {
+  fun updateLastUsed(apiKeyId: Long) {
     // Cache eviction: Not necessary, last used date is not cached
-    apiKey.lastUsedAt = currentDateProvider.date
-    save(apiKey)
+    apiKeyRepository.updateLastUsedById(apiKeyId, currentDateProvider.date)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#result.keyHash")

@@ -11,10 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class ProjectPermissionFilterTest : AuthorizedControllerTest() {
-
-  @field:Autowired
-  lateinit var projectHolder: ProjectHolder
-
   @Test
   fun allowsAccessToPrivilegedUser() {
     val base = dbPopulator.createBase(generateUniqueString())

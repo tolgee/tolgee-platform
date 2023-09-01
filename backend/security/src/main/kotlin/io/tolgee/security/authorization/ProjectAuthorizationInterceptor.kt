@@ -23,6 +23,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class ProjectAuthorizationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
+  private val organizationService: OrganizationService,
   private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
   private val projectHolder: ProjectHolder,
@@ -61,10 +63,13 @@ class ProjectAuthorizationInterceptor(
       ?: return true
 
     projectHolder.project = project
+    authenticationFacade.authentication.targetProject = project
+    authenticationFacade.authentication.targetOrganization = organizationService.findDto(project.organizationOwnerId)
+
     val requiredScopes = getRequiredScopes(request, handler)
     val scopes =
       if (authenticationFacade.isProjectApiKeyAuth)
-        authenticationFacade.projectApiKey.scopesEnum.toTypedArray()
+        authenticationFacade.projectApiKey.scopes.toTypedArray()
       else
         securityService.getProjectPermissionScopes(project.id, userId)
 
@@ -84,13 +89,13 @@ class ProjectAuthorizationInterceptor(
 
     if (authenticationFacade.isProjectApiKeyAuth) {
       // Verify the key matches the project
-      if (project.id != authenticationFacade.projectApiKey.project.id) {
+      if (project.id != authenticationFacade.projectApiKey.projectId) {
         throw PermissionException()
       }
 
       // Validate scopes set on the key
       requiredScopes?.forEach {
-        if (!authenticationFacade.projectApiKey.scopesEnum.contains(it)) {
+        if (!authenticationFacade.projectApiKey.scopes.contains(it)) {
           throw PermissionException(
             Message.OPERATION_NOT_PERMITTED,
             requiredScopes.map { s -> s.value }

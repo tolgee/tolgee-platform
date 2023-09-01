@@ -21,6 +21,7 @@ import java.io.Serializable
 import java.util.*
 
 data class PatDto(
+  val id: Long,
   val hash: String,
   val expiresAt: Date?,
   val userAccountId: Long,
@@ -28,6 +29,7 @@ data class PatDto(
   companion object {
     fun fromEntity(pat: Pat): PatDto {
       return PatDto(
+        id = pat.id,
         hash = pat.tokenHash,
         expiresAt = pat.expiresAt,
         userAccountId = pat.userAccount.id,

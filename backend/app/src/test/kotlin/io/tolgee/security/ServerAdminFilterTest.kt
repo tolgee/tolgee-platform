@@ -11,19 +11,15 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class ServerAdminFilterTest : AuthorizedControllerTest() {
-
-  @field:Autowired
-  lateinit var projectHolder: ProjectHolder
-
   @Test
   fun deniesAccessToRegularAdmin() {
-    val base = dbPopulator.createBase(generateUniqueString(), "admin")
+    dbPopulator.createBase(generateUniqueString(), "admin")
     performAuthGet("/v2/administration/organizations").andIsForbidden
   }
 
   @Test
   fun allowsAccessToServerAdmin() {
-    val base = dbPopulator.createBase(generateUniqueString(), "admin")
+    dbPopulator.createBase(generateUniqueString(), "admin")
     val serverAdmin = userAccountService.createUser(
       UserAccount(
         username = "serverAdmin",
