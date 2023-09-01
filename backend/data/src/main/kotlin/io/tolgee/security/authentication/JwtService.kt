@@ -74,23 +74,30 @@ class JwtService(
    * @param userAccountId The user account ID this ticket belongs to.
    * @param ticketType The type of ticket.
    * @param expiresAfter Amount of milliseconds after which the ticket will be expired.
+   * @param data Arbitrary data to attach with the ticket.
    * @return A ticket.
    */
   fun emitTicket(
     userAccountId: Long,
     ticketType: TicketType,
     expiresAfter: Long = DEFAULT_TICKET_EXPIRATION_TIME,
+    data: Map<String, String?>? = null,
   ): String {
     val now = currentDateProvider.date
 
-    return Jwts.builder()
+    val builder = Jwts.builder()
       .signWith(signingKey)
       .setIssuedAt(now)
       .setAudience(JWT_TICKET_AUDIENCE)
       .setSubject(userAccountId.toString())
       .setExpiration(Date(now.time + expiresAfter))
       .claim(JWT_TICKET_TYPE_CLAIM, ticketType.name)
-      .compact()
+
+    if (data != null) {
+      builder.claim(JWT_TICKET_DATA_CLAIM, data)
+    }
+
+    return builder.compact()
   }
 
   /**
@@ -131,7 +138,7 @@ class JwtService(
    * @return The authenticated user account.
    * @throws AuthenticationException The ticket is invalid or expired.
    */
-  fun validateTicket(token: String, expectedType: TicketType): UserAccountDto {
+  fun validateTicket(token: String, expectedType: TicketType): TicketAuthentication {
     val jws = parseJwt(token)
     if (jws.body.audience != JWT_TICKET_AUDIENCE) {
       // This is not a token - possibly a token or something else.
@@ -146,7 +153,12 @@ class JwtService(
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    return validateJwt(jws.body)
+    val userAccount = validateJwt(jws.body)
+
+    @Suppress("UNCHECKED_CAST") // Type safety: safe to do as the JWT comes from a trusted source (ourselves).
+    val data = jws.body.get(JWT_TICKET_DATA_CLAIM, Map::class.java) as? Map<String, String?>
+
+    return TicketAuthentication(userAccount, data)
   }
 
   private fun validateJwt(claims: Claims): UserAccountDto {
@@ -185,6 +197,7 @@ class JwtService(
     const val JWT_TOKEN_AUDIENCE = "tg.tok"
     const val JWT_TICKET_AUDIENCE = "tg.tic"
     const val JWT_TICKET_TYPE_CLAIM = "t.typ"
+    const val JWT_TICKET_DATA_CLAIM = "t.dat"
     const val SUPER_JWT_TOKEN_EXPIRATION_CLAIM = "ste"
 
     const val DEFAULT_TICKET_EXPIRATION_TIME = 5 * 60 * 1000L // 5 minutes

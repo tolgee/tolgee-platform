@@ -91,10 +91,11 @@ class JwtServiceTest {
   @Test
   fun `it generates and understands tickets`() {
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
-    val authenticatedUser = jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA)
+    val authenticated = jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA)
 
-    assertThat(authenticatedUser.id).isEqualTo(TEST_USER_ID)
-    assertThat(authenticatedUser.username).isEqualTo(TEST_USER_EMAIL)
+    assertThat(authenticated.data).isNull()
+    assertThat(authenticated.userAccount.id).isEqualTo(TEST_USER_ID)
+    assertThat(authenticated.userAccount.username).isEqualTo(TEST_USER_EMAIL)
   }
 
   @Test
@@ -126,6 +127,17 @@ class JwtServiceTest {
 
     assertDoesNotThrow { jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA) }
     assertThrows<AuthenticationException> { jwtService.validateTicket(ticket, JwtService.TicketType.IMG_ACCESS) }
+  }
+
+  @Test
+  fun `it stores arbitrary data in tickets`() {
+    val data = mapOf("owo" to "uwu", "meow" to "nya", "testing" to "yes yes")
+
+    val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA, data = data)
+    val authenticated = jwtService.validateTicket(ticket, JwtService.TicketType.AUTH_MFA)
+
+    assertThat(authenticated.data).isNotNull
+    assertThat(authenticated.data).isEqualTo(data)
   }
 
   @Test

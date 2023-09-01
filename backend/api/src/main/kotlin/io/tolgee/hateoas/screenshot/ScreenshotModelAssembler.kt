@@ -1,20 +1,21 @@
 package io.tolgee.hateoas.screenshot
 
 import io.tolgee.api.v2.controllers.translation.TranslationsController
-import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.model.Screenshot
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.JwtService
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.util.*
 
 @Component
 class ScreenshotModelAssembler(
-  private val timestampValidation: TimestampValidation,
   private val tolgeeProperties: TolgeeProperties,
+  private val authenticationFacade: AuthenticationFacade,
+  private val jwtService: JwtService,
 ) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
   TranslationsController::class.java, ScreenshotModel::class.java
 ) {
@@ -69,10 +70,19 @@ class ScreenshotModelAssembler(
   private fun getFilenameWithSignature(filename: String): String {
     var filenameWithSignature = filename
     if (tolgeeProperties.authentication.securedImageRetrieval) {
-      filenameWithSignature = "$filenameWithSignature?timestamp=${
-      timestampValidation.encryptTimeStamp(filename, Date().time)
-      }"
+      val token = jwtService.emitTicket(
+        authenticationFacade.authenticatedUser.id,
+        JwtService.TicketType.IMG_ACCESS,
+        tolgeeProperties.authentication.securedImageTimestampMaxAge,
+        mapOf(
+          "fileName" to filename,
+          "projectId" to authenticationFacade.targetProjectOrNull?.id?.toString(),
+        )
+      )
+
+      filenameWithSignature = "$filenameWithSignature?token=${token}"
     }
+
     return filenameWithSignature
   }
 }

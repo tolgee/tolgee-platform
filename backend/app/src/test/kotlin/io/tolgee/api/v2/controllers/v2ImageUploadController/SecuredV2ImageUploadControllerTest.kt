@@ -4,11 +4,9 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.component.TimestampValidation
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsCreated
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.fixtures.*
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -17,8 +15,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.io.File
+import java.time.Duration
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,43 +28,45 @@ import java.util.*
   ]
 )
 class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
-  @set:Autowired
-  lateinit var timestampValidation: TimestampValidation
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
 
   @Test
   fun getScreenshotFileNoTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
-
-    val result = performAuthGet("/uploaded-images/${image.filename}.jpg")
-      .andExpect(status().isBadRequest)
-      .andReturn()
-
-    assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+    performAuthGet("/uploaded-images/${image.filename}.jpg").andIsNotFound
   }
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
-    val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
+    val token = jwtService.emitTicket(
+      userAccount!!.id,
+      JwtService.TicketType.IMG_ACCESS,
+      5000,
+      mapOf("fileName" to image.filenameWithExtension)
+    )
 
-    val result = performAuthGet("/uploaded-images/${image.filename}.jpg?timestamp=$timestamp")
-      .andExpect(status().isBadRequest)
-      .andReturn()
-
-    assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+    currentDateProvider.move(Duration.ofSeconds(10))
+    performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
+    currentDateProvider.forcedDate = null
   }
 
   @Test
   fun getFile() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
-    val timestamp = timestampValidation.encryptTimeStamp(image.filenameWithExtension, rawTimestamp)
+    val token = jwtService.emitTicket(
+      userAccount!!.id,
+      JwtService.TicketType.IMG_ACCESS,
+      5000,
+      mapOf("fileName" to image.filenameWithExtension)
+    )
 
-    val storedImage = performAuthGet("/uploaded-images/${image.filename}.png?timestamp=$timestamp")
+    val storedImage = performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
       .andIsOk.andReturn().response.contentAsByteArray
+
     val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + image.filename + ".png")
     assertThat(storedImage).isEqualTo(file.readBytes())
   }
@@ -81,8 +81,9 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
         assertThat(file.readBytes().size).isCloseTo(7365, Offset.offset(200))
       }
       node("requestFilename").isString.satisfies {
-        val parts = it.split("?timestamp=")
-        timestampValidation.checkTimeStamp(parts[0], parts[1])
+        val parts = it.split("?token=")
+        val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)
+        assertThat(auth.data?.get("fileName")).isEqualTo(parts[0])
       }
     }
   }
