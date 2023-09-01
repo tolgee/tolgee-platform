@@ -129,7 +129,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     )
 
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
-      it.node("organizationOwner.name").isEqualTo("admin")
+      it.node("organizationOwner.name").isEqualTo(base.userAccount.username)
       it.node("directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
       it.node("computedPermission.permittedLanguageIds").isArray.hasSize(1).contains(base.project.languages.first().id)
     }
