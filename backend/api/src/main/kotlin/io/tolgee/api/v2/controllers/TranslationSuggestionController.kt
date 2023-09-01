@@ -120,8 +120,9 @@ class TranslationSuggestionController(
 
   @PostMapping("/machine-translations-streaming", produces = ["application/x-ndjson"])
   @Operation(
-    summary = "Suggests machine translations from enabled services (streaming)." +
-      "Is an error occurs when any of the services is used, the error is returned in the response item with 200 status code."
+    summary = "Suggests machine translations from enabled services (streaming).\n" +
+      "If an error occurs when any of the services is used," +
+      " the error information is returned as a part of the result item, while the response has 200 status code."
   )
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
