@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.user_account
 
 import io.tolgee.dtos.Avatar
+import io.tolgee.model.QuickStart
 import io.tolgee.model.UserAccount
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -16,5 +17,6 @@ data class PrivateUserAccountModel(
   var accountType: UserAccount.AccountType,
   var globalServerRole: UserAccount.Role,
   val deletable: Boolean,
-  val needsSuperJwtToken: Boolean
+  val needsSuperJwtToken: Boolean,
+  val quickStart: QuickStartModel?
 ) : RepresentationModel<PrivateUserAccountModel>()

@@ -56,6 +56,7 @@ export const BaseAdministrationView: React.FC<Props> = ({
       navigation={[...navigationPrefix, ...(navigation || [])]}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
+      maxWidth="normal"
     >
       {children}
     </BaseSettingsView>

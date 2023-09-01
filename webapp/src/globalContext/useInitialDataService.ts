@@ -13,6 +13,7 @@ import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
 type AnnouncementDto = components['schemas']['AnnouncementDto'];
+type QuickStartModel = components['schemas']['QuickStartModel'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
@@ -24,6 +25,7 @@ export const useInitialDataService = () => {
   >(undefined);
   const security = useSelector((state: AppState) => state.global.security);
   const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
+  const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>();
   const initialData = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
@@ -32,6 +34,9 @@ export const useInitialDataService = () => {
       cacheTime: Infinity,
       keepPreviousData: true,
       staleTime: Infinity,
+      onSuccess(data) {
+        setQuickStart(data.userInfo?.quickStart);
+      },
     },
   });
 
@@ -77,6 +82,47 @@ export const useInitialDataService = () => {
     method: 'post',
   });
 
+  const putQuickStartStep = useApiMutation({
+    url: '/v2/quick-start/complete/{step}',
+    method: 'put',
+  });
+
+  const putQuickStartClose = useApiMutation({
+    url: '/v2/quick-start/close',
+    method: 'put',
+  });
+
+  const completeGuideStep = (step: string) => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        completedSteps: [...(quickStart.completedSteps || []), step],
+      });
+    }
+    putQuickStartStep.mutate(
+      { path: { step } },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
+  const dismissGuide = () => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        open: false,
+      });
+    }
+    putQuickStartClose.mutate(undefined, {
+      onSuccess(data) {
+        setQuickStart(data);
+      },
+    });
+  };
+
   const preferredOrganization =
     organization ?? initialData.data?.preferredOrganization;
 
@@ -117,6 +163,8 @@ export const useInitialDataService = () => {
 
   useOnUpdate(() => {
     refetchInitialData();
+    setOrganization(undefined);
+    setQuickStart(undefined);
   }, [security.jwtToken]);
 
   const isFetching =
@@ -130,9 +178,17 @@ export const useInitialDataService = () => {
     throw initialData.error;
   }
 
+  const userInfo = initialData.data?.userInfo
+    ? {
+        ...initialData.data?.userInfo,
+        quickStart,
+      }
+    : undefined;
+
   return {
     data: {
       ...initialData.data!,
+      userInfo,
       preferredOrganization,
       announcement,
     },
@@ -142,5 +198,7 @@ export const useInitialDataService = () => {
     refetchInitialData,
     updatePreferredOrganization,
     dismissAnnouncement,
+    completeGuideStep,
+    dismissGuide,
   };
 };

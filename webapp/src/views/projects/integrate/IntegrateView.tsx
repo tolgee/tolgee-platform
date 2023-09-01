@@ -11,6 +11,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
@@ -45,21 +46,30 @@ export const IntegrateView: FunctionComponent = () => {
           }),
         ],
       ]}
-      md={11}
-      lg={9}
-      containerMaxWidth="lg"
+      maxWidth="normal"
     >
-      <Stepper activeStep={activeStep} orientation="vertical">
-        <Step expanded={true}>
+      <Stepper
+        activeStep={activeStep}
+        orientation="vertical"
+        sx={{ display: 'grid', maxWidth: '100%', contain: 'layout' }}
+      >
+        <Step expanded={true} sx={{ maxWidth: '100%' }}>
           <StepLabel data-cy="integrate-choose-your-weapon-step-label">
             <T keyName="integrate_choose_your_weapon" />
           </StepLabel>
-          <StepContent data-cy="integrate-choose-your-weapon-step-content">
-            <WeaponSelector
-              selected={selectedWeapon}
-              onSelect={onWeaponSelect}
-            />
-          </StepContent>
+          <QuickStartHighlight
+            itemKey="integrate_form"
+            message={t('quick_start_item_integrate_form_hint')}
+            offset={8}
+            borderRadius="5px"
+          >
+            <StepContent data-cy="integrate-choose-your-weapon-step-content">
+              <WeaponSelector
+                selected={selectedWeapon}
+                onSelect={onWeaponSelect}
+              />
+            </StepContent>
+          </QuickStartHighlight>
         </Step>
         <Step expanded={activeStep > 0}>
           <StepLabel data-cy="integrate-select-api-key-step-label">
@@ -75,14 +85,14 @@ export const IntegrateView: FunctionComponent = () => {
             />
           </StepContent>
         </Step>
-        <Step>
+        <Step sx={{ overflowX: 'auto', maxWidth: '100%' }}>
           <StepLabel>
             <T keyName="integrate_step_integrate" />
           </StepLabel>
           <StepContent>
             <React.Suspense fallback={<FullPageLoading />}>
               {selectedWeapon && selectedApiKey && (
-                <Box data-cy="integrate-guide" mb={12}>
+                <Box data-cy="integrate-guide">
                   <MdxProvider
                     modifyValue={(code) => {
                       return code

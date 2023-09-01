@@ -3,19 +3,20 @@ import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
 import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
-import { components } from 'tg.service/apiSchema.generated';
-import { Editor } from 'tg.component/editor/Editor';
-import { useProject } from 'tg.hooks/useProject';
-import { FieldLabel } from 'tg.component/FormField';
-import { Tag } from '../Tags/Tag';
-import { TagInput } from '../Tags/TagInput';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
-import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { FieldError } from 'tg.component/FormField';
+import { components } from 'tg.service/apiSchema.generated';
+import { Editor } from 'tg.component/editor/Editor';
+import { useProject } from 'tg.hooks/useProject';
+import { FieldLabel } from 'tg.component/FormField';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+
+import { Tag } from '../Tags/Tag';
+import { TagInput } from '../Tags/TagInput';
+import { ToolsBottomPanel } from '../TranslationTools/ToolsBottomPanel';
+import { useTranslationTools } from '../TranslationTools/useTranslationTools';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -199,7 +200,7 @@ export const FormBody: React.FC<Props> = ({
             </FastField>
           )}
         />
-        {languages.map((lang) => (
+        {languages.map((lang, i) => (
           <FastField key={lang.tag} name={`translations.${lang.tag}`}>
             {({ field, form, meta }) => (
               <div key={lang.tag}>

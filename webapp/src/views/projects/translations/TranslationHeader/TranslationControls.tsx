@@ -12,6 +12,7 @@ import {
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
 import { StickyHeader } from './StickyHeader';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -95,15 +96,17 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           </ButtonGroup>
 
           {canCreateKeys && (
-            <Button
-              startIcon={<Add />}
-              color="primary"
-              variant="contained"
-              onClick={handleAddTranslation}
-              data-cy="translations-add-button"
-            >
-              <T keyName="translation_add" />
-            </Button>
+            <QuickStartHighlight itemKey="add_key">
+              <Button
+                startIcon={<Add />}
+                color="primary"
+                variant="contained"
+                onClick={handleAddTranslation}
+                data-cy="translations-add-button"
+              >
+                <T keyName="translation_add" />
+              </Button>
+            </QuickStartHighlight>
           )}
         </StyledSpaced>
       </StyledContainer>

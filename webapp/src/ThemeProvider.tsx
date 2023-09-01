@@ -147,11 +147,8 @@ const getTheme = (mode: PaletteMode) => {
       billingPlan: createColor(c.billingPlan),
       globalLoading: createColor(c.globalLoading),
       marker: c.marker,
-      topBanner: {
-        background: c.topBanner.background,
-        mainText: c.topBanner.mainText,
-        linkText: c.topBanner.linkText,
-      },
+      topBanner: c.topBanner,
+      quickStart: c.quickStart,
     },
     mixins: {
       toolbar: {

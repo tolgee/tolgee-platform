@@ -68,7 +68,6 @@ export const AdministrationOrganizations = ({
             ],
           ]}
           initialSearch={search}
-          containerMaxWidth="lg"
           allCentered
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
