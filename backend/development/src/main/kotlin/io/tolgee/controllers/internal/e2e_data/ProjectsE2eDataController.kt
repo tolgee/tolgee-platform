@@ -121,7 +121,9 @@ class ProjectsE2eDataController(
     }
 
     organizations.forEach {
-      organizationService.deleteAllByName(it.name)
+      organizationService.findAllByName(it.name).forEach { org ->
+        organizationService.delete(org)
+      }
     }
 
     users.forEach {

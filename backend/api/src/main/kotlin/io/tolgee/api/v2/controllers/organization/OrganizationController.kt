@@ -154,7 +154,8 @@ class OrganizationController(
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun delete(@PathVariable("id") id: Long) {
-    organizationService.delete(id)
+    val org = organizationService.get(id)
+    organizationService.delete(org)
   }
 
   @GetMapping("/{id:[0-9]+}/users")

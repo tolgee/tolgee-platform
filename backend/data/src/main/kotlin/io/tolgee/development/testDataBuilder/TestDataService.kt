@@ -120,7 +120,11 @@ class TestDataService(
     }
 
     builder.data.organizations.forEach { organizationBuilder ->
-      organizationBuilder.self.name.let { name -> organizationService.deleteAllByName(name) }
+      organizationBuilder.self.name.let { name ->
+        organizationService.findAllByName(name).forEach { org ->
+          organizationService.delete(org)
+        }
+      }
     }
 
     additionalTestDataSavers.forEach { dataSaver ->
@@ -286,7 +290,7 @@ class TestDataService(
   }
 
   private fun saveApiKeys(builder: ProjectBuilder) {
-    apiKeyService.saveAll(builder.data.apiKeys.map { it.self })
+    builder.data.apiKeys.forEach { apiKeyService.save(it.self) }
   }
 
   private fun savePermissions(builder: ProjectBuilder) {
@@ -340,11 +344,10 @@ class TestDataService(
       }
     }
 
-    permissionService.saveAll(organizationsToSave.map { it.basePermission }.filterNotNull())
-
-    organizationService.saveAll(
-      organizationsToSave
-    )
+    organizationsToSave.forEach { org ->
+      permissionService.save(org.basePermission)
+      organizationService.save(org)
+    }
   }
 
   private fun saveAllUsers(builder: TestDataBuilder) {

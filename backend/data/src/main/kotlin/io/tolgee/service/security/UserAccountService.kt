@@ -138,7 +138,7 @@ class UserAccountService(
       it.preferredBy.removeIf { preferences ->
         preferences.userAccount.id == userAccount.id
       }
-      organizationService.delete(it.id)
+      organizationService.delete(it)
     }
     userAccount.organizationRoles.forEach {
       entityManager.remove(it)

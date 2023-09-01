@@ -13,7 +13,7 @@ class OrganizationServiceTest : AbstractSpringTest() {
   fun `deletes organization with preferences`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
-    organizationService.delete(testData.jirinaOrg.id)
+    organizationService.delete(testData.jirinaOrg)
     entityManager.flush()
     assertThat(organizationService.find(testData.jirinaOrg.id)).isNull()
   }

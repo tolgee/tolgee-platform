@@ -36,7 +36,7 @@ class ProjectTransferringE2eDataController(
     val data = ProjectTransferringTestData()
     listOf(data.organization, data.notOwnedOrganization, data.anotherOrganization).forEach {
       organizationService.find(it.slug)?.let { found ->
-        organizationService.delete(found.id)
+        organizationService.delete(found)
       }
     }
     listOf(data.user, data.user2, data.user).forEach { user ->

@@ -2,7 +2,9 @@ package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.pat.UpdatePatDto
 import io.tolgee.exceptions.NotFoundException
@@ -10,6 +12,8 @@ import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.PatRepository
 import io.tolgee.util.runSentryCatching
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
@@ -40,6 +44,12 @@ class PatService(
     return find(id) ?: throw NotFoundException(Message.PAT_NOT_FOUND)
   }
 
+  @Cacheable(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#hash")
+  fun findDto(hash: String): PatDto? {
+    return find(hash)?.let { PatDto.fromEntity(it) }
+  }
+
+  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#result.tokenHash")
   fun save(pat: Pat): Pat {
     if (pat.tokenHash.isBlank()) {
       pat.regenerateToken()
@@ -60,6 +70,7 @@ class PatService(
     return save(pat)
   }
 
+  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#result.tokenHash")
   fun regenerate(id: Long, expiresAt: Long?): Pat {
     val pat = get(id).apply {
       this.expiresAt = expiresAt.epochToDate()
@@ -70,6 +81,7 @@ class PatService(
   }
 
   fun update(id: Long, updatePatDto: UpdatePatDto): Pat {
+    // Cache eviction: Not necessary, description is not cached
     val pat = get(id).apply {
       this.description = updatePatDto.description
     }
@@ -80,8 +92,9 @@ class PatService(
     return keyGenerator.hash(token)
   }
 
-  fun delete(id: Long) {
-    return patRepository.deleteById(id)
+  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#pat.tokenHash")
+  fun delete(pat: Pat) {
+    return patRepository.deleteById(pat.id)
   }
 
   fun findAll(userId: Long, pageable: Pageable): Page<Pat> {
@@ -89,6 +102,7 @@ class PatService(
   }
 
   fun updateLastUsed(pat: Pat) {
+    // Cache eviction: Not necessary, last usage date is not cached
     pat.lastUsedAt = currentDateProvider.date
     patRepository.save(pat)
   }
@@ -106,6 +120,7 @@ class PatService(
   @Async
   @Transactional
   fun updateLastUsedAsync(pat: Pat) {
+    // Cache eviction: Not necessary, last usage date is not cached
     runSentryCatching {
       updateLastUsed(pat)
     }

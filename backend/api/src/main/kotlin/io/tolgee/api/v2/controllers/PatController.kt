@@ -107,8 +107,8 @@ class PatController(
   fun delete(
     @PathVariable id: Long
   ) {
-    checkOwner(id)
-    return patService.delete(id)
+    val pat = checkOwner(id)
+    return patService.delete(pat)
   }
 
   @GetMapping(path = ["/current"])
@@ -123,9 +123,11 @@ class PatController(
     return patWithUserModelAssembler.toModel(pat)
   }
 
-  private fun checkOwner(id: Long) {
-    if (patService.get(id).userAccount.id != authenticationFacade.authenticatedUser.id) {
+  private fun checkOwner(id: Long): Pat {
+    val pat = patService.get(id)
+    if (pat.userAccount.id != authenticationFacade.authenticatedUser.id) {
       throw PermissionException()
     }
+    return pat
   }
 }

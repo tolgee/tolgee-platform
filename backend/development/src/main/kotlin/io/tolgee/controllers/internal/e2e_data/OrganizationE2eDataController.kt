@@ -52,11 +52,11 @@ class OrganizationE2eDataController(
   @Transactional
   fun cleanupOrganizations() {
     organizationService.find("what-a-nice-organization")?.let {
-      organizationService.delete(it.id)
+      organizationService.delete(it)
     }
     data.forEach {
       organizationService.find(it.dto.slug!!)?.let { organization ->
-        organizationService.delete(organization.id)
+        organizationService.delete(organization)
       }
       userAccountService.findActive(it.owner.email)?.let { userAccount ->
         if (userAccount.name != "admin") {
