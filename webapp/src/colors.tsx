@@ -42,6 +42,12 @@ export type Marker = {
   secondary: string;
 };
 
+export type TopBanner = {
+  background: string;
+  mainText: string;
+  linkText: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -84,6 +90,11 @@ export const colors = {
     tooltip: {
       background: '#ffffff',
       text: '#111111',
+    },
+    topBanner: {
+      background: '#BEF4E9',
+      mainText: '#004437',
+      linkText: '#009B85',
     },
   },
   dark: {
@@ -142,6 +153,11 @@ export const colors = {
     tooltip: {
       background: '#394556',
       text: '#efefef',
+    },
+    topBanner: {
+      background: '#008371',
+      mainText: '#BEF4E9',
+      linkText: '#dddddd',
     },
   },
 } as const;

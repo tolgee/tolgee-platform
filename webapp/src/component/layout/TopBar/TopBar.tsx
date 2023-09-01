@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Box, IconButton, Slide, styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,7 @@ import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
 import { useThemeContext } from '../../../ThemeProvider';
 import { AdminInfo } from './AdminInfo';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -19,10 +20,7 @@ const StyledAppBar = styled(AppBar)(
   ({ theme }) =>
     ({
       zIndex: theme.zIndex.drawer + 1,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
+      transition: 'transform 0.2s ease-in-out',
       ...theme.mixins.toolbar,
       background: theme.palette.navbarBackground.main,
       boxShadow:
@@ -59,11 +57,6 @@ const StyledTolgeeLink = styled(Link)`
   &:focus ${StyledLogoWrapper} {
     filter: brightness(95%);
   }
-
-  ,
-&: focus ${StyledLogoTitle} {
-    filter: brightness(95%);
-  }
 `;
 
 const StyledIconButton = styled(IconButton)`
@@ -86,6 +79,8 @@ export const TopBar: React.FC<Props> = ({
 
   const trigger = useTopBarHidden() && autoHide;
 
+  const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
+
   const { mode, setMode } = useThemeContext();
 
   const toggleTheme = () => {
@@ -97,43 +92,42 @@ export const TopBar: React.FC<Props> = ({
   };
 
   return (
-    <Slide appear={false} direction="down" in={!trigger}>
-      <StyledAppBar>
-        <StyledToolbar>
-          <Box flexGrow={1} display="flex">
-            <Box>
-              <StyledTolgeeLink to={'/'}>
-                <Box display="flex" alignItems="center">
-                  <StyledLogoWrapper
-                    pr={1}
-                    display="flex"
-                    justifyItems="center"
-                  >
-                    <TolgeeLogo fontSize="large" />
-                  </StyledLogoWrapper>
-                  <StyledLogoTitle variant="h5" color="inherit">
-                    {config.appName}
-                  </StyledLogoTitle>
-                  {config.showVersion && (
-                    <StyledVersion variant="body1">
-                      {config.version}
-                    </StyledVersion>
-                  )}
-                </Box>
-              </StyledTolgeeLink>
-            </Box>
-            <AdminInfo
-              adminAccess={isAdminAccess}
-              debuggingCustomerAccount={isDebuggingCustomerAccount}
-            />
+    <StyledAppBar
+      sx={{
+        top: topBannerSize,
+        transform: trigger ? `translate(0px, ${-55}px)` : `translate(0px, 0px)`,
+      }}
+    >
+      <StyledToolbar>
+        <Box flexGrow={1} display="flex">
+          <Box>
+            <StyledTolgeeLink to={'/'}>
+              <Box display="flex" alignItems="center">
+                <StyledLogoWrapper pr={1} display="flex" justifyItems="center">
+                  <TolgeeLogo fontSize="large" />
+                </StyledLogoWrapper>
+                <StyledLogoTitle variant="h5" color="inherit">
+                  {config.appName}
+                </StyledLogoTitle>
+                {config.showVersion && (
+                  <StyledVersion variant="body1">
+                    {config.version}
+                  </StyledVersion>
+                )}
+              </Box>
+            </StyledTolgeeLink>
           </Box>
-          <StyledIconButton onClick={toggleTheme} color="inherit">
-            {mode === 'dark' ? <LightMode /> : <DarkMode />}
-          </StyledIconButton>
-          <LocaleMenu />
-          <UserMenu />
-        </StyledToolbar>
-      </StyledAppBar>
-    </Slide>
+          <AdminInfo
+            adminAccess={isAdminAccess}
+            debuggingCustomerAccount={isDebuggingCustomerAccount}
+          />
+        </Box>
+        <StyledIconButton onClick={toggleTheme} color="inherit">
+          {mode === 'dark' ? <LightMode /> : <DarkMode />}
+        </StyledIconButton>
+        <LocaleMenu />
+        <UserMenu />
+      </StyledToolbar>
+    </StyledAppBar>
   );
 };

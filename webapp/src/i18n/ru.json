@@ -212,7 +212,7 @@
   "namespace_rename_cancel" : "Отменить",
   "namespace_rename_confirm" : "Переименовать",
   "namespace_rename_confirmation_title" : "Вы уверены?",
-  "namespace_rename_placeholder" : "Новое имя ...",
+  "namespace_rename_placeholder" : "Новое имя...",
   "namespace_rename_success" : "Пространство имен переименовано",
   "namespace_rename_title" : "Переименовать пространство имен",
   "namespace_select_cancel" : "Отменить",

@@ -28,7 +28,8 @@ class InitialDataController(
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
   private val eeSubscriptionModelAssembler: EeSubscriptionModelAssembler,
-  private val eeSubscriptionService: EeSubscriptionService
+  private val eeSubscriptionService: EeSubscriptionService,
+  private val announcementController: AnnouncementController,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(description = "Returns initial data always required by frontend")
@@ -44,6 +45,7 @@ class InitialDataController(
       data.userInfo = userController.getInfo()
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
+      data.announcement = announcementController.getLatest()
     }
 
     return data

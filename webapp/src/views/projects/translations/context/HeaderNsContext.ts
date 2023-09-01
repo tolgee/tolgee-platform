@@ -4,6 +4,7 @@ import { useTranslationsSelector } from './TranslationsContext';
 import { useDebouncedCallback } from 'use-debounce';
 import { NsBannerRecord, useNsBanners } from './useNsBanners';
 import { createProvider } from 'tg.fixtures/createProvider';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 /**
  * Context responsible for top namespace banner in translations header
@@ -16,6 +17,7 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
     const [topNamespace, setTopNamespace] = useState<
       NsBannerRecord | undefined
     >(undefined);
+    const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
     const [topBarHeight, setTopBarHeight] = useState(0);
 
     const nsElements = useRef<Record<number, HTMLElement | undefined>>({});
@@ -48,7 +50,7 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
         const advance = !isFirst ? 5 : 0;
         const top = el.getBoundingClientRect()!.top;
         // check exact location
-        return top > topBarHeight + advance;
+        return top > topBarHeight + topBannerHeight + advance;
       }
 
       // take first banner that is after `start`
@@ -70,7 +72,7 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
 
     useEffect(() => {
       calculateTopNamespace();
-    }, [reactList, topBarHeight, nsElements, translations]);
+    }, [reactList, topBarHeight, topBannerHeight, nsElements, translations]);
 
     useEffect(() => {
       window.addEventListener('scroll', calculateTopNamespace, {
@@ -96,7 +98,6 @@ export const [HeaderNsContext, useHeaderNsActions, useHeaderNsContext] =
     };
 
     const contextData = {
-      topBarHeight,
       topNamespace,
     };
 

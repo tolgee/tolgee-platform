@@ -536,7 +536,7 @@
   "namespace_rename_confirm" : "Rename",
   "namespace_rename_confirmation_message" : "Do you really want to change namespace name? Make sure you reflect this change in translated application.",
   "namespace_rename_confirmation_title" : "Are you sure?",
-  "namespace_rename_placeholder" : "New name ...",
+  "namespace_rename_placeholder" : "New name...",
   "namespace_rename_success" : "Namespace renamed",
   "namespace_rename_title" : "Rename namespace",
   "namespace_select_cancel" : "Cancel",

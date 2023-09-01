@@ -51,6 +51,12 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
     invalidatePrefix: '/internal/test-clock-helper',
   });
 
+  const resetMutation = useApiMutation({
+    url: '/internal/time' as any,
+    method: 'delete',
+    invalidatePrefix: '/internal/test-clock-helper',
+  });
+
   const info = infoLoadable.data;
 
   const timeToString = (value) => new Date(value).toISOString();
@@ -110,6 +116,10 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
     });
   }
 
+  function resetClock() {
+    resetMutation.mutate({});
+  }
+
   return (
     <BaseOrganizationSettingsView
       hideChildrenOnLoading={true}
@@ -153,16 +163,25 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
             onChange={(e) => setStringValue(e.target.value)}
             value={stringValue}
           />
-          <br />
-          <LoadingButton
-            disabled={value !== parseStringValue()}
-            loading={moveMutation.isLoading}
-            onClick={moveClock}
-            color="primary"
-            variant="contained"
-          >
-            Move clock!
-          </LoadingButton>
+          <Box display="flex" gap={1} justifyContent="end" mt={2}>
+            <LoadingButton
+              loading={resetMutation.isLoading}
+              onClick={resetClock}
+              variant="contained"
+              color="secondary"
+            >
+              Reset
+            </LoadingButton>
+            <LoadingButton
+              disabled={value !== parseStringValue()}
+              loading={moveMutation.isLoading}
+              onClick={moveClock}
+              color="primary"
+              variant="contained"
+            >
+              Move clock!
+            </LoadingButton>
+          </Box>
         </>
       )}
     </BaseOrganizationSettingsView>

@@ -2683,6 +2683,22 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1692866751704-2">
+        <createTable tableName="dismissed_announcement">
+            <column name="announcement" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="dismissed_announcementPK"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="dismissed_announcementPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1692866751704-3">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="dismissed_announcement" constraintName="FKovu46iiclpbyq98rtdshmabvb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1692866751704-1">
+        <dropDefaultValue columnDataType="boolean" columnName="hidden" tableName="tolgee_batch_job"/>
+    </changeSet>
     <changeSet author="cynthia (generated)" id="1693517732527-1">
         <addColumn tableName="user_account">
             <column name="is_initial_user" type="boolean" defaultValue="false">
