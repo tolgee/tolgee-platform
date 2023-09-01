@@ -25,7 +25,8 @@ class InitialUserCreatorCommandLineRunner(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun run(vararg args: String) {
-    if (userAccountService.findInitialUser() == null) {
+    val initialUser = userAccountService.findInitialUser()
+    if (initialUser == null) {
       logger.info("Creating initial user...")
 
       val initialUsername = properties.authentication.initialUsername
@@ -42,6 +43,18 @@ class InitialUserCreatorCommandLineRunner(
         ),
         userAccount = user
       )
+    } else if (initialUser.username == "___implicit_user") {
+      // Legacy installations might have promoted the implicit user as initial user.
+      // If that's the case, we update its username, name and password to match what it'd have been otherwise.
+      logger.info("Migrating initial user...")
+
+      val initialUsername = properties.authentication.initialUsername
+      val initialPassword = initialPasswordManager.initialPassword
+
+      initialUser.username = initialUsername
+      initialUser.name = initialUsername
+      userAccountService.save(initialUser)
+      userAccountService.setUserPassword(initialUser, initialPassword)
     }
   }
 

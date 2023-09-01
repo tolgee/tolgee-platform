@@ -16,6 +16,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.ApiKey
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
@@ -52,7 +53,7 @@ class UserAccountService(
   @Lazy
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -115,7 +116,7 @@ class UserAccountService(
       this.createUser(it)
 
       // TODO: remove this on Tolgee 4 release
-      migrateLegacyNoAuthUser()
+      transferLegacyNoAuthUser()
       return it
     }
   }
@@ -407,11 +408,50 @@ class UserAccountService(
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
 
-  /**
-   * Moves orgs owned by the no auth user that was created in older versions of Tolgee to the initial user
-   * This is to ensure a smooth migration to the new implicit authentication system
-   */
-  private fun migrateLegacyNoAuthUser() {
-    // TODO
+  private fun transferLegacyNoAuthUser() {
+    val legacyImplicitUser = findActive("___implicit_user")
+      ?: return
+
+    // We need to migrate what's owned by `___implicit_user` to the initial user
+    val initialUser = findInitialUser() ?: throw IllegalStateException("Initial user does not exist?")
+
+    legacyImplicitUser.apiKeys?.forEach {
+      it.userAccount = initialUser
+      initialUser.apiKeys!!.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.pats?.forEach {
+      it.userAccount = initialUser
+      initialUser.pats!!.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.permissions.forEach {
+      it.user = initialUser
+      initialUser.permissions.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.preferences?.let {
+      it.userAccount = initialUser
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.organizationRoles.forEach {
+      it.user = initialUser
+      initialUser.organizationRoles.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.apiKeys?.clear()
+    legacyImplicitUser.pats?.clear()
+    legacyImplicitUser.permissions.clear()
+    legacyImplicitUser.organizationRoles.clear()
+
+    entityManager.flush()
+    userAccountRepository.save(initialUser)
+
+    userAccountRepository.deleteById(legacyImplicitUser.id)
   }
 }

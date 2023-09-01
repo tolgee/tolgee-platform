@@ -8,6 +8,9 @@ import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.development.testDataBuilder.data.ImplicitUserLegacyData
+import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
