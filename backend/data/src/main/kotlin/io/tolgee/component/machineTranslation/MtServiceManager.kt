@@ -6,6 +6,8 @@ import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
+import io.tolgee.exceptions.FormalityNotSupportedException
+import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -78,6 +80,9 @@ class MtServiceManager(
   }
 
   fun translate(params: TranslationParams): TranslateResult {
+    val provider = params.serviceInfo.serviceType.getProvider()
+    validate(provider, params)
+
     if (internalProperties.fakeMtProviders) {
       logger.debug("Fake MT provider is enabled")
       return getFaked(params)
@@ -89,19 +94,18 @@ class MtServiceManager(
     }
 
     return try {
-      val translated = params.serviceInfo.serviceType.getProvider()
-        .translate(
-          ProviderTranslateParams(
-            params.text,
-            params.textRaw,
-            params.keyName,
-            params.sourceLanguageTag,
-            params.targetLanguageTag,
-            params.metadata,
-            params.serviceInfo.formality,
-            params.isBatch
-          )
+      val translated = provider.translate(
+        ProviderTranslateParams(
+          params.text,
+          params.textRaw,
+          params.keyName,
+          params.sourceLanguageTag,
+          params.targetLanguageTag,
+          params.metadata,
+          params.serviceInfo.formality,
+          params.isBatch
         )
+      )
 
       val translateResult = TranslateResult(
         translated.translated,
@@ -121,6 +125,19 @@ class MtServiceManager(
         0,
         params.serviceInfo.serviceType
       )
+    }
+  }
+
+  private fun validate(
+    provider: MtValueProvider,
+    params: TranslationParams
+  ) {
+    if (!provider.isLanguageSupported(params.targetLanguageTag)) {
+      throw LanguageNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
+    }
+
+    if (!provider.isLanguageFormalitySupported(params.targetLanguageTag)) {
+      throw FormalityNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
   }
 
@@ -215,21 +232,16 @@ class MtServiceManager(
     metadata: Map<String, Metadata>? = null,
     isBatch: Boolean
   ): List<TranslateResult> {
-    return if (!internalProperties.fakeMtProviders) {
-      translateToMultipleTargets(
-        serviceInfo = service,
-        textRaw = textRaw,
-        keyName = keyName,
-        text = text,
-        sourceLanguageTag = sourceLanguageTag,
-        targetLanguageTags = targetLanguageTags,
-        metadata = metadata,
-        isBatch = isBatch
-      )
-    } else targetLanguageTags.map {
-      logger.debug("Fake MT provider is enabled")
-      getFaked(getParams(text, textRaw, keyName, sourceLanguageTag, it, service, null, isBatch))
-    }
+    return translateToMultipleTargets(
+      serviceInfo = service,
+      textRaw = textRaw,
+      keyName = keyName,
+      text = text,
+      sourceLanguageTag = sourceLanguageTag,
+      targetLanguageTags = targetLanguageTags,
+      metadata = metadata,
+      isBatch = isBatch
+    )
   }
 
   private fun translateToMultipleTargets(
