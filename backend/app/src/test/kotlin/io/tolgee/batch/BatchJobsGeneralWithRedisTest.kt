@@ -8,6 +8,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration.Companion.JOB_QUEUE_TOPIC
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.eq
@@ -37,6 +38,12 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   companion object {
     val redisRunner = RedisRunner()
 
+    @AfterAll
+    @JvmStatic
+    fun stopRedis() {
+      redisRunner.stop()
+    }
+
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
@@ -51,11 +58,10 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   @Autowired
   lateinit var redisTemplate: StringRedisTemplate
 
-  @AfterAll
+  @AfterEach
   fun cleanup() {
     Mockito.reset(redisTemplate)
     Mockito.clearInvocations(redisTemplate)
-    redisRunner.stop()
     jobConcurrentLauncher.pause = false
   }
 

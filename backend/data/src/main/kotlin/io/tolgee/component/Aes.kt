@@ -4,6 +4,7 @@
 
 package io.tolgee.component
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.security.MessageDigest
 import java.util.*
@@ -11,10 +12,10 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 @Component
-class Aes(jwtSecretProvider: JwtSecretProvider) {
+class Aes(@Qualifier("jwt_signing_secret") bytes: ByteArray) {
   private val secretKey: SecretKeySpec? by lazy {
     val sha = MessageDigest.getInstance("SHA-1")
-    val key = Arrays.copyOf(sha.digest(jwtSecretProvider.jwtSecret), 16)
+    val key = Arrays.copyOf(sha.digest(bytes), 16)
     SecretKeySpec(key, "AES")
   }
 

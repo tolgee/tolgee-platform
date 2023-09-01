@@ -49,7 +49,7 @@ class AuthenticationDisabledFilterTest {
     Mockito.`when`(authProperties.enabled).thenReturn(false)
     Mockito.`when`(authProperties.initialUsername).thenReturn("admin")
 
-    Mockito.`when`(userAccountService.findActive(TEST_INITIAL_USER_NAME)).thenReturn(userAccount)
+    Mockito.`when`(userAccountService.findInitialUser()).thenReturn(userAccount)
 
     Mockito.`when`(userAccount.id).thenReturn(TEST_USER_ID)
     Mockito.`when`(userAccount.name).thenReturn("")

@@ -17,6 +17,7 @@
 package io.tolgee.security
 
 import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Organization
@@ -46,11 +47,9 @@ class RequestContextServiceTest {
 
   private val organizationService = Mockito.mock(OrganizationService::class.java)
 
-  private val project = Mockito.mock(Project::class.java)
-
   private val projectDto = Mockito.mock(ProjectDto::class.java)
 
-  private val organization = Mockito.mock(Organization::class.java)
+  private val organization = Mockito.mock(OrganizationDto::class.java)
 
   private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
@@ -61,25 +60,23 @@ class RequestContextServiceTest {
     Mockito.`when`(projectService.findDto(Mockito.anyLong())).thenReturn(null)
     Mockito.`when`(projectService.findDto(TEST_PROJECT_ID)).thenReturn(projectDto)
 
-    Mockito.`when`(organizationService.find(Mockito.anyLong())).thenReturn(null)
-    Mockito.`when`(organizationService.find(TEST_ORGANIZATION_ID)).thenReturn(organization)
+    Mockito.`when`(organizationService.findDto(Mockito.anyLong())).thenReturn(null)
+    Mockito.`when`(organizationService.findDto(TEST_ORGANIZATION_ID)).thenReturn(organization)
 
-    Mockito.`when`(organizationService.find(Mockito.anyString())).thenReturn(null)
-    Mockito.`when`(organizationService.find(TEST_ORGANIZATION_SLUG)).thenReturn(organization)
+    Mockito.`when`(organizationService.findDto(Mockito.anyString())).thenReturn(null)
+    Mockito.`when`(organizationService.findDto(TEST_ORGANIZATION_SLUG)).thenReturn(organization)
 
-    Mockito.`when`(project.name).thenReturn("")
-    Mockito.`when`(project.id).thenReturn(TEST_PROJECT_ID)
-    Mockito.`when`(project.organizationOwner).thenReturn(organization)
     Mockito.`when`(projectDto.id).thenReturn(TEST_PROJECT_ID)
+    Mockito.`when`(projectDto.organizationOwnerId).thenReturn(TEST_ORGANIZATION_ID)
     Mockito.`when`(organization.id).thenReturn(TEST_ORGANIZATION_ID)
     Mockito.`when`(organization.slug).thenReturn(TEST_ORGANIZATION_SLUG)
 
-    Mockito.`when`(apiKey.projectId).thenReturn(project.id)
+    Mockito.`when`(apiKey.projectId).thenReturn(TEST_PROJECT_ID)
   }
 
   @AfterEach
   fun resetMocks() {
-    Mockito.reset(authenticationFacade, projectService, organizationService, project, organization)
+    Mockito.reset(authenticationFacade, projectService, organizationService, organization)
   }
 
   private fun setupApiKey() {

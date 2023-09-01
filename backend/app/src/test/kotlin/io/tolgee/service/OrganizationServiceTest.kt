@@ -15,6 +15,8 @@ class OrganizationServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     organizationService.delete(testData.jirinaOrg)
     entityManager.flush()
+
+    println(organizationService.find(testData.jirinaOrg.id)?.preferredBy)
     assertThat(organizationService.find(testData.jirinaOrg.id)).isNull()
   }
 }

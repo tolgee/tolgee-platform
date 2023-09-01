@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
 
-@SpringBootTest(properties = ["tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret"])
+@SpringBootTest(
+  properties = [
+    "tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret_azeazezaezaezaezaezzaezaezaeazeazezaeazezeaeazeazezaezaea"
+  ]
+)
 @ContextRecreatingTest
 class TimestampValidationTest {
 

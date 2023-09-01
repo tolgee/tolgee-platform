@@ -30,11 +30,12 @@ class InitialUserCreatorCommandLineRunner(
 
       val initialUsername = properties.authentication.initialUsername
       val initialPassword = initialPasswordManager.initialPassword
-      val user = userAccountService.createUser(
+      val user = userAccountService.createInitialUser(
         SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
-        UserAccount.Role.ADMIN
       )
 
+      // If the user was already existing, it may already have assigned orgs.
+      // To avoid conflicts, we only create the org if the user doesn't have any.
       organizationService.create(
         OrganizationDto(
           properties.authentication.initialUsername,

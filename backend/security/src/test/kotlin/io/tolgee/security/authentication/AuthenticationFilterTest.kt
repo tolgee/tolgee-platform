@@ -19,6 +19,8 @@ package io.tolgee.security.authentication
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.ApiKey
@@ -69,9 +71,9 @@ class AuthenticationFilterTest {
 
   private val userAccountService = Mockito.mock(UserAccountService::class.java)
 
-  private val apiKey = Mockito.mock(ApiKey::class.java)
+  private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
-  private val pat = Mockito.mock(Pat::class.java)
+  private val pat = Mockito.mock(PatDto::class.java)
 
   private val userAccountDto = Mockito.mock(UserAccountDto::class.java)
 
@@ -127,19 +129,21 @@ class AuthenticationFilterTest {
     Mockito.`when`(pakService.parseApiKey(TEST_INVALID_PAK)).thenReturn(TEST_INVALID_PAK)
     Mockito.`when`(pakService.hashKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
     Mockito.`when`(pakService.hashKey(TEST_INVALID_PAK)).thenReturn(TEST_INVALID_PAK)
-    Mockito.`when`(pakService.find(Mockito.anyString())).thenReturn(null)
-    Mockito.`when`(pakService.find(TEST_VALID_PAK)).thenReturn(apiKey)
+    Mockito.`when`(pakService.findDto(Mockito.anyString())).thenReturn(null)
+    Mockito.`when`(pakService.findDto(TEST_VALID_PAK)).thenReturn(apiKey)
 
     Mockito.`when`(patService.hashToken("valid")).thenReturn(TEST_VALID_PAT)
     Mockito.`when`(patService.hashToken("invalid")).thenReturn(TEST_INVALID_PAT)
-    Mockito.`when`(patService.find(Mockito.anyString())).thenReturn(null)
-    Mockito.`when`(patService.find(TEST_VALID_PAT)).thenReturn(pat)
+    Mockito.`when`(patService.findDto(Mockito.anyString())).thenReturn(null)
+    Mockito.`when`(patService.findDto(TEST_VALID_PAT)).thenReturn(pat)
 
     Mockito.`when`(userAccountService.findActive(TEST_USER_ID)).thenReturn(userAccount)
+    Mockito.`when`(userAccountService.findDto(TEST_USER_ID)).thenReturn(userAccountDto)
+    Mockito.`when`(userAccountService.findInitialUser()).thenReturn(Mockito.mock(UserAccount::class.java))
 
-    Mockito.`when`(apiKey.userAccount).thenReturn(userAccount)
+    Mockito.`when`(apiKey.userAccountId).thenReturn(TEST_USER_ID)
     Mockito.`when`(apiKey.expiresAt).thenReturn(null)
-    Mockito.`when`(pat.userAccount).thenReturn(userAccount)
+    Mockito.`when`(pat.userAccountId).thenReturn(TEST_USER_ID)
     Mockito.`when`(pat.expiresAt).thenReturn(null)
 
     Mockito.`when`(userAccount.id).thenReturn(TEST_USER_ID)

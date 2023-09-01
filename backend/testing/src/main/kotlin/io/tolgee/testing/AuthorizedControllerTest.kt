@@ -44,12 +44,12 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
 
   fun loginAsAdminIfNotLogged() {
     if (_userAccount == null) {
-      loginAsUser("admin")
+      loginAsUser(initialUsername)
     }
   }
 
   fun loginAsUser(userName: String) {
-    val account = userAccountService.findActive(userName) ?: dbPopulator.createUserIfNotExists("admin")
+    val account = userAccountService.findActive(userName) ?: dbPopulator.createUserIfNotExists(userName)
     loginAsUser(account)
   }
 

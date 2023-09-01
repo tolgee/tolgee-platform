@@ -86,7 +86,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     batchJobConcurrentLauncher.pause = false
   }
 
-  @AfterEach()
+  @AfterEach
   fun teardown() {
     batchJobChunkExecutionQueue.clear()
     batchJobConcurrentLauncher.pause = true

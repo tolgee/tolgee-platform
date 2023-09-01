@@ -32,5 +32,5 @@ interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
 
   @Modifying
   @Query("UPDATE ApiKey ak SET ak.lastUsedAt = ?2 WHERE ak.id = ?1")
-  fun updateLastUsedById(id: Long, lastUsed: Date): ApiKey
+  fun updateLastUsedById(id: Long, lastUsed: Date)
 }

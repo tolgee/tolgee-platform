@@ -3,6 +3,7 @@ package io.tolgee.websocket
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.Message
@@ -50,8 +51,10 @@ class WebSocketConfig(
           }
 
           if (projectId != null) {
+            val user = (accessor.user as? TolgeeAuthentication)?.principal
+              ?: throw MessagingException("Unauthenticated")
+
             try {
-              val user = (accessor.user as? UsernamePasswordAuthenticationToken)?.principal as UserAccountDto
               securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
             } catch (e: Exception) {
               throw MessagingException("Forbidden")

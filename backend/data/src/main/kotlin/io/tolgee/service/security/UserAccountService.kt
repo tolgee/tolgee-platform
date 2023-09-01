@@ -8,7 +8,6 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
-import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -104,6 +103,19 @@ class UserAccountService(
     dtoToEntity(request).let {
       it.role = role
       this.createUser(it)
+      return it
+    }
+  }
+
+  @Transactional
+  fun createInitialUser(request: SignUpDto): UserAccount {
+    dtoToEntity(request).let {
+      it.role = UserAccount.Role.ADMIN
+      it.isInitialUser = true
+      this.createUser(it)
+
+      // TODO: remove this on Tolgee 4 release
+      migrateLegacyNoAuthUser()
       return it
     }
   }
@@ -394,4 +406,12 @@ class UserAccountService(
 
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
+
+  /**
+   * Moves orgs owned by the no auth user that was created in older versions of Tolgee to the initial user
+   * This is to ensure a smooth migration to the new implicit authentication system
+   */
+  private fun migrateLegacyNoAuthUser() {
+    // TODO
+  }
 }

@@ -25,6 +25,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -62,6 +63,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(authenticationFacade.authentication).thenReturn(Mockito.mock(TolgeeAuthentication::class.java))
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)

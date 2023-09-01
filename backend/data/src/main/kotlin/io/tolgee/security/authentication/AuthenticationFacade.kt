@@ -24,14 +24,15 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade(
   private val userAccountService: UserAccountService,
-  private val projectService: ProjectService,
-  private val organizationService: OrganizationService,
+  @Lazy private val projectService: ProjectService,
+  @Lazy private val organizationService: OrganizationService,
 ) {
   // -- GENERAL AUTHENTICATION INFO
   val isAuthenticated: Boolean

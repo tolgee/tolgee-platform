@@ -224,7 +224,9 @@ class OrganizationService(
       invitationService.delete(invitation)
     }
 
-    organization.preferredBy
+    // `get` is important to help reducing the likelihood of a race-condition
+    // One may still occur, as a con of not relying on a DB-level cascade delete logic.
+    get(organization.id).preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
         it.preferredOrganization = findOrCreatePreferred(

@@ -12,7 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
 
 @ContextRecreatingTest
-@SpringBootTest(properties = ["tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret"])
+@SpringBootTest(
+  properties = [
+    "tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret_azeazezaezaezaezaezzaezaezaeazeazezaeazezeaeazeazezaezaea"
+  ]
+)
 class AesTest {
 
   @set:Autowired

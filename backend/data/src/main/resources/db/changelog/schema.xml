@@ -2694,7 +2694,9 @@
         <sql dbms="postgresql">
             UPDATE user_account
             SET is_initial_user = true
-            LIMIT 1;
+            WHERE id = (
+                SELECT id FROM user_account LIMIT 1
+            );
         </sql>
     </changeSet>
     <changeSet author="cynthia" id="1693517732527-3">

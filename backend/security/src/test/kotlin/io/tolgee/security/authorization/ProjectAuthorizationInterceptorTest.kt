@@ -28,6 +28,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.junit.jupiter.api.AfterEach
@@ -73,6 +74,7 @@ class ProjectAuthorizationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(authenticationFacade.authentication).thenReturn(Mockito.mock(TolgeeAuthentication::class.java))
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
@@ -85,7 +87,7 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(projectDto.id).thenReturn(1337L)
     Mockito.`when`(project.id).thenReturn(1337L)
 
-    Mockito.`when`(apiKey.projectId).thenReturn(project.id)
+    Mockito.`when`(apiKey.projectId).thenReturn(1337L)
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
   }
 
@@ -171,7 +173,7 @@ class ProjectAuthorizationInterceptorTest {
 
     val fakeProject = Mockito.mock(Project::class.java)
     Mockito.`when`(fakeProject.id).thenReturn(7331L)
-    Mockito.`when`(apiKey.projectId).thenReturn(fakeProject.id)
+    Mockito.`when`(apiKey.projectId).thenReturn(7331L)
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
   }

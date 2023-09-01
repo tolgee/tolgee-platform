@@ -64,7 +64,13 @@ class DbPopulatorReal(
         password = password
           ?: initialPasswordManager.initialPassword
       )
-      userAccountService.createUser(signUpDto)
+
+      if (username == tolgeeProperties.authentication.initialUsername) {
+        // Avoid conflicts with the initial user creation procedure
+        userAccountService.createInitialUser(signUpDto)
+      } else {
+        userAccountService.createUser(signUpDto)
+      }
     }
   }
 

@@ -60,9 +60,6 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   lateinit var testData: BatchJobsTestData
 
   @Autowired
-  lateinit var batchJobActionService: BatchJobActionService
-
-  @Autowired
   lateinit var batchJobService: BatchJobService
 
   @Autowired

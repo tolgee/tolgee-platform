@@ -28,16 +28,17 @@ class CacheWithRedisTest : AbstractCacheTest() {
   companion object {
     val redisRunner = RedisRunner()
 
+    @AfterAll
+    @JvmStatic
+    fun cleanup() {
+      redisRunner.stop()
+    }
+
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
       }
     }
-  }
-
-  @AfterAll
-  fun cleanup() {
-    redisRunner.stop()
   }
 
   @Test

@@ -40,9 +40,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   lateinit var sendInBlueProperties: SendInBlueProperties
 
   @Autowired
-  lateinit var authenticationProperties: AuthenticationProperties
-
-  @Autowired
   @MockBean
   lateinit var contactsApi: ContactsApi
 
