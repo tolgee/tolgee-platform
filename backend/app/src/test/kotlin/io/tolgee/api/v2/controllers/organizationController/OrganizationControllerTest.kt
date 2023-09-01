@@ -189,6 +189,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun testCreateNotAllowed() {
     this.tolgeeProperties.authentication.userCanCreateOrganizations = false
+    loginAsUserIfNotLogged()
     performAuthPost(
       "/v2/organizations",
       dummyDto

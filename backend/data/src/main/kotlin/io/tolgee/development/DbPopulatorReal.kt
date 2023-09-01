@@ -153,7 +153,7 @@ class DbPopulatorReal(
 
   @Transactional
   fun createBase(projectName: String): Base {
-    return createBase(projectName, tolgeeProperties.authentication.initialUsername)
+    return createBase(projectName, tolgeeProperties.authentication.initialUsername + "_base")
   }
 
   fun populate(projectName: String): Base {

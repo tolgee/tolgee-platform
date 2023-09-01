@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class AnnouncementControllerTest() : AuthorizedControllerTest() {
+class AnnouncementControllerTest : AuthorizedControllerTest() {
   lateinit var testData: ProjectsTestData
 
   @Autowired
@@ -32,6 +32,7 @@ class AnnouncementControllerTest() : AuthorizedControllerTest() {
   @Test
   fun `announcement is in initial data`() {
     this.currentDateProvider.forceDateString("2023-08-28 00:00:00 UTC")
+    userAccount = testData.user // -- Regenerate token to be sure it doesn't appear expired
     this.performAuthGet("/v2/public/initial-data").andIsOk.andPrettyPrint.andAssertThatJson {
       node("announcement.type").isString
     }
@@ -40,6 +41,7 @@ class AnnouncementControllerTest() : AuthorizedControllerTest() {
   @Test
   fun `announcement will disappear after until time`() {
     this.currentDateProvider.forceDateString("2100-01-01 00:00:00 UTC")
+    userAccount = testData.user // -- Regenerate token to be sure it doesn't appear expired
     this.performAuthGet("/v2/public/initial-data").andIsOk.andPrettyPrint.andAssertThatJson {
       node("announcement").isNull()
     }
@@ -48,6 +50,7 @@ class AnnouncementControllerTest() : AuthorizedControllerTest() {
   @Test
   fun `announcement can be dismissed`() {
     this.currentDateProvider.forceDateString("2023-08-28 00:00:00 UTC")
+    userAccount = testData.user // -- Regenerate token to be sure it doesn't appear expired
     this.performAuthPost("/v2/announcement/dismiss", content = null).andIsOk
     this.performAuthGet("/v2/public/initial-data").andIsOk.andPrettyPrint.andAssertThatJson {
       node("announcement").isNull()

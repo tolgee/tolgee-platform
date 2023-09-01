@@ -17,6 +17,7 @@ class ProjectPermissionFilterTest : AuthorizedControllerTest() {
 
   @Test
   fun deniesAccessToNonPrivilegedUser() {
+    loginAsUserIfNotLogged()
     val base2 = dbPopulator.createBase(generateUniqueString(), "new-user")
     performAuthGet("/v2/projects/${base2.project.id}/translations").andIsNotFound
   }
