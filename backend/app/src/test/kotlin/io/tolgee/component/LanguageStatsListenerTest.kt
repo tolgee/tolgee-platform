@@ -5,14 +5,22 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.opentest4j.AssertionFailedError
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 
 class LanguageStatsListenerTest : AbstractControllerTest() {
+
+  @Autowired
+  @SpyBean
+  private lateinit var authenticationFacade: AuthenticationFacade
 
   @Autowired
   private lateinit var projectHolder: ProjectHolder
@@ -29,7 +37,10 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
       }
 
     executeInNewTransaction(platformTransactionManager) {
-      projectHolder.project = ProjectDto.fromEntity(testData.project)
+      val projectDto = ProjectDto.fromEntity(testData.project)
+      Mockito.`when`(authenticationFacade.targetProjectOrNull).thenReturn(projectDto)
+      projectHolder.project = projectDto
+
       keyService.create(
         testData.project,
         CreateKeyDto(
