@@ -56,7 +56,6 @@ class OrganizationAuthorizationInterceptor(
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
-
     var bypassed = false
     val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredRole = getRequiredRole(request, handler)
