@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 import java.io.Serializable
 
 @Component
-class ActivityInterceptor : EmptyInterceptor(), Logging {
+class ActivityDatabaseInterceptor : EmptyInterceptor(), Logging {
 
   @Autowired
   lateinit var applicationContext: ApplicationContext

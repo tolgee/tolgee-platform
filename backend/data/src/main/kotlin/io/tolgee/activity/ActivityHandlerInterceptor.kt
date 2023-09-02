@@ -3,39 +3,32 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.ScopeNotActiveException
-import org.springframework.context.ApplicationContext
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import org.springframework.web.servlet.HandlerInterceptor
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class ActivityFilter(
-  private val applicationContext: ApplicationContext,
+class ActivityHandlerInterceptor(
   private val activityHolder: ActivityHolder,
   private val sdkInfoProvider: SdkInfoProvider
-) : OncePerRequestFilter() {
-  // Lazy loading with @Lazy makes it throw a NPE :shrug:
-  private val requestMappingHandlerMapping: RequestMappingHandlerMapping by lazy {
-    applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping::class.java)
-  }
+) : HandlerInterceptor {
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
-  override fun doFilterInternal(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    filterChain: FilterChain
-  ) {
+  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    if (handler !is HandlerMethod) {
+      return super.preHandle(request, response, handler)
+    }
 
     try {
-      val activityAnnotation = getActivityAnnotation(request)
-
+      val activityAnnotation = AnnotationUtils.getAnnotation(handler.method, RequestActivity::class.java)
       if (activityAnnotation != null) {
         activityHolder.activity = activityAnnotation.activity
       }
@@ -46,16 +39,11 @@ class ActivityFilter(
       logger.debug("Activity filter called outside of request scope")
     }
 
-    filterChain.doFilter(request, response)
+    return true
   }
 
   private fun assignSdkInfo(request: HttpServletRequest) {
     activityHolder.sdkInfo = sdkInfoProvider.getSdkInfo(request)
-  }
-
-  private fun getActivityAnnotation(request: HttpServletRequest): RequestActivity? {
-    val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-    return handlerMethod?.getMethodAnnotation(RequestActivity::class.java)
   }
 
   fun assignUtmData(request: HttpServletRequest) {
@@ -65,7 +53,7 @@ class ActivityFilter(
       activityHolder.utmData = parsed
     } catch (e: Exception) {
       Sentry.captureException(e)
-      logger.error(e)
+      logger.error("Exception occurred while assigning UTM data", e)
     }
   }
 
