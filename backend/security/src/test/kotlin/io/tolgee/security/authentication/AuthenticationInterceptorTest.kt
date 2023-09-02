@@ -28,6 +28,7 @@ class AuthenticationInterceptorTest {
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
+    Mockito.`when`(userAccount.needsSuperJwt).thenReturn(true)
   }
 
   @AfterEach
@@ -51,6 +52,10 @@ class AuthenticationInterceptorTest {
   fun `it enforces the super JWT requirement`() {
     mockMvc.perform(get("/requires-super-auth")).andIsForbidden
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(true)
+    mockMvc.perform(get("/requires-super-auth")).andIsOk
+
+    Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
+    Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
     mockMvc.perform(get("/requires-super-auth")).andIsOk
   }
 

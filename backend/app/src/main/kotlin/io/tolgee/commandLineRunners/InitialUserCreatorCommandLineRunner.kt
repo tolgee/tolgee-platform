@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Order(0)
@@ -23,6 +24,7 @@ class InitialUserCreatorCommandLineRunner(
 ) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
+  @Transactional
   override fun run(vararg args: String) {
     val initialUser = userAccountService.findInitialUser()
     if (initialUser == null) {
