@@ -19,6 +19,8 @@ package io.tolgee.security.authentication
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.model.Organization
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -31,6 +33,11 @@ class TolgeeAuthentication(
 ) : Authentication {
   var targetOrganization: OrganizationDto? = null
   var targetProject: ProjectDto? = null
+
+  var targetOrganizationEntity: Organization? = null
+  var targetProjectEntity: Project? = null
+
+  var userAccountEntity: UserAccount? = null
 
   override fun getName(): String {
     return userAccount.username

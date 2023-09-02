@@ -107,6 +107,14 @@ class UserAccountService(
 
   @Transactional
   fun createInitialUser(request: SignUpDto): UserAccount {
+    // Check if the account already exists.
+    // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.
+    val candidate = findActive(request.email)
+    if (candidate != null) {
+      candidate.isInitialUser = true
+      return save(candidate)
+    }
+
     dtoToEntity(request).let {
       it.role = UserAccount.Role.ADMIN
       it.isInitialUser = true

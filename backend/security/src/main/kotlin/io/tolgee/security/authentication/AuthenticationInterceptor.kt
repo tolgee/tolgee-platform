@@ -49,7 +49,11 @@ class AuthenticationInterceptor(
       throw PermissionException(Message.INVALID_AUTHENTICATION_METHOD)
     }
 
-    if (requiresSuperAuth && !authenticationFacade.isUserSuperAuthenticated) {
+    if (
+      requiresSuperAuth &&
+      authenticationFacade.authenticatedUser.needsSuperJwt &&
+      !authenticationFacade.isUserSuperAuthenticated
+    ) {
       throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }
 

@@ -64,13 +64,7 @@ class DbPopulatorReal(
         password = password
           ?: initialPasswordManager.initialPassword
       )
-
-      if (username == tolgeeProperties.authentication.initialUsername) {
-        // Avoid conflicts with the initial user creation procedure
-        userAccountService.createInitialUser(signUpDto)
-      } else {
-        userAccountService.createUser(signUpDto)
-      }
+      userAccountService.createUser(signUpDto)
     }
   }
 
@@ -153,7 +147,7 @@ class DbPopulatorReal(
 
   @Transactional
   fun createBase(projectName: String): Base {
-    return createBase(projectName, tolgeeProperties.authentication.initialUsername + "_base")
+    return createBase(projectName, tolgeeProperties.authentication.initialUsername)
   }
 
   fun populate(projectName: String): Base {

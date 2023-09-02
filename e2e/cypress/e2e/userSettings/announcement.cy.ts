@@ -29,6 +29,7 @@ describe('Feature announcement', () => {
 
   it('Announcement will disappear', () => {
     forceDate(new Date('2100-01-01').getTime());
+    login(initalUser, INITIAL_PASSWORD); // relog necessary: JWT is expired!
     visit();
     cy.gcy('global-base-view-content').should('exist');
     cy.gcy('top-banner-content').should('not.exist');

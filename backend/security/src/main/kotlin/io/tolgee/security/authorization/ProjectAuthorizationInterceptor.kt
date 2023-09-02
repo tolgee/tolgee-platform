@@ -19,12 +19,14 @@ package io.tolgee.security.authorization
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
+import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
@@ -44,6 +46,8 @@ class ProjectAuthorizationInterceptor(
   private val requestContextService: RequestContextService,
   private val projectHolder: ProjectHolder,
 ) : HandlerInterceptor, Ordered {
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (handler !is HandlerMethod) {
       return super.preHandle(request, response, handler)
@@ -62,40 +66,77 @@ class ProjectAuthorizationInterceptor(
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
-    projectHolder.project = project
-    authenticationFacade.authentication.targetProject = project
-    authenticationFacade.authentication.targetOrganization = organizationService.findDto(project.organizationOwnerId)
-
+    var bypassed = false
+    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredScopes = getRequiredScopes(request, handler)
+
+    val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
+    logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
+
     val scopes =
       if (authenticationFacade.isProjectApiKeyAuth)
         authenticationFacade.projectApiKey.scopes.toTypedArray()
       else
-        securityService.getProjectPermissionScopes(project.id, userId)
+        securityService.getProjectPermissionScopes(project.id, userId) ?: emptyArray()
 
-    if (scopes.isNullOrEmpty()) {
-      // Security consideration: if the user cannot see the project, pretend it does not exist.
-      throw NotFoundException()
+    if (scopes.isEmpty()) {
+      if (!isAdmin) {
+        logger.debug(
+          "Rejecting access to proj#{} for user#{} - No view permissions",
+          project.id,
+          userId
+        )
+
+        // Security consideration: if the user cannot see the project, pretend it does not exist.
+        throw NotFoundException()
+      }
+
+      bypassed = true
     }
 
     requiredScopes?.forEach {
       if (!scopes.contains(it)) {
-        throw PermissionException(
-          Message.OPERATION_NOT_PERMITTED,
-          requiredScopes.map { s -> s.value }
-        )
+        if (!isAdmin) {
+          logger.debug(
+            "Rejecting access to proj#{} for user#{} - Insufficient permissions",
+            project.id,
+            userId
+          )
+
+          throw PermissionException(
+            Message.OPERATION_NOT_PERMITTED,
+            requiredScopes.map { s -> s.value }
+          )
+        }
+
+        bypassed = true
       }
     }
 
     if (authenticationFacade.isProjectApiKeyAuth) {
+      val pak = authenticationFacade.projectApiKey
       // Verify the key matches the project
-      if (project.id != authenticationFacade.projectApiKey.projectId) {
+      if (project.id != pak.projectId) {
+        logger.debug(
+          "Rejecting access to proj#{} for user#{} via pak#{} - API Key mismatch",
+          project.id,
+          userId,
+          pak.id
+        )
+
         throw PermissionException()
       }
 
       // Validate scopes set on the key
       requiredScopes?.forEach {
-        if (!authenticationFacade.projectApiKey.scopes.contains(it)) {
+        if (!pak.scopes.contains(it)) {
+          logger.debug(
+            "Rejecting access to proj#{} for user#{} via pak#{} - Insufficient permissions granted to PAK",
+            project.id,
+            userId,
+            pak.id
+          )
+
           throw PermissionException(
             Message.OPERATION_NOT_PERMITTED,
             requiredScopes.map { s -> s.value }
@@ -104,6 +145,19 @@ class ProjectAuthorizationInterceptor(
       }
     }
 
+    if (bypassed) {
+      logger.info(
+        "Use of admin privileges: user#{} failed local security checks for proj#{} - bypassing for {} {}",
+        userId,
+        project.id,
+        request.method,
+        request.requestURI,
+      )
+    }
+
+    projectHolder.project = project
+    authenticationFacade.authentication.targetProject = project
+    authenticationFacade.authentication.targetOrganization = organizationService.findDto(project.organizationOwnerId)
     return true
   }
 

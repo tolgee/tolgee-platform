@@ -11,10 +11,6 @@ services:
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:8201
-      # tests go brrrr but then get 429'd and no longer go brrrr
-      - tolgee.rate-limits.global-limits=false
-      - tolgee.rate-limits.endpoint-limits=false
-      - tolgee.rate-limits.authentication-limits=false
   fakesmtp:
     image: reachfive/fake-smtp-server:0.8.1
     ports:

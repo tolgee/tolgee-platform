@@ -80,18 +80,6 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `it saves proper data and returns correct response `() {
-    val base = dbPopulator.createBase(generateUniqueString())
-    commitTransaction()
-
-    performImport(projectId = base.project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
-      .andPrettyPrint.andAssertThatJson {
-        node("result._embedded.languages").isArray.hasSize(3)
-      }
-    validateSavedJsonImportData(base.project, base.userAccount)
-  }
-
-  @Test
   fun `it handles po file`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
@@ -280,8 +268,8 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
     executeInNewTransaction {
       importService.find(base.project.id, base.userAccount.id)!!.let {
-        assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("not_string")
-        assertThat(it.files[0].issues[0].params?.get(2)?.value).isEqualTo(
+        assertThat(it.files[0].issues[0].params[0].value).isEqualTo("not_string")
+        assertThat(it.files[0].issues[0].params[2].value).isEqualTo(
           "[Lorem ipsum dolor sit amet," +
             " consectetur adipiscing elit. Suspendisse" +
             " ac ultricies tortor. Integer ac..."

@@ -18,10 +18,12 @@ package io.tolgee.security.authorization
 
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
+import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
@@ -40,6 +42,8 @@ class OrganizationAuthorizationInterceptor(
   private val organizationRoleService: OrganizationRoleService,
   private val requestContextService: RequestContextService,
 ) : HandlerInterceptor, Ordered {
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (handler !is HandlerMethod) {
       return super.preHandle(request, response, handler)
@@ -52,14 +56,54 @@ class OrganizationAuthorizationInterceptor(
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
+
+    var bypassed = false
+    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredRole = getRequiredRole(request, handler)
+    logger.debug(
+      "Checking access to org#{} by user#{} (Requires {})",
+      organization.id,
+      userId,
+      requiredRole ?: "read-only"
+    )
+
     if (!organizationRoleService.canUserView(userId, organization.id)) {
-      // Security consideration: if the user cannot see the organization, pretend it does not exist.
-      throw NotFoundException()
+      if (!isAdmin) {
+        logger.debug(
+          "Rejecting access to org#{} for user#{} - No view permissions",
+          organization.id,
+          userId,
+        )
+
+        // Security consideration: if the user cannot see the organization, pretend it does not exist.
+        throw NotFoundException()
+      }
+
+      bypassed = true
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      throw PermissionException()
+      if (!isAdmin) {
+        logger.debug(
+          "Rejecting access to org#{} for user#{} - Insufficient role",
+          organization.id,
+          userId,
+        )
+
+        throw PermissionException()
+      }
+
+      bypassed = true
+    }
+
+    if (bypassed) {
+      logger.info(
+        "Use of admin privileges: user#{} failed local security checks for org#{} - bypassing for {} {}",
+        userId,
+        organization.id,
+        request.method,
+        request.requestURI,
+      )
     }
 
     authenticationFacade.authentication.targetOrganization = organization

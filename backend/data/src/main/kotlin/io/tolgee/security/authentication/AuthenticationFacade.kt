@@ -53,7 +53,13 @@ class AuthenticationFacade(
     get() = authenticatedUserEntityOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   val authenticatedUserEntityOrNull: UserAccount?
-    get() = if (isAuthenticated) userAccountService.findActive(authenticatedUser.id) else null
+    get() = authenticatedUserOrNull?.let {
+      if (authentication.userAccountEntity == null) {
+        authentication.userAccountEntity = userAccountService.findActive(it.id)
+      }
+
+      return authentication.userAccountEntity
+    }
 
   // -- CURRENT ORGANIZATION
   val targetOrganization: OrganizationDto
@@ -66,7 +72,13 @@ class AuthenticationFacade(
     get() = targetOrganizationEntityOrNull ?: throw IllegalStateException("No available organization")
 
   val targetOrganizationEntityOrNull: Organization?
-    get() = targetOrganizationOrNull?.let { organizationService.find(it.id) }
+    get() = targetOrganizationOrNull?.let {
+      if (authentication.targetOrganizationEntity == null) {
+        authentication.targetOrganizationEntity = organizationService.find(it.id)
+      }
+
+      return authentication.targetOrganizationEntity
+    }
 
   // -- CURRENT PROJECT
   val targetProject: ProjectDto
@@ -79,18 +91,20 @@ class AuthenticationFacade(
     get() = targetProjectEntityOrNull ?: throw ProjectNotSelectedException()
 
   val targetProjectEntityOrNull: Project?
-    get() = targetProjectOrNull?.let { projectService.find(it.id) }
+    get() = targetProjectOrNull?.let {
+      if (authentication.targetProjectEntity == null) {
+        authentication.targetProjectEntity = projectService.find(it.id)
+      }
+
+      return authentication.targetProjectEntity
+    }
 
   // -- AUTHENTICATION METHOD AND DETAILS
   val isUserSuperAuthenticated: Boolean
     get() = if (isAuthenticated) authentication.details?.isSuperToken == true else false
 
   val isApiAuthentication: Boolean
-    get() =
-      if (isAuthenticated)
-        authentication.credentials is ApiKeyDto || authentication.credentials is PatDto
-      else
-        false
+    get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth
 
   val isProjectApiKeyAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false

@@ -22,6 +22,8 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
@@ -47,8 +49,10 @@ class OrganizationService(
   @Lazy
   private val userPreferencesService: UserPreferencesService,
   private val tolgeeProperties: TolgeeProperties,
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
+  private val cacheManager: CacheManager,
 ) {
+  private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
   @set:Autowired
   lateinit var projectService: ProjectService
@@ -172,31 +176,25 @@ class OrganizationService(
     return organizationRepository.getOneBySlug(slug)
   }
 
-  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "#id")
+  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun findDto(id: Long): CachedOrganizationDto? {
     return find(id)?.let { CachedOrganizationDto.fromEntity(it) }
   }
 
-  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "#slug")
+  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #slug}")
   fun findDto(slug: String): CachedOrganizationDto? {
     return find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
   }
 
-  @Caching(
-    evict = [
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#result.organization.id"),
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#result.organization.slug"),
-    ]
-  )
+  @CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
     val organization = this.find(id) ?: throw NotFoundException()
 
-    val newSlug = editDto.slug
-    if (newSlug == null) {
-      editDto.slug = organization.slug
-    }
+    // Evict slug-based cache entry
+    cache?.evict(listOf("slug", organization.slug))
 
-    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug!!)) {
+    val newSlug = editDto.slug ?: organization.slug
+    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug)) {
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
@@ -211,8 +209,8 @@ class OrganizationService(
   @Transactional
   @Caching(
     evict = [
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
     ]
   )
   fun delete(organization: Organization) {
