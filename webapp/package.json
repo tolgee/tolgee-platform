@@ -46,7 +46,7 @@
     "react-query": "^3.39.2",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
-    "recharts": "2.1.9",
+    "recharts": "2.7.3",
     "redux": "^4.1.0",
     "redux-promise-middleware": "^6.1.2",
     "redux-thunk": "^2.3.0",
