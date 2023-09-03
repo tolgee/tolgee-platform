@@ -139,7 +139,7 @@ class ApiKeyService(
 
   fun hashKey(key: String) = keyGenerator.hash(key)
 
-  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#result.keyHash")
+  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#entity.keyHash")
   fun save(entity: ApiKey): ApiKey {
     entity.key?.let { key ->
       entity.keyHash = hashKey(key)
@@ -187,9 +187,11 @@ class ApiKeyService(
     apiKeyRepository.updateLastUsedById(apiKeyId, currentDateProvider.date)
   }
 
-  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#result.keyHash")
   fun regenerate(id: Long, expiresAt: Long?): ApiKey {
     val apiKey = get(id)
+    // Manual cache eviction
+    cache?.evict(apiKey.keyHash)
+
     apiKey.key = generateKey()
     apiKey.expiresAt = expiresAt?.let { Date(it) }
     return save(apiKey)

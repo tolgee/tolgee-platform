@@ -12,6 +12,8 @@ import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.PatRepository
 import io.tolgee.util.runSentryCatching
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
@@ -25,8 +27,10 @@ import java.util.*
 class PatService(
   private val patRepository: PatRepository,
   private val keyGenerator: KeyGenerator,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val cacheManager: CacheManager,
 ) {
+  private val cache: Cache? by lazy { cacheManager.getCache(Caches.PERSONAL_ACCESS_TOKENS) }
 
   fun find(hash: String): Pat? {
     return patRepository.findByTokenHash(hash)
@@ -49,7 +53,7 @@ class PatService(
     return find(hash)?.let { PatDto.fromEntity(it) }
   }
 
-  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#result.tokenHash")
+  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#pat.tokenHash")
   fun save(pat: Pat): Pat {
     if (pat.tokenHash.isBlank()) {
       pat.regenerateToken()
@@ -70,9 +74,11 @@ class PatService(
     return save(pat)
   }
 
-  @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#result.tokenHash")
   fun regenerate(id: Long, expiresAt: Long?): Pat {
     val pat = get(id).apply {
+      // Manual cache eviction
+      cache?.evict(this.tokenHash)
+
       this.expiresAt = expiresAt.epochToDate()
       this.regenerateToken()
       save(this)
