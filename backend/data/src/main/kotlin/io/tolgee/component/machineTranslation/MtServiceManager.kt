@@ -8,6 +8,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
+import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -136,7 +137,11 @@ class MtServiceManager(
       throw LanguageNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
 
-    if (!provider.isLanguageFormalitySupported(params.targetLanguageTag)) {
+    val formality = params.serviceInfo.formality
+    val requiresFormality = formality != null &&
+      formality != Formality.DEFAULT
+
+    if (!provider.isLanguageFormalitySupported(params.targetLanguageTag) && requiresFormality) {
       throw FormalityNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
   }
