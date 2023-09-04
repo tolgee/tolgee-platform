@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2ProjectsController
+package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.MtServiceType
@@ -6,10 +6,14 @@ import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.Language
+import io.tolgee.model.mtServiceConfig.Formality
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthControllerTest() {
+class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   lateinit var testData: MtSettingsTestData
 
@@ -60,27 +64,77 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.englishLanguage.id,
             primaryService = MtServiceType.GOOGLE,
-            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+            enabledServicesInfo = setOf(
+              MtServiceInfo(MtServiceType.GOOGLE, null),
+              MtServiceInfo(MtServiceType.AWS, Formality.DEFAULT)
+            )
           )
         )
       )
     ).andIsOk.andAssertThatJson {
       node("_embedded.languageConfigs") {
+        node("[0]") {
+          node("targetLanguageId").isNull()
+          node("primaryService").isEqualTo("GOOGLE")
+          node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
+          node("enabledServicesInfo") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formality").isNull()
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formality").isEqualTo("DEFAULT")
+            }
+          }
+        }
         node("[1]") {
           node("targetLanguageId").isValidId
           node("targetLanguageTag").isEqualTo("en")
           node("targetLanguageName").isEqualTo("English")
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
-        }
-        node("[0]") {
-          node("targetLanguageId").isNull()
-          node("primaryService").isEqualTo("GOOGLE")
-          node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
+          node("enabledServicesInfo") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formality").isNull()
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formality").isEqualTo("DEFAULT")
+            }
+          }
         }
       }
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it validates the config`() {
+    performSet(null, MtServiceType.AWS, Formality.FORMAL).andIsOk
+    performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
+    performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+    performSet(testData.englishLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+  }
+
+  private fun performSet(language: Language?, mtServiceType: MtServiceType, formality: Formality) = performAuthPut(
+    "/v2/projects/${project.id}/machine-translation-service-settings",
+    SetMachineTranslationSettingsDto(
+      listOf(
+        MachineTranslationLanguagePropsDto(
+          targetLanguageId = language?.id,
+          primaryService = MtServiceType.GOOGLE,
+          enabledServicesInfo = setOf(
+            MtServiceInfo(mtServiceType, formality)
+          )
+        )
+      )
+    )
+  )
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -117,6 +171,32 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
           node("targetLanguageName").isEqualTo("German")
           node("primaryService").isEqualTo("AWS")
           node("enabledServices").isArray.isEqualTo("""[ "AWS" ]""")
+        }
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it returns the info`() {
+    performAuthGet(
+      "/v2/projects/${project.id}/machine-translation-language-info"
+    ).andPrettyPrint.andAssertThatJson {
+      node("_embedded.languageInfos") {
+        isArray
+        node("[1]") {
+          node("languageTag").isEqualTo("de")
+          node("supportedServices") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formalitySupported").isEqualTo(false)
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formalitySupported").isEqualTo(true)
+            }
+          }
         }
       }
     }

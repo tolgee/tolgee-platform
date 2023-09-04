@@ -146,4 +146,5 @@ class GoogleTranslationProvider(
     "he",
     "zh"
   )
+  override val formalitySupportingLanguages: Array<String>? = null
 }

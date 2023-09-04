@@ -9,6 +9,7 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.logger
@@ -51,7 +52,8 @@ class TolgeeTranslateApiService(
       params.targetTag,
       examples,
       closeItems,
-      priority = if (params.isBatch) "low" else "high"
+      priority = if (params.isBatch) "low" else "high",
+      params.formality
     )
     val request = HttpEntity(requestBody, headers)
 
@@ -122,7 +124,8 @@ class TolgeeTranslateApiService(
       val target: String?,
       val examples: List<TolgeeTranslateExample>?,
       val closeItems: List<TolgeeTranslateExample>?,
-      val priority: String = "low"
+      val priority: String = "low",
+      val formality: Formality? = null
     )
 
     class TolgeeTranslateParams(
@@ -131,6 +134,7 @@ class TolgeeTranslateApiService(
       val sourceTag: String,
       val targetTag: String,
       val metadata: Metadata?,
+      val formality: Formality?,
       val isBatch: Boolean
     )
 

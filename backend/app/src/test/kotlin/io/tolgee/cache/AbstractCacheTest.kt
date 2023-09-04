@@ -13,6 +13,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.assertions.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,13 +66,13 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       keyName = "key-name",
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
-      serviceType = MtServiceType.GOOGLE,
+      serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
       isBatch = false
     )
   }
 
   val paramsEnAws by lazy {
-    paramsEnGoogle.copy(serviceType = MtServiceType.AWS)
+    paramsEnGoogle.copy(serviceInfo = MtServiceInfo(MtServiceType.AWS, null))
   }
 
   @BeforeEach

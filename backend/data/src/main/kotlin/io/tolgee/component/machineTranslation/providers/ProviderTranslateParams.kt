@@ -1,6 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.metadata.Metadata
+import io.tolgee.model.mtServiceConfig.Formality
 
 data class ProviderTranslateParams(
   val text: String,
@@ -9,6 +10,7 @@ data class ProviderTranslateParams(
   var sourceLanguageTag: String,
   var targetLanguageTag: String,
   val metadata: Metadata? = null,
+  val formality: Formality? = null,
 
   /**
    * Whether translation is executed as a part of batch translation task
