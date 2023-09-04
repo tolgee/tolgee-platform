@@ -1,13 +1,15 @@
 import { Skeleton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { components } from 'tg.service/apiSchema.generated';
 import { TabMessage } from './TabMessage';
 import { useTranslationTools } from './useTranslationTools';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { ProviderLogo } from './ProviderLogo';
-
-type TranslationItemModel = components['schemas']['TranslationItemModel'];
+import { CombinedMTResponse } from './useMTStreamed';
+import { UseQueryResult } from 'react-query';
+import { ApiError } from 'tg.service/http/ApiError';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import clsx from 'clsx';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -21,13 +23,17 @@ const StyledItem = styled('div')`
   display: grid;
   gap: ${({ theme }) => theme.spacing(0, 1)};
   grid-template-columns: 20px 1fr;
-  cursor: pointer;
   transition: all 0.1s ease-in-out;
   transition-property: background color;
 
   &:hover {
     background: ${({ theme }) => theme.palette.emphasis[100]};
-    color: ${({ theme }) => theme.palette.primary.main};
+  }
+  &.clickable {
+    cursor: pointer;
+    &:hover {
+      color: ${({ theme }) => theme.palette.primary.main};
+    }
   }
 `;
 
@@ -36,35 +42,35 @@ const StyledValue = styled('div')`
   align-self: center;
 `;
 
+const StyledError = styled(StyledValue)`
+  color: ${({ theme }) => theme.palette.error.main};
+`;
+
 const StyledDescription = styled('div')`
   font-size: 13px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-type ProviderData = {
-  provider: string;
-  data: TranslationItemModel | undefined;
-};
-
 type Props = {
-  data: ProviderData[] | undefined;
+  machine: UseQueryResult<CombinedMTResponse, ApiError> | undefined;
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
   languageTag: string;
   contextPresent: boolean | undefined;
-  isFetching: boolean;
 };
 
 export const MachineTranslation: React.FC<Props> = ({
-  data,
+  machine,
   operationsRef,
   languageTag,
   contextPresent,
-  isFetching,
 }) => {
   const { t } = useTranslate();
-  const baseIsEmpty = data?.find((item) => item.data === null);
-  const nothingFetched =
-    data?.every((item) => !item.data?.output) && isFetching;
+  const baseIsEmpty = false;
+  const data = machine?.data;
+  const nothingFetched = !data?.servicesTypes;
+  const results = data?.servicesTypes.map(
+    (provider) => [provider, data.result[provider]] as const
+  );
 
   return (
     <StyledContainer>
@@ -72,40 +78,48 @@ export const MachineTranslation: React.FC<Props> = ({
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         !nothingFetched &&
-        data?.map(({ provider, data }) => {
+        results?.map(([provider, data]) => {
+          const error = data?.errorMessage?.toLowerCase();
+          const result = data?.result;
+          const clickable = data?.result?.output;
           return (
             <StyledItem
               key={provider}
               onMouseDown={(e) => {
-                e.preventDefault();
-              }}
-              onClick={() => {
-                if (data?.output) {
-                  operationsRef.current.updateTranslation(data?.output);
+                if (clickable) {
+                  e.preventDefault();
                 }
               }}
-              role="button"
+              onClick={() => {
+                if (clickable) {
+                  operationsRef.current.updateTranslation(result!.output);
+                }
+              }}
               data-cy="translation-tools-machine-translation-item"
+              className={clsx({ clickable })}
             >
               <ProviderLogo
                 provider={provider}
                 contextPresent={contextPresent}
               />
-              {data?.output && (
+              {result?.output ? (
                 <>
                   <StyledValue dir={getLanguageDirection(languageTag)}>
-                    <div>{data?.output}</div>
-                    {data.contextDescription && (
+                    <div>{result.output}</div>
+                    {result.contextDescription && (
                       <StyledDescription>
-                        {data.contextDescription}
+                        {result.contextDescription}
                       </StyledDescription>
                     )}
                   </StyledValue>
                 </>
-              )}
-              {data?.output === undefined && isFetching && (
+              ) : error ? (
+                <StyledError>
+                  <TranslatedError code={error} />
+                </StyledError>
+              ) : !result && machine?.isFetching ? (
                 <Skeleton variant="text" />
-              )}
+              ) : null}
             </StyledItem>
           );
         })

@@ -298,6 +298,9 @@ export interface paths {
   "/v2/projects/{projectId}/suggest/translation-memory": {
     post: operations["suggestTranslationMemory"];
   };
+  "/v2/projects/{projectId}/suggest/machine-translations-streaming": {
+    post: operations["suggestMachineTranslationsStreaming"];
+  };
   "/v2/projects/{projectId}/suggest/machine-translations": {
     post: operations["suggestMachineTranslations"];
   };
@@ -386,6 +389,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/namespace-by-name/{name}": {
     get: operations["getByName"];
+  };
+  "/v2/projects/{projectId}/machine-translation-language-info": {
+    get: operations["getMachineTranslationLanguageInfo"];
   };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
@@ -622,6 +628,21 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
        *
@@ -658,21 +679,6 @@ export interface components {
         | "translations.batch-by-tm"
         | "translations.batch-machine"
       )[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -812,7 +818,10 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** @description List of enabled services */
+      /**
+       * @deprecated
+       * @description List of enabled services (deprecated: use enabledServicesInfo)
+       */
       enabledServices: (
         | "GOOGLE"
         | "AWS"
@@ -821,6 +830,13 @@ export interface components {
         | "BAIDU"
         | "TOLGEE"
       )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
+    };
+    /** @description Info about enabled services */
+    MtServiceInfo: {
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -848,7 +864,10 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** @description Services to be used for suggesting */
+      /**
+       * @deprecated
+       * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
+       */
       enabledServices: (
         | "GOOGLE"
         | "AWS"
@@ -857,6 +876,8 @@ export interface components {
         | "BAIDU"
         | "TOLGEE"
       )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
     };
     TagKeyDto: {
       name: string;
@@ -1210,14 +1231,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1350,17 +1371,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      username?: string;
-      description: string;
+      scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1896,8 +1917,6 @@ export interface components {
     };
     AnnouncementDto: {
       type: "FEATURE_BATCH_OPERATIONS";
-      /** Format: int64 */
-      until: number;
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1955,18 +1974,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2055,6 +2074,21 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    CollectionModelLanguageInfoModel: {
+      _embedded?: {
+        languageInfos?: components["schemas"]["LanguageInfoModel"][];
+      };
+    };
+    LanguageInfoModel: {
+      /** Format: int64 */
+      languageId: number;
+      languageTag: string;
+      supportedServices: components["schemas"]["MtSupportedService"][];
+    };
+    MtSupportedService: {
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      formalitySupported: boolean;
+    };
     CreditBalanceModel: {
       /** Format: int64 */
       creditBalance: number;
@@ -2067,18 +2101,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2524,14 +2558,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2650,17 +2684,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      username?: string;
-      description: string;
+      scopes: string[];
+      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -5932,6 +5966,38 @@ export interface operations {
       };
     };
   };
+  suggestMachineTranslationsStreaming: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
   suggestMachineTranslations: {
     parameters: {
       path: {
@@ -6840,6 +6906,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getMachineTranslationLanguageInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageInfoModel"];
         };
       };
       /** Bad Request */

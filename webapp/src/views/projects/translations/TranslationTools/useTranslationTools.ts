@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 
 import { stringHash } from 'tg.fixtures/stringHash';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { useProjectActions, useProjectContext } from 'tg.hooks/ProjectContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslationsSelector } from '../context/TranslationsContext';
+import { useMTStreamed } from './useMTStreamed';
 
 type Props = {
   projectId: number;
@@ -23,36 +22,17 @@ export const useTranslationTools = ({
   onValueUpdate,
   enabled = true,
 }: Props) => {
-  const { updateUsage } = useGlobalActions();
-
   const contextPresent = useTranslationsSelector(
     (c) => c.translations?.find((item) => item.keyId === keyId)?.contextPresent
   );
-
-  const enabledMtServices = useProjectContext((c) => c.enabledMtServices);
-  const { refetchSettings } = useProjectActions();
-
-  const mtServices = useMemo(() => {
-    const settingItem =
-      enabledMtServices?.find((i) => i.targetLanguageId === targetLanguageId) ||
-      enabledMtServices?.find((i) => i.targetLanguageId === null);
-
-    const orderedEnabledServices = settingItem?.enabledServices.sort((a) => {
-      if (a === 'TOLGEE') return -1;
-      else return 1;
-    });
-
-    return orderedEnabledServices || [];
-  }, [enabledMtServices, targetLanguageId]);
-
-  const fast = mtServices.filter((item) => item !== 'TOLGEE');
-  const slow = mtServices.filter((item) => item === 'TOLGEE');
 
   const dependencies = {
     keyId,
     targetLanguageId,
     baseText,
   };
+
+  const dependenciesHash = stringHash(JSON.stringify(dependencies));
 
   const data = {
     keyId,
@@ -65,7 +45,7 @@ export const useTranslationTools = ({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
     // @ts-ignore add all dependencies to properly update query
-    query: { hash: stringHash(JSON.stringify(dependencies)) },
+    query: { hash: dependenciesHash },
     path: { projectId },
     content: {
       'application/json': data,
@@ -75,67 +55,19 @@ export const useTranslationTools = ({
     },
   });
 
-  const machineFast = useApiQuery({
-    url: '/v2/projects/{projectId}/suggest/machine-translations',
-    method: 'post',
+  const machine = useMTStreamed({
     path: { projectId },
+    content: { 'application/json': { ...data } },
     // @ts-ignore add all dependencies to properly update query
-    query: { hash: stringHash(JSON.stringify({ ...dependencies, fast })) },
-    content: {
-      'application/json': { ...data, services: fast },
-    },
+    query: { hash: dependenciesHash },
     fetchOptions: {
       // error is displayed inside the popup
       disableAutoErrorHandle: false,
     },
     options: {
       keepPreviousData: true,
-      enabled: enabled && Boolean(fast.length),
-      onSettled(data) {
-        if (data) {
-          updateUsage({
-            creditBalance: data.translationCreditsBalanceAfter,
-            extraCreditBalance: data.translationExtraCreditsBalanceAfter,
-          });
-        }
-      },
+      enabled: enabled,
     },
-  });
-
-  const machineSlow = useApiQuery({
-    url: '/v2/projects/{projectId}/suggest/machine-translations',
-    method: 'post',
-    path: { projectId },
-    // @ts-ignore add all dependencies to properly update query
-    query: { hash: stringHash(JSON.stringify({ ...dependencies, slow })) },
-    content: {
-      'application/json': { ...data, services: slow },
-    },
-    fetchOptions: {
-      // error is displayed inside the popup
-      disableAutoErrorHandle: true,
-    },
-    options: {
-      keepPreviousData: true,
-      refetchOnMount: true,
-      enabled: enabled && Boolean(slow.length),
-      onSettled(data) {
-        if (data) {
-          updateUsage({
-            creditBalance: data.translationCreditsBalanceAfter,
-            extraCreditBalance: data.translationExtraCreditsBalanceAfter,
-          });
-        }
-      },
-    },
-  });
-
-  const machine = mtServices.map((provider) => {
-    const sourceData = slow.includes(provider) ? machineSlow : machineFast;
-    return {
-      provider,
-      data: sourceData.data?.result?.[provider],
-    };
   });
 
   const updateTranslation = (value: string) => {
@@ -150,25 +82,12 @@ export const useTranslationTools = ({
 
   operationsRef.current = operations;
 
-  useEffect(() => {
-    if (
-      [machineFast.error?.code, machineSlow.error?.code].includes(
-        'mt_service_not_enabled'
-      )
-    ) {
-      // refetch project mt settings if this error appears
-      refetchSettings();
-    }
-  }, [machineFast.error?.code, machineSlow.error?.code]);
-
   return useMemo(
     () => ({
       operationsRef,
-      isFetching:
-        memory.isFetching || machineFast.isFetching || machineSlow.isFetching,
+      isFetching: memory.isFetching || machine.isFetching,
       memory: enabled ? memory : undefined,
       machine: enabled ? machine : undefined,
-      machineError: machineFast.error || machineSlow.error,
       contextPresent,
     }),
     [
@@ -176,10 +95,10 @@ export const useTranslationTools = ({
       memory.isFetching,
       memory.data,
       operationsRef,
-      machineFast.isFetching,
-      machineFast.data,
-      machineSlow.isFetching,
-      machineSlow.data,
+      machine.status,
+      machine.isFetching,
+      machine.data,
+      machine.dataUpdatedAt,
     ]
   );
 };

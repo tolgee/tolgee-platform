@@ -73,6 +73,7 @@ export const MachineTranslation = () => {
       targetLanguageId: targetLanguageId as any,
       primaryService: (primary === 'none' ? null : primary) as any,
       enabledServices: enabled as any,
+      enabledServicesInfo: [],
     };
   };
 

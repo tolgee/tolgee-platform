@@ -89,14 +89,13 @@ const TranslationTools = React.memo(function TranslationTools({
             )}
             icon={<MachineTranslationIcon fontSize="small" color="inherit" />}
             badgeNumber={Object.keys(data.machine || {}).length}
-            error={data.machineError}
+            error={data.machine?.error}
           >
             <MachineTranslation
               languageTag={languageTag}
-              data={data.machine}
+              machine={data.machine}
               operationsRef={data.operationsRef}
               contextPresent={data.contextPresent}
-              isFetching={data.isFetching}
             />
           </ToolsTab>
         )}
