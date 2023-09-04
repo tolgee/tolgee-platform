@@ -2,7 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.Metadata
-import io.tolgee.constants.MtServiceType
+import io.tolgee.service.machineTranslation.MtServiceInfo
 
 data class TranslationParams(
   val text: String,
@@ -10,12 +10,12 @@ data class TranslationParams(
   val keyName: String?,
   val sourceLanguageTag: String,
   val targetLanguageTag: String,
-  val serviceType: MtServiceType,
+  val serviceInfo: MtServiceInfo,
   val metadata: Metadata?,
   val isBatch: Boolean
 ) {
 
   val cacheKey: String
     get() = jacksonObjectMapper()
-      .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceType, metadata))
+      .writeValueAsString(listOf(text, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata))
 }

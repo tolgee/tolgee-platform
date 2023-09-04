@@ -37,4 +37,5 @@ class AzureCognitiveTranslationProvider(
     "sw", "ta", "te", "th", "ti", "tk", "tlh-Latn", "tlh-Piqd", "to", "tr", "tt", "ty", "ug", "uk", "ur", "uz", "vi",
     "yua", "yue", "zh-Hans", "zh-Hant", "zu"
   )
+  override val formalitySupportingLanguages: Array<String>? = null
 }

@@ -57,7 +57,7 @@ class AutoTranslateChunkProcessor(
       return 5
     }
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()
-    if (!services.contains(MtServiceType.TOLGEE)) {
+    if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
       return 5
     }
     return 2

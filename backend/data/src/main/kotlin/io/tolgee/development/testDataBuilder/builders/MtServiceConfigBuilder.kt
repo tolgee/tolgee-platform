@@ -1,6 +1,6 @@
 package io.tolgee.development.testDataBuilder.builders
 
-import io.tolgee.model.MtServiceConfig
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 
 class MtServiceConfigBuilder(
   val projectBuilder: ProjectBuilder

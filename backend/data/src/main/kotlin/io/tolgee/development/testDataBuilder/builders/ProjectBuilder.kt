@@ -4,7 +4,6 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.ApiKey
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
-import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -14,6 +13,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 

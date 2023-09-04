@@ -2,6 +2,7 @@ package io.tolgee.hateoas.machineTranslation
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -21,6 +22,9 @@ class LanguageConfigItemModel(
   @Schema(description = "Service used for automated translating")
   val primaryService: MtServiceType?,
 
-  @Schema(description = "Services to be used for suggesting")
-  val enabledServices: Set<MtServiceType>
+  @Schema(description = "Services to be used for suggesting (deprecated: use enabledServicesInfo)", deprecated = true)
+  val enabledServices: Set<MtServiceType>,
+
+  @Schema(description = "Info about enabled services")
+  var enabledServicesInfo: Set<MtServiceInfo>
 ) : RepresentationModel<LanguageConfigItemModel>(), Serializable

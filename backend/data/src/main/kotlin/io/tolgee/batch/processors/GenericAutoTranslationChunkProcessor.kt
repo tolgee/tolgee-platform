@@ -7,6 +7,8 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.FormalityNotSupportedException
+import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.PlanTranslationLimitExceeded
 import io.tolgee.exceptions.TranslationSpendingLimitExceeded
@@ -75,6 +77,10 @@ class GenericAutoTranslationChunkProcessor(
         throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
       } catch (e: TranslationSpendingLimitExceeded) {
         throw FailedDontRequeueException(Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED, successfulTargets, e)
+      } catch (e: FormalityNotSupportedException) {
+        throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
+      } catch (e: LanguageNotSupportedException) {
+        throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
       } catch (e: Throwable) {
         throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
       }
