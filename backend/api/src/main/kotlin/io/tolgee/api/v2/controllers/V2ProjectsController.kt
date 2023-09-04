@@ -11,7 +11,6 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
-import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
@@ -20,7 +19,6 @@ import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
-import io.tolgee.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.hateoas.project.ProjectModel
 import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectTransferOptionModel
@@ -283,25 +281,6 @@ V2ProjectsController(
     val project = projectService.get(id)
     val invitations = invitationService.getForProject(project)
     return projectInvitationModelAssembler.toCollectionModel(invitations)
-  }
-
-  @GetMapping("/{projectId}/machine-translation-service-settings")
-  @Operation(summary = "Returns machine translation settings for project")
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey
-  fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
-    val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
-    return languageConfigItemModelAssembler.toCollectionModel(data)
-  }
-
-  @PutMapping("/{projectId}/machine-translation-service-settings")
-  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
-  @Operation(summary = "Sets machine translation settings for project")
-  fun setMachineTranslationSettings(
-    @RequestBody dto: SetMachineTranslationSettingsDto
-  ): CollectionModel<LanguageConfigItemModel> {
-    mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
-    return getMachineTranslationSettings()
   }
 
   @PutMapping("/{projectId}/auto-translation-settings")

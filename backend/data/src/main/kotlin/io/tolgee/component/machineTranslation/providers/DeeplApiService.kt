@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation.providers
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpHeaders
@@ -19,7 +20,7 @@ class DeeplApiService(
   private val restTemplate: RestTemplate,
 ) {
 
-  fun translate(text: String, sourceTag: String, targetTag: String): String? {
+  fun translate(text: String, sourceTag: String, targetTag: String, formality: Formality): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
 
@@ -29,8 +30,8 @@ class DeeplApiService(
     requestBody.add("text", text)
     requestBody.add("source_lang", sourceTag.uppercase())
     requestBody.add("target_lang", targetTag.uppercase())
-    // Optional parameters
-    requestBody.add("formality", deeplMachineTranslationProperties.formality)
+
+    addFormality(requestBody, formality)
 
     val response = restTemplate.postForEntity<DeeplResponse>(
       apiEndpointFromKey(),
@@ -39,6 +40,16 @@ class DeeplApiService(
 
     return response.body?.translations?.first()?.text
       ?: throw RuntimeException(response.toString())
+  }
+
+  private fun addFormality(requestBody: MultiValueMap<String, String>, formality: Formality) {
+    val deeplFormality = when (formality) {
+      Formality.FORMAL -> "prefer_more"
+      Formality.INFORMAL -> "prefer_less"
+      else -> "default"
+    }
+
+    return requestBody.add("formality", deeplFormality)
   }
 
   /**

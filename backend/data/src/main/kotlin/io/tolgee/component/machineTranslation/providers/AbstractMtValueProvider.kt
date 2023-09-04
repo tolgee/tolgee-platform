@@ -1,18 +1,16 @@
 package io.tolgee.component.machineTranslation.providers
 
-import io.tolgee.component.machineTranslation.LanguageTagConvertor
 import io.tolgee.component.machineTranslation.MtValueProvider
 
 abstract class AbstractMtValueProvider : MtValueProvider {
-  abstract val supportedLanguages: Array<String>?
 
   private val String.toSuitableTag: String?
-    get() {
-      if (supportedLanguages.isNullOrEmpty()) {
-        return this
-      }
-      return LanguageTagConvertor.findSuitableTag(supportedLanguages!!, this)
-    }
+    get() = getSuitableTag(this)
+
+  fun isFormalitySupported(tag: String): Boolean {
+    val suitableTag = getSuitableTag(tag) ?: return false
+    return formalitySupportingLanguages?.contains(suitableTag) ?: false
+  }
 
   override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val suitableSourceTag = params.sourceLanguageTag.toSuitableTag

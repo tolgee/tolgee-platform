@@ -7,6 +7,7 @@ import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.events.OnLanguagePrePersist
 import io.tolgee.events.OnLanguagePreRemove
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory

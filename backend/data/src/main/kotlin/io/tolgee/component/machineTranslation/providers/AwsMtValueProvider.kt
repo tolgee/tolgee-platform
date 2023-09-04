@@ -2,11 +2,14 @@ package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
+import software.amazon.awssdk.services.translate.model.TranslationSettings
+import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -23,9 +26,11 @@ class AwsMtValueProvider(
       TranslateTextRequest.builder()
         .sourceLanguageCode(params.sourceLanguageTag)
         .targetLanguageCode(params.targetLanguageTag)
+        .settings(getSettings(params))
         .text(params.text)
         .build()
     )
+
     return MtValueProvider.MtResult(
       result.translatedText(),
       params.text.length * 100
@@ -35,6 +40,38 @@ class AwsMtValueProvider(
   private val translateService by lazy {
     amazonTranslate ?: throw IllegalStateException("AmazonTranslate is not injected")
   }
+
+  private fun getAwsFormality(params: ProviderTranslateParams): AwsFormality? {
+    if (!isFormalitySupported(params.targetLanguageTag)) {
+      return null
+    }
+    return when (params.formality) {
+      Formality.FORMAL -> AwsFormality.FORMAL
+      Formality.INFORMAL -> AwsFormality.INFORMAL
+      else -> null
+    }
+  }
+
+  private fun getSettings(params: ProviderTranslateParams): TranslationSettings {
+    val formality = getAwsFormality(params) ?: return TranslationSettings.builder().build()
+    return TranslationSettings.builder()
+      .formality(formality)
+      .build()
+  }
+
+  override val formalitySupportingLanguages = arrayOf(
+    "nl",
+    "fr",
+    "fr-CA",
+    "de",
+    "hi",
+    "it",
+    "ja",
+    "ko",
+    "pt-PT",
+    "es",
+    "es-MX"
+  )
 
   override val supportedLanguages = arrayOf(
     "af",

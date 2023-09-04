@@ -1,3 +1,10 @@
+## [3.29.1](https://github.com/tolgee/tolgee-platform/compare/v3.29.0...v3.29.1) (2023-08-31)
+
+
+### Bug Fixes
+
+* StackOverflowError in bigmeta & validate keys import ([#1882](https://github.com/tolgee/tolgee-platform/issues/1882)) ([c52edda](https://github.com/tolgee/tolgee-platform/commit/c52eddabb87199f845b0812c0cb56d006490998b))
+
 # [3.29.0](https://github.com/tolgee/tolgee-platform/compare/v3.28.3...v3.29.0) (2023-08-30)
 
 

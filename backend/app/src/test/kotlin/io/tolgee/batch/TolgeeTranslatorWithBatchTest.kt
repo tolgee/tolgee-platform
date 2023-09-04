@@ -74,6 +74,7 @@ class TolgeeTranslatorWithBatchTest {
           "en",
           "cs",
           null,
+          null,
           true
         )
       )
@@ -93,6 +94,7 @@ class TolgeeTranslatorWithBatchTest {
           null,
           "en",
           "cs",
+          null,
           null,
           true
         )
