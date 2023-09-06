@@ -173,6 +173,19 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `e-mail is sanitized`() {
+    dummyDto.name = "Test org <a href='https://evil.local'>test</a>"
+    val organization = prepareTestOrganization()
+
+    inviteWithUserWithNameAndEmail(organization.id)
+    emailTestUtil.verifyEmailSent()
+
+    val messageContent = emailTestUtil.messageContents.single()
+    assertThat(messageContent).doesNotContain("<a href='https://evil.local")
+    assertThat(messageContent).contains("&lt;a href=&#39;https://evil.local")
+  }
+
+  @Test
   fun `does not invite when email already invited`() {
     val organization = prepareTestOrganization()
     performCreateInvitation(organization.id).andIsOk
