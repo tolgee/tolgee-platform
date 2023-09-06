@@ -4,6 +4,7 @@ import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.model.Invitation
 import org.springframework.stereotype.Component
+import org.springframework.web.util.HtmlUtils
 
 @Component
 class InvitationEmailSender(
@@ -45,8 +46,10 @@ class InvitationEmailSender(
     }
 
     val name = projectNameOrNull ?: organizationNameOrNull
+      ?: throw IllegalStateException("Both the organization and the project are null??")
 
-    return "You have been invited to $toWhat $name in Tolgee."
+    val escapedName = HtmlUtils.htmlEscape(name)
+    return "You have been invited to $toWhat $escapedName in Tolgee."
   }
 
   private fun getInvitationAcceptUrl(code: String): String {
