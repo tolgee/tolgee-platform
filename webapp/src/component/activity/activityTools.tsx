@@ -113,7 +113,7 @@ function getFieldLanguageTag(
   entityData: ModifiedEntityModel
 ): string | undefined {
   if (entityType == 'Translation') {
-    return entityData.relations?.['language'].data?.['tag'] as any as string;
+    return entityData.relations?.['language']?.data?.['tag'] as any as string;
   }
 }
 
