@@ -245,8 +245,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      node("translationCreditsBalanceBefore").isEqualTo(10)
-      node("translationCreditsBalanceAfter").isEqualTo(10 - "Beautiful".length)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+        .assert.isEqualTo((1000 - "Beautiful".length * 100).toLong())
     }
   }
 
@@ -297,7 +297,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("BAIDU").isEqualTo("Translated with Baidu")
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(6)
+
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance.assert.isEqualTo(600)
     }
   }
 
@@ -412,8 +413,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      node("translationCreditsBalanceBefore").isEqualTo(2)
-      node("translationCreditsBalanceAfter").isEqualTo(0)
     }
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
@@ -432,7 +431,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         translatedText = "Yeey! Cached!",
         contextDescription = "context",
         actualPrice = 100,
-        usedService = MtServiceType.GOOGLE
+        usedService = MtServiceType.GOOGLE,
+        baseEmpty = false
       )
     )
     performMtRequestAndExpectAfterBalance(10)
@@ -449,7 +449,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(51)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+        .assert.isEqualTo(5100)
     }
 
     tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
@@ -501,10 +502,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(currentDateProvider.date).thenAnswer { dateProvider() }
   }
 
-  private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {
+  private fun performMtRequestAndExpectAfterBalance(creditBalance: Long, extraCreditBalance: Long = 0) {
     performMtRequest().andIsOk.andAssertThatJson {
-      node("translationCreditsBalanceAfter").isEqualTo(creditBalance)
-      node("translationExtraCreditsBalanceAfter").isEqualTo(extraCreditBalance)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+        .assert.isEqualTo(creditBalance * 100)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).extraCreditBalance
+        .assert.isEqualTo(extraCreditBalance * 100)
     }
   }
 
