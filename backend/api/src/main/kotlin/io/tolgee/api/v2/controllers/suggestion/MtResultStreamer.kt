@@ -16,6 +16,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.project.ProjectService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -31,6 +32,7 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
   private lateinit var outputStream: OutputStream
 
   fun stream(): StreamingResponseBody {
+    init()
     return StreamingResponseBody { outputStream ->
       this.outputStream = outputStream
       writeInfo()
@@ -42,6 +44,15 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
 
       writeServiceResultsAsync()
     }
+  }
+
+  /**
+   * Init the props which setting possibly throws an exception, so it's caught by ExceptionHandler
+   * before the stream is started
+   */
+  private fun init() {
+    key = with(machineTranslationSuggestionFacade) { dto.key }
+    servicesToUse = mtService.getServicesToUse(dto.targetLanguageId, dto.services)
   }
 
   private fun writeInfo() {
@@ -148,14 +159,17 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
     applicationContext.getBean(ProjectService::class.java)
   }
 
-  private val key by lazy { with(machineTranslationSuggestionFacade) { dto.key } }
+  var key: Key? = null
   private val writer by lazy { OutputStreamWriter(outputStream) }
-  private val servicesToUse by lazy { mtService.getServicesToUse(dto.targetLanguageId, dto.services) }
+  private lateinit var servicesToUse: Set<MtServiceInfo>
+
   private val balanceBefore by lazy {
     mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
   }
+
   private val project by lazy { projectHolder.projectEntity }
-  private val baseLanguage by lazy { projectService.getOrCreateBaseLanguage(projectHolder.project.id) }
+  private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(projectHolder.project.id)
+
   private val baseBlank by lazy {
     mtService.getBaseTranslation(
       key = key,

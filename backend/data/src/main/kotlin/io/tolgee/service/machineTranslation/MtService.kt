@@ -34,25 +34,6 @@ class MtService(
   private val bigMetaService: BigMetaService,
   private val keyService: KeyService
 ) {
-  fun getMachineTranslations(
-    key: Key,
-    targetLanguage: Language,
-    services: Set<MtServiceType>?
-  ):
-    Map<MtServiceType, TranslateResult> {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
-    val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
-
-    return getMachineTranslations(
-      project = key.project,
-      baseTranslationText = baseTranslationText,
-      keyId = key.id,
-      baseLanguage = baseLanguage,
-      targetLanguage = targetLanguage,
-      services = services
-    )
-  }
-
   @Transactional
   fun getMachineTranslations(
     project: Project,
@@ -61,7 +42,7 @@ class MtService(
     targetLanguage: Language,
     services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult> {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)
+    val baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(project.id)
 
     val baseTranslationTextSafe = getBaseTranslation(baseTranslationText, key, baseLanguage)
 

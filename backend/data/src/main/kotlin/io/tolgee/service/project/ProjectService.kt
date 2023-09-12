@@ -245,13 +245,22 @@ class ProjectService constructor(
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun getOrCreateBaseLanguage(projectId: Long): Language {
+  fun getOrCreateBaseLanguage(projectId: Long): Language? {
     val project = this.get(projectId)
     return project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
       project.baseLanguage = it
       projectRepository.save(project)
       it
-    } ?: throw IllegalStateException("Project has no languages")
+    }
+  }
+
+  /**
+   * If base language is missing on project it selects language with lowest id
+   * It saves updated project and returns project's new baseLanguage
+   */
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
+  fun getOrCreateBaseLanguageOrThrow(projectId: Long): Language {
+    return getOrCreateBaseLanguage(projectId) ?: throw IllegalStateException("Project has no languages")
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
