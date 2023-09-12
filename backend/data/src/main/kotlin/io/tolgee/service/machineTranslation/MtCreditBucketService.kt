@@ -34,12 +34,13 @@ class MtCreditBucketService(
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
-  fun consumeCredits(project: Project, amount: Int) {
-    lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+  fun consumeCredits(project: Project, amount: Int): MtCreditBucket {
+    return lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
           val bucket = findOrCreateBucket(project)
           consumeCredits(bucket, amount)
+          bucket
         }
       }
     }
