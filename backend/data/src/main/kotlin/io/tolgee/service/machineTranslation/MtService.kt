@@ -154,7 +154,7 @@ class MtService(
     services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult> {
     checkTextLength(baseTranslationText)
-    val servicesToUse = getServicesToUse(targetLanguage.id, services)
+    val servicesToUse = getServicesToUse(targetLanguage, services)
 
     if (baseTranslationText.isNullOrBlank()) {
       return getEmptyResults(servicesToUse)
@@ -207,10 +207,10 @@ class MtService(
   }
 
   fun getServicesToUse(
-    targetLanguageId: Long,
+    targetLanguage: Language,
     desiredServices: Set<MtServiceType>?
   ): Set<MtServiceInfo> {
-    val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguageId)
+    val enabledServices = mtServiceConfigService.getEnabledServiceInfos(targetLanguage)
     checkServices(desired = desiredServices?.toSet(), enabled = enabledServices.map { it.serviceType })
     return enabledServices.filter { desiredServices?.contains(it.serviceType) ?: true }
       .toSet()

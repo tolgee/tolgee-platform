@@ -14,6 +14,7 @@ import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceInfo
@@ -52,7 +53,8 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
    */
   private fun init() {
     key = with(machineTranslationSuggestionFacade) { dto.key }
-    servicesToUse = mtService.getServicesToUse(dto.targetLanguageId, dto.services)
+    val targetLanguage = applicationContext.getBean(LanguageService::class.java).get(dto.targetLanguageId)
+    servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
   }
 
   private fun writeInfo() {

@@ -117,6 +117,14 @@ class ProjectBuilder(
     }
   }
 
+  fun addHindi(): LanguageBuilder {
+    return addLanguage {
+      name = "Hindi"
+      originalName = "हिन्दी"
+      tag = "hi"
+    }
+  }
+
   fun addFrench(): LanguageBuilder {
     return addLanguage {
       name = "French"

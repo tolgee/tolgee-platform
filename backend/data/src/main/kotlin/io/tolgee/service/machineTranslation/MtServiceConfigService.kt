@@ -35,8 +35,8 @@ class MtServiceConfigService(
    *
    * @return enabled translation services for project
    */
-  fun getEnabledServiceInfos(languageId: Long): List<MtServiceInfo> {
-    return getEnabledServiceInfosByStoredConfig(languageId) ?: getEnabledServicesByDefaultServerConfig()
+  fun getEnabledServiceInfos(language: Language): List<MtServiceInfo> {
+    return getEnabledServiceInfosByStoredConfig(language) ?: getEnabledServicesByDefaultServerConfig(language)
   }
 
   fun getPrimaryServices(languagesIds: List<Long>, project: Project): Map<Long, MtServiceInfo?> {
@@ -52,10 +52,11 @@ class MtServiceConfigService(
     return MtServiceInfo(defaultPrimaryService, null)
   }
 
-  private fun getEnabledServicesByDefaultServerConfig(): MutableList<MtServiceInfo> {
+  private fun getEnabledServicesByDefaultServerConfig(language: Language): MutableList<MtServiceInfo> {
     return services.asSequence()
       .sortedByDescending { it.value.first.defaultPrimary }
-      .filter { it.value.first.defaultEnabled && it.value.second.isEnabled }.map { it.key }
+      .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
+      .map { it.key }
       .map { MtServiceInfo(it, null) }
       .toMutableList()
   }
@@ -64,17 +65,21 @@ class MtServiceConfigService(
     return services.filter { it.value.first.defaultPrimary }.keys.firstOrNull()
   }
 
-  private fun getEnabledServiceInfosByStoredConfig(languageId: Long): List<MtServiceInfo>? {
-    getStoredConfig(languageId)?.let { storedConfig ->
+  private fun getEnabledServiceInfosByStoredConfig(language: Language): List<MtServiceInfo>? {
+    getStoredConfig(language.id)?.let { storedConfig ->
       return storedConfig.enabledServicesInfo.toList()
         // return just enabled services
         .filter {
-          isServiceEnabledByServerConfig(it)
+          isServiceEnabledByServerConfig(it) && language.isSupportedBy(it.serviceType)
         }
         // primary first!
         .sortedByDescending { storedConfig.primaryService == it.serviceType }
     }
     return null
+  }
+
+  private fun Language.isSupportedBy(serviceType: MtServiceType): Boolean {
+    return services[serviceType]?.second?.isLanguageSupported(this.tag) ?: return false
   }
 
   private fun isServiceEnabledByServerConfig(it: MtServiceInfo) =
