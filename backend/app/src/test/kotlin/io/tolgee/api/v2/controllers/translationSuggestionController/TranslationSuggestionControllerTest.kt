@@ -503,12 +503,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   }
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Long, extraCreditBalance: Long = 0) {
-    performMtRequest().andIsOk.andAssertThatJson {
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
-        .assert.isEqualTo(creditBalance * 100)
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).extraCreditBalance
-        .assert.isEqualTo(extraCreditBalance * 100)
-    }
+    performMtRequest().andIsOk
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+      .assert.isEqualTo(creditBalance * 100)
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).extraCreditBalance
+      .assert.isEqualTo(extraCreditBalance * 100)
   }
 
   private fun performMtRequestAndExpectBadRequest(): ResultActions {

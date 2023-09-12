@@ -7,17 +7,21 @@ import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class MtEventListener(
   private val mtCreditBucketService: MtCreditBucketService,
   private val machineTranslationProperties: MachineTranslationProperties,
-  private val publicBillingConfProvider: PublicBillingConfProvider
+  private val publicBillingConfProvider: PublicBillingConfProvider,
+  private val entityManager: EntityManager
 ) {
   @EventListener(OnBeforeMachineTranslationEvent::class)
   fun onBeforeMtEvent(event: OnBeforeMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
       mtCreditBucketService.checkPositiveBalance(event.project)
+      // we need to clear the entity manager here, because the bucket might have been modified in different transaction
+      entityManager.clear()
     }
   }
 
@@ -25,6 +29,8 @@ class MtEventListener(
   fun onAfterMtEvent(event: OnAfterMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
       mtCreditBucketService.consumeCredits(event.project, event.actualSumPrice)
+      // we need to clear the entity manager here, because the bucket might have been modified in different transaction
+      entityManager.clear()
     }
   }
 

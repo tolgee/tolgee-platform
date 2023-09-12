@@ -172,13 +172,14 @@ class MtService(
     targetLanguage: Language,
     services: Set<MtServiceType>?
   ): Map<MtServiceType, TranslateResult> {
-    publishBeforeEvent(project)
     checkTextLength(baseTranslationText)
     val servicesToUse = getServicesToUse(targetLanguage.id, services)
 
     if (baseTranslationText.isNullOrBlank()) {
       return getEmptyResults(servicesToUse)
     }
+
+    publishBeforeEvent(project)
 
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
