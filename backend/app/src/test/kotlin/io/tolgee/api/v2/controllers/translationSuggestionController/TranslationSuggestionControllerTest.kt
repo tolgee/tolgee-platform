@@ -432,7 +432,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         contextDescription = "context",
         actualPrice = 100,
         usedService = MtServiceType.GOOGLE,
-        baseEmpty = false
+        baseBlank = false
       )
     )
     performMtRequestAndExpectAfterBalance(10)

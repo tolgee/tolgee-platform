@@ -35,7 +35,7 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
       this.outputStream = outputStream
       writeInfo()
 
-      if (baseEmpty) {
+      if (baseBlank) {
         writer.close()
         return@StreamingResponseBody
       }
@@ -45,7 +45,7 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
   }
 
   private fun writeInfo() {
-    writer.writeJson(StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseEmpty))
+    writer.writeJson(StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank))
   }
 
   private fun writeServiceResultsAsync() {
@@ -156,7 +156,7 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
   }
   private val project by lazy { projectHolder.projectEntity }
   private val baseLanguage by lazy { projectService.getOrCreateBaseLanguage(projectHolder.project.id) }
-  private val baseEmpty by lazy {
+  private val baseBlank by lazy {
     mtService.getBaseTranslation(
       key = key,
       baseTranslationText = dto.baseText,

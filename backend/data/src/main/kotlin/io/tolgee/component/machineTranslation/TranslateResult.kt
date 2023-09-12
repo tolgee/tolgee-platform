@@ -8,5 +8,5 @@ data class TranslateResult(
   var contextDescription: String?,
   var actualPrice: Int = 0,
   val usedService: MtServiceType? = null,
-  val baseEmpty: Boolean
+  val baseBlank: Boolean
 ) : Serializable

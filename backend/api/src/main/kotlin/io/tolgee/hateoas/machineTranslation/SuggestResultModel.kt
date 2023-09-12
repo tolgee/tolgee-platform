@@ -40,5 +40,5 @@ class SuggestResultModel(
   @Schema(
     description = "If true, the base translation was empty and no translation was provided."
   )
-  val baseEmpty: Boolean,
+  val baseBlank: Boolean,
 ) : RepresentationModel<KeyModel>(), Serializable

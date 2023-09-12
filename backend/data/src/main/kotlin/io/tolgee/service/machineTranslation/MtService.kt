@@ -220,7 +220,7 @@ class MtService(
           contextDescription = null,
           actualPrice = 0,
           usedService = it.serviceType,
-          baseEmpty = true
+          baseBlank = true
         )
     }
   }

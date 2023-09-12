@@ -43,12 +43,12 @@ class MachineTranslationSuggestionFacade(
 
     return catchingOutOfCredits(balanceBefore) {
       val resultData = getTranslationResults(dto, targetLanguage)
-      val baseEmpty = resultData == null
+      val baseBlank = resultData == null
 
       SuggestResultModel(
         machineTranslations = resultData?.map { it.key to it.value.output }?.toMap(),
         result = resultData,
-        baseEmpty = baseEmpty
+        baseBlank = baseBlank
       )
     }
   }
@@ -77,7 +77,7 @@ class MachineTranslationSuggestionFacade(
         key to TranslationItemModel(value.translatedText.orEmpty(), value.contextDescription)
       }.toMap()
 
-    if (resultMap.values.all { it.baseEmpty }) {
+    if (resultMap.values.all { it.baseBlank }) {
       return null
     }
 

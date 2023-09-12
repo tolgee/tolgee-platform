@@ -96,7 +96,7 @@ class MtServiceManager(
         contextDescription = null,
         actualPrice = 0,
         usedService = params.serviceInfo.serviceType,
-        baseEmpty = true,
+        baseBlank = true,
       )
     }
 
@@ -205,7 +205,7 @@ class MtServiceManager(
       contextDescription = null,
       actualPrice = params.text.length * 100,
       usedService = params.serviceInfo.serviceType,
-      baseEmpty = params.textRaw.isEmpty()
+      baseBlank = params.textRaw.isEmpty()
     )
   }
 
