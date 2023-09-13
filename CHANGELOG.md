@@ -1,3 +1,10 @@
+## [3.29.4](https://github.com/tolgee/tolgee-platform/compare/v3.29.3...v3.29.4) (2023-09-13)
+
+
+### Bug Fixes
+
+* Project with context deletion ([#1906](https://github.com/tolgee/tolgee-platform/issues/1906)) ([36b10f5](https://github.com/tolgee/tolgee-platform/commit/36b10f5552c02d2e89b18a640c8468387a94cfff))
+
 ## [3.29.3](https://github.com/tolgee/tolgee-platform/compare/v3.29.2...v3.29.3) (2023-09-08)
 
 
