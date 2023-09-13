@@ -29,6 +29,9 @@ class MtServiceConfig : StandardAuditModel() {
   var primaryService: MtServiceType? = null
 
   @Enumerated(EnumType.STRING)
+  var primaryServiceFormality: Formality? = null
+
+  @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = MtServiceType::class)
   var enabledServices: MutableSet<MtServiceType> = mutableSetOf()
 
@@ -44,8 +47,10 @@ class MtServiceConfig : StandardAuditModel() {
   @ColumnDefault("DEFAULT")
   var tolgeeFormality: Formality = Formality.DEFAULT
 
-  val primaryServiceInfo
-    get() = getServiceInfo(this, primaryService)
+  val primaryServiceInfo: MtServiceInfo?
+    get() {
+      return MtServiceInfo(primaryService ?: return null, primaryServiceFormality)
+    }
 
   val enabledServicesInfo
     get() = enabledServices.mapNotNull { getServiceInfo(this, it) }

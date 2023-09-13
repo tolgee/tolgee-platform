@@ -83,7 +83,7 @@ class MtServiceConfigService(
   }
 
   private fun isServiceEnabledByServerConfig(it: MtServiceInfo) =
-    this.services[it.serviceType]?.second?.isEnabled ?: false
+    getServiceProcessor(it)?.isEnabled ?: false
 
   private fun isServiceEnabledByServerConfig(it: MtServiceType) =
     this.services[it]?.second?.isEnabled ?: false
@@ -103,7 +103,7 @@ class MtServiceConfigService(
             ?.let { allLanguages.getLanguageOrThrow(it) }
         }
 
-      entity.primaryService = languageSetting.primaryService
+      setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)
       setFormalities(entity, languageSetting)
       save(entity)
@@ -114,6 +114,20 @@ class MtServiceConfigService(
     }
 
     delete(toDelete)
+  }
+
+  private fun setPrimaryService(
+    entity: MtServiceConfig,
+    languageSetting: MachineTranslationLanguagePropsDto
+  ) {
+    // this setting is already deprecated (it doesn't support formality), but we need to support it for now
+    entity.primaryService = languageSetting.primaryService
+
+    // this is the new approach
+    val primaryServiceInfo = languageSetting.primaryServiceInfo ?: return
+
+    entity.primaryService = primaryServiceInfo.serviceType
+    entity.primaryServiceFormality = primaryServiceInfo.formality
   }
 
   private fun Map<Long, Language>.getLanguageOrThrow(id: Long?): Language? {
@@ -140,26 +154,57 @@ class MtServiceConfigService(
     languageProps: MachineTranslationLanguagePropsDto,
     language: Language,
   ) {
-    languageProps.enabledServicesInfo.forEach {
+    validateEnabledServicesFormality(languageProps, language)
+    validatePrimaryServiceFormality(languageProps, language)
+  }
+
+  private fun validatePrimaryServiceFormality(
+    languageProps: MachineTranslationLanguagePropsDto,
+    language: Language
+  ) {
+    val primaryServiceInfo = languageProps.primaryServiceInfo ?: return
+    val isSupported = getServiceProcessor(primaryServiceInfo)?.isLanguageFormalitySupported(language.tag)
+      ?: false
+
+    if (!isSupported) {
+      throwFormalityNotSupported(primaryServiceInfo, language)
+    }
+  }
+
+  private fun validateEnabledServicesFormality(
+    languageProps: MachineTranslationLanguagePropsDto,
+    language: Language,
+  ) {
+    languageProps.enabledServicesInfo?.forEach {
       if (it.formality == Formality.DEFAULT || it.formality == null) {
         return@forEach
       }
       val isFormalitySupported =
-        this.services[it.serviceType]?.second?.isLanguageFormalitySupported(language.tag) ?: false
+        getServiceProcessor(it)?.isLanguageFormalitySupported(language.tag) ?: false
       if (!isFormalitySupported) {
-        throw BadRequestException(
-          Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE,
-          listOf(it.serviceType.name, language.tag, it.formality)
-        )
+        throwFormalityNotSupported(it, language)
       }
     }
   }
+
+  private fun throwFormalityNotSupported(
+    mtServiceInfo: MtServiceInfo,
+    language: Language,
+  ) {
+    throw BadRequestException(
+      Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE,
+      listOf(mtServiceInfo.serviceType.name, language.tag, mtServiceInfo.formality!!)
+    )
+  }
+
+  private fun getServiceProcessor(it: MtServiceInfo) =
+    this.services[it.serviceType]?.second
 
   private fun validateLanguageSupported(
     it: MachineTranslationLanguagePropsDto,
     language: Language
   ) {
-    val allServices = it.enabledServicesInfo.map { it.serviceType } + it.enabledServices
+    val allServices = getAllEnabledOrPrimaryServices(it)
     allServices.forEach {
       val isLanguageSupported = this.services[it]?.second?.isLanguageSupported(language.tag) ?: false
       if (!isLanguageSupported) {
@@ -168,22 +213,29 @@ class MtServiceConfigService(
     }
   }
 
+  private fun getAllEnabledOrPrimaryServices(it: MachineTranslationLanguagePropsDto) =
+    it.enabledServicesInfoNotNull.map { it.serviceType } +
+      it.enabledServicesNotNull +
+      listOfNotNull(it.primaryService) +
+      listOfNotNull(it.primaryServiceInfo?.serviceType)
+
   private fun getEnabledServices(languageSetting: MachineTranslationLanguagePropsDto): MutableSet<MtServiceType> {
-    val allServiceTypes = languageSetting.enabledServices + languageSetting.enabledServicesInfo.map { it.serviceType }
+    val allServiceTypes =
+      languageSetting.enabledServicesNotNull + languageSetting.enabledServicesInfoNotNull.map { it.serviceType }
     return allServiceTypes.filter { isServiceEnabledByServerConfig(it) }.toMutableSet()
   }
 
   private fun setFormalities(entity: MtServiceConfig, languageSetting: MachineTranslationLanguagePropsDto) {
-    languageSetting.enabledServicesInfo.forEach {
+    languageSetting.enabledServicesInfoNotNull.forEach {
       when (it.serviceType) {
         MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.DEEPL -> entity.deeplFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.TOLGEE -> entity.tolgeeFormality = it.formality ?: Formality.DEFAULT
         else -> {
           if (it.formality == null) {
-            return
+            return@forEach
           }
-          throw BadRequestException(Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE)
+          throw BadRequestException(Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE, listOf(it.serviceType))
         }
       }
     }

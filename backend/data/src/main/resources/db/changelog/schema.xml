@@ -2717,4 +2717,9 @@
     <changeSet author="jenik (generated)" id="1692875439264-1">
         <dropDefaultValue columnDataType="boolean" columnName="hidden" tableName="tolgee_batch_job"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1694597501285-1">
+        <addColumn tableName="mt_service_config">
+            <column name="primary_service_formality" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -19,6 +19,8 @@ class MtSettingsTestData : BaseTestData() {
         tag = "es"
         originalName = "Spanish"
       }.self
+
+      addFrench()
     }
 
     projectBuilder.addMtServiceConfig {
