@@ -21,4 +21,5 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
         """
   )
   fun getCloseKeys(keyId: Long, pageable: Pageable = PageRequest.of(0, 10)): List<Array<Long>>
+  fun deleteAllByProjectId(id: Long)
 }
