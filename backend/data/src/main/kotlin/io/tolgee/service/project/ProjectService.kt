@@ -25,6 +25,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.security.project_auth.ProjectNotSelectedException
 import io.tolgee.service.AvatarService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
@@ -98,6 +99,10 @@ class ProjectService constructor(
   @set:Autowired
   @set:Lazy
   lateinit var apiKeyService: ApiKeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var bigMetaService: BigMetaService
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
@@ -237,6 +242,7 @@ class ProjectService constructor(
     keyService.deleteAllByProject(project.id)
     avatarService.unlinkAvatarFiles(project)
     batchJobService.deleteAllByProjectId(project.id)
+    bigMetaService.deleteAllByProjectId(project.id)
     projectRepository.delete(project)
   }
 

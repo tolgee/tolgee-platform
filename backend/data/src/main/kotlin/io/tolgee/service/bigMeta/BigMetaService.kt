@@ -146,4 +146,8 @@ class BigMetaService(
     )
     return query
   }
+
+  fun deleteAllByProjectId(id: Long) {
+    keysDistanceRepository.deleteAllByProjectId(id)
+  }
 }
