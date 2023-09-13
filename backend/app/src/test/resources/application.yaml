@@ -44,7 +44,6 @@ tolgee:
   authentication:
     native-enabled: true
     registrationsAllowed: true
-    create-initial-user: false
     oauth2:
       client-id: fake_client_id
       client-secret: fake_client_secret

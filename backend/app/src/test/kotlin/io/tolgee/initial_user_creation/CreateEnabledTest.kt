@@ -95,11 +95,15 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
     val johnyAfter = userAccountService.findActive("johny")!!
     assertThat(passBefore).isEqualTo(johnyAfter.password)
+
+    johnyBefore.passwordChanged = false
+    userAccountService.save(johnyBefore)
   }
 
   @AfterAll
   fun cleanUp() {
     passwordFile.delete()
+    resetInitialPassword()
   }
 
   private fun resetInitialPassword() {
