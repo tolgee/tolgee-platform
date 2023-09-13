@@ -2701,7 +2701,7 @@
     </changeSet>
     <changeSet author="cynthia (generated)" id="1693517732527-1">
         <addColumn tableName="user_account">
-            <column name="is_initial_user" type="boolean" defaultValue="false">
+            <column name="is_initial_user" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -2710,8 +2710,8 @@
         <sql dbms="postgresql">
             UPDATE user_account
             SET is_initial_user = true
-            WHERE id IN (
-                SELECT id FROM user_account WHERE username != "___implicit_user" ORDER BY id LIMIT 1
+            WHERE id = (
+                SELECT id FROM user_account WHERE username != '___implicit_user' ORDER BY id LIMIT 1
             );
         </sql>
     </changeSet>
@@ -2721,5 +2721,12 @@
             SET account_type = 'MANAGED'
             WHERE account_type = 'LDAP';
         </sql>
+    </changeSet>
+    <changeSet author="cynthia (generated)" id="1694597673944-1">
+        <addColumn tableName="user_account">
+            <column defaultValueBoolean="true" name="password_changed" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

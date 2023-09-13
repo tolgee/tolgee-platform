@@ -118,6 +118,7 @@ class UserAccountService(
     dtoToEntity(request).let {
       it.role = UserAccount.Role.ADMIN
       it.isInitialUser = true
+      it.passwordChanged = false
       this.createUser(it)
 
       // TODO: remove this on Tolgee 4 release
@@ -333,6 +334,7 @@ class UserAccountService(
 
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
+    userAccount.passwordChanged = true
     return userAccountRepository.save(userAccount)
   }
 

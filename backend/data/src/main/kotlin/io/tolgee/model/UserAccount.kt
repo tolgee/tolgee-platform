@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import java.util.*
@@ -85,8 +86,13 @@ data class UserAccount(
   @Column(name = "disabled_at")
   var disabledAt: Date? = null
 
-  @Column(name = "is_initial_user")
+  @Column(name = "is_initial_user", nullable = false)
+  @ColumnDefault("false")
   var isInitialUser: Boolean = false
+
+  @Column(name = "password_changed", nullable = false)
+  @ColumnDefault("true")
+  var passwordChanged: Boolean = true
 
   val isDeletable: Boolean
     get() = this.accountType != AccountType.MANAGED && !this.isInitialUser

@@ -8,6 +8,7 @@ import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -43,6 +44,9 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   @set:Autowired
   lateinit var passwordEncoder: PasswordEncoder
 
+  @set:Autowired
+  lateinit var initialPasswordManager: InitialPasswordManager
+
   private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
 
   @Autowired
@@ -65,8 +69,44 @@ class CreateEnabledTest : AbstractTransactionalTest() {
     assertThat(passwordEncoder.matches(passwordFile.readText(), johny!!.password)).isTrue
   }
 
+  @Test
+  fun passwordUpdated() {
+    resetInitialPassword()
+
+    val passBefore = userAccountService.findActive("johny")!!.password
+    tolgeeProperties.authentication.initialPassword = "new password!!"
+    initialUserCreatorCommandLineRunner.run()
+
+    val johnyAfter = userAccountService.findActive("johny")
+    assertThat(passBefore).isNotEqualTo(johnyAfter!!.password)
+  }
+
+  @Test
+  fun passwordNotUpdatedAfterChange() {
+    resetInitialPassword()
+
+    val johnyBefore = userAccountService.findActive("johny")!!
+    val passBefore = johnyBefore.password
+    johnyBefore.passwordChanged = true
+    userAccountService.save(johnyBefore)
+
+    tolgeeProperties.authentication.initialPassword = "another new password!!"
+    initialUserCreatorCommandLineRunner.run()
+
+    val johnyAfter = userAccountService.findActive("johny")!!
+    assertThat(passBefore).isEqualTo(johnyAfter.password)
+  }
+
   @AfterAll
   fun cleanUp() {
     passwordFile.delete()
+  }
+
+  private fun resetInitialPassword() {
+    val field = initialPasswordManager.javaClass.getDeclaredField("cachedInitialPassword")
+    with(field) {
+      isAccessible = true
+      set(initialPasswordManager, null)
+    }
   }
 }
