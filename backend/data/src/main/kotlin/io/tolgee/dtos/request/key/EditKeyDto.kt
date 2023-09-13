@@ -3,6 +3,7 @@ package io.tolgee.dtos.request.key
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.ValidationConstants
+import io.tolgee.util.getSafeNamespace
 import org.hibernate.validator.constraints.Length
 import javax.validation.constraints.NotBlank
 
@@ -17,10 +18,6 @@ data class EditKeyDto(
 ) {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {
-    if (namespace == "") {
-      this.namespace = null
-      return
-    }
-    this.namespace = namespace
+    this.namespace = getSafeNamespace(namespace)
   }
 }

@@ -20,11 +20,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import java.util.*
@@ -46,7 +48,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var permissionRepository: PermissionRepository
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
   @Autowired
@@ -152,7 +154,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is caching machine translations`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    doAnswer { googleResponse }.whenever(googleTranslationProvider).translate(any())
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle)
