@@ -4,7 +4,6 @@
 
 package io.tolgee.component.fileStorage
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
@@ -12,12 +11,9 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import java.io.ByteArrayInputStream
 
 class S3FileStorage(
-  tolgeeProperties: TolgeeProperties,
+  private val bucketName: String,
   private val s3: S3Client,
 ) : FileStorage {
-
-  private val bucketName = tolgeeProperties.fileStorage.s3.bucketName
-
   override fun readFile(storageFilePath: String): ByteArray {
     try {
       return s3.getObject { b -> b.bucket(bucketName).key(storageFilePath) }.readAllBytes()
