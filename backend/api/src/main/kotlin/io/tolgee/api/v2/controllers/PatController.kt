@@ -2,9 +2,11 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.pat.RegeneratePatDto
 import io.tolgee.dtos.request.pat.UpdatePatDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.pat.PatModel
 import io.tolgee.hateoas.pat.PatModelAssembler
@@ -114,6 +116,10 @@ class PatController(
   @Operation(summary = "Returns current Personal Access Token info")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   fun getCurrent(): PatWithUserModel {
+    if (!authenticationFacade.isPersonalAccessTokenAuth) {
+      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+    }
+
     return patWithUserModelAssembler.toModel(authenticationFacade.personalAccessTokenEntity)
   }
 

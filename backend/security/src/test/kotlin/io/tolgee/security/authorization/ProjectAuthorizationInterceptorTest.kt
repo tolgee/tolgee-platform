@@ -221,6 +221,7 @@ class ProjectAuthorizationInterceptorTest {
   @RestController
   class TestController {
     @GetMapping("/v2/projects")
+    @IsGlobalRoute
     fun getAll() = "hello!"
 
     @GetMapping("/v2/projects/{id}/not-annotated")

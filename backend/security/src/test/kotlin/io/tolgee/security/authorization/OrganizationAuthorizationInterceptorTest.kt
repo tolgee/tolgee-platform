@@ -102,13 +102,13 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(organizationRoleService.canUserView(1337L, 1337L))
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsNotFound
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsNotFound
 
-    Mockito.`when`(organizationRoleService.canUserView(1337L, 1337L))
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
@@ -116,7 +116,7 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have a sufficiently high role`() {
-    Mockito.`when`(organizationRoleService.canUserView(1337L, 1337L))
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
     Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(false)
@@ -132,6 +132,7 @@ class OrganizationAuthorizationInterceptorTest {
   @RestController
   class TestController {
     @GetMapping("/v2/organizations")
+    @IsGlobalRoute
     fun getAll() = "hello!"
 
     @GetMapping("/v2/organizations/{id}/not-annotated")

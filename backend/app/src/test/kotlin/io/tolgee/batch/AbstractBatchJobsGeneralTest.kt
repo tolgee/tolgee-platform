@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -29,6 +30,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @SpyBean
   @Autowired
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
+
+  @Suppress("unused") // Used to instrument it in other places via @SpyBean
+  @SpyBean
+  @Autowired
+  lateinit var deleteKeysChunkProcessor: DeleteKeysChunkProcessor
 
   @Autowired
   lateinit var batchJobActionService: BatchJobActionService

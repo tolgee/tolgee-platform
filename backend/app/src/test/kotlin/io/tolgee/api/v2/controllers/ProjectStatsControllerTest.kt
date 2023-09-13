@@ -24,7 +24,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
-    forceDateString("2022-03-20", "yyyy-MM-dd")
+    mockDate("2022-03-20")
     testData = TranslationsTestData()
     testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
@@ -87,11 +87,11 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns daily activity`() {
-    forceDateString("2022-04-01", "yyyy-MM-dd")
+    mockDate("2022-04-01")
     createActivity(1)
-    forceDateString("2022-04-05", "yyyy-MM-dd")
+    mockDate("2022-04-05")
     createActivity(5)
-    forceDateString("2022-04-20", "yyyy-MM-dd")
+    mockDate("2022-04-20")
     createActivity(2)
     performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson {
       isEqualTo(
@@ -105,6 +105,10 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       """
       )
     }
+  }
+
+  private fun mockDate(stringDate: String) {
+    setForcedDate(format.parse(stringDate))
   }
 
   private fun createActivity(times: Int) {
