@@ -23,7 +23,8 @@ class FileStorageConfiguration(
   @Bean
   fun fileStorage(): FileStorage {
     if (s3config.enabled && amazonS3 != null) {
-      return S3FileStorage(tolgeeProperties = properties, amazonS3)
+      val bucketName = properties.fileStorage.s3.bucketName ?: throw RuntimeException("Bucket name is not set")
+      return S3FileStorage(bucketName, amazonS3)
     }
     return LocalFileStorage(tolgeeProperties = properties)
   }
