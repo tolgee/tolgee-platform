@@ -8,6 +8,7 @@ import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -40,6 +41,9 @@ class CreateEnabledTest : AbstractTransactionalTest() {
 
   @set:Autowired
   lateinit var userAccountService: UserAccountService
+
+  @set:Autowired
+  lateinit var userAccountRepository: UserAccountRepository
 
   @set:Autowired
   lateinit var passwordEncoder: PasswordEncoder
@@ -104,6 +108,9 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   fun cleanUp() {
     passwordFile.delete()
     resetInitialPassword()
+
+    val initial = userAccountService.findActive("johny")!!
+    userAccountRepository.delete(initial)
   }
 
   private fun resetInitialPassword() {
