@@ -54,6 +54,7 @@ class MtServiceConfigService(
 
   private fun getEnabledServicesByDefaultServerConfig(language: Language): MutableList<MtServiceInfo> {
     return services.asSequence()
+      .sortedBy { it.key.order }
       .sortedByDescending { it.value.first.defaultPrimary }
       .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
       .map { it.key }
@@ -71,7 +72,7 @@ class MtServiceConfigService(
         // return just enabled services
         .filter {
           isServiceEnabledByServerConfig(it) && language.isSupportedBy(it.serviceType)
-        }
+        }.sortedBy { it.serviceType.order }
         // primary first!
         .sortedByDescending { storedConfig.primaryService == it.serviceType }
     }
