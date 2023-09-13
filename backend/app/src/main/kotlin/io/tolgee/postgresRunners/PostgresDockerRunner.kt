@@ -31,7 +31,8 @@ class PostgresDockerRunner(
         "POSTGRES_USER" to postgresAutostartProperties.user,
         "POSTGRES_DB" to postgresAutostartProperties.databaseName,
       ),
-      command = "postgres -c max_connections=10000",
+      command = "postgres -c max_connections=10000 -c random_page_cost=1.0 " +
+        "-c fsync=off -c synchronous_commit=off -c full_page_writes=off",
       timeout = 300000,
     ).also {
       logger.info("Starting Postgres Docker container")

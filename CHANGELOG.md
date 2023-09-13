@@ -1,3 +1,17 @@
+## [3.29.3](https://github.com/tolgee/tolgee-platform/compare/v3.29.2...v3.29.3) (2023-09-08)
+
+
+### Bug Fixes
+
+* null errors in activity and translation view ([#1899](https://github.com/tolgee/tolgee-platform/issues/1899)) ([e7fbe1c](https://github.com/tolgee/tolgee-platform/commit/e7fbe1c1787f3aaacbe59c436275be6d8a239d8b))
+
+## [3.29.2](https://github.com/tolgee/tolgee-platform/compare/v3.29.1...v3.29.2) (2023-09-07)
+
+
+### Bug Fixes
+
+* sanitize project/org name in invitation emails ([#1898](https://github.com/tolgee/tolgee-platform/issues/1898)) ([bab718b](https://github.com/tolgee/tolgee-platform/commit/bab718b1c9b3e90327bfb10d27b9799996e5c35b))
+
 ## [3.29.1](https://github.com/tolgee/tolgee-platform/compare/v3.29.0...v3.29.1) (2023-08-31)
 
 

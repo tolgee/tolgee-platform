@@ -205,7 +205,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         translations.selectedLanguages
       );
 
-      if (result) {
+      if (result?.translations) {
         Object.entries(result.translations).forEach(([lang, translation]) =>
           translations.changeTranslations([
             { keyId, language: lang, value: translation },
