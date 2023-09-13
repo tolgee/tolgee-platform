@@ -53,11 +53,8 @@ class ProjectAuthorizationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
-    if (IS_GLOBAL_RE.matches(request.requestURI)) {
-      // This is quite fragile and works on a known-ahead list.
-      // Unfortunately there's not much better, since implicit projects are hard to distinguish from these routes.
-      return true
-    }
+    // Global route; abort here
+    if (isGlobal(handler)) return true
 
     val userId = authenticationFacade.authenticatedUser.id
     val project = requestContextService.getTargetProject(request)
@@ -161,6 +158,11 @@ class ProjectAuthorizationInterceptor(
     return true
   }
 
+  private fun isGlobal(handler: HandlerMethod): Boolean {
+    val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
+    return annotation != null
+  }
+
   private fun getRequiredScopes(request: HttpServletRequest, handler: HandlerMethod): Array<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val projectPerms = AnnotationUtils.getAnnotation(handler.method, RequiresProjectPermissions::class.java)
@@ -189,14 +191,5 @@ class ProjectAuthorizationInterceptor(
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE
-  }
-
-  companion object {
-    // Excluded routes form filtering (exact):
-    // - /v2/projects
-    // - /v2/projects/
-    // - /v2/projects/with-stats
-    // - /v2/projects/with-stats/
-    val IS_GLOBAL_RE = "^/v2/projects(?:/|/with-stats|/with-stats/)?$".toRegex()
   }
 }

@@ -56,9 +56,7 @@ class TranslationSuggestionController(
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
   @AllowApiAccess
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
-    val targetLanguage = languageService.find(dto.targetLanguageId)
-      ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-
+    val targetLanguage = languageService.get(dto.targetLanguageId)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 
     val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
@@ -110,8 +108,7 @@ class TranslationSuggestionController(
     @RequestBody @Valid dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable
   ): PagedModel<TranslationMemoryItemModel> {
-    val targetLanguage = languageService.find(dto.targetLanguageId)
-      ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    val targetLanguage = languageService.get(dto.targetLanguageId)
 
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 

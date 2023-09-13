@@ -27,20 +27,20 @@ annotation class RateLimited(
    */
   val limit: Int,
   /**
-   * Size of the window to consider in milliseconds. Defaults to a second.
+   * Time it will take for the bucket to refill, in milliseconds. Defaults to a second.
    */
-  val windowSize: Long = 1_000,
+  val refillDurationInMs: Long = 1_000,
   /**
    * Allows for grouping different endpoints under the same bucket. Will default to "{method} {path}".
    */
   val bucketName: String = "",
   /**
-   * Number of route parameters to take into account during bucketing.
+   * Number of path variables to take into account during bucketing.
    *
    * For instance, GET `/v2/projects/1/activity` and `/v2/projects/2/activity` will be considered different buckets
    * despite the route being the same (`/v2/projects/{id}/activity`).
    */
-  val majorParametersToDiscriminate: Int = 1,
+  val pathVariablesToDiscriminate: Int = 1,
   /**
    * Whether this rate limit applies to an authentication-related endpoint.
    *

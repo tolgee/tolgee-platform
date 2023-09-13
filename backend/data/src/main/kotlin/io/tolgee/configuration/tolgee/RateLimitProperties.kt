@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 )
 class RateLimitProperties(
   @DocProperty(
-    description = "To turn all rate limits off, set this varue to `false`.\n\n" +
+    description = "To turn all rate limits off, set this value to `false`.\n\n" +
       ":::danger" +
       "This field is **deprecated** and will be removed with Tolgee 4. If set to `false`, it will take priority\n" +
       "over the more granular `global-limits`, `endpoint-limits` and `authentication-limits` and all limits\n" +

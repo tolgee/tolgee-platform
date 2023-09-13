@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package io.tolgee.security.ratelimit
+package io.tolgee.security.authentication
 
-import java.time.Duration
-
-data class RateLimitPolicy(
-  val bucketName: String,
-  val limit: Int,
-  val refillDuration: Duration,
-  val global: Boolean,
-)
+enum class AuthTokenType {
+  ANY,
+  ONLY_PAT,
+  ONLY_PAK,
+}

@@ -175,21 +175,15 @@ class JwtService(
   private fun parseJwt(token: String): Jws<Claims> {
     try {
       return jwtParser.parseClaimsJws(token)
-    } catch (ex: SignatureException) {
-      // Token signature is invalid - fake token (or key changed)
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    } catch (ex: MalformedJwtException) {
-      // Token is malformed
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    } catch (ex: ExpiredJwtException) {
-      // Token is expired
-      throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
-    } catch (ex: UnsupportedJwtException) {
-      // Token is not of the correct type (e.g. attempting to use a plaintext token)
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    } catch (ex: IllegalArgumentException) {
-      // Token does not contain claims
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    } catch (ex: Exception) {
+      when (ex) {
+        is SignatureException,
+        is MalformedJwtException,
+        is UnsupportedJwtException,
+        is IllegalArgumentException -> throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+        is ExpiredJwtException -> throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
+        else -> throw ex
+      }
     }
   }
 

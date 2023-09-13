@@ -9,7 +9,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.apiKey.ApiKeyModel
@@ -23,6 +22,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -101,18 +101,13 @@ class ApiKeyController(
 
   @GetMapping(path = ["/api-keys/current"])
   @Operation(summary = "Returns current API key info")
-  @AllowApiAccess
+  @AllowApiAccess(AuthTokenType.ONLY_PAK)
   fun getCurrent(): ApiKeyWithLanguagesModel {
-    if (!authenticationFacade.isProjectApiKeyAuth) {
-      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
-    }
-
-    val apiKeyDto = authenticationFacade.projectApiKey
-    val apiKey = apiKeyService.get(apiKeyDto.id)
+    val apiKey = authenticationFacade.projectApiKeyEntity
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = getProjectPermittedLanguages(
-        apiKeyDto.projectId,
+        apiKey.project.id,
         authenticationFacade.authenticatedUser.id
       )?.toList()
     )

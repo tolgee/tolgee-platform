@@ -13,7 +13,6 @@ import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.Language
@@ -88,7 +87,7 @@ class V2LanguagesController(
     @PathVariable("languageId") languageId: Long
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
-    val language = languageService.find(languageId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    val language = languageService.get(languageId)
     return languageModelAssembler.toModel(languageService.editLanguage(language, dto))
   }
 
@@ -109,7 +108,7 @@ class V2LanguagesController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun get(@PathVariable("languageId") id: Long): LanguageModel {
-    val language = languageService.find(id) ?: throw NotFoundException()
+    val language = languageService.get(id)
     return languageModelAssembler.toModel(language)
   }
 
@@ -119,7 +118,7 @@ class V2LanguagesController(
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
   fun deleteLanguage(@PathVariable languageId: Long) {
-    val language = languageService.find(languageId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    val language = languageService.get(languageId)
     securityService.checkProjectPermission(language.project.id, Scope.LANGUAGES_EDIT)
 
     // if base language is missing, select first language

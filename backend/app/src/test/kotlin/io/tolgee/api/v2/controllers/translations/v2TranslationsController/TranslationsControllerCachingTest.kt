@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
@@ -10,11 +9,8 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.ResultActions
 import java.time.ZonedDateTime
@@ -27,10 +23,6 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
   lateinit var testData: TranslationsTestData
 
-  @SpyBean
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
@@ -41,7 +33,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `returns all with last modified`() {
     val now = Date()
-    whenever(currentDateProvider.date).then { now }
+    setForcedDate(now)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     val lastModified = performAndGetLastModified()
@@ -52,7 +44,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `returns 304 when not modified`() {
     val now = Date()
-    whenever(currentDateProvider.date).then { now }
+    setForcedDate(now)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     val lastModified = performAndGetLastModified()
@@ -63,14 +55,14 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `works when data change`() {
     val now = Date()
-    whenever(currentDateProvider.date).then { now }
+    setForcedDate(now)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     val lastModified = performAndGetLastModified()
     performWithIsModifiedSince(lastModified).andIsNotModified
 
     val newNow = Date(Date().time + 50000)
-    whenever(currentDateProvider.date).then { newNow }
+    setForcedDate(newNow)
     translationService.setTranslation(testData.aKey, testData.englishLanguage, "This was changed!")
 
     val newLastModified = performWithIsModifiedSince(lastModified).andIsOk.lastModified()

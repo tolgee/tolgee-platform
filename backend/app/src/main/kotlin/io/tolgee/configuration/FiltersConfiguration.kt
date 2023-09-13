@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class FiltersConfiguration {
   @Bean("filterRegistrationVersion")
-  fun exceptionHandlerFilter(versionFilter: VersionFilter): FilterRegistrationBean<*> {
+  fun versionFilter(versionFilter: VersionFilter): FilterRegistrationBean<*> {
     val registration = FilterRegistrationBean(versionFilter)
     registration.order = SecurityProperties.DEFAULT_FILTER_ORDER - 1
     return registration
   }
 
-  @Bean("filterRegistrationSecutityExceptionHandler")
+  @Bean("filterRegistrationSecurityExceptionHandler")
   fun exceptionHandlerFilter(exceptionHandlerFilter: ExceptionHandlerFilter): FilterRegistrationBean<*> {
     val registration = FilterRegistrationBean(exceptionHandlerFilter)
     registration.isEnabled = false

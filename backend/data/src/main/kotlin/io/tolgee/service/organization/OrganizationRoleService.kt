@@ -1,6 +1,7 @@
 package io.tolgee.service.organization
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
@@ -32,6 +33,19 @@ class OrganizationRoleService(
   @Lazy
   private val userPreferencesService: UserPreferencesService,
 ) {
+  fun checkUserCanViewStrict(organizationId: Long) {
+    checkUserCanViewStrict(
+      authenticationFacade.authenticatedUser.id,
+      organizationId
+    )
+  }
+
+  private fun checkUserCanViewStrict(userId: Long, organizationId: Long) {
+    if (!canUserViewStrict(userId, organizationId)) throw PermissionException()
+  }
+
+  fun canUserViewStrict(userId: Long, organizationId: Long) =
+    this.organizationRepository.canUserView(userId, organizationId)
 
   fun checkUserCanView(organizationId: Long) {
     checkUserCanView(
@@ -42,11 +56,18 @@ class OrganizationRoleService(
   }
 
   private fun checkUserCanView(userId: Long, organizationId: Long, isAdmin: Boolean = false) {
-    if (canUserView(userId, organizationId) || isAdmin) return else throw PermissionException()
+    if (!isAdmin && !canUserViewStrict(userId, organizationId)) throw PermissionException()
   }
 
-  fun canUserView(userId: Long, organizationId: Long) =
-    this.organizationRepository.canUserView(userId, organizationId)
+  fun canUserView(userId: Long, organizationId: Long): Boolean {
+    val userAccountDto = userAccountService.findDto(userId)
+      ?: return false
+
+    return canUserView(userAccountDto, organizationId)
+  }
+
+  fun canUserView(user: UserAccountDto, organizationId: Long) =
+    user.role === UserAccount.Role.ADMIN || this.organizationRepository.canUserView(user.id, organizationId)
 
   /**
    * Verifies the user has a role equal or higher than a given role.

@@ -71,7 +71,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p
     left join p.permissions perm on perm.user.id = :userId
-    where (perm is not null or mr is not null)  and o.id = :organizationId
+    where (perm is not null or mr is not null) and o.id = :organizationId
   """
   )
   fun canUserView(userId: Long, organizationId: Long): Boolean

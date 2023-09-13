@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import java.time.Duration
+import java.util.Date
 
 abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
@@ -121,5 +123,31 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   ): ResultActions {
     loginAsAdminIfNotLogged()
     return authorizedRequestPerformer.performAuthMultipart(url, files, params)
+  }
+
+  fun refreshJwtToken() {
+    if (_userAccount != null) {
+      init(generateJwtToken(_userAccount!!.id))
+    }
+  }
+
+  override fun setForcedDate(date: Date) {
+    super.setForcedDate(date)
+    refreshJwtToken()
+  }
+
+  override fun clearForcedDate() {
+    super.clearForcedDate()
+    refreshJwtToken()
+  }
+
+  override fun forceDateString(dateString: String, pattern: String) {
+    super.forceDateString(dateString, pattern)
+    refreshJwtToken()
+  }
+
+  override fun moveCurrentDate(duration: Duration) {
+    super.moveCurrentDate(duration)
+    refreshJwtToken()
   }
 }

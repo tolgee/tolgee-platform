@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -12,9 +11,6 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
@@ -24,15 +20,11 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private var activityCounter = 0
 
-  @SpyBean
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   var format: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
   @BeforeEach
   fun setup() {
-    mockDate("2022-03-20")
+    forceDateString("2022-03-20", "yyyy-MM-dd")
     testData = TranslationsTestData()
     testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
@@ -95,14 +87,11 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns daily activity`() {
-    mockDate("2022-04-01")
-    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
+    forceDateString("2022-04-01", "yyyy-MM-dd")
     createActivity(1)
-    mockDate("2022-04-05")
-    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
+    forceDateString("2022-04-05", "yyyy-MM-dd")
     createActivity(5)
-    mockDate("2022-04-20")
-    userAccount = testData.user // Reset so the JWT is renewed and doesn't expire
+    forceDateString("2022-04-20", "yyyy-MM-dd")
     createActivity(2)
     performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson {
       isEqualTo(
@@ -116,10 +105,6 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       """
       )
     }
-  }
-
-  private fun mockDate(stringDate: String) {
-    whenever(currentDateProvider.date).thenReturn(format.parse(stringDate))
   }
 
   private fun createActivity(times: Int) {

@@ -40,6 +40,7 @@ import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.context.SecurityContextHolder
+import java.time.Duration
 import java.util.*
 
 class AuthenticationFilterTest {
@@ -91,6 +92,8 @@ class AuthenticationFilterTest {
     userAccountService,
     Mockito.mock(ProjectService::class.java),
     Mockito.mock(OrganizationService::class.java),
+    Mockito.mock(ApiKeyService::class.java),
+    Mockito.mock(PatService::class.java),
   )
 
   @BeforeEach
@@ -102,7 +105,7 @@ class AuthenticationFilterTest {
 
     Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
-        RateLimitPolicy("test policy", 5, 1000, true)
+        RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true)
       )
 
     Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))

@@ -32,8 +32,11 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
@@ -100,6 +103,8 @@ class OrganizationController(
   @PostMapping
   @Transactional
   @Operation(summary = "Creates organization")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @IsGlobalRoute
   fun create(@RequestBody @Valid dto: OrganizationDto): ResponseEntity<OrganizationModel> {
     if (!this.tolgeeProperties.authentication.userCanCreateOrganizations &&
       authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
@@ -115,6 +120,7 @@ class OrganizationController(
 
   @GetMapping("/{id:[0-9]+}")
   @Operation(summary = "Returns organization by ID")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
@@ -124,6 +130,7 @@ class OrganizationController(
 
   @GetMapping("/{slug:.*[a-z].*}")
   @Operation(summary = "Returns organization by address part")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
@@ -133,6 +140,8 @@ class OrganizationController(
 
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @Operation(summary = "Returns all organizations, which is current user allowed to view")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @IsGlobalRoute
   fun getAll(
     @ParameterObject @SortDefault(sort = ["id"]) pageable: Pageable,
     params: OrganizationRequestParamsDto

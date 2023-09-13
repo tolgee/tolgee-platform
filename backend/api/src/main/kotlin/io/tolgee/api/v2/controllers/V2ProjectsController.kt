@@ -35,6 +35,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
@@ -97,6 +98,7 @@ class V2ProjectsController(
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @IsGlobalRoute
   fun getAll(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
@@ -107,6 +109,7 @@ class V2ProjectsController(
 
   @Operation(summary = "Returns all projects (including statistics) where current user has any permission")
   @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @IsGlobalRoute
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
@@ -212,6 +215,7 @@ class V2ProjectsController(
   @PostMapping(value = [""])
   @Operation(summary = "Creates project with specified languages")
   @RequestActivity(ActivityType.CREATE_PROJECT)
+  @IsGlobalRoute
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
     organizationRoleService.checkUserIsOwner(dto.organizationId)
     val project = projectService.createProject(dto)

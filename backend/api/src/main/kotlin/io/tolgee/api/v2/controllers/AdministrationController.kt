@@ -11,6 +11,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
@@ -49,6 +50,7 @@ class AdministrationController(
 
   @GetMapping(value = ["/organizations"])
   @Operation(summary = "Get all server organizations")
+  @RequiresSuperAuthentication
   fun getOrganizations(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
@@ -59,6 +61,7 @@ class AdministrationController(
 
   @GetMapping(value = ["/users"])
   @Operation(summary = "Get all server users")
+  @RequiresSuperAuthentication
   fun getUsers(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
@@ -69,6 +72,7 @@ class AdministrationController(
 
   @DeleteMapping(value = ["/users/{userId}"])
   @Operation(summary = "Deletes an user")
+  @RequiresSuperAuthentication
   fun deleteUser(@PathVariable userId: Long) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
@@ -78,6 +82,7 @@ class AdministrationController(
 
   @PutMapping(value = ["/users/{userId}/disable"])
   @Operation(summary = "Deletes an user")
+  @RequiresSuperAuthentication
   fun disableUser(@PathVariable userId: Long) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
@@ -87,12 +92,14 @@ class AdministrationController(
 
   @PutMapping(value = ["/users/{userId}/enable"])
   @Operation(summary = "Deletes an user")
+  @RequiresSuperAuthentication
   fun enableUser(@PathVariable userId: Long) {
     userAccountService.enable(userId)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])
   @Operation(summary = "")
+  @RequiresSuperAuthentication
   fun setRole(
     @PathVariable userId: Long,
     @PathVariable role: UserAccount.Role
@@ -104,6 +111,7 @@ class AdministrationController(
 
   @GetMapping(value = ["/users/{userId:[0-9]+}/generate-token"])
   @Operation(summary = "Get all server users")
+  @RequiresSuperAuthentication
   fun generateUserToken(
     @PathVariable userId: Long,
   ): String {

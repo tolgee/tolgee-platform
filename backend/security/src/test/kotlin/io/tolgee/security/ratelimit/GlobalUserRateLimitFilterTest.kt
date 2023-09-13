@@ -21,7 +21,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -37,11 +36,6 @@ class GlobalUserRateLimitFilterTest {
 
   @BeforeEach
   fun setupMocks() {
-    Mockito.`when`(rateLimitService.getGlobalUserRateLimitPolicy(any(), any()))
-      .thenReturn(
-        RateLimitPolicy("uwu", 5, 1000, false)
-      )
-
     Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(true)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(userAccount.id).thenReturn(1337L)
@@ -60,8 +54,7 @@ class GlobalUserRateLimitFilterTest {
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
 
-    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).getGlobalUserRateLimitPolicy(req, userAccount.id)
-    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).consumeBucket(any())
+    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).consumeGlobalUserRateLimitPolicy(req, userAccount.id)
   }
 
   @Test
@@ -70,19 +63,9 @@ class GlobalUserRateLimitFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeBucket(any())).thenThrow(RateLimitedException(1000, true))
+    Mockito.`when`(rateLimitService.consumeGlobalUserRateLimitPolicy(any(), any()))
+      .thenThrow(RateLimitedException(1000, true))
+
     assertThrows<RateLimitedException> { rateLimitFilter.doFilter(req, res, chain) }
-  }
-
-  @Test
-  fun `it does not apply rate limiting when there are no policy defined`() {
-    val req = MockHttpServletRequest()
-    val res = MockHttpServletResponse()
-    val chain = MockFilterChain()
-
-    Mockito.`when`(rateLimitService.getGlobalUserRateLimitPolicy(any(), eq(1337L))).thenReturn(null)
-    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
-
-    Mockito.verify(rateLimitService, Mockito.never()).consumeBucket(any())
   }
 }

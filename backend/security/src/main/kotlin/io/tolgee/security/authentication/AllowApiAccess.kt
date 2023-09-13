@@ -45,4 +45,4 @@ import io.tolgee.API_KEY_HEADER_NAME
   description = "API key provided via header. Safer since headers are not stored in server logs."
 )
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
-annotation class AllowApiAccess(val onlyPat: Boolean = false)
+annotation class AllowApiAccess(val tokenType: AuthTokenType = AuthTokenType.ANY)

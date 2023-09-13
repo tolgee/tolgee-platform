@@ -49,6 +49,9 @@ class OrganizationAuthorizationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
+    // Global route; abort here
+    if (isGlobal(handler)) return true
+
     val userId = authenticationFacade.authenticatedUser.id
     val organization = requestContextService.getTargetOrganization(request)
       // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
@@ -66,7 +69,7 @@ class OrganizationAuthorizationInterceptor(
       requiredRole ?: "read-only"
     )
 
-    if (!organizationRoleService.canUserView(userId, organization.id)) {
+    if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
       if (!isAdmin) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
@@ -107,6 +110,11 @@ class OrganizationAuthorizationInterceptor(
 
     authenticationFacade.authentication.targetOrganization = organization
     return true
+  }
+
+  private fun isGlobal(handler: HandlerMethod): Boolean {
+    val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
+    return annotation != null
   }
 
   private fun getRequiredRole(request: HttpServletRequest, handler: HandlerMethod): OrganizationRoleType? {

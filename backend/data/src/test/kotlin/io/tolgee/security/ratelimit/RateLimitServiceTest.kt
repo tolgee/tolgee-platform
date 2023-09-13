@@ -26,9 +26,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.HandlerMapping
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -53,11 +57,13 @@ class RateLimitServiceTest {
 
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
-  private val rateLimitService = RateLimitService(
-    cacheManager,
-    lockingProvider,
-    currentDateProvider,
-    rateLimitProperties,
+  private val rateLimitService = Mockito.spy(
+    RateLimitService(
+      cacheManager,
+      lockingProvider,
+      currentDateProvider,
+      rateLimitProperties,
+    )
   )
 
   private val userAccount = Mockito.mock(UserAccount::class.java)
@@ -82,7 +88,7 @@ class RateLimitServiceTest {
 
   @Test
   fun `it applies rate limit policies correctly`() {
-    val testPolicy = RateLimitPolicy("test_policy", 2, 1_000, false)
+    val testPolicy = RateLimitPolicy("test_policy", 2, Duration.ofSeconds(1), false)
     val baseTime = currentDateProvider.date.time
 
     rateLimitService.consumeBucket(testPolicy)
@@ -100,7 +106,7 @@ class RateLimitServiceTest {
 
   @Test
   fun `it conditionally applies rate limit policies correctly`() {
-    val testPolicy = RateLimitPolicy("test_policy", 2, 1_000, false)
+    val testPolicy = RateLimitPolicy("test_policy", 2, Duration.ofSeconds(1), false)
 
     rateLimitService.consumeBucketUnless(testPolicy) { false }
     rateLimitService.consumeBucketUnless(testPolicy) { true }
@@ -114,7 +120,7 @@ class RateLimitServiceTest {
 
   @Test
   fun `it conditionally applies rate limit policies correctly when throwing exceptions`() {
-    val testPolicy = RateLimitPolicy("test_policy", 2, 1_000, false)
+    val testPolicy = RateLimitPolicy("test_policy", 2, Duration.ofSeconds(1), false)
 
     assertThrows<TestException> { rateLimitService.consumeBucketUnless(testPolicy) { throw TestException() } }
     rateLimitService.consumeBucketUnless(testPolicy) { true }
@@ -131,23 +137,31 @@ class RateLimitServiceTest {
   @Test
   fun `rate limit bucket is correctly defined for global public rate limit`() {
     val fakeRequest = makeFakeGenericRequest()
-    val policy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
+    val captor = argumentCaptor<RateLimitPolicy>()
+    Mockito.`when`(rateLimitService.consumeBucket(captor.capture())).thenCallRealMethod()
 
+    rateLimitService.consumeGlobalIpRateLimitPolicy(fakeRequest)
+
+    val policy = captor.firstValue
     assertThat(policy).isNotNull
-    assertThat(policy?.bucketName).isEqualTo("global.ip.127.0.0.1")
-    assertThat(policy?.limit).isEqualTo(TEST_IP_LIMIT)
-    assertThat(policy?.windowSize).isEqualTo(TEST_IP_WINDOW)
+    assertThat(policy.bucketName).isEqualTo("global.ip.127.0.0.1")
+    assertThat(policy.limit).isEqualTo(TEST_IP_LIMIT)
+    assertThat(policy.refillDuration).isEqualTo(Duration.ofMillis(TEST_IP_WINDOW))
   }
 
   @Test
   fun `rate limit bucket is correctly defined for global user rate limit`() {
     val fakeRequest = makeFakeGenericRequest()
-    val policy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
+    val captor = argumentCaptor<RateLimitPolicy>()
+    Mockito.`when`(rateLimitService.consumeBucket(captor.capture())).thenCallRealMethod()
 
+    rateLimitService.consumeGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
+
+    val policy = captor.firstValue
     assertThat(policy).isNotNull
-    assertThat(policy?.bucketName).isEqualTo("global.user.$TEST_USER_ID")
-    assertThat(policy?.limit).isEqualTo(TEST_USER_LIMIT)
-    assertThat(policy?.windowSize).isEqualTo(TEST_USER_WINDOW)
+    assertThat(policy.bucketName).isEqualTo("global.user.$TEST_USER_ID")
+    assertThat(policy.limit).isEqualTo(TEST_USER_LIMIT)
+    assertThat(policy.refillDuration).isEqualTo(Duration.ofMillis(TEST_USER_WINDOW))
   }
 
   @Test
@@ -165,12 +179,11 @@ class RateLimitServiceTest {
 
     val fakeRequest = makeFakeGenericRequest()
 
-    val globalIpPolicy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
-    val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
+    rateLimitService.consumeGlobalIpRateLimitPolicy(fakeRequest)
+    rateLimitService.consumeGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
     val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    assertThat(globalIpPolicy).isNull()
-    assertThat(globalUserPolicy).isNull()
+    Mockito.verify(rateLimitService, times(0)).consumeBucket(any())
     assertThat(authPolicy).isNotNull
   }
 
@@ -180,12 +193,11 @@ class RateLimitServiceTest {
 
     val fakeRequest = makeFakeGenericRequest()
 
-    val globalIpPolicy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
-    val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
+    rateLimitService.consumeGlobalIpRateLimitPolicy(fakeRequest)
+    rateLimitService.consumeGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
     val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    assertThat(globalIpPolicy).isNotNull
-    assertThat(globalUserPolicy).isNotNull
+    Mockito.verify(rateLimitService, times(2)).consumeBucket(any())
     assertThat(authPolicy).isNotNull
   }
 
@@ -195,12 +207,11 @@ class RateLimitServiceTest {
 
     val fakeRequest = makeFakeGenericRequest()
 
-    val globalIpPolicy = rateLimitService.getGlobalIpRateLimitPolicy(fakeRequest)
-    val globalUserPolicy = rateLimitService.getGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
+    rateLimitService.consumeGlobalIpRateLimitPolicy(fakeRequest)
+    rateLimitService.consumeGlobalUserRateLimitPolicy(fakeRequest, userAccount.id)
     val authPolicy = rateLimitService.getIpAuthRateLimitPolicy(fakeRequest)
 
-    assertThat(globalIpPolicy).isNotNull
-    assertThat(globalUserPolicy).isNotNull
+    Mockito.verify(rateLimitService, times(2)).consumeBucket(any())
     assertThat(authPolicy).isNull()
   }
 

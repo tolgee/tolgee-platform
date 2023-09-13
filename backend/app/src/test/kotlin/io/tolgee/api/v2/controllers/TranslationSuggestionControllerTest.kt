@@ -3,7 +3,6 @@ package io.tolgee.api.v2.controllers
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
@@ -39,7 +38,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -51,10 +49,6 @@ import kotlin.system.measureTimeMillis
 
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
-
-  @Autowired
-  @SpyBean
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
   @MockBean
@@ -95,7 +89,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @BeforeEach
   fun setup() {
-    mockCurrentDate { Date() }
+    setForcedDate(Date())
+
     initTestData()
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
@@ -374,12 +369,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     testMtCreditConsumption()
 
-    mockCurrentDate { Date().addMonths(1) }
-    loginAsUser(testData.user) // To refresh the JWT, or it'll be affected by the mocked date and auth will fail
+    setForcedDate(Date().addMonths(1))
     testMtCreditConsumption()
 
-    mockCurrentDate { Date().addMonths(2) }
-    loginAsUser(testData.user) // To refresh the JWT, or it'll be affected by the mocked date and auth will fail
+    setForcedDate(Date().addMonths(2))
     testMtCreditConsumption()
   }
 
@@ -459,10 +452,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     performMtRequestAndExpectAfterBalance(1)
     performMtRequestAndExpectAfterBalance(0)
     performMtRequestAndExpectBadRequest()
-  }
-
-  private fun mockCurrentDate(dateProvider: () -> Date) {
-    whenever(currentDateProvider.date).thenAnswer { dateProvider() }
   }
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {

@@ -7,6 +7,7 @@ import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModel
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
 import io.tolgee.ee.service.EeSubscriptionService
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -23,6 +24,7 @@ class EeLicenseController(
 ) {
   @PutMapping("set-license-key")
   @Operation(summary = "Sets the EE licence key for this instance")
+  @RequiresSuperAuthentication
   fun setLicenseKey(@RequestBody body: SetLicenseKeyDto): EeSubscriptionModel {
     val eeSubscription = eeSubscriptionService.setLicenceKey(body.licenseKey)
     return eeSubscriptionModelAssembler.toModel(eeSubscription)
@@ -30,11 +32,13 @@ class EeLicenseController(
 
   @PostMapping("prepare-set-license-key")
   @Operation(summary = "Returns info about the upcoming EE subscription")
+  @RequiresSuperAuthentication
   fun prepareSetLicenseKey(@RequestBody body: SetLicenseKeyDto): PrepareSetEeLicenceKeyModel {
     return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
   }
 
   @PutMapping("/refresh")
+  @RequiresSuperAuthentication
   fun refreshSubscription(): EeSubscriptionModel? {
     eeSubscriptionService.refreshSubscription()
     val eeSubscription = eeSubscriptionService.findSubscriptionEntity() ?: return null
@@ -43,6 +47,7 @@ class EeLicenseController(
 
   @GetMapping("info")
   @Operation(summary = "Returns the info about the current EE subscription")
+  @RequiresSuperAuthentication
   fun getInfo(): EeSubscriptionModel? {
     val eeSubscription = eeSubscriptionService.findSubscriptionEntity()
     return eeSubscription?.let { eeSubscriptionModelAssembler.toModel(it) }
@@ -50,6 +55,7 @@ class EeLicenseController(
 
   @PutMapping("release-license-key")
   @Operation(summary = "Removes the EE licence key from this instance")
+  @RequiresSuperAuthentication
   fun release() {
     eeSubscriptionService.releaseSubscription()
   }

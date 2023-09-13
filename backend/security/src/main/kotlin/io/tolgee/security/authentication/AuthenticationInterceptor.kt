@@ -39,14 +39,20 @@ class AuthenticationInterceptor(
     }
 
     val allowApiAccess = AnnotationUtils.getAnnotation(handler.method, AllowApiAccess::class.java)
-    val requiresSuperAuth = requiresSuperAuthentication(request, handler)
+    val requiresSuperAuth = requiresSuperAuthentication(handler)
 
-    if (allowApiAccess == null && authenticationFacade.isApiAuthentication) {
-      throw PermissionException(Message.API_ACCESS_FORBIDDEN)
-    }
+    if (authenticationFacade.isApiAuthentication) {
+      if (allowApiAccess == null) {
+        throw PermissionException(Message.API_ACCESS_FORBIDDEN)
+      }
 
-    if (allowApiAccess?.onlyPat == true && authenticationFacade.isProjectApiKeyAuth) {
-      throw PermissionException(Message.INVALID_AUTHENTICATION_METHOD)
+      if (authenticationFacade.isPersonalAccessTokenAuth && !isPatAllowed(allowApiAccess)) {
+        throw PermissionException(Message.INVALID_AUTHENTICATION_METHOD)
+      }
+
+      if (authenticationFacade.isProjectApiKeyAuth && !isPakAllowed(allowApiAccess)) {
+        throw PermissionException(Message.INVALID_AUTHENTICATION_METHOD)
+      }
     }
 
     if (
@@ -60,19 +66,19 @@ class AuthenticationInterceptor(
     return true
   }
 
-  private fun requiresSuperAuthentication(request: HttpServletRequest, handlerMethod: HandlerMethod): Boolean {
-    if (IS_ADMIN_RE.matches(request.requestURI)) return true
+  private fun requiresSuperAuthentication(handlerMethod: HandlerMethod): Boolean {
     return AnnotationUtils.getAnnotation(handlerMethod.method, RequiresSuperAuthentication::class.java) != null
+  }
+
+  private fun isPatAllowed(annotation: AllowApiAccess): Boolean {
+    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAT
+  }
+
+  private fun isPakAllowed(annotation: AllowApiAccess): Boolean {
+    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
   }
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE
-  }
-
-  companion object {
-    // Admin routes
-    // - /v2/administration/**
-    // - /v2/ee-license/**
-    val IS_ADMIN_RE = "^/v\\d+/(?:administration|ee-license).*$".toRegex()
   }
 }

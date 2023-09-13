@@ -56,9 +56,6 @@ tolgee:
   internal:
     fake-mt-providers: true
     mock-free-plan: true
-  socket-io:
-    port: 19090
-    enabled: false
   cache:
     caffeine-max-size: 1000
   machine-translation:

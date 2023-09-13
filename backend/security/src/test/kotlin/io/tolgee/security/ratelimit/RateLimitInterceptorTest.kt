@@ -181,7 +181,7 @@ class RateLimitInterceptorTest {
   }
 
   @Test
-  fun `endpoint rate limit bucket correctly discriminates against major route parameters`() {
+  fun `endpoint rate limit bucket correctly discriminates against major path variables`() {
     val fakeRequest1 = makeFakeGenericRequest()
     fakeRequest1.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, mapOf("major" to "1", "minor" to "2"))
     fakeRequest1.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, "/fake/route/{major}/{minor}")
@@ -303,7 +303,7 @@ class RateLimitInterceptorTest {
     @RateLimited(2, bucketName = "uwu")
     fun fakeHandlerWithExplicitBucket() {}
 
-    @RateLimited(2, majorParametersToDiscriminate = 0)
+    @RateLimited(2, pathVariablesToDiscriminate = 0)
     fun fakeHandlerWithoutMajorDiscriminator() {}
 
     fun fakeHandlerWithoutRateLimit() {}

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package io.tolgee.security.ratelimit
+package io.tolgee.security.authorization
 
-import java.time.Duration
-
-data class RateLimitPolicy(
-  val bucketName: String,
-  val limit: Int,
-  val refillDuration: Duration,
-  val global: Boolean,
-)
+/**
+ * Marks a project or organization route as global.
+ */
+annotation class IsGlobalRoute

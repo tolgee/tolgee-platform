@@ -1,7 +1,6 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.andAssertThatJson
@@ -47,9 +46,6 @@ class AuthTest : AbstractControllerTest() {
   @Autowired
   private lateinit var jwtService: JwtService
 
-  @Autowired
-  private lateinit var currentDateProvider: CurrentDateProvider
-
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val oAuth2AuthUtil: OAuth2AuthUtil by lazy { OAuth2AuthUtil(tolgeeProperties, authMvc, restTemplate) }
@@ -64,7 +60,7 @@ class AuthTest : AbstractControllerTest() {
 
   @AfterEach
   fun clean() {
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
 
   @Test
@@ -262,11 +258,11 @@ class AuthTest : AbstractControllerTest() {
     assertExpired(token)
 
     val baseline = Date()
-    currentDateProvider.forcedDate = Date(
-      baseline.time - tolgeeProperties.authentication.jwtSuperExpiration - 10_000
-    )
+    val newDate = baseline.time - tolgeeProperties.authentication.jwtSuperExpiration - 10_000
+
+    setForcedDate(Date(newDate))
     token = jwtService.emitToken(admin.id, true)
-    currentDateProvider.forcedDate = baseline
+    setForcedDate(baseline)
 
     assertExpired(token)
   }

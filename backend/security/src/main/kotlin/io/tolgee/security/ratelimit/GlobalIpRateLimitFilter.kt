@@ -30,10 +30,7 @@ class GlobalIpRateLimitFilter(
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
     if (!authenticationFacade.isAuthenticated) {
-      val policy = rateLimitService.getGlobalIpRateLimitPolicy(request)
-      if (policy != null) {
-        rateLimitService.consumeBucket(policy)
-      }
+      rateLimitService.consumeGlobalIpRateLimitPolicy(request)
     }
 
     filterChain.doFilter(request, response)

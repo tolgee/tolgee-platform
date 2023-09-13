@@ -77,11 +77,10 @@ class StartupImportService(
     }.filterNotNull().toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
-    // TODO: this is atrocious and needs to be avoided.
     SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
-      null,
-      UserAccountDto.fromEntity(userAccount),
-      TolgeeAuthenticationDetails(false)
+      credentials = null,
+      userAccount = UserAccountDto.fromEntity(userAccount),
+      details = TolgeeAuthenticationDetails(false)
     )
   }
 

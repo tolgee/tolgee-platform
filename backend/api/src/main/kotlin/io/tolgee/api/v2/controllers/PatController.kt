@@ -2,11 +2,9 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.pat.RegeneratePatDto
 import io.tolgee.dtos.request.pat.UpdatePatDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.pat.PatModel
 import io.tolgee.hateoas.pat.PatModelAssembler
@@ -16,6 +14,7 @@ import io.tolgee.hateoas.pat.RevealedPatModel
 import io.tolgee.hateoas.pat.RevealedPatModelAssembler
 import io.tolgee.model.Pat
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.security.PatService
@@ -113,15 +112,9 @@ class PatController(
 
   @GetMapping(path = ["/current"])
   @Operation(summary = "Returns current Personal Access Token info")
-  @AllowApiAccess
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
   fun getCurrent(): PatWithUserModel {
-    if (!authenticationFacade.isPersonalAccessTokenAuth) {
-      throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
-    }
-
-    val patDto = authenticationFacade.personalAccessToken
-    val pat = patService.get(patDto.id)
-    return patWithUserModelAssembler.toModel(pat)
+    return patWithUserModelAssembler.toModel(authenticationFacade.personalAccessTokenEntity)
   }
 
   private fun checkOwner(id: Long): Pat {

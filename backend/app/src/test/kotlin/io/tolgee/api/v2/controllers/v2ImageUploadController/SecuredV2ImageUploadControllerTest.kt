@@ -4,7 +4,6 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.fixtures.*
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
@@ -13,7 +12,6 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 import java.time.Duration
@@ -28,9 +26,6 @@ import java.util.*
   ]
 )
 class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @Test
   fun getScreenshotFileNoTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
@@ -48,9 +43,9 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       mapOf("fileName" to image.filenameWithExtension)
     )
 
-    currentDateProvider.move(Duration.ofSeconds(10))
+    moveCurrentDate(Duration.ofSeconds(10))
     performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
 
   @Test

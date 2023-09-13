@@ -1,7 +1,6 @@
 package io.tolgee.security
 
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.fixtures.*
@@ -20,10 +19,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @AutoConfigureMockMvc
 class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
-
-  @Autowired
-  private lateinit var currentDateProvider: CurrentDateProvider
-
   @Autowired
   private lateinit var jwtService: JwtService
 

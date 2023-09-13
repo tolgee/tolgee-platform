@@ -9,7 +9,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.machineTranslation.MtCreditBucketService
-import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController
 class MtCreditsController(
   private val projectHolder: ProjectHolder,
   private val mtCreditBucketService: MtCreditBucketService,
-  private val organizationRoleService: OrganizationRoleService,
   private val organizationService: OrganizationService
 ) {
   @GetMapping("/projects/{projectId:\\d+}/machine-translation-credit-balance")

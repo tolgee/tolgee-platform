@@ -23,6 +23,8 @@ import io.tolgee.model.*
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.ApiKeyService
+import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
@@ -33,6 +35,8 @@ class AuthenticationFacade(
   private val userAccountService: UserAccountService,
   @Lazy private val projectService: ProjectService,
   @Lazy private val organizationService: OrganizationService,
+  @Lazy private val apiKeyService: ApiKeyService,
+  @Lazy private val patService: PatService,
 ) {
   // -- GENERAL AUTHENTICATION INFO
   val isAuthenticated: Boolean
@@ -115,6 +119,26 @@ class AuthenticationFacade(
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 
+  val projectApiKeyEntity: ApiKey
+    get() {
+      if (authentication.projectApiKeyEntity == null) {
+        authentication.projectApiKeyEntity = apiKeyService.get(projectApiKey.id)
+      }
+
+      // null safety: `.get` returns non-null or throws. non-null assert is safe here.
+      return authentication.projectApiKeyEntity!!
+    }
+
   val personalAccessToken: PatDto
     get() = authentication.credentials as PatDto
+
+  val personalAccessTokenEntity: Pat
+    get() {
+      if (authentication.personalAccessTokenEntity == null) {
+        authentication.personalAccessTokenEntity = patService.get(personalAccessToken.id)
+      }
+
+      // null safety: `.get` returns non-null or throws. non-null assert is safe here.
+      return authentication.personalAccessTokenEntity!!
+    }
 }

@@ -38,10 +38,6 @@ class GlobalIpRateLimitFilterTest {
   @BeforeEach
   fun setupMocks() {
     Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(false)
-    Mockito.`when`(rateLimitService.getGlobalIpRateLimitPolicy(any()))
-      .thenReturn(
-        RateLimitPolicy("uwu", 5, 1000, false)
-      )
   }
 
   @AfterEach
@@ -57,8 +53,7 @@ class GlobalIpRateLimitFilterTest {
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
 
-    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).getGlobalIpRateLimitPolicy(req)
-    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).consumeBucket(any())
+    Mockito.verify(rateLimitService, Mockito.atLeastOnce()).consumeGlobalIpRateLimitPolicy(req)
   }
 
   @Test
@@ -67,19 +62,9 @@ class GlobalIpRateLimitFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeBucket(any())).thenThrow(RateLimitedException(1000, true))
+    Mockito.`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+      .thenThrow(RateLimitedException(1000, true))
+
     assertThrows<RateLimitedException> { rateLimitFilter.doFilter(req, res, chain) }
-  }
-
-  @Test
-  fun `it does not apply rate limiting when there are no policy defined`() {
-    val req = MockHttpServletRequest()
-    val res = MockHttpServletResponse()
-    val chain = MockFilterChain()
-
-    Mockito.`when`(rateLimitService.getGlobalIpRateLimitPolicy(any())).thenReturn(null)
-    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
-
-    Mockito.verify(rateLimitService, Mockito.never()).consumeBucket(any())
   }
 }

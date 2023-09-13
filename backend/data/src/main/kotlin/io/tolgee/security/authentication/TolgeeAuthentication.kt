@@ -19,9 +19,7 @@ package io.tolgee.security.authentication
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.model.Organization
-import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
+import io.tolgee.model.*
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -39,16 +37,19 @@ class TolgeeAuthentication(
 
   var userAccountEntity: UserAccount? = null
 
+  var projectApiKeyEntity: ApiKey? = null
+  var personalAccessTokenEntity: Pat? = null
+
   override fun getName(): String {
     return userAccount.username
   }
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
-      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority("ROLE_USER"))
+      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
       UserAccount.Role.ADMIN -> listOf(
-        SimpleGrantedAuthority("ROLE_USER"),
-        SimpleGrantedAuthority("ROLE_ADMIN")
+        SimpleGrantedAuthority(ROLE_USER),
+        SimpleGrantedAuthority(ROLE_ADMIN)
       )
       null -> emptyList()
     }
@@ -72,5 +73,10 @@ class TolgeeAuthentication(
 
   override fun setAuthenticated(isAuthenticated: Boolean) {
     throw IllegalArgumentException("Implementation is immutable")
+  }
+
+  companion object {
+    const val ROLE_USER = "ROLE_USER"
+    const val ROLE_ADMIN = "ROLE_ADMIN"
   }
 }

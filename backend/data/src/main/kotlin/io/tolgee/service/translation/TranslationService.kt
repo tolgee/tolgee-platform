@@ -97,7 +97,7 @@ class TranslationService(
     return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
       ?: let {
         val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
-        val language = languageService.find(languageId) ?: throw NotFoundException()
+        val language = languageService.get(languageId)
         Translation().apply {
           this.key = key
           this.language = language

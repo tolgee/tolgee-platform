@@ -93,11 +93,11 @@ class Xliff12FileProcessorTest {
     fileProcessorContext.fileEntity.issues.let { issues ->
       assertThat(issues).hasSize(4)
       assertThat(issues[0].type).isEqualTo(FileIssueType.TARGET_NOT_PROVIDED)
-      assertThat(issues[0].params!![0].type).isEqualTo(FileIssueParamType.KEY_NAME)
-      assertThat(issues[0].params!![0].value).isEqualTo("vpn.main.back")
+      assertThat(issues[0].params[0].type).isEqualTo(FileIssueParamType.KEY_NAME)
+      assertThat(issues[0].params[0].value).isEqualTo("vpn.main.back")
       assertThat(issues[1].type).isEqualTo(FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED)
-      assertThat(issues[1].params!![0].type).isEqualTo(FileIssueParamType.FILE_NODE_ORIGINAL)
-      assertThat(issues[1].params!![0].value).isEqualTo("../src/platforms/android/androidauthenticationview.qml")
+      assertThat(issues[1].params[0].type).isEqualTo(FileIssueParamType.FILE_NODE_ORIGINAL)
+      assertThat(issues[1].params[0].value).isEqualTo("../src/platforms/android/androidauthenticationview.qml")
     }
   }
 }

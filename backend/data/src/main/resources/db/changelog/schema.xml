@@ -2710,8 +2710,8 @@
         <sql dbms="postgresql">
             UPDATE user_account
             SET is_initial_user = true
-            WHERE id = (
-                SELECT id FROM user_account LIMIT 1
+            WHERE id IN (
+                SELECT id FROM user_account WHERE username != "___implicit_user" ORDER BY id LIMIT 1
             );
         </sql>
     </changeSet>

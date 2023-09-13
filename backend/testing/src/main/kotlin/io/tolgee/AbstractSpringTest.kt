@@ -2,6 +2,7 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.activity.ActivityService
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
@@ -50,6 +51,8 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.Duration
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -220,6 +223,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   open lateinit var cacheManager: CacheManager
 
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
   fun clearCaches() {
     cacheManager.cacheNames.stream().forEach { cacheName: String ->
       @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -258,5 +264,21 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
       fn = fn,
       isolationLevel = TransactionDefinition.ISOLATION_DEFAULT
     )
+  }
+
+  open fun setForcedDate(date: Date) {
+    currentDateProvider.forcedDate = date
+  }
+
+  open fun clearForcedDate() {
+    currentDateProvider.forcedDate = null
+  }
+
+  open fun forceDateString(dateString: String, pattern: String = "yyyy-MM-dd HH:mm:ss z") {
+    currentDateProvider.forceDateString(dateString, pattern)
+  }
+
+  open fun moveCurrentDate(duration: Duration) {
+    currentDateProvider.move(duration)
   }
 }

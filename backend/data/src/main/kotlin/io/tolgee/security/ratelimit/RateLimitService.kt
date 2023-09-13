@@ -23,6 +23,7 @@ import io.tolgee.constants.Caches
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import java.time.Duration
 import javax.servlet.http.HttpServletRequest
 
 @Service
@@ -40,11 +41,8 @@ class RateLimitService(
    * @param policy The rate limit policy.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
    */
-  fun consumeBucket(policy: RateLimitPolicy) {
-    lockingProvider.withLocking("tolgee.ratelimit.${policy.bucketName}") {
-      val bucket = cache.get(policy.bucketName, Bucket::class.java)
-      cache.put(policy.bucketName, doConsumeBucket(policy, bucket))
-    }
+  fun consumeBucket(policy: RateLimitPolicy?) {
+    consumeBucketUnless(policy) { false }
   }
 
   /**
@@ -55,8 +53,11 @@ class RateLimitService(
    * @param policy The rate limit policy.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
    */
-  fun consumeBucketUnless(policy: RateLimitPolicy, cond: () -> Boolean) {
-    lockingProvider.withLocking("tolgee.ratelimit.${policy.bucketName}") {
+  fun consumeBucketUnless(policy: RateLimitPolicy?, cond: () -> Boolean) {
+    if (policy == null) return
+
+    val lockName = getLockName(policy)
+    lockingProvider.withLocking(lockName) {
       val bucket = cache.get(policy.bucketName, Bucket::class.java)
       val consumed = doConsumeBucket(policy, bucket)
       try {
@@ -76,36 +77,40 @@ class RateLimitService(
    * @param request The HTTP request.
    * @return The applicable rate limit policy, if any.
    */
-  fun getGlobalIpRateLimitPolicy(request: HttpServletRequest): RateLimitPolicy? {
+  fun consumeGlobalIpRateLimitPolicy(request: HttpServletRequest) {
     @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
-    if (!rateLimitProperties.enabled) return null
-    if (!rateLimitProperties.globalLimits) return null
+    if (!rateLimitProperties.enabled) return
+    if (!rateLimitProperties.globalLimits) return
 
-    return RateLimitPolicy(
-      "global.ip.${request.remoteAddr}",
-      rateLimitProperties.ipRequestLimit,
-      rateLimitProperties.ipRequestWindow,
-      true,
+    consumeBucket(
+      RateLimitPolicy(
+        "global.ip.${request.remoteAddr}",
+        rateLimitProperties.ipRequestLimit,
+        Duration.ofMillis(rateLimitProperties.ipRequestWindow),
+        true,
+      )
     )
   }
 
   /**
-   * Returns the global per-user rate limit policy applicable to the request.
+   * Consumes a bucket according to the global per-user rate limit policy applicable to the request.
    *
    * @param request The HTTP request.
    * @param userId The authenticated user ID.
    * @return The applicable rate limit policy, if any.
    */
-  fun getGlobalUserRateLimitPolicy(request: HttpServletRequest, userId: Long): RateLimitPolicy? {
+  fun consumeGlobalUserRateLimitPolicy(request: HttpServletRequest, userId: Long) {
     @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
-    if (!rateLimitProperties.enabled) return null
-    if (!rateLimitProperties.globalLimits) return null
+    if (!rateLimitProperties.enabled) return
+    if (!rateLimitProperties.globalLimits) return
 
-    return RateLimitPolicy(
-      "global.user.$userId",
-      rateLimitProperties.userRequestLimit,
-      rateLimitProperties.userRequestWindow,
-      true,
+    consumeBucket(
+      RateLimitPolicy(
+        "global.user.$userId",
+        rateLimitProperties.userRequestLimit,
+        Duration.ofMillis(rateLimitProperties.userRequestWindow),
+        true,
+      )
     )
   }
 
@@ -123,7 +128,7 @@ class RateLimitService(
     return RateLimitPolicy(
       "global.ip.${request.remoteAddr}::auth",
       5,
-      1000,
+      Duration.ofSeconds(1),
       true,
     )
   }
@@ -138,17 +143,21 @@ class RateLimitService(
    */
   private fun doConsumeBucket(policy: RateLimitPolicy, bucket: Bucket?): Bucket {
     val time = currentDateProvider.date.time
-    if (bucket == null || bucket.resetAt < time) {
+    if (bucket == null || bucket.refillAt < time) {
       val tokensRemaining = policy.limit - 1
-      val tokensResetAt = time + policy.windowSize
+      val tokensResetAt = policy.refillDuration.toMillis() + time
 
       return Bucket(tokensRemaining, tokensResetAt)
     }
 
     if (bucket.tokens == 0) {
-      throw RateLimitedException(bucket.resetAt - time, policy.global)
+      throw RateLimitedException(bucket.refillAt - time, policy.global)
     }
 
-    return Bucket(bucket.tokens - 1, bucket.resetAt)
+    return Bucket(bucket.tokens - 1, bucket.refillAt)
+  }
+
+  private fun getLockName(policy: RateLimitPolicy): String {
+    return "tolgee.ratelimit.${policy.bucketName}"
   }
 }

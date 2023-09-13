@@ -68,9 +68,9 @@ class WebSecurityConfig(
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .authorizeRequests()
-      .antMatchers("/api/public/**", "/v2/public/**").permitAll()
-      .antMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
-      .antMatchers("/api/**", "/v2/**").authenticated()
+      .mvcMatchers("/api/public/**", "/v2/public/**").permitAll()
+      .mvcMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
+      .mvcMatchers("/api/**", "/v2/**").authenticated()
       .anyRequest().permitAll()
       .and().build()
   }

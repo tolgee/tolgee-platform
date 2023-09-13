@@ -4,7 +4,6 @@
 
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
@@ -16,7 +15,6 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 import java.time.Duration
@@ -31,9 +29,6 @@ import java.util.*
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @Test
   fun getScreenshotFileNoTimestamp() {
     executeInNewTransaction {
@@ -64,9 +59,9 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
         )
       )
 
-      currentDateProvider.move(Duration.ofSeconds(10))
+      moveCurrentDate(Duration.ofSeconds(10))
       performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
-      currentDateProvider.forcedDate = null
+      clearForcedDate()
     }
   }
 

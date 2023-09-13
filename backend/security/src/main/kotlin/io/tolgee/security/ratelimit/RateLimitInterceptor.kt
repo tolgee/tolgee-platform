@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.HandlerMapping
+import java.time.Duration
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -52,19 +53,31 @@ class RateLimitInterceptor(
     account: UserAccountDto?,
     handler: HandlerMethod
   ): RateLimitPolicy? {
-    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
-    if (!rateLimitProperties.enabled) return null
-
     val annotation = AnnotationUtils.getAnnotation(handler.method, RateLimited::class.java)
       ?: return null
 
-    if (
-      (!annotation.isAuthentication && !rateLimitProperties.endpointLimits) ||
-      (annotation.isAuthentication && !rateLimitProperties.authenticationLimits)
-    ) {
+    if (!shouldRateLimit(annotation)) {
       return null
     }
 
+    val bucketName = getBucketName(request, annotation, account)
+    return RateLimitPolicy(
+      bucketName,
+      annotation.limit,
+      Duration.ofMillis(annotation.refillDurationInMs),
+      false,
+    )
+  }
+
+  private fun shouldRateLimit(annotation: RateLimited): Boolean {
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return false
+
+    return (annotation.isAuthentication && rateLimitProperties.authenticationLimits) ||
+      (!annotation.isAuthentication && rateLimitProperties.endpointLimits)
+  }
+
+  private fun getBucketName(request: HttpServletRequest, annotation: RateLimited, account: UserAccountDto?): String {
     val matchedPath = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE) as String
     val pathVariablesMap = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
 
@@ -73,7 +86,7 @@ class RateLimitInterceptor(
 
     var bucketName = "endpoint.$id.${annotation.bucketName.ifEmpty { "${request.method} $matchedPath" }}"
 
-    // Include route parameters to discriminate major routes, but not minor routes.
+    // Include path variables to discriminate major routes, but not minor routes.
     // Example: These are different
     //  - /major/1/some-path -> "/major/{id}/some-path 1"
     //  - /major/2/some-path -> "/major/{id}/some-path 2"
@@ -82,17 +95,12 @@ class RateLimitInterceptor(
     //  - /major/1/minor/2/some-path -> "/major/{id}/minor/{subId}/some-path 1"
 
     var i = 0
-    while (i < annotation.majorParametersToDiscriminate && pathVariables.hasNext()) {
+    while (i < annotation.pathVariablesToDiscriminate && pathVariables.hasNext()) {
       bucketName += pathVariables.next()
       i++
     }
 
-    return RateLimitPolicy(
-      bucketName,
-      annotation.limit,
-      annotation.windowSize,
-      false,
-    )
+    return bucketName
   }
 
   override fun getOrder(): Int {
