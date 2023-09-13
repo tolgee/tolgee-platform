@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request.key
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.util.getSafeNamespace
@@ -8,7 +9,7 @@ import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
 
 @Validated
-data class CreateKeyDto(
+class CreateKeyDto(
   /**
    * Key full path is stored as name in entity
    */
@@ -19,6 +20,7 @@ data class CreateKeyDto(
 
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   var namespace: String? = null,
 
   val translations: Map<String, String?>? = null,

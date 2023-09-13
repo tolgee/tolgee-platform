@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request.key
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.util.getSafeNamespace
@@ -16,6 +17,7 @@ data class ComplexEditKeyDto(
 
   @field:Length(max = 100)
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   var namespace: String? = null,
 
   @Schema(description = "Translations to update")
@@ -36,9 +38,5 @@ data class ComplexEditKeyDto(
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {
     this.namespace = getSafeNamespace(namespace)
-  }
-
-  init {
-    println("being created")
   }
 }
