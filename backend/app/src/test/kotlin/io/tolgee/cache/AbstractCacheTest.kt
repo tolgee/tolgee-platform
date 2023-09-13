@@ -52,7 +52,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager
@@ -154,7 +154,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is caching machine translations`() {
-    doAnswer { googleResponse }.whenever(googleTranslationProvider).translate(any())
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle)
@@ -163,7 +163,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different service)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnAws)
@@ -172,7 +172,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different targetLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(targetLanguageTag = "cs"))
@@ -181,16 +181,20 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different sourceLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(sourceLanguageTag = "de"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 
+  private fun mockGoogleResponse() {
+    doAnswer { googleResponse }.whenever(googleTranslationProvider).translate(any())
+  }
+
   @Test
   fun `is not caching machine translations (different input)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(text = "Hello!"))

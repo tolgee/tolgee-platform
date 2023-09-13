@@ -62,7 +62,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
 
     response.split("\n").filter { it.isNotBlank() }.map {
       jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(3)
+    }.assert.hasSize(4)
   }
 
   @Test
