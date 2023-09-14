@@ -19,6 +19,8 @@ import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,7 +30,10 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 
-class MtResultStreamer(private val dto: SuggestRequestDto, private val applicationContext: ApplicationContext) {
+class MtResultStreamer(
+  private val dto: SuggestRequestDto,
+  private val applicationContext: ApplicationContext
+) : Logging {
 
   private lateinit var outputStream: OutputStream
 
@@ -55,6 +60,7 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
     key = with(machineTranslationSuggestionFacade) { dto.key }
     val targetLanguage = applicationContext.getBean(LanguageService::class.java).get(dto.targetLanguageId)
     servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
+    project = projectHolder.projectEntity
   }
 
   private fun writeInfo() {
@@ -82,6 +88,10 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
       }
     } catch (e: Exception) {
       writeException(e, writer, service)
+      if (e !is BadRequestException && e !is NotFoundException) {
+        Sentry.captureException(e)
+        logger.error("Error while streaming machine translation suggestion", e)
+      }
     }
   }
 
@@ -166,10 +176,10 @@ class MtResultStreamer(private val dto: SuggestRequestDto, private val applicati
   private lateinit var servicesToUse: Set<MtServiceInfo>
 
   private val balanceBefore by lazy {
-    mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
+    mtCreditBucketService.getCreditBalances(project)
   }
 
-  private val project by lazy { projectHolder.projectEntity }
+  private lateinit var project: Project
   private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(projectHolder.project.id)
 
   private val baseBlank by lazy {
