@@ -42,6 +42,7 @@ enum class ActivityType(
   BATCH_SET_TRANSLATION_STATE(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_TAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
-  BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class)
+  BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class),
+  AUTOMATION(true)
   ;
 }

@@ -308,4 +308,11 @@ class BatchJobService(
   fun getStuckJobs(jobIds: MutableSet<Long>): List<BatchJob> {
     return batchJobRepository.getStuckJobs(jobIds, currentDateProvider.date.addMinutes(-2))
   }
+
+  fun getFirstAndLastCreatedAtByDebouncingKey(projectId: Long, debouncingKey: String): Pair<Long, Long>? {
+    val result = batchJobRepository.getFirstAndLastCreatedAtByDebouncingKey(projectId, debouncingKey)
+    val first = result?.get(0)?.time ?: return null
+    val last = result[1]?.time ?: return null
+    return first to last
+  }
 }
