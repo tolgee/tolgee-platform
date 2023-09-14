@@ -15,6 +15,7 @@ import javax.persistence.Entity
 import javax.persistence.EnumType.STRING
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
+import javax.persistence.Index
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 import javax.persistence.Table
@@ -23,7 +24,7 @@ import javax.persistence.Table
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
-@Table(name = "tolgee_batch_job")
+@Table(name = "tolgee_batch_job", indexes = [Index(columnList = "debouncingKey")])
 class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -62,6 +63,13 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   var hidden: Boolean = false
 
   val dto get() = BatchJobDto.fromEntity(this)
+
+  val debounceDurationInMs: Long? = null
+
+  val debounceMaxWaitTimeInMs: Long? = null
+
+  @Type(type = "text")
+  val debouncingKey: String? = null
 
   companion object {
     fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =

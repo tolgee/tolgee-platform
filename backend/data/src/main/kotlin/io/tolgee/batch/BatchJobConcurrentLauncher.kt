@@ -29,6 +29,7 @@ class BatchJobConcurrentLauncher(
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val batchJobService: BatchJobService,
   private val progressManager: ProgressManager,
+  private val debouncingManager: DebouncingManager
 ) : Logging {
   companion object {
     val runningInstances: ConcurrentHashMap.KeySetView<BatchJobConcurrentLauncher, Boolean> =
@@ -154,6 +155,14 @@ class BatchJobConcurrentLauncher(
       addBackToQueue(executionItem)
       return false
     }
+    if (!executionItem.shouldNotBeDebounced()) {
+      logger.trace(
+        """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
+                    | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
+      )
+      addBackToQueue(executionItem)
+      return false
+    }
     if (!canRunJobWithCharacter(executionItem.jobCharacter)) {
       logger.trace(
         """Execution ${executionItem.chunkExecutionId} cannot run concurrent job 
@@ -222,6 +231,10 @@ class BatchJobConcurrentLauncher(
   fun ExecutionQueueItem.isTimeToExecute(): Boolean {
     val executeAfter = this.executeAfter ?: return true
     return executeAfter <= currentDateProvider.date.time
+  }
+
+  fun ExecutionQueueItem.shouldNotBeDebounced(): Boolean {
+    return debouncingManager.shouldNotBeDebounced(this.jobId)
   }
 
   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {
