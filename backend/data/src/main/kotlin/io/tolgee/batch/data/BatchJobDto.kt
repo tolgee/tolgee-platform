@@ -21,6 +21,7 @@ class BatchJobDto(
   var hidden: Boolean,
   var debouncingKey: String?,
   var createdAt: Long? = null,
+  val lastDebouncingEvent: Long? = null,
   val debounceDurationInMs: Long? = null,
   var debounceMaxWaitTimeInMs: Long? = null,
 ) : IBatchJob {
@@ -46,6 +47,7 @@ class BatchJobDto(
         createdAt = entity.createdAt?.time,
         debounceDurationInMs = entity.debounceDurationInMs,
         debounceMaxWaitTimeInMs = entity.debounceMaxWaitTimeInMs,
+        lastDebouncingEvent = entity.lastDebouncingEvent?.time,
       )
     }
   }

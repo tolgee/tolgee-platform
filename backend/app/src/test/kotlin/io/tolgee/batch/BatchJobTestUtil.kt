@@ -2,8 +2,10 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.state.BatchJobStateProvider
@@ -37,6 +39,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
+import java.time.Duration
 import java.util.*
 import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
@@ -126,6 +129,12 @@ class BatchJobTestUtil(
         any(),
         any()
       )
+  }
+
+  fun makeAutomationChunkProcessorPass() {
+    doAnswer { }
+      .whenever(automationChunkProcessor)
+      .process(any(), any(), any(), any())
   }
 
   fun verifyConstantRepeats(repeats: Int, timeout: Long = 2000) {
@@ -321,6 +330,18 @@ class BatchJobTestUtil(
     }
   }
 
+  fun runDebouncedJob(): BatchJob {
+    return executeInNewTransaction(transactionManager) {
+      batchJobService.startJob(
+        request = AutomationBjRequest(1, 1),
+        project = testData.projectBuilder.self,
+        author = testData.user,
+        type = BatchJobType.AUTOMATION,
+        debounceDuration = Duration.ofSeconds(10)
+      )
+    }
+  }
+
   fun waitForQueueSize(size: Int) {
     waitForNotThrowing(pollTime = 50, timeout = 2000) {
       batchJobChunkExecutionQueue.size.assert.isEqualTo(size)
@@ -393,6 +414,9 @@ class BatchJobTestUtil(
 
   private val preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
     get() = applicationContext.getBean(PreTranslationByTmChunkProcessor::class.java)
+
+  private val automationChunkProcessor: AutomationChunkProcessor
+    get() = applicationContext.getBean(AutomationChunkProcessor::class.java)
 
   private val transactionManager: PlatformTransactionManager
     get() = applicationContext.getBean(PlatformTransactionManager::class.java)

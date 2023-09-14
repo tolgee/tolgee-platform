@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.events.OnBatchJobCreated
@@ -22,6 +23,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import io.tolgee.util.logger
+import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigInteger
+import java.time.Duration
 import java.util.*
 import javax.persistence.EntityManager
 
@@ -48,16 +51,29 @@ class BatchJobService(
   private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
 
+  companion object {
+    private const val DEBOUNCE_MAX_WAITING_TIME_MULTIPLIER = 4
+  }
+
   @Transactional
   fun startJob(
     request: Any,
     project: Project,
     author: UserAccount?,
     type: BatchJobType,
-    isHidden: Boolean = false
+    isHidden: Boolean = false,
+    debounceDuration: Duration? = null
   ): BatchJob {
     val processor = getProcessor(type)
     val target = processor.getTarget(request)
+
+    val debouncingKey = debounceDuration?.let { getDebouncingKey(type, project, target, request) }
+    if (debouncingKey != null) {
+      val debouncedJob = tryDebounceJob(debouncingKey, debounceDuration)
+      if (debouncedJob != null) {
+        return debouncedJob
+      }
+    }
 
     val job = BatchJob().apply {
       this.project = project
@@ -69,6 +85,9 @@ class BatchJobService(
       this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
       this.type = type
       this.hidden = isHidden
+      this.debounceDurationInMs = debounceDuration?.toMillis()
+      this.debounceMaxWaitTimeInMs = debounceDuration?.let { it.toMillis() * DEBOUNCE_MAX_WAITING_TIME_MULTIPLIER }
+      this.debouncingKey = debouncingKey
     }
 
     val chunked = job.chunkedTarget
@@ -89,6 +108,28 @@ class BatchJobService(
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
+  }
+
+  private fun tryDebounceJob(
+    debouncingKey: String?,
+    debounceDuration: Duration?
+  ): BatchJob? {
+    debouncingKey ?: return null
+    val job = batchJobRepository.findBatchJobByDebouncingKey(debouncingKey) ?: return null
+    job.lastDebouncingEvent = currentDateProvider.date
+    job.debounceDurationInMs = debounceDuration?.toMillis()
+    cachingBatchJobService.saveJob(job)
+    return job
+  }
+
+  private fun getDebouncingKey(
+    type: BatchJobType,
+    project: Project,
+    target: List<Any>,
+    request: Any
+  ): String? {
+    val debouncingKeyJson = jacksonObjectMapper().writeValueAsString(listOf(type, project.id, target, request))
+    return sha256Hex(debouncingKeyJson)
   }
 
   @TransactionalEventListener
@@ -307,12 +348,5 @@ class BatchJobService(
 
   fun getStuckJobs(jobIds: MutableSet<Long>): List<BatchJob> {
     return batchJobRepository.getStuckJobs(jobIds, currentDateProvider.date.addMinutes(-2))
-  }
-
-  fun getFirstAndLastCreatedAtByDebouncingKey(projectId: Long, debouncingKey: String): Pair<Long, Long>? {
-    val result = batchJobRepository.getFirstAndLastCreatedAtByDebouncingKey(projectId, debouncingKey)
-    val first = result?.get(0)?.time ?: return null
-    val last = result[1]?.time ?: return null
-    return first to last
   }
 }

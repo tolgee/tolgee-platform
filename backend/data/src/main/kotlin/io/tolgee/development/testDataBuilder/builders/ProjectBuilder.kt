@@ -8,6 +8,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.automations.Automation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -37,6 +38,7 @@ class ProjectBuilder(
     val imports = mutableListOf<ImportBuilder>()
     val keys = mutableListOf<KeyBuilder>()
     val translations = mutableListOf<TranslationBuilder>()
+    val automations = mutableListOf<AutomationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
     var autoTranslationConfigBuilders = mutableListOf<AutoTranslationConfigBuilder>()
@@ -68,6 +70,8 @@ class ProjectBuilder(
   fun addKey(keyName: String): KeyBuilder {
     return addKey(keyName, null)
   }
+
+  fun addAutomation(ft: FT<Automation>) = addOperation(data.automations, ft)
 
   fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
     return addKey {

@@ -2760,4 +2760,84 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-1">
+        <createTable tableName="automation">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-2">
+        <createTable tableName="automation_action">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automation_actionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="INTEGER"/>
+            <column name="automation_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-3">
+        <createTable tableName="automation_trigger">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="automation_triggerPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_type" type="VARCHAR(255)"/>
+            <column name="debounce_duration_in_ms" type="BIGINT"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="automation_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-4">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debounce_duration_in_ms" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-5">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debounce_max_wait_time_in_ms" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-6">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="debouncing_key" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-7">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="last_debouncing_event" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-8">
+        <createIndex indexName="IDX3me47efrnb9cl4yp7y3iw3so7" tableName="tolgee_batch_job">
+            <column name="debouncing_key"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-9">
+        <addForeignKeyConstraint baseColumnNames="automation_id" baseTableName="automation_action" constraintName="FK6xrtt8p6hxmnq6obmb7rspxw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="automation" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-10">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="automation" constraintName="FKjb13s5bve410o2v8qinwgnpmc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1694691784081-11">
+        <addForeignKeyConstraint baseColumnNames="automation_id" baseTableName="automation_trigger" constraintName="FKkwhuv2sdsacybp49ixx5x7oee" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="automation" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

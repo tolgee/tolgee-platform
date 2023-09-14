@@ -29,7 +29,6 @@ class BatchJobConcurrentLauncher(
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val batchJobService: BatchJobService,
   private val progressManager: ProgressManager,
-  private val debouncingManager: DebouncingManager
 ) : Logging {
   companion object {
     val runningInstances: ConcurrentHashMap.KeySetView<BatchJobConcurrentLauncher, Boolean> =
@@ -157,8 +156,7 @@ class BatchJobConcurrentLauncher(
     }
     if (!executionItem.shouldNotBeDebounced()) {
       logger.trace(
-        """Execution ${executionItem.chunkExecutionId} not ready to execute, adding back to queue:
-                    | Difference ${executionItem.executeAfter!! - currentDateProvider.date.time}""".trimMargin()
+        """Execution ${executionItem.chunkExecutionId} not ready to execute (debouncing), adding back to queue""".trimMargin()
       )
       addBackToQueue(executionItem)
       return false
@@ -234,7 +232,16 @@ class BatchJobConcurrentLauncher(
   }
 
   fun ExecutionQueueItem.shouldNotBeDebounced(): Boolean {
-    return debouncingManager.shouldNotBeDebounced(this.jobId)
+    val dto = batchJobService.getJobDto(this.jobId)
+    val lastEventTime = dto.lastDebouncingEvent ?: dto.createdAt ?: return true
+    val debounceDuration = dto.debounceDurationInMs ?: return true
+    val executeAfter = lastEventTime + debounceDuration
+    if (executeAfter <= currentDateProvider.date.time) {
+      return true
+    }
+    val createdAt = dto.createdAt ?: return true
+    val debounceMaxWaitTimeInMs = dto.debounceMaxWaitTimeInMs ?: return true
+    return createdAt + debounceMaxWaitTimeInMs <= currentDateProvider.date.time
   }
 
   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {

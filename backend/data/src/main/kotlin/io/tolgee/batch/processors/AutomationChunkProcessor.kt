@@ -28,7 +28,7 @@ class AutomationChunkProcessor(
   }
 
   override fun getTarget(data: AutomationBjRequest): List<AutomationTargetItem> {
-    return listOf(AutomationTargetItem(data.trigger.id, data.action.id))
+    return listOf(AutomationTargetItem(data.triggerId, data.actionId))
   }
 
   override fun getParamsType(): Class<AutomationBjParams> {
