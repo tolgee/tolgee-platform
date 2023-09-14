@@ -47,7 +47,6 @@ class BatchJobActionService(
   private val savePointManager: SavePointManager,
   private val currentDateProvider: CurrentDateProvider,
   private val activityHolder: ActivityHolder,
-  private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val metrics: Metrics
 ) : Logging {
   companion object {

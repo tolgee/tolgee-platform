@@ -98,11 +98,10 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
 
   @Query(
     """
-    select min(bj.createdAt), max(bj.createdAt) from BatchJob bj
-      where bj.project.id = :projectId
-        and bj.debouncingKey = :debouncingKey
-        and bj.status = 'PENDING'
+    from BatchJob j
+    where j.debouncingKey = :debouncingKey
+    and j.status = 'PENDING'
   """
   )
-  fun getFirstAndLastCreatedAtByDebouncingKey(projectId: Long, debouncingKey: String): Array<Date?>?
+  fun findBatchJobByDebouncingKey(debouncingKey: String?): BatchJob?
 }

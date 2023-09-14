@@ -10,6 +10,7 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.LanguageService
+import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyMetaService
@@ -70,7 +71,8 @@ class TestDataService(
   private val patService: PatService,
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
+  private val automationService: AutomationService
 ) : Logging {
 
   @Transactional
@@ -200,6 +202,13 @@ class TestDataService(
     saveProjectAvatars(builder)
     saveScreenshotData(builder)
     saveKeyDistances(builder)
+    saveAutomations(builder)
+  }
+
+  private fun saveAutomations(builder: ProjectBuilder) {
+    builder.data.automations.forEach {
+      automationService.save(it.self)
+    }
   }
 
   private fun saveKeyDistances(builder: ProjectBuilder) {

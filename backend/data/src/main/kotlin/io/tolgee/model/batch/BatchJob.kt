@@ -11,6 +11,7 @@ import io.tolgee.model.activity.ActivityRevision
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
+import java.util.*
 import javax.persistence.Entity
 import javax.persistence.EnumType.STRING
 import javax.persistence.Enumerated
@@ -64,12 +65,14 @@ class BatchJob : StandardAuditModel(), IBatchJob {
 
   val dto get() = BatchJobDto.fromEntity(this)
 
-  val debounceDurationInMs: Long? = null
+  var debounceDurationInMs: Long? = null
 
-  val debounceMaxWaitTimeInMs: Long? = null
+  var debounceMaxWaitTimeInMs: Long? = null
+
+  var lastDebouncingEvent: Date? = null
 
   @Type(type = "text")
-  val debouncingKey: String? = null
+  var debouncingKey: String? = null
 
   companion object {
     fun <T> chunkTarget(chunkSize: Int, target: List<T>): List<List<T>> =

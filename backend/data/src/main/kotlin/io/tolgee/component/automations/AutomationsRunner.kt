@@ -54,7 +54,7 @@ class AutomationsRunner(
     projectId: Long
   ) {
     batchJobService.startJob(
-      AutomationBjRequest(trigger, action),
+      AutomationBjRequest(trigger.id, action.id),
       project = entityManager.getReference(Project::class.java, projectId),
       author = null,
       type = BatchJobType.AUTOMATION,
