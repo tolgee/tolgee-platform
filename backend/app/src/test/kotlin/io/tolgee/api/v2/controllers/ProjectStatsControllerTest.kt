@@ -9,6 +9,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -30,6 +31,11 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   @Test

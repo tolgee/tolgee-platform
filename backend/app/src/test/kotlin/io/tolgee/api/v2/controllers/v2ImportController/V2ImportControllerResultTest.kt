@@ -9,6 +9,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -17,6 +18,11 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     setForcedDate(Date())
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   @Test

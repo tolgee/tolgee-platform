@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -27,6 +28,11 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])

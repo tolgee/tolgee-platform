@@ -13,6 +13,7 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.data.Offset
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,6 +30,11 @@ import java.util.*
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
+  }
+
   @Test
   fun getScreenshotFileNoTimestamp() {
     executeInNewTransaction {
@@ -61,7 +67,6 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
 
       moveCurrentDate(Duration.ofSeconds(10))
       performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
-      clearForcedDate()
     }
   }
 

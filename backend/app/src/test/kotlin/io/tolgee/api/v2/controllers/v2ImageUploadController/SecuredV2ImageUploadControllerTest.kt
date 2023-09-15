@@ -10,6 +10,7 @@ import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.data.Offset
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -26,6 +27,11 @@ import java.util.*
   ]
 )
 class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
+  }
+
   @Test
   fun getScreenshotFileNoTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
@@ -45,7 +51,6 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
     moveCurrentDate(Duration.ofSeconds(10))
     performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
-    clearForcedDate()
   }
 
   @Test

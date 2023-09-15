@@ -26,6 +26,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addMonths
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.KArgumentCaptor
@@ -99,6 +100,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     val rateLimitsCacheMock = mock<Cache>()
     whenever(cacheManager.getCache(eq(Caches.RATE_LIMITS))).thenReturn(rateLimitsCacheMock)
     whenever(cacheManager.getCache(eq(Caches.MACHINE_TRANSLATIONS))).thenReturn(cacheMock)
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
