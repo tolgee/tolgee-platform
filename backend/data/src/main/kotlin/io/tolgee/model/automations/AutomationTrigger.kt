@@ -17,7 +17,7 @@ class AutomationTrigger(
   var type: AutomationTriggerType = AutomationTriggerType.MANUAL
 
   /**
-   * when type is ACTIVITY
+   * only when type is ACTIVITY
    */
   @Enumerated(STRING)
   var activityType: ActivityType? = null

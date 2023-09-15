@@ -11,10 +11,11 @@ import io.tolgee.model.Project
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.service.automations.AutomationService
 import org.springframework.stereotype.Component
+import java.time.Duration
 import javax.persistence.EntityManager
 
 @Component
-class AutomationsRunner(
+class AutomationsBatchJobCreator(
   val batchJobService: BatchJobService,
   val automationService: AutomationService,
   val entityManager: EntityManager
@@ -58,7 +59,8 @@ class AutomationsRunner(
       project = entityManager.getReference(Project::class.java, projectId),
       author = null,
       type = BatchJobType.AUTOMATION,
-      isHidden = true
+      isHidden = true,
+      debounceDuration = trigger.debounceDurationInMs?.let { Duration.ofMillis(it) }
     )
   }
 }

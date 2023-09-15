@@ -2,34 +2,16 @@ package io.tolgee.component.cdn
 
 import com.azure.storage.blob.BlobServiceClientBuilder
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.events.OnProjectActivityStoredEvent
-import io.tolgee.service.export.ExportService
-import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
-class Cdn(
+class StorageClientProvider(
   private val tolgeeProperties: TolgeeProperties,
-  private val exportService: ExportService
 ) {
-
-  @EventListener
-  @Async
-  fun listen(event: OnProjectActivityStoredEvent) {
-    upload(event.activityRevision.projectId)
-  }
-
-  fun upload(projectId: Long?) {
-    projectId ?: return
-    exportService.export(projectId, ExportParams()).forEach {
-      client.storeFile(
-        storageFilePath = "$projectId/${it.key}",
-        bytes = it.value.readBytes()
-      )
-    }
+  operator fun invoke(): FileStorage {
+    return client
   }
 
   val client by lazy {

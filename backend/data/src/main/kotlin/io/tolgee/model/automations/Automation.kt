@@ -13,9 +13,9 @@ class Automation(
   var project: Project,
 ) : StandardAuditModel() {
 
-  @OneToMany(mappedBy = "automation")
+  @OneToMany(mappedBy = "automation", orphanRemoval = true)
   var triggers: MutableList<AutomationTrigger> = mutableListOf()
 
-  @OneToMany(mappedBy = "automation")
+  @OneToMany(mappedBy = "automation", orphanRemoval = true)
   var actions: MutableList<AutomationAction> = mutableListOf()
 }
