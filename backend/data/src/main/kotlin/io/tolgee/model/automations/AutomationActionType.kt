@@ -1,5 +1,11 @@
 package io.tolgee.model.automations
 
-enum class AutomationActionType {
-  CDN_PUBLISH
+import io.tolgee.component.automations.AutomationProcessor
+import io.tolgee.component.automations.processors.CdnPublishProcessor
+import kotlin.reflect.KClass
+
+enum class AutomationActionType(
+  val processor: KClass<out AutomationProcessor>
+) {
+  CDN_PUBLISH(CdnPublishProcessor::class)
 }

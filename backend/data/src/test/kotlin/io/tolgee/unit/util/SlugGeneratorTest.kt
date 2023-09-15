@@ -68,7 +68,7 @@ class SlugGeneratorTest {
 
   @Test
   fun removesSpecialChars() {
-    assertThat(slugGenerator.generate("+--%%\\---normál|____!!`", 3, 50, { true }))
+    assertThat(slugGenerator.generate("+--%%\\---normál|____!!`", 3, 50) { true })
       .isEqualTo("normal")
   }
 }

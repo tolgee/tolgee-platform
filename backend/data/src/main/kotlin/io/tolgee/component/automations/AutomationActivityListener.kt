@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AutomationActivityListener(
-  private val automationsRunner: AutomationsRunner
+  private val automationsBatchJobCreator: AutomationsBatchJobCreator
 ) {
   @EventListener
   @Async
@@ -23,14 +23,14 @@ class AutomationActivityListener(
   private fun executeTranslationDataModificationAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val projectId = event.activityRevision.projectId ?: return
     if (isTranslationDataModification(event)) {
-      automationsRunner.executeTranslationDataModificationAutomation(projectId)
+      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId)
     }
   }
 
   private fun executeActivityAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
-    automationsRunner.executeActivityAutomation(projectId, activityType)
+    automationsBatchJobCreator.executeActivityAutomation(projectId, activityType)
   }
 
   private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean {

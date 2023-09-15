@@ -4,17 +4,14 @@ import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.data.AutomationTargetItem
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.AutomationBjRequest
+import io.tolgee.component.automations.AutomationRunner
 import io.tolgee.model.batch.params.AutomationBjParams
-import io.tolgee.service.key.TagService
-import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class AutomationChunkProcessor(
-  private val entityManager: EntityManager,
-  private val tagService: TagService
+  private val automationRunner: AutomationRunner
 ) : ChunkProcessor<AutomationBjRequest, AutomationBjParams, AutomationTargetItem> {
   override fun process(
     job: BatchJobDto,
@@ -23,7 +20,7 @@ class AutomationChunkProcessor(
     onProgress: (Int) -> Unit
   ) {
     chunk.forEach {
-      coroutineContext.ensureActive()
+      automationRunner.run(it.actionId)
     }
   }
 
