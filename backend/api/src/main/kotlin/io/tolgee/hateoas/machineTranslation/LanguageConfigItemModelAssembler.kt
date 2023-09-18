@@ -17,6 +17,7 @@ class LanguageConfigItemModelAssembler : RepresentationModelAssemblerSupport<MtS
     targetLanguageName = entity.targetLanguage?.name,
     primaryService = entity.primaryService,
     enabledServices = entity.enabledServices,
-    enabledServicesInfo = entity.enabledServicesInfo.toSet()
+    enabledServicesInfo = entity.enabledServicesInfo.toSet(),
+    primaryServiceInfo = entity.primaryServiceInfo
   )
 }

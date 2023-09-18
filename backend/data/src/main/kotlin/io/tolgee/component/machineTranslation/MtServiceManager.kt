@@ -75,7 +75,8 @@ class MtServiceManager(
         translatedText = it.translatedText,
         contextDescription = it.contextDescription,
         actualPrice = 0,
-        usedService = params.serviceInfo.serviceType
+        usedService = params.serviceInfo.serviceType,
+        params.textRaw.isEmpty()
       )
     }
   }
@@ -87,6 +88,16 @@ class MtServiceManager(
     if (internalProperties.fakeMtProviders) {
       logger.debug("Fake MT provider is enabled")
       return getFaked(params)
+    }
+
+    if (params.textRaw.isBlank()) {
+      return TranslateResult(
+        translatedText = null,
+        contextDescription = null,
+        actualPrice = 0,
+        usedService = params.serviceInfo.serviceType,
+        baseBlank = true,
+      )
     }
 
     val foundInCache = findInCache(params)
@@ -112,7 +123,8 @@ class MtServiceManager(
         translated.translated,
         translated.contextDescription,
         translated.price,
-        params.serviceInfo.serviceType
+        params.serviceInfo.serviceType,
+        params.textRaw.isBlank()
       )
 
       params.cacheResult(translateResult)
@@ -124,7 +136,8 @@ class MtServiceManager(
         null,
         null,
         0,
-        params.serviceInfo.serviceType
+        params.serviceInfo.serviceType,
+        params.textRaw.isBlank(),
       )
     }
   }
@@ -191,7 +204,8 @@ class MtServiceManager(
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
       contextDescription = null,
       actualPrice = params.text.length * 100,
-      usedService = params.serviceInfo.serviceType
+      usedService = params.serviceInfo.serviceType,
+      baseBlank = params.textRaw.isEmpty()
     )
   }
 

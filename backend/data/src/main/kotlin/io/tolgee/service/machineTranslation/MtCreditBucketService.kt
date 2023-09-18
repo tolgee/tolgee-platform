@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
-import javax.persistence.EntityManager
 import javax.transaction.Transactional
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -33,16 +32,15 @@ class MtCreditBucketService(
   private val organizationService: OrganizationService,
   private val eventPublisher: ApplicationEventPublisher,
   private val lockingProvider: LockingProvider,
-  private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
 ) : Logging {
-  fun consumeCredits(project: Project, amount: Int) {
-    lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
+  fun consumeCredits(project: Project, amount: Int): MtCreditBucket {
+    return lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
           val bucket = findOrCreateBucket(project)
           consumeCredits(bucket, amount)
-          entityManager.flush()
+          bucket
         }
       }
     }

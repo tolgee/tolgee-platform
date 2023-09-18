@@ -4,15 +4,18 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
+import io.tolgee.model.MtCreditBucket
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import javax.persistence.EntityManager
 
 @Component
 class MtEventListener(
   private val mtCreditBucketService: MtCreditBucketService,
   private val machineTranslationProperties: MachineTranslationProperties,
-  private val publicBillingConfProvider: PublicBillingConfProvider
+  private val publicBillingConfProvider: PublicBillingConfProvider,
+  private val entityManager: EntityManager
 ) {
   @EventListener(OnBeforeMachineTranslationEvent::class)
   fun onBeforeMtEvent(event: OnBeforeMachineTranslationEvent) {
@@ -24,8 +27,20 @@ class MtEventListener(
   @EventListener(OnAfterMachineTranslationEvent::class)
   fun onAfterMtEvent(event: OnAfterMachineTranslationEvent) {
     if (shouldConsumeCredits()) {
-      mtCreditBucketService.consumeCredits(event.project, event.actualSumPrice)
+      val bucket = mtCreditBucketService.consumeCredits(event.project, event.actualSumPrice)
+      detachBucketAfterConsumption(bucket)
     }
+  }
+
+  /**
+   * Since consumption does happen in a separate transaction,
+   * we need to detach the bucket from the current transaction
+   *
+   * Otherwise, hibernate saves the entity and credits won't be consumed
+   */
+  private fun detachBucketAfterConsumption(bucket: MtCreditBucket) {
+    val bucketRef = entityManager.getReference(MtCreditBucket::class.java, bucket.id)
+    entityManager.detach(bucketRef)
   }
 
   fun shouldConsumeCredits(): Boolean {

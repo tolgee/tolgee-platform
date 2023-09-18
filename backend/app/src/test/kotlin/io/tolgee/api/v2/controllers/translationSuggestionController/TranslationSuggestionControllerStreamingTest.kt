@@ -26,15 +26,20 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   lateinit var testData: BaseTestData
 
   lateinit var czechLanguage: Language
+  lateinit var hindiLanguage: Language
 
   @BeforeEach
   fun setup() {
-    initMachineTranslationProperties(-1, setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE))
+    initMachineTranslationProperties(
+      freeCreditsAmount = -1,
+      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE, MtServiceType.DEEPL)
+    )
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
 
     testData = BaseTestData().apply {
       czechLanguage = projectBuilder.addCzech().self
+      hindiLanguage = projectBuilder.addHindi().self
     }
 
     testDataService.saveTestData(testData.root)
@@ -57,7 +62,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
 
     response.split("\n").filter { it.isNotBlank() }.map {
       jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(3)
+    }.assert.hasSize(4)
   }
 
   @Test
@@ -77,5 +82,25 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
       }
       """.trimIndent()
     )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it does not return unsupporting services`() {
+    val response = performProjectAuthPost(
+      "suggest/machine-translations-streaming",
+      mapOf(
+        "targetLanguageId" to hindiLanguage.id,
+        "baseText" to "text"
+      )
+    ).andDo {
+      it.asyncResult
+    }.andReturn().response.contentAsString
+
+    response.split("\n").filter { it.isNotBlank() }.map {
+      jacksonObjectMapper().readValue(it, Any::class.java)
+    }.assert.hasSize(3)
+
+    response.assert.doesNotContain("DEEPL")
   }
 }
