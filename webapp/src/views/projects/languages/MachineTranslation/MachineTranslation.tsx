@@ -1,16 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { styled } from '@mui/material';
-import { Formik, FormikProps } from 'formik';
-
-import { components } from 'tg.service/apiSchema.generated';
-import { StyledLanguageTable } from '../tableStyles';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { useMachineTranslationSettings } from './useMachineTranslationSettings';
-import { SettingsForm } from './SettingsForm';
 
-type MachineTranslationLanguagePropsDto =
-  components['schemas']['MachineTranslationLanguagePropsDto'];
+import { SmoothProgress } from 'tg.component/SmoothProgress';
+import { StyledLanguageTable } from '../tableStyles';
+import { useMachineTranslationSettings } from './useMachineTranslationSettings';
+import { SettingsTable } from './SettingsTable';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -38,125 +33,34 @@ const StyledLoadingWrapper = styled('div')`
 `;
 
 export const MachineTranslation = () => {
-  const formRef = useRef<FormikProps<any>>();
   const [expanded, setExpanded] = useState(false);
-  const [formInstance, setFormInstance] = useState(0);
 
-  const {
-    settings,
-    languages,
-    updateSettings,
-    providers,
-    baseSetting,
-    applyUpdate,
-  } = useMachineTranslationSettings({
-    // completely reset form (by creating new instance)
-    onReset: () => setFormInstance((i) => i + 1),
-  });
+  const { settings, applyUpdate, isFetching } = useMachineTranslationSettings();
 
-  const isUpdating = updateSettings.isLoading;
-
-  const formatLangSettings = (
-    lang: string | null,
-    enabled: string[],
-    primary: string | null | undefined
-  ): MachineTranslationLanguagePropsDto | null => {
-    const targetLanguageId = lang
-      ? languages.data?._embedded?.languages?.find((l) => l.tag === lang)?.id
-      : null;
-
-    if (primary === 'default') {
-      return null;
-    }
-
-    return {
-      targetLanguageId: targetLanguageId as any,
-      primaryService: (primary === 'none' ? null : primary) as any,
-      enabledServices: enabled as any,
-    };
-  };
-
-  const langDefaults: Record<
-    string,
-    { enabled: string[]; primary?: string | null }
-  > = {};
-
-  languages.data?._embedded?.languages?.forEach((lang) => {
-    const config = settings.data?._embedded?.languageConfigs?.find(
-      (langSettings) => langSettings.targetLanguageId === lang.id
-    );
-
-    langDefaults[lang.tag] = {
-      enabled: config?.enabledServices || baseSetting?.enabledServices || [],
-      primary: config ? config.primaryService || 'none' : 'default',
-    };
-  });
-
-  const initialValues = {
-    default: {
-      enabled: baseSetting?.enabledServices,
-      primary: baseSetting?.primaryService || 'none',
-    },
-    languages: langDefaults,
-  };
-
-  const submit = (values: typeof initialValues) => {
-    const languageSettings = Object.entries(values.languages).map(
-      ([lang, value]) => formatLangSettings(lang, value.enabled, value.primary)
-    );
-
-    languageSettings.push(
-      formatLangSettings(null, values.default.enabled!, values.default.primary)
-    );
-
-    applyUpdate({
-      settings: languageSettings.filter(
-        Boolean
-      ) as MachineTranslationLanguagePropsDto[],
-    });
-  };
-
-  const gridTemplateColumns = `1fr ${providers
-    .map(() => 'auto')
-    .join(' ')} auto`;
+  const gridTemplateColumns = `1fr auto 1fr auto`;
 
   useEffect(() => {
-    formRef.current?.resetForm();
-  }, [settings.data]);
-
-  useEffect(() => {
-    if (Number(settings.data?._embedded?.languageConfigs?.length) > 1) {
+    if (
+      (settings || [])?.filter(
+        ({ autoSettings, mtSettings }) => autoSettings || mtSettings
+      ).length > 1
+    ) {
       setExpanded(true);
     }
-  }, [settings.data]);
-
-  const languagesCount = languages.data?._embedded?.languages?.length || 0;
+  }, [settings]);
 
   return (
     <>
-      {settings.data && languages.data && (
+      {settings && settings && (
         <StyledContainer>
           <StyledLanguageTable style={{ gridTemplateColumns }}>
-            <Formik
-              key={formInstance}
-              initialValues={initialValues}
-              enableReinitialize={true}
-              onSubmit={() => {}}
-              validate={submit}
-              validateOnChange
-            >
-              {(form) => {
-                formRef.current = form;
-                return (
-                  <SettingsForm
-                    providers={providers}
-                    expanded={expanded}
-                    languages={languages.data}
-                  />
-                );
-              }}
-            </Formik>
-            {languagesCount > 1 && (
+            <SettingsTable
+              settings={settings || []}
+              expanded={expanded}
+              onUpdate={applyUpdate}
+            />
+
+            {settings.length > 1 && (
               <StyledToggle
                 role="button"
                 onClick={() => setExpanded((expanded) => !expanded)}
@@ -165,7 +69,7 @@ export const MachineTranslation = () => {
               </StyledToggle>
             )}
             <StyledLoadingWrapper>
-              <SmoothProgress loading={isUpdating} />
+              <SmoothProgress loading={isFetching} />
             </StyledLoadingWrapper>
           </StyledLanguageTable>
         </StyledContainer>

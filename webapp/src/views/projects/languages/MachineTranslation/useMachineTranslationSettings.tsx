@@ -1,25 +1,9 @@
-import { useRef } from 'react';
-
-type SetMachineTranslationSettingsDto =
-  components['schemas']['SetMachineTranslationSettingsDto'];
-
-import {
-  useApiQuery,
-  useApiMutation,
-  matchUrlPrefix,
-} from 'tg.service/http/useQueryApi';
+import { useApiQuery, useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useQueryClient } from 'react-query';
-import { useConfig } from 'tg.globalContext/helpers';
-import { components } from 'tg.service/apiSchema.generated';
+import { OnMtChange } from './types';
+import { useMemo } from 'react';
 
-type Props = {
-  onReset: () => void;
-};
-
-export const useMachineTranslationSettings = ({ onReset }: Props) => {
-  const queryClient = useQueryClient();
-  const config = useConfig();
+export const useMachineTranslationSettings = () => {
   const project = useProject();
 
   const languages = useApiQuery({
@@ -27,67 +11,146 @@ export const useMachineTranslationSettings = ({ onReset }: Props) => {
     method: 'get',
     path: { projectId: project.id },
     query: { size: 1000 },
-    options: {
-      onSuccess: onReset,
-    },
   });
 
-  const settings = useApiQuery({
+  const mtSettings = useApiQuery({
     url: '/v2/projects/{projectId}/machine-translation-service-settings',
     method: 'get',
     path: { projectId: project.id },
   });
 
-  const updateSettings = useApiMutation({
+  const autoTranslationSettings = useApiQuery({
+    url: '/v2/projects/{projectId}/per-language-auto-translation-settings',
+    method: 'get',
+    path: { projectId: project.id },
+  });
+
+  const updateMtSettings = useApiMutation({
     url: '/v2/projects/{projectId}/machine-translation-service-settings',
     method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/machine-translation-service-settings',
   });
 
-  const lastUpdateRef = useRef<Promise<any>>();
-  const applyUpdate = (data: SetMachineTranslationSettingsDto) => {
-    const promise = updateSettings
-      .mutateAsync({
-        path: { projectId: project.id },
-        content: { 'application/json': data },
-      })
-      .then((data) => {
-        if (lastUpdateRef.current === promise) {
-          queryClient.setQueriesData(
-            matchUrlPrefix(
-              '/v2/projects/{projectId}/machine-translation-service-settings'
-            ),
-            {
-              _version: Math.random(), // force new instance
-              ...data,
-            }
-          );
-        }
-      })
-      .catch(() => {
-        onReset();
-      });
-    lastUpdateRef.current = promise;
+  const updateAutoTranslationSettings = useApiMutation({
+    url: '/v2/projects/{projectId}/per-language-auto-translation-settings',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/per-language-auto-translation-settings',
+  });
+
+  const languageInfos = useApiQuery({
+    url: '/v2/projects/{projectId}/machine-translation-language-info',
+    method: 'get',
+    path: { projectId: project.id },
+  });
+
+  const applyUpdate: OnMtChange = async (languageId, data) => {
+    const existingMtSettings =
+      mtSettings.data?._embedded?.languageConfigs
+        ?.filter((l) => l.targetLanguageId !== languageId)
+        .map(
+          ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
+            return {
+              targetLanguageId,
+              primaryServiceInfo,
+              enabledServicesInfo,
+            };
+          }
+        ) || [];
+
+    const newMtSettings = data
+      ? [...existingMtSettings, data.machineTranslation]
+      : existingMtSettings;
+
+    const existingAutoSettings =
+      autoTranslationSettings.data?._embedded?.configs
+        ?.filter((l) => l.languageId !== languageId)
+        .map(
+          ({
+            languageId,
+            enableForImport,
+            usingMachineTranslation,
+            usingTranslationMemory,
+          }) => {
+            return {
+              languageId,
+              enableForImport,
+              usingMachineTranslation,
+              usingTranslationMemory,
+            };
+          }
+        ) || [];
+
+    const newAutoSettings = data
+      ? [...existingAutoSettings, data.autoTranslation]
+      : existingAutoSettings;
+
+    await updateMtSettings.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': { settings: newMtSettings },
+      },
+    });
+
+    await updateAutoTranslationSettings.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': newAutoSettings,
+      },
+    });
   };
 
-  const baseSetting = settings.data?._embedded?.languageConfigs?.find(
-    (item) => item.targetLanguageId === null
-  );
+  const languageIds = [
+    null,
+    ...(languages.data?._embedded?.languages
+      ?.filter((l) => !l.base)
+      .map((l) => l.id) || []),
+  ];
 
-  const providers = Object.entries(config.machineTranslationServices.services)
-    .map(([service, value]) => (value.enabled ? service : undefined))
-    .filter(Boolean) as string[];
+  const isFetching =
+    languages.isFetching ||
+    mtSettings.isFetching ||
+    autoTranslationSettings.isFetching ||
+    languageInfos.isFetching ||
+    updateMtSettings.isLoading ||
+    updateAutoTranslationSettings.isLoading;
 
-  providers.sort((a) => {
-    if (a === 'TOLGEE') return -1;
-    else return 1;
-  });
+  const isLoading =
+    languages.isLoading ||
+    mtSettings.isLoading ||
+    autoTranslationSettings.isLoading ||
+    languageInfos.isLoading;
+
+  const settings = useMemo(() => {
+    if (isLoading) {
+      return undefined;
+    }
+    return languageIds.map((id) => ({
+      id,
+      language: languages.data?._embedded?.languages?.find((l) => l.id === id),
+      info: languageInfos.data?._embedded?.languageInfos?.find(
+        (l) => l.languageId === id
+      ),
+      mtSettings: mtSettings.data?._embedded?.languageConfigs?.find(
+        (l) => l.targetLanguageId === id
+      ),
+      autoSettings: autoTranslationSettings.data?._embedded?.configs?.find(
+        (c) => c.languageId === id
+      ),
+    }));
+  }, [
+    isLoading,
+    languages.data,
+    languageInfos.data,
+    mtSettings.data,
+    autoTranslationSettings.data,
+  ]);
 
   return {
-    languages,
     settings,
     applyUpdate,
-    baseSetting,
-    updateSettings,
-    providers,
+    isFetching,
+    isLoading,
   };
 };
