@@ -15,6 +15,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -113,12 +114,73 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it sets AWS formality for german`() {
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = null,
+            primaryService = MtServiceType.GOOGLE,
+            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+          ),
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = testData.germanLanguage.id,
+            primaryService = MtServiceType.AWS,
+            enabledServicesInfo = setOf(
+              MtServiceInfo(MtServiceType.GOOGLE, null),
+              MtServiceInfo(MtServiceType.AWS, Formality.FORMAL)
+            )
+          )
+        )
+      )
+    )
+
+    executeInNewTransaction {
+      val germanSetting = mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+        .find { it.targetLanguage?.id == testData.germanLanguage.id }
+      germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it sets primary service via info`() {
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = testData.germanLanguage.id,
+            primaryService = MtServiceType.AWS,
+            primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+          )
+        )
+      )
+    ).andAssertThatJson {
+      node("_embedded.languageConfigs") {
+        node("[1]") {
+          node("primaryServiceInfo.formality").isEqualTo("FORMAL")
+        }
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it validates the config`() {
     performSet(null, MtServiceType.AWS, Formality.FORMAL).andIsOk
     performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.AWS, Formality.DEFAULT).andIsOk
     performSet(testData.germanLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
     performSet(testData.englishLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+    performSet(
+      MachineTranslationLanguagePropsDto(
+        testData.englishLanguage.id,
+        primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL)
+      )
+    ).andIsOk
   }
 
   private fun performSet(language: Language?, mtServiceType: MtServiceType, formality: Formality) = performAuthPut(
@@ -127,11 +189,20 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
       listOf(
         MachineTranslationLanguagePropsDto(
           targetLanguageId = language?.id,
-          primaryService = MtServiceType.GOOGLE,
+          primaryServiceInfo = MtServiceInfo(mtServiceType, Formality.DEFAULT),
           enabledServicesInfo = setOf(
             MtServiceInfo(mtServiceType, formality)
           )
         )
+      )
+    )
+  )
+
+  private fun performSet(props: MachineTranslationLanguagePropsDto) = performAuthPut(
+    "/v2/projects/${project.id}/machine-translation-service-settings",
+    SetMachineTranslationSettingsDto(
+      listOf(
+        props
       )
     )
   )

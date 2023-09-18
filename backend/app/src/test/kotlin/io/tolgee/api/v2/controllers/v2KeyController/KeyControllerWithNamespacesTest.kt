@@ -38,7 +38,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `creates key and namespace`() {
-    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = "new_ns"))
+    performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
       .andIsCreated.andAssertThatJson {
         node("name").isEqualTo("super_key")
         node("namespace").isEqualTo("new_ns")

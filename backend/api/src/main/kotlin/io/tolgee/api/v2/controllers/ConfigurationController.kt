@@ -48,12 +48,14 @@ class ConfigurationController @Autowired constructor(
   }
 
   private fun getMtServices(): Map<MtServiceType, PublicConfigurationDTO.MtServiceDTO> {
-    val mtServices = MtServiceType.values().associateWith {
-      PublicConfigurationDTO.MtServiceDTO(
-        applicationContext.getBean(it.providerClass).isEnabled,
-        applicationContext.getBean(it.propertyClass).defaultEnabled
-      )
-    }
+    val mtServices = MtServiceType.values()
+      .sortedBy { it.order }
+      .associateWith {
+        PublicConfigurationDTO.MtServiceDTO(
+          applicationContext.getBean(it.providerClass).isEnabled,
+          applicationContext.getBean(it.propertyClass).defaultEnabled
+        )
+      }
     return mtServices
   }
 }
