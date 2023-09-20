@@ -1,3 +1,10 @@
+## [3.29.5](https://github.com/tolgee/tolgee-platform/compare/v3.29.4...v3.29.5) (2023-09-20)
+
+
+### Bug Fixes
+
+* Error message conversion issues ([#1907](https://github.com/tolgee/tolgee-platform/issues/1907)) ([7b2713c](https://github.com/tolgee/tolgee-platform/commit/7b2713c689d6aa36dd49556bed9b22c4289ab693))
+
 ## [3.29.4](https://github.com/tolgee/tolgee-platform/compare/v3.29.3...v3.29.4) (2023-09-13)
 
 
