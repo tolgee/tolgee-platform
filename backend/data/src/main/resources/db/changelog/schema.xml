@@ -2722,4 +2722,12 @@
             <column name="primary_service_formality" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1695219440045-1">
+        <addColumn tableName="auto_translation_config">
+            <column name="target_language_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695219440045-2">
+        <addForeignKeyConstraint baseColumnNames="target_language_id" baseTableName="auto_translation_config" constraintName="FKjpclpxmeu0csl8htj3j9xfu3y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

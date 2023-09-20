@@ -3,6 +3,8 @@ package io.tolgee.dtos.request
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class AutoTranslationSettingsDto(
+  val languageId: Long? = null,
+
   @Schema(
     description = "If true, new keys will be automatically translated via batch operation using translation memory" +
       " when 100% match is found"

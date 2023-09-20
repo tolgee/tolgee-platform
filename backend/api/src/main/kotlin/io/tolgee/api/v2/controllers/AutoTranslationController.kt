@@ -73,7 +73,7 @@ When no languages provided, it translates only untranslated languages."""
 
     autoTranslationService.autoTranslateSync(
       key = key,
-      languageTags = languages?.toList(),
+      forcedLanguageTags = languages?.toList(),
       useTranslationMemory = useTranslationMemory ?: false,
       useMachineTranslation = useMachineTranslation ?: false,
       isBatch = true

@@ -223,7 +223,7 @@ class TestDataService(
 
   private fun saveAutoTranslationConfigs(builder: ProjectBuilder) {
     builder.data.autoTranslationConfigBuilder?.self?.let {
-      autoTranslateService.saveConfig(it)
+      autoTranslateService.saveDefaultConfig(it)
     }
   }
 

@@ -43,7 +43,7 @@ class GenericAutoTranslationChunkProcessor(
       val key = keys[keyId] ?: return@iterateCatching
       autoTranslationService.autoTranslateSync(
         key = key,
-        languageTags = listOf(languageTag),
+        forcedLanguageTags = listOf(languageTag),
         useTranslationMemory = useTranslationMemory,
         useMachineTranslation = useMachineTranslation,
         isBatch = true
