@@ -60,11 +60,14 @@ class AutoTranslationListener(
   }
 
   private fun shouldRunTheOperation(event: OnProjectActivityStoredEvent, projectId: Long): Boolean {
-    val config = autoTranslationService.getConfig(
+    val configs = autoTranslationService.getConfigs(
       entityManager.getReference(Project::class.java, projectId)
     )
 
-    if (!config.usingPrimaryMtService && !config.usingTm) {
+    val usingPrimaryMtService = configs.any { it.usingPrimaryMtService }
+    val usingTm = configs.any { it.usingTm }
+
+    if (!usingPrimaryMtService && !usingTm) {
       return false
     }
 
@@ -72,7 +75,7 @@ class AutoTranslationListener(
       return true
     }
 
-    val hasEnabledForImport = config.enableForImport
+    val hasEnabledForImport = configs.any { it.enableForImport }
 
     return hasEnabledForImport && event.activityRevision.type in IMPORT_ACTIVITIES
   }

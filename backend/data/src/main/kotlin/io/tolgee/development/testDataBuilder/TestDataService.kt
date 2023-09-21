@@ -222,8 +222,8 @@ class TestDataService(
   }
 
   private fun saveAutoTranslationConfigs(builder: ProjectBuilder) {
-    builder.data.autoTranslationConfigBuilder?.self?.let {
-      autoTranslateService.saveDefaultConfig(it)
+    builder.data.autoTranslationConfigBuilders.forEach {
+      autoTranslateService.saveConfig(it.self)
     }
   }
 

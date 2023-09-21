@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.ContextRecreatingTest
@@ -112,7 +113,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
   @Test
   fun `config test mt disabled`() {
     saveTestData()
-    performSetConfig(true, false, false)
+    performSetConfig(true, false, false, testData.spanishLanguage.id)
     testUsingMtDoesNotWork()
   }
 
@@ -198,6 +199,51 @@ class AutoTranslatingTest : MachineTranslationTest() {
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `it returns per language settings`() {
+    saveTestData()
+    performProjectAuthGet("per-language-auto-translation-settings").andIsOk.andAssertThatJson {
+      node("_embedded.configs").isArray.hasSize(2)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `it sets and returns per language settings`() {
+    saveTestData()
+    performProjectAuthPut(
+      "per-language-auto-translation-settings",
+      listOf(
+        mapOf(
+          "languageId" to null,
+          "usingTranslationMemory" to false,
+          "usingMachineTranslation" to false
+        ),
+        mapOf(
+          "languageId" to testData.germanLanguage.id,
+          "usingTranslationMemory" to false,
+          "usingMachineTranslation" to false
+        ),
+        mapOf(
+          "languageId" to testData.spanishLanguage.id,
+          "usingTranslationMemory" to false,
+          "usingMachineTranslation" to false
+        )
+      )
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.configs").isArray.hasSize(3)
+    }
+
+    performProjectAuthGet("per-language-auto-translation-settings").andIsOk.andAssertThatJson {
+      node("_embedded.configs") {
+        isArray.hasSize(3)
+        node("[0].usingTranslationMemory").isEqualTo(false)
+        node("[0].usingMachineTranslation").isEqualTo(false)
+      }
+    }
+  }
+
   private fun testUsingMtWorks() {
     performCreateHalloKeyWithEnAndDeTranslations()
     waitForNotThrowing {
@@ -251,13 +297,16 @@ class AutoTranslatingTest : MachineTranslationTest() {
   private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME, null)
     .getLangTranslation(testData.germanLanguage).text
 
-  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean, enableForImport: Boolean) {
+  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean, enableForImport: Boolean, languageId: Long? = null) {
     performProjectAuthPut(
-      "auto-translation-settings",
-      mapOf(
-        "usingTranslationMemory" to usingTm,
-        "usingMachineTranslation" to usingMt,
-        "enableForImport" to enableForImport
+      "per-language-auto-translation-settings",
+      listOf(
+        mapOf(
+          "languageId" to languageId,
+          "usingTranslationMemory" to usingTm,
+          "usingMachineTranslation" to usingMt,
+          "enableForImport" to enableForImport
+        )
       )
     ).andIsOk
   }
