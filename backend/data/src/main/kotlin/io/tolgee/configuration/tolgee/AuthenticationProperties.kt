@@ -25,7 +25,7 @@ import javax.validation.constraints.Size
     DocProperty(
       name = "createInitialUser",
       description = "If true, Tolgee creates initial user on first start-up.",
-      removedIn = "xxx", // TODO: define when this PR will land -- DO NOT MERGE BEFORE ADDRESSED.
+      removedIn = "3.30.0",
       removalReason = "Presence of this initial account is now expected for Tolgee to operate as expected.\n" +
         "For instance, when authentication is disabled, users are automatically logged in as this admin user.",
       defaultValue = "true",
@@ -33,7 +33,7 @@ import javax.validation.constraints.Size
     DocProperty(
       name = "ldap.*",
       description = "LDAP-related settings.",
-      removedIn = "xxx", // TODO: define when this PR will land -- DO NOT MERGE BEFORE ADDRESSED.
+      removedIn = "3.30.0",
       removalReason = "LDAP is no longer supported due to unstable and unmaintained implementation.",
     ),
   ],
