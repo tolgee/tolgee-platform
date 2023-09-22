@@ -14,9 +14,9 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
-import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
@@ -33,11 +33,11 @@ export const ProjectMenu = ({ id }) => {
 
   const { t } = useTranslate();
 
-  const topBarHidden = useTopBarHidden();
+  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
 
   return (
     <SideMenu>
-      <SideLogo hidden={!topBarHidden} />
+      <SideLogo hidden={!topBarHeight} />
       <SideMenuItem
         linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
         icon={<ProjectsIcon />}
@@ -59,6 +59,7 @@ export const ProjectMenu = ({ id }) => {
           text={t('project_menu_translations')}
           data-cy="project-menu-item-translations"
           matchAsPrefix
+          quickStart={{ itemKey: 'menu_translations' }}
         />
       )}
       <>
@@ -71,6 +72,7 @@ export const ProjectMenu = ({ id }) => {
             icon={<SettingsIcon />}
             text={t('project_menu_project_settings')}
             data-cy="project-menu-item-settings"
+            quickStart={{ itemKey: 'menu_settings' }}
           />
         )}
         {canEditLanguages && (
@@ -82,6 +84,9 @@ export const ProjectMenu = ({ id }) => {
             icon={<LanguageIcon />}
             text={t('project_menu_languages')}
             data-cy="project-menu-item-languages"
+            quickStart={{
+              itemKey: 'menu_languages',
+            }}
           />
         )}
         {canViewUsers && (
@@ -93,6 +98,9 @@ export const ProjectMenu = ({ id }) => {
               icon={<PersonOutline />}
               text={t('project_menu_members')}
               data-cy="project-menu-item-members"
+              quickStart={{
+                itemKey: 'menu_members',
+              }}
             />
           </>
         )}
@@ -104,6 +112,7 @@ export const ProjectMenu = ({ id }) => {
             icon={<ImportIcon />}
             text={t('project_menu_import')}
             data-cy="project-menu-item-import"
+            quickStart={{ itemKey: 'menu_import' }}
           />
         )}
       </>
@@ -116,6 +125,7 @@ export const ProjectMenu = ({ id }) => {
           icon={<ExportIcon />}
           text={t('project_menu_export')}
           data-cy="project-menu-item-export"
+          quickStart={{ itemKey: 'menu_export' }}
         />
       )}
       {canIntegrate && (
@@ -126,6 +136,7 @@ export const ProjectMenu = ({ id }) => {
           icon={<Devices />}
           text={t('project_menu_integrate')}
           data-cy="project-menu-item-integrate"
+          quickStart={{ itemKey: 'menu_integrate' }}
         />
       )}
       {!config.authentication && (

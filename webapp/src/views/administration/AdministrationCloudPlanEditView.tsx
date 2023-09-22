@@ -59,7 +59,6 @@ export const AdministrationCloudPlanEditView = () => {
             }),
           ],
         ]}
-        containerMaxWidth="lg"
         allCentered
         hideChildrenOnLoading={false}
       >

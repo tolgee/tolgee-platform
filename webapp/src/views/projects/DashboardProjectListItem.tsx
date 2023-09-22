@@ -6,7 +6,6 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
@@ -18,6 +17,7 @@ import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { ProjectLanguages } from './ProjectLanguages';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -36,14 +36,14 @@ const StyledContainer = styled('div')`
       opacity: 1;
     }
   }
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     grid-template-columns: auto 1fr 1fr 70px;
     grid-template-areas:
       'image title keyCount  controls'
       'image title languages controls'
       'image stats stats     stats';
   }
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     grid-gap: ${({ theme }) => theme.spacing(1, 2)};
     grid-template-columns: auto 1fr 70px;
     grid-template-areas:
@@ -58,7 +58,7 @@ const StyledImage = styled('div')`
   grid-area: image;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     margin-right: 0px;
   }
 `;
@@ -69,7 +69,7 @@ const StyledTitle = styled('div')`
   flex-direction: column;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
-  ${({ theme }) => theme.breakpoints.down('sm')} {
+  @container (max-width: 599px) {
     margin-right: 0px;
   }
 `;
@@ -78,7 +78,7 @@ const StyledKeyCount = styled('div')`
   grid-area: keyCount;
   display: flex;
   justify-content: flex-end;
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     justify-content: flex-start;
   }
 `;
@@ -88,14 +88,14 @@ const StyledStats = styled('div')`
   display: flex;
   padding-top: ${({ theme }) => theme.spacing(1)};
   margin: ${({ theme }) => theme.spacing(0, 6)};
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     margin: 0px;
   }
 `;
 
 const StyledLanguages = styled('div')`
   grid-area: languages;
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 850px) {
     justify-content: flex-start;
   }
 `;
@@ -120,8 +120,10 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
     [PARAMS.PROJECT_ID]: p.id,
   });
   const history = useHistory();
-  const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down('md'));
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const isCompact = useMediaQuery(
+    `@media(max-width: ${rightPanelWidth + 800}px)`
+  );
 
   return (
     <StyledContainer

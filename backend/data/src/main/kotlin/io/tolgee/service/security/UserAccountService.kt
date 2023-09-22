@@ -17,10 +17,12 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.QuickStart
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
+import io.tolgee.repository.QuickStartRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -54,7 +56,8 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private var quickStartRepository: QuickStartRepository
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -90,6 +93,10 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun createUser(userAccount: UserAccount): UserAccount {
+    val quickStart = QuickStart(userAccount)
+    quickStart.open = true
+    userAccount.quickStart = quickStart
+    quickStartRepository.save(quickStart)
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
@@ -99,7 +106,6 @@ class UserAccountService(
   @Transactional
   fun createUser(request: SignUpDto, role: UserAccount.Role = UserAccount.Role.USER): UserAccount {
     dtoToEntity(request).let {
-      it.role = role
       this.createUser(it)
       return it
     }

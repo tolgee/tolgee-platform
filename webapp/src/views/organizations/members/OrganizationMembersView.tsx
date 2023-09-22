@@ -60,7 +60,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
       loading={membersLoadable.isFetching}
       windowTitle={t('organization_members_title')}
       link={LINKS.ORGANIZATION_MEMBERS}
-      containerMaxWidth="md"
+      maxWidth="normal"
       navigation={[
         [
           t('organization_members_title'),

@@ -21,7 +21,7 @@ const StyledContainer = styled('div')`
   color: ${({ theme }) => theme.palette.topBanner.mainText};
   font-size: 15px;
   font-weight: 700;
-  ${({ theme }) => theme.breakpoints.down('md')} {
+  @container (max-width: 899px) {
     grid-template-columns: 0px 1fr 50px;
   }
 `;

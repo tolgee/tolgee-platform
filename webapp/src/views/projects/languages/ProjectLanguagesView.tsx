@@ -11,9 +11,7 @@ export const ProjectLanguagesView = () => {
 
   return (
     <BaseProjectView
-      lg={7}
-      md={9}
-      containerMaxWidth="lg"
+      maxWidth={700}
       windowTitle={t('languages_title')}
       navigation={[
         [

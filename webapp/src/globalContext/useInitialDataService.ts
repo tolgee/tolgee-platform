@@ -13,6 +13,7 @@ import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
 type AnnouncementDto = components['schemas']['AnnouncementDto'];
+type QuickStartModel = components['schemas']['QuickStartModel'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
@@ -24,6 +25,7 @@ export const useInitialDataService = () => {
   >(undefined);
   const security = useSelector((state: AppState) => state.global.security);
   const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
+  const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>();
   const initialData = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
@@ -59,6 +61,7 @@ export const useInitialDataService = () => {
   useEffect(() => {
     if (initialData.data) {
       setAnnouncement(initialData.data.announcement);
+      setQuickStart(initialData.data.userInfo?.quickStart);
     }
   }, [initialData.data]);
 
@@ -76,6 +79,47 @@ export const useInitialDataService = () => {
     url: '/v2/announcement/dismiss',
     method: 'post',
   });
+
+  const putQuickStartStep = useApiMutation({
+    url: '/v2/quick-start/complete/{step}',
+    method: 'put',
+  });
+
+  const putQuickStartClose = useApiMutation({
+    url: '/v2/quick-start/close',
+    method: 'put',
+  });
+
+  const completeGuideStep = (step: string) => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        completedSteps: [...(quickStart.completedSteps || []), step],
+      });
+    }
+    putQuickStartStep.mutate(
+      { path: { step } },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
+  const dismissGuide = () => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        open: false,
+      });
+    }
+    putQuickStartClose.mutate(undefined, {
+      onSuccess(data) {
+        setQuickStart(data);
+      },
+    });
+  };
 
   const preferredOrganization =
     organization ?? initialData.data?.preferredOrganization;
@@ -99,6 +143,7 @@ export const useInitialDataService = () => {
   };
 
   const refetchInitialData = () => {
+    setQuickStart(undefined);
     setOrganization(undefined);
     return initialData.refetch();
   };
@@ -130,9 +175,17 @@ export const useInitialDataService = () => {
     throw initialData.error;
   }
 
+  const userInfo = initialData.data?.userInfo
+    ? {
+        ...initialData.data?.userInfo,
+        quickStart,
+      }
+    : undefined;
+
   return {
     data: {
       ...initialData.data!,
+      userInfo,
       preferredOrganization,
       announcement,
     },
@@ -142,5 +195,7 @@ export const useInitialDataService = () => {
     refetchInitialData,
     updatePreferredOrganization,
     dismissAnnouncement,
+    completeGuideStep,
+    dismissGuide,
   };
 };

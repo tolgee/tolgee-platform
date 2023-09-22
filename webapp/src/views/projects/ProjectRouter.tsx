@@ -17,6 +17,7 @@ import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
+import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -36,7 +37,8 @@ export const ProjectRouter = () => {
   return (
     <Switch>
       <ProjectContext id={Number(projectId)}>
-        <ProjectPage topBarAutoHide={matchedTranslations?.isExact}>
+        <ProjectPage>
+          {matchedTranslations?.isExact && <HideObserver />}
           <React.Suspense fallback={<FullPageLoading />}>
             <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
               <SingleKeyView />

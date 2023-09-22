@@ -30,6 +30,12 @@ export interface paths {
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
   };
+  "/v2/quick-start/complete/{step}": {
+    put: operations["completeGuideStep"];
+  };
+  "/v2/quick-start/close": {
+    put: operations["completeGuide"];
+  };
   "/v2/projects/{projectId}": {
     get: operations["get_3"];
     put: operations["editProject"];
@@ -587,6 +593,11 @@ export interface components {
       globalServerRole: "USER" | "ADMIN";
       deletable: boolean;
       needsSuperJwtToken: boolean;
+      quickStart?: components["schemas"]["QuickStartModel"];
+    };
+    QuickStartModel: {
+      open: boolean;
+      completedSteps: string[];
     };
     UserUpdatePasswordRequestDto: {
       currentPassword: string;
@@ -622,14 +633,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -659,11 +662,6 @@ export interface components {
         | "translations.batch-machine"
       )[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
        * @example 200001,200004
        */
@@ -673,6 +671,19 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1209,15 +1220,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1350,17 +1361,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
-      /** Format: int64 */
-      projectId: number;
+      description: string;
+      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1896,8 +1907,6 @@ export interface components {
     };
     AnnouncementDto: {
       type: "FEATURE_BATCH_OPERATIONS";
-      /** Format: int64 */
-      until: number;
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1955,18 +1964,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -1998,8 +2007,8 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      displayName?: string;
       name: string;
+      displayName?: string;
       description?: string;
     };
     PagedModelProjectModel: {
@@ -2067,18 +2076,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2523,15 +2532,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2650,17 +2659,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
-      /** Format: int64 */
-      projectId: number;
+      description: string;
+      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      description: string;
+      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -2975,6 +2984,55 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  completeGuideStep: {
+    parameters: {
+      path: {
+        step: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  completeGuide: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

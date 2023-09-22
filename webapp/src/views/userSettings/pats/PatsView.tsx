@@ -45,7 +45,6 @@ export const PatsView: FunctionComponent = () => {
         loading={list.isFetching}
         navigation={[[t('user_menu_pats'), LINKS.USER_PATS.build()]]}
         hideChildrenOnLoading={false}
-        containerMaxWidth="md"
         addLinkTo={LINKS.USER_PATS_GENERATE.template}
       >
         <Box sx={{ my: 2 }}>

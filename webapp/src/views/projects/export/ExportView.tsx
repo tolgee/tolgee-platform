@@ -21,9 +21,7 @@ export const ExportView: FunctionComponent = () => {
           }),
         ],
       ]}
-      lg={7}
-      md={9}
-      containerMaxWidth="lg"
+      maxWidth="narrow"
     >
       <ExportForm />
     </BaseProjectView>

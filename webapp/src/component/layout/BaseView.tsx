@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Box, Container, Grid, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { Navigation } from 'tg.component/navigation/Navigation';
@@ -9,17 +9,33 @@ import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { BaseViewAddButton } from './BaseViewAddButton';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
+const widthMap = {
+  wide: 1200,
+  normal: 800,
+  narrow: 600,
+};
+
+const StyledContainer = styled(Box)`
+  margin: 0px auto;
+  width: 100%;
+  max-width: 100%;
+`;
+
+type BaseViewWidth = keyof typeof widthMap | number | undefined;
+
+export function getBaseViewWidth(width: BaseViewWidth) {
+  return typeof width === 'string' ? widthMap[width] : width;
+}
+
 export interface BaseViewProps {
   windowTitle: string;
   loading?: boolean;
   title?: ReactNode;
   onAdd?: () => void;
   addLinkTo?: string;
+  addLabel?: string;
+  addComponent?: React.ReactNode;
   children: (() => ReactNode) | ReactNode;
-  xs?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   onSearch?: (string) => void;
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
@@ -27,7 +43,7 @@ export interface BaseViewProps {
   navigationRight?: ReactNode;
   switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
-  containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  maxWidth?: BaseViewWidth;
   allCentered?: boolean;
   'data-cy'?: string;
   initialSearch?: string;
@@ -50,13 +66,12 @@ export const BaseView = (props: BaseViewProps) => {
     props.onAdd ||
     props.addLinkTo;
 
+  const maxWidth = getBaseViewWidth(props.maxWidth);
+
   return (
-    <Container
-      maxWidth={props.allCentered ? props.containerMaxWidth : false}
+    <StyledContainer
       style={{
-        position: 'relative',
-        padding: 0,
-        flexGrow: 1,
+        maxWidth: props.allCentered ? maxWidth : undefined,
       }}
     >
       <Box minHeight="100%" data-cy={props['data-cy']}>
@@ -81,81 +96,65 @@ export const BaseView = (props: BaseViewProps) => {
         )}
         {displayHeader && (
           <SecondaryBar noBorder={Boolean(displayNavigation)}>
-            <Container
-              maxWidth={props.containerMaxWidth || false}
-              style={{ padding: 0 }}
+            <StyledContainer
+              data-cy="global-base-view-title"
+              style={{ maxWidth }}
             >
-              <Grid container justifyContent="center" alignItems="center">
-                <Grid
-                  data-cy="global-base-view-title"
-                  item
-                  xs={props.xs || 12}
-                  md={props.md || 12}
-                  lg={props.lg || 12}
-                  sm={props.sm || 12}
-                >
-                  {props.customHeader || (
-                    <Box display="flex" justifyContent="space-between">
-                      <Box display="flex" alignItems="center" gap="8px">
-                        {props.title && (
-                          <Typography variant="h4">{props.title}</Typography>
-                        )}
-                        {typeof props.onSearch === 'function' && (
-                          <Box>
-                            <SecondaryBarSearchField
-                              onSearch={props.onSearch}
-                              initial={props.initialSearch}
-                            />
-                          </Box>
-                        )}
+              {props.customHeader || (
+                <Box display="flex" justifyContent="space-between">
+                  <Box display="flex" alignItems="center" gap="8px">
+                    {props.title && (
+                      <Typography variant="h4">{props.title}</Typography>
+                    )}
+                    {typeof props.onSearch === 'function' && (
+                      <Box>
+                        <SecondaryBarSearchField
+                          onSearch={props.onSearch}
+                          initial={props.initialSearch}
+                        />
                       </Box>
-                      <Box display="flex" gap={2}>
-                        {props.switcher && (
-                          <Box display="flex" alignItems="center">
-                            {props.switcher}
-                          </Box>
-                        )}
-                        {(props.onAdd || props.addLinkTo) && (
+                    )}
+                  </Box>
+                  <Box display="flex" gap={2}>
+                    {props.switcher && (
+                      <Box display="flex" alignItems="center">
+                        {props.switcher}
+                      </Box>
+                    )}
+                    {props.addComponent
+                      ? props.addComponent
+                      : (props.onAdd || props.addLinkTo) && (
                           <BaseViewAddButton
                             addLinkTo={props.addLinkTo}
                             onClick={props.onAdd}
+                            label={props.addLabel}
                           />
                         )}
-                      </Box>
-                    </Box>
-                  )}
-                </Grid>
-              </Grid>
-            </Container>
+                  </Box>
+                </Box>
+              )}
+            </StyledContainer>
           </SecondaryBar>
         )}
         <Box pl={3} pr={3} pt={2} pb={2}>
-          <Container
-            maxWidth={props.containerMaxWidth || false}
-            style={{ padding: 0 }}
-          >
-            <Grid container justifyContent="center" alignItems="center">
-              <Grid
-                item
-                xs={props.xs || 12}
-                md={props.md || 12}
-                lg={props.lg || 12}
-                sm={props.sm || 12}
+          <StyledContainer style={{ maxWidth }}>
+            {!props.loading || !hideChildrenOnLoading ? (
+              <Box
+                data-cy="global-base-view-content"
+                display="grid"
+                position="relative"
+                maxWidth="100%"
               >
-                {!props.loading || !hideChildrenOnLoading ? (
-                  <Box data-cy="global-base-view-content">
-                    {typeof props.children === 'function'
-                      ? props.children()
-                      : props.children}
-                  </Box>
-                ) : (
-                  <></>
-                )}
-              </Grid>
-            </Grid>
-          </Container>
+                {typeof props.children === 'function'
+                  ? props.children()
+                  : props.children}
+              </Box>
+            ) : (
+              <></>
+            )}
+          </StyledContainer>
         </Box>
       </Box>
-    </Container>
+    </StyledContainer>
   );
 };
