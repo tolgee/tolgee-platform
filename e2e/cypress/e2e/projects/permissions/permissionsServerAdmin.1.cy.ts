@@ -11,7 +11,7 @@ import {
   visitProjectDashboard,
 } from '../../../common/shared';
 
-describe('Permissions admin 1', () => {
+describe('Server admin 1', () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin

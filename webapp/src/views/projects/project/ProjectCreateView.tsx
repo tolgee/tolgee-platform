@@ -1,15 +1,15 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { LINKS } from 'tg.constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -18,16 +18,20 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const messageService = container.resolve(MessageService);
 
 export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
 
 export const ProjectCreateView: FunctionComponent = () => {
+  const history = useHistory();
+  const { quickStartCompleteStep } = useGlobalActions();
   const createProjectLoadable = useApiMutation({
     url: '/v2/projects',
     method: 'post',
     fetchOptions: { disableErrorNotification: true },
+    invalidatePrefix: '/v2/projects',
   });
   const { t } = useTranslate();
   const { preferredOrganization, updatePreferredOrganization } =
@@ -42,9 +46,13 @@ export const ProjectCreateView: FunctionComponent = () => {
         },
       },
       {
-        onSuccess() {
+        onSuccess(data) {
           updatePreferredOrganization(values.organizationId);
           messageService.success(<T keyName="project_created_message" />);
+          history.push(
+            LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: data.id })
+          );
+          quickStartCompleteStep('new_project');
         },
       }
     );
@@ -70,23 +78,15 @@ export const ProjectCreateView: FunctionComponent = () => {
     baseLanguageTag: 'en',
   };
 
-  const [cancelled, setCancelled] = useState(false);
-
-  if (cancelled || createProjectLoadable.isSuccess) {
-    return <Redirect to={LINKS.PROJECTS.build()} />;
-  }
-
   return (
     <DashboardPage>
       <BaseFormView
-        lg={6}
-        md={8}
+        maxWidth="narrow"
         windowTitle={t('create_project_view')}
         title={t('create_project_view')}
         initialValues={initialValues}
         loading={organizationsLoadable.isLoading}
         onSubmit={onSubmit}
-        onCancel={() => setCancelled(true)}
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
         switcher={<OrganizationSwitch ownedOnly />}

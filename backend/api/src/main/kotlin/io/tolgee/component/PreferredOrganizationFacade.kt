@@ -5,6 +5,7 @@ import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.QuickStartService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.stereotype.Component
@@ -15,7 +16,8 @@ class PreferredOrganizationFacade(
   private val organizationRoleService: OrganizationRoleService,
   private val userPreferencesService: UserPreferencesService,
   private val privateOrganizationModelAssembler: PrivateOrganizationModelAssembler,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val quickStartService: QuickStartService
 ) {
 
   fun getPreferred(): PrivateOrganizationModel? {
@@ -25,7 +27,9 @@ class PreferredOrganizationFacade(
       val roleType = organizationRoleService.findType(preferredOrganization.id)
       val view = OrganizationView.of(preferredOrganization, roleType)
       return this.privateOrganizationModelAssembler.toModel(
-        view to enabledFeaturesProvider.get(view.organization.id)
+        view,
+        enabledFeaturesProvider.get(view.organization.id),
+        quickStartService.find(authenticationFacade.authenticatedUser.id, view.organization.id)
       )
     }
     return null

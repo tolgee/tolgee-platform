@@ -35,7 +35,7 @@ ext {
                             "billing_sequence," +
                             "activity_sequence," +
                             "FK9xs5a07fba5yqje5jqm6qrehs,"+
-                            "column:textsearchable_.*,"
+                            "column:textsearchable_.*"+
                             "column:enabled_features"
                 }
             }

@@ -8,6 +8,7 @@ import { WebsocketClient } from 'tg.websocket-client/WebsocketClient';
 import { useOrganizationUsageService } from './useOrganizationUsageService';
 import { useInitialDataService } from './useInitialDataService';
 import { globalContext } from './globalActions';
+import { useQuickStartGuide } from './useQuickStartGuide';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
@@ -17,6 +18,10 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     const [client, setClient] = useState<ReturnType<typeof WebsocketClient>>();
     const initialData = useInitialDataService();
     const [topBannerHeight, setTopBannerHeight] = useState(0);
+    const [rightPanelWidth, setRightPanelWidth] = useState(0);
+    const [topBarHidden, setTopBarHidden] = useState(false);
+    const [quickStartState, quickStartActions] =
+      useQuickStartGuide(initialData);
 
     const jwtToken = useSelector(
       (state: AppState) => state.global.security.jwtToken
@@ -43,6 +48,7 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     });
 
     const actions = {
+      ...quickStartActions,
       updatePreferredOrganization: (organizationId: number) => {
         return initialData.updatePreferredOrganization(organizationId);
       },
@@ -65,6 +71,8 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       dismissTopBanner: () => {
         return initialData.dismissAnnouncement();
       },
+      setRightPanelWidth,
+      setTopBarHidden,
     };
 
     globalContext.actions = actions;
@@ -77,6 +85,9 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       client,
       clientConnected,
       topBannerHeight,
+      rightPanelWidth,
+      topBarHeight: topBarHidden ? 0 : 52,
+      quickStartGuide: quickStartState,
     };
 
     return [contextData, actions];

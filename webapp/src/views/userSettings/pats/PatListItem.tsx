@@ -14,7 +14,7 @@ const StyledRoot = styled(Box)`
   display: grid;
   gap: 0.5rem;
 
-  ${(props) => props.theme.breakpoints.up('md')} {
+  @container (min-width: 899px) {
     grid-template-columns: 2fr auto auto auto;
   }
 

@@ -1,3 +1,4 @@
+import { dismissMenu } from '../shared';
 import { ProjectInfo } from './shared';
 
 export function testIntegration({ project }: ProjectInfo) {
@@ -6,5 +7,5 @@ export function testIntegration({ project }: ProjectInfo) {
   cy.gcy('integrate-api-key-selector-select').click();
   cy.gcy('integrate-api-key-selector-create-new-item').click();
   cy.gcy('permissions-advanced-checkbox').should('exist');
-  cy.get('body').type('{esc}');
+  dismissMenu();
 }

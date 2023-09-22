@@ -9,6 +9,9 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { ImportAlertError } from './ImportAlertError';
 import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
@@ -17,10 +20,7 @@ import ImportFileInput from './component/ImportFileInput';
 import { ImportResult } from './component/ImportResult';
 import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BaseProjectView } from '../BaseProjectView';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const messageService = container.resolve(MessageService);
 
@@ -82,15 +82,13 @@ export const ImportView: FunctionComponent = () => {
           }),
         ],
       ]}
-      lg={10}
-      md={12}
-      containerMaxWidth="lg"
+      maxWidth="wide"
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
         onClose={onConflictResolutionDialogClose}
       />
-      <Box mt={2}>
+      <Box mt={2} position="relative">
         <ImportFileInput
           onNewFiles={dataHelper.onNewFiles}
           loading={dataHelper.addFilesMutation.isLoading}

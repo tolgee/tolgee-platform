@@ -45,11 +45,6 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
   const fetchRecoveryCodes = useApiMutation({
     url: '/v2/user/mfa/recovery',
     method: 'put',
-    options: {
-      onSuccess: (codes) => {
-        setCodes(codes);
-      },
-    },
   });
 
   useEffect(() => {
@@ -92,9 +87,16 @@ export const MfaRecoveryCodesDialog: FunctionComponent<
         ) : (
           <StandardForm
             onSubmit={(values) => {
-              fetchRecoveryCodes.mutate({
-                content: { 'application/json': values },
-              });
+              fetchRecoveryCodes.mutate(
+                {
+                  content: { 'application/json': values },
+                },
+                {
+                  onSuccess: (codes) => {
+                    setCodes(codes);
+                  },
+                }
+              );
             }}
             saveActionLoadable={fetchRecoveryCodes}
             onCancel={() => onDialogClose()}

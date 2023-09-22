@@ -5,14 +5,15 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { DarkMode, LightMode } from '@mui/icons-material';
 
-import { LocaleMenu } from '../../LocaleMenu';
-import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
-import { useTopBarHidden } from './TopBarContext';
+
+import { LocaleMenu } from '../../LocaleMenu';
+import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { useThemeContext } from '../../../ThemeProvider';
 import { AdminInfo } from './AdminInfo';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -68,20 +69,17 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 type Props = {
-  autoHide?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
 };
 
 export const TopBar: React.FC<Props> = ({
-  autoHide = false,
   isAdminAccess = false,
   isDebuggingCustomerAccount = false,
 }) => {
   const config = useConfig();
 
-  const trigger = useTopBarHidden() && autoHide;
-
+  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
 
   const { mode, setMode } = useThemeContext();
@@ -99,7 +97,9 @@ export const TopBar: React.FC<Props> = ({
     <StyledAppBar
       sx={{
         top: topBannerSize,
-        transform: trigger ? `translate(0px, ${-55}px)` : `translate(0px, 0px)`,
+        transform: topBarHidden
+          ? `translate(0px, -55px)`
+          : `translate(0px, 0px)`,
       }}
     >
       <StyledToolbar>
@@ -129,6 +129,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
+        <QuickStartTopBarButton />
         <StyledIconButton onClick={toggleTheme} color="inherit">
           {mode === 'dark' ? <LightMode /> : <DarkMode />}
         </StyledIconButton>

@@ -37,6 +37,7 @@ fun <T> executeInNewTransaction(
 fun <T> executeInNewRepeatableTransaction(
   transactionManager: PlatformTransactionManager,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+  isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
   fn: () -> T
 ): T {
   var exception: Exception? = null
@@ -46,7 +47,7 @@ fun <T> executeInNewRepeatableTransaction(
       return executeInNewTransaction(
         transactionManager,
         propagationBehavior = propagationBehavior,
-        isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED
+        isolationLevel = isolationLevel
       ) {
         fn()
       }

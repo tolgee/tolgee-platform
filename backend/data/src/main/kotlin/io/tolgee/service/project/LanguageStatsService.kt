@@ -8,10 +8,12 @@ import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.service.LanguageService
 import io.tolgee.service.query_builders.LanguageStatsProvider
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
@@ -28,7 +30,7 @@ class LanguageStatsService(
 ) : Logging {
   fun refreshLanguageStats(projectId: Long) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId") {
-      executeInNewRepeatableTransaction(platformTransactionManager) tx@{
+      executeInNewRepeatableTransaction(platformTransactionManager, TransactionDefinition.ISOLATION_READ_COMMITTED) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId)
         try {
@@ -70,6 +72,13 @@ class LanguageStatsService(
             it.language.stats = it
             languageStatsRepository.save(it)
           }
+          logger.debug {
+            "Language stats refreshed for project $projectId: ${
+              languageStats.values.joinToString("\n") {
+                "${it.language.id} reviewed words: ${it.reviewedWords} translated words:${it.translatedWords}"
+              }
+            }"
+          }
         } catch (e: NotFoundException) {
           logger.warn("Cannot save Language Stats due to NotFoundException. Project deleted too fast?", e)
         }
@@ -104,10 +113,6 @@ class LanguageStatsService(
     }
     refreshLanguageStats(projectId)
     return languageStatsRepository.getAllByProjectId(projectId)
-  }
-
-  fun deleteAllByLanguage(languageId: Long) {
-    languageStatsRepository.deleteAllByLanguage(languageId)
   }
 
   private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> {

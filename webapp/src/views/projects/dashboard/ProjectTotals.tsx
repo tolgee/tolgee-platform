@@ -21,14 +21,14 @@ const StyledTiles = styled(Box)`
   grid-template-areas: 'languages text text progress progress users users tags';
   gap: 10px;
 
-  @media (max-width: 1200px) {
+  @container (max-width: 1200px) {
     grid-template-columns: repeat(4, 1fr);
     grid-template-areas:
       'languages text     text   tags'
       'progress  progress users  users';
   }
 
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     grid-template-columns: repeat(2, 1fr);
     grid-template-areas:
       'languages tags'
@@ -62,11 +62,11 @@ const StyledTile = styled(Box)`
     }
   }
 
-  @media (max-width: 1200px) {
+  @container (max-width: 1200px) {
     height: 100px;
   }
 
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     height: 80px;
   }
 `;
@@ -88,7 +88,7 @@ const StyledTileValue = styled(Box)`
   font-size: 28px;
   display: flex;
   justify-content: center;
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 24px;
   }
 `;
@@ -97,7 +97,7 @@ const StyledTileDescription = styled('div')`
   grid-area: label;
   padding: 0px 8px;
   font-size: 18px;
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 14px;
   }
 `;
@@ -108,7 +108,7 @@ const StyledTileDescriptionSmall = styled(StyledTileDescription)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 12px;
   }
 `;
@@ -122,7 +122,7 @@ const StyledTileSubDescription = styled('div')`
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }) => theme.palette.text.secondary};
-  @media (max-width: 800px) {
+  @container (max-width: 800px) {
     font-size: 11px;
   }
 `;

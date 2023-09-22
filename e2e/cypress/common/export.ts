@@ -2,6 +2,7 @@ import { createKey, createProject, login } from './apiCalls/common';
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import Chainable = Cypress.Chainable;
+import { dismissMenu } from './shared';
 
 export function createExportableProject(): Chainable<ProjectDTO> {
   return login().then(() => {
@@ -44,11 +45,11 @@ export const create4Translations = (projectId: number) => {
 export const exportToggleLanguage = (lang: string) => {
   cy.gcy('export-language-selector').click();
   cy.gcy('export-language-selector-item').contains(lang).click();
-  cy.get('body').click();
+  dismissMenu();
 };
 
 export const exportSelectFormat = (format: string) => {
   cy.gcy('export-format-selector').click();
   cy.gcy('export-format-selector-item').contains(format).click();
-  cy.get('body').click();
+  dismissMenu();
 };

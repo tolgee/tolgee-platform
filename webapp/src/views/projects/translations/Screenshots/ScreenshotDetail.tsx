@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 
 import {
   ScreenshotProps,
@@ -25,11 +25,11 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
       open={open}
       maxWidth="xl"
     >
-      <div>
+      <Box display="flex">
         {screenshot && (
           <ScreenshotWithLabels showTooltips screenshot={screenshot} />
         )}
-      </div>
+      </Box>
     </Dialog>
   );
 };

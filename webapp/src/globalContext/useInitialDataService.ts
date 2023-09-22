@@ -13,6 +13,7 @@ import { useOnUpdate } from 'tg.hooks/useOnUpdate';
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
 type AnnouncementDto = components['schemas']['AnnouncementDto'];
+type QuickStartModel = components['schemas']['QuickStartModel'];
 
 export const useInitialDataService = () => {
   const [organizationLoading, setOrganizationLoading] = useState(false);
@@ -24,6 +25,7 @@ export const useInitialDataService = () => {
   >(undefined);
   const security = useSelector((state: AppState) => state.global.security);
   const [announcement, setAnnouncement] = useState<AnnouncementDto | null>();
+  const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>();
   const initialData = useApiQuery({
     url: '/v2/public/initial-data',
     method: 'get',
@@ -59,6 +61,7 @@ export const useInitialDataService = () => {
   useEffect(() => {
     if (initialData.data) {
       setAnnouncement(initialData.data.announcement);
+      setQuickStart(initialData.data.preferredOrganization?.quickStart);
     }
   }, [initialData.data]);
 
@@ -77,6 +80,74 @@ export const useInitialDataService = () => {
     method: 'post',
   });
 
+  const putQuickStartStep = useApiMutation({
+    url: '/v2/quick-start/steps/{step}/complete',
+    method: 'put',
+  });
+
+  const putQuickStartFinished = useApiMutation({
+    url: '/v2/quick-start/set-finished/{finished}',
+    method: 'put',
+  });
+
+  const putQuickStartOpen = useApiMutation({
+    url: '/v2/quick-start/set-open/{open}',
+    method: 'put',
+  });
+
+  const completeGuideStep = (step: string) => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        completedSteps: [...(quickStart.completedSteps || []), step],
+      });
+    }
+    putQuickStartStep.mutate(
+      { path: { step } },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
+  const finishGuide = () => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        finished: true,
+      });
+    }
+    putQuickStartFinished.mutate(
+      {
+        path: { finished: true },
+      },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
+  const setQuickStartOpen = (open: boolean) => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        open,
+      });
+    }
+    putQuickStartOpen.mutate(
+      { path: { open } },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
   const preferredOrganization =
     organization ?? initialData.data?.preferredOrganization;
 
@@ -84,7 +155,7 @@ export const useInitialDataService = () => {
     if (organizationId !== preferredOrganization?.id) {
       setOrganizationLoading(true);
       try {
-        // set preffered organization
+        // set preferred organization
         await setPreferredOrganization.mutateAsync({
           path: { organizationId },
         });
@@ -99,6 +170,7 @@ export const useInitialDataService = () => {
   };
 
   const refetchInitialData = () => {
+    setQuickStart(undefined);
     setOrganization(undefined);
     return initialData.refetch();
   };
@@ -133,7 +205,9 @@ export const useInitialDataService = () => {
   return {
     data: {
       ...initialData.data!,
-      preferredOrganization,
+      preferredOrganization: preferredOrganization
+        ? { ...preferredOrganization, quickStart }
+        : undefined,
       announcement,
     },
     isFetching,
@@ -142,5 +216,8 @@ export const useInitialDataService = () => {
     refetchInitialData,
     updatePreferredOrganization,
     dismissAnnouncement,
+    completeGuideStep,
+    finishGuide,
+    setQuickStartOpen,
   };
 };

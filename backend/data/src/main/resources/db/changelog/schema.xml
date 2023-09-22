@@ -2955,4 +2955,25 @@
             <column name="last_published" type="timestamp"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-1">
+        <createTable tableName="quick_start">
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quick_startPK"/>
+            </column>
+            <column name="completed_steps" type="TEXT[]"/>
+            <column name="finished" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-2">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="quick_start" constraintName="FK2gbjbrkjgdy770vc1nyuvbfal" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1695640860120-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="quick_start" constraintName="FK946dggx61o0jyux1oo5gby8v0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

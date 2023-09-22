@@ -77,6 +77,15 @@ export type Navbar = {
   logo: string;
 };
 
+export type QuickStart = {
+  circleNormal: string;
+  circleSuccess: string;
+  successBackground: string;
+  topBorder: string;
+  progressBackground: string;
+  highlightColor: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -133,6 +142,13 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    quickStart: {
+      successBackground: '#F7F8FB',
+      circleNormal: '#E7EBF5',
+      circleSuccess: '#0ea459',
+      topBorder: '#e9ecef',
+      progressBackground: '#bcbcbc70',
+    } as QuickStart,
   },
   dark: {
     white: '#dddddd',
@@ -205,5 +221,12 @@ export const colors = {
       mainText: '#BEF4E9',
       linkText: '#dddddd',
     },
+    quickStart: {
+      successBackground: '#20362b',
+      circleNormal: '#2c3c52',
+      circleSuccess: '#3bac21',
+      topBorder: '#2a384c',
+      progressBackground: '#2c3c52',
+    } as QuickStart,
   },
 } as const;

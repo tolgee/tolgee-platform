@@ -4,6 +4,7 @@ import {
   openBatchOperationMenu,
   selectAll,
 } from '../batchOperations';
+import { dismissMenu } from '../shared';
 import { visitTranslations } from '../translations';
 import { getLanguageName, ProjectInfo } from './shared';
 
@@ -14,7 +15,7 @@ function checkSourceLanguages(languages: number[], projectInfo: ProjectInfo) {
       .contains(getLanguageName(projectInfo.languages, langId))
       .should('exist');
   });
-  cy.get('body').type('{esc}');
+  dismissMenu();
 }
 
 function checkTargetLanguages(languages: number[], projectInfo: ProjectInfo) {
@@ -26,7 +27,7 @@ function checkTargetLanguages(languages: number[], projectInfo: ProjectInfo) {
       .contains(getLanguageName(projectInfo.languages, langId))
       .should('exist');
   });
-  cy.get('body').type('{esc}');
+  dismissMenu();
 }
 
 function checkOperationsAccessibility(
@@ -95,6 +96,6 @@ export function testBatchOperations(projectInfo: ProjectInfo) {
     projectInfo
   );
 
-  cy.get('body').type('{esc}');
+  dismissMenu();
   cy.waitForDom();
 }

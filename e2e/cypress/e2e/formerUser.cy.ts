@@ -19,7 +19,7 @@ describe('Former user', () => {
   });
 
   afterEach(() => {
-    // formerUserTestData.clean();
+    formerUserTestData.clean();
   });
 
   it('shows the former user in activity', () => {

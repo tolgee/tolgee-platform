@@ -132,7 +132,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
       ]}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
-      containerMaxWidth="md"
+      maxWidth="normal"
     >
       <Box data-cy="organization-profile">
         <StandardForm

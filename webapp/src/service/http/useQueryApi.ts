@@ -135,6 +135,21 @@ export const useApiMutation = <
 ) => {
   const queryClient = useQueryClient();
   const { url, method, fetchOptions, options, invalidatePrefix } = props;
+
+  // inject custom onSuccess
+  const customOptions = (
+    options: UseQueryOptions<any, ApiError> | undefined
+  ) => ({
+    ...options,
+    onSuccess: (...params) => {
+      // @ts-ignore
+      options?.onSuccess?.(...params);
+      if (invalidatePrefix !== undefined) {
+        invalidateUrlPrefix(queryClient, invalidatePrefix);
+      }
+    },
+  });
+
   const mutation = useMutation<
     ResponseContent<Url, Method, Paths>,
     ApiError,
@@ -145,21 +160,8 @@ export const useApiMutation = <
         ...fetchOptions,
         disableAutoErrorHandle: true,
       })(request),
-    options
+    customOptions(options as any) as any
   );
-
-  // inject custom onSuccess
-  const customOptions = (
-    options: UseQueryOptions<any, ApiError> | undefined
-  ) => ({
-    ...options,
-    onSuccess: (data) => {
-      if (invalidatePrefix !== undefined) {
-        invalidateUrlPrefix(queryClient, invalidatePrefix);
-      }
-      options?.onSuccess?.(data);
-    },
-  });
 
   const mutate = useCallback<typeof mutation.mutate>(
     (variables, options) => {
