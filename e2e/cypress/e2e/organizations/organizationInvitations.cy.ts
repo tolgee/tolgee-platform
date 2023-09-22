@@ -90,9 +90,9 @@ describe('Organization Invitations', () => {
     gcy('invitation-dialog-role-button').click();
     gcy('organization-role-select-item')
       .filter(':visible')
-      .within(() => {
-        cy.contains(roleType).click();
-      });
+      .contains(roleType)
+      .click();
+
     cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
     cy.gcy('invitation-dialog-invite-button').click();
 
