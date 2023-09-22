@@ -20,7 +20,7 @@ const items: ItemType[] = [
       {
         link: LINKS.PROJECTS.build(),
         label: <T keyName="guide_new_project_create" />,
-        highlightItems: ['add_project'],
+        highlightItems: ['add_project', 'unfinished'],
       },
     ],
   },

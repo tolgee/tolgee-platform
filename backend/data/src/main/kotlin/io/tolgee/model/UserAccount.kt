@@ -60,7 +60,13 @@ data class UserAccount(
   @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
   var preferences: UserPreferences? = null
 
-  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true, optional = true)
+  @OneToOne(
+    mappedBy = "userAccount",
+    fetch = FetchType.LAZY,
+    cascade = [CascadeType.REMOVE],
+    orphanRemoval = true,
+    optional = true
+  )
   var quickStart: QuickStart? = null
 
   @OneToMany(mappedBy = "userAccount", orphanRemoval = true)

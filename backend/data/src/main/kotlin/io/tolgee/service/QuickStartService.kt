@@ -6,11 +6,11 @@ import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Component
 
 @Component
-class QuickStartService (
+class QuickStartService(
   private val quickStartRepository: QuickStartRepository,
   private val authenticationFacade: AuthenticationFacade
 ) {
-  fun completeStep(step: String) : QuickStart? {
+  fun completeStep(step: String): QuickStart? {
     val userAccount = authenticationFacade.userAccountEntity
 
     val quickStart = quickStartRepository.findByUserAccount(userAccount)
@@ -21,8 +21,7 @@ class QuickStartService (
     return quickStart
   }
 
-
-  fun finish() : QuickStart? {
+  fun finish(): QuickStart? {
     val userAccount = authenticationFacade.userAccountEntity
     val quickStart = quickStartRepository.findByUserAccount(userAccount)
 

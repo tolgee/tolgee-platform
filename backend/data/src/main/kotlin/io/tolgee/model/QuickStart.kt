@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @Entity
 @TypeDef(name = "string-array", typeClass = ListArrayType::class)
-data class QuickStart (
+data class QuickStart(
   @OneToOne
   @MapsId
   @JoinColumn(name = "user_account_id")
