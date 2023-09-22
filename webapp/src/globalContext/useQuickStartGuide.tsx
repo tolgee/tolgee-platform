@@ -18,6 +18,8 @@ export const useQuickStartGuide = (
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
 
   const organizationSlug = initialData.data.preferredOrganization?.slug;
+  const isOwner =
+    initialData.data.preferredOrganization?.currentUserRole === 'OWNER';
 
   const projects = useApiQuery({
     url: '/v2/organizations/{slug}/projects',
@@ -67,7 +69,7 @@ export const useQuickStartGuide = (
   }
 
   const state = {
-    open: initialData.data.userInfo?.quickStart?.open,
+    open: initialData.data.userInfo?.quickStart?.open && isOwner,
     active: active[0],
     lastProjectId,
     completed: allCompleted,

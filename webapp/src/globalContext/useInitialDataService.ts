@@ -34,9 +34,6 @@ export const useInitialDataService = () => {
       cacheTime: Infinity,
       keepPreviousData: true,
       staleTime: Infinity,
-      onSuccess(data) {
-        setQuickStart(data.userInfo?.quickStart);
-      },
     },
   });
 
@@ -64,6 +61,7 @@ export const useInitialDataService = () => {
   useEffect(() => {
     if (initialData.data) {
       setAnnouncement(initialData.data.announcement);
+      setQuickStart(initialData.data.userInfo?.quickStart);
     }
   }, [initialData.data]);
 
@@ -145,6 +143,7 @@ export const useInitialDataService = () => {
   };
 
   const refetchInitialData = () => {
+    setQuickStart(undefined);
     setOrganization(undefined);
     return initialData.refetch();
   };
@@ -163,8 +162,6 @@ export const useInitialDataService = () => {
 
   useOnUpdate(() => {
     refetchInitialData();
-    setOrganization(undefined);
-    setQuickStart(undefined);
   }, [security.jwtToken]);
 
   const isFetching =
