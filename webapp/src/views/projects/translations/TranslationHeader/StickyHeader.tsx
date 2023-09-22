@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { styled } from '@mui/material';
 
-import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import {
   useHeaderNsActions,
   useHeaderNsContext,
@@ -58,10 +57,10 @@ type Props = {
 
 export const StickyHeader: React.FC<Props> = ({ height, children }) => {
   const { setTopBarHeight } = useHeaderNsActions();
-  const topBarHidden = useTopBarHidden();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
   const columnSizes = useColumnsContext((c) => c.columnSizes);
   const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
+  const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
 
   useEffect(() => {
     setTopBarHeight(height + (topBarHidden ? 0 : 50));

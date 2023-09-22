@@ -100,9 +100,7 @@ export const LanguageEditView = () => {
 
   return (
     <BaseProjectView
-      lg={6}
-      md={8}
-      xs={10}
+      maxWidth="narrow"
       windowTitle={t('language_settings_title')}
       navigation={[
         [

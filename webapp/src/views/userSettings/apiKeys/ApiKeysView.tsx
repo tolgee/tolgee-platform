@@ -47,7 +47,6 @@ export const ApiKeysView: FunctionComponent = () => {
         loading={list.isFetching}
         navigation={[[t('user_menu_api_keys'), LINKS.USER_API_KEYS.build()]]}
         hideChildrenOnLoading={false}
-        containerMaxWidth="md"
         addLinkTo={LINKS.USER_API_KEYS_GENERATE.build()}
       >
         <Box sx={{ my: 2 }}>

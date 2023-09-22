@@ -10,6 +10,7 @@ import { TranslationControls } from './TranslationControls';
 import { TranslationControlsCompact } from './TranslationControlsCompact';
 import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledResultCount = styled('div')`
   margin-left: 1px;
@@ -25,13 +26,16 @@ export const TranslationsHeader = () => {
     defaultVal: 'false',
   });
   const { height: bottomPanelHeight } = useBottomPanel();
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
   const [dirty, setDirty] = useState(false);
 
   const onDialogOpen = () => {
     setNewDialog('true');
   };
 
-  const isSmall = useMediaQuery('@media (max-width: 1000px)');
+  const isSmall = useMediaQuery(
+    `@media(max-width: ${rightPanelWidth + 1000}px)`
+  );
 
   const translationsTotal = useTranslationsSelector((c) => c.translationsTotal);
 

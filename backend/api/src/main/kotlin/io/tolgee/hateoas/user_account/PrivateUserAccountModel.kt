@@ -16,5 +16,6 @@ data class PrivateUserAccountModel(
   var accountType: UserAccount.AccountType,
   var globalServerRole: UserAccount.Role,
   val deletable: Boolean,
-  val needsSuperJwtToken: Boolean
+  val needsSuperJwtToken: Boolean,
+  val quickStart: QuickStartModel?
 ) : RepresentationModel<PrivateUserAccountModel>()

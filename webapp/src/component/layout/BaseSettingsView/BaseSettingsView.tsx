@@ -1,6 +1,10 @@
 import { Box, Container, styled, Typography } from '@mui/material';
 
-import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
+import {
+  BaseView,
+  BaseViewProps,
+  getBaseViewWidth,
+} from 'tg.component/layout/BaseView';
 import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
 import { BaseViewAddButton } from '../BaseViewAddButton';
 
@@ -8,7 +12,7 @@ const StyledWrapper = styled('div')`
   display: grid;
   grid-template: auto / auto 1fr;
   gap: 32px;
-  @media (max-width: 800px) {
+  @container main-container (max-width: 800px) {
     grid-template: auto auto / auto;
   }
   overflow-x: hidden;
@@ -35,11 +39,12 @@ export const BaseSettingsView: React.FC<Props> = ({
   children,
   title,
   menuItems,
-  containerMaxWidth,
   addLinkTo,
+  maxWidth = 'normal',
   onAdd,
   ...otherProps
 }) => {
+  const containerMaxWidth = getBaseViewWidth(maxWidth);
   return (
     <BaseView {...otherProps}>
       <StyledWrapper>
@@ -47,7 +52,7 @@ export const BaseSettingsView: React.FC<Props> = ({
           <SettingsMenu items={menuItems} />
         </StyledMenu>
 
-        <StyledContainer maxWidth={containerMaxWidth}>
+        <StyledContainer style={{ maxWidth: containerMaxWidth }}>
           <StyledContent>
             {title && (
               <Box sx={{ mb: 2, display: 'flex' }}>

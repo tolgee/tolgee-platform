@@ -23,6 +23,7 @@ import { useActiveFilters } from '../Filters/useActiveFilters';
 import { FiltersMenu } from '../Filters/FiltersMenu';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { StickyHeader } from './StickyHeader';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -197,14 +198,16 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               </ButtonGroup>
 
               {projectPermissions.satisfiesPermission('keys.edit') && (
-                <StyledIconButton
-                  color="primary"
-                  size="small"
-                  onClick={handleAddTranslation}
-                  data-cy="translations-add-button"
-                >
-                  <Add />
-                </StyledIconButton>
+                <QuickStartHighlight itemKey="add_key">
+                  <StyledIconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleAddTranslation}
+                    data-cy="translations-add-button"
+                  >
+                    <Add />
+                  </StyledIconButton>
+                </QuickStartHighlight>
               )}
             </StyledSpaced>
           </>

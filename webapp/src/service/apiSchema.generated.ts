@@ -30,6 +30,12 @@ export interface paths {
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
   };
+  "/v2/quick-start/complete/{step}": {
+    put: operations["completeGuideStep"];
+  };
+  "/v2/quick-start/close": {
+    put: operations["completeGuide"];
+  };
   "/v2/projects/{projectId}": {
     get: operations["get_3"];
     put: operations["editProject"];
@@ -597,6 +603,11 @@ export interface components {
       globalServerRole: "USER" | "ADMIN";
       deletable: boolean;
       needsSuperJwtToken: boolean;
+      quickStart?: components["schemas"]["QuickStartModel"];
+    };
+    QuickStartModel: {
+      open: boolean;
+      completedSteps: string[];
     };
     UserUpdatePasswordRequestDto: {
       currentPassword: string;
@@ -632,14 +643,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -669,11 +672,6 @@ export interface components {
         | "translations.batch-machine"
       )[];
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
        * @example 200001,200004
        */
@@ -683,6 +681,19 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1991,7 +2002,7 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
@@ -2034,8 +2045,8 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      displayName?: string;
       name: string;
+      displayName?: string;
       description?: string;
     };
     PagedModelProjectModel: {
@@ -3026,6 +3037,55 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  completeGuideStep: {
+    parameters: {
+      path: {
+        step: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  completeGuide: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

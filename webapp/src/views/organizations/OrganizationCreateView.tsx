@@ -50,8 +50,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
     <DashboardPage>
       <BaseFormView
         windowTitle={t('create_organization_title')}
-        lg={6}
-        md={8}
+        maxWidth="narrow"
         title={<T keyName="create_organization_title" />}
         initialValues={initialValues}
         onSubmit={onSubmit}

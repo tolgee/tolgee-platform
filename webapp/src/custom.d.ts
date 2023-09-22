@@ -7,6 +7,7 @@ import {
   Editor,
   Emphasis,
   Marker,
+  QuickStart,
   TopBanner,
 } from './colors';
 
@@ -31,6 +32,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColor;
     marker: Marker;
     topBanner: TopBanner;
+    quickStart: QuickStart;
   }
 
   interface PaletteOptions {
@@ -48,6 +50,7 @@ declare module '@mui/material/styles/createPalette' {
     globalLoading: PaletteColorOptions;
     marker: Marker;
     topBanner: TopBanner;
+    quickStart: QuickStart;
   }
 }
 

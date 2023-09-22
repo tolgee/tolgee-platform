@@ -48,6 +48,12 @@ export type TopBanner = {
   linkText: string;
 };
 
+export type QuickStart = {
+  circleNormal: string;
+  circleSuccess: string;
+  successBackground: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -96,6 +102,11 @@ export const colors = {
       mainText: '#004437',
       linkText: '#009B85',
     },
+    quickStart: {
+      successBackground: '#F7F8FB',
+      circleNormal: '#E7EBF5',
+      circleSuccess: '#0ea459',
+    } as QuickStart,
   },
   dark: {
     white: '#dddddd',
@@ -159,5 +170,10 @@ export const colors = {
       mainText: '#BEF4E9',
       linkText: '#dddddd',
     },
+    quickStart: {
+      successBackground: '#134029',
+      circleNormal: '#2c3c52',
+      circleSuccess: '#3bac21',
+    } as QuickStart,
   },
 } as const;

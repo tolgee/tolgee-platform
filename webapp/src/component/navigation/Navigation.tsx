@@ -3,13 +3,13 @@ import {
   Breadcrumbs,
   Link,
   Box,
-  useTheme,
   useMediaQuery,
   styled,
   Typography,
 } from '@mui/material';
 import { NavigateNext } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledWrapper = styled('div')`
   overflow-x: auto;
@@ -40,8 +40,10 @@ type Props = {
 };
 
 export const Navigation: React.FC<Props> = ({ path }) => {
-  const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
+  const smallScreen = useMediaQuery(
+    `@media (max-width: ${800 + rightPanelWidth}px)`
+  );
 
   return (
     <StyledWrapper>

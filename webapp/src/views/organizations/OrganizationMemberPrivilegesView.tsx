@@ -17,7 +17,7 @@ export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
       windowTitle={t('organization_member_privileges_title')}
       title={t('organization_member_privileges_title')}
       link={LINKS.ORGANIZATION_MEMBER_PRIVILEGES}
-      containerMaxWidth="md"
+      maxWidth="normal"
       navigation={[
         [
           t('organization_member_privileges_title'),
