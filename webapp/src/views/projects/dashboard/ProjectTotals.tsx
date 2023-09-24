@@ -302,7 +302,7 @@ export const ProjectTotals: React.FC<{
               {t('project_dashboard_member_count', 'Members')}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {canEditMembers && (
+          {membersAccessible && (
             <StyledTileEdit>
               <Edit fontSize="small" />
             </StyledTileEdit>
