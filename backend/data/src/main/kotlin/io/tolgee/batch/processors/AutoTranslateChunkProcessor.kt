@@ -27,7 +27,6 @@ class AutoTranslateChunkProcessor(
     coroutineContext: CoroutineContext,
     onProgress: (Int) -> Unit
   ) {
-    val params = getParams(job)
     genericAutoTranslationChunkProcessor.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
       autoTranslationService.softAutoTranslate(job.projectId, keyId, languageId)
@@ -53,9 +52,6 @@ class AutoTranslateChunkProcessor(
   override fun getChunkSize(request: AutoTranslationRequest, projectId: Long): Int {
     val languageIds = request.target.map { it.languageId }.distinct()
     val project = entityManager.getReference(Project::class.java, projectId)
-    if (request.useMachineTranslation) {
-      return 5
-    }
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()
     if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
       return 5
@@ -68,9 +64,6 @@ class AutoTranslateChunkProcessor(
   }
 
   override fun getParams(data: AutoTranslationRequest): AutoTranslationJobParams {
-    return AutoTranslationJobParams().apply {
-      useMachineTranslation = data.useMachineTranslation
-      useTranslationMemory = data.useTranslationMemory
-    }
+    return AutoTranslationJobParams()
   }
 }

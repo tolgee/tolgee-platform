@@ -39,7 +39,7 @@ class ProjectBuilder(
     val translations = mutableListOf<TranslationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
-    var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
+    var autoTranslationConfigBuilders = mutableListOf<AutoTranslationConfigBuilder>()
     var avatarFile: ClassPathResource? = null
     var namespaces = mutableListOf<NamespaceBuilder>()
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
@@ -85,7 +85,7 @@ class ProjectBuilder(
   }
 
   fun addAutoTranslationConfig(ft: FT<AutoTranslationConfig>) {
-    data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this@ProjectBuilder).also { ft(it.self) }
+    addOperation(data.autoTranslationConfigBuilders, ft)
   }
 
   fun addNamespace(ft: FT<Namespace>) = addOperation(data.namespaces, ft)

@@ -1,6 +1,5 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -16,19 +15,24 @@ class AutoTranslateTestData : BaseTestData() {
   init {
     root.apply {
       projectBuilder.apply {
-        addAutoTranslationConfig {
-          usingTm = true
-          usingPrimaryMtService = true
-        }
         addLanguage {
           name = "German"
           tag = "de"
           germanLanguage = this
         }
-        addLanguage {
+        val spanish = addLanguage {
           name = "Spanish"
           tag = "es"
           spanishLanguage = this
+        }.self
+        addAutoTranslationConfig {
+          usingTm = true
+          usingPrimaryMtService = true
+        }
+        addAutoTranslationConfig {
+          usingTm = true
+          usingPrimaryMtService = true
+          targetLanguage = spanish
         }
         addKey {
           name = "base-translation-doesn't-exist"
@@ -85,43 +89,6 @@ class AutoTranslateTestData : BaseTestData() {
     }
   }
 
-  fun generateManyLanguages() {
-    projectBuilder.apply {
-      (1..20).forEach { langNum ->
-        addLanguage {
-          name = "Lang $langNum"
-          tag = if (langNum % 3 == 0) "cs-$langNum" else "lng-$langNum"
-
-          addMtServiceConfig {
-            this.targetLanguage = this@addLanguage
-            this.primaryService = if (langNum % 2 == 0) MtServiceType.AWS else MtServiceType.GOOGLE
-          }
-        }
-      }
-    }
-  }
-
-  fun generateLanguagesWithDifferentPrimaryServices() {
-    projectBuilder.apply {
-      addLanguage {
-        name = "Google translated Lang"
-        tag = "fr"
-        addMtServiceConfig {
-          this.targetLanguage = this@addLanguage
-          this.primaryService = MtServiceType.GOOGLE
-        }
-      }
-      addLanguage {
-        name = "AWS translated Lang"
-        tag = "ar"
-        addMtServiceConfig {
-          this.targetLanguage = this@addLanguage
-          this.primaryService = MtServiceType.AWS
-        }
-      }
-    }
-  }
-
   fun createAnotherThisIsBeautifulKey(): Key {
     return projectBuilder.addKey {
       name = "another-this-is-b"
@@ -134,9 +101,11 @@ class AutoTranslateTestData : BaseTestData() {
   }
 
   fun disableAutoTranslating() {
-    projectBuilder.data.autoTranslationConfigBuilder!!.self {
-      usingPrimaryMtService = false
-      usingTm = false
+    projectBuilder.data.autoTranslationConfigBuilders.forEach {
+      it.self {
+        usingPrimaryMtService = false
+        usingTm = false
+      }
     }
   }
 }

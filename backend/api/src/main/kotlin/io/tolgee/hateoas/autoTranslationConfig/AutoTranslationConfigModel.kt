@@ -1,8 +1,11 @@
-package io.tolgee.dtos.request
+package io.tolgee.hateoas.autoTranslationConfig
 
 import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.hateoas.RepresentationModel
+import org.springframework.hateoas.server.core.Relation
 
-data class AutoTranslationSettingsDto(
+@Relation(collectionRelation = "configs", itemRelation = "config")
+data class AutoTranslationConfigModel(
   val languageId: Long? = null,
 
   @Schema(
@@ -24,4 +27,4 @@ data class AutoTranslationSettingsDto(
       "It includes also the data imported via CLI, Figma, or other integrations using batch key import."
   )
   var enableForImport: Boolean = false
-)
+) : RepresentationModel<AutoTranslationConfigModel>()

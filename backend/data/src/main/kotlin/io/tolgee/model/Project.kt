@@ -75,8 +75,8 @@ class Project(
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
-  var autoTranslationConfig: AutoTranslationConfig? = null
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project", orphanRemoval = true)
+  var autoTranslationConfigs: MutableList<AutoTranslationConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var mtServiceConfig: MutableList<MtServiceConfig> = mutableListOf()
