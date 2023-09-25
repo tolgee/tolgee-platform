@@ -12,5 +12,5 @@ class InitialDataModel(
   var preferredOrganization: PrivateOrganizationModel? = null,
   var languageTag: String? = null,
   val eeSubscription: EeSubscriptionModel? = null,
-  var announcement: AnnouncementDto? = null
+  var announcement: AnnouncementDto? = null,
 )

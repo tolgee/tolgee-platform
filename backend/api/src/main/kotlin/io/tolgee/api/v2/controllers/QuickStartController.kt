@@ -1,7 +1,8 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.hateoas.user_account.QuickStartModel
-import io.tolgee.hateoas.user_account.QuickStartModelAssembler
+import io.tolgee.hateoas.quickStart.QuickStartModel
+import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.QuickStartService
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,17 +14,29 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/v2/quick-start")
 class QuickStartController(
   private val quickStartService: QuickStartService,
-  private val quickStartModelAssembler: QuickStartModelAssembler
+  private val quickStartModelAssembler: QuickStartModelAssembler,
+  private val authenticationFacade: AuthenticationFacade
 ) {
-  @PutMapping("/complete/{step}")
+  @PutMapping("/steps/{step}/complete")
   fun completeGuideStep(@PathVariable("step") step: String): QuickStartModel {
-    val entity = quickStartService.completeStep(step) ?: throw NotFoundException()
+    val entity = quickStartService.completeStep(authenticationFacade.userAccount, step)
+      ?: throw NotFoundException()
     return quickStartModelAssembler.toModel(entity)
   }
 
-  @PutMapping("/close")
-  fun closeGuide(): QuickStartModel {
-    val entity = quickStartService.finish() ?: throw NotFoundException()
+  @PutMapping("/set-finished/{finished}")
+  fun setFinishedState(
+    @PathVariable finished: Boolean
+  ): QuickStartModel {
+    val entity = quickStartService.setFinishState(authenticationFacade.userAccount, finished)
+    return quickStartModelAssembler.toModel(entity)
+  }
+
+  @PutMapping("/set-open/{open}")
+  fun setOpenState(
+    @PathVariable open: Boolean
+  ): QuickStartModel {
+    val entity = quickStartService.setOpenState(authenticationFacade.userAccount, open)
     return quickStartModelAssembler.toModel(entity)
   }
 }

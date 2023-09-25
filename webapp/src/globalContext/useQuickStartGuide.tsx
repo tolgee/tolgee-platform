@@ -35,7 +35,8 @@ export const useQuickStartGuide = (
     ? projectId
     : projects.data?._embedded?.projects?.[0]?.id;
 
-  const completed = initialData.data.userInfo?.quickStart?.completedSteps || [];
+  const completed =
+    initialData.data.preferredOrganization?.quickStart?.completedSteps || [];
 
   const allCompleted =
     lastProjectId === undefined
@@ -69,7 +70,9 @@ export const useQuickStartGuide = (
   }
 
   const state = {
-    open: initialData.data.userInfo?.quickStart?.open && isOwner,
+    open:
+      initialData.data.preferredOrganization?.quickStart?.finished === false &&
+      isOwner,
     active: active[0],
     lastProjectId,
     completed: allCompleted,
