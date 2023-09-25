@@ -2049,8 +2049,8 @@ export interface components {
       postHogHost?: string;
     };
     DocItem: {
-      name: string;
       displayName?: string;
+      name: string;
       description?: string;
     };
     PagedModelProjectModel: {

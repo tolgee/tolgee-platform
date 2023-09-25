@@ -1,5 +1,5 @@
 import { Scopes } from '../../../webapp/src/fixtures/permissions';
-import { assertMessage, confirmHardMode } from './shared';
+import { assertMessage, confirmHardMode, dismissMenu } from './shared';
 
 type Options = {
   confirm?: boolean;
@@ -17,7 +17,7 @@ export const permissionsMenuSelectRole = (role: string, options?: Options) => {
       cy.gcy('search-select-item').contains(lang).click();
     });
 
-    cy.get('body').click(0, 0);
+    dismissMenu();
   }
 
   cy.gcy('permissions-menu-save').click();

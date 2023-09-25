@@ -1,11 +1,4 @@
-import { Close } from '@mui/icons-material';
-import {
-  Box,
-  ClickAwayListener,
-  IconButton,
-  styled,
-  useMediaQuery,
-} from '@mui/material';
+import { Box, ClickAwayListener, styled } from '@mui/material';
 import clsx from 'clsx';
 import { useEffect, useRef } from 'react';
 import {
@@ -25,47 +18,52 @@ const StyledPanel = styled(Box)`
   box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.1);
   background: ${({ theme }) => theme.palette.background.default};
   box-sizing: border-box;
+  z-index: ${({ theme }) => theme.zIndex.drawer + 2};
   @media (max-width: ${1200}px) {
     box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.5);
-    z-index: ${({ theme }) => theme.zIndex.drawer};
     right: -105%;
   }
 `;
 
 type Props = {
   children: React.ReactNode;
+  onClose: () => void;
+  floating: boolean;
+  open: boolean;
 };
 
-export const RightSidePanel = ({ children }: Props) => {
-  const floating = useMediaQuery(`@media (max-width: ${1200}px)`);
-  const { setRightPanelWidth, setRightPanelOpen } = useGlobalActions();
+export const RightSidePanel = ({
+  children,
+  floating,
+  onClose,
+  open,
+}: Props) => {
+  const { setRightPanelWidth } = useGlobalActions();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBannerHeight = useGlobalContext((c) => c.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.topBarHeight);
-  const rightPanelOpen = useGlobalContext((c) => c.rightPanelOpen);
 
   useEffect(() => {
-    if (!floating) {
+    if (!floating && open) {
       setRightPanelWidth(containerRef.current?.offsetWidth || 0);
     }
     return () => setRightPanelWidth(0);
-  }, [floating]);
+  }, [floating, open]);
 
   useEffect(() => {
     function handler() {
       setRightPanelWidth(containerRef.current?.offsetWidth || 0);
     }
-    if (!floating) {
+    if (!floating && open) {
       window.addEventListener('resize', handler);
       return () => window.removeEventListener('resize', handler);
     }
-  }, [floating]);
+  }, [floating, open]);
 
-  const [openedDebounced] = useDebounce(rightPanelOpen, 100);
+  const [openedDebounced] = useDebounce(open, 100);
 
-  const handleClickAway = openedDebounced
-    ? () => setRightPanelOpen(false)
-    : () => {};
+  const handleClickAway =
+    openedDebounced && floating ? () => onClose() : () => {};
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
@@ -76,19 +74,11 @@ export const RightSidePanel = ({ children }: Props) => {
           paddingBottom: topBarHeight + 'px',
         }}
         style={{
-          right: rightPanelOpen ? '0%' : undefined,
+          right: open ? '0%' : '-105%',
         }}
         className={clsx({ floating })}
         ref={containerRef}
       >
-        {floating && (
-          <IconButton
-            sx={{ position: 'absolute', right: 10, top: 10 }}
-            onClick={() => setRightPanelOpen(false)}
-          >
-            <Close />
-          </IconButton>
-        )}
         {children}
       </StyledPanel>
     </ClickAwayListener>

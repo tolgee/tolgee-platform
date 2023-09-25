@@ -5,17 +5,15 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { DarkMode, LightMode } from '@mui/icons-material';
 
-import { LocaleMenu } from '../../LocaleMenu';
-import { UserMenu } from '../../security/UserMenu/UserMenu';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useConfig } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
+
+import { LocaleMenu } from '../../LocaleMenu';
+import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { useThemeContext } from '../../../ThemeProvider';
 import { AdminInfo } from './AdminInfo';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { RocketIcon } from 'tg.component/CustomIcons';
+import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -80,8 +78,6 @@ export const TopBar: React.FC<Props> = ({
 
   const topBarHidden = useGlobalContext((c) => !c.topBarHeight);
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
-  const guideOpen = useGlobalContext((c) => c.quickStartGuide.open);
-  const { setRightPanelOpen } = useGlobalActions();
 
   const { mode, setMode } = useThemeContext();
 
@@ -126,14 +122,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
-        {guideOpen && (
-          <StyledIconButton
-            color="inherit"
-            onClick={() => setRightPanelOpen((val) => !val)}
-          >
-            <RocketIcon fontSize="small" />
-          </StyledIconButton>
-        )}
+        <QuickStartTopBarButton />
         <StyledIconButton onClick={toggleTheme} color="inherit">
           {mode === 'dark' ? <LightMode /> : <DarkMode />}
         </StyledIconButton>

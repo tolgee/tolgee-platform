@@ -85,8 +85,13 @@ export const useInitialDataService = () => {
     method: 'put',
   });
 
-  const putQuickStartClose = useApiMutation({
+  const putQuickStartFinished = useApiMutation({
     url: '/v2/quick-start/set-finished/{finished}',
+    method: 'put',
+  });
+
+  const putQuickStartOpen = useApiMutation({
+    url: '/v2/quick-start/set-open/{open}',
     method: 'put',
   });
 
@@ -107,17 +112,34 @@ export const useInitialDataService = () => {
     );
   };
 
-  const dismissGuide = () => {
+  const finishGuide = () => {
     if (quickStart) {
       setQuickStart({
         ...quickStart,
         finished: true,
       });
     }
-    putQuickStartClose.mutate(
+    putQuickStartFinished.mutate(
       {
         path: { finished: true },
       },
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
+  };
+
+  const setQuickStartOpen = (open: boolean) => {
+    if (quickStart) {
+      setQuickStart({
+        ...quickStart,
+        open,
+      });
+    }
+    putQuickStartOpen.mutate(
+      { path: { open } },
       {
         onSuccess(data) {
           setQuickStart(data);
@@ -195,6 +217,7 @@ export const useInitialDataService = () => {
     updatePreferredOrganization,
     dismissAnnouncement,
     completeGuideStep,
-    dismissGuide,
+    finishGuide,
+    setQuickStartOpen,
   };
 };

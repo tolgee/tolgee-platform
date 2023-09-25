@@ -75,7 +75,6 @@ const StyledPopperActions = styled('div')`
 type Props = {
   children: React.ReactNode;
   itemKey: HighlightItem;
-  focusSensitive?: boolean;
   message?: string;
   offset?: number;
   fullfiled?: boolean;
@@ -87,7 +86,6 @@ type Props = {
 export const QuickStartHighlight = ({
   children,
   itemKey,
-  focusSensitive,
   message,
   offset = 0,
   fullfiled,
@@ -101,8 +99,8 @@ export const QuickStartHighlight = ({
   const itemActive = useGlobalContext(
     (c) => c.quickStartGuide.active === itemKey
   );
-  const guideOpen = useGlobalContext((c) => c.quickStartGuide.open);
-  const active = itemActive && guideOpen;
+  const enabled = useGlobalContext((c) => c.quickStartGuide.enabled);
+  const active = itemActive && enabled;
   const placement = messagePlacement ?? (rightPanelWidth ? 'right' : 'bottom');
 
   const { t } = useTranslate();
@@ -118,7 +116,7 @@ export const QuickStartHighlight = ({
 
   const { quickStartVisited, quickStartSkipTips } = useGlobalActions();
 
-  const visible = active && guideOpen;
+  const visible = active && enabled;
 
   function handleCompleted() {
     setPopperOpen(false);
@@ -196,7 +194,6 @@ export const QuickStartHighlight = ({
           dashed: message,
         })}
         onClick={active && !message ? handleCompleted : undefined}
-        onFocus={focusSensitive ? handleCompleted : undefined}
         ref={wrapperRef}
         borderradius={borderRadius}
       >

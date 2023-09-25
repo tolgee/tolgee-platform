@@ -14,7 +14,7 @@ type Props = {
 
 export const BottomLinks = ({ allCompleted }: Props) => {
   const { t } = useTranslate();
-  const { quickStartDismiss } = useGlobalActions();
+  const { quickStartFinish } = useGlobalActions();
 
   return (
     <StyledContainer>
@@ -29,7 +29,7 @@ export const BottomLinks = ({ allCompleted }: Props) => {
           </StyledLink>
         </Box>
         {!allCompleted && (
-          <StyledLink className="secondary" onClick={() => quickStartDismiss()}>
+          <StyledLink className="secondary" onClick={() => quickStartFinish()}>
             {t('guide_links_skip')}
           </StyledLink>
         )}

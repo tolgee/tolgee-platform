@@ -1,7 +1,7 @@
 import { getCell, visitTranslations } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { batchJobs } from '../../common/apiCalls/testData/testData';
-import { gcy } from '../../common/shared';
+import { dismissMenu, gcy } from '../../common/shared';
 import {
   executeBatchOperation,
   executeBatchOperationWithConfirmation,
@@ -142,6 +142,6 @@ function selectLanguage(language = 'German') {
     .findDcy('translations-language-select-form-control')
     .click();
   cy.gcy('translations-language-select-item').contains(language).click();
-  cy.get('body').click(0, 0);
+  dismissMenu();
   cy.gcy('translations-language-select-item').should('not.exist');
 }

@@ -52,6 +52,8 @@ export type QuickStart = {
   circleNormal: string;
   circleSuccess: string;
   successBackground: string;
+  topBorder: string;
+  progressBackground: string;
 };
 
 export const colors = {
@@ -106,6 +108,8 @@ export const colors = {
       successBackground: '#F7F8FB',
       circleNormal: '#E7EBF5',
       circleSuccess: '#0ea459',
+      topBorder: '#00000033',
+      progressBackground: '#bcbcbc70',
     } as QuickStart,
   },
   dark: {
@@ -174,6 +178,8 @@ export const colors = {
       successBackground: '#134029',
       circleNormal: '#2c3c52',
       circleSuccess: '#3bac21',
+      topBorder: '#2a384c',
+      progressBackground: '#2c3c52',
     } as QuickStart,
   },
 } as const;

@@ -4,7 +4,10 @@ import { Link, useRouteMatch } from 'react-router-dom';
 import { ItemType } from './types';
 import { Check } from '@mui/icons-material';
 import { StyledLink } from './StyledComponents';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { LINKS, PARAMS } from 'tg.constants/links';
 
 const StyledContainer = styled(Box)`
@@ -51,7 +54,10 @@ type Props = {
 export const QuickStartItem = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
   const actions = item.actions?.({ projectId });
-  const { quickStartBegin, setRightPanelOpen } = useGlobalActions();
+  const { quickStartBegin, quickStartSetOpen } = useGlobalActions();
+  const quickStartFloating = useGlobalContext(
+    (c) => c.quickStartGuide.floating
+  );
   const links = actions
     ?.map((i) => i.link)
     .filter((i) => Boolean(i)) as string[];
@@ -96,7 +102,9 @@ export const QuickStartItem = ({ item, index, projectId, done }: Props) => {
                     ? () => {
                         if (action.highlightItems) {
                           quickStartBegin(item.step, action.highlightItems);
-                          setRightPanelOpen(false);
+                          if (quickStartFloating) {
+                            quickStartSetOpen(false);
+                          }
                         }
                       }
                     : undefined

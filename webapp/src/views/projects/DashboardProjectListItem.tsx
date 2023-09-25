@@ -18,6 +18,7 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { ProjectLanguages } from './ProjectLanguages';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -25,7 +26,6 @@ const StyledContainer = styled('div')`
   grid-template-areas: 'image title keyCount stats languages controls';
   padding: ${({ theme }) => theme.spacing(3, 2.5)};
   cursor: pointer;
-  overflow: hidden;
   & .translationIconButton {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
@@ -126,69 +126,74 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
   );
 
   return (
-    <StyledContainer
-      data-cy="dashboard-projects-list-item"
-      onClick={() =>
-        history.push(
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: p.id,
-          })
-        )
-      }
+    <QuickStartHighlight
+      itemKey="demo_project"
+      disabled={p.name !== 'Demo project'}
     >
-      <StyledImage>
-        <AvatarImg
-          owner={{
-            name: p.name,
-            avatar: p.avatar,
-            type: 'PROJECT',
-            id: p.id,
-          }}
-          size={50}
-        />
-      </StyledImage>
-      <StyledTitle>
-        <StyledProjectName variant="h3">{p.name}</StyledProjectName>
-      </StyledTitle>
-      <StyledKeyCount>
-        <Typography variant="body1">
-          <T
-            keyName="project_list_keys_count"
-            params={{ keysCount: p.stats.keyCount.toString() }}
+      <StyledContainer
+        data-cy="dashboard-projects-list-item"
+        onClick={() =>
+          history.push(
+            LINKS.PROJECT_DASHBOARD.build({
+              [PARAMS.PROJECT_ID]: p.id,
+            })
+          )
+        }
+      >
+        <StyledImage>
+          <AvatarImg
+            owner={{
+              name: p.name,
+              avatar: p.avatar,
+              type: 'PROJECT',
+              id: p.id,
+            }}
+            size={50}
           />
-        </Typography>
-      </StyledKeyCount>
-      <StyledStats>
-        <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
-      </StyledStats>
-      <StyledLanguages data-cy="project-list-languages">
-        <Grid container>
-          <ProjectLanguages p={p} />
-        </Grid>
-      </StyledLanguages>
-      <StyledControls>
-        <Box width="100%" display="flex" justifyContent="flex-end">
-          <Tooltip title={t('project_list_translations_button')}>
-            <IconButton
-              data-cy="project-list-translations-button"
-              onClick={stopBubble()}
-              aria-label={t('project_list_translations_button')}
-              component={Link}
-              to={translationsLink}
-              size="small"
-              className="translationIconButton"
-            >
-              <TranslationIcon />
-            </IconButton>
-          </Tooltip>
-          <ProjectListItemMenu
-            projectId={p.id}
-            computedPermission={p.computedPermission}
-            projectName={p.name}
-          />
-        </Box>
-      </StyledControls>
-    </StyledContainer>
+        </StyledImage>
+        <StyledTitle>
+          <StyledProjectName variant="h3">{p.name}</StyledProjectName>
+        </StyledTitle>
+        <StyledKeyCount>
+          <Typography variant="body1">
+            <T
+              keyName="project_list_keys_count"
+              params={{ keysCount: p.stats.keyCount.toString() }}
+            />
+          </Typography>
+        </StyledKeyCount>
+        <StyledStats>
+          <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
+        </StyledStats>
+        <StyledLanguages data-cy="project-list-languages">
+          <Grid container>
+            <ProjectLanguages p={p} />
+          </Grid>
+        </StyledLanguages>
+        <StyledControls>
+          <Box width="100%" display="flex" justifyContent="flex-end">
+            <Tooltip title={t('project_list_translations_button')}>
+              <IconButton
+                data-cy="project-list-translations-button"
+                onClick={stopBubble()}
+                aria-label={t('project_list_translations_button')}
+                component={Link}
+                to={translationsLink}
+                size="small"
+                className="translationIconButton"
+              >
+                <TranslationIcon />
+              </IconButton>
+            </Tooltip>
+            <ProjectListItemMenu
+              projectId={p.id}
+              computedPermission={p.computedPermission}
+              projectName={p.name}
+            />
+          </Box>
+        </StyledControls>
+      </StyledContainer>
+    </QuickStartHighlight>
   );
 };
 

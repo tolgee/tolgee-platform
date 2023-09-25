@@ -6,7 +6,10 @@ import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
 import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { RightSidePanel } from './RightSidePanel';
 import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
 
@@ -54,8 +57,15 @@ export const DashboardPage: FunctionComponent<Props> = ({
 
   const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
 
-  const quickStartGuideOpen = useGlobalContext((c) =>
-    Boolean(c.quickStartGuide.open && c.userInfo)
+  const { quickStartSetOpen } = useGlobalActions();
+  const quickStartEnabled = useGlobalContext(
+    (c) => c.quickStartGuide.enabled && c.userInfo
+  );
+  const quickStartOpen = useGlobalContext((c) =>
+    Boolean(c.quickStartGuide.open)
+  );
+  const quickStartFloating = useGlobalContext(
+    (c) => c.quickStartGuide.floating
   );
 
   return (
@@ -84,8 +94,12 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartGuideOpen && (
-          <RightSidePanel>
+        {quickStartEnabled && (quickStartOpen || quickStartFloating) && (
+          <RightSidePanel
+            open={quickStartOpen}
+            onClose={() => quickStartSetOpen(false)}
+            floating={quickStartFloating}
+          >
             <QuickStartGuide />
           </RightSidePanel>
         )}

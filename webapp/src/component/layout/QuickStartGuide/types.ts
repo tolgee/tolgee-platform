@@ -28,6 +28,7 @@ export type HighlightItem =
   | 'members'
   | 'add_key'
   | 'pick_import_file'
-  | 'unfinished' // non-existing item - in case we don't want the flow to finish automatically
+  | 'add_project_submit'
   | 'export_form'
-  | 'integrate_form';
+  | 'integrate_form'
+  | 'demo_project';

@@ -2,92 +2,21 @@ import { Box, Button, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useMemo } from 'react';
 import { RocketIcon } from 'tg.component/CustomIcons';
-import { LINKS } from 'tg.constants/links';
 import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { BottomLinks } from './BottomLinks';
+import { items } from './quickStartConfig';
 import { QuickStartItem } from './QuickStartItem';
-import { ItemType } from './types';
-
-const items: ItemType[] = [
-  {
-    step: 'new_project',
-    name: <T keyName="guide_new_project" />,
-    actions: () => [
-      { label: <T keyName="guide_new_project_demo" /> },
-      {
-        link: LINKS.PROJECTS.build(),
-        label: <T keyName="guide_new_project_create" />,
-        highlightItems: ['add_project', 'unfinished'],
-      },
-    ],
-  },
-  {
-    step: 'languages',
-    name: <T keyName="guide_languages" />,
-    needsProject: true,
-    actions: () => [
-      {
-        label: <T keyName="guide_languages_set_up" />,
-        highlightItems: [
-          'menu_languages',
-          'add_language',
-          'machine_translation',
-          'automatic_translation',
-        ],
-      },
-    ],
-  },
-  {
-    step: 'members',
-    name: <T keyName="guide_members" />,
-    needsProject: true,
-    actions: () => [
-      {
-        label: <T keyName="guide_members_invite" />,
-        highlightItems: ['menu_members', 'invitations', 'members'],
-      },
-    ],
-  },
-  {
-    step: 'keys',
-    name: <T keyName="guide_keys" />,
-    needsProject: true,
-    actions: () => [
-      {
-        label: <T keyName="guide_keys_add" />,
-        highlightItems: ['menu_translations', 'add_key'],
-      },
-      {
-        label: <T keyName="guide_keys_import" />,
-        highlightItems: ['menu_import', 'pick_import_file'],
-      },
-    ],
-  },
-  {
-    step: 'use',
-    name: <T keyName="guide_use" />,
-    needsProject: true,
-    actions: () => [
-      {
-        label: <T keyName="guide_use_integrate" />,
-        highlightItems: ['menu_integrate', 'integrate_form'],
-      },
-      {
-        label: <T keyName="guide_use_export" />,
-        highlightItems: ['menu_export', 'export_form'],
-      },
-    ],
-  },
-];
 
 const StyledContainer = styled(Box)`
   display: grid;
   gap: 8px;
   grid-template-rows: auto 1fr auto;
   height: 100%;
+  position: relative;
+  border-top: 2px solid ${({ theme }) => theme.palette.quickStart.topBorder};
 `;
 
 const StyledContent = styled(Box)`
@@ -107,11 +36,24 @@ const StyledHeader = styled(Box)`
   gap: 12px;
 `;
 
+const StyledArrow = styled(Box)`
+  position: absolute;
+  top: -10px;
+  right: 170px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid ${({ theme }) => theme.palette.emphasis[100]};
+  transition: opacity 0.2s ease-in-out;
+`;
+
 export const QuickStartGuide = () => {
   const { t } = useTranslate();
   const projectId = useGlobalContext((c) => c.quickStartGuide.lastProjectId);
   const completed = useGlobalContext((c) => c.quickStartGuide.completed);
-  const { quickStartDismiss } = useGlobalActions();
+  const { quickStartFinish } = useGlobalActions();
+  const topBarHeight = useGlobalContext((c) => c.topBarHeight);
   const allCompleted = useMemo(
     () => items.every((i) => completed.includes(i.step)),
     [completed, items]
@@ -119,6 +61,7 @@ export const QuickStartGuide = () => {
 
   return (
     <StyledContainer>
+      <StyledArrow sx={{ opacity: topBarHeight ? 1 : 0 }} />
       <StyledHeader>
         <RocketIcon fontSize="small" />
         <T keyName="guide_title" />
@@ -139,7 +82,7 @@ export const QuickStartGuide = () => {
             <Button
               color="primary"
               variant="contained"
-              onClick={() => quickStartDismiss()}
+              onClick={() => quickStartFinish()}
             >
               {t('guide_finish_button')}
             </Button>

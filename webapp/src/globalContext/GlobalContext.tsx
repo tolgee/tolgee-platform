@@ -22,7 +22,6 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
     const [topBarHidden, setTopBarHidden] = useState(false);
     const [quickStartState, quickStartActions] =
       useQuickStartGuide(initialData);
-    const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
     const jwtToken = useSelector(
       (state: AppState) => state.global.security.jwtToken
@@ -74,7 +73,6 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       },
       setRightPanelWidth,
       setTopBarHidden,
-      setRightPanelOpen,
     };
 
     globalContext.actions = actions;
@@ -90,7 +88,6 @@ export const [GlobalProvider, useGlobalActions, useGlobalContext] =
       rightPanelWidth,
       topBarHeight: topBarHidden ? 0 : 52,
       quickStartGuide: quickStartState,
-      rightPanelOpen,
     };
 
     return [contextData, actions];

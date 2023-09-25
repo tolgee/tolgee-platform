@@ -126,7 +126,7 @@ export const toggleInMultiselect = (
         }
       });
   });
-  cy.get('body').click(0, 0);
+  dismissMenu();
   waitForGlobalLoading();
 };
 
@@ -174,4 +174,8 @@ export const visitProjectMembers = (projectId: number) => {
 
 export const visitProjectDashboard = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}`);
+};
+
+export const dismissMenu = () => {
+  cy.focused().type('{esc}');
 };

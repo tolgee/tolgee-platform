@@ -18,6 +18,7 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const messageService = container.resolve(MessageService);
 
@@ -25,6 +26,7 @@ export type CreateProjectValueType = components['schemas']['CreateProjectDTO'];
 
 export const ProjectCreateView: FunctionComponent = () => {
   const history = useHistory();
+  const { quickStartCompleteStep } = useGlobalActions();
   const createProjectLoadable = useApiMutation({
     url: '/v2/projects',
     method: 'post',
@@ -50,6 +52,7 @@ export const ProjectCreateView: FunctionComponent = () => {
           history.push(
             LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: data.id })
           );
+          quickStartCompleteStep('new_project');
         },
       }
     );
