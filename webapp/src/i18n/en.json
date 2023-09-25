@@ -507,6 +507,7 @@
   "key-context-present-hint" : "Tolgee context is available for this key",
   "key_exists" : "Key exists",
   "key_exists_in_namespace" : "Key already exists in namespace",
+  "key_is_blank" : "Key is blank",
   "language_create_add" : "Add",
   "language_create_autocomplete_label" : "Find language",
   "language_created_message" : "Language created",

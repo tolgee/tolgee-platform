@@ -505,6 +505,7 @@
   "key-context-present-hint" : "Pro tento klíč je k dispozici Tolgee kontext",
   "key_exists" : "Klíč existuje",
   "key_exists_in_namespace" : "Klíč již existuje v namespace",
+  "key_is_blank" : "Klíč je prázdný",
   "language_create_add" : "Přidat",
   "language_create_autocomplete_label" : "Hledat jazyk",
   "language_created_message" : "Jazyk vytvořen",

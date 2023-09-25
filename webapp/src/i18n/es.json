@@ -574,7 +574,7 @@
   "translations_filters_missing_translation" : "Falta traducción",
   "translations_filters_no_screenshots" : "Sin capturas de pantalla",
   "translations_filters_text" : "{filtersNum, plural, one {1 filtro} other {# filtros}}",
-  "translations_filters_with_screenshots" : "Con etiquetas",
+  "translations_filters_with_screenshots" : "Con capturas de pantalla",
   "translations-history-differences-toggle" : "Diferencias",
   "translations_history_load_more" : "Cargar más",
   "translation_single_create_title" : "Crear nueva clave",

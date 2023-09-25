@@ -1,3 +1,10 @@
+## [3.29.6](https://github.com/tolgee/tolgee-platform/compare/v3.29.5...v3.29.6) (2023-09-25)
+
+
+### Bug Fixes
+
+* members edit when no auth mode ([#1912](https://github.com/tolgee/tolgee-platform/issues/1912)) ([2441fdf](https://github.com/tolgee/tolgee-platform/commit/2441fdf0d9eb183193c0c15c12287e7f1eb793ca))
+
 ## [3.29.5](https://github.com/tolgee/tolgee-platform/compare/v3.29.4...v3.29.5) (2023-09-20)
 
 
