@@ -1,8 +1,9 @@
-package io.tolgee.hateoas.user_account
+package io.tolgee.hateoas.quickStart
 
 import org.springframework.hateoas.RepresentationModel
 
 data class QuickStartModel(
-  val open: Boolean,
-  val completedSteps: MutableList<String>
+  val finished: Boolean,
+  val completedSteps: MutableList<String>,
+  val open: Boolean
 ) : RepresentationModel<QuickStartModel>()

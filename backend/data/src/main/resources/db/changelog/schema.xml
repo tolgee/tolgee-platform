@@ -2699,34 +2699,25 @@
     <changeSet author="stepangranat (generated)" id="1692866751704-1">
         <dropDefaultValue columnDataType="boolean" columnName="hidden" tableName="tolgee_batch_job"/>
     </changeSet>
-    <changeSet author="stepangranat (generated)" id="1695216476169-1">
+    <changeSet author="jenik (generated)" id="1695640860120-1">
         <createTable tableName="quick_start">
             <column name="user_account_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="quick_startPK"/>
             </column>
-            <column name="guide_completed_steps" type="TEXT[]"/>
-            <column name="guide_open" type="BOOLEAN"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="stepangranat (generated)" id="1695216476169-2">
-        <createTable tableName="quick_start_guide">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="quick_start_guidePK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="completed_steps" type="TEXT[]"/>
+            <column name="finished" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="open" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="completed" type="BOOLEAN"/>
-            <column name="user_id" type="BIGINT"/>
+            <column name="organization_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="stepangranat (generated)" id="1695216476169-3">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="quick_start_guide" constraintName="FK5kthdabyk9qdqtexgd13c3mfp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    <changeSet author="jenik (generated)" id="1695640860120-2">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="quick_start" constraintName="FK2gbjbrkjgdy770vc1nyuvbfal" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
-    <changeSet author="stepangranat (generated)" id="1695216476169-4">
+    <changeSet author="jenik (generated)" id="1695640860120-3">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="quick_start" constraintName="FK946dggx61o0jyux1oo5gby8v0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
 </databaseChangeLog>

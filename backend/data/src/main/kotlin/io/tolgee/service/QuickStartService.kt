@@ -1,19 +1,19 @@
 package io.tolgee.service
 
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.model.Organization
 import io.tolgee.model.QuickStart
+import io.tolgee.model.UserAccount
 import io.tolgee.repository.QuickStartRepository
-import io.tolgee.security.AuthenticationFacade
+import org.springframework.data.crossstore.ChangeSetPersister
 import org.springframework.stereotype.Component
 
 @Component
 class QuickStartService(
   private val quickStartRepository: QuickStartRepository,
-  private val authenticationFacade: AuthenticationFacade
 ) {
-  fun completeStep(step: String): QuickStart? {
-    val userAccount = authenticationFacade.userAccountEntity
-
-    val quickStart = quickStartRepository.findByUserAccount(userAccount)
+  fun completeStep(userAccount: UserAccountDto, step: String): QuickStart? {
+    val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
     if (quickStart?.completedSteps?.let { !it.contains(step) } == true) {
       quickStart.completedSteps.add(step)
       quickStartRepository.save(quickStart)
@@ -21,14 +21,30 @@ class QuickStartService(
     return quickStart
   }
 
-  fun finish(): QuickStart? {
-    val userAccount = authenticationFacade.userAccountEntity
-    val quickStart = quickStartRepository.findByUserAccount(userAccount)
-
-    if (quickStart?.open == true) {
-      quickStart.open = false
-      quickStartRepository.save(quickStart)
-    }
+  fun setFinishState(userAccount: UserAccountDto, finished: Boolean): QuickStart {
+    val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
+      ?: throw ChangeSetPersister.NotFoundException()
+    quickStart.finished = finished
+    quickStartRepository.save(quickStart)
     return quickStart
+  }
+
+  fun setOpenState(userAccount: UserAccountDto, open: Boolean): QuickStart {
+    val quickStart = quickStartRepository.findByUserAccountId(userAccount.id)
+      ?: throw ChangeSetPersister.NotFoundException()
+    quickStart.open = open
+    quickStartRepository.save(quickStart)
+    return quickStart
+  }
+
+  fun create(userAccount: UserAccount, organization: Organization) {
+    val quickStart = QuickStart(userAccount)
+    quickStart.organization = organization
+    quickStartRepository.save(quickStart)
+  }
+
+  fun find(userAccountId: Long, organizationId: Long?): QuickStart? {
+    organizationId ?: return null
+    return quickStartRepository.findByUserAccountIdAndOrganizationId(userAccountId, organizationId)
   }
 }
