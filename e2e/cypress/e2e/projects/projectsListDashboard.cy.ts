@@ -5,7 +5,7 @@ import { projectListdData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
 describe('Projects Dashboard', () => {
-  before(() => {
+  beforeEach(() => {
     projectListdData.clean();
     projectListdData.generate();
     login('projectListDashboardUser', 'admin');
@@ -45,7 +45,7 @@ describe('Projects Dashboard', () => {
     assertTooltip('Deutsch');
   });
 
-  after(() => {
+  afterEach(() => {
     projectListdData.clean();
   });
 });

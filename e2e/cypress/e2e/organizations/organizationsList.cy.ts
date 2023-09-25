@@ -1,6 +1,7 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import {
+  assertMessage,
   clickGlobalSave,
   gcy,
   switchToOrganization,
@@ -40,7 +41,7 @@ describe('Organization List', () => {
     );
     clickGlobalSave();
     gcy('organization-switch').contains('What a nice organization');
-    cy.contains('Organization created').should('be.visible');
+    assertMessage('Organization created').should('be.visible');
     gcy('organization-switch')
       .contains('What a nice organization')
       .should('be.visible');
@@ -55,7 +56,7 @@ describe('Organization List', () => {
       cy.get('input').should('have.value', 'what-a-nice-organization')
     );
     clickGlobalSave();
-    cy.contains('Organization created').should('be.visible');
+    assertMessage('Organization created');
   });
 
   it('validates creation fields', { retries: { runMode: 3 } }, () => {
@@ -66,9 +67,7 @@ describe('Organization List', () => {
 
     gcy('organization-address-part-field').click();
 
-    gcy('organization-name-field').within(() => {
-      cy.contains('This field is required');
-    });
+    gcy('organization-name-field').contains('This field is required');
 
     gcy('organization-name-field').within(() => {
       cy.get('input').type(
@@ -109,7 +108,7 @@ describe('Organization List', () => {
       gcy('organization-profile-leave-button').click();
 
       gcy('global-confirmation-confirm').click();
-      cy.contains('Organization left').should('be.visible');
+      assertMessage('Organization left');
     });
 
     it('admin cannot leave Techfides', { scrollBehavior: 'center' }, () => {
@@ -122,7 +121,7 @@ describe('Organization List', () => {
       gcy('organization-profile-leave-button').click();
 
       gcy('global-confirmation-confirm').click();
-      cy.contains('Organization has no other owner.').should('be.visible');
+      assertMessage('Organization has no other owner.');
     });
 
     it('admin can change Tolgee settings', { scrollBehavior: 'center' }, () => {

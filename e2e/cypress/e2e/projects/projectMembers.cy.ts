@@ -9,7 +9,6 @@ import {
   visitProjectMembers,
 } from '../../common/shared';
 import { enterProjectSettings, visitList } from '../../common/projects';
-import { waitForGlobalLoading } from '../../common/loading';
 
 import { projectTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
@@ -27,12 +26,6 @@ import { ProjectInfo } from '../../common/permissions/shared';
 import { openMemberSettings, revokeMemberAccess } from '../../common/members';
 
 describe('Project members', () => {
-  beforeEach(() => {});
-
-  afterEach(() => {
-    waitForGlobalLoading();
-  });
-
   describe('Permission settings', () => {
     describe('Not modifying', () => {
       before(() => {
@@ -49,11 +42,10 @@ describe('Project members', () => {
         enterProjectSettings('Facebook itself', 'Facebook');
         selectInProjectMenu('Members');
         gcy('global-list-search').find('input').type('Doe');
-        gcy('global-paginated-list').within(() => {
-          gcy('project-member-item')
-            .should('have.length', 1)
-            .should('contain', 'John Doe');
-        });
+
+        gcy('project-member-item')
+          .should('have.length', 1)
+          .should('contain', 'John Doe');
       });
 
       it('Can paginate', () => {
@@ -71,22 +63,21 @@ describe('Project members', () => {
         visitList();
         enterProjectSettings('Facebook itself', 'Facebook');
         selectInProjectMenu('Members');
-        gcy('global-paginated-list').within(() => {
-          gcy('project-member-item')
-            .contains('John Doe')
-            .closestDcy('project-member-item')
-            .within(() => {
-              gcy('project-member-revoke-button').should('be.disabled');
-              gcy('permissions-menu-button').should('be.enabled');
-            });
-          gcy('project-member-item')
-            .contains('Cukrberg')
-            .closestDcy('project-member-item')
-            .within(() => {
-              gcy('project-member-revoke-button').should('be.disabled');
-              gcy('permissions-menu-button').should('be.disabled');
-            });
-        });
+
+        gcy('project-member-item')
+          .contains('John Doe')
+          .closestDcy('project-member-item')
+          .within(() => {
+            gcy('project-member-revoke-button').should('be.disabled');
+            gcy('permissions-menu-button').should('be.enabled');
+          });
+        gcy('project-member-item')
+          .contains('Cukrberg')
+          .closestDcy('project-member-item')
+          .within(() => {
+            gcy('project-member-revoke-button').should('be.disabled');
+            gcy('permissions-menu-button').should('be.disabled');
+          });
       });
     });
 
