@@ -41,6 +41,7 @@ class InitialDataController(
     )
 
     val userAccount = authenticationFacade.userAccountOrNull
+
     if (userAccount != null) {
       data.userInfo = userController.getInfo()
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()

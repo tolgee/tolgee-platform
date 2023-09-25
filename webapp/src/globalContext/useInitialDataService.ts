@@ -61,7 +61,7 @@ export const useInitialDataService = () => {
   useEffect(() => {
     if (initialData.data) {
       setAnnouncement(initialData.data.announcement);
-      setQuickStart(initialData.data.userInfo?.quickStart);
+      setQuickStart(initialData.data.preferredOrganization?.quickStart);
     }
   }, [initialData.data]);
 
@@ -81,12 +81,12 @@ export const useInitialDataService = () => {
   });
 
   const putQuickStartStep = useApiMutation({
-    url: '/v2/quick-start/complete/{step}',
+    url: '/v2/quick-start/steps/{step}/complete',
     method: 'put',
   });
 
   const putQuickStartClose = useApiMutation({
-    url: '/v2/quick-start/close',
+    url: '/v2/quick-start/set-finished/{finished}',
     method: 'put',
   });
 
@@ -111,14 +111,19 @@ export const useInitialDataService = () => {
     if (quickStart) {
       setQuickStart({
         ...quickStart,
-        open: false,
+        finished: true,
       });
     }
-    putQuickStartClose.mutate(undefined, {
-      onSuccess(data) {
-        setQuickStart(data);
+    putQuickStartClose.mutate(
+      {
+        path: { finished: true },
       },
-    });
+      {
+        onSuccess(data) {
+          setQuickStart(data);
+        },
+      }
+    );
   };
 
   const preferredOrganization =
@@ -128,7 +133,7 @@ export const useInitialDataService = () => {
     if (organizationId !== preferredOrganization?.id) {
       setOrganizationLoading(true);
       try {
-        // set preffered organization
+        // set preferred organization
         await setPreferredOrganization.mutateAsync({
           path: { organizationId },
         });
@@ -175,18 +180,12 @@ export const useInitialDataService = () => {
     throw initialData.error;
   }
 
-  const userInfo = initialData.data?.userInfo
-    ? {
-        ...initialData.data?.userInfo,
-        quickStart,
-      }
-    : undefined;
-
   return {
     data: {
       ...initialData.data!,
-      userInfo,
-      preferredOrganization,
+      preferredOrganization: preferredOrganization
+        ? { ...preferredOrganization, quickStart }
+        : undefined,
       announcement,
     },
     isFetching,

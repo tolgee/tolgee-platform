@@ -140,7 +140,7 @@ class TranslationService(
     return setTranslation(key, language, text)
   }
 
-  fun setTranslation(key: Key, language: Language, text: String?): Translation? {
+  fun setTranslation(key: Key, language: Language, text: String?): Translation {
     val translation = getOrCreate(key, language)
     setTranslation(translation, text)
     key.translations.add(translation)

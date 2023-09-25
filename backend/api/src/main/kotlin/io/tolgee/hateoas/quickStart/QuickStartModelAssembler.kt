@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.user_account
+package io.tolgee.hateoas.quickStart
 
 import io.tolgee.model.QuickStart
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -10,8 +10,9 @@ class QuickStartModelAssembler() : RepresentationModelAssemblerSupport<QuickStar
 ) {
   override fun toModel(entity: QuickStart): QuickStartModel {
     return QuickStartModel(
-      open = entity.open,
-      completedSteps = entity.completedSteps
+      finished = entity.finished,
+      completedSteps = entity.completedSteps,
+      open = entity.open
     )
   }
 }
