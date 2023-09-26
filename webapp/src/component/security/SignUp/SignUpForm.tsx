@@ -79,7 +79,7 @@ export const SignUpForm = (props: Props) => {
             color="primary"
             type="submit"
             variant="contained"
-            loading={props.loadable.loading}
+            loading={props.loadable.isLoading}
           >
             <T keyName="sign_up_submit_button" />
           </LoadingButton>
