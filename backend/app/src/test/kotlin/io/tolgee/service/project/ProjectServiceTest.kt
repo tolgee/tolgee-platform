@@ -8,15 +8,19 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.dtos.BigMetaDto
+import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
@@ -29,6 +33,9 @@ class ProjectServiceTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var batchJobService: BatchJobService
+
+  @Autowired
+  private lateinit var bigMetaService: BigMetaService
 
   @Test
   fun testFindAllPermitted() {
@@ -176,6 +183,30 @@ class ProjectServiceTest : AbstractSpringTest() {
 
     executeInNewTransaction {
       projectService.find(testData.projectBuilder.self.id).assert.isNull()
+    }
+  }
+
+  @Test
+  fun `deletes project with big meta`() {
+    val testData = BaseTestData()
+    val key1 = testData.projectBuilder.addKey(keyName = "hello").self
+    val key2 = testData.projectBuilder.addKey(keyName = "hello1").self
+
+    testDataService.saveTestData(testData.root)
+
+    executeInNewTransaction {
+      bigMetaService.store(
+        BigMetaDto().apply {
+          relatedKeysInOrder = mutableListOf(
+            RelatedKeyDto(keyName = key1.name),
+            RelatedKeyDto(keyName = key2.name)
+          )
+        },
+        testData.projectBuilder.self
+      )
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      projectService.deleteProject(testData.projectBuilder.self.id)
     }
   }
 }

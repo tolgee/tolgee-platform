@@ -1,3 +1,24 @@
+## [3.29.6](https://github.com/tolgee/tolgee-platform/compare/v3.29.5...v3.29.6) (2023-09-25)
+
+
+### Bug Fixes
+
+* members edit when no auth mode ([#1912](https://github.com/tolgee/tolgee-platform/issues/1912)) ([2441fdf](https://github.com/tolgee/tolgee-platform/commit/2441fdf0d9eb183193c0c15c12287e7f1eb793ca))
+
+## [3.29.5](https://github.com/tolgee/tolgee-platform/compare/v3.29.4...v3.29.5) (2023-09-20)
+
+
+### Bug Fixes
+
+* Error message conversion issues ([#1907](https://github.com/tolgee/tolgee-platform/issues/1907)) ([7b2713c](https://github.com/tolgee/tolgee-platform/commit/7b2713c689d6aa36dd49556bed9b22c4289ab693))
+
+## [3.29.4](https://github.com/tolgee/tolgee-platform/compare/v3.29.3...v3.29.4) (2023-09-13)
+
+
+### Bug Fixes
+
+* Project with context deletion ([#1906](https://github.com/tolgee/tolgee-platform/issues/1906)) ([36b10f5](https://github.com/tolgee/tolgee-platform/commit/36b10f5552c02d2e89b18a640c8468387a94cfff))
+
 ## [3.29.3](https://github.com/tolgee/tolgee-platform/compare/v3.29.2...v3.29.3) (2023-09-08)
 
 

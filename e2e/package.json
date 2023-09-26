@@ -16,7 +16,7 @@
     "@typescript-eslint/parser": "^5.30.5",
     "bcryptjs": "^2.4.3",
     "cy-verify-downloads": "^0.1.8",
-    "cypress": "^10.3.0",
+    "cypress": "^13.2.0",
     "cypress-dotenv": "^2.0.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-promise": "^1.1.0",

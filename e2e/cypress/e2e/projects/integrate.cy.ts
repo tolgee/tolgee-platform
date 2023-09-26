@@ -192,8 +192,8 @@ describe('Integrate view', () => {
       },
     ];
 
-    data.forEach((item) => {
-      it(`${item.weapon} works`, () => {
+    it(`Integrations work`, () => {
+      data.forEach((item) => {
         gcy('integrate-weapon-selector-button').contains(item.weapon).click();
         item.textsToContain.forEach((t) => {
           gcy('integrate-guide').contains(t);
