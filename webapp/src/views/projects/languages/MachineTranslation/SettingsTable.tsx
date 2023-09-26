@@ -1,5 +1,3 @@
-import { styled, Tooltip } from '@mui/material';
-import { Help } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 
