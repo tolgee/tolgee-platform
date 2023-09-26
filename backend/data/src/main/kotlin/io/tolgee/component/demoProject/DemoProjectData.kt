@@ -48,30 +48,31 @@ object DemoProjectData {
 
   val inTranslatedState = mapOf("fr" to "add-item-add-button", "ar-SA" to "add-item-add-button")
 
-  val languages = listOf(
-    Language().apply {
-      name = "English"
-      tag = "en"
-      originalName = "English"
-      flagEmoji = "🇬🇧"
-    },
-    Language().apply {
-      name = "German"
-      tag = "de"
-      originalName = "Deutsch"
-      flagEmoji = "🇩🇪"
-    },
-    Language().apply {
-      name = "French"
-      tag = "fr"
-      originalName = "Français"
-      flagEmoji = "🇫🇷"
-    },
-    Language().apply {
-      name = "Arabic (Saudi Arabia)"
-      tag = "ar-SA"
-      originalName = "العربية (السعودية)"
-      flagEmoji = "🇸🇦"
-    }
-  )
+  val languages
+    get() = listOf(
+      Language().apply {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        flagEmoji = "🇬🇧"
+      },
+      Language().apply {
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
+        flagEmoji = "🇩🇪"
+      },
+      Language().apply {
+        name = "French"
+        tag = "fr"
+        originalName = "Français"
+        flagEmoji = "🇫🇷"
+      },
+      Language().apply {
+        name = "Arabic (Saudi Arabia)"
+        tag = "ar-SA"
+        originalName = "العربية (السعودية)"
+        flagEmoji = "🇸🇦"
+      }
+    )
 }
