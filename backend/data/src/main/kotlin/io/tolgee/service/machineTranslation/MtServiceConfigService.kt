@@ -164,6 +164,9 @@ class MtServiceConfigService(
     language: Language
   ) {
     val primaryServiceInfo = languageProps.primaryServiceInfo ?: return
+    if (primaryServiceInfo.formality === null) {
+      return
+    }
     val isSupported = getServiceProcessor(primaryServiceInfo)?.isLanguageFormalitySupported(language.tag)
       ?: false
 

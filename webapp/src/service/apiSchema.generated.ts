@@ -47,6 +47,10 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/per-language-auto-translation-settings": {
+    get: operations["getPerLanguageAutoTranslationSettings"];
+    put: operations["setPerLanguageAutoTranslationSettings"];
+  };
   "/v2/projects/{projectId}/namespaces/{id}": {
     put: operations["update"];
   };
@@ -298,6 +302,9 @@ export interface paths {
   "/v2/projects/{projectId}/suggest/translation-memory": {
     post: operations["suggestTranslationMemory"];
   };
+  "/v2/projects/{projectId}/suggest/machine-translations-streaming": {
+    post: operations["suggestMachineTranslationsStreaming"];
+  };
   "/v2/projects/{projectId}/suggest/machine-translations": {
     post: operations["suggestMachineTranslations"];
   };
@@ -386,6 +393,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/namespace-by-name/{name}": {
     get: operations["getByName"];
+  };
+  "/v2/projects/{projectId}/machine-translation-language-info": {
+    get: operations["getMachineTranslationLanguageInfo"];
   };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
@@ -785,6 +795,37 @@ export interface components {
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
     };
+    AutoTranslationSettingsDto: {
+      /** Format: int64 */
+      languageId?: number;
+      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
+      /**
+       * @description If true, import will trigger batch operation to translate the new new keys.
+       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
+       */
+      enableForImport: boolean;
+    };
+    AutoTranslationConfigModel: {
+      /** Format: int64 */
+      languageId?: number;
+      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
+      /**
+       * @description If true, import will trigger batch operation to translate the new new keys.
+       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
+       */
+      enableForImport: boolean;
+    };
+    CollectionModelAutoTranslationConfigModel: {
+      _embedded?: {
+        configs?: components["schemas"]["AutoTranslationConfigModel"][];
+      };
+    };
     UpdateNamespaceDto: {
       name: string;
     };
@@ -804,7 +845,10 @@ export interface components {
        * @description The language to apply those rules. If null, then this settings are default.
        */
       targetLanguageId?: number;
-      /** @description This service will be used for automated translation */
+      /**
+       * @deprecated
+       * @description This service will be used for automated translation
+       */
       primaryService?:
         | "GOOGLE"
         | "AWS"
@@ -812,8 +856,12 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** @description List of enabled services */
-      enabledServices: (
+      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
+      /**
+       * @deprecated
+       * @description List of enabled services (deprecated: use enabledServicesInfo)
+       */
+      enabledServices?: (
         | "GOOGLE"
         | "AWS"
         | "DEEPL"
@@ -821,6 +869,13 @@ export interface components {
         | "BAIDU"
         | "TOLGEE"
       )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo?: components["schemas"]["MtServiceInfo"][];
+    };
+    /** @description Info about enabled services */
+    MtServiceInfo: {
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -840,7 +895,10 @@ export interface components {
       targetLanguageTag?: string;
       /** @description When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
-      /** @description Service used for automated translating */
+      /**
+       * @deprecated
+       * @description Service used for automated translating (deprecated: use primaryServiceInfo)
+       */
       primaryService?:
         | "GOOGLE"
         | "AWS"
@@ -848,7 +906,11 @@ export interface components {
         | "AZURE"
         | "BAIDU"
         | "TOLGEE";
-      /** @description Services to be used for suggesting */
+      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
+      /**
+       * @deprecated
+       * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
+       */
       enabledServices: (
         | "GOOGLE"
         | "AWS"
@@ -857,6 +919,8 @@ export interface components {
         | "BAIDU"
         | "TOLGEE"
       )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
     };
     TagKeyDto: {
       name: string;
@@ -869,7 +933,6 @@ export interface components {
     ComplexEditKeyDto: {
       /** @description Name of the key */
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /** @description Translations to update */
       translations?: { [key: string]: string };
@@ -996,7 +1059,6 @@ export interface components {
     };
     EditKeyDto: {
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
     };
     KeyModel: {
@@ -1059,17 +1121,6 @@ export interface components {
       invitedUserName?: string;
       invitedUserEmail?: string;
       permission: components["schemas"]["PermissionModel"];
-    };
-    AutoTranslationSettingsDto: {
-      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
-      usingTranslationMemory: boolean;
-      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
-      usingMachineTranslation: boolean;
-      /**
-       * @description If true, import will trigger batch operation to translate the new new keys.
-       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
-       */
-      enableForImport: boolean;
     };
     SetFileNamespaceRequest: {
       namespace?: string;
@@ -1209,15 +1260,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1350,17 +1401,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      description: string;
+      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1477,7 +1528,6 @@ export interface components {
     CreateKeyDto: {
       /** @description Name of the key */
       name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       translations?: { [key: string]: string };
       tags?: string[];
@@ -1698,25 +1748,13 @@ export interface components {
        *     }
        */
       machineTranslations?: { [key: string]: string };
-      /** Format: int64 */
-      translationCreditsBalanceBefore: number;
-      /** Format: int64 */
-      translationCreditsBalanceAfter: number;
       /**
        * @description Results provided by enabled services.
        * @example [object Object]
        */
       result?: { [key: string]: components["schemas"]["TranslationItemModel"] };
-      /**
-       * Format: int64
-       * @description Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud.
-       */
-      translationExtraCreditsBalanceBefore: number;
-      /**
-       * Format: int64
-       * @description Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud.
-       */
-      translationExtraCreditsBalanceAfter: number;
+      /** @description If true, the base translation was empty and no translation was provided. */
+      baseBlank: boolean;
     };
     /**
      * @description Results provided by enabled services.
@@ -1896,8 +1934,6 @@ export interface components {
     };
     AnnouncementDto: {
       type: "FEATURE_BATCH_OPERATIONS";
-      /** Format: int64 */
-      until: number;
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1959,14 +1995,14 @@ export interface components {
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -2055,6 +2091,21 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    CollectionModelLanguageInfoModel: {
+      _embedded?: {
+        languageInfos?: components["schemas"]["LanguageInfoModel"][];
+      };
+    };
+    LanguageInfoModel: {
+      /** Format: int64 */
+      languageId: number;
+      languageTag: string;
+      supportedServices: components["schemas"]["MtSupportedService"][];
+    };
+    MtSupportedService: {
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      formalitySupported: boolean;
+    };
     CreditBalanceModel: {
       /** Format: int64 */
       creditBalance: number;
@@ -2067,18 +2118,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -2523,15 +2574,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2650,17 +2701,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
+      userFullName?: string;
       scopes: string[];
+      description: string;
+      username?: string;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      description: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3188,6 +3239,65 @@ export interface operations {
       };
     };
   };
+  getPerLanguageAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setPerLanguageAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoTranslationSettingsDto"][];
+      };
+    };
+  };
   update: {
     parameters: {
       path: {
@@ -3421,7 +3531,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+          "*/*": components["schemas"]["AutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
@@ -3448,7 +3558,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+          "*/*": components["schemas"]["AutoTranslationConfigModel"];
         };
       };
       /** Bad Request */
@@ -5932,6 +6042,38 @@ export interface operations {
       };
     };
   };
+  suggestMachineTranslationsStreaming: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
   suggestMachineTranslations: {
     parameters: {
       path: {
@@ -6840,6 +6982,33 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getMachineTranslationLanguageInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageInfoModel"];
         };
       };
       /** Bad Request */

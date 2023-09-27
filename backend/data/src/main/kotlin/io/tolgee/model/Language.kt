@@ -15,18 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.FetchType
-import javax.persistence.Index
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.PrePersist
-import javax.persistence.PreRemove
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
+import javax.persistence.*
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
 
@@ -85,6 +74,9 @@ class Language : StandardAuditModel() {
 
   @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
   var mtServiceConfig: MtServiceConfig? = null
+
+  @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
+  var autoTranslationConfig: AutoTranslationConfig? = null
 
   @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var stats: LanguageStats? = null

@@ -31,7 +31,7 @@ describe('Translations Base', () => {
     createTranslation('Test key', 'Translated test key');
     toggleLang('Česky');
     visitProjectLanguages(project.id);
-    visitLanguageSettings('Česky');
+    visitLanguageSettings('cs');
     deleteLanguage();
     visit();
     // wait for loading to appear and disappear again

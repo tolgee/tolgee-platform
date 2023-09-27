@@ -1,6 +1,6 @@
 import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useProviderImg } from './useProviderImg';
+import { useServiceImg } from './useServiceImg';
 
 const StyledSource = styled('div')`
   margin-top: 3px;
@@ -13,7 +13,7 @@ type Props = {
 
 export const ProviderLogo = ({ provider, contextPresent }: Props) => {
   const { t } = useTranslate();
-  const getLogo = useProviderImg();
+  const getLogo = useServiceImg();
 
   const providerLogo = getLogo(provider, contextPresent);
 
