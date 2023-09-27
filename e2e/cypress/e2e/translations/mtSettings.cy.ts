@@ -59,11 +59,15 @@ describe('Machine translation settings', () => {
     cy.gcy('machine-translations-settings-toggle').click();
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',
-      language: 'cs',
+      language: 'es',
     }).click();
 
-    getEnableCheckbox('AWS').click();
     getPrimaryRadio('AWS').click();
+    getFormalitySelect('AWS').click();
+    cy.gcy('mt-language-dialog-formality-select-item')
+      .contains('Formal')
+      .click();
+
     cy.gcy('mt-language-dialog-auto-for-import').click();
     cy.gcy('mt-language-dialog-auto-machine-translation').click();
     cy.gcy('mt-language-dialog-auto-translation-memory').click();
@@ -71,19 +75,24 @@ describe('Machine translation settings', () => {
 
     waitForGlobalLoading();
 
-    getAvatarPrimary('AWS', 'cs').should('be.visible');
-    getAvatarEnabled('GOOGLE', 'cs').should('be.visible');
+    getAvatarPrimary('AWS', 'es').should('be.visible');
+    getAvatarEnabled('GOOGLE', 'es').should('be.visible');
 
     cy.gcy('project-menu-item-translations').click();
+    openEditor('Texto traducido en frío 1');
 
-    openEditor('Studený přeložený text 1');
     cy.gcy('translation-tools-machine-translation-item').should(
       'have.length',
-      1
+      2
     );
+    cy.gcy('translation-tools-machine-translation-item')
+      .contains(
+        'Cool translated text 1 translated with AWS from en to es FORMAL'
+      )
+      .should('be.visible');
     cy.gcy('global-editor').type('{esc}');
 
-    openEditor('Texto traducido en frío 1');
+    openEditor('Studený přeložený text 1');
     cy.gcy('translation-tools-machine-translation-item').should(
       'have.length',
       2
@@ -91,10 +100,10 @@ describe('Machine translation settings', () => {
     cy.gcy('global-editor').type('{esc}');
 
     createTranslation('aaa_key', 'test translation');
-    cy.contains('test translation translated with AWS from en to cs').should(
-      'be.visible'
-    );
-    cy.contains('from en to es').should('not.exist');
+    cy.contains(
+      'test translation translated with AWS from en to es FORMAL'
+    ).should('be.visible');
+    cy.contains('from en to cs').should('not.exist');
   });
 
   const visit = () => {
@@ -115,6 +124,13 @@ describe('Machine translation settings', () => {
 
   const getPrimaryRadio = (service: string) => {
     return gcyAdvanced({ value: 'mt-language-dialog-primary-radio', service });
+  };
+
+  const getFormalitySelect = (service: string) => {
+    return gcyAdvanced({
+      value: 'mt-language-dialog-formality-select',
+      service,
+    });
   };
 
   const getAvatarPrimary = (service: string, language: string) => {

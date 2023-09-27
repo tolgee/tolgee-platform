@@ -293,7 +293,11 @@ export const LanguageSettingsDialog = ({
                             }
                           >
                             {FORMALITY_VALUES.map((val) => (
-                              <MenuItem key={val} value={val}>
+                              <MenuItem
+                                key={val}
+                                value={val}
+                                data-cy="mt-language-dialog-formality-select-item"
+                              >
                                 {translateFormality(val)}
                               </MenuItem>
                             ))}

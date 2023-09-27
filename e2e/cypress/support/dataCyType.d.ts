@@ -254,6 +254,7 @@ declare namespace DataCy {
         "mt-language-dialog-auto-translation-memory" |
         "mt-language-dialog-enabled-checkbox" |
         "mt-language-dialog-formality-select" |
+        "mt-language-dialog-formality-select-item" |
         "mt-language-dialog-primary-radio" |
         "mt-language-dialog-save" |
         "mt-language-dialog-service-label" |
