@@ -30,8 +30,10 @@ export const selectInAutocomplete = (containedText: string) => {
     .click();
 };
 
-export const visitLanguageSettings = (langName: string) => {
-  cy.get(`[aria-label="Settings ${langName}"]`).click();
+export const visitLanguageSettings = (langTag: string) => {
+  cy.get(
+    `[data-cy="project-settings-languages-list-edit-button"][data-cy-language="${langTag}"]`
+  ).click();
 };
 
 export const deleteLanguage = () => {
