@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -20,8 +20,11 @@ import {
 } from './tableStyles';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
+import { useQueryClient } from 'react-query';
 
 export const ProjectSettingsLanguages = () => {
+  const queryClient = useQueryClient();
   const project = useProject();
   const { t } = useTranslate();
   const config = useConfig();
@@ -44,6 +47,24 @@ export const ProjectSettingsLanguages = () => {
 
   return (
     <Box mb={6}>
+      {canEditLanguages && (
+        <>
+          <Box mt={4}>
+            <Typography variant="h5">
+              <T keyName="create_language_title" />
+            </Typography>
+          </Box>
+          <Box mb={2}>
+            <CreateSingleLanguage
+              autoFocus={false}
+              onCancel={() => {}}
+              onCreated={() => {
+                invalidateUrlPrefix(queryClient, '/v2/project');
+              }}
+            />
+          </Box>
+        </>
+      )}
       <QuickStartHighlight
         itemKey="add_language"
         message={t('quick_start_item_add_language_hint')}
