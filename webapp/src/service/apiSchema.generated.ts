@@ -30,11 +30,14 @@ export interface paths {
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
   };
-  "/v2/quick-start/complete/{step}": {
+  "/v2/quick-start/steps/{step}/complete": {
     put: operations["completeGuideStep"];
   };
-  "/v2/quick-start/close": {
-    put: operations["completeGuide"];
+  "/v2/quick-start/set-open/{open}": {
+    put: operations["setOpenState"];
+  };
+  "/v2/quick-start/set-finished/{finished}": {
+    put: operations["setFinishedState"];
   };
   "/v2/projects/{projectId}": {
     get: operations["get_3"];
@@ -603,11 +606,6 @@ export interface components {
       globalServerRole: "USER" | "ADMIN";
       deletable: boolean;
       needsSuperJwtToken: boolean;
-      quickStart?: components["schemas"]["QuickStartModel"];
-    };
-    QuickStartModel: {
-      open: boolean;
-      completedSteps: string[];
     };
     UserUpdatePasswordRequestDto: {
       currentPassword: string;
@@ -624,6 +622,11 @@ export interface components {
     };
     UserMfaRecoveryRequestDto: {
       password: string;
+    };
+    QuickStartModel: {
+      finished: boolean;
+      completedSteps: string[];
+      open: boolean;
     };
     EditProjectDTO: {
       name: string;
@@ -642,6 +645,14 @@ export interface components {
         | "SERVER_ADMIN";
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -686,14 +697,6 @@ export interface components {
        * @example 200001,200004
        */
       translateLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1277,9 +1280,9 @@ export interface components {
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1412,17 +1415,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
       description: string;
       username?: string;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -1998,11 +2001,12 @@ export interface components {
         | "ACCOUNT_MANAGER"
         | "STANDARD_SUPPORT"
       )[];
+      quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example btforg */
       slug: string;
       avatar?: components["schemas"]["Avatar"];
@@ -2277,7 +2281,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       /** Format: int64 */
       id: number;
       type:
@@ -2290,6 +2293,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2591,9 +2595,9 @@ export interface components {
       /** Format: int64 */
       updatedAt: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -2712,17 +2716,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       userFullName?: string;
+      projectName: string;
       scopes: string[];
       description: string;
       username?: string;
       /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -3078,7 +3082,39 @@ export interface operations {
       };
     };
   };
-  completeGuide: {
+  setOpenState: {
+    parameters: {
+      path: {
+        open: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setFinishedState: {
+    parameters: {
+      path: {
+        finished: boolean;
+      };
+    };
     responses: {
       /** OK */
       200: {

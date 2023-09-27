@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
