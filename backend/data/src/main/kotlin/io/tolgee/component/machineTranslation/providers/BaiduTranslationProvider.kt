@@ -117,6 +117,8 @@ class BaiduTranslationProvider(
     "hu-hu",
   )
 
+  override val formalitySupportingLanguages: Array<String>? = null
+
   // https://fanyi-api.baidu.com/doc/21
   // extracted commonly used only
   val languageTagMap = mapOf(

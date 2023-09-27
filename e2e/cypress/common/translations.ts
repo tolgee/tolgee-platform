@@ -164,3 +164,47 @@ export const forEachView = (
     });
   });
 };
+
+export function createProjectWithThreeLanguages() {
+  return login()
+    .then(() =>
+      createProject({
+        name: 'Test',
+        languages: [
+          {
+            tag: 'en',
+            name: 'English',
+            originalName: 'English',
+          },
+          {
+            tag: 'cs',
+            name: 'Česky',
+            originalName: 'česky',
+          },
+          {
+            tag: 'es',
+            name: 'Spanish',
+            originalName: 'espanol',
+          },
+        ],
+      })
+    )
+    .then((r) => {
+      const project = r.body as ProjectDTO;
+      selectLangsInLocalstorage(project.id, ['en']);
+      const promises = [];
+      for (let i = 1; i < 5; i++) {
+        promises.push(
+          createKey(project.id, `Cool key ${i.toString().padStart(2, '0')}`, {
+            en: `Cool translated text ${i}`,
+            cs: `Studený přeložený text ${i}`,
+            es: `Texto traducido en frío ${i}`,
+          })
+        );
+      }
+
+      selectLangsInLocalstorage(project.id, ['en', 'cs', 'es']);
+
+      return Cypress.Promise.all(promises).then(() => project);
+    });
+}

@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
@@ -23,12 +23,14 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
+import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addMonths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -48,6 +50,7 @@ import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
 import kotlin.system.measureTimeMillis
+import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
@@ -95,6 +98,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @BeforeEach
   fun setup() {
+    Mockito.clearInvocations(amazonTranslate, deeplApiService, tolgeeTranslateApiService)
     mockCurrentDate { Date() }
     initTestData()
     initMachineTranslationProperties(1000)
@@ -137,6 +141,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         any(),
         any(),
         any(),
+        any()
       )
     ).thenReturn("Translated with DeepL")
 
@@ -240,8 +245,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      node("translationCreditsBalanceBefore").isEqualTo(10)
-      node("translationCreditsBalanceAfter").isEqualTo(10 - "Beautiful".length)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+        .assert.isEqualTo((1000 - "Beautiful".length * 100).toLong())
     }
   }
 
@@ -292,7 +297,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("BAIDU").isEqualTo("Translated with Baidu")
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(6)
+
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance.assert.isEqualTo(600)
     }
   }
 
@@ -407,8 +413,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      node("translationCreditsBalanceBefore").isEqualTo(2)
-      node("translationCreditsBalanceAfter").isEqualTo(0)
     }
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
@@ -427,7 +431,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         translatedText = "Yeey! Cached!",
         contextDescription = "context",
         actualPrice = 100,
-        usedService = MtServiceType.GOOGLE
+        usedService = MtServiceType.GOOGLE,
+        baseBlank = false
       )
     )
     performMtRequestAndExpectAfterBalance(10)
@@ -444,13 +449,47 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       node("machineTranslations") {
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(51)
+      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+        .assert.isEqualTo(5100)
     }
 
     tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
     val metadata = tolgeeTranslateParamsCaptor.firstValue.metadata
     metadata!!.examples.assert.hasSize(2)
     metadata.closeItems.assert.hasSize(4)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it uses correct Tolgee formality`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableTolgee(Formality.FORMAL)
+    saveTestData()
+    performMtRequest()
+    tolgeeTranslateParamsCaptor.firstValue.formality.assert.isEqualTo(Formality.FORMAL)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it uses correct DeepL formality`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableDeepL(Formality.FORMAL)
+    saveTestData()
+    performMtRequest()
+    val formality = Mockito.mockingDetails(deeplApiService).invocations.first().arguments[3] as? Formality
+    formality.assert.isEqualTo(Formality.FORMAL)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it uses correct AWS formality`() {
+    mockDefaultMtBucketSize(6000)
+    testData.enableAWS(Formality.FORMAL)
+    saveTestData()
+    performMtRequest()
+    val request = Mockito.mockingDetails(amazonTranslate).invocations.first().arguments[0]
+      as TranslateTextRequest
+    request.settings().formality().assert.isEqualTo(AwsFormality.FORMAL)
   }
 
   private fun testMtCreditConsumption() {
@@ -463,11 +502,12 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(currentDateProvider.date).thenAnswer { dateProvider() }
   }
 
-  private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {
-    performMtRequest().andIsOk.andAssertThatJson {
-      node("translationCreditsBalanceAfter").isEqualTo(creditBalance)
-      node("translationExtraCreditsBalanceAfter").isEqualTo(extraCreditBalance)
-    }
+  private fun performMtRequestAndExpectAfterBalance(creditBalance: Long, extraCreditBalance: Long = 0) {
+    performMtRequest().andIsOk
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).creditBalance
+      .assert.isEqualTo(creditBalance * 100)
+    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self).extraCreditBalance
+      .assert.isEqualTo(extraCreditBalance * 100)
   }
 
   private fun performMtRequestAndExpectBadRequest(): ResultActions {

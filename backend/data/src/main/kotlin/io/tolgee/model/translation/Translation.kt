@@ -90,6 +90,34 @@ class Translation(
     this.auto = false
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+    if (!super.equals(other)) return false
+
+    other as Translation
+
+    if (text != other.text) return false
+    if (language.id != other.language.id) return false
+    if (key.id != other.key.id) return false
+    if (state != other.state) return false
+    if (auto != other.auto) return false
+    if (mtProvider != other.mtProvider) return false
+    return outdated == other.outdated
+  }
+
+  override fun hashCode(): Int {
+    var result = super.hashCode()
+    result = 31 * result + (text?.hashCode() ?: 0)
+    result = 31 * result + language.id.hashCode()
+    result = 31 * result + key.id.hashCode()
+    result = 31 * result + state.hashCode()
+    result = 31 * result + auto.hashCode()
+    result = 31 * result + (mtProvider?.hashCode() ?: 0)
+    result = 31 * result + outdated.hashCode()
+    return result
+  }
+
   companion object {
     class UpdateStatsListener {
       @PrePersist

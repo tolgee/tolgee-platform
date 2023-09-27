@@ -4,7 +4,6 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.ApiKey
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
-import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -14,6 +13,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
@@ -39,7 +39,7 @@ class ProjectBuilder(
     val translations = mutableListOf<TranslationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
-    var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
+    var autoTranslationConfigBuilders = mutableListOf<AutoTranslationConfigBuilder>()
     var avatarFile: ClassPathResource? = null
     var namespaces = mutableListOf<NamespaceBuilder>()
     var keyScreenshotReferences = mutableListOf<KeyScreenshotReferenceBuilder>()
@@ -85,7 +85,7 @@ class ProjectBuilder(
   }
 
   fun addAutoTranslationConfig(ft: FT<AutoTranslationConfig>) {
-    data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this@ProjectBuilder).also { ft(it.self) }
+    addOperation(data.autoTranslationConfigBuilders, ft)
   }
 
   fun addNamespace(ft: FT<Namespace>) = addOperation(data.namespaces, ft)
@@ -114,6 +114,14 @@ class ProjectBuilder(
       name = "Czech"
       originalName = "Čeština"
       tag = "cs"
+    }
+  }
+
+  fun addHindi(): LanguageBuilder {
+    return addLanguage {
+      name = "Hindi"
+      originalName = "हिन्दी"
+      tag = "hi"
     }
   }
 

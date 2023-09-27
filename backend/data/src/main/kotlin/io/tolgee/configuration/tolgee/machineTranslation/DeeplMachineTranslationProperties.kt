@@ -17,11 +17,4 @@ open class DeeplMachineTranslationProperties(
 
   @DocProperty(description = "DeepL auth key. Both key types (commercial and free) are supported.")
   var authKey: String? = null,
-
-  @DocProperty(
-    description = "Whether the translated text should lean towards formal or informal language.\n" +
-      "See [DeepL's documentation](https://www.deepl.com/docs-api/translating-text/request/) " +
-      "for supported languages and details."
-  )
-  var formality: String = "default"
 ) : MachineTranslationServiceProperties

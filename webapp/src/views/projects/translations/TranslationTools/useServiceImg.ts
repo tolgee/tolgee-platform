@@ -1,13 +1,10 @@
 import { useTheme } from '@mui/material';
 
-export const useProviderImg = () => {
+export const useServiceImg = () => {
   const { palette } = useTheme();
 
-  return (
-    provider: string | undefined,
-    contextPresent: boolean | undefined
-  ) => {
-    switch (provider) {
+  return (service: string | undefined, contextPresent: boolean | undefined) => {
+    switch (service) {
       case 'GOOGLE':
         return '/images/providers/google-translate.svg';
       case 'AWS':
@@ -23,7 +20,7 @@ export const useProviderImg = () => {
           ? `/images/providers/tolgee-logo-${palette.mode}-in-context.svg`
           : `/images/providers/tolgee-logo-${palette.mode}.svg`;
       default:
-        return null;
+        return undefined;
     }
   };
 };

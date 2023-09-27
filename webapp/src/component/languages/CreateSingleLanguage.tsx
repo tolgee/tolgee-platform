@@ -27,6 +27,9 @@ export const CreateSingleLanguage: FunctionComponent<{
   const createLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages',
     method: 'post',
+    fetchOptions: {
+      disableErrorNotification: true,
+    },
   });
 
   const [value, setValue] = useState(null as LanguageDto | null);
@@ -64,7 +67,7 @@ export const CreateSingleLanguage: FunctionComponent<{
     <Box>
       {serverError && (
         <Box ml={2} mr={2}>
-          <ResourceErrorComponent error={serverError} />
+          <ResourceErrorComponent error={serverError} limit={1} />
         </Box>
       )}
       <CreateLanguageField

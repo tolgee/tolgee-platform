@@ -27,6 +27,17 @@ export const getPopover = () => {
 export const gcy = (dataCy: Value, options?: Parameters<typeof cy.get>[1]) =>
   cy.get('[data-cy="' + dataCy + '"]', options);
 
+export const gcyAdvanced = (
+  { value, ...other }: { value: Value; [key: string]: string },
+  options?: Parameters<typeof cy.get>[1]
+) =>
+  cy.get(
+    `[data-cy="${value}"]${Object.entries(other)
+      .map(([key, value]) => `[data-cy-${key}="${value}"]`)
+      .join('')}`,
+    options
+  );
+
 export const gcyChain = (...dataCy: Value[]) => {
   let xPath = '.';
   dataCy.forEach((dc) => {

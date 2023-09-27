@@ -12,7 +12,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
-import { AutoTranslations } from './AutoTranslations/AutoTranslations';
 import { useConfig } from 'tg.globalContext/helpers';
 import {
   StyledLanguageTable,
@@ -90,6 +89,7 @@ export const ProjectSettingsLanguages = () => {
                 mt={1}
                 mb={1}
                 data-cy="project-settings-languages-list-edit-button"
+                data-cy-language={l.tag}
               >
                 <Link
                   to={LINKS.PROJECT_EDIT_LANGUAGE.build({
@@ -119,13 +119,6 @@ export const ProjectSettingsLanguages = () => {
           <MachineTranslation />
         </>
       )}
-
-      <Box mt={4} mb={0}>
-        <Typography variant="h5">
-          <T keyName="machine_translation_new_keys_title" />
-        </Typography>
-      </Box>
-      <AutoTranslations mtEnabled={mtEnabled} />
     </Box>
   );
 };

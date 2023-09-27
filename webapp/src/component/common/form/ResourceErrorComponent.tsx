@@ -9,17 +9,20 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 export const ResourceErrorComponent: FunctionComponent<{
   error: ErrorResponseDto | any;
+  limit?: number;
 }> = (props) => {
   return (
     <>
       {props.error &&
-        parseErrorResponse(props.error).map((e, index) => (
-          <Box ml={-2} mr={-2} key={index}>
-            <Alert severity="error">
-              <TranslatedError code={e} />
-            </Alert>
-          </Box>
-        ))}
+        parseErrorResponse(props.error)
+          .slice(0, props.limit)
+          .map((e, index) => (
+            <Box ml={-2} mr={-2} key={index}>
+              <Alert severity="error">
+                <TranslatedError code={e} />
+              </Alert>
+            </Box>
+          ))}
     </>
   );
 };

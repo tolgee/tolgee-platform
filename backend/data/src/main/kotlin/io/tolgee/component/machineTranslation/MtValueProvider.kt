@@ -5,6 +5,18 @@ import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 interface MtValueProvider {
   val isEnabled: Boolean
 
+  val supportedLanguages: Array<String>?
+
+  fun isLanguageSupported(tag: String): Boolean {
+    val suitableTag = getSuitableTag(tag) ?: return false
+    return supportedLanguages?.contains(suitableTag) ?: true
+  }
+
+  fun isLanguageFormalitySupported(tag: String): Boolean {
+    val suitableTag = getSuitableTag(tag) ?: return false
+    return formalitySupportingLanguages?.contains(suitableTag) ?: false
+  }
+
   /**
    * Translates the text using the service
    */
@@ -15,4 +27,13 @@ interface MtValueProvider {
     val price: Int,
     val contextDescription: String? = null
   )
+
+  val formalitySupportingLanguages: Array<String>?
+
+  fun getSuitableTag(tag: String): String? {
+    if (supportedLanguages.isNullOrEmpty()) {
+      return tag
+    }
+    return LanguageTagConvertor.findSuitableTag(supportedLanguages!!, tag)
+  }
 }
