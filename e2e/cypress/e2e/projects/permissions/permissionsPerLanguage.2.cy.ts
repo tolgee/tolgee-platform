@@ -3,20 +3,8 @@ import {
   RUN,
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
-import {
-  awaitPendingRequests,
-  setupRequestAwaiter,
-} from '../../../common/requestsAwaiter';
 
 describe('Permissions per language 2', () => {
-  beforeEach(() => {
-    setupRequestAwaiter();
-  });
-
-  afterEach(() => {
-    awaitPendingRequests();
-  });
-
   it('translations.state-edit', () => {
     visitProjectWithPermissions({
       scopes: ['translations.view', 'translations.state-edit'],

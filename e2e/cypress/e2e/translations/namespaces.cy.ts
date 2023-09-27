@@ -12,11 +12,9 @@ import {
   selectInSelect,
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
-import { setupRequestAwaiter } from '../../common/requestsAwaiter';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
-    setupRequestAwaiter();
     namespaces.clean({ failOnStatusCode: false });
     namespaces
       .generateStandard()
@@ -31,10 +29,9 @@ describe('namespaces in translations', () => {
     waitForGlobalLoading();
   });
 
-  // afterEach(() => {
-  //   namespaces.clean({ failOnStatusCode: false, timeout: 60000 });
-  //   awaitPendingRequests();
-  // });
+  afterEach(() => {
+    waitForGlobalLoading();
+  });
 
   it('displays keys with namespaces correctly', () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
