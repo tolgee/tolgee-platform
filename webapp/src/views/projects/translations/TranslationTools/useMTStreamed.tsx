@@ -44,11 +44,7 @@ function combineChunks(meshedChunks: string): CombinedMTResponse {
   };
   messages.forEach((message) => {
     if (message.servicesTypes) {
-      result.servicesTypes = [...message.servicesTypes];
-      result.servicesTypes.sort((a) => {
-        if (a === 'TOLGEE') return -1;
-        else return 1;
-      });
+      result.servicesTypes = message.servicesTypes;
       result.baseBlank = message.baseBlank;
     }
     if (message.serviceType) {
