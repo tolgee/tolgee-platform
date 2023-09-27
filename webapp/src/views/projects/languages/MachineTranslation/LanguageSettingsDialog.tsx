@@ -254,6 +254,8 @@ export const LanguageSettingsDialog = ({
                       <div className={TABLE_CENTERED}>
                         {languageSupported && (
                           <Checkbox
+                            data-cy="mt-language-dialog-enabled-checkbox"
+                            name={service}
                             disabled={!languageSupported}
                             size="small"
                             checked={Boolean(
@@ -265,6 +267,8 @@ export const LanguageSettingsDialog = ({
                       </div>
                       <div className={TABLE_CENTERED}>
                         <Radio
+                          data-cy="mt-language-dialog-primary-radio"
+                          name={service}
                           size="small"
                           checked={values.primaryService === service}
                           onClick={() => setPrimary(service)}
@@ -274,6 +278,8 @@ export const LanguageSettingsDialog = ({
                       <div className={TABLE_CENTERED}>
                         {formalitySupported && (
                           <Select
+                            data-cy="mt-language-dialog-formality-select"
+                            name={service}
                             sx={{ width: 130 }}
                             value={
                               values.servicesFormality[service] ?? 'DEFAULT'
@@ -310,7 +316,7 @@ export const LanguageSettingsDialog = ({
                 </StyledHint>
                 <StyledSettings>
                   <FormControlLabel
-                    data-cy="languages-auto-machine-translation"
+                    data-cy="mt-language-dialog-auto-machine-translation"
                     label={t(
                       'project_languages_new_keys_machine_translations_switch',
                       'Enable machine translation with primary provider'
@@ -325,7 +331,7 @@ export const LanguageSettingsDialog = ({
                     disabled={!mtEnabled}
                   />
                   <FormControlLabel
-                    data-cy="languages-auto-translation-memory"
+                    data-cy="mt-language-dialog-auto-translation-memory"
                     label={t(
                       'project_languages_new_keys_translation_memory_switch',
                       'Enable translation memory'
@@ -339,7 +345,7 @@ export const LanguageSettingsDialog = ({
                     control={<Checkbox />}
                   />
                   <FormControlLabel
-                    data-cy="languages-auto-for-import"
+                    data-cy="mt-language-dialog-auto-for-import"
                     label={t(
                       'project_languages_auto_translation_enable_for_import_switch',
                       'Enable for import'
@@ -377,6 +383,7 @@ export const LanguageSettingsDialog = ({
                   variant="contained"
                   color="primary"
                   loading={isSubmitting}
+                  data-cy="mt-language-dialog-save"
                 >
                   {t('project_mt_dialog_save_button')}
                 </LoadingButton>

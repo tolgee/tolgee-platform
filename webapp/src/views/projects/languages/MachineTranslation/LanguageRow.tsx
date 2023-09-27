@@ -43,11 +43,13 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
       </div>
       <Box className={TABLE_CENTERED}>
         <ServiceAvatar
+          language={rowData.settings.language?.tag || 'default'}
           service={settings.mtSettings?.primaryServiceInfo?.serviceType}
           inheritedFromDefault={inheritedFromDefault}
           notSupported={
             !isSupported(settings.mtSettings?.primaryServiceInfo?.serviceType)
           }
+          data-cy="machine-translations-settings-language-primary-service"
         />
       </Box>
       <Box display="flex" gap={3} sx={{ padding: '0px 15px' }}>
@@ -62,14 +64,20 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
           .map(({ serviceType }) => (
             <div key={serviceType} className={TABLE_CENTERED}>
               <ServiceAvatar
+                language={rowData.settings.language?.tag || 'default'}
                 service={serviceType}
                 inheritedFromDefault={inheritedFromDefault}
+                data-cy="machine-translations-settings-language-enabled-service"
               />
             </div>
           ))}
       </Box>
       <Box className={TABLE_LAST_CELL}>
-        <IconButton onClick={() => setSettingsOpen(true)} size="small">
+        <IconButton
+          onClick={() => setSettingsOpen(true)}
+          size="small"
+          data-cy="machine-translations-settings-language-options"
+        >
           <Settings />
         </IconButton>
       </Box>

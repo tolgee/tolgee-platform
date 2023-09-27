@@ -46,9 +46,10 @@ export const useMachineTranslationSettings = () => {
   });
 
   const applyUpdate: OnMtChange = async (languageId, data) => {
+    const languageIdOrNull = languageId || null;
     const existingMtSettings =
       mtSettings.data?._embedded?.languageConfigs
-        ?.filter((l) => l.targetLanguageId !== languageId)
+        ?.filter((l) => l.targetLanguageId !== languageIdOrNull)
         .map(
           ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
             return {
@@ -65,7 +66,7 @@ export const useMachineTranslationSettings = () => {
 
     const existingAutoSettings =
       autoTranslationSettings.data?._embedded?.configs
-        ?.filter((l) => l.languageId !== languageId)
+        ?.filter((l) => l.languageId !== languageIdOrNull)
         .map(
           ({
             languageId,

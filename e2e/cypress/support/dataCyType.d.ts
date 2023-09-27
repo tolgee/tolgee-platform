@@ -217,9 +217,6 @@ declare namespace DataCy {
         "invite-generate-button" |
         "language-delete-button" |
         "language-modify-form" |
-        "languages-auto-for-import" |
-        "languages-auto-machine-translation" |
-        "languages-auto-translation-memory" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
@@ -230,6 +227,10 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "login-button" |
+        "machine-translations-settings-language-enabled-service" |
+        "machine-translations-settings-language-options" |
+        "machine-translations-settings-language-primary-service" |
+        "machine-translations-settings-toggle" |
         "mfa-disable-button" |
         "mfa-disable-dialog" |
         "mfa-disable-dialog-content" |
@@ -248,6 +249,14 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "mt-language-dialog-auto-for-import" |
+        "mt-language-dialog-auto-machine-translation" |
+        "mt-language-dialog-auto-translation-memory" |
+        "mt-language-dialog-enabled-checkbox" |
+        "mt-language-dialog-formality-select" |
+        "mt-language-dialog-primary-radio" |
+        "mt-language-dialog-save" |
+        "mt-language-dialog-service-label" |
         "namespaces-banner-content" |
         "namespaces-banner-menu" |
         "namespaces-banner-menu-button" |

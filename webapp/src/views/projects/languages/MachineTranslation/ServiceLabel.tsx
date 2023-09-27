@@ -18,7 +18,12 @@ export const ServiceLabel = ({ service, isSupported }: Props) => {
       title={!isSupported ? t('project_mt_dialog_service_not_supported') : ''}
       disableInteractive
     >
-      <Box display="flex" gap={1} sx={{ opacity: isSupported ? 1 : 0.5 }}>
+      <Box
+        display="flex"
+        gap={1}
+        sx={{ opacity: isSupported ? 1 : 0.5 }}
+        data-cy="mt-language-dialog-service-label"
+      >
         <img src={getServiceImg(service, false)} width={20} />
         <div>{getServiceName(service)}</div>
       </Box>

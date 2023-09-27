@@ -63,6 +63,7 @@ export const MachineTranslation = () => {
             {settings.length > 1 && (
               <StyledToggle
                 role="button"
+                data-cy="machine-translations-settings-toggle"
                 onClick={() => setExpanded((expanded) => !expanded)}
               >
                 {expanded ? <ExpandLess /> : <ExpandMore />}

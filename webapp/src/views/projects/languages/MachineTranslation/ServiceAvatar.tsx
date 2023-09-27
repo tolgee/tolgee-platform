@@ -18,12 +18,16 @@ type Props = {
   inheritedFromDefault: boolean;
   service: ServiceType | undefined;
   notSupported?: boolean;
+  language: string;
+  'data-cy': string;
 };
 
 export const ServiceAvatar = ({
   service,
   inheritedFromDefault,
   notSupported,
+  language,
+  'data-cy': dataCy,
 }: Props) => {
   const getServiceImg = useServiceImg();
   const { t } = useTranslate();
@@ -41,7 +45,14 @@ export const ServiceAvatar = ({
           }
           disableInteractive
         >
-          <Box display="flex" alignItems="center" position="relative">
+          <Box
+            display="flex"
+            alignItems="center"
+            position="relative"
+            data-cy={dataCy}
+            data-cy-service={service}
+            data-cy-language={language}
+          >
             <img
               style={{ opacity: inheritedFromDefault ? '0.5' : '1' }}
               src={getServiceImg(service, false) || undefined}
