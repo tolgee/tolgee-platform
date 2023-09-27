@@ -8,14 +8,9 @@ import {
 } from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import {
-  awaitPendingRequests,
-  setupRequestAwaiter,
-} from '../../common/requestsAwaiter';
 
 describe('Organization List', () => {
   beforeEach(() => {
-    setupRequestAwaiter();
     organizationTestData.clean();
     organizationTestData
       .generate()
@@ -24,7 +19,6 @@ describe('Organization List', () => {
   });
 
   afterEach(() => {
-    awaitPendingRequests();
     organizationTestData.clean();
   });
 
