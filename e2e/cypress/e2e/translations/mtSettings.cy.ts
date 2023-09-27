@@ -6,6 +6,7 @@ import {
 import { deleteProject } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
+import { gcyAdvanced } from '../../common/shared';
 
 describe('Machine translation settings', () => {
   let project: ProjectDTO = null;
@@ -113,14 +114,18 @@ describe('Machine translation settings', () => {
   };
 
   const getAvatarPrimary = (service: string, language: string) => {
-    return cy.get(
-      `[data-cy="machine-translations-settings-language-primary-service"][data-cy-service="${service}"][data-cy-language="${language}"]`
-    );
+    return gcyAdvanced({
+      value: 'machine-translations-settings-language-primary-service',
+      service,
+      language,
+    });
   };
 
   const getAvatarEnabled = (service: string, language: string) => {
-    return cy.get(
-      `[data-cy="machine-translations-settings-language-enabled-service"][data-cy-service="${service}"][data-cy-language="${language}"]`
-    );
+    return gcyAdvanced({
+      value: 'machine-translations-settings-language-enabled-service',
+      service,
+      language,
+    });
   };
 });

@@ -1,4 +1,4 @@
-import { confirmHardMode, gcy, getInputByName } from './shared';
+import { confirmHardMode, gcy, gcyAdvanced, getInputByName } from './shared';
 
 export const selectFlag = (emoji: string) => {
   gcy('languages-flag-selector-open-button').click();
@@ -31,9 +31,10 @@ export const selectInAutocomplete = (containedText: string) => {
 };
 
 export const visitLanguageSettings = (langTag: string) => {
-  cy.get(
-    `[data-cy="project-settings-languages-list-edit-button"][data-cy-language="${langTag}"]`
-  ).click();
+  gcyAdvanced({
+    value: 'project-settings-languages-list-edit-button',
+    language: langTag,
+  }).click();
 };
 
 export const deleteLanguage = () => {
