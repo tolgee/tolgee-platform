@@ -202,7 +202,7 @@ class MtServiceManager(
     var fakedText = "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
       "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"
     if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
-      fakedText += " ${params.serviceInfo.formality.toString()}"
+      fakedText += " ${params.serviceInfo.formality}"
     }
     return TranslateResult(
       translatedText = fakedText,
