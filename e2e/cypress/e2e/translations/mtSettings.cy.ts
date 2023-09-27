@@ -57,7 +57,10 @@ describe('Machine translation settings', () => {
 
   it('will update language specific settings', () => {
     cy.gcy('machine-translations-settings-toggle').click();
-    cy.gcy('machine-translations-settings-language-options').eq(1).click();
+    gcyAdvanced({
+      value: 'machine-translations-settings-language-options',
+      language: 'cs',
+    }).click();
 
     getEnableCheckbox('AWS').click();
     getPrimaryRadio('AWS').click();
@@ -104,13 +107,14 @@ describe('Machine translation settings', () => {
   };
 
   const getEnableCheckbox = (service: string) => {
-    return cy
-      .gcy('mt-language-dialog-enabled-checkbox')
-      .findInputByName(service);
+    return gcyAdvanced({
+      value: 'mt-language-dialog-enabled-checkbox',
+      service,
+    });
   };
 
   const getPrimaryRadio = (service: string) => {
-    return cy.gcy('mt-language-dialog-primary-radio').findInputByName(service);
+    return gcyAdvanced({ value: 'mt-language-dialog-primary-radio', service });
   };
 
   const getAvatarPrimary = (service: string, language: string) => {

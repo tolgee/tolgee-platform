@@ -255,7 +255,7 @@ export const LanguageSettingsDialog = ({
                         {languageSupported && (
                           <Checkbox
                             data-cy="mt-language-dialog-enabled-checkbox"
-                            name={service}
+                            data-cy-service={service}
                             disabled={!languageSupported}
                             size="small"
                             checked={Boolean(
@@ -268,7 +268,7 @@ export const LanguageSettingsDialog = ({
                       <div className={TABLE_CENTERED}>
                         <Radio
                           data-cy="mt-language-dialog-primary-radio"
-                          name={service}
+                          data-cy-service={service}
                           size="small"
                           checked={values.primaryService === service}
                           onClick={() => setPrimary(service)}
@@ -279,7 +279,7 @@ export const LanguageSettingsDialog = ({
                         {formalitySupported && (
                           <Select
                             data-cy="mt-language-dialog-formality-select"
-                            name={service}
+                            data-cy-service={service}
                             sx={{ width: 130 }}
                             value={
                               values.servicesFormality[service] ?? 'DEFAULT'

@@ -50,6 +50,8 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
             !isSupported(settings.mtSettings?.primaryServiceInfo?.serviceType)
           }
           data-cy="machine-translations-settings-language-primary-service"
+          data-cy-language={rowData.settings.language?.tag || 'default'}
+          data-cy-service={settings.mtSettings?.primaryServiceInfo?.serviceType}
         />
       </Box>
       <Box display="flex" gap={3} sx={{ padding: '0px 15px' }}>
@@ -68,6 +70,8 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
                 service={serviceType}
                 inheritedFromDefault={inheritedFromDefault}
                 data-cy="machine-translations-settings-language-enabled-service"
+                data-cy-language={rowData.settings.language?.tag || 'default'}
+                data-cy-service={serviceType}
               />
             </div>
           ))}
@@ -77,6 +81,7 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
           onClick={() => setSettingsOpen(true)}
           size="small"
           data-cy="machine-translations-settings-language-options"
+          data-cy-language={rowData.settings.language?.tag || 'default'}
         >
           <Settings />
         </IconButton>

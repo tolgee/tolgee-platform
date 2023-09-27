@@ -199,9 +199,13 @@ class MtServiceManager(
   private fun getFaked(
     params: TranslationParams
   ): TranslateResult {
+    var fakedText = "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
+      "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"
+    if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
+      fakedText += " ${params.serviceInfo.formality.toString()}"
+    }
     return TranslateResult(
-      translatedText = "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
-        "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
+      translatedText = fakedText,
       contextDescription = null,
       actualPrice = params.text.length * 100,
       usedService = params.serviceInfo.serviceType,
