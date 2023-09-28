@@ -298,6 +298,7 @@ class V2ProjectsController(
 
   @GetMapping("/{projectId}/per-language-auto-translation-settings")
   @Operation(summary = "Returns per-language auto translation settings for project")
+  @UseDefaultPermissions
   fun getPerLanguageAutoTranslationSettings(): CollectionModel<AutoTranslationConfigModel> {
     val configs = autoTranslateService.getConfigs(projectHolder.projectEntity)
     return autoTranslationSettingsModelAssembler.toCollectionModel(configs)

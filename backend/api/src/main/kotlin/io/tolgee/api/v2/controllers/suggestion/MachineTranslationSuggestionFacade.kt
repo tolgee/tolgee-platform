@@ -16,7 +16,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
