@@ -1,15 +1,12 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.suggestion
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuggestRequestDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel
-import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
@@ -19,8 +16,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
-import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationMemoryService
 import org.springdoc.api.annotations.ParameterObject
@@ -32,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import javax.validation.Valid
 
 @RestController
@@ -43,58 +39,31 @@ class TranslationSuggestionController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val keyService: KeyService,
-  private val mtService: MtService,
-  private val mtCreditBucketService: MtCreditBucketService,
   private val translationMemoryService: TranslationMemoryService,
   private val translationMemoryItemModelAssembler: TranslationMemoryItemModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arraytranslationMemoryItemModelAssembler: PagedResourcesAssembler<TranslationMemoryItemView>,
-  private val securityService: SecurityService
+  private val securityService: SecurityService,
+  private val machineTranslationSuggestionFacade: MachineTranslationSuggestionFacade
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
   @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
   @AllowApiAccess
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
-    val targetLanguage = languageService.get(dto.targetLanguageId)
-    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
+    return machineTranslationSuggestionFacade.suggestSync(dto)
+  }
 
-    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
-    try {
-      val resultMap = dto.baseText?.ifBlank { null }?.let {
-        mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage, dto.services)
-      } ?: let {
-        val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
-        key.checkInProject()
-        mtService.getMachineTranslations(key, targetLanguage, dto.services)
-      }
-
-      val resultData = resultMap
-        ?.map { (key, value) ->
-          key to TranslationItemModel(value?.translatedText.orEmpty(), value?.contextDescription)
-        }?.toMap()
-
-      val balanceAfter = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
-
-      return SuggestResultModel(
-        machineTranslations = resultData?.map { it.key to it.value.output }?.toMap(),
-        result = resultData,
-        translationCreditsBalanceBefore = balanceBefore.creditBalance / 100,
-        translationCreditsBalanceAfter = balanceAfter.creditBalance / 100,
-        translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance / 100,
-        translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance / 100,
-      )
-    } catch (e: OutOfCreditsException) {
-      if (e.reason == OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED) {
-        throw BadRequestException(
-          Message.CREDIT_SPENDING_LIMIT_EXCEEDED,
-        )
-      }
-      throw BadRequestException(
-        Message.OUT_OF_CREDITS,
-        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance)
-      )
-    }
+  @PostMapping("/machine-translations-streaming", produces = ["application/x-ndjson"])
+  @Operation(
+    summary = "Suggests machine translations from enabled services (streaming).\n" +
+      "If an error occurs when any of the services is used," +
+      " the error information is returned as a part of the result item, while the response has 200 status code."
+  )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
+  fun suggestMachineTranslationsStreaming(@RequestBody @Valid dto: SuggestRequestDto): StreamingResponseBody {
+    return machineTranslationSuggestionFacade.suggestStreaming(dto)
   }
 
   @PostMapping("/translation-memory")

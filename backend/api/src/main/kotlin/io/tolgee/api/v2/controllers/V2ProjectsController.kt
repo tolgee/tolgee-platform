@@ -8,19 +8,18 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
-import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
+import io.tolgee.hateoas.autoTranslationConfig.AutoTranslationConfigModel
+import io.tolgee.hateoas.autoTranslationConfig.AutoTranslationSettingsModelAssembler
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
-import io.tolgee.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.hateoas.project.ProjectModel
 import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectTransferOptionModel
@@ -40,7 +39,6 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -82,7 +80,6 @@ class V2ProjectsController(
   private val userArrayResourcesAssembler: PagedResourcesAssembler<ExtendedUserAccountInProject>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
-  private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
@@ -91,10 +88,10 @@ class V2ProjectsController(
   private val organizationRoleService: OrganizationRoleService,
   private val imageUploadService: ImageUploadService,
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
-  private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
   private val projectPermissionFacade: ProjectPermissionFacade,
-  private val projectWithStatsFacade: ProjectWithStatsFacade
+  private val projectWithStatsFacade: ProjectWithStatsFacade,
+  private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -289,44 +286,46 @@ class V2ProjectsController(
     return projectInvitationModelAssembler.toCollectionModel(invitations)
   }
 
-  @GetMapping("/{projectId}/machine-translation-service-settings")
-  @Operation(summary = "Returns machine translation settings for project")
-  @UseDefaultPermissions
-  @AllowApiAccess
-  fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
-    val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
-    return languageConfigItemModelAssembler.toCollectionModel(data)
+  @PutMapping("/{projectId}/per-language-auto-translation-settings")
+  @Operation(summary = "Sets per-language auto translation settings for project")
+  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  fun setPerLanguageAutoTranslationSettings(
+    @RequestBody dto: List<AutoTranslationSettingsDto>
+  ): CollectionModel<AutoTranslationConfigModel> {
+    val config = autoTranslateService.saveConfig(projectHolder.projectEntity, dto)
+    return autoTranslationSettingsModelAssembler.toCollectionModel(config)
   }
 
-  @PutMapping("/{projectId}/machine-translation-service-settings")
-  @Operation(summary = "Sets machine translation settings for project")
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
-  fun setMachineTranslationSettings(
-    @RequestBody dto: SetMachineTranslationSettingsDto
-  ): CollectionModel<LanguageConfigItemModel> {
-    mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
-    return getMachineTranslationSettings()
+  @GetMapping("/{projectId}/per-language-auto-translation-settings")
+  @Operation(summary = "Returns per-language auto translation settings for project")
+  fun getPerLanguageAutoTranslationSettings(): CollectionModel<AutoTranslationConfigModel> {
+    val configs = autoTranslateService.getConfigs(projectHolder.projectEntity)
+    return autoTranslationSettingsModelAssembler.toCollectionModel(configs)
   }
 
   @PutMapping("/{projectId}/auto-translation-settings")
-  @Operation(summary = "Sets auto translation settings for project")
+  @Operation(
+    summary = "Sets default auto translation settings for project " +
+      "(deprecated: use per language config with null language id)",
+    deprecated = true
+  )
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   fun setAutoTranslationSettings(
     @RequestBody dto: AutoTranslationSettingsDto
-  ): AutoTranslationSettingsDto {
-    autoTranslateService.saveConfig(projectHolder.projectEntity, dto)
-    return dto
+  ): AutoTranslationConfigModel {
+    val config = autoTranslateService.saveDefaultConfig(projectHolder.projectEntity, dto)
+    return autoTranslationSettingsModelAssembler.toModel(config)
   }
 
   @GetMapping("/{projectId}/auto-translation-settings")
-  @Operation(summary = "Returns auto translation settings for project")
+  @Operation(
+    summary = "Returns default auto translation settings for project " +
+      "(deprecated: use per language config with null language id)",
+    deprecated = true
+  )
   @UseDefaultPermissions
-  fun getAutoTranslationSettings(): AutoTranslationSettingsDto {
-    val config = autoTranslateService.getConfig(projectHolder.projectEntity)
-    return AutoTranslationSettingsDto(
-      usingTranslationMemory = config.usingTm,
-      usingMachineTranslation = config.usingPrimaryMtService,
-      enableForImport = config.enableForImport,
-    )
+  fun getAutoTranslationSettings(): AutoTranslationConfigModel {
+    val config = autoTranslateService.getDefaultConfig(projectHolder.projectEntity)
+    return autoTranslationSettingsModelAssembler.toModel(config)
   }
 }

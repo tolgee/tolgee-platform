@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -20,7 +21,8 @@ class DeeplTranslationProvider(
     val result = deeplApiService.translate(
       params.text,
       params.sourceLanguageTag.uppercase(),
-      params.targetLanguageTag.uppercase()
+      params.targetLanguageTag.uppercase(),
+      getFormality(params)
     )
 
     return MtValueProvider.MtResult(
@@ -28,6 +30,26 @@ class DeeplTranslationProvider(
       params.text.length * 100
     )
   }
+
+  private fun getFormality(params: ProviderTranslateParams): Formality {
+    if (!isFormalitySupported(params.targetLanguageTag)) {
+      return Formality.DEFAULT
+    }
+    return params.formality ?: Formality.DEFAULT
+  }
+
+  override val formalitySupportingLanguages = arrayOf(
+    "de",
+    "es",
+    "fr",
+    "it",
+    "ja",
+    "nl",
+    "pl",
+    "pt-pt",
+    "pt-br",
+    "ru",
+  )
 
   override val supportedLanguages = arrayOf(
     "bg",

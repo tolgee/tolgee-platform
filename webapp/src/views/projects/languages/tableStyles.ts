@@ -19,7 +19,6 @@ export const StyledLanguageTable = styled('div')`
     background: ${({ theme }) => theme.palette.emphasis[100]};
     align-self: stretch;
     font-size: 13px;
-    min-width: 60px;
     height: 24px;
     padding: ${({ theme }) => theme.spacing(0, 1)};
     align-items: center;
@@ -35,7 +34,7 @@ export const StyledLanguageTable = styled('div')`
 
   & .${TABLE_LAST_CELL} {
     justify-self: end;
-    padding-right: ${({ theme }) => theme.spacing(2)};
+    padding-right: ${({ theme }) => theme.spacing(1)};
   }
 
   & .${TABLE_CENTERED} {

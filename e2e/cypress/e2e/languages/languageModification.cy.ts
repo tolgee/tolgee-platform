@@ -23,7 +23,7 @@ describe('Language modification', () => {
   });
 
   it('modifies language', () => {
-    visitLanguageSettings('English');
+    visitLanguageSettings('en');
     setLanguageData({
       name: 'Modified',
       originalName: 'Modified Original',
@@ -39,7 +39,7 @@ describe('Language modification', () => {
   });
 
   it('cannot delete base language', () => {
-    visitLanguageSettings('English');
+    visitLanguageSettings('en');
     gcy('language-delete-button').click();
     assertMessage('Cannot delete base language');
   });

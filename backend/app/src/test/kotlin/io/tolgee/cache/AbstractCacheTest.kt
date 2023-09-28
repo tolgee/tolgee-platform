@@ -13,6 +13,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.testing.assertions.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -20,11 +21,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
 import java.util.*
@@ -52,11 +55,11 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   lateinit var permissionRepository: PermissionRepository
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var googleTranslationProvider: GoogleTranslationProvider
 
   @Autowired
-  @MockBean
+  @SpyBean
   lateinit var awsTranslationProvider: AwsMtValueProvider
 
   val unwrappedCacheManager
@@ -72,13 +75,13 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       keyName = "key-name",
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
-      serviceType = MtServiceType.GOOGLE,
+      serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
       isBatch = false
     )
   }
 
   val paramsEnAws by lazy {
-    paramsEnGoogle.copy(serviceType = MtServiceType.AWS)
+    paramsEnGoogle.copy(serviceInfo = MtServiceInfo(MtServiceType.AWS, null))
   }
 
   @BeforeEach
@@ -158,7 +161,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is caching machine translations`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle)
@@ -167,7 +170,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different service)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnAws)
@@ -176,7 +179,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different targetLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(targetLanguageTag = "cs"))
@@ -185,16 +188,20 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Test
   fun `is not caching machine translations (different sourceLang)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(sourceLanguageTag = "de"))
     verify(googleTranslationProvider, times(2)).translate(any())
   }
 
+  private fun mockGoogleResponse() {
+    doAnswer { googleResponse }.whenever(googleTranslationProvider).translate(any())
+  }
+
   @Test
   fun `is not caching machine translations (different input)`() {
-    whenever(googleTranslationProvider.translate(any())).thenAnswer { googleResponse }
+    mockGoogleResponse()
     mtServiceManager.translate(paramsEnGoogle)
     verify(googleTranslationProvider, times(1)).translate(any())
     mtServiceManager.translate(paramsEnGoogle.copy(text = "Hello!"))

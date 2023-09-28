@@ -4,7 +4,7 @@ import {
   MachineTranslationIcon,
   TranslationMemoryIcon,
 } from 'tg.component/CustomIcons';
-import { useProviderImg } from 'tg.views/projects/translations/TranslationTools/useProviderImg';
+import { useServiceImg } from 'tg.views/projects/translations/TranslationTools/useServiceImg';
 import { TranslationFlagIcon } from './TranslationFlagIcon';
 
 const StyledImgWrapper = styled('div')`
@@ -29,7 +29,7 @@ export const AutoTranslationIcon: React.FC<Props> = ({
   provider,
   noTooltip,
 }) => {
-  const getProviderImg = useProviderImg();
+  const getProviderImg = useServiceImg();
   const providerImg = getProviderImg(provider, false);
   const { t } = useTranslate();
 

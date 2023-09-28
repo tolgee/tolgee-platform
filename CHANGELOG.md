@@ -1,3 +1,10 @@
+# [3.30.0](https://github.com/tolgee/tolgee-platform/compare/v3.29.6...v3.30.0) (2023-09-27)
+
+
+### Features
+
+* Add formality, improve language settings ([#1895](https://github.com/tolgee/tolgee-platform/issues/1895)) ([2e0decc](https://github.com/tolgee/tolgee-platform/commit/2e0deccf1f1e1973551206da9bc59663f75e24a1))
+
 ## [3.29.6](https://github.com/tolgee/tolgee-platform/compare/v3.29.5...v3.29.6) (2023-09-25)
 
 

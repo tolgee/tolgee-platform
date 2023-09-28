@@ -29,7 +29,7 @@ class LanguageService(
   private val projectService: ProjectService,
   private val permissionService: PermissionService,
   @Lazy
-  private val securityService: SecurityService
+  private val securityService: SecurityService,
 ) {
   @set:Autowired
   @set:Lazy

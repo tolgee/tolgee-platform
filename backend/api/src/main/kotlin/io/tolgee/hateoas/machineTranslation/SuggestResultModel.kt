@@ -19,8 +19,6 @@ class SuggestResultModel(
     deprecated = true
   )
   val machineTranslations: Map<MtServiceType, String?>?,
-  val translationCreditsBalanceBefore: Long,
-  val translationCreditsBalanceAfter: Long,
 
   @Schema(
     description = "Results provided by enabled services.",
@@ -40,14 +38,7 @@ class SuggestResultModel(
   val result: Map<MtServiceType, TranslationItemModel?>?,
 
   @Schema(
-    description = "Extra credits are neither refilled nor reset every period." +
-      " User's can refill them on Tolgee cloud."
+    description = "If true, the base translation was empty and no translation was provided."
   )
-  val translationExtraCreditsBalanceBefore: Long,
-
-  @Schema(
-    description = "Extra credits are neither refilled nor reset every period." +
-      " User's can refill them on Tolgee cloud."
-  )
-  val translationExtraCreditsBalanceAfter: Long,
+  val baseBlank: Boolean,
 ) : RepresentationModel<KeyModel>(), Serializable

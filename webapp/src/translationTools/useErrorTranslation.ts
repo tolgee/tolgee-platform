@@ -81,6 +81,10 @@ export function useErrorTranslation() {
         return t('translation_api_rate_limit');
       case 'translation_failed':
         return t('translation_failed');
+      case 'language_not_supported_by_service':
+        return t('language_not_supported_by_service');
+      case 'formality_not_supported_by_service':
+        return t('formality_not_supported_by_service');
 
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':

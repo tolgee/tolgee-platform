@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
+import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -74,8 +75,8 @@ class Project(
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
-  var autoTranslationConfig: AutoTranslationConfig? = null
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project", orphanRemoval = true)
+  var autoTranslationConfigs: MutableList<AutoTranslationConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var mtServiceConfig: MutableList<MtServiceConfig> = mutableListOf()

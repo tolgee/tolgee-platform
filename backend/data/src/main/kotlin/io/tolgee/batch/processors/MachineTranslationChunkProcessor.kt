@@ -60,7 +60,7 @@ class MachineTranslationChunkProcessor(
     val languageIds = request.targetLanguageIds
     val project = entityManager.getReference(Project::class.java, projectId)
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project).values.toSet()
-    if (services.contains(MtServiceType.TOLGEE)) {
+    if (services.map { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
       return 2
     }
     return 5

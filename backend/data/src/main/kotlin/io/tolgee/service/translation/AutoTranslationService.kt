@@ -53,16 +53,13 @@ class AutoTranslationService(
     isHiddenJob: Boolean,
   ) {
     val project = entityManager.getReference(Project::class.java, projectId)
-    val config = getConfig(project)
     val languageIds = languageService.findAll(projectId).map { it.id }
     val request = AutoTranslationRequest().apply {
-      this.useTranslationMemory = useTranslationMemory ?: config.usingTm
-      this.useMachineTranslation = useMachineTranslation ?: config.usingPrimaryMtService
       target = languageIds.flatMap { languageId ->
         keyIds.map { keyId ->
           BatchTranslationTargetItem(
             keyId = keyId,
-            languageId = languageId
+            languageId = languageId,
           )
         }
       }
@@ -78,7 +75,7 @@ class AutoTranslationService(
     keyId: Long,
     languageId: Long
   ) {
-    val config = getConfig(entityManager.getReference(Project::class.java, projectId))
+    val config = getConfig(entityManager.getReference(Project::class.java, projectId), languageId)
     val translation =
       translationService.getTranslations(listOf(keyId), listOf(languageId)).singleOrNull() ?: Translation().apply {
         key = entityManager.getReference(Key::class.java, keyId)
@@ -126,25 +123,77 @@ class AutoTranslationService(
 
   fun autoTranslateSync(
     key: Key,
-    languageTags: List<String>? = null,
+    forcedLanguageTags: List<String>? = null,
     useTranslationMemory: Boolean? = null,
     useMachineTranslation: Boolean? = null,
     isBatch: Boolean,
   ) {
-    val config = getConfig(key.project)
+    val adjustedConfigs = getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation)
 
-    if (useTranslationMemory ?: config.usingTm) {
-      autoTranslateUsingTm(key, languageTags?.toSet())
+    val translations = adjustedConfigs.map {
+      if (it.override) {
+        return@map it to translationService.getOrCreate(key, it.language)
+      }
+
+      it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()
     }
-    if (useMachineTranslation ?: config.usingPrimaryMtService) {
-      autoTranslateUsingMachineTranslation(key, languageTags?.toSet(), isBatch)
+
+    val toTmTranslate = translations.filter { it.first.usingTm }.mapNotNull { it.second }
+
+    val translatedWithTm = autoTranslateUsingTm(toTmTranslate, key).filter { it.value }.keys
+
+    val toMtTranslate =
+      translations.filter { it.first.usingPrimaryMtService && !translatedWithTm.contains(it.second) }
+        .mapNotNull { it.second }
+
+    autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
+  }
+
+  /**
+   * Returns config adjusted to reflect languages and translation methods overrides
+   */
+  private fun getAdjustedConfigs(
+    key: Key,
+    forcedLanguageTags: List<String>?,
+    useTranslationMemory: Boolean?,
+    useMachineTranslation: Boolean?
+  ) = getPerLanguageConfigs(key.project).mapNotNull {
+    if (forcedLanguageTags != null) {
+      // if we got languages provided, we want to override the existing language values
+      it.override = true
+
+      if (!forcedLanguageTags.contains(it.language.tag)) {
+        return@mapNotNull null
+      }
+    }
+
+    it.usingTm = useTranslationMemory ?: it.usingTm
+    it.usingPrimaryMtService = (useMachineTranslation ?: it.usingPrimaryMtService)
+
+    if (!it.usingTm && !it.usingPrimaryMtService) {
+      return@mapNotNull null
+    }
+
+    it
+  }
+
+  fun getPerLanguageConfigs(project: Project): List<LanguageConfig> {
+    val configs = getConfigs(project)
+    val perLangConfig = configs.associateBy { it.targetLanguage?.id }
+
+    val languages = languageService.findAll(project.id)
+    return languages.map {
+      val config = (perLangConfig[it.id] ?: perLangConfig[null] ?: AutoTranslationConfig())
+      LanguageConfig(it, config.usingTm, config.usingPrimaryMtService)
     }
   }
 
-  private fun autoTranslateUsingMachineTranslation(key: Key, languageTags: Set<String>? = null, isBatch: Boolean) {
-    val translations = languageTags?.let { getTranslations(key, languageTags) } ?: getUntranslatedTranslations(key)
-    autoTranslateUsingMachineTranslation(translations, key, isBatch)
-  }
+  data class LanguageConfig(
+    val language: Language,
+    var usingTm: Boolean,
+    var usingPrimaryMtService: Boolean,
+    var override: Boolean = false
+  )
 
   private fun autoTranslateUsingMachineTranslation(
     translations: List<Translation>,
@@ -165,22 +214,21 @@ class AutoTranslationService(
       }
   }
 
-  private fun autoTranslateUsingTm(key: Key, languageTags: Set<String>? = null) {
-    val translations = languageTags?.let { getTranslations(key, languageTags) } ?: getUntranslatedTranslations(key)
-    autoTranslateUsingTm(translations, key)
-  }
-
+  /**
+   * Returns map of translation and boolean value indicating if the translation was auto translated.
+   */
   private fun autoTranslateUsingTm(
-    untranslated: List<Translation>,
-    key: Key
-  ) {
-    untranslated.forEach { translation ->
+    toTranslate: List<Translation>,
+    key: Key,
+  ): Map<Translation, Boolean> {
+    return toTranslate.associateWith { translation ->
       val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
       tmValue?.targetTranslationText
         .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
         ?.let {
           translation.setValueAndState(it, null)
         }
+      (tmValue != null)
     }
   }
 
@@ -193,49 +241,85 @@ class AutoTranslationService(
     translationService.save(this)
   }
 
-  private fun getTranslations(key: Key, languageTags: Set<String>): List<Translation> {
-    val languages = languageService.findByTags(languageTags, projectId = key.project.id)
-    return languages.map {
-      translationService.getOrCreate(key, it)
-    }
+  private fun getUntranslatedTranslations(key: Key, languages: List<Language>?): List<Translation> {
+    return getUntranslatedExistingTranslations(key, languages) + createNonExistingTranslations(key, languages)
   }
 
-  private fun getUntranslatedTranslations(key: Key): List<Translation> {
-    return getUntranslatedExistingTranslations(key) + createNonExistingTranslations(key)
-  }
-
-  private fun createNonExistingTranslations(key: Key): List<Translation> {
-    return getLanguagesWithNoTranslation(key).map { language ->
+  private fun createNonExistingTranslations(key: Key, languages: List<Language>?): List<Translation> {
+    return getLanguagesWithNoTranslation(key, languages).map { language ->
       val translation = Translation(key = key, language = language)
       key.translations.add(translation)
       translation
     }
   }
 
-  fun saveConfig(project: Project, dto: AutoTranslationSettingsDto) {
-    val config = getConfig(project)
+  fun saveDefaultConfig(project: Project, dto: AutoTranslationSettingsDto): AutoTranslationConfig {
+    val config = getDefaultConfig(project)
     config.usingTm = dto.usingTranslationMemory
     config.usingPrimaryMtService = dto.usingMachineTranslation
     config.enableForImport = dto.enableForImport
-    saveConfig(config)
+    return saveConfig(config)
   }
 
-  fun saveConfig(config: AutoTranslationConfig) {
-    autoTranslationConfigRepository.save(config)
+  fun saveConfig(config: AutoTranslationConfig): AutoTranslationConfig {
+    return autoTranslationConfigRepository.save(config)
   }
 
-  fun getConfig(project: Project) =
-    autoTranslationConfigRepository.findOneByProject(project) ?: AutoTranslationConfig()
+  fun getConfigs(project: Project) =
+    addDefaultConfig(project, autoTranslationConfigRepository.findAllByProject(project))
+
+  private fun addDefaultConfig(project: Project, list: List<AutoTranslationConfig>?): List<AutoTranslationConfig> {
+    val hasDefault = list?.any { autoTranslationConfig -> autoTranslationConfig.targetLanguage == null }
+      ?: false
+    if (!hasDefault) {
+      return (list ?: listOf()) + listOf(AutoTranslationConfig().also { it.project = project })
+    }
+    return list!!
+  }
+
+  fun getConfig(project: Project, targetLanguageId: Long) =
+    autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, targetLanguageId)
+      ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
+      it.project = project
+    }
+
+  fun getDefaultConfig(project: Project) =
+    autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, null) ?: AutoTranslationConfig()
       .also { it.project = project }
 
-  private fun getLanguagesWithNoTranslation(key: Key) = key.project.languages
-    .filter { projectLanguage ->
-      key.translations.find { it.language.id == projectLanguage.id } == null
-    }
+  private fun getLanguagesWithNoTranslation(key: Key, languages: List<Language>?): List<Language> {
+    return (languages ?: key.project.languages)
+      .filter { projectLanguage ->
+        key.translations.find { it.language.id == projectLanguage.id } == null
+      }
+  }
 
   /**
    * Returns existing translations with null or empty value
    */
-  private fun getUntranslatedExistingTranslations(key: Key) = key.translations
-    .filter { it.text.isNullOrEmpty() }
+  private fun getUntranslatedExistingTranslations(key: Key, languages: List<Language>?) = key.translations
+    .filter { languages?.contains(it.language) != false && it.text.isNullOrEmpty() }
+
+  fun saveConfig(projectEntity: Project, dtos: List<AutoTranslationSettingsDto>): List<AutoTranslationConfig> {
+    val configs = getConfigs(projectEntity).associateBy { it.targetLanguage?.id }
+
+    val languages = languageService.findAll(projectEntity.id)
+    val result = dtos.map { dto ->
+      val config = (configs[dto.languageId] ?: AutoTranslationConfig())
+      config.usingTm = dto.usingTranslationMemory
+      config.usingPrimaryMtService = dto.usingMachineTranslation
+      config.enableForImport = dto.enableForImport
+      config.project = projectEntity
+      config.targetLanguage = languages.find { it.id == dto.languageId }
+      config
+    }
+
+    val toDelete = configs.values.filter { config ->
+      result.find { it.targetLanguage?.id == config.targetLanguage?.id } == null
+    }
+
+    autoTranslationConfigRepository.deleteAll(toDelete)
+    autoTranslationConfigRepository.saveAll(result)
+    return addDefaultConfig(projectEntity, result)
+  }
 }
