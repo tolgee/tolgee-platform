@@ -59,13 +59,13 @@ class CoreImportFilesProcessor(
       return processArchive(file, errors)
     }
 
-    return processFile(file, errors)
+    processFile(file)
+    return mutableListOf()
   }
 
   private fun processFile(
     file: ImportFileDto,
-    errors: MutableList<ErrorResponseBody>
-  ): MutableList<ErrorResponseBody> {
+  ) {
     val savedFileEntity = file.saveFileEntity()
     val fileProcessorContext = FileProcessorContext(
       file = file,
@@ -76,7 +76,6 @@ class CoreImportFilesProcessor(
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
     processor.context.processResult()
-    return errors
   }
 
   private fun processArchive(

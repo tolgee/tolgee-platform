@@ -22,8 +22,13 @@ data class FileProcessorContext(
 
   lateinit var languageNameGuesses: List<String>
 
-  fun addTranslation(keyName: String, languageName: String, value: Any?, idx: Int? = null) {
+  fun addTranslation(keyName: String, languageName: String, value: Any?, idx: Int = 0) {
     val stringValue = value as? String
+
+    if (keyName.isBlank()) {
+      this.fileEntity.addKeyIsBlankIssue(idx)
+      return
+    }
 
     if (value !is String?) {
       this.fileEntity.addValueIsNotStringIssue(keyName, idx, value)
