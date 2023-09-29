@@ -68,4 +68,17 @@ class GlobalUserRateLimitFilterTest {
 
     assertThrows<RateLimitedException> { rateLimitFilter.doFilter(req, res, chain) }
   }
+
+  @Test
+  fun `it does rate limit if request is OPTIONS`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.method = "OPTIONS"
+
+    Mockito.`when`(rateLimitService.consumeGlobalUserRateLimitPolicy(any(), any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
 }

@@ -94,4 +94,17 @@ class AuthenticationDisabledFilterTest {
     val ctx = SecurityContextHolder.getContext()
     assertThat(ctx.authentication).isNull()
   }
+
+  @Test
+  fun `it does not filter when request is OPTIONS`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.method = "OPTIONS"
+
+    assertDoesNotThrow { authenticationDisabledFilter.doFilter(req, res, chain) }
+
+    val ctx = SecurityContextHolder.getContext()
+    assertThat(ctx.authentication).isNull()
+  }
 }

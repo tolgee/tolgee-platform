@@ -58,7 +58,7 @@ class AuthenticationFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return !authenticationProperties.enabled
+    return !authenticationProperties.enabled || request.method == "OPTIONS"
   }
 
   private fun doAuthenticate(request: HttpServletRequest) {

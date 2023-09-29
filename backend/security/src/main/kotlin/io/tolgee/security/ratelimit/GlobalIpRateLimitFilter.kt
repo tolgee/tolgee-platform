@@ -35,4 +35,8 @@ class GlobalIpRateLimitFilter(
 
     filterChain.doFilter(request, response)
   }
+
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+    return request.method == "OPTIONS"
+  }
 }

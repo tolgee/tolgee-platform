@@ -318,4 +318,17 @@ class AuthenticationFilterTest {
     req.addHeader("X-API-Key", TEST_VALID_PAT)
     assertThrows<RateLimitedException> { authenticationFilter.doFilter(req, res, chain) }
   }
+
+  @Test
+  fun `it does not filter when request is OPTIONS`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.method = "OPTIONS"
+
+    assertDoesNotThrow { authenticationFilter.doFilter(req, res, chain) }
+
+    val ctx = SecurityContextHolder.getContext()
+    assertThat(ctx.authentication).isNull()
+  }
 }
