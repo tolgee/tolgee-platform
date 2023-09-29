@@ -39,6 +39,11 @@ class AuthenticationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
+    if (request.method == "OPTIONS") {
+      // Do not process OPTIONS requests
+      return true
+    }
+
     val allowApiAccess = AnnotationUtils.getAnnotation(handler.method, AllowApiAccess::class.java)
     val requiresSuperAuth = requiresSuperAuthentication(handler)
 

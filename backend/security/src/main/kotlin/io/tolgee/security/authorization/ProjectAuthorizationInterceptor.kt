@@ -27,11 +27,9 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.slf4j.LoggerFactory
-import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
-import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -44,22 +42,20 @@ class ProjectAuthorizationInterceptor(
   private val organizationService: OrganizationService,
   private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
+  @Suppress("DEPRECATION")
   private val projectHolder: ProjectHolder,
-) : HandlerInterceptor, Ordered {
+) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    if (handler !is HandlerMethod) {
-      return super.preHandle(request, response, handler)
-    }
-
-    // Global route; abort here
-    if (isGlobal(handler)) return true
-
+  override fun preHandleInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: HandlerMethod
+  ): Boolean {
     val userId = authenticationFacade.authenticatedUser.id
     val project = requestContextService.getTargetProject(request)
       // Two possible scenarios: we're on a "global" route, or the project was not found.
-      // In both cases, there is no authorization to perform and we simply continue.
+      // In both cases, there is no authorization to perform, and we simply continue.
       // It is not the job of the interceptor to return a 404 error.
       ?: return true
 
@@ -158,11 +154,6 @@ class ProjectAuthorizationInterceptor(
     return true
   }
 
-  private fun isGlobal(handler: HandlerMethod): Boolean {
-    val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
-    return annotation != null
-  }
-
   private fun getRequiredScopes(request: HttpServletRequest, handler: HandlerMethod): Array<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val projectPerms = AnnotationUtils.getAnnotation(handler.method, RequiresProjectPermissions::class.java)
@@ -187,9 +178,5 @@ class ProjectAuthorizationInterceptor(
     }
 
     return projectPerms?.scopes
-  }
-
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
   }
 }

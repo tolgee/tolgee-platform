@@ -24,11 +24,9 @@ import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import org.slf4j.LoggerFactory
-import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
-import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -41,17 +39,14 @@ class OrganizationAuthorizationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val requestContextService: RequestContextService,
-) : HandlerInterceptor, Ordered {
+) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    if (handler !is HandlerMethod) {
-      return super.preHandle(request, response, handler)
-    }
-
-    // Global route; abort here
-    if (isGlobal(handler)) return true
-
+  override fun preHandleInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: HandlerMethod
+  ): Boolean {
     val userId = authenticationFacade.authenticatedUser.id
     val organization = requestContextService.getTargetOrganization(request)
       // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
@@ -112,11 +107,6 @@ class OrganizationAuthorizationInterceptor(
     return true
   }
 
-  private fun isGlobal(handler: HandlerMethod): Boolean {
-    val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
-    return annotation != null
-  }
-
   private fun getRequiredRole(request: HttpServletRequest, handler: HandlerMethod): OrganizationRoleType? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
     val orgPermission = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationRole::class.java)
@@ -134,9 +124,5 @@ class OrganizationAuthorizationInterceptor(
     }
 
     return orgPermission?.role
-  }
-
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
   }
 }
