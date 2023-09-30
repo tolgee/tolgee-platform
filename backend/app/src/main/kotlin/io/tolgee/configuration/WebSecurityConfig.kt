@@ -53,8 +53,10 @@ class WebSecurityConfig(
 ) : WebMvcConfigurer {
   @Bean
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
-    return httpSecurity.csrf().disable()
+    return httpSecurity
       // -- Global configuration
+      .csrf().disable()
+      .cors().and()
       .headers()
       .referrerPolicy().policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN).and()
       .xssProtection().block(true).and()
