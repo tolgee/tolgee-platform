@@ -16,6 +16,7 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
 import org.hibernate.Transaction
@@ -213,8 +214,8 @@ class InterceptedEventsManager(
       revision.isInitializedByInterceptor = true
       revision.authorId = userAccount?.id
       try {
-        revision.projectId = authenticationFacade.targetProject.id
-        activityHolder.organizationId = authenticationFacade.targetProject.organizationOwnerId
+        revision.projectId = projectHolder.project.id
+        activityHolder.organizationId = projectHolder.project.organizationOwnerId
       } catch (e: ProjectNotSelectedException) {
         logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
       }
@@ -272,6 +273,10 @@ class InterceptedEventsManager(
 
   private val activityHolder: ActivityHolder by lazy {
     applicationContext.getBean(ActivityHolder::class.java)
+  }
+
+  private val projectHolder: ProjectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private val userAccount: UserAccountDto?
