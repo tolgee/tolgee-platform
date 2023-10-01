@@ -12,7 +12,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.params.CdnPublishParams
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.cdn.CdnExporterService
 import io.tolgee.service.security.SecurityService
 import org.springframework.stereotype.Component

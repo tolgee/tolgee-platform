@@ -9,9 +9,9 @@ import io.tolgee.hateoas.cdn.CdnExporterModel
 import io.tolgee.hateoas.cdn.CdnExporterModelAssembler
 import io.tolgee.model.cdn.CdnExporter
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.cdn.CdnExporterService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -46,8 +46,8 @@ class CdnExporterController(
 ) : IController {
   @PostMapping("")
   @Operation(description = "Create CDN Exporter")
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
-  @AccessWithApiKey
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
+  @AllowApiAccess
   fun createCdnExporter(@Valid @RequestBody dto: CdnExporterDto): CdnExporterModel {
     val cdn = cdnExporterService.create(projectHolder.project.id, dto)
     return cdnExporterModelAssembler.toModel(cdn)
@@ -55,42 +55,42 @@ class CdnExporterController(
 
   @PutMapping("/{cdnId}")
   @Operation(description = "Updates CDN Exporter")
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
-  @AccessWithApiKey
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
+  @AllowApiAccess
   fun update(@PathVariable cdnId: Long, @Valid @RequestBody dto: CdnExporterDto): CdnExporterModel {
     val cdn = cdnExporterService.update(cdnId, dto)
     return cdnExporterModelAssembler.toModel(cdn)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @GetMapping("")
   @Operation(description = "List existing CDNs Exporters")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun list(@ParameterObject pageable: Pageable): PagedModel<CdnExporterModel> {
     val page = cdnExporterService.getAllInProject(projectHolder.project.id, pageable)
     return pagedCdnModelAssemblerExporter.toModel(page, cdnExporterModelAssembler)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @DeleteMapping("/{cdnId}")
   @Operation(description = "Delete CDN Exporter")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun delete(@PathVariable cdnId: Long) {
     cdnExporterService.delete(cdnId)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.CDN_MANAGE])
   @GetMapping("/{cdnId}")
   @Operation(description = "Get CDN Exporter")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun get(@PathVariable cdnId: Long): CdnExporterModel {
     return cdnExporterModelAssembler.toModel(cdnExporterService.get(cdnId))
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_PUBLISH)
+  @RequiresProjectPermissions([Scope.CDN_PUBLISH])
   @PostMapping("/{cdnId}")
   @Operation(description = "Publish to CDN Exporter")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun post(@PathVariable cdnId: Long) {
     val cdn = cdnExporterService.get(cdnId)
     cdnUploader.upload(cdn.id)
