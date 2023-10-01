@@ -1,7 +1,7 @@
 package io.tolgee.automation
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.cdn.StorageClientProvider
+import io.tolgee.component.cdn.CdnFileStorageProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andAssertThatJson
@@ -31,7 +31,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @MockBean
   @Autowired
-  lateinit var cdnClientProvider: StorageClientProvider
+  lateinit var cdnClientProvider: CdnFileStorageProvider
 
   lateinit var fileStorageMock: FileStorage
 
@@ -42,7 +42,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
     fileStorageMock = mock()
-    doReturn(fileStorageMock).whenever(cdnClientProvider).invoke()
+    doReturn(fileStorageMock).whenever(cdnClientProvider).getCdnStorageWithDefaultClient()
   }
 
   @Test

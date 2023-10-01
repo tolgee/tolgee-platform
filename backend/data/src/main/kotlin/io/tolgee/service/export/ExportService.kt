@@ -3,7 +3,7 @@ package io.tolgee.service.export
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.dtos.IExportParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.service.export.dataProvider.ExportDataProvider
@@ -21,7 +21,7 @@ class ExportService(
   private val entityManager: EntityManager,
   private val businessEventPublisher: BusinessEventPublisher
 ) {
-  fun export(projectId: Long, exportParams: ExportParams): Map<String, InputStream> {
+  fun export(projectId: Long, exportParams: IExportParams): Map<String, InputStream> {
     val data = getDataForExport(projectId, exportParams)
     val baseLanguage = getProjectBaseLanguage(projectId)
     val baseTranslationsProvider = getBaseTranslationsProvider(
@@ -51,20 +51,25 @@ class ExportService(
    * So formatters which need them can call the provider.
    */
   private fun getBaseTranslationsProvider(
-    exportParams: ExportParams,
+    exportParams: IExportParams,
     projectId: Long,
     baseLanguage: Language
   ): () -> List<ExportTranslationView> {
     return {
-      getDataForExport(projectId, exportParams.copy(languages = setOf(baseLanguage.tag), filterState = null))
+      getDataForExport(projectId, exportParams, listOf(baseLanguage.tag))
     }
   }
 
-  private fun getDataForExport(projectId: Long, exportParams: ExportParams): List<ExportTranslationView> {
+  private fun getDataForExport(
+    projectId: Long,
+    exportParams: IExportParams,
+    overrideLanguageTags: List<String>? = null
+  ): List<ExportTranslationView> {
     return ExportDataProvider(
       entityManager = entityManager,
       exportParams = exportParams,
-      projectId = projectId
+      projectId = projectId,
+      overrideLanguageTag = overrideLanguageTags
     ).getData()
   }
 

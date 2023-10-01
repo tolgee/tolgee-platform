@@ -1,7 +1,7 @@
 package io.tolgee.service.export
 
+import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
-import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.model.Language
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class FileExporterFactory {
   fun create(
     data: List<ExportTranslationView>,
-    exportParams: ExportParams,
+    exportParams: IExportParams,
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: Language
   ): FileExporter {
