@@ -7,9 +7,9 @@ import io.tolgee.hateoas.automation.AutomationModel
 import io.tolgee.hateoas.automation.AutomationModelAssembler
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.automations.AutomationService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -43,8 +43,8 @@ class AutomationController(
 ) : IController {
   @PostMapping("")
   @Operation(description = "Create Automation")
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
-  @AccessWithApiKey
+  @RequiresProjectPermissions([Scope.AUTOMATIONS_MANAGE])
+  @AllowApiAccess
   fun create(@Valid @RequestBody dto: AutomationRequest): AutomationModel {
     val automation = automationService.create(projectHolder.project.id, dto)
     return automationModelAssembler.toModel(automation)
@@ -52,34 +52,34 @@ class AutomationController(
 
   @PutMapping("/{automationId}")
   @Operation(description = "Create Automation")
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
-  @AccessWithApiKey
+  @RequiresProjectPermissions([Scope.AUTOMATIONS_MANAGE])
+  @AllowApiAccess
   fun update(@PathVariable automationId: Long, @Valid @RequestBody dto: AutomationRequest): AutomationModel {
     val automation = automationService.update(projectHolder.project.id, automationId, dto)
     return automationModelAssembler.toModel(automation)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.AUTOMATIONS_MANAGE])
   @GetMapping("")
   @Operation(description = "List existing Automations")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun list(@ParameterObject pageable: Pageable): PagedModel<AutomationModel> {
     val page = automationService.getProjectAutomations(projectHolder.project.id, pageable)
     return pagedCdnModelAssembler.toModel(page, automationModelAssembler)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.AUTOMATIONS_MANAGE])
   @DeleteMapping("/{automationId}")
   @Operation(description = "Delete Automation")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun delete(@PathVariable automationId: Long) {
     automationService.delete(projectHolder.project.id, automationId)
   }
 
-  @AccessWithProjectPermission(scope = Scope.CDN_MANAGE)
+  @RequiresProjectPermissions([Scope.AUTOMATIONS_MANAGE])
   @GetMapping("/{automationId}")
   @Operation(description = "Get Automation")
-  @AccessWithApiKey
+  @AllowApiAccess
   fun get(@PathVariable id: Long): AutomationModel {
     return automationModelAssembler.toModel(automationService.get(projectHolder.project.id, id))
   }
