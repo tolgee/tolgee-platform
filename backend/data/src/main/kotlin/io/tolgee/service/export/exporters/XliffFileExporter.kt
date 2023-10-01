@@ -1,7 +1,7 @@
 package io.tolgee.service.export.exporters
 
+import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.request.export.ExportFormat
-import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -17,7 +17,7 @@ import java.io.InputStream
 
 class XliffFileExporter(
   override val translations: List<ExportTranslationView>,
-  override val exportParams: ExportParams,
+  override val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: Language
 ) : FileExporter {

@@ -13,22 +13,22 @@ import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.params.CdnPublishParams
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.CdnService
+import io.tolgee.service.cdn.CdnExporterService
 import io.tolgee.service.security.SecurityService
 import org.springframework.stereotype.Component
 
 @Component
 class CdnPublishProcessor(
   val cdnUploader: CdnUploader,
-  val cdnService: CdnService,
+  val cdnExporterService: CdnExporterService,
   val securityService: SecurityService,
   val projectHolder: ProjectHolder,
   val objectMapper: ObjectMapper
 ) : AutomationProcessor {
   override fun process(action: AutomationAction) {
     val params = parseParams(action)
-    val cdn = cdnService.get(params.cdnId)
-    cdnUploader.upload(cdnId = cdn.id, cdn.exportParams)
+    val cdn = cdnExporterService.get(params.cdnId)
+    cdnUploader.upload(cdnExporterId = cdn.id)
   }
 
   override fun getParamsFromRequest(request: AutomationActionRequest): Any? {
@@ -44,7 +44,7 @@ class CdnPublishProcessor(
   }
 
   fun validateRequestParams(params: CdnPublishParams) {
-    cdnService.get(projectHolder.project.id, params.cdnId)
+    cdnExporterService.get(projectHolder.project.id, params.cdnId)
     securityService.checkProjectPermission(projectHolder.project.id, Scope.CDN_MANAGE)
   }
 

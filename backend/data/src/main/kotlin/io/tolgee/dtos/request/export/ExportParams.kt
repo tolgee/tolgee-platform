@@ -1,8 +1,7 @@
 package io.tolgee.dtos.request.export
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
+import io.tolgee.dtos.IExportParams
 import io.tolgee.model.enums.TranslationState
 
 data class ExportParams(
@@ -12,12 +11,12 @@ data class ExportParams(
 If null, all languages are exported""",
     example = "en"
   )
-  var languages: Set<String>? = null,
+  override var languages: Set<String>? = null,
 
   @field:Parameter(
     description = """Format to export to""",
   )
-  var format: ExportFormat = ExportFormat.JSON,
+  override var format: ExportFormat = ExportFormat.JSON,
 
   @field:Parameter(
     description = """Delimiter to structure file content. 
@@ -27,32 +26,32 @@ e.g. For key "home.header.title" would result in {"home": {"header": "title": {"
 When null, resulting file won't be structured.
     """,
   )
-  var structureDelimiter: Char? = '.',
+  override var structureDelimiter: Char? = '.',
 
   @field:Parameter(
     description = """Filter key IDs to be contained in export""",
   )
-  var filterKeyId: List<Long>? = null,
+  override var filterKeyId: List<Long>? = null,
 
   @field:Parameter(
     description = """Filter key IDs not to be contained in export""",
   )
-  var filterKeyIdNot: List<Long>? = null,
+  override var filterKeyIdNot: List<Long>? = null,
 
   @field:Parameter(
     description = """Filter keys tagged by""",
   )
-  var filterTag: String? = null,
+  override var filterTag: String? = null,
 
   @field:Parameter(
     description = """Filter keys with prefix""",
   )
-  var filterKeyPrefix: String? = null,
+  override var filterKeyPrefix: String? = null,
 
   @field:Parameter(
     description = """Filter translations with state. By default, everything except untranslated is exported.""",
   )
-  var filterState: List<TranslationState>? = listOf(
+  override var filterState: List<TranslationState>? = listOf(
     TranslationState.TRANSLATED,
     TranslationState.REVIEWED,
   ),
@@ -60,7 +59,7 @@ When null, resulting file won't be structured.
   @field:Parameter(
     description = """Select one ore multiple namespaces to export"""
   )
-  var filterNamespace: List<String?>? = null,
+  override var filterNamespace: List<String?>? = null,
 
   @field:Parameter(
     description = """If false, it doesn't return zip of files, but it returns single file.
@@ -69,9 +68,4 @@ This is possible only when single language is exported. Otherwise it returns "40
     """
   )
   var zip: Boolean = true
-) {
-  @get:Hidden
-  @get:JsonIgnore
-  val shouldContainUntranslated: Boolean
-    get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
-}
+) : IExportParams
