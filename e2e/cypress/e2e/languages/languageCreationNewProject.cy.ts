@@ -1,5 +1,6 @@
 import { HOST } from '../../common/constants';
 import {
+  dismissMenu,
   gcy,
   getInputByName,
   getPopover,
@@ -80,7 +81,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     addLanguage('Deutsch');
     gcy('base-language-select').click();
     getPopover().contains('German').should('be.visible');
@@ -91,7 +92,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     removeLanguage('Azerbaijani');
     gcy('base-language-select').click();
     getPopover().contains('Azerbaijani').should('not.exist');
@@ -102,7 +103,7 @@ describe('Language creation in new project', () => {
     gcy('base-language-select').click();
     getPopover().contains('English').should('be.visible');
     getPopover().contains('Azerbaijani').should('be.visible');
-    cy.get('body').click();
+    dismissMenu();
     removeLanguage('English');
     gcy('base-language-select').contains('Azerbaijani').should('be.visible');
   });
