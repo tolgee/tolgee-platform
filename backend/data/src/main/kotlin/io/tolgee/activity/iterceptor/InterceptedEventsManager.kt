@@ -279,6 +279,10 @@ class InterceptedEventsManager(
     applicationContext.getBean(ActivityHolder::class.java)
   }
 
+  private val projectHolder: ProjectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
+  }
+
   private val userAccount: UserAccountDto?
     get() = authenticationFacade.authenticatedUserOrNull
 }
