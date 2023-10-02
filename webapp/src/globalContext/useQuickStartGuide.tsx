@@ -4,7 +4,7 @@ import { useRouteMatch } from 'react-router-dom';
 import {
   HighlightItem,
   ItemStep,
-} from 'tg.component/layout/QuickStartGuide/types';
+} from 'tg.component/layout/QuickStartGuide/enums';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import type { useInitialDataService } from './useInitialDataService';
