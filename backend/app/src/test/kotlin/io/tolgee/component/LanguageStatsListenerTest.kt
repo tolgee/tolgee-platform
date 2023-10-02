@@ -9,7 +9,6 @@ import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.opentest4j.AssertionFailedError
 import org.springframework.beans.factory.annotation.Autowired
 
