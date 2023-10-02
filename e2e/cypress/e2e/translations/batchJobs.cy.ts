@@ -20,7 +20,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     batchJobs.clean();
     batchJobs.generateStandard().then((data) => {
       project = data.body.projects[0];
-      login('admin');
+      login('test_username');
       visit();
 
       // wait for loading to appear and disappear again
