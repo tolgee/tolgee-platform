@@ -17,6 +17,7 @@
 package io.tolgee.security.authorization
 
 import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
@@ -47,6 +48,8 @@ import org.springframework.web.bind.annotation.RestController
 class ProjectAuthorizationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
+  private val organizationService = Mockito.mock(OrganizationService::class.java)
+
   private val securityService = Mockito.mock(SecurityService::class.java)
 
   private val requestContextService = Mockito.mock(RequestContextService::class.java)
@@ -61,7 +64,7 @@ class ProjectAuthorizationInterceptorTest {
 
   private val projectAuthenticationInterceptor = ProjectAuthorizationInterceptor(
     authenticationFacade,
-    Mockito.mock(OrganizationService::class.java),
+    organizationService,
     securityService,
     requestContextService,
     Mockito.mock(ProjectHolder::class.java),
@@ -81,6 +84,8 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
 
+    val mockOrganizationDto = Mockito.mock(OrganizationDto::class.java)
+    Mockito.`when`(organizationService.findDto(Mockito.anyLong())).thenReturn(mockOrganizationDto)
     Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(projectDto)
 
     Mockito.`when`(userAccount.id).thenReturn(1337L)
