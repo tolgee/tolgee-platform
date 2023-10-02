@@ -70,6 +70,15 @@ class ImportFile(
     )
   }
 
+  fun addKeyIsBlankIssue(keyIndex: Int) {
+    addIssue(
+      FileIssueType.KEY_IS_BLANK,
+      mapOf(
+        FileIssueParamType.KEY_INDEX to keyIndex.toString(),
+      )
+    )
+  }
+
   fun addValueIsEmptyIssue(keyName: String) {
     addIssue(
       FileIssueType.VALUE_IS_EMPTY,
