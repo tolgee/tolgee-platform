@@ -47,74 +47,76 @@ export const ProjectSettingsLanguages = () => {
 
   return (
     <Box mb={6}>
-      {canEditLanguages && (
-        <>
-          <Box mt={4}>
-            <Typography variant="h5">
-              <T keyName="create_language_title" />
-            </Typography>
-          </Box>
-          <Box mb={2}>
-            <CreateSingleLanguage
-              autoFocus={false}
-              onCancel={() => {}}
-              onCreated={() => {
-                invalidateUrlPrefix(queryClient, '/v2/project');
-              }}
-            />
-          </Box>
-        </>
-      )}
       <QuickStartHighlight
         itemKey="add_language"
         message={t('quick_start_item_add_language_hint')}
         borderRadius="5px"
         offset={5}
       >
-        <StyledLanguageTable
-          style={{ gridTemplateColumns: '1fr auto auto' }}
-          data-cy="project-settings-languages"
-        >
-          <div className={TABLE_TOP_ROW} />
-          <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
-            {t('project_languages_base_language')}
-          </div>
-          <div className={TABLE_TOP_ROW} />
+        <Box>
+          {canEditLanguages && (
+            <>
+              <Box mt={4}>
+                <Typography variant="h5">
+                  <T keyName="create_language_title" />
+                </Typography>
+              </Box>
+              <Box mb={2}>
+                <CreateSingleLanguage
+                  autoFocus={false}
+                  onCancel={() => {}}
+                  onCreated={() => {
+                    invalidateUrlPrefix(queryClient, '/v2/project');
+                  }}
+                />
+              </Box>
+            </>
+          )}
+          <StyledLanguageTable
+            style={{ gridTemplateColumns: '1fr auto auto' }}
+            data-cy="project-settings-languages"
+          >
+            <div className={TABLE_TOP_ROW} />
+            <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
+              {t('project_languages_base_language')}
+            </div>
+            <div className={TABLE_TOP_ROW} />
 
-          {languagesLoadable.data?._embedded?.languages?.map((l) => (
-            <React.Fragment key={l.id}>
-              <div
-                className={TABLE_FIRST_CELL}
-                data-cy="project-settings-languages-list-name"
-              >
-                <LanguageItem language={l} />
-              </div>
-              <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
-              {canEditLanguages && (
-                <Box
-                  className={TABLE_LAST_CELL}
-                  mt={1}
-                  mb={1}
-                  data-cy="project-settings-languages-list-edit-button"
-                  data-cy-language={l.tag}
+            {languagesLoadable.data?._embedded?.languages?.map((l) => (
+              <React.Fragment key={l.id}>
+                <div
+                  className={TABLE_FIRST_CELL}
+                  data-cy="project-settings-languages-list-name"
                 >
-                  <Link
-                    to={LINKS.PROJECT_EDIT_LANGUAGE.build({
-                      [PARAMS.PROJECT_ID]: project.id,
-                      [PARAMS.LANGUAGE_ID]: l.id,
-                    })}
+                  <LanguageItem language={l} />
+                </div>
+                <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
+                {canEditLanguages && (
+                  <Box
+                    className={TABLE_LAST_CELL}
+                    mt={1}
+                    mb={1}
+                    data-cy="project-settings-languages-list-edit-button"
+                    data-cy-language={l.tag}
                   >
-                    <SettingsIconButton
-                      disabled={!canEditLanguages}
-                      size="small"
-                      aria-label={`Settings ${l.name}`}
-                    />
-                  </Link>
-                </Box>
-              )}
-            </React.Fragment>
-          ))}
-        </StyledLanguageTable>
+                    <Link
+                      to={LINKS.PROJECT_EDIT_LANGUAGE.build({
+                        [PARAMS.PROJECT_ID]: project.id,
+                        [PARAMS.LANGUAGE_ID]: l.id,
+                      })}
+                    >
+                      <SettingsIconButton
+                        disabled={!canEditLanguages}
+                        size="small"
+                        aria-label={`Settings ${l.name}`}
+                      />
+                    </Link>
+                  </Box>
+                )}
+              </React.Fragment>
+            ))}
+          </StyledLanguageTable>
+        </Box>
       </QuickStartHighlight>
 
       {mtEnabled && (

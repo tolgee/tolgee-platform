@@ -164,6 +164,8 @@ export const QuickStartHighlight = ({
                   color="primary"
                   sx={{ padding: '0px 8px', minWidth: 40 }}
                   onClick={handleCompleted}
+                  data-cy="quick-start-highlight-ok"
+                  data-cy-item={itemKey}
                 >
                   {t('quick_start_highlight_ok')}
                 </Button>
@@ -179,7 +181,7 @@ export const QuickStartHighlight = ({
     }
   }
 
-  if (disabled) {
+  if (disabled || !visible) {
     return <>{children}</>;
   }
 
@@ -196,6 +198,8 @@ export const QuickStartHighlight = ({
         onClick={active && !message ? handleCompleted : undefined}
         ref={wrapperRef}
         borderradius={borderRadius}
+        data-cy="quick-start-highlight"
+        data-cy-item={itemKey}
       >
         {withTooltip(children)}
       </StyledHighlighter>

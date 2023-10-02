@@ -51,7 +51,7 @@ type Props = {
   projectId?: number;
 };
 
-export const QuickStartItem = ({ item, index, projectId, done }: Props) => {
+export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
   const actions = item.actions?.({ projectId });
   const { quickStartBegin, quickStartSetOpen } = useGlobalActions();
@@ -75,6 +75,8 @@ export const QuickStartItem = ({ item, index, projectId, done }: Props) => {
         active,
         done,
       })}
+      data-cy="quick-start-step"
+      data-cy-step={item.step}
     >
       <StyledIndex className={clsx({ done })}>
         {done ? <Check fontSize="small" /> : <span>{index}</span>}
@@ -95,6 +97,7 @@ export const QuickStartItem = ({ item, index, projectId, done }: Props) => {
               <StyledLink
                 // @ts-ignore
                 component={link ? Link : undefined}
+                data-cy="quick-start-action"
                 key={i}
                 to={(!disabled && link) || ''}
                 onClick={

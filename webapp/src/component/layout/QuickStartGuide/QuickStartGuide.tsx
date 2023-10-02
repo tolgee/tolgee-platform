@@ -8,7 +8,7 @@ import {
 } from 'tg.globalContext/GlobalContext';
 import { BottomLinks } from './BottomLinks';
 import { items } from './quickStartConfig';
-import { QuickStartItem } from './QuickStartItem';
+import { QuickStartStep } from './QuickStartStep';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -60,7 +60,7 @@ export const QuickStartGuide = () => {
   );
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="quick-start-dialog">
       <StyledArrow sx={{ opacity: topBarHeight ? 1 : 0 }} />
       <StyledHeader>
         <RocketIcon fontSize="small" />
@@ -68,7 +68,7 @@ export const QuickStartGuide = () => {
       </StyledHeader>
       <StyledContent>
         {items.map((item, i) => (
-          <QuickStartItem
+          <QuickStartStep
             key={i}
             index={i + 1}
             item={item}
@@ -80,6 +80,7 @@ export const QuickStartGuide = () => {
           <Box sx={{ display: 'grid', justifyItems: 'center', gap: 2, pt: 1 }}>
             <Typography>{t('guide_finish_text')}</Typography>
             <Button
+              data-cy="quick-start-finish"
               color="primary"
               variant="contained"
               onClick={() => quickStartFinish()}
