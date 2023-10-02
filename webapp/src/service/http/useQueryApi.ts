@@ -141,8 +141,9 @@ export const useApiMutation = <
     options: UseQueryOptions<any, ApiError> | undefined
   ) => ({
     ...options,
-    onSuccess: (data) => {
-      options?.onSuccess?.(data);
+    onSuccess: (...params) => {
+      // @ts-ignore
+      options?.onSuccess?.(...params);
       if (invalidatePrefix !== undefined) {
         invalidateUrlPrefix(queryClient, invalidatePrefix);
       }
