@@ -20,9 +20,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.*
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.*
-import io.tolgee.security.ProjectNotSelectedException
-import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -33,8 +30,6 @@ import org.springframework.stereotype.Component
 @Component
 class AuthenticationFacade(
   private val userAccountService: UserAccountService,
-  @Lazy private val projectService: ProjectService,
-  @Lazy private val organizationService: OrganizationService,
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
 ) {
@@ -63,44 +58,6 @@ class AuthenticationFacade(
       }
 
       return authentication.userAccountEntity
-    }
-
-  // -- CURRENT ORGANIZATION
-  val targetOrganization: OrganizationDto
-    get() = targetOrganizationOrNull ?: throw IllegalStateException("No available organization")
-
-  val targetOrganizationOrNull: OrganizationDto?
-    get() = if (isAuthenticated) authentication.targetOrganization else null
-
-  val targetOrganizationEntity: Organization
-    get() = targetOrganizationEntityOrNull ?: throw IllegalStateException("No available organization")
-
-  val targetOrganizationEntityOrNull: Organization?
-    get() = targetOrganizationOrNull?.let {
-      if (authentication.targetOrganizationEntity == null) {
-        authentication.targetOrganizationEntity = organizationService.find(it.id)
-      }
-
-      return authentication.targetOrganizationEntity
-    }
-
-  // -- CURRENT PROJECT
-  val targetProject: ProjectDto
-    get() = targetProjectOrNull ?: throw ProjectNotSelectedException()
-
-  val targetProjectOrNull: ProjectDto?
-    get() = if (isAuthenticated) authentication.targetProject else null
-
-  val targetProjectEntity: Project
-    get() = targetProjectEntityOrNull ?: throw ProjectNotSelectedException()
-
-  val targetProjectEntityOrNull: Project?
-    get() = targetProjectOrNull?.let {
-      if (authentication.targetProjectEntity == null) {
-        authentication.targetProjectEntity = projectService.find(it.id)
-      }
-
-      return authentication.targetProjectEntity
     }
 
   // -- AUTHENTICATION METHOD AND DETAILS

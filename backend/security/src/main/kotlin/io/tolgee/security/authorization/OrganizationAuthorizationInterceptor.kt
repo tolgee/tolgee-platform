@@ -20,6 +20,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
@@ -39,6 +40,7 @@ class OrganizationAuthorizationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val requestContextService: RequestContextService,
+  private val organizationHolder: OrganizationHolder,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -103,7 +105,7 @@ class OrganizationAuthorizationInterceptor(
       )
     }
 
-    authenticationFacade.authentication.targetOrganization = organization
+    organizationHolder.organization = organization
     return true
   }
 

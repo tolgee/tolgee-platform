@@ -4,6 +4,7 @@ import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.model.UploadedImage
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class UploadedImageModelAssembler(
   private val tolgeeProperties: TolgeeProperties,
   private val authenticationFacade: AuthenticationFacade,
+  private val projectHolder: ProjectHolder,
   private val jwtService: JwtService,
 ) : RepresentationModelAssemblerSupport<UploadedImage, UploadedImageModel>(
   TranslationsController::class.java, UploadedImageModel::class.java
@@ -28,7 +30,7 @@ class UploadedImageModelAssembler(
         tolgeeProperties.authentication.securedImageTimestampMaxAge,
         mapOf(
           "fileName" to entity.filenameWithExtension,
-          "projectId" to authenticationFacade.targetProjectOrNull?.id?.toString(),
+          "projectId" to projectHolder.projectOrNull?.id?.toString(),
         )
       )
 

@@ -4,6 +4,7 @@ import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.model.Screenshot
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import org.springframework.hateoas.Link
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class ScreenshotModelAssembler(
   private val tolgeeProperties: TolgeeProperties,
   private val authenticationFacade: AuthenticationFacade,
+  private val projectHolder: ProjectHolder,
   private val jwtService: JwtService,
 ) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
   TranslationsController::class.java, ScreenshotModel::class.java
@@ -76,7 +78,7 @@ class ScreenshotModelAssembler(
         tolgeeProperties.authentication.securedImageTimestampMaxAge,
         mapOf(
           "fileName" to filename,
-          "projectId" to authenticationFacade.targetProjectOrNull?.id?.toString(),
+          "projectId" to projectHolder.projectOrNull?.id?.toString(),
         )
       )
 

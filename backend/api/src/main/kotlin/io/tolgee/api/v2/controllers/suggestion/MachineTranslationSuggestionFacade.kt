@@ -11,7 +11,7 @@ import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
-import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 @Service
 class MachineTranslationSuggestionFacade(
-  private val authenticationFacade: AuthenticationFacade,
+  private val projectHolder: ProjectHolder,
   private val mtService: MtService,
   private val keyService: KeyService,
   private val languageService: LanguageService,
@@ -36,11 +36,11 @@ class MachineTranslationSuggestionFacade(
     val targetLanguage = dto.targetLanguage
 
     securityService.checkLanguageTranslatePermission(
-      authenticationFacade.targetProject.id,
+      projectHolder.project.id,
       listOf(targetLanguage.id)
     )
 
-    val balanceBefore = mtCreditBucketService.getCreditBalances(authenticationFacade.targetProjectEntity)
+    val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
 
     return catchingOutOfCredits(balanceBefore) {
       val resultData = getTranslationResults(dto, targetLanguage)
@@ -72,7 +72,7 @@ class MachineTranslationSuggestionFacade(
 
     val resultMap =
       mtService.getMachineTranslations(
-        authenticationFacade.targetProjectEntity,
+        projectHolder.projectEntity,
         key, dto.baseText,
         targetLanguage,
         dto.services
@@ -119,6 +119,6 @@ class MachineTranslationSuggestionFacade(
     get() = languageService.get(this.targetLanguageId)
 
   private fun Key.checkInProject() {
-    keyService.checkInProject(this, authenticationFacade.targetProject.id)
+    keyService.checkInProject(this, projectHolder.project.id)
   }
 }

@@ -16,8 +16,6 @@
 
 package io.tolgee.security.authentication
 
-import io.tolgee.dtos.cacheable.OrganizationDto
-import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.*
 import org.springframework.security.core.Authentication
@@ -29,14 +27,7 @@ class TolgeeAuthentication(
   private val userAccount: UserAccountDto,
   private val details: TolgeeAuthenticationDetails?,
 ) : Authentication {
-  var targetOrganization: OrganizationDto? = null
-  var targetProject: ProjectDto? = null
-
-  var targetOrganizationEntity: Organization? = null
-  var targetProjectEntity: Project? = null
-
   var userAccountEntity: UserAccount? = null
-
   var projectApiKeyEntity: ApiKey? = null
   var personalAccessTokenEntity: Pat? = null
 

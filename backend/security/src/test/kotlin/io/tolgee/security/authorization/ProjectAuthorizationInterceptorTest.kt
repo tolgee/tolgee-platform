@@ -24,6 +24,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
@@ -50,8 +51,6 @@ class ProjectAuthorizationInterceptorTest {
 
   private val requestContextService = Mockito.mock(RequestContextService::class.java)
 
-  private val projectHolder = Mockito.mock(ProjectHolder::class.java)
-
   private val project = Mockito.mock(Project::class.java)
 
   private val projectDto = Mockito.mock(ProjectDto::class.java)
@@ -65,7 +64,8 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.mock(OrganizationService::class.java),
     securityService,
     requestContextService,
-    projectHolder,
+    Mockito.mock(ProjectHolder::class.java),
+    Mockito.mock(OrganizationHolder::class.java),
   )
 
   private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)

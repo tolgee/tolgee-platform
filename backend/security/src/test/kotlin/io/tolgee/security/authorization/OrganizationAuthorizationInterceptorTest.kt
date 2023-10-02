@@ -22,6 +22,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
@@ -54,6 +55,7 @@ class OrganizationAuthorizationInterceptorTest {
     authenticationFacade,
     organizationRoleService,
     requestContextService,
+    Mockito.mock(OrganizationHolder::class.java),
   )
 
   private val mockMvc = MockMvcBuilders.standaloneSetup(TestController::class.java)

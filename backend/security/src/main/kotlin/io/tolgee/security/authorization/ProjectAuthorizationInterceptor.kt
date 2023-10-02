@@ -21,6 +21,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -42,8 +43,8 @@ class ProjectAuthorizationInterceptor(
   private val organizationService: OrganizationService,
   private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
-  @Suppress("DEPRECATION")
   private val projectHolder: ProjectHolder,
+  private val organizationHolder: OrganizationHolder,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -149,8 +150,9 @@ class ProjectAuthorizationInterceptor(
     }
 
     projectHolder.project = project
-    authenticationFacade.authentication.targetProject = project
-    authenticationFacade.authentication.targetOrganization = organizationService.findDto(project.organizationOwnerId)
+    organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
+      ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+
     return true
   }
 

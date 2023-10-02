@@ -27,8 +27,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
-import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -90,8 +88,6 @@ class AuthenticationFilterTest {
 
   private val authenticationFacade = AuthenticationFacade(
     userAccountService,
-    Mockito.mock(ProjectService::class.java),
-    Mockito.mock(OrganizationService::class.java),
     Mockito.mock(ApiKeyService::class.java),
     Mockito.mock(PatService::class.java),
   )

@@ -11,8 +11,8 @@ import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.hateoas.machineTranslation.LanguageInfoModel
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
 class MachineTranslationSettingsController(
-  private val authenticationFacade: AuthenticationFacade,
+  private val projectHolder: ProjectHolder,
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
 ) {
@@ -39,7 +39,7 @@ class MachineTranslationSettingsController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
-    val data = mtServiceConfigService.getProjectSettings(authenticationFacade.targetProjectEntity)
+    val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
@@ -49,7 +49,7 @@ class MachineTranslationSettingsController(
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto
   ): CollectionModel<LanguageConfigItemModel> {
-    mtServiceConfigService.setProjectSettings(authenticationFacade.targetProjectEntity, dto)
+    mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
     return getMachineTranslationSettings()
   }
 
@@ -57,7 +57,7 @@ class MachineTranslationSettingsController(
   @Operation(summary = "Returns info about formality and ")
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {
-    val data = mtServiceConfigService.getLanguageInfo(authenticationFacade.targetProject)
+    val data = mtServiceConfigService.getLanguageInfo(projectHolder.project)
     return CollectionModel.of(
       data.map {
         LanguageInfoModel(

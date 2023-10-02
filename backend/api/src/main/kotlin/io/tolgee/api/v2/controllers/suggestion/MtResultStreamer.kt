@@ -13,7 +13,7 @@ import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
-import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
@@ -60,7 +60,7 @@ class MtResultStreamer(
     key = with(machineTranslationSuggestionFacade) { dto.key }
     val targetLanguage = applicationContext.getBean(LanguageService::class.java).get(dto.targetLanguageId)
     servicesToUse = mtService.getServicesToUse(targetLanguage, dto.services)
-    project = authenticationFacade.targetProjectEntity
+    project = projectHolder.projectEntity
   }
 
   private fun writeInfo() {
@@ -163,8 +163,8 @@ class MtResultStreamer(
     applicationContext.getBean(MtCreditBucketService::class.java)
   }
 
-  private val authenticationFacade by lazy {
-    applicationContext.getBean(AuthenticationFacade::class.java)
+  private val projectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private val projectService by lazy {
@@ -180,7 +180,7 @@ class MtResultStreamer(
   }
 
   private lateinit var project: Project
-  private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(authenticationFacade.targetProject.id)
+  private var baseLanguage = projectService.getOrCreateBaseLanguageOrThrow(projectHolder.project.id)
 
   private val baseBlank by lazy {
     mtService.getBaseTranslation(
