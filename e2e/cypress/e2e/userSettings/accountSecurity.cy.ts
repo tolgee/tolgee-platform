@@ -48,7 +48,7 @@ describe('Account security', () => {
     cy.contains('User profile');
   });
 
-  it.only('enables mfa', { retries: 5 }, () => {
+  it('enables mfa', { retries: 5 }, () => {
     cy.gcy('mfa-enable-button').click();
     cy.gcy('mfa-enable-dialog-totp-key')
       .invoke('text')
