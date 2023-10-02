@@ -107,6 +107,7 @@ jobs:
       - name: Run backend tests
         uses: nick-fields/retry@v2
         with:
+          timeout-minutes: 30
           max_attempts: ${{ github.event_name = 'push' && 5 || 1 }}
           command: ./gradlew ${{ matrix.command }}
         env:
@@ -198,6 +199,7 @@ jobs:
       - name: Run e2e test
         uses: nick-fields/retry@v2
         with:
+          timeout-minutes: 30
           max_attempts: ${{ github.event_name = 'push' && 5 || 1 }}
           command: |
             ./gradlew runE2e
