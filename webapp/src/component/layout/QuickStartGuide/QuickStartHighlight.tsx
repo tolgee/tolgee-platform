@@ -7,7 +7,7 @@ import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
-import { HighlightItem } from './types';
+import { HighlightItem } from './enums';
 
 const StyledHighlighter = styled('div')<{
   offset: number;

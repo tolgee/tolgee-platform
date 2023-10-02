@@ -13,7 +13,7 @@ import {
 import type {
   HighlightItem,
   ItemStep,
-} from '../../../../webapp/src/component/layout/QuickStartGuide/types';
+} from '../../../../webapp/src/component/layout/QuickStartGuide/enums';
 
 describe('Quick start guide', () => {
   const INITIAL_EMAIL = 'quick-start-test@test.com';
