@@ -108,7 +108,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout-minutes: 30
-          max_attempts: ${{ github.event_name = 'push' && 5 || 1 }}
+          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
           command: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
@@ -200,7 +200,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout-minutes: 30
-          max_attempts: ${{ github.event_name = 'push' && 5 || 1 }}
+          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
           command: |
             ./gradlew runE2e
         env:
