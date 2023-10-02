@@ -96,6 +96,7 @@ export const ProjectSettingsLanguages = () => {
                   mt={1}
                   mb={1}
                   data-cy="project-settings-languages-list-edit-button"
+                  data-cy-language={l.tag}
                 >
                   <Link
                     to={LINKS.PROJECT_EDIT_LANGUAGE.build({

@@ -6,7 +6,7 @@ import {
   visitProjectWithPermissions,
 } from '../../../common/permissions/main';
 
-describe('Permissions admin 2', () => {
+describe('Server admin 2', () => {
   it('admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
