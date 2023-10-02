@@ -14,7 +14,7 @@ const StyledRoot = styled(Box)`
   display: grid;
   gap: 0.5rem;
 
-  @container (max-width: 899px) {
+  @container (min-width: 899px) {
     grid-template-columns: 2fr auto auto auto;
   }
 

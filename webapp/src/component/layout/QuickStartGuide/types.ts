@@ -23,7 +23,6 @@ export type HighlightItem =
   | 'add_project'
   | 'add_language'
   | 'machine_translation'
-  | 'automatic_translation'
   | 'invitations'
   | 'members'
   | 'add_key'

@@ -30,7 +30,6 @@ export const items: ItemType[] = [
           'menu_languages',
           'add_language',
           'machine_translation',
-          'automatic_translation',
         ],
       },
     ],
