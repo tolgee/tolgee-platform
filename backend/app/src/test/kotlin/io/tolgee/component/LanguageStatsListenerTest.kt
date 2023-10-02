@@ -30,7 +30,6 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
 
     executeInNewTransaction(platformTransactionManager) {
       val projectDto = ProjectDto.fromEntity(testData.project)
-      Mockito.`when`(projectHolder.project).thenReturn(projectDto)
       projectHolder.project = projectDto
 
       keyService.create(
