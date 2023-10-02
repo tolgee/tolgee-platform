@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.activity.ActivityFilter
+import io.tolgee.component.TransferEncodingHeaderDebugFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
@@ -13,8 +14,10 @@ import io.tolgee.security.project_auth.ProjectPermissionFilter
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
 import io.tolgee.security.rateLimits.RateLimitsFilterFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -35,7 +38,7 @@ class WebSecurityConfig @Autowired constructor(
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
   private val patAuthFilter: PatAuthFilter,
   private val versionFilter: VersionFilter,
-  private val serverAdminFilter: ServerAdminFilter
+  private val serverAdminFilter: ServerAdminFilter,
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http
@@ -89,6 +92,15 @@ class WebSecurityConfig @Autowired constructor(
         .userDnPatterns(ldapConfiguration.userDnPattern)
       return
     }
+  }
+
+  @Bean
+  fun customFilterRegistration(): FilterRegistrationBean<TransferEncodingHeaderDebugFilter>? {
+    val registration: FilterRegistrationBean<TransferEncodingHeaderDebugFilter> =
+      FilterRegistrationBean<TransferEncodingHeaderDebugFilter>()
+    registration.setFilter(TransferEncodingHeaderDebugFilter())
+    registration.setOrder(Ordered.HIGHEST_PRECEDENCE)
+    return registration
   }
 
   @Bean(BeanIds.AUTHENTICATION_MANAGER)
