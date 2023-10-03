@@ -54,7 +54,7 @@ type Props = {
 export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
   const actions = item.actions?.({ projectId });
-  const { quickStartBegin, quickStartSetOpen } = useGlobalActions();
+  const { quickStartBegin, setQuickStartOpen } = useGlobalActions();
   const quickStartFloating = useGlobalContext(
     (c) => c.quickStartGuide.floating
   );
@@ -106,7 +106,7 @@ export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
                         if (action.highlightItems) {
                           quickStartBegin(item.step, action.highlightItems);
                           if (quickStartFloating) {
-                            quickStartSetOpen(false);
+                            setQuickStartOpen(false);
                           }
                         }
                       }

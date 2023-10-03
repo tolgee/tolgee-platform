@@ -92,7 +92,7 @@ export const useQuickStartGuide = (
 
   const actions = {
     quickStartFinish: initialData.finishGuide,
-    quickStartSetOpen: floating
+    setQuickStartOpen: floating
       ? setFloatingOpen
       : initialData.setQuickStartOpen,
     quickStartBegin,

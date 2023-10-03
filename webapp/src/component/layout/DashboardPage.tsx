@@ -57,7 +57,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
 
   const rightPanelWidth = useGlobalContext((c) => c.rightPanelWidth);
 
-  const { quickStartSetOpen } = useGlobalActions();
+  const { setQuickStartOpen } = useGlobalActions();
   const quickStartEnabled = useGlobalContext(
     (c) => c.quickStartGuide.enabled && c.userInfo
   );
@@ -97,7 +97,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
         {quickStartEnabled && (quickStartOpen || quickStartFloating) && (
           <RightSidePanel
             open={quickStartOpen}
-            onClose={() => quickStartSetOpen(false)}
+            onClose={() => setQuickStartOpen(false)}
             floating={quickStartFloating}
           >
             <QuickStartGuide />

@@ -23,14 +23,14 @@ export const QuickStartTopBarButton = () => {
     (c) => c.quickStartGuide.completed.length
   );
   const allSteps = items.length;
-  const { quickStartSetOpen } = useGlobalActions();
+  const { setQuickStartOpen } = useGlobalActions();
 
   return (
     <>
       {guideEnabled && (
         <StyledContainer>
           <StyledButton
-            onClick={() => quickStartSetOpen(!guideOpen)}
+            onClick={() => setQuickStartOpen(!guideOpen)}
             color="inherit"
           >
             <Box display="flex" gap={1} alignItems="center">
