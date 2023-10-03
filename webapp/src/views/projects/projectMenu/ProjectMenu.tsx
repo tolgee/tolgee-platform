@@ -18,7 +18,6 @@ import { SideLogo } from './SideLogo';
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
