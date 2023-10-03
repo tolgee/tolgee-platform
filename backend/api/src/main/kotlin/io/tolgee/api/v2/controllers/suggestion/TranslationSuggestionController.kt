@@ -22,6 +22,7 @@ import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -62,8 +63,14 @@ class TranslationSuggestionController(
   )
   @AccessWithApiKey()
   @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  fun suggestMachineTranslationsStreaming(@RequestBody @Valid dto: SuggestRequestDto): StreamingResponseBody {
-    return machineTranslationSuggestionFacade.suggestStreaming(dto)
+  fun suggestMachineTranslationsStreaming(
+    @RequestBody @Valid dto: SuggestRequestDto
+  ): ResponseEntity<StreamingResponseBody> {
+    return ResponseEntity.ok().headers {
+      it.add("X-Accel-Buffering", "no")
+    }.body(
+      machineTranslationSuggestionFacade.suggestStreaming(dto)
+    )
   }
 
   @PostMapping("/translation-memory")
