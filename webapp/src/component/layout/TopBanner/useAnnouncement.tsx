@@ -17,6 +17,13 @@ export function useAnnouncement() {
             link="https://tolgee.io/platform/translation_keys/batch_operations"
           />
         );
+      case 'FEATURE_MT_FORMALITY':
+        return (
+          <Announcement
+            content={t('announcement_feature_mt_formality')}
+            link="https://tolgee.io/platform/projects_and_organizations/languages#machine-translation-settings"
+          />
+        );
       default:
         assertUnreachable(value);
     }
