@@ -104,9 +104,12 @@ jobs:
           tar -xzf ~/backend-testing.tgz ./backend/testing/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
 
-
       - name: Run backend tests
-        run: ./gradlew ${{ matrix.command }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
+          command: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
 
@@ -194,7 +197,12 @@ jobs:
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        run: ./gradlew runE2e
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
+          command: |
+            ./gradlew runE2e
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}

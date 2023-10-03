@@ -17,6 +17,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.component.ExceptionHandlerFilter
+import io.tolgee.component.TransferEncodingHeaderDebugFilter
 import io.tolgee.security.authentication.AuthenticationDisabledFilter
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
@@ -26,8 +27,10 @@ import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -98,5 +101,14 @@ class WebSecurityConfig(
       .addPathPatterns("/v2/organizations/**")
     registry.addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
+  }
+
+  @Bean
+  fun customFilterRegistration(): FilterRegistrationBean<TransferEncodingHeaderDebugFilter>? {
+    val registration: FilterRegistrationBean<TransferEncodingHeaderDebugFilter> =
+      FilterRegistrationBean<TransferEncodingHeaderDebugFilter>()
+    registration.setFilter(TransferEncodingHeaderDebugFilter())
+    registration.setOrder(Ordered.HIGHEST_PRECEDENCE)
+    return registration
   }
 }

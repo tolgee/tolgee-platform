@@ -1,3 +1,12 @@
+## [3.30.1](https://github.com/tolgee/tolgee-platform/compare/v3.30.0...v3.30.1) (2023-10-02)
+
+
+### Bug Fixes
+
+* Add Transfer-Encoding debug logging ([#1923](https://github.com/tolgee/tolgee-platform/issues/1923)) ([6aa6b2c](https://github.com/tolgee/tolgee-platform/commit/6aa6b2c8310c155c10cf9e60b4c027aee80e1cd8))
+* Blank key import results in 500 ([#1911](https://github.com/tolgee/tolgee-platform/issues/1911)) ([9cdb89c](https://github.com/tolgee/tolgee-platform/commit/9cdb89c1610d242383194530ed2a6ddd0542a1a6))
+* Client abort exception handling ([#1919](https://github.com/tolgee/tolgee-platform/issues/1919)) ([ca4b4ad](https://github.com/tolgee/tolgee-platform/commit/ca4b4ad83dca8aedd2ea9a8839ceed899175c6c9))
+
 # [3.30.0](https://github.com/tolgee/tolgee-platform/compare/v3.29.6...v3.30.0) (2023-09-27)
 
 
