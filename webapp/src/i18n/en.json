@@ -153,6 +153,7 @@
   "administration_user_role_user" : "User",
   "administration_users" : "Users",
   "announcement_feature_batch_operations" : "We've released batch operations",
+  "announcement_feature_mt_formality" : "Machine translations now supports formality",
   "announcement_general_link_text" : "Show more",
   "api-key-delete-button" : "Delete",
   "api-key-deleted-message" : "API key deleted",

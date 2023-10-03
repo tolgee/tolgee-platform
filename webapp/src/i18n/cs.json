@@ -153,6 +153,7 @@
   "administration_user_role_user" : "Uživatel",
   "administration_users" : "Uživatelé",
   "announcement_feature_batch_operations" : "Byly vydány hromadné operace",
+  "announcement_feature_mt_formality" : "Strojové překlady nyní podporují formálnost",
   "announcement_general_link_text" : "Zobrazit více",
   "api-key-delete-button" : "Odstranit",
   "api-key-deleted-message" : "API klíč byl odstraněn",
