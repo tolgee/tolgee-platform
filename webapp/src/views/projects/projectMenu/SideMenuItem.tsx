@@ -42,6 +42,7 @@ type Props = {
   selected?: boolean;
   matchAsPrefix?: boolean;
   hidden?: boolean;
+  onClick?: () => void;
   'data-cy': string;
 };
 

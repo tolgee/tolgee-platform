@@ -322,4 +322,9 @@ export class LINKS {
   );
 
   static PROJECT_IMPORT = Link.ofParent(LINKS.PROJECT, 'import');
+
+  static PROJECT_ORDER_TRANSLATION = Link.ofParent(
+    LINKS.PROJECT,
+    'order-translation'
+  );
 }

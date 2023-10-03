@@ -351,6 +351,7 @@ declare namespace DataCy {
         "project-menu-item-settings" |
         "project-menu-item-translations" |
         "project-menu-items" |
+        "project-menu-order-translation" |
         "project-mt-dialog-settings-inherited" |
         "project-name-field" |
         "project-settings" |

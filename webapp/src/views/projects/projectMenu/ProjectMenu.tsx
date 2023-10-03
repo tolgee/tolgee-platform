@@ -4,6 +4,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import {
   ExportIcon,
   ImportIcon,
+  MarketPlaceIcon,
   ProjectsIcon,
   SettingsIcon,
   TranslationIcon,
@@ -17,6 +18,7 @@ import { SideLogo } from './SideLogo';
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
@@ -128,6 +130,14 @@ export const ProjectMenu = ({ id }) => {
           data-cy="project-menu-item-integrate"
         />
       )}
+      <SideMenuItem
+        linkTo={LINKS.PROJECT_ORDER_TRANSLATION.build({
+          [PARAMS.PROJECT_ID]: id,
+        })}
+        icon={<MarketPlaceIcon />}
+        text={t('project_menu_order_translation')}
+        data-cy="project-menu-order-translation"
+      />
       {!config.authentication && (
         <SideMenuItem
           linkTo={LINKS.USER_API_KEYS.build()}
