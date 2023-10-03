@@ -18,7 +18,7 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
@@ -241,7 +241,7 @@ class BatchJobTestUtil(
   fun initWebsocketHelper() {
     websocketHelper = WebsocketTestHelper(
       port,
-      jwtTokenProvider.generateToken(testData.user.id).toString(),
+      jwtService.emitToken(testData.user.id),
       testData.projectBuilder.self.id
     )
     websocketHelper.listenForBatchJobProgress()
@@ -379,8 +379,8 @@ class BatchJobTestUtil(
   private val port: Int
     get() = applicationContext.environment.getProperty("local.server.port")!!.toInt()
 
-  private val jwtTokenProvider: JwtTokenProvider
-    get() = applicationContext.getBean(JwtTokenProvider::class.java)
+  private val jwtService: JwtService
+    get() = applicationContext.getBean(JwtService::class.java)
 
   private val entityManager
     get() = applicationContext.getBean(EntityManager::class.java)

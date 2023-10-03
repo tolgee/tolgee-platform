@@ -1,7 +1,6 @@
 package io.tolgee.controllers.internal
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.security.InternalController
 import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -16,7 +15,6 @@ import javax.persistence.EntityManager
 @Hidden
 @RequestMapping(value = ["internal/sql"])
 @Transactional
-@InternalController
 class SqlController(
   val entityManager: EntityManager
 ) {

@@ -4,13 +4,15 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import java.time.Duration
+import java.util.Date
 
 abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
@@ -35,7 +37,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   lateinit var authorizedRequestPerformer: AuthorizedRequestPerformer
 
   @Autowired
-  lateinit var jwtTokenProvider: JwtTokenProvider
+  lateinit var jwtService: JwtService
 
   @AfterEach
   fun afterEach() {
@@ -44,12 +46,18 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
 
   fun loginAsAdminIfNotLogged() {
     if (_userAccount == null) {
-      loginAsUser("admin")
+      loginAsUser(initialUsername)
+    }
+  }
+
+  fun loginAsUserIfNotLogged() {
+    if (_userAccount == null) {
+      loginAsUser("_test_user")
     }
   }
 
   fun loginAsUser(userName: String) {
-    val account = userAccountService.findActive(userName) ?: dbPopulator.createUserIfNotExists("admin")
+    val account = userAccountService.findActive(userName) ?: dbPopulator.createUserIfNotExists(userName)
     loginAsUser(account)
   }
 
@@ -58,7 +66,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     init(generateJwtToken(_userAccount!!.id))
   }
 
-  protected fun generateJwtToken(userAccountId: Long) = jwtTokenProvider.generateToken(userAccountId, true).toString()
+  protected fun generateJwtToken(userAccountId: Long) = jwtService.emitToken(userAccountId, true)
 
   fun refreshUser() {
     _userAccount = userAccountService.findActive(_userAccount!!.id)
@@ -115,5 +123,31 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   ): ResultActions {
     loginAsAdminIfNotLogged()
     return authorizedRequestPerformer.performAuthMultipart(url, files, params)
+  }
+
+  fun refreshJwtToken() {
+    if (_userAccount != null) {
+      init(generateJwtToken(_userAccount!!.id))
+    }
+  }
+
+  override fun setForcedDate(date: Date) {
+    super.setForcedDate(date)
+    refreshJwtToken()
+  }
+
+  override fun clearForcedDate() {
+    super.clearForcedDate()
+    refreshJwtToken()
+  }
+
+  override fun forceDateString(dateString: String, pattern: String) {
+    super.forceDateString(dateString, pattern)
+    refreshJwtToken()
+  }
+
+  override fun moveCurrentDate(duration: Duration) {
+    super.moveCurrentDate(duration)
+    refreshJwtToken()
   }
 }

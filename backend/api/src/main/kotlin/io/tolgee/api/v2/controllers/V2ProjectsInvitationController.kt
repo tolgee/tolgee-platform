@@ -15,9 +15,9 @@ import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.InvitationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PutMapping
@@ -31,8 +31,7 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
-class
-V2ProjectsInvitationController(
+class V2ProjectsInvitationController(
   private val projectHolder: ProjectHolder,
   private val invitationService: InvitationService,
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
@@ -41,8 +40,8 @@ V2ProjectsInvitationController(
 ) {
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
-  @AccessWithProjectPermission(Scope.MEMBERS_EDIT)
-  @NeedsSuperJwtToken
+  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresSuperAuthentication
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
     validatePermissions(invitation)
 
@@ -66,7 +65,7 @@ V2ProjectsInvitationController(
     return projectInvitationModelAssembler.toModel(created)
   }
 
-  fun validatePermissions(invitation: ProjectInviteUserDto) {
+  private fun validatePermissions(invitation: ProjectInviteUserDto) {
     if (!(invitation.scopes.isNullOrEmpty() xor (invitation.type == null))) {
       throw BadRequestException(Message.SET_EXACTLY_ONE_OF_SCOPES_OR_TYPE)
     }

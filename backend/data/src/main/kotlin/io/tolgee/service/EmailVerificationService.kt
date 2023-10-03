@@ -75,7 +75,7 @@ class EmailVerificationService(
   fun verify(userId: Long, code: String) {
     val user = userAccountService.findActive(userId) ?: throw NotFoundException()
     val old = UserAccountDto.fromEntity(user)
-    val emailVerification = user?.emailVerification
+    val emailVerification = user.emailVerification
 
     if (emailVerification == null || emailVerification.code != code) {
       throw NotFoundException()

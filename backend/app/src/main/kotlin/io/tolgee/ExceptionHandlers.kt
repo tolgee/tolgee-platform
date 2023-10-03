@@ -11,6 +11,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.security.ratelimit.RateLimitResponseBody
+import io.tolgee.security.ratelimit.RateLimitedException
 import org.apache.catalina.connector.ClientAbortException
 import org.hibernate.QueryException
 import org.slf4j.LoggerFactory
@@ -195,6 +197,14 @@ class ExceptionHandlers {
       return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY))
     }
     throw ex
+  }
+
+  @ExceptionHandler(RateLimitedException::class)
+  fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
+    return ResponseEntity(
+      RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
+      HttpStatus.TOO_MANY_REQUESTS
+    )
   }
 
   @ExceptionHandler(Throwable::class)

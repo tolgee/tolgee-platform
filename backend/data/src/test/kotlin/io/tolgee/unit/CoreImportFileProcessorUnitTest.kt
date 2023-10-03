@@ -11,7 +11,7 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
@@ -88,8 +88,8 @@ class CoreImportFileProcessorUnitTest {
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(Optional.of(existingLanguage))
     val userAccount = UserAccount()
-    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(userAccount))
-    whenever(authenticationFacadeMock.userAccountEntity).thenReturn(userAccount)
+    whenever(authenticationFacadeMock.authenticatedUser).thenReturn(UserAccountDto.fromEntity(userAccount))
+    whenever(authenticationFacadeMock.authenticatedUserEntity).thenReturn(userAccount)
   }
 
   @Test

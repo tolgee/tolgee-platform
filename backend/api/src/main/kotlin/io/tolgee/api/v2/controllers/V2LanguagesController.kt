@@ -13,16 +13,14 @@ import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
@@ -64,12 +62,11 @@ class V2LanguagesController(
   private val pagedAssembler: PagedResourcesAssembler<Language>,
   private val projectHolder: ProjectHolder,
 ) : IController {
-
   @PostMapping(value = [""])
   @Operation(summary = "Creates language")
   @RequestActivity(ActivityType.CREATE_LANGUAGE)
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
+  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @AllowApiAccess
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid dto: LanguageDto
@@ -83,21 +80,21 @@ class V2LanguagesController(
   @Operation(summary = "Edits language")
   @PutMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.EDIT_LANGUAGE)
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
+  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @AllowApiAccess
   fun editLanguage(
     @RequestBody @Valid dto: LanguageDto,
     @PathVariable("languageId") languageId: Long
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
-    val language = languageService.findById(languageId).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    return languageModelAssembler.toModel(languageService.editLanguage(languageId, dto))
+    val language = languageService.get(languageId)
+    return languageModelAssembler.toModel(languageService.editLanguage(language, dto))
   }
 
   @GetMapping(value = [""])
-  @AccessWithApiKey
-  @AccessWithAnyProjectPermission
   @Operation(summary = "Returns all project languages", tags = ["Languages"])
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun getAll(
     @PathVariable("projectId") pathProjectId: Long?,
     @ParameterObject pageable: Pageable
@@ -106,24 +103,22 @@ class V2LanguagesController(
     return pagedAssembler.toModel(data, languageModelAssembler)
   }
 
-  @GetMapping(value = ["{languageId}"])
+  @GetMapping(value = ["/{languageId}"])
   @Operation(summary = "Returns specific language")
-  @AccessWithAnyProjectPermission
-  operator fun get(@PathVariable("languageId") id: Long?): LanguageModel {
-    val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
-    securityService.checkAnyProjectPermission(language.project.id)
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun get(@PathVariable("languageId") id: Long): LanguageModel {
+    val language = languageService.get(id)
     return languageModelAssembler.toModel(language)
   }
 
   @Operation(summary = "Deletes specific language")
   @DeleteMapping(value = ["/{languageId}"])
   @RequestActivity(ActivityType.DELETE_LANGUAGE)
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.LANGUAGES_EDIT)
-  @NeedsSuperJwtToken
+  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @AllowApiAccess
   fun deleteLanguage(@PathVariable languageId: Long) {
-    val language = languageService.findById(languageId)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    val language = languageService.get(languageId)
     securityService.checkProjectPermission(language.project.id, Scope.LANGUAGES_EDIT)
 
     // if base language is missing, select first language

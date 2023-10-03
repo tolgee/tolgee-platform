@@ -20,9 +20,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.security.project_auth.ProjectNotSelectedException
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.ProjectNotSelectedException
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -51,7 +51,7 @@ import javax.persistence.EntityManager
 
 @Transactional
 @Service
-class ProjectService constructor(
+class ProjectService(
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
@@ -122,8 +122,8 @@ class ProjectService constructor(
 
   @Transactional
   fun getView(id: Long): ProjectWithLanguagesView {
-    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.userAccount.id)
-    val withoutPermittedLanguages = projectRepository.findViewById(authenticationFacade.userAccount.id, id)
+    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
+    val withoutPermittedLanguages = projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
       ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
@@ -204,7 +204,7 @@ class ProjectService constructor(
   fun addPermittedLanguagesToProjects(projectsPage: Page<ProjectView>): Page<ProjectWithLanguagesView> {
     val projectLanguageMap = permissionService.getPermittedTranslateLanguagesForProjectIds(
       projectsPage.content.map { it.id },
-      authenticationFacade.userAccount.id
+      authenticationFacade.authenticatedUser.id
     )
     val newContent = projectsPage.content.map {
       ProjectWithLanguagesView.fromProjectView(it, projectLanguageMap[it.id])
@@ -307,7 +307,7 @@ class ProjectService constructor(
     organizationId: Long? = null
   ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages = projectRepository.findAllPermitted(
-      authenticationFacade.userAccount.id,
+      authenticationFacade.authenticatedUser.id,
       pageable,
       search,
       organizationId
@@ -325,7 +325,7 @@ class ProjectService constructor(
     projectRepository.save(project)
     if (isCreating) {
       projectHolder.project = ProjectDto.fromEntity(project)
-      activityHolder.activityRevision?.projectId = projectHolder.project.id
+      activityHolder.activityRevision.projectId = projectHolder.project.id
     }
     return project
   }

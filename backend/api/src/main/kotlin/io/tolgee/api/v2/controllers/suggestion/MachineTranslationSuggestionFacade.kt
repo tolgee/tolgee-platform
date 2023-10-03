@@ -11,12 +11,11 @@ import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
@@ -25,19 +24,21 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 @Service
 class MachineTranslationSuggestionFacade(
-  val projectHolder: ProjectHolder,
-  val mtService: MtService,
-  val keyService: KeyService,
-  val languageService: LanguageService,
-  val securityService: SecurityService,
-  val mtCreditBucketService: MtCreditBucketService,
-  val projectService: ProjectService,
-  val applicationContext: ApplicationContext,
+  private val projectHolder: ProjectHolder,
+  private val mtService: MtService,
+  private val keyService: KeyService,
+  private val languageService: LanguageService,
+  private val securityService: SecurityService,
+  private val mtCreditBucketService: MtCreditBucketService,
+  private val applicationContext: ApplicationContext,
 ) {
   fun suggestSync(dto: SuggestRequestDto): SuggestResultModel {
     val targetLanguage = dto.targetLanguage
 
-    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
+    securityService.checkLanguageTranslatePermission(
+      projectHolder.project.id,
+      listOf(targetLanguage.id)
+    )
 
     val balanceBefore = mtCreditBucketService.getCreditBalances(projectHolder.projectEntity)
 
@@ -70,7 +71,12 @@ class MachineTranslationSuggestionFacade(
     val key = dto.key
 
     val resultMap =
-      mtService.getMachineTranslations(projectHolder.projectEntity, key, dto.baseText, targetLanguage, dto.services)
+      mtService.getMachineTranslations(
+        projectHolder.projectEntity,
+        key, dto.baseText,
+        targetLanguage,
+        dto.services
+      )
 
     val resultData = resultMap
       .map { (key, value) ->
@@ -110,8 +116,7 @@ class MachineTranslationSuggestionFacade(
     }
 
   val SuggestRequestDto.targetLanguage
-    get() = languageService.findById(this.targetLanguageId)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    get() = languageService.get(this.targetLanguageId)
 
   private fun Key.checkInProject() {
     keyService.checkInProject(this, projectHolder.project.id)

@@ -77,6 +77,7 @@
   "administration_user_role_admin" : "Administrador",
   "administration_user_role_user" : "Usuario",
   "administration_users" : "Usuarios",
+  "announcement_feature_mt_formality" : "Las traducciones automáticas ahora admiten formalidad",
   "api-key-delete-button" : "Eliminar",
   "api-key-deleted-message" : "Clave API eliminada",
   "api-key-delete-token-confirmation-message" : "¿Realmente quieres eliminar esta clave de API?",

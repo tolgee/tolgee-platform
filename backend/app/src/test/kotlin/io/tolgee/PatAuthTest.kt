@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.Pat
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -63,7 +64,7 @@ class PatAuthTest : AbstractControllerTest() {
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_nopat")
       }
-    ).andIsForbidden
+    ).andIsUnauthorized
   }
 
   @Test
@@ -74,7 +75,7 @@ class PatAuthTest : AbstractControllerTest() {
       HttpHeaders().apply {
         add("X-API-Key", "tgpat_${pat.token}")
       }
-    ).andIsForbidden
+    ).andIsUnauthorized
   }
 
   @Test

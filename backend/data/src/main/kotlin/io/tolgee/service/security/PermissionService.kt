@@ -77,7 +77,7 @@ class PermissionService(
     val projectPermission = find(projectId = project.id, userId = userAccountId)
 
     val organizationRole = project.organizationOwnerId
-      ?.let { organizationRoleService.findType(userAccountId, it) }
+      .let { organizationRoleService.findType(userAccountId, it) }
 
     val organizationBasePermission = find(organizationId = project.organizationOwnerId)
       ?: throw IllegalStateException("Organization has no base permission")

@@ -3,12 +3,9 @@ package io.tolgee.batch
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
-import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.security.JwtTokenProvider
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
@@ -34,18 +31,13 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Autowired
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
+  @Suppress("unused") // Used to instrument it in other places via @SpyBean
   @SpyBean
   @Autowired
   lateinit var deleteKeysChunkProcessor: DeleteKeysChunkProcessor
 
   @Autowired
   lateinit var batchJobActionService: BatchJobActionService
-
-  @Autowired
-  lateinit var jwtTokenProvider: JwtTokenProvider
-
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
   lateinit var batchJobCancellationManager: BatchJobCancellationManager
@@ -64,12 +56,6 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @SpyBean
   lateinit var progressManager: ProgressManager
 
-  @Autowired
-  lateinit var batchJobStateProvider: BatchJobStateProvider
-
-  @Autowired
-  lateinit var cachingBatchJobService: CachingBatchJobService
-
   lateinit var util: BatchJobTestUtil
 
   @BeforeEach
@@ -85,16 +71,16 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     testDataService.saveTestData(testData.root)
     util = BatchJobTestUtil(applicationContext, testData)
 
-    currentDateProvider.forcedDate = Date(1687237928000)
+    setForcedDate(Date(1687237928000))
     util.initWebsocketHelper()
     batchJobConcurrentLauncher.pause = false
   }
 
-  @AfterEach()
+  @AfterEach
   fun teardown() {
     batchJobChunkExecutionQueue.clear()
     batchJobConcurrentLauncher.pause = true
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
     util.websocketHelper.stop()
   }
 
@@ -156,11 +142,11 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val job = util.runChunkedJob(1000)
 
     util.waitForRetryExecutionCreated(100)
-    currentDateProvider.move(Duration.ofMillis(100))
+    moveCurrentDate(Duration.ofMillis(100))
     util.waitForRetryExecutionCreated(1000)
-    currentDateProvider.move(Duration.ofMillis(1000))
+    moveCurrentDate(Duration.ofMillis(1000))
     util.waitForRetryExecutionCreated(10000)
-    currentDateProvider.move(Duration.ofMillis(10000))
+    moveCurrentDate(Duration.ofMillis(10000))
 
     util.waitForJobFailed(job)
     util.assertTotalExecutionsCount(job, 103)
@@ -198,7 +184,7 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
 
   @Test
   fun `it locks the single job for project`() {
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
     batchJobConcurrentLauncher.pause = true
 
     val job1 = util.runChunkedJob(20)

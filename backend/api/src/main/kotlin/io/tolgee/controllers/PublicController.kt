@@ -10,12 +10,13 @@ import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
-import io.tolgee.security.JwtTokenProviderImpl
-import io.tolgee.security.LoginRequest
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.security.third_party.OAuth2Delegate
@@ -45,7 +46,7 @@ import javax.validation.constraints.NotNull
 @RequestMapping("/api/public")
 @Tag(name = "Authentication")
 class PublicController(
-  private val tokenProvider: JwtTokenProviderImpl,
+  private val jwtService: JwtService,
   private val githubOAuthDelegate: GithubOAuthDelegate,
   private val googleOAuthDelegate: GoogleOAuthDelegate,
   private val oauth2Delegate: OAuth2Delegate,
@@ -60,22 +61,14 @@ class PublicController(
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
+  @RateLimited(5, isAuthentication = true)
   fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<*> {
-    // note: These checks are left to keep the behavior of this legacy endpoint untouched;
-    // v2 endpoint will allow for hybrid authentication between platform accounts and ldap accounts
-    if (properties.authentication.ldap.enabled && properties.authentication.nativeEnabled) {
-      throw RuntimeException("Can not use native auth and ldap auth in the same time")
-    }
-    if (!properties.authentication.ldap.enabled && !properties.authentication.nativeEnabled) {
-      throw RuntimeException("Authentication method not configured")
-    }
-
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token
-    val jwt = tokenProvider.generateToken(userAccount.id, true).toString()
+    val jwt = jwtService.emitToken(userAccount.id, true)
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 
@@ -149,7 +142,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     @PathVariable("code") @NotBlank code: String
   ): JwtAuthenticationResponse {
     emailVerificationService.verify(userId, code)
-    return JwtAuthenticationResponse(tokenProvider.generateToken(userId).toString())
+    return JwtAuthenticationResponse(jwtService.emitToken(userId))
   }
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -169,7 +162,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
       val user = getFakeGithubUser()
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+      return JwtAuthenticationResponse(jwtService.emitToken(user.id))
     }
     return when (serviceType) {
       "github" -> {

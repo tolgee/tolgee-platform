@@ -1,11 +1,11 @@
 package io.tolgee.security
 
 import io.tolgee.API_KEY_HEADER_NAME
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.fixtures.*
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.testing.assertions.UserApiAppAction
@@ -18,13 +18,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @AutoConfigureMockMvc
-class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
-
+class ProjectApiKeyAuthenticationTest : AbstractApiKeyTest() {
   @Autowired
-  private lateinit var currentDateProvider: CurrentDateProvider
-
-  @Autowired
-  private lateinit var jwtProvider: JwtTokenProvider
+  private lateinit var jwtService: JwtService
 
   @Test
   fun after() {
@@ -33,7 +29,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
 
   @Test
   fun accessWithApiKey_failure() {
-    val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/uaa/en"))
+    val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations"))
       .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
     Assertions.assertThat(mvcResult).error()
   }
@@ -47,8 +43,8 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
 
   @Test
   fun accessWithApiKey_failure_wrong_key() {
-    mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=wrong_api_key"))
-      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=wrong_api_key"))
+      .andExpect(MockMvcResultMatchers.status().isUnauthorized).andReturn()
   }
 
   @Test
@@ -58,12 +54,12 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
     performAction(
       UserApiAppAction(
         apiKey = apiKey.key,
-        url = "/api/projects",
+        url = "/v2/projects",
         expectedStatus = HttpStatus.FORBIDDEN
       )
     )
-    mvc.perform(MockMvcRequestBuilders.get("/api/projects"))
-      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects"))
+      .andIsForbidden
   }
 
   @Test
@@ -91,7 +87,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
   }
 
   @Test
-  fun `expired key is forbidden`() {
+  fun `expired key is unauthorized`() {
     val testData = ApiKeysTestData()
     testDataService.saveTestData(testData.root)
 
@@ -100,7 +96,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_" + testData.expiredKey.encodedKey)
       }
-    ).andIsForbidden
+    ).andIsUnauthorized
   }
 
   @Test
@@ -130,7 +126,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
   }
 
   @Test
-  fun `malformed API key is forbidden`() {
+  fun `malformed API key is unauthorized`() {
     val testData = ApiKeysTestData()
     testDataService.saveTestData(testData.root)
 
@@ -139,7 +135,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
       HttpHeaders().apply {
         add(API_KEY_HEADER_NAME, "tgpak_---aaajsjs")
       }
-    ).andIsForbidden
+    ).andIsUnauthorized
   }
 
   @Test
@@ -156,7 +152,7 @@ class ProjectApiKeyAuthenticationTest() : AbstractApiKeyTest() {
     ).andIsOk
 
     // Revoke user permissions
-    val tokenFrantisek = jwtProvider.generateToken(testData.frantisekDobrota.id, true)
+    val tokenFrantisek = jwtService.emitToken(testData.frantisekDobrota.id, true)
     performPut(
       "/v2/projects/${testData.frantasProject.id}/users/${testData.user.id}/set-permissions/VIEW",
       null,

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.AbstractSpringTest
+import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
-import io.tolgee.security.LoginRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException
 abstract class AbstractControllerTest :
   AbstractSpringTest(), RequestPerformer {
 
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   protected lateinit var mvc: MockMvc
 

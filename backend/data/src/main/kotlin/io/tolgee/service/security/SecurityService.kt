@@ -2,6 +2,7 @@ package io.tolgee.service.security
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
@@ -12,14 +13,14 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.Serializable
 
 @Service
-class SecurityService @Autowired constructor(
+class SecurityService(
   private val authenticationFacade: AuthenticationFacade,
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository
@@ -42,11 +43,11 @@ class SecurityService @Autowired constructor(
       throw PermissionException()
   }
 
-  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKey) {
+  fun checkProjectPermission(projectId: Long, requiredScopes: Scope, apiKey: ApiKeyDto) {
     checkProjectPermission(listOf(requiredScopes), apiKey)
   }
 
-  private fun checkProjectPermission(requiredScopes: List<Scope>, apiKey: ApiKey) {
+  private fun checkProjectPermission(requiredScopes: List<Scope>, apiKey: ApiKeyDto) {
     this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
@@ -70,7 +71,6 @@ class SecurityService @Autowired constructor(
     allowedScopes: Array<Scope>
   ) {
     if (!allowedScopes.contains(requiredScope)) {
-      @Suppress("UNCHECKED_CAST")
       throw PermissionException(
         Message.OPERATION_NOT_PERMITTED,
         listOf(requiredScope.value) as List<Serializable>
@@ -79,8 +79,12 @@ class SecurityService @Autowired constructor(
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: Scope) {
-    val apiKey = activeApiKey ?: return checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
-    return checkProjectPermission(projectId, requiredPermission, apiKey)
+    // Always check for the current user even if we're using an API key for security reasons.
+    // This prevents improper preservation of permissions.
+    checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
+
+    val apiKey = activeApiKey ?: return
+    checkProjectPermission(projectId, requiredPermission, apiKey)
   }
 
   fun checkLanguageViewPermissionByTag(projectId: Long, languageTags: Collection<String>) {
@@ -146,7 +150,7 @@ class SecurityService @Autowired constructor(
     }
     val usersPermission = permissionService.getProjectPermissionData(
       projectId,
-      authenticationFacade.userAccount.id
+      authenticationFacade.authenticatedUser.id
     )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -160,7 +164,7 @@ class SecurityService @Autowired constructor(
     try {
       val usersPermission = permissionService.getProjectPermissionData(
         projectId,
-        authenticationFacade.userAccount.id
+        authenticationFacade.authenticatedUser.id
       )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -211,7 +215,7 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKey) {
+  fun checkApiKeyScopes(scopes: Set<Scope>, apiKey: ApiKeyDto) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
       if (!expandedScopes.toList().containsAll(scopes)) {
         throw PermissionException()
@@ -219,7 +223,7 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  fun checkApiKeyScopes(scopes: Collection<Scope>, apiKey: ApiKey) {
+  fun checkApiKeyScopes(scopes: Collection<Scope>, apiKey: ApiKeyDto) {
     checkApiKeyScopes(apiKey) { expandedScopes ->
       val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
       if (!hasRequiredPermission) {
@@ -228,20 +232,20 @@ class SecurityService @Autowired constructor(
     }
   }
 
-  private fun checkApiKeyScopes(apiKey: ApiKey, checkFn: (expandedScopes: Array<Scope>) -> Unit) {
-    val expandedScopes = Scope.expand(apiKey.scopesEnum)
+  private fun checkApiKeyScopes(apiKey: ApiKeyDto, checkFn: (expandedScopes: Array<Scope>) -> Unit) {
+    val expandedScopes = Scope.expand(apiKey.scopes)
     checkFn(expandedScopes)
   }
 
   fun checkScreenshotsUploadPermission(projectId: Long) {
-    if (authenticationFacade.isApiKeyAuthentication) {
-      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.apiKey)
+    if (authenticationFacade.isProjectApiKeyAuth) {
+      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.projectApiKey)
     }
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
   }
 
   fun checkUserIsServerAdmin() {
-    if (authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
+    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
       throw PermissionException()
     }
   }
@@ -277,8 +281,8 @@ class SecurityService @Autowired constructor(
   }
 
   private val activeUser: UserAccountDto
-    get() = authenticationFacade.userAccountOrNull ?: throw PermissionException()
+    get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException()
 
-  private val activeApiKey: ApiKey?
-    get() = authenticationFacade.apiKeyOrNull
+  private val activeApiKey: ApiKeyDto?
+    get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 }

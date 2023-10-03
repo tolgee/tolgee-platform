@@ -3,7 +3,9 @@ package io.tolgee.service.dataImport
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportNamespacesTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
-import io.tolgee.security.AuthenticationProvider
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -84,8 +86,11 @@ class ImportServiceTest : AbstractSpringTest() {
     val testData = executeInNewTransaction {
       val testData = ImportNamespacesTestData()
       testDataService.saveTestData(testData.root)
-      val provider = applicationContext.getBean(AuthenticationProvider::class.java)
-      SecurityContextHolder.getContext().authentication = provider.getAuthentication(testData.userAccount)
+      SecurityContextHolder.getContext().authentication = TolgeeAuthentication(
+        null,
+        UserAccountDto.fromEntity(testData.userAccount),
+        TolgeeAuthenticationDetails(false)
+      )
       testData
     }
     executeInNewTransaction {

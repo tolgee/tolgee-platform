@@ -7,6 +7,6 @@ class InternalException : ErrorException {
   constructor(message: io.tolgee.constants.Message, params: List<Serializable>?) : super(message, params)
   constructor(message: io.tolgee.constants.Message) : super(message)
 
-  override val httpStatus: HttpStatus?
+  override val httpStatus: HttpStatus
     get() = HttpStatus.INTERNAL_SERVER_ERROR
 }

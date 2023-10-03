@@ -593,7 +593,7 @@ export interface components {
       emailAwaitingVerification?: string;
       mfaEnabled: boolean;
       avatar?: components["schemas"]["Avatar"];
-      accountType: "LOCAL" | "LDAP" | "THIRD_PARTY";
+      accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       globalServerRole: "USER" | "ADMIN";
       deletable: boolean;
       needsSuperJwtToken: boolean;

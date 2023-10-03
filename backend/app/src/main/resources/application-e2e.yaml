@@ -23,6 +23,10 @@ tolgee:
       authorization-url: "https://dummy-url.com/authorize"
       token-url: "https://dummy-url.com/oauth/token"
       user-url: "https://dummy-url.com/userinfo"
+  rate-limits: # tests go brrrr but then get 429'd and no longer go brrrr
+    global-limits: false
+    endpoint-limits: false
+    authentication-limits: false
   file-storage-url: http://localhost:8201
   internal:
     controller-enabled: true

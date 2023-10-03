@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
+import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.BadRequestException
@@ -69,7 +70,7 @@ class ImportService(
     val languages = findLanguages(import)
 
     if (languages.count() + files.size > 100) {
-      throw BadRequestException(io.tolgee.constants.Message.CANNOT_ADD_MORE_THEN_100_LANGUAGES)
+      throw BadRequestException(Message.CANNOT_ADD_MORE_THEN_100_LANGUAGES)
     }
 
     importRepository.save(import)
@@ -116,7 +117,7 @@ class ImportService(
         it.existingLanguage?.id == existingLanguage.id && it.file.namespace == importLanguage.file.namespace
       }
       if (langAlreadySelectedInTheSameNS) {
-        throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_ALREADY_SELECTED)
+        throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
       }
     }
     importLanguage.existingLanguage = existingLanguage

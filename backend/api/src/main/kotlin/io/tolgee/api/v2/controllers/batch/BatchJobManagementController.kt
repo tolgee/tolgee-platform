@@ -10,11 +10,11 @@ import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.BatchJobView
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.security.SecurityService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -45,35 +45,35 @@ class BatchJobManagementController(
   private val securityService: SecurityService
 ) {
   @GetMapping(value = ["batch-jobs"])
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.BATCH_JOBS_VIEW)
   @Operation(summary = "Lists all batch operations in project")
+  @RequiresProjectPermissions([ Scope.BATCH_JOBS_VIEW ])
+  @AllowApiAccess
   fun list(@Valid @ParameterObject @SortDefault("id") pageable: Pageable): PagedModel<BatchJobModel> {
     val views = batchJobService.getViews(projectHolder.project.id, null, pageable)
     return pagedResourcesAssembler.toModel(views, batchJobModelAssembler)
   }
 
   @GetMapping(value = ["my-batch-jobs"])
-  @AccessWithApiKey()
-  @AccessWithAnyProjectPermission()
   @Operation(summary = "Lists all batch operations in project started by current user")
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun myList(@Valid @ParameterObject @SortDefault("id") pageable: Pageable): PagedModel<BatchJobModel> {
     val views = batchJobService.getViews(
       projectId = projectHolder.project.id,
-      userAccount = authenticationFacade.userAccount,
+      userAccount = authenticationFacade.authenticatedUser,
       pageable = pageable
     )
     return pagedResourcesAssembler.toModel(views, batchJobModelAssembler)
   }
 
   @GetMapping(value = ["current-batch-jobs"])
-  @AccessWithApiKey()
-  @AccessWithAnyProjectPermission()
   @Operation(
     summary = "Returns all running and pending batch operations",
     description = "Completed batch operations are returned only if they are not older than 1 hour. " +
       "If user doesn't have permission to view all batch operations, only their operations are returned."
   )
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun currentJobs(): CollectionModel<BatchJobModel> {
     val views = batchJobService.getCurrentJobViews(
       projectId = projectHolder.project.id,
@@ -82,9 +82,9 @@ class BatchJobManagementController(
   }
 
   @GetMapping(value = ["batch-jobs/{id}"])
-  @AccessWithApiKey()
-  @AccessWithAnyProjectPermission()
   @Operation(summary = "Returns batch operation")
+  @UseDefaultPermissions // Security: permission checked internally
+  @AllowApiAccess
   fun get(@PathVariable id: Long): BatchJobModel {
     val view = batchJobService.getView(id)
     checkViewPermission(view.batchJob)
@@ -92,23 +92,23 @@ class BatchJobManagementController(
   }
 
   @PutMapping(value = ["batch-jobs/{id}/cancel"])
-  @AccessWithApiKey()
-  @AccessWithAnyProjectPermission()
   @Operation(summary = "Stops batch operation (if possible)")
+  @UseDefaultPermissions // Security: permission checked internally
+  @AllowApiAccess
   fun cancel(@PathVariable id: Long) {
     checkCancelPermission(batchJobService.getJobDto(id))
     batchJobCancellationManager.cancel(id)
   }
 
   private fun checkViewPermission(job: BatchJob) {
-    if (job.author?.id == authenticationFacade.userAccount.id) {
+    if (job.author?.id == authenticationFacade.authenticatedUser.id) {
       return
     }
     securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_VIEW)
   }
 
   private fun checkCancelPermission(job: BatchJobDto) {
-    if (job.authorId == authenticationFacade.userAccount.id) {
+    if (job.authorId == authenticationFacade.authenticatedUser.id) {
       return
     }
     securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_CANCEL)

@@ -14,6 +14,7 @@ import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.machineTranslation.MtServiceInfo
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.testing.assertions.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +34,13 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
+  // Mocking this is necessary to avoid entering org creation logic
+  // Otherwise, the org creation during initial user creation will cause everything to fail
+  @Suppress("LateinitVarOverridesLateinitVar")
+  @Autowired
+  @MockBean
+  override lateinit var organizationService: OrganizationService
+
   @Autowired
   @MockBean
   lateinit var userAccountRepository: UserAccountRepository
@@ -42,7 +50,6 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockBean
   override lateinit var projectRepository: ProjectRepository
 
-  @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
   @MockBean
   lateinit var permissionRepository: PermissionRepository

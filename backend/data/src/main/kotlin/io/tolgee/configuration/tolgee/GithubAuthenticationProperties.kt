@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.authentication.github")
 @DocProperty(
   description = ":::info\n" +
-    "GitHub authentication can be used in combination with LDAP or native authentication.\n" +
+    "GitHub authentication can be used in combination with native authentication.\n" +
     ":::",
   displayName = "GitHub"
 )

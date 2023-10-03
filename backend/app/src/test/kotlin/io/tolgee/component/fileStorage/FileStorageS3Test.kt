@@ -22,12 +22,15 @@ import software.amazon.awssdk.services.s3.model.S3Exception
 @ContextRecreatingTest
 @SpringBootTest(
   properties = [
+    "tolgee.authentication.jwt-secret=this is a predefined secret, so it doesn't attempt to " +
+      "get it from the S3 mock that doesn't exist yet :D",
     "tolgee.file-storage.s3.enabled=true",
     "tolgee.file-storage.s3.access-key=dummy_access_key",
     "tolgee.file-storage.s3.secret-key=dummy_secret_key",
     "tolgee.file-storage.s3.endpoint=http://localhost:29090",
     "tolgee.file-storage.s3.signing-region=dummy_signing_region",
     "tolgee.file-storage.s3.bucket-name=$BUCKET_NAME",
+    "tolgee.authentication.initial-password=hey password manager, please don't use the filesystem :3",
   ]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

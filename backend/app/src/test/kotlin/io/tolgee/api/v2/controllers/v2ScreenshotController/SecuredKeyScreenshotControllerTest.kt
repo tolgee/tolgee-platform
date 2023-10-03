@@ -4,22 +4,21 @@
 
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
-import io.tolgee.component.TimestampValidation
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsCreated
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.*
+import io.tolgee.model.Permission
+import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.data.Offset
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.io.File
+import java.time.Duration
 import java.util.*
 
 @ContextRecreatingTest
@@ -31,8 +30,10 @@ import java.util.*
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
-  @set:Autowired
-  lateinit var timestampValidation: TimestampValidation
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
+  }
 
   @Test
   fun getScreenshotFileNoTimestamp() {
@@ -42,11 +43,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val result = performAuthGet("/screenshots/${screenshot.filename}")
-        .andExpect(status().isBadRequest)
-        .andReturn()
-
-      assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+      performAuthGet("/screenshots/${screenshot.filename}").andIsNotFound
     }
   }
 
@@ -58,14 +55,18 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
-      val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
+      val token = jwtService.emitTicket(
+        userAccount!!.id,
+        JwtService.TicketType.IMG_ACCESS,
+        5000,
+        mapOf(
+          "fileName" to screenshot.filename,
+          "projectId" to project.id.toString(),
+        )
+      )
 
-      val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
-        .andExpect(status().isBadRequest)
-        .andReturn()
-
-      assertThat(result).error().isCustomValidation.hasMessage("invalid_timestamp")
+      moveCurrentDate(Duration.ofSeconds(10))
+      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
     }
   }
 
@@ -77,10 +78,17 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
-      val timestamp = timestampValidation.encryptTimeStamp(screenshot.filename, rawTimestamp)
+      val token = jwtService.emitTicket(
+        userAccount!!.id,
+        JwtService.TicketType.IMG_ACCESS,
+        5000,
+        mapOf(
+          "fileName" to screenshot.filename,
+          "projectId" to project.id.toString(),
+        )
+      )
 
-      performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp").andIsOk
+      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
     }
   }
 
@@ -97,8 +105,9 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
         assertThat(file).exists()
         assertThat(file.readBytes().size).isCloseTo(1524, Offset.offset(200))
         node("filename").isString.startsWith(screenshots[0].filename).satisfies {
-          val parts = it.split("?timestamp=")
-          timestampValidation.checkTimeStamp(parts[0], parts[1])
+          val parts = it.split("?token=")
+          val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)
+          assertThat(auth.data?.get("fileName")).isEqualTo(parts[0])
         }
       }
     }
@@ -112,10 +121,49 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       screenshotService.store(screenshotFile, key, null)
       performProjectAuthGet("/keys/${key.id}/screenshots").andIsOk.andAssertThatJson {
         node("_embedded.screenshots[0].filename").isString.satisfies {
-          val parts = it.split("?timestamp=")
-          timestampValidation.checkTimeStamp(parts[0], parts[1])
+          val parts = it.split("?token=")
+          val auth = jwtService.validateTicket(parts[1], JwtService.TicketType.IMG_ACCESS)
+          assertThat(auth.data?.get("fileName")).isEqualTo(parts[0])
         }
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it applies project permissions when accessing the screenshot`() {
+    executeInNewTransaction {
+      val newUser = dbPopulator.createUserIfNotExists("screenshot-test-user-1")
+      val newUserRandom = dbPopulator.createUserIfNotExists("screenshot-test-user-2")
+
+      val userPermission = permissionService.create(
+        Permission(
+          type = null,
+          user = newUser,
+          project = project,
+          scopes = Scope.expand(Scope.SCREENSHOTS_UPLOAD)
+        )
+      )
+
+      val key = keyService.create(project, CreateKeyDto("test"))
+      val screenshot = screenshotService.store(screenshotFile, key, null)
+
+      val token = jwtService.emitTicket(
+        newUser.id,
+        JwtService.TicketType.IMG_ACCESS,
+        5000,
+        mapOf(
+          "fileName" to screenshot.filename,
+          "projectId" to project.id.toString(),
+        )
+      )
+
+      // Login as someone who has 0 access to the project and see if it works
+      loginAsUser(newUserRandom)
+
+      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
+      permissionService.delete(userPermission)
+      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
     }
   }
 }

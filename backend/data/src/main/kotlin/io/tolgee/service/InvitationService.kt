@@ -16,7 +16,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.InvitationRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
 import org.apache.commons.lang3.RandomStringUtils
@@ -97,7 +97,7 @@ class InvitationService @Autowired constructor(
 
   @Transactional
   fun accept(code: String?) {
-    this.accept(code, authenticationFacade.userAccountEntity)
+    this.accept(code, authenticationFacade.authenticatedUserEntity)
   }
 
   @Transactional

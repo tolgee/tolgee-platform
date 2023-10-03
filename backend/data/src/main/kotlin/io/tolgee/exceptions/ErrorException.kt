@@ -12,5 +12,5 @@ abstract class ErrorException : ExceptionWithMessage {
   val errorResponseBody: ErrorResponseBody
     get() = ErrorResponseBody(this.code, params)
 
-  abstract val httpStatus: HttpStatus?
+  abstract val httpStatus: HttpStatus
 }

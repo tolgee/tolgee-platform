@@ -8,7 +8,7 @@ import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithStatsView
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -25,7 +25,7 @@ class ProjectWithStatsModelAssembler(
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val permissionModelAssembler: PermissionModelAssembler,
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
   V2ProjectsController::class.java, ProjectWithStatsModel::class.java
 ) {
@@ -39,7 +39,7 @@ class ProjectWithStatsModelAssembler(
       view.organizationOwner.basePermission,
       view.directPermission,
       UserAccount.Role.USER
-    ).getAdminPermissions(userRole = authenticationFacade.userAccountOrNull?.role)
+    ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
 
     return ProjectWithStatsModel(
       id = view.id,

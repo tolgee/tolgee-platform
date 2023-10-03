@@ -5,8 +5,7 @@ import io.tolgee.hateoas.language.LanguageModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.PagedModel
 
-// They use the PagedModel(...) constructor themselves, so how could it be deprecated???
-@Suppress("DEPRECATION", "unused")
+@Suppress("unused")
 class KeysWithTranslationsPageModel(
   content: Collection<KeyWithTranslationsModel>,
   metadata: PageMetadata?,

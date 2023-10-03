@@ -6,7 +6,6 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.security.InternalController
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PutMapping
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/features"])
 @Transactional
-@InternalController
 class DebugFeaturesController(
   val enabledFeaturesProvider: EnabledFeaturesProvider
 ) {

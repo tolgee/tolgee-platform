@@ -3,7 +3,6 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ProjectTransferringTestData
-import io.tolgee.security.InternalController
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/project-transferring"])
 @Transactional
-@InternalController
 class ProjectTransferringE2eDataController(
   private val testDataService: TestDataService,
   private val projectService: ProjectService,
@@ -38,7 +36,7 @@ class ProjectTransferringE2eDataController(
     val data = ProjectTransferringTestData()
     listOf(data.organization, data.notOwnedOrganization, data.anotherOrganization).forEach {
       organizationService.find(it.slug)?.let { found ->
-        organizationService.delete(found.id)
+        organizationService.delete(found)
       }
     }
     listOf(data.user, data.user2, data.user).forEach { user ->

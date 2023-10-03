@@ -92,3 +92,6 @@ project(':development').projectDir = new File('backend/development')
 
 include ':api'
 project(':api').projectDir = new File('backend/api')
+
+include ':security'
+project(':security').projectDir = new File('backend/security')

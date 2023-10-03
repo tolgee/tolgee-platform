@@ -3,15 +3,7 @@ package io.tolgee.api.v2.controllers.organizationController
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
-import io.tolgee.fixtures.andAssertError
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsCreated
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isPermissionScopes
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -142,7 +134,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     testDataService.saveTestData(testData.root)
     val organization = testData.jirinaOrg
     userAccount = testData.pepa
-    performAuthGet("/v2/organizations/${organization.id}").andIsForbidden
+    performAuthGet("/v2/organizations/${organization.id}").andIsNotFound
   }
 
   @Test
@@ -197,6 +189,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun testCreateNotAllowed() {
     this.tolgeeProperties.authentication.userCanCreateOrganizations = false
+    loginAsUserIfNotLogged()
     performAuthPost(
       "/v2/organizations",
       dummyDto

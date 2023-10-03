@@ -9,14 +9,14 @@ import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
-import io.tolgee.security.JwtToken
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
 import io.tolgee.util.GoogleAuthUtil
 import io.tolgee.util.OAuth2AuthUtil
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,7 +44,7 @@ class AuthTest : AbstractControllerTest() {
   private var authMvc: MockMvc? = null
 
   @Autowired
-  private lateinit var jwtTokenProvider: JwtTokenProvider
+  private lateinit var jwtService: JwtService
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
@@ -58,10 +58,17 @@ class AuthTest : AbstractControllerTest() {
     authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
   }
 
+  @AfterEach
+  fun clean() {
+    clearForcedDate()
+  }
+
   @Test
   fun generatesTokenForValidUser() {
     val response = doAuthentication(initialUsername, initialPassword)
+    println(response.andReturn().response.contentAsString)
     val result: HashMap<String, Any> = response.andReturn().mapResponseTo()
+    println(result)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")
   }
@@ -89,11 +96,14 @@ class AuthTest : AbstractControllerTest() {
 
   @Test
   fun `expired tokens do not have access`() {
-    tolgeeProperties.authentication.jwtExpiration *= -1 // Invert sign to *subtract* expiry time
+    val baseline = Date()
+
+    currentDateProvider.forcedDate = Date(baseline.time - tolgeeProperties.authentication.jwtExpiration - 10_000)
+
     val user = userAccountService[initialUsername].id
-    val token = jwtTokenProvider.generateToken(user)
-    tolgeeProperties.authentication.jwtExpiration *= -1 // Reset to normal
-    Thread.sleep(2000) // Make sure token is expired
+    val token = jwtService.emitToken(user)
+
+    currentDateProvider.forcedDate = baseline
 
     val mvcResult = mvc.perform(
       MockMvcRequestBuilders.get("/api/projects")
@@ -243,14 +253,21 @@ class AuthTest : AbstractControllerTest() {
 
   @Test
   fun `super token endpoints require super token`() {
-    val admin = userAccountService.get(initialUsername)
-    var token = jwtTokenProvider.generateToken(admin.id, false)
+    val admin = userAccountService[initialUsername]
+    var token = jwtService.emitToken(admin.id, false)
     assertExpired(token)
-    token = jwtTokenProvider.generateToken(admin.id, Date().time - 10)
+
+    val baseline = Date()
+    val newDate = baseline.time - tolgeeProperties.authentication.jwtSuperExpiration - 10_000
+
+    setForcedDate(Date(newDate))
+    token = jwtService.emitToken(admin.id, true)
+    setForcedDate(baseline)
+
     assertExpired(token)
   }
 
-  private fun assertExpired(token: JwtToken) {
+  private fun assertExpired(token: String) {
     mvc.perform(
       MockMvcRequestBuilders.put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
         .accept(MediaType.ALL)
