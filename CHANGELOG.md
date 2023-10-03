@@ -1,3 +1,10 @@
+# [3.32.0](https://github.com/tolgee/tolgee-platform/compare/v3.31.0...v3.32.0) (2023-10-03)
+
+
+### Features
+
+* platform security enhancements ([#1887](https://github.com/tolgee/tolgee-platform/issues/1887)) ([090bbbb](https://github.com/tolgee/tolgee-platform/commit/090bbbbe84dec73a187e87d3c3add562158dd684))
+
 # [3.31.0](https://github.com/tolgee/tolgee-platform/compare/v3.30.1...v3.31.0) (2023-10-03)
 
 
