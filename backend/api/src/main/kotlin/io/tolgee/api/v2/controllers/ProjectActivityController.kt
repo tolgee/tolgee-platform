@@ -11,9 +11,9 @@ import io.tolgee.hateoas.activity.ProjectActivityModel
 import io.tolgee.hateoas.activity.ProjectActivityModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.activity.ProjectActivityView
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -36,9 +36,9 @@ class ProjectActivityController(
   private val projectActivityModelAssembler: ProjectActivityModelAssembler
 ) {
   @Operation(summary = "Returns project history")
-  @AccessWithProjectPermission(Scope.ACTIVITY_VIEW)
-  @AccessWithApiKey()
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
+  @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable
   ): PagedModel<ProjectActivityModel> {

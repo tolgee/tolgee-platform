@@ -4,7 +4,9 @@ import com.google.common.io.BaseEncoding
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
@@ -17,6 +19,10 @@ import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -33,8 +39,13 @@ class ApiKeyService(
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
   private val permissionService: PermissionService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val cacheManager: CacheManager,
 ) : Logging {
+  private val cache: Cache? by lazy {
+    cacheManager.getCache(Caches.PROJECT_API_KEYS)
+  }
+
   fun create(
     userAccount: UserAccount,
     scopes: Set<Scope>,
@@ -92,6 +103,12 @@ class ApiKeyService(
     return find(id) ?: throw NotFoundException(Message.API_KEY_NOT_FOUND)
   }
 
+  @Cacheable(cacheNames = [Caches.PROJECT_API_KEYS], key = "#hash")
+  fun findDto(hash: String): ApiKeyDto? {
+    return find(hash)?.let { ApiKeyDto.fromEntity(it) }
+  }
+
+  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
   fun deleteApiKey(apiKey: ApiKey) {
     apiKeyRepository.delete(apiKey)
   }
@@ -102,6 +119,7 @@ class ApiKeyService(
     return Scope.expand(permittedScopes)
   }
 
+  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
   fun editApiKey(apiKey: ApiKey, dto: V2EditApiKeyDto): ApiKey {
     apiKey.scopesEnum = dto.scopes.toMutableSet()
     dto.description?.let {
@@ -111,17 +129,17 @@ class ApiKeyService(
   }
 
   fun deleteAllByProject(projectId: Long) {
-    apiKeyRepository.deleteAllByProjectId(projectId)
-  }
-
-  fun saveAll(entities: Iterable<ApiKey>) {
-    entities.forEach {
-      save(it)
+    cache?.let {
+      // Manual bulk cache eviction
+      getAllByProject(projectId).forEach { p -> it.evict(p.keyHash) }
     }
+
+    apiKeyRepository.deleteAllByProjectId(projectId)
   }
 
   fun hashKey(key: String) = keyGenerator.hash(key)
 
+  @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#entity.keyHash")
   fun save(entity: ApiKey): ApiKey {
     entity.key?.let { key ->
       entity.keyHash = hashKey(key)
@@ -156,20 +174,24 @@ class ApiKeyService(
 
   @Async
   @Transactional
-  fun updateLastUsedAsync(apiKey: ApiKey) {
+  fun updateLastUsedAsync(apiKeyId: Long) {
+    // Cache eviction: Not necessary, last used date is not cached
     runSentryCatching {
       logTransactionIsolation()
-      updateLastUsed(apiKey)
+      updateLastUsed(apiKeyId)
     }
   }
 
-  fun updateLastUsed(apiKey: ApiKey) {
-    apiKey.lastUsedAt = currentDateProvider.date
-    save(apiKey)
+  fun updateLastUsed(apiKeyId: Long) {
+    // Cache eviction: Not necessary, last used date is not cached
+    apiKeyRepository.updateLastUsedById(apiKeyId, currentDateProvider.date)
   }
 
   fun regenerate(id: Long, expiresAt: Long?): ApiKey {
     val apiKey = get(id)
+    // Manual cache eviction
+    cache?.evict(apiKey.keyHash)
+
     apiKey.key = generateKey()
     apiKey.expiresAt = expiresAt?.let { Date(it) }
     return save(apiKey)

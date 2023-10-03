@@ -1,0 +1,90 @@
+/**
+ * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.tolgee.security.authentication
+
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.PermissionException
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.AnnotationUtils
+import org.springframework.stereotype.Component
+import org.springframework.web.method.HandlerMethod
+import org.springframework.web.servlet.HandlerInterceptor
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
+/**
+ * This interceptor validates the user authentication for use in the authorization phase.
+ */
+@Component
+class AuthenticationInterceptor(
+  private val authenticationFacade: AuthenticationFacade
+) : HandlerInterceptor, Ordered {
+  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    if (handler !is HandlerMethod) {
+      return super.preHandle(request, response, handler)
+    }
+
+    if (request.method == "OPTIONS") {
+      // Do not process OPTIONS requests
+      return true
+    }
+
+    val allowApiAccess = AnnotationUtils.getAnnotation(handler.method, AllowApiAccess::class.java)
+    val requiresSuperAuth = requiresSuperAuthentication(handler)
+
+    if (authenticationFacade.isApiAuthentication) {
+      if (allowApiAccess == null) {
+        throw PermissionException(Message.API_ACCESS_FORBIDDEN)
+      }
+
+      if (authenticationFacade.isPersonalAccessTokenAuth && !isPatAllowed(allowApiAccess)) {
+        throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+      }
+
+      if (authenticationFacade.isProjectApiKeyAuth && !isPakAllowed(allowApiAccess)) {
+        throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+      }
+    }
+
+    if (
+      requiresSuperAuth &&
+      authenticationFacade.authenticatedUser.needsSuperJwt &&
+      !authenticationFacade.isUserSuperAuthenticated
+    ) {
+      throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
+    }
+
+    return true
+  }
+
+  private fun requiresSuperAuthentication(handlerMethod: HandlerMethod): Boolean {
+    return AnnotationUtils.getAnnotation(handlerMethod.method, RequiresSuperAuthentication::class.java) != null
+  }
+
+  private fun isPatAllowed(annotation: AllowApiAccess): Boolean {
+    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAT
+  }
+
+  private fun isPakAllowed(annotation: AllowApiAccess): Boolean {
+    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
+  }
+
+  override fun getOrder(): Int {
+    return Ordered.HIGHEST_PRECEDENCE
+  }
+}

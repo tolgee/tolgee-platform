@@ -8,7 +8,7 @@ import io.tolgee.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService

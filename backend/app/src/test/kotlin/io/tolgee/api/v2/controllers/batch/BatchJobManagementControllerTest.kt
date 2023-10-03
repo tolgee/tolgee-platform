@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.batch.BatchJobActionService
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
@@ -12,7 +11,6 @@ import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -60,9 +58,6 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   lateinit var testData: BatchJobsTestData
 
   @Autowired
-  lateinit var batchJobActionService: BatchJobActionService
-
-  @Autowired
   lateinit var batchJobService: BatchJobService
 
   @Autowired
@@ -81,9 +76,6 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Autowired
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
-
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
@@ -118,7 +110,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   @AfterEach
   fun after() {
     batchJobConcurrentLauncher.pause = false
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
 
   @Test
@@ -196,7 +188,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     waitForNotThrowing(pollTime = 100) {
       // lets move time fast
-      currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(1)
+      setForcedDate(currentDateProvider.date.addMinutes(1))
       getSingleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
     }
 
@@ -368,7 +360,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
           node("_embedded.batchJobs").isArray.hasSize(3)
         }
 
-      currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(61)
+      setForcedDate(currentDateProvider.date.addMinutes(61))
 
       performProjectAuthGet("current-batch-jobs")
         .andIsOk.andAssertThatJson {

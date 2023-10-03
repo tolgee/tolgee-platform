@@ -76,8 +76,6 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation("org.springframework.ldap:spring-ldap-core")
-    implementation("org.springframework.security:spring-security-ldap")
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
 
@@ -92,7 +90,6 @@ dependencies {
     implementation libs.jsonUnitAssert
     testImplementation libs.mockito
     testImplementation("io.findify:s3mock_2.13:0.2.6")
-    testImplementation("io.socket:socket.io-client:1.0.1")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
@@ -166,6 +163,12 @@ dependencies {
      * API module
      */
     implementation(project(':api'))
+
+
+    /**
+     * API module
+     */
+    implementation(project(':security'))
 }
 
 test {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.posthog.java.PostHog
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
@@ -50,9 +49,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var postHog: PostHog
 
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @BeforeEach
   fun setup() {
     Mockito.reset(postHog)
@@ -61,7 +57,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @AfterEach
   fun tearDown() {
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
 
   @Test
@@ -90,7 +86,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performExport()
     Thread.sleep(2000)
     verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
-    currentDateProvider.forcedDate = currentDateProvider.date.addDays(1)
+    setForcedDate(currentDateProvider.date.addDays(1))
     performExport()
     performExport()
     verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())

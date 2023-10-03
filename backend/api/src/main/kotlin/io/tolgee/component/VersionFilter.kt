@@ -16,7 +16,7 @@ class VersionFilter(
   }
 
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-    response.addHeader("X-Tolgee-Version", versionProvider.version)
+    response.addHeader(TOLGEE_VERSION_HEADER_NAME, versionProvider.version)
     filterChain.doFilter(request, response)
   }
 }

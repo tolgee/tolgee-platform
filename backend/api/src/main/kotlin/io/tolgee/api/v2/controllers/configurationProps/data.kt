@@ -7,6 +7,7 @@ data class Property(
   val defaultValue: String? = null,
   val defaultExplanation: String? = null,
   val removedIn: String? = null,
+  val removalReason: String? = null,
 ) : DocItem
 
 interface DocItem {

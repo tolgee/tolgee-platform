@@ -5,7 +5,6 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.InternalController
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,7 +18,6 @@ import org.springframework.web.context.annotation.RequestScope
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/permissions"])
 @Transactional
-@InternalController
 @RequestScope
 class PermissionsE2eDataController() : AbstractE2eDataController() {
 

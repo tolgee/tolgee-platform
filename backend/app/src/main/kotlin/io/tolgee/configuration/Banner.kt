@@ -5,7 +5,7 @@ import org.springframework.core.env.Environment
 import java.io.PrintStream
 import org.springframework.boot.Banner as SpringBanner
 
-class Banner() : SpringBanner {
+class Banner : SpringBanner {
   override fun printBanner(arg0: Environment, arg1: Class<*>?, arg2: PrintStream) {
     val blue = "\u001B[34m"
     val red = "\u001B[31m"

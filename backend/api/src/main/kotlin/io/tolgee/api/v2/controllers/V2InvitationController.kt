@@ -7,7 +7,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.service.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -17,21 +16,21 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v2/")
+@RequestMapping("/v2/invitations")
 @Tag(name = "User invitations to project or organization")
-class V2InvitationController @Autowired constructor(
+class V2InvitationController(
   private val invitationService: InvitationService,
   private val securityService: SecurityService,
   private val organizationRoleService: OrganizationRoleService,
 ) {
-  @GetMapping("invitations/{code}/accept")
+  @GetMapping("/{code}/accept")
   @Operation(summary = "Accepts invitation to project or organization")
   fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
     invitationService.accept(code)
     return ResponseEntity(HttpStatus.OK)
   }
 
-  @DeleteMapping("invitations/{invitationId}")
+  @DeleteMapping("/{invitationId}")
   @Operation(summary = "Deletes invitation by ID")
   fun deleteInvitation(@PathVariable("invitationId") id: Long): ResponseEntity<Void> {
     val invitation = invitationService.findById(id).orElseThrow {

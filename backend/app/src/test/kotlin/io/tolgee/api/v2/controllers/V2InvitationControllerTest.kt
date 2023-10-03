@@ -2,11 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
-import io.tolgee.fixtures.EmailTestUtil
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.equalsPermissionType
-import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.*
 import io.tolgee.model.Invitation
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -35,7 +31,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     userAccount = dbPopulator.createUserIfNotExists("pavol")
-    performAuthGet("/v2/projects/${project.id}/invitations").andIsForbidden
+    performAuthGet("/v2/projects/${project.id}/invitations").andIsNotFound
   }
 
   @Test

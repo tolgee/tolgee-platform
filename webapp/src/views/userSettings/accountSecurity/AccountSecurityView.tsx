@@ -29,7 +29,7 @@ export const AccountSecurityView: FunctionComponent = () => {
     (state: AppState) => state.global.loadables.resetPasswordRequest
   );
 
-  const isManaged = user?.accountType === 'LDAP';
+  const isManaged = user?.accountType === 'MANAGED';
   const isThirdParty = user?.accountType === 'THIRD_PARTY';
 
   if (!config.authentication) {

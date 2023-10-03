@@ -3,7 +3,6 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
@@ -28,6 +27,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addMonths
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -41,7 +41,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -54,10 +53,6 @@ import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
-
-  @Autowired
-  @SpyBean
-  lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
   @MockBean
@@ -99,7 +94,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(amazonTranslate, deeplApiService, tolgeeTranslateApiService)
-    mockCurrentDate { Date() }
+    setForcedDate(Date())
     initTestData()
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
@@ -108,6 +103,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     val rateLimitsCacheMock = mock<Cache>()
     whenever(cacheManager.getCache(eq(Caches.RATE_LIMITS))).thenReturn(rateLimitsCacheMock)
     whenever(cacheManager.getCache(eq(Caches.MACHINE_TRANSLATIONS))).thenReturn(cacheMock)
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
@@ -380,10 +380,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     testMtCreditConsumption()
 
-    mockCurrentDate { Date().addMonths(1) }
+    setForcedDate(Date().addMonths(1))
     testMtCreditConsumption()
 
-    mockCurrentDate { Date().addMonths(2) }
+    setForcedDate(Date().addMonths(2))
     testMtCreditConsumption()
   }
 
@@ -496,10 +496,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     performMtRequestAndExpectAfterBalance(1)
     performMtRequestAndExpectAfterBalance(0)
     performMtRequestAndExpectBadRequest()
-  }
-
-  private fun mockCurrentDate(dateProvider: () -> Date) {
-    whenever(currentDateProvider.date).thenAnswer { dateProvider() }
   }
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Long, extraCreditBalance: Long = 0) {

@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
@@ -10,23 +9,20 @@ import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.*
 
 class V2ImportControllerResultTest : AuthorizedControllerTest() {
-  @SpyBean
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @BeforeEach
   fun setup() {
-    whenever(currentDateProvider.date).then {
-      Date()
-    }
+    setForcedDate(Date())
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   @Test
@@ -56,9 +52,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    whenever(currentDateProvider.date).then {
-      DateUtils.addHours(Date(), 2)
-    }
+    setForcedDate(DateUtils.addHours(Date(), 2))
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
 

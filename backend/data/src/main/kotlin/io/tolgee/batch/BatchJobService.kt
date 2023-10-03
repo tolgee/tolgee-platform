@@ -17,7 +17,7 @@ import io.tolgee.model.batch.IBatchJob
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.BatchJobView
 import io.tolgee.repository.BatchJobRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
@@ -45,7 +45,7 @@ class BatchJobService(
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val currentDateProvider: CurrentDateProvider,
   private val securityService: SecurityService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
 
   @Transactional
@@ -158,10 +158,10 @@ class BatchJobService(
       securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW)
       null
     } catch (e: PermissionException) {
-      if (authenticationFacade.isApiKeyAuthentication) {
+      if (authenticationFacade.isProjectApiKeyAuth) {
         throw e
       }
-      authenticationFacade.userAccount.id
+      authenticationFacade.authenticatedUser.id
     }
   }
 

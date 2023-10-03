@@ -1,6 +1,6 @@
 package io.tolgee.configuration.tolgee
 
-import io.tolgee.activity.iterceptor.ActivityInterceptor
+import io.tolgee.activity.iterceptor.ActivityDatabaseInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer
 import org.springframework.context.annotation.Configuration
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 class HibernateConfiguration : HibernatePropertiesCustomizer {
 
   @Autowired
-  lateinit var activityInterceptor: ActivityInterceptor
+  lateinit var activityInterceptor: ActivityDatabaseInterceptor
 
   override fun customize(vendorProperties: MutableMap<String, Any?>) {
     vendorProperties["hibernate.ejb.interceptor"] = activityInterceptor

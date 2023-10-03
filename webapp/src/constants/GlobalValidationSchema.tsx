@@ -98,7 +98,9 @@ export class Validation {
         }),
       name: Yup.string().required(),
       email:
-        accountType === 'LDAP' ? Yup.string() : Yup.string().email().required(),
+        accountType === 'MANAGED'
+          ? Yup.string()
+          : Yup.string().email().required(),
     });
 
   static readonly USER_PASSWORD_CHANGE = Yup.object().shape({

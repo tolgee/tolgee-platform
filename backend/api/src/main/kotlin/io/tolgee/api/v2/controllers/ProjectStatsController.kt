@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
@@ -37,8 +37,8 @@ class ProjectStatsController(
 ) {
   @Operation(summary = "Returns project stats")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun getProjectStats(): ProjectStatsModel {
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id)
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
@@ -63,8 +63,8 @@ class ProjectStatsController(
 
   @Operation(summary = "Returns project daily amount of events")
   @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
-  @AccessWithProjectPermission(Scope.ACTIVITY_VIEW)
-  @AccessWithApiKey()
+  @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
+  @AllowApiAccess
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
   }

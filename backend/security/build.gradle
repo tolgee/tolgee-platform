@@ -1,0 +1,95 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'io.spring.dependency-management'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.springframework.boot'
+    id "kotlin-allopen"
+
+}
+
+group = 'io.tolgee'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: "org.jetbrains.kotlin.plugin.spring"
+apply plugin: 'org.springframework.boot'
+apply plugin: "kotlin-allopen"
+apply plugin: 'io.spring.dependency-management'
+
+repositories {
+    mavenCentral()
+}
+
+kotlin {
+    jvmToolchain(11)
+}
+
+allOpen {
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.boot.test.context.SpringBootTest")
+}
+
+dependencies {
+    implementation libs.kotlinCoroutines
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    implementation(project(':data'))
+    implementation(project(':misc'))
+    testImplementation(project(':testing'))
+
+    /**
+     * SPRING DOC
+     */
+    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocOpenApiUi
+    implementation libs.springDocOpenApiKotlin
+    implementation libs.springDocOpenApiDataRest
+    implementation libs.springDocOpenApiHateoas
+
+    implementation libs.redissonSpringBootStarter
+    implementation libs.redissonSpringData
+
+    /**
+     * Misc
+     */
+    implementation libs.commonsCodec
+    implementation libs.sentry
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
+    implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
+    api libs.postHog
+
+    /**
+     * Tests
+     */
+    testImplementation libs.assertJCore
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    // implementation libs.springmockk
+    testImplementation libs.mockito
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = "2048m"
+}
+
+sourceSets {
+    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+tasks.findByName("jar").enabled(true)
+tasks.findByName("bootJar").enabled(false)
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}

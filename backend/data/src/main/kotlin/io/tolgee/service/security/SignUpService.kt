@@ -5,7 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
-import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.InvitationService
@@ -18,7 +18,7 @@ class SignUpService(
   private val invitationService: InvitationService,
   private val userAccountService: UserAccountService,
   private val tolgeeProperties: TolgeeProperties,
-  private val tokenProvider: JwtTokenProvider,
+  private val jwtService: JwtService,
   private val emailVerificationService: EmailVerificationService,
   private val organizationService: OrganizationService,
 ) {
@@ -47,7 +47,7 @@ class SignUpService(
     }
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id, true).toString())
+      return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
     }
 
     emailVerificationService.createForUser(user, dto.callbackUrl)

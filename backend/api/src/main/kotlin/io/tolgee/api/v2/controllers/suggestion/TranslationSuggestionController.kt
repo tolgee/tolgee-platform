@@ -11,9 +11,9 @@ import io.tolgee.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
@@ -48,8 +48,8 @@ class TranslationSuggestionController(
 ) {
   @PostMapping("/machine-translations")
   @Operation(summary = "Suggests machine translations from enabled services")
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
     return machineTranslationSuggestionFacade.suggestSync(dto)
   }
@@ -60,8 +60,8 @@ class TranslationSuggestionController(
       "If an error occurs when any of the services is used," +
       " the error information is returned as a part of the result item, while the response has 200 status code."
   )
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun suggestMachineTranslationsStreaming(@RequestBody @Valid dto: SuggestRequestDto): StreamingResponseBody {
     return machineTranslationSuggestionFacade.suggestStreaming(dto)
   }
@@ -71,14 +71,13 @@ class TranslationSuggestionController(
     summary = "Suggests machine translations from translation memory." +
       "\n\nThe result is always sorted by similarity, so sorting is not supported."
   )
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun suggestTranslationMemory(
     @RequestBody @Valid dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable
   ): PagedModel<TranslationMemoryItemModel> {
-    val targetLanguage = languageService.findById(dto.targetLanguageId)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    val targetLanguage = languageService.get(dto.targetLanguageId)
 
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 

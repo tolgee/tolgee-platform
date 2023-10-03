@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -10,11 +9,9 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
@@ -23,10 +20,6 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: TranslationsTestData
 
   private var activityCounter = 0
-
-  @SpyBean
-  @Autowired
-  lateinit var currentDateProvider: CurrentDateProvider
 
   var format: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
@@ -38,6 +31,11 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
+  }
+
+  @AfterEach
+  fun clear() {
+    clearForcedDate()
   }
 
   @Test
@@ -116,7 +114,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun mockDate(stringDate: String) {
-    whenever(currentDateProvider.date).thenReturn(format.parse(stringDate))
+    setForcedDate(format.parse(stringDate))
   }
 
   private fun createActivity(times: Int) {

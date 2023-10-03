@@ -3,10 +3,8 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -14,9 +12,6 @@ import java.util.*
 @SpringBootTest
 @Transactional
 class TranslationServiceTest : AbstractSpringTest() {
-
-  @Autowired
-  lateinit var authenticationFacade: AuthenticationFacade
 
   @Transactional
   @Test

@@ -3,6 +3,7 @@ package io.tolgee.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
@@ -28,7 +29,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     projectSupplier = { base.project }
     userAccount = base.userAccount
     val mvcResult = performProjectAuthGet("export/jsonZip")
-      .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
+      .andIsOk.andDo { obj: MvcResult -> obj.getAsyncResult(60000) }.andReturn()
     mvcResult.response
     val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
     project.languages.forEach(

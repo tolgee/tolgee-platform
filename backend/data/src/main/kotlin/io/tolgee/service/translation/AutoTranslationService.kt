@@ -13,7 +13,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.AutoTranslationConfigRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
 import org.slf4j.Logger
@@ -38,7 +38,7 @@ class AutoTranslationService(
     batchJobService.startJob(
       request,
       project,
-      authenticationFacade.userAccountEntity,
+      authenticationFacade.authenticatedUserEntity,
       BatchJobType.AUTO_TRANSLATE,
       isHiddenJob
     )

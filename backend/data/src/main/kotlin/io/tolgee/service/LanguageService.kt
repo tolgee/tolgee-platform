@@ -59,6 +59,11 @@ class LanguageService(
   @Transactional
   fun editLanguage(id: Long, dto: LanguageDto): Language {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
+    return editLanguage(language, dto)
+  }
+
+  @Transactional
+  fun editLanguage(language: Language, dto: LanguageDto): Language {
     language.updateByDTO(dto)
     entityManager.persist(language)
     return language

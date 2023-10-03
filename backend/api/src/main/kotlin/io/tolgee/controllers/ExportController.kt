@@ -5,14 +5,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
 import org.apache.tomcat.util.http.fileupload.IOUtils
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,21 +31,21 @@ import java.util.zip.ZipOutputStream
   "/api/repository/{projectId}/export", "/api/repository/export"
 )
 @Tag(name = "Export")
-class ExportController @Autowired constructor(
+class ExportController(
   private val translationService: TranslationService,
   private val permissionService: PermissionService,
   private val projectHolder: ProjectHolder,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
     val allLanguages = permissionService.getPermittedViewLanguages(
       projectHolder.project.id,
-      authenticationFacade.userAccount.id
+      authenticationFacade.authenticatedUser.id
     )
 
     return ResponseEntity

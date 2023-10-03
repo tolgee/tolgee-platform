@@ -33,6 +33,9 @@ val ResultActions.andIsBadRequest: ResultActions
 val ResultActions.andIsNotModified: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isNotModified) }
 
+val ResultActions.andIsRateLimited: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isTooManyRequests) }
+
 fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
   return this.tryPrettyPrinting {
     this.andAssertThatJson {

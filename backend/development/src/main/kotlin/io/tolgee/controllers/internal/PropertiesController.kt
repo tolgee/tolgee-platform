@@ -6,7 +6,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.SetPropertyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.security.InternalController
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PutMapping
@@ -24,7 +23,6 @@ import kotlin.reflect.full.hasAnnotation
 @Hidden
 @RequestMapping(value = ["internal/properties"])
 @Transactional
-@InternalController
 class PropertiesController(
   val tolgeeProperties: TolgeeProperties
 ) {

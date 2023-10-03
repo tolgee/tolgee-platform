@@ -8,7 +8,6 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
-import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
@@ -25,7 +24,6 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
-import io.tolgee.util.executeInNewTransaction
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +35,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
@@ -52,9 +49,8 @@ class UserAccountService(
   private val passwordEncoder: PasswordEncoder,
   @Lazy
   private val organizationService: OrganizationService,
-  private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -75,6 +71,10 @@ class UserAccountService(
 
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
+  }
+
+  fun findInitialUser(): UserAccount? {
+    return userAccountRepository.findInitialUser()
   }
 
   fun get(id: Long): UserAccount {
@@ -101,6 +101,28 @@ class UserAccountService(
     dtoToEntity(request).let {
       it.role = role
       this.createUser(it)
+      return it
+    }
+  }
+
+  @Transactional
+  fun createInitialUser(request: SignUpDto): UserAccount {
+    // Check if the account already exists.
+    // This can only be the case on Tolgee 3.x series and should be removed on Tolgee 4.
+    val candidate = findActive(request.email)
+    if (candidate != null) {
+      candidate.isInitialUser = true
+      return save(candidate)
+    }
+
+    dtoToEntity(request).let {
+      it.role = UserAccount.Role.ADMIN
+      it.isInitialUser = true
+      it.passwordChanged = false
+      this.createUser(it)
+
+      // TODO: remove this on Tolgee 4 release
+      transferLegacyNoAuthUser()
       return it
     }
   }
@@ -135,7 +157,7 @@ class UserAccountService(
       it.preferredBy.removeIf { preferences ->
         preferences.userAccount.id == userAccount.id
       }
-      organizationService.delete(it.id)
+      organizationService.delete(it)
     }
     userAccount.organizationRoles.forEach {
       entityManager.remove(it)
@@ -148,20 +170,6 @@ class UserAccountService(
     val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
-
-  @get:Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "'implicit'")
-  val implicitUser: UserAccount
-    get() {
-      val username = "___implicit_user"
-      return executeInNewTransaction(transactionManager) {
-        userAccountRepository.findActive(username) ?: let {
-          val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
-          this.createUser(account)
-          this.organizationService.create(OrganizationDto(name = account.name), account)
-          account
-        }
-      }
-    }
 
   fun findByThirdParty(type: String, id: String): Optional<UserAccount> {
     return userAccountRepository.findThirdByThirdParty(id, type)
@@ -298,7 +306,7 @@ class UserAccountService(
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
     // Current password required to change email or password
     if (dto.email != userAccount.username) {
-      if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+      if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
         throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
       }
 
@@ -317,7 +325,7 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun updatePassword(userAccount: UserAccount, dto: UserUpdatePasswordRequestDto): UserAccount {
-    if (userAccount.accountType == UserAccount.AccountType.LDAP) {
+    if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
@@ -326,6 +334,7 @@ class UserAccountService(
 
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
+    userAccount.passwordChanged = true
     return userAccountRepository.save(userAccount)
   }
 
@@ -405,4 +414,51 @@ class UserAccountService(
 
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
+
+  private fun transferLegacyNoAuthUser() {
+    val legacyImplicitUser = findActive("___implicit_user")
+      ?: return
+
+    // We need to migrate what's owned by `___implicit_user` to the initial user
+    val initialUser = findInitialUser() ?: throw IllegalStateException("Initial user does not exist?")
+
+    legacyImplicitUser.apiKeys?.forEach {
+      it.userAccount = initialUser
+      initialUser.apiKeys!!.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.pats?.forEach {
+      it.userAccount = initialUser
+      initialUser.pats!!.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.permissions.forEach {
+      it.user = initialUser
+      initialUser.permissions.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.preferences?.let {
+      it.userAccount = initialUser
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.organizationRoles.forEach {
+      it.user = initialUser
+      initialUser.organizationRoles.add(it)
+      entityManager.merge(it)
+    }
+
+    legacyImplicitUser.apiKeys?.clear()
+    legacyImplicitUser.pats?.clear()
+    legacyImplicitUser.permissions.clear()
+    legacyImplicitUser.organizationRoles.clear()
+
+    entityManager.flush()
+    userAccountRepository.save(initialUser)
+
+    userAccountRepository.deleteById(legacyImplicitUser.id)
+  }
 }

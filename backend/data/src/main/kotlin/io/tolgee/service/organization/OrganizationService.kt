@@ -1,6 +1,7 @@
 package io.tolgee.service.organization
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -13,7 +14,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
@@ -21,6 +22,11 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -29,6 +35,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
+import io.tolgee.dtos.cacheable.OrganizationDto as CachedOrganizationDto
 
 @Service
 @Transactional
@@ -42,8 +49,10 @@ class OrganizationService(
   @Lazy
   private val userPreferencesService: UserPreferencesService,
   private val tolgeeProperties: TolgeeProperties,
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
+  private val cacheManager: CacheManager,
 ) {
+  private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
   @set:Autowired
   lateinit var projectService: ProjectService
@@ -52,7 +61,7 @@ class OrganizationService(
   fun create(
     createDto: OrganizationDto,
   ): Organization {
-    return create(createDto, authenticationFacade.userAccountEntity)
+    return create(createDto, authenticationFacade.authenticatedUserEntity)
   }
 
   @Transactional
@@ -143,7 +152,7 @@ class OrganizationService(
     exceptOrganizationId: Long? = null
   ): Page<OrganizationView> {
     return organizationRepository.findAllPermitted(
-      userId = authenticationFacade.userAccount.id,
+      userId = authenticationFacade.authenticatedUser.id,
       pageable = pageable,
       roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
       search = search,
@@ -167,15 +176,25 @@ class OrganizationService(
     return organizationRepository.getOneBySlug(slug)
   }
 
+  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
+  fun findDto(id: Long): CachedOrganizationDto? {
+    return find(id)?.let { CachedOrganizationDto.fromEntity(it) }
+  }
+
+  @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #slug}")
+  fun findDto(slug: String): CachedOrganizationDto? {
+    return find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
+  }
+
+  @CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
     val organization = this.find(id) ?: throw NotFoundException()
 
-    val newSlug = editDto.slug
-    if (newSlug == null) {
-      editDto.slug = organization.slug
-    }
+    // Evict slug-based cache entry
+    cache?.evict(listOf("slug", organization.slug))
 
-    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug!!)) {
+    val newSlug = editDto.slug ?: organization.slug
+    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug)) {
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
@@ -188,10 +207,14 @@ class OrganizationService(
   }
 
   @Transactional
-  fun delete(id: Long) {
-    val organization = this.find(id) ?: throw NotFoundException()
-
-    projectService.findAllInOrganization(id).forEach {
+  @Caching(
+    evict = [
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
+    ]
+  )
+  fun delete(organization: Organization) {
+    projectService.findAllInOrganization(organization.id).forEach {
       projectService.deleteProject(it.id)
     }
 
@@ -199,7 +222,9 @@ class OrganizationService(
       invitationService.delete(invitation)
     }
 
-    organization.preferredBy
+    // `get` is important to help reducing the likelihood of a race-condition
+    // One may still occur, as a con of not relying on a DB-level cascade delete logic.
+    get(organization.id).preferredBy
       .toList() // we need to clone it so hibernate doesn't change it concurrently
       .forEach {
         it.preferredOrganization = findOrCreatePreferred(
@@ -216,11 +241,23 @@ class OrganizationService(
   }
 
   @Transactional
+  @Caching(
+    evict = [
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+    ]
+  )
   fun removeAvatar(organization: Organization) {
     avatarService.removeAvatar(organization)
   }
 
   @Transactional
+  @Caching(
+    evict = [
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+    ]
+  )
   fun setAvatar(organization: Organization, avatar: InputStream) {
     avatarService.setAvatar(organization, avatar)
   }
@@ -257,18 +294,22 @@ class OrganizationService(
     return organization
   }
 
-  fun deleteAllByName(name: String) {
-    organizationRepository.findAllByName(name).forEach {
-      this.delete(it.id)
-    }
-  }
-
-  fun saveAll(organizations: List<Organization>) {
-    organizationRepository.saveAll(organizations)
+  @Caching(
+    evict = [
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+    ]
+  )
+  fun save(organization: Organization) {
+    organizationRepository.save(organization)
   }
 
   fun findAllPaged(pageable: Pageable, search: String?, userId: Long): Page<OrganizationView> {
     return organizationRepository.findAllViews(pageable, search, userId)
+  }
+
+  fun findAllByName(name: String): List<Organization> {
+    return organizationRepository.findAllByName(name)
   }
 
   fun getProjectOwner(projectId: Long): Organization {
@@ -276,6 +317,7 @@ class OrganizationService(
   }
 
   fun setBasePermission(organizationId: Long, permissionType: ProjectPermissionType) {
+    // Cache eviction: Not necessary, base permission is not cached here
     val organization = get(organizationId)
     val basePermission = organization.basePermission
     basePermission.type = permissionType

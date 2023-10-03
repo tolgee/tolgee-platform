@@ -8,6 +8,8 @@ import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.repository.UserAccountRepository
+import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -27,7 +29,6 @@ import java.io.File
   classes = [Application::class],
   properties = [
     "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
-    "tolgee.authentication.create-initial-user=true",
     "tolgee.authentication.initial-username=johny"
   ]
 )
@@ -42,7 +43,13 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   lateinit var userAccountService: UserAccountService
 
   @set:Autowired
+  lateinit var userAccountRepository: UserAccountRepository
+
+  @set:Autowired
   lateinit var passwordEncoder: PasswordEncoder
+
+  @set:Autowired
+  lateinit var initialPasswordManager: InitialPasswordManager
 
   private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
 
@@ -66,8 +73,51 @@ class CreateEnabledTest : AbstractTransactionalTest() {
     assertThat(passwordEncoder.matches(passwordFile.readText(), johny!!.password)).isTrue
   }
 
+  @Test
+  fun passwordUpdated() {
+    resetInitialPassword()
+
+    val passBefore = userAccountService.findActive("johny")!!.password
+    tolgeeProperties.authentication.initialPassword = "new password!!"
+    initialUserCreatorCommandLineRunner.run()
+
+    val johnyAfter = userAccountService.findActive("johny")
+    assertThat(passBefore).isNotEqualTo(johnyAfter!!.password)
+  }
+
+  @Test
+  fun passwordNotUpdatedAfterChange() {
+    resetInitialPassword()
+
+    val johnyBefore = userAccountService.findActive("johny")!!
+    val passBefore = johnyBefore.password
+    johnyBefore.passwordChanged = true
+    userAccountService.save(johnyBefore)
+
+    tolgeeProperties.authentication.initialPassword = "another new password!!"
+    initialUserCreatorCommandLineRunner.run()
+
+    val johnyAfter = userAccountService.findActive("johny")!!
+    assertThat(passBefore).isEqualTo(johnyAfter.password)
+
+    johnyBefore.passwordChanged = false
+    userAccountService.save(johnyBefore)
+  }
+
   @AfterAll
   fun cleanUp() {
     passwordFile.delete()
+    resetInitialPassword()
+
+    val initial = userAccountService.findActive("johny")!!
+    userAccountRepository.delete(initial)
+  }
+
+  private fun resetInitialPassword() {
+    val field = initialPasswordManager.javaClass.getDeclaredField("cachedInitialPassword")
+    with(field) {
+      isAccessible = true
+      set(initialPasswordManager, null)
+    }
   }
 }

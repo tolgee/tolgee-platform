@@ -6,7 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
-import io.tolgee.security.JwtTokenProviderImpl
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.InvitationService
 import io.tolgee.service.security.UserAccountService
@@ -24,7 +24,7 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class OAuth2Delegate(
-  private val tokenProvider: JwtTokenProviderImpl,
+  private val jwtService: JwtService,
   private val userAccountService: UserAccountService,
   private val restTemplate: RestTemplate,
   private val properties: TolgeeProperties,
@@ -126,7 +126,7 @@ class OAuth2Delegate(
           }
           newUserAccount
         }
-        val jwt = tokenProvider.generateToken(user.id).toString()
+        val jwt = jwtService.emitToken(user.id)
         return JwtAuthenticationResponse(jwt)
       }
       if (response == null) {

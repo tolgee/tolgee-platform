@@ -6,10 +6,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
 import org.apache.tomcat.util.http.fileupload.IOUtils
@@ -34,22 +34,22 @@ import java.util.zip.ZipOutputStream
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/export", "/v2/projects/export"])
 @Tag(name = "Export")
-@Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
+@Suppress("MVCPathVariableInspection")
 class V2ExportController(
   private val exportService: ExportService,
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @GetMapping(value = [""])
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(summary = "Exports data")
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun export(
     @ParameterObject params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
     params.languages = languageService
-      .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.userAccount.id)
+      .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
       .toList()
       .map { language -> language.tag }
       .toSet()
@@ -59,12 +59,12 @@ class V2ExportController(
   }
 
   @PostMapping(value = [""])
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_VIEW)
   @Operation(
     summary = """Exports data (post). Useful when providing params exceeding allowed query size.
   """
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun exportPost(
     @RequestBody params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {

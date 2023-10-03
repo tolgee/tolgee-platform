@@ -12,7 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
 
 @ContextRecreatingTest
-@SpringBootTest(properties = ["tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret"])
+@SpringBootTest(
+  properties = [
+    "tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret_azeazezaezaezaezaezzaezaezaeazeazezaeazezeaeazeazezaezaea"
+  ]
+)
 class AesTest {
 
   @set:Autowired
@@ -25,12 +29,12 @@ class AesTest {
         .encode(aes.encrypt("hello".toByteArray(charset("UTF-8"))))
         .toString(charset("UTF-8"))
     )
-      .isEqualTo("17u71OZauaAoEf+e0vc6Kg==")
+      .isEqualTo("6E2puGrGLgbMG+V26rdnMA==")
   }
 
   @Test
   fun decrypt() {
-    val base64 = Base64.getDecoder().decode("17u71OZauaAoEf+e0vc6Kg==")
+    val base64 = Base64.getDecoder().decode("6E2puGrGLgbMG+V26rdnMA==")
     assertThat(aes.decrypt(base64).toString(charset("UTF-8"))).isEqualTo("hello")
   }
 }

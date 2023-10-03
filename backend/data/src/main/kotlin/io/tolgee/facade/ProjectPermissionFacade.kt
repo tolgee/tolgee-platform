@@ -5,7 +5,7 @@ import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.RequestWithLanguagePermissions
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import org.springframework.stereotype.Component
 
@@ -16,7 +16,7 @@ class ProjectPermissionFacade(
 ) {
 
   fun checkNotCurrentUser(userId: Long) {
-    if (userId == authenticationFacade.userAccount.id) {
+    if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
     }
   }

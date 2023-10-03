@@ -12,7 +12,9 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.core.annotation.Order
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Order(0)
@@ -20,31 +22,45 @@ class InitialUserCreatorCommandLineRunner(
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val initialPasswordManager: InitialPasswordManager,
-  private val organizationService: OrganizationService
-) :
-  CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+  private val organizationService: OrganizationService,
+  private val passwordEncoder: PasswordEncoder,
+) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
+  @Transactional
   override fun run(vararg args: String) {
+    val initialUser = userAccountService.findInitialUser()
+    if (initialUser == null) {
+      createInitialUser()
+    } else if (!initialUser.passwordChanged) {
+      updatePasswordIfNecessary(initialUser)
+    }
+  }
+
+  fun createInitialUser() {
+    logger.info("Creating initial user...")
+
     val initialUsername = properties.authentication.initialUsername
-    if (
-      properties.authentication.enabled &&
-      properties.authentication.createInitialUser &&
-      !userAccountService.isAnyUserAccount &&
-      userAccountService.findActive(initialUsername) == null
-    ) {
-      logger.info("Creating initial user...")
-      val initialPassword = initialPasswordManager.initialPassword
-      val user = userAccountService.createUser(
-        SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
-        UserAccount.Role.ADMIN
-      )
-      organizationService.create(
-        OrganizationDto(
-          properties.authentication.initialUsername,
-        ),
-        userAccount = user
-      )
+    val initialPassword = initialPasswordManager.initialPassword
+    val user = userAccountService.createInitialUser(
+      SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername),
+    )
+
+    // If the user was already existing, it may already have assigned orgs.
+    // To avoid conflicts, we only create the org if the user doesn't have any.
+    organizationService.create(
+      OrganizationDto(
+        properties.authentication.initialUsername,
+      ),
+      userAccount = user
+    )
+  }
+
+  fun updatePasswordIfNecessary(initialUser: UserAccount) {
+    val initialPassword = initialPasswordManager.initialPassword
+    if (!passwordEncoder.matches(initialPassword, initialUser.password)) {
+      logger.info("Updating initial user password...")
+      userAccountService.setUserPassword(initialUser, initialPassword)
     }
   }
 

@@ -3,14 +3,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.fixtures.isPermissionScopes
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
@@ -136,7 +129,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     )
 
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
-      it.node("organizationOwner.name").isEqualTo("admin")
+      it.node("organizationOwner.name").isEqualTo(base.userAccount.username)
       it.node("directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
       it.node("computedPermission.permittedLanguageIds").isArray.hasSize(1).contains(base.project.languages.first().id)
     }
@@ -149,7 +142,7 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     val account = dbPopulator.createUserIfNotExists("peter")
     loginAsUser(account.name)
 
-    performAuthGet("/v2/projects/${base.project.id}").andIsForbidden
+    performAuthGet("/v2/projects/${base.project.id}").andIsNotFound
   }
 
   @Test

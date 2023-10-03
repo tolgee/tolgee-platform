@@ -8,9 +8,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.AutoTranslationService
@@ -38,8 +38,6 @@ class AutoTranslationController(
   private val securityService: SecurityService
 ) {
   @PutMapping("")
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_EDIT)
-  @AccessWithApiKey()
   @Operation(
     summary = "Auto translates keys",
     description = """Uses enabled auto-translation methods.
@@ -48,6 +46,8 @@ You need to set at least one of useMachineTranslation or useTranslationMemory to
 This will replace the the existing translation with the result obtained from specified source!
     """
   )
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @AllowApiAccess
   fun autoTranslate(
     @PathVariable keyId: Long,
     @Parameter(

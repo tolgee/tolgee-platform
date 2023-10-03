@@ -6,6 +6,7 @@ package io.tolgee.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.apache.http.impl.client.HttpClientBuilder
@@ -18,10 +19,7 @@ import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.config.annotation.*
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 import javax.servlet.MultipartConfigElement
@@ -30,7 +28,8 @@ import javax.servlet.MultipartConfigElement
 @EnableScheduling
 @EnableAsync
 class WebConfiguration(
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
+  private val activityInterceptor: ActivityHandlerInterceptor,
 ) : WebMvcConfigurer {
   override fun addViewControllers(registry: ViewControllerRegistry) {
     registry.run {
@@ -54,6 +53,10 @@ class WebConfiguration(
     registry.addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
       .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME)
+  }
+
+  override fun addInterceptors(registry: InterceptorRegistry) {
+    registry.addInterceptor(activityInterceptor)
   }
 
   @Bean

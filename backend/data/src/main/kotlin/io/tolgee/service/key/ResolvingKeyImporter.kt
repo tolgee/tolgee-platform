@@ -21,7 +21,7 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.security.SecurityService
@@ -150,7 +150,7 @@ class ResolvingKeyImporter(
       securityService.checkScreenshotsUploadPermission(projectEntity.id)
     }
     images.forEach { image ->
-      if (authenticationFacade.userAccount.id != image.userAccount.id) {
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
         throw PermissionException()
       }
     }

@@ -12,6 +12,7 @@ import io.tolgee.hateoas.project.ProjectModel
 import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.model.views.ProjectWithLanguagesView
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
@@ -40,7 +41,8 @@ class OrganizationProjectController(
   private val projectWithStatsFacade: ProjectWithStatsFacade
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
-  @Operation(summary = "Returns all organization projects")
+  @Operation(summary = "Returns all organization projects the user has access to")
+  @UseDefaultPermissions
   fun getAllProjects(
     @PathVariable("id") id: Long,
     @ParameterObject pageable: Pageable,
@@ -55,7 +57,8 @@ class OrganizationProjectController(
   }
 
   @GetMapping("/{slug:.*[a-z].*}/projects")
-  @Operation(summary = "Returns all organization projects")
+  @Operation(summary = "Returns all organization projects the user has access to")
+  @UseDefaultPermissions
   fun getAllProjects(
     @PathVariable("slug") slug: String,
     @ParameterObject pageable: Pageable,
@@ -71,6 +74,7 @@ class OrganizationProjectController(
       " where current user has any permission (except none)"
   )
   @GetMapping("/{organizationId:[0-9]+}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
@@ -85,6 +89,7 @@ class OrganizationProjectController(
       "where current user has any permission (except none)"
   )
   @GetMapping("/{slug:.*[a-z].*}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject @SortDefault("id") pageable: Pageable,
     @RequestParam("search") search: String?,

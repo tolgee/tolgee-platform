@@ -19,7 +19,7 @@ import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.repository.ScreenshotRepository
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
@@ -137,7 +137,7 @@ class ScreenshotService(
       val image = images[screenshotInfo.uploadedImageId]
         ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
 
-      if (authenticationFacade.userAccount.id != image.userAccount.id) {
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
         throw PermissionException()
       }
 

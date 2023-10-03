@@ -6,7 +6,7 @@ import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.ee.api.v2.hateoas.eeSubscription.EeSubscriptionModelAssembler
 import io.tolgee.ee.service.EeSubscriptionService
 import io.tolgee.hateoas.InitialDataModel
-import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -40,7 +40,7 @@ class InitialDataController(
       eeSubscription = eeSubscriptionService.findSubscriptionEntity()?.let { eeSubscriptionModelAssembler.toModel(it) }
     )
 
-    val userAccount = authenticationFacade.userAccountOrNull
+    val userAccount = authenticationFacade.authenticatedUserOrNull
     if (userAccount != null) {
       data.userInfo = userController.getInfo()
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()

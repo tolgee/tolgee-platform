@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.security.InternalController
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -19,7 +18,6 @@ import java.util.*
 @Hidden
 @RequestMapping(value = ["internal/time"])
 @Transactional
-@InternalController
 class TestClockController(
   val currentDateProvider: CurrentDateProvider
 ) {

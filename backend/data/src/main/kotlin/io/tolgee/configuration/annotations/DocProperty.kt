@@ -10,5 +10,6 @@ annotation class DocProperty(
   val children: Array<DocProperty> = [],
   val prefix: String = "",
   val removedIn: String = "",
+  val removalReason: String = "",
   val hidden: Boolean = false
 )

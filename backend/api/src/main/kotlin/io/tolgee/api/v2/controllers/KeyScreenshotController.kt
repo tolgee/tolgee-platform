@@ -21,9 +21,9 @@ import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import org.springframework.hateoas.CollectionModel
@@ -59,11 +59,11 @@ class KeyScreenshotController(
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload screenshot for specific key")
-  @AccessWithProjectPermission(Scope.SCREENSHOTS_UPLOAD)
-  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
   @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
+  @RequiresProjectPermissions([ Scope.SCREENSHOTS_UPLOAD ])
+  @AllowApiAccess
   fun uploadScreenshot(
     @PathVariable keyId: Long,
     @RequestPart("screenshot") screenshot: MultipartFile,
@@ -81,8 +81,8 @@ class KeyScreenshotController(
 
   @GetMapping("")
   @Operation(summary = "Returns all screenshots for specified key")
-  @AccessWithProjectPermission(Scope.SCREENSHOTS_VIEW)
-  @AccessWithApiKey()
+  @RequiresProjectPermissions([ Scope.SCREENSHOTS_VIEW ])
+  @AllowApiAccess
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
@@ -90,10 +90,10 @@ class KeyScreenshotController(
   }
 
   @DeleteMapping("/{ids}")
-  @AccessWithProjectPermission(Scope.SCREENSHOTS_DELETE)
   @Operation(summary = "Deletes multiple screenshots by ids")
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
+  @RequiresProjectPermissions([ Scope.SCREENSHOTS_DELETE ])
+  @AllowApiAccess
   fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>, @PathVariable keyId: Long) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {

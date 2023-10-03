@@ -9,13 +9,10 @@ import io.tolgee.hateoas.user_account.UserAccountModel
 import io.tolgee.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.security.AccessWithServerAdminPermission
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.JwtTokenProvider
-import io.tolgee.security.NeedsSuperJwtToken
-import io.tolgee.security.patAuth.DenyPatAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.JwtService
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.security.SecurityService
 import io.tolgee.service.security.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -44,32 +41,27 @@ class AdministrationController(
   private val organizationService: OrganizationService,
   private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val organizationModelAssembler: OrganizationModelAssembler,
-  private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
   private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccount>,
   private val userAccountModelAssembler: UserAccountModelAssembler,
-  private val jwtTokenProvider: JwtTokenProvider
+  private val jwtService: JwtService
 ) : IController {
 
   @GetMapping(value = ["/organizations"])
   @Operation(summary = "Get all server organizations")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun getOrganizations(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
   ): PagedModel<OrganizationModel> {
-    val organizations = organizationService.findAllPaged(pageable, search, authenticationFacade.userAccount.id)
+    val organizations = organizationService.findAllPaged(pageable, search, authenticationFacade.authenticatedUser.id)
     return pagedOrganizationResourcesAssembler.toModel(organizations, organizationModelAssembler)
   }
 
   @GetMapping(value = ["/users"])
   @Operation(summary = "Get all server users")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun getUsers(
     @ParameterObject @SortDefault(sort = ["name"]) pageable: Pageable,
     search: String? = null
@@ -80,11 +72,9 @@ class AdministrationController(
 
   @DeleteMapping(value = ["/users/{userId}"])
   @Operation(summary = "Deletes an user")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun deleteUser(@PathVariable userId: Long) {
-    if (userId == authenticationFacade.userAccount.id) {
+    if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
     }
     userAccountService.delete(userId)
@@ -92,11 +82,9 @@ class AdministrationController(
 
   @PutMapping(value = ["/users/{userId}/disable"])
   @Operation(summary = "Deletes an user")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun disableUser(@PathVariable userId: Long) {
-    if (userId == authenticationFacade.userAccount.id) {
+    if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
     }
     userAccountService.disable(userId)
@@ -104,18 +92,14 @@ class AdministrationController(
 
   @PutMapping(value = ["/users/{userId}/enable"])
   @Operation(summary = "Deletes an user")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun enableUser(@PathVariable userId: Long) {
     userAccountService.enable(userId)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])
   @Operation(summary = "")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun setRole(
     @PathVariable userId: Long,
     @PathVariable role: UserAccount.Role
@@ -127,14 +111,11 @@ class AdministrationController(
 
   @GetMapping(value = ["/users/{userId:[0-9]+}/generate-token"])
   @Operation(summary = "Get all server users")
-  @NeedsSuperJwtToken
-  @DenyPatAccess
-  @AccessWithServerAdminPermission
+  @RequiresSuperAuthentication
   fun generateUserToken(
     @PathVariable userId: Long,
   ): String {
     val user = userAccountService.get(userId)
-    val token = jwtTokenProvider.generateToken(user.id, isSuper = true)
-    return token.toString()
+    return jwtService.emitToken(user.id, true)
   }
 }

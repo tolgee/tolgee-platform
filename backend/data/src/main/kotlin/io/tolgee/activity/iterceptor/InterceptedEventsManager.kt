@@ -16,9 +16,9 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.security.project_auth.ProjectNotSelectedException
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.ProjectNotSelectedException
+import io.tolgee.security.authentication.AuthenticationFacade
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.internal.AbstractPersistentCollection
@@ -259,18 +259,26 @@ class InterceptedEventsManager(
     )
   }
 
-  private val entityManager: EntityManager
-    get() = applicationContext.getBean(EntityManager::class.java)
+  private val entityManager: EntityManager by lazy {
+    applicationContext.getBean(EntityManager::class.java)
+  }
 
-  private val activityService: ActivityService
-    get() = applicationContext.getBean(ActivityService::class.java)
+  private val authenticationFacade: AuthenticationFacade by lazy {
+    applicationContext.getBean(AuthenticationFacade::class.java)
+  }
+
+  private val projectHolder: ProjectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
+  }
+
+  private val activityService: ActivityService by lazy {
+    applicationContext.getBean(ActivityService::class.java)
+  }
+
+  private val activityHolder: ActivityHolder by lazy {
+    applicationContext.getBean(ActivityHolder::class.java)
+  }
 
   private val userAccount: UserAccountDto?
-    get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull
-
-  private val activityHolder: ActivityHolder
-    get() = applicationContext.getBean(ActivityHolder::class.java)
-
-  private val projectHolder: ProjectHolder
-    get() = applicationContext.getBean(ProjectHolder::class.java)
+    get() = authenticationFacade.authenticatedUserOrNull
 }

@@ -23,11 +23,11 @@ import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
@@ -75,9 +75,9 @@ class TranslationCommentController(
 ) {
 
   @GetMapping(value = ["{translationId}/comments"])
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey()
   @Operation(summary = "Returns translation comments of translation")
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun getAll(
     @PathVariable translationId: Long,
     @ParameterObject pageable: Pageable
@@ -91,9 +91,9 @@ class TranslationCommentController(
   }
 
   @GetMapping(value = ["{translationId}/comments/{commentId}"])
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey()
   @Operation(summary = "Returns single translation comment")
+  @UseDefaultPermissions
+  @AllowApiAccess
   fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
     val comment = translationCommentService.get(commentId)
     comment.checkFromProject()
@@ -101,13 +101,13 @@ class TranslationCommentController(
   }
 
   @PutMapping(value = ["{translationId}/comments/{commentId}"])
-  @AccessWithAnyProjectPermission
-  @AccessWithApiKey()
   @Operation(summary = "Updates single translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_EDIT)
+  @UseDefaultPermissions // Security: Permission check done inside; users should be able to edit their comments
+  @AllowApiAccess
   fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
     val comment = translationCommentService.get(commentId)
-    if (comment.author.id != authenticationFacade.userAccount.id) {
+    if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
     }
     translationCommentService.update(dto, comment)
@@ -116,9 +116,9 @@ class TranslationCommentController(
 
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_SET_STATE)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_SET_STATE ])
+  @AllowApiAccess
   fun setState(
     @PathVariable commentId: Long,
     @PathVariable state: TranslationCommentState
@@ -132,12 +132,13 @@ class TranslationCommentController(
   @DeleteMapping(value = ["{translationId}/comments/{commentId}"])
   // the permissions are checked in the body! We need to enable authors to delete their comments
   @Operation(summary = "Deletes the translation comment")
-  @AccessWithApiKey
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_DELETE)
+  @UseDefaultPermissions // Security: Permission check done inside; users should be able to delete their comments
+  @AllowApiAccess
   fun delete(@PathVariable commentId: Long) {
     val comment = translationCommentService.get(commentId)
     comment.checkFromProject()
-    if (comment.author.id != authenticationFacade.userAccount.id) {
+    if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       try {
         checkEditPermission()
       } catch (e: PermissionException) {
@@ -155,11 +156,11 @@ class TranslationCommentController(
   }
 
   @PostMapping(value = ["/create-comment"])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
-  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_ADD ])
+  @AllowApiAccess
   fun create(
     @RequestBody @Valid dto: TranslationCommentWithLangKeyDto
   ): ResponseEntity<TranslationWithCommentModel> {
@@ -179,7 +180,7 @@ class TranslationCommentController(
 
     translationService.save(translation)
 
-    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
+    val comment = translationCommentService.create(dto, translation, authenticationFacade.authenticatedUserEntity)
     return ResponseEntity(
       TranslationWithCommentModel(
         comment = translationCommentModelAssembler.toModel(comment),
@@ -190,18 +191,18 @@ class TranslationCommentController(
   }
 
   @PostMapping(value = ["{translationId}/comments"])
-  @AccessWithProjectPermission(Scope.TRANSLATIONS_COMMENTS_ADD)
-  @AccessWithApiKey()
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
+  @RequiresProjectPermissions([ Scope.TRANSLATIONS_COMMENTS_ADD ])
+  @AllowApiAccess
   fun create(
     @PathVariable translationId: Long,
     @RequestBody @Valid dto: TranslationCommentDto
   ): ResponseEntity<TranslationCommentModel> {
     val translation = translationService.find(translationId) ?: throw NotFoundException()
     translation.checkFromProject()
-    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
+    val comment = translationCommentService.create(dto, translation, authenticationFacade.authenticatedUserEntity)
     return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
   }
 

@@ -26,10 +26,10 @@ import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
-import io.tolgee.security.apiKeyAuth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
-import io.tolgee.security.project_auth.AccessWithProjectPermission
-import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
@@ -73,18 +73,20 @@ class KeyController(
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
   private val applicationContext: ApplicationContext,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val keyPagedResourcesAssembler: PagedResourcesAssembler<Key>,
   private val keySearchResultModelAssembler: KeySearchResultModelAssembler,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler
 ) : IController {
   @PostMapping(value = ["/create", ""])
-  @AccessWithProjectPermission(Scope.KEYS_CREATE)
-  @AccessWithApiKey()
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.CREATE_KEY)
+  @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+  @AllowApiAccess
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
     if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
@@ -102,18 +104,17 @@ class KeyController(
 
   @PutMapping(value = ["/{id}/complex-update"])
   @Operation(summary = "More")
-  @AccessWithAnyProjectPermission
-  // key permissions are checked separately in method body
-  @AccessWithApiKey
+  @UseDefaultPermissions // Security: key permissions are checked separately in method body
+  @AllowApiAccess
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
   @PutMapping(value = ["/{id}"])
   @Operation(summary = "Edits key name")
-  @AccessWithProjectPermission(Scope.KEYS_EDIT)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_NAME_EDIT)
+  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @AllowApiAccess
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
@@ -123,9 +124,9 @@ class KeyController(
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs")
-  @AccessWithProjectPermission(Scope.KEYS_DELETE)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_DELETE)
+  @RequiresProjectPermissions([ Scope.KEYS_DELETE ])
+  @AllowApiAccess
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
@@ -134,8 +135,8 @@ class KeyController(
   @GetMapping(value = [""])
   @Transactional
   @Operation(summary = "Returns all keys in the project")
-  @AccessWithProjectPermission(Scope.KEYS_VIEW)
-  @AccessWithApiKey()
+  @RequiresProjectPermissions([ Scope.KEYS_VIEW ])
+  @AllowApiAccess
   fun getAll(
     @ParameterObject
     @SortDefault("id")
@@ -148,22 +149,21 @@ class KeyController(
   @DeleteMapping(value = [""])
   @Transactional
   @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
-  @AccessWithProjectPermission(Scope.KEYS_DELETE)
-  @AccessWithApiKey()
   @RequestActivity(ActivityType.KEY_DELETE)
+  @RequiresProjectPermissions([ Scope.KEYS_DELETE ])
+  @AllowApiAccess
   fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
     delete(dto.ids.toSet())
   }
 
   @PostMapping("/import")
-  @AccessWithApiKey
-  // language translate permissions are handled in service
-  @AccessWithProjectPermission(Scope.KEYS_CREATE)
   @Operation(
     summary = "Imports new keys with translations. If key already exists, its translations and tags" +
       " are not updated."
   )
   @RequestActivity(ActivityType.IMPORT)
+  @RequiresProjectPermissions([ Scope.KEYS_CREATE ]) // Security: language translate permissions are handled in service
+  @AllowApiAccess
   fun importKeys(@RequestBody @Valid dto: ImportKeysDto) {
     securityService.checkLanguageTranslatePermissionByTag(
       projectHolder.project.id,
@@ -174,11 +174,10 @@ class KeyController(
   }
 
   @PostMapping("/import-resolvable")
-  @AccessWithApiKey
   @Operation(summary = "Import's new keys with translations. Translations can be updated, when specified.")
   @RequestActivity(ActivityType.IMPORT)
-  // permissions are handled in service
-  @AccessWithAnyProjectPermission
+  @UseDefaultPermissions // Security: permissions are handled in service
+  @AllowApiAccess
   fun importKeys(@RequestBody @Valid dto: ImportKeysResolvableDto): KeyImportResolvableResultModel {
     val uploadedImageToScreenshotMap =
       keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
@@ -194,12 +193,12 @@ class KeyController(
   }
 
   @GetMapping("/search")
-  @AccessWithApiKey()
-  @AccessWithProjectPermission(Scope.KEYS_VIEW)
   @Operation(
     summary = "This endpoint helps you to find desired key by keyName, " +
       "base translation or translation in specified language."
   )
+  @RequiresProjectPermissions([ Scope.KEYS_VIEW ])
+  @AllowApiAccess
   fun searchForKey(
     @RequestParam
     @Parameter(description = "Search query")
@@ -220,21 +219,17 @@ class KeyController(
   }
 
   @PostMapping("/info")
-  @AccessWithApiKey()
-  // it's checked manually in the code
-  @AccessWithAnyProjectPermission
   @Operation(
     summary = "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
       "If key is not found, it's not included in the response."
   )
+  @RequiresProjectPermissions([ Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW ])
+  @AllowApiAccess
   fun getInfo(
     @RequestBody
     @Valid
     dto: GetKeysRequestDto,
   ): CollectionModel<KeyWithDataModel> {
-    arrayOf(Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW).forEach {
-      securityService.checkProjectPermission(projectHolder.project.id, it)
-    }
     val result = keyService.getKeysInfo(dto, projectHolder.project.id)
     return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }

@@ -2,6 +2,7 @@ package io.tolgee.websocket
 
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.testing.ContextRecreatingTest
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
@@ -21,6 +22,12 @@ import org.springframework.test.context.ContextConfiguration
 class WebsocketWithRedisTest : AbstractWebsocketTest() {
   companion object {
     val redisRunner = RedisRunner()
+
+    @AfterAll
+    @JvmStatic
+    fun cleanup() {
+      redisRunner.stop()
+    }
 
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
