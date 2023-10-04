@@ -5,7 +5,7 @@ import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasL
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { CompactProjectItem } from './CompactProjectItem';
+import { OrderProjectItem } from './OrderProjectItem';
 import { ProviderType } from './types';
 
 const StyledDescription = styled('div')`
@@ -21,11 +21,25 @@ const StyledDialogContent = styled(DialogContent)`
 type Props = {
   provider: ProviderType;
   onClose: () => void;
+  preselected: number[];
 };
 
-export const OrderTranslationDialog = ({ provider, onClose }: Props) => {
+export const OrderTranslationDialog = ({
+  provider,
+  onClose,
+  preselected,
+}: Props) => {
+  const [selected, setSelected] = useState(preselected);
   const [page, setPage] = useState(0);
   const { preferredOrganization } = usePreferredOrganization();
+
+  function handleToggle(projectId: number) {
+    if (selected.includes(projectId)) {
+      setSelected(selected.filter((id) => id !== projectId));
+    } else {
+      setSelected([...selected, projectId]);
+    }
+  }
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
@@ -33,7 +47,7 @@ export const OrderTranslationDialog = ({ provider, onClose }: Props) => {
     path: { slug: preferredOrganization?.slug || '' },
     query: {
       page,
-      size: 20,
+      size: 10,
       sort: ['id,desc'],
     },
     options: {
@@ -55,7 +69,14 @@ export const OrderTranslationDialog = ({ provider, onClose }: Props) => {
         <PaginatedHateoasList
           onPageChange={setPage}
           loadable={listPermitted}
-          renderItem={(r) => <CompactProjectItem key={r.id} {...r} />}
+          renderItem={(i) => (
+            <OrderProjectItem
+              key={i.id}
+              project={i}
+              selected={selected.includes(i.id)}
+              onSelectToggle={() => handleToggle(i.id)}
+            />
+          )}
         />
       </StyledDialogContent>
     </Dialog>

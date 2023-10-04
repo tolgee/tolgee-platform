@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
+import { useProject } from 'tg.hooks/useProject';
 import { OrderTranslationDialog } from './OrderTranslationDialog';
 import { TranslationProvider } from './TranslationProvider';
 import { TRANSLATORS_LIST } from './translatorsList';
@@ -15,6 +16,7 @@ export const OrderTranslation = () => {
   const { t } = useTranslate();
 
   const [activeProvider, setActiveProvider] = useState<ProviderType>();
+  const project = useProject();
 
   return (
     <StyledContainer>
@@ -30,6 +32,7 @@ export const OrderTranslation = () => {
 
       {activeProvider !== undefined && (
         <OrderTranslationDialog
+          preselected={[project.id]}
           provider={activeProvider}
           onClose={() => setActiveProvider(undefined)}
         />

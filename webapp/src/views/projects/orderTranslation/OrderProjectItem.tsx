@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   Grid,
   styled,
   Typography,
@@ -11,9 +12,9 @@ import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { ProjectLanguages } from '../ProjectLanguages';
 
-const StyledContainer = styled('div')`
+const StyledContent = styled('div')`
   display: grid;
-  grid-template-columns: calc(${({ theme }) => theme.spacing(2)} + 50px) 150px 100px 5fr 1.5fr;
+  grid-template-columns: auto 150px 100px 5fr 1.5fr;
   grid-template-areas: 'image title keyCount stats languages';
   padding: ${({ theme }) => theme.spacing(3, 2.5)};
   overflow: hidden;
@@ -45,10 +46,18 @@ const StyledContainer = styled('div')`
   }
 `;
 
+const StyledCheckboxWrapper = styled('div')`
+  grid-area: checkbox;
+  width: 60px;
+`;
+
 const StyledImage = styled('div')`
   grid-area: image;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
+  display: flex;
+  align-items: center;
+  align-self: start;
   @container (max-width: 599px) {
     margin-right: 0px;
   }
@@ -101,42 +110,58 @@ const StyledProjectName = styled(Typography)`
 
 type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
 
-export const CompactProjectItem = (p: ProjectWithStatsModel) => {
+type Props = {
+  project: ProjectWithStatsModel;
+  selected: boolean;
+  onSelectToggle: () => void;
+};
+
+export const OrderProjectItem = ({
+  project,
+  selected,
+  onSelectToggle,
+}: Props) => {
   const theme = useTheme();
   const isCompact = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <StyledContainer data-cy="dashboard-projects-list-item">
+    <StyledContent data-cy="dashboard-projects-list-item">
       <StyledImage>
+        <StyledCheckboxWrapper>
+          <Checkbox checked={selected} onChange={() => onSelectToggle()} />
+        </StyledCheckboxWrapper>
         <AvatarImg
           owner={{
-            name: p.name,
-            avatar: p.avatar,
+            name: project.name,
+            avatar: project.avatar,
             type: 'PROJECT',
-            id: p.id,
+            id: project.id,
           }}
           size={50}
         />
       </StyledImage>
       <StyledTitle>
-        <StyledProjectName variant="h3">{p.name}</StyledProjectName>
+        <StyledProjectName variant="h3">{project.name}</StyledProjectName>
       </StyledTitle>
       <StyledKeyCount>
         <Typography variant="body1">
           <T
             keyName="project_list_keys_count"
-            params={{ keysCount: p.stats.keyCount.toString() }}
+            params={{ keysCount: project.stats.keyCount.toString() }}
           />
         </Typography>
       </StyledKeyCount>
       <StyledStats>
-        <TranslationStatesBar stats={p.stats as any} labels={!isCompact} />
+        <TranslationStatesBar
+          stats={project.stats as any}
+          labels={!isCompact}
+        />
       </StyledStats>
       <StyledLanguages data-cy="project-list-languages">
         <Grid container>
-          <ProjectLanguages p={p} />
+          <ProjectLanguages p={project} />
         </Grid>
       </StyledLanguages>
-    </StyledContainer>
+    </StyledContent>
   );
 };
