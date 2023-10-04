@@ -1,7 +1,21 @@
-import { Dialog, DialogContent, DialogTitle, styled } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  styled,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { Formik } from 'formik';
 import { useState } from 'react';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { FieldLabel } from 'tg.component/FormField';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -29,19 +43,10 @@ export const OrderTranslationDialog = ({
   onClose,
   preselected,
 }: Props) => {
-  const [selected, setSelected] = useState(preselected);
   const [page, setPage] = useState(0);
   const { preferredOrganization } = usePreferredOrganization();
 
-  function handleToggle(projectId: number) {
-    if (selected.includes(projectId)) {
-      setSelected(selected.filter((id) => id !== projectId));
-    } else {
-      setSelected([...selected, projectId]);
-    }
-  }
-
-  const listPermitted = useApiQuery({
+  const projects = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
     path: { slug: preferredOrganization?.slug || '' },
@@ -59,26 +64,100 @@ export const OrderTranslationDialog = ({
   const { t } = useTranslate();
   return (
     <Dialog open={true} onClose={onClose} maxWidth="md">
-      <DialogTitle>{t('order_translation_dialog_title')}</DialogTitle>
+      {projects.data ? (
+        <Formik
+          initialValues={{
+            selected: preselected,
+            note: '',
+          }}
+          onSubmit={(values) => {
+            console.log(values);
+          }}
+        >
+          {({ values, setFieldValue, handleSubmit }) => {
+            function handleToggle(projectId: number) {
+              if (values.selected.includes(projectId)) {
+                setFieldValue(
+                  'selected',
+                  values.selected.filter((id) => id !== projectId)
+                );
+              } else {
+                setFieldValue('selected', [...values.selected, projectId]);
+              }
+            }
 
-      <StyledDialogContent>
-        <StyledDescription>
-          {t('order_translation_dialog_subtitle')}
-        </StyledDescription>
+            return (
+              <>
+                <DialogTitle>{t('order_translation_dialog_title')}</DialogTitle>
 
-        <PaginatedHateoasList
-          onPageChange={setPage}
-          loadable={listPermitted}
-          renderItem={(i) => (
-            <OrderProjectItem
-              key={i.id}
-              project={i}
-              selected={selected.includes(i.id)}
-              onSelectToggle={() => handleToggle(i.id)}
-            />
-          )}
-        />
-      </StyledDialogContent>
+                <StyledDialogContent>
+                  <StyledDescription>
+                    {t('order_translation_dialog_subtitle')}
+                  </StyledDescription>
+
+                  <FieldLabel>
+                    {t('order_translation_dialog_projects_label')}
+                  </FieldLabel>
+                  <PaginatedHateoasList
+                    onPageChange={setPage}
+                    loadable={projects}
+                    renderItem={(i) => (
+                      <OrderProjectItem
+                        key={i.id}
+                        project={i}
+                        selected={values.selected.includes(i.id)}
+                        onSelectToggle={() => handleToggle(i.id)}
+                      />
+                    )}
+                  />
+
+                  <Box mt={3}>
+                    <FieldLabel>
+                      {t('order_translation_dialog_note_label')}
+                    </FieldLabel>
+                    <TextField
+                      minRows={2}
+                      size="small"
+                      name="note"
+                      multiline
+                      placeholder={t(
+                        'order_translation_dialog_note_placeholder'
+                      )}
+                      sx={{ mt: 0 }}
+                    />
+                  </Box>
+
+                  <Box mt={3} display="grid" gap={1}>
+                    <FormControlLabel
+                      label={t('order_translation_dialog_consent')}
+                      control={<Checkbox />}
+                    />
+                    <FormControlLabel
+                      label={t('order_translation_dialog_send_invitation')}
+                      control={<Checkbox />}
+                    />
+                  </Box>
+                </StyledDialogContent>
+
+                <DialogActions>
+                  <Button onClick={() => onClose()}>
+                    {t('order_translation_dialog_cancel')}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleSubmit()}
+                  >
+                    {t('order_translation_dialog_submit')}
+                  </Button>
+                </DialogActions>
+              </>
+            );
+          }}
+        </Formik>
+      ) : (
+        <BoxLoading my={10} mx={16} />
+      )}
     </Dialog>
   );
 };
