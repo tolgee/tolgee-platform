@@ -1,6 +1,6 @@
 import { useApiQuery, useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { OnMtChange } from './types';
+import { MtServiceInfo, OnMtChange } from './types';
 import { useMemo } from 'react';
 
 export const useMachineTranslationSettings = () => {
@@ -45,8 +45,53 @@ export const useMachineTranslationSettings = () => {
     path: { projectId: project.id },
   });
 
+  function isSupported(
+    service: MtServiceInfo | undefined,
+    languageId: number | null
+  ) {
+    const settings = languageInfos.data!._embedded?.languageInfos?.find(
+      (l) => l.languageId === languageId
+    );
+    return (
+      service &&
+      (!settings ||
+        Boolean(
+          settings.supportedServices.find(
+            (i) => i.serviceType === service.serviceType
+          )
+        ))
+    );
+  }
+
+  function supportsFormality(
+    service: MtServiceInfo | undefined,
+    languageId: number | null
+  ) {
+    const settings = languageInfos.data!._embedded?.languageInfos?.find(
+      (l) => l.languageId === languageId
+    );
+    return settings?.supportedServices.find(
+      (i) => i.serviceType === service?.serviceType
+    )?.formalitySupported;
+  }
+
+  function validateService(
+    service: MtServiceInfo | undefined,
+    languageId: number | null
+  ): MtServiceInfo | undefined {
+    if (service === undefined || !isSupported(service, languageId)) {
+      return undefined;
+    }
+    return {
+      serviceType: service.serviceType,
+      formality: supportsFormality(service, languageId)
+        ? service.formality
+        : undefined,
+    };
+  }
+
   const applyUpdate: OnMtChange = async (languageId, data) => {
-    const languageIdOrNull = languageId || null;
+    const languageIdOrNull = languageId ?? null;
     const existingMtSettings =
       mtSettings.data?._embedded?.languageConfigs
         ?.filter((l) => l.targetLanguageId !== languageIdOrNull)
@@ -60,9 +105,25 @@ export const useMachineTranslationSettings = () => {
           }
         ) || [];
 
-    const newMtSettings = data
+    const updatedMtSettings = data
       ? [...existingMtSettings, data.machineTranslation]
       : existingMtSettings;
+
+    const mtSettingsValidated = updatedMtSettings.map(
+      ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
+        const targetLanguageIdOrNull = targetLanguageId ?? null;
+        return {
+          targetLanguageId,
+          primaryServiceInfo: validateService(
+            primaryServiceInfo,
+            targetLanguageIdOrNull
+          ),
+          enabledServicesInfo: enabledServicesInfo
+            ?.map((service) => validateService(service, targetLanguageIdOrNull))
+            .filter((service) => Boolean(service)) as MtServiceInfo[],
+        };
+      }
+    );
 
     const existingAutoSettings =
       autoTranslationSettings.data?._embedded?.configs
@@ -90,7 +151,7 @@ export const useMachineTranslationSettings = () => {
     await updateMtSettings.mutateAsync({
       path: { projectId: project.id },
       content: {
-        'application/json': { settings: newMtSettings },
+        'application/json': { settings: mtSettingsValidated },
       },
     });
 
