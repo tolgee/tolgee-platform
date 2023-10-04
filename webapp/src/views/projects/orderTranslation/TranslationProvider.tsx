@@ -2,10 +2,6 @@ import { Box, Button, styled, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { ProviderType } from './types';
 
-type Props = {
-  provider: ProviderType;
-};
-
 const StyledContainer = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider};
   padding: 16px;
@@ -20,14 +16,19 @@ const StyledImage = styled('img')`
 
 const StyledDescription = styled('div')``;
 
-export const TranslationProvider = ({ provider }: Props) => {
+type Props = {
+  provider: ProviderType;
+  onOrder: () => void;
+};
+
+export const TranslationProvider = ({ provider, onOrder }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
   return (
     <StyledContainer>
       <Box display="flex" justifyContent="space-between">
         <StyledImage src={provider.logo[theme.palette.mode]} />
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" onClick={() => onOrder()}>
           {t('translation_provider_get_quote')}
         </Button>
       </Box>
