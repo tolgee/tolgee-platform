@@ -69,6 +69,8 @@ export const OrderTranslationDialog = ({
           initialValues={{
             selected: preselected,
             note: '',
+            contactDetailsConsent: false,
+            inviteProvider: false,
           }}
           onSubmit={(values) => {
             console.log(values);
@@ -88,7 +90,11 @@ export const OrderTranslationDialog = ({
 
             return (
               <>
-                <DialogTitle>{t('order_translation_dialog_title')}</DialogTitle>
+                <DialogTitle>
+                  {t('order_translation_dialog_title', {
+                    provider: provider.name,
+                  })}
+                </DialogTitle>
 
                 <StyledDialogContent>
                   <StyledDescription>
@@ -130,11 +136,31 @@ export const OrderTranslationDialog = ({
                   <Box mt={3} display="grid" gap={1}>
                     <FormControlLabel
                       label={t('order_translation_dialog_consent')}
-                      control={<Checkbox />}
+                      control={
+                        <Checkbox
+                          checked={values.contactDetailsConsent}
+                          onChange={() =>
+                            setFieldValue(
+                              'contactDetailsConsent',
+                              !values.contactDetailsConsent
+                            )
+                          }
+                        />
+                      }
                     />
                     <FormControlLabel
                       label={t('order_translation_dialog_send_invitation')}
-                      control={<Checkbox />}
+                      control={
+                        <Checkbox
+                          checked={values.inviteProvider}
+                          onChange={() =>
+                            setFieldValue(
+                              'inviteProvider',
+                              !values.inviteProvider
+                            )
+                          }
+                        />
+                      }
                     />
                   </Box>
                 </StyledDialogContent>
