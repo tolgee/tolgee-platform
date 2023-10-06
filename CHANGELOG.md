@@ -1,3 +1,10 @@
+## [3.32.1](https://github.com/tolgee/tolgee-platform/compare/v3.32.0...v3.32.1) (2023-10-06)
+
+
+### Bug Fixes
+
+* handle RedisException gracefully when retrieving cached data ([#1934](https://github.com/tolgee/tolgee-platform/issues/1934)) ([29bb9fc](https://github.com/tolgee/tolgee-platform/commit/29bb9fc808664ee3aa4b528f1eec99c1568abdf7))
+
 # [3.32.0](https://github.com/tolgee/tolgee-platform/compare/v3.31.0...v3.32.0) (2023-10-03)
 
 
