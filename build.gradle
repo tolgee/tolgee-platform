@@ -148,5 +148,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 
 subprojects {
     task allDeps(type: DependencyReportTask) {}
-}
 
+    tasks.withType(Test) {
+        testLogging {
+            events "passed", "skipped", "failed", "started"
+        }
+    }
+}
