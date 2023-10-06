@@ -16,7 +16,7 @@ class ImportTranslationResolvableDto(
 - OVERRIDE: Translation is overridden
 - NEW: New translation is created)
 """,
-    example = "Hello! I am a translation!"
+    example = "OVERRIDE"
   )
   val resolution: ImportTranslationResolution = ImportTranslationResolution.NEW,
 )
