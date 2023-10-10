@@ -8,9 +8,7 @@ import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
-@ConstructorBinding
 @AdditionalDocsProperties(
   [
     DocProperty(

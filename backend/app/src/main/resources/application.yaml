@@ -12,6 +12,8 @@ spring:
 #    open-in-view: false
     properties:
       hibernate:
+        order_by:
+          default_null_ordering: first
         jdbc:
           batch_size: 1000
         order_inserts: true

@@ -48,6 +48,6 @@ class AllOrganizationOwnerJobRunner(
     }
     val json = jacksonObjectMapper().writeValueAsBytes(mapOf("users" to userIds, "projects" to projectIds))
     val hash = DigestUtils.sha256Hex(json)
-    return JobParameters(mapOf("idsHash" to JobParameter(hash)))
+    return JobParameters(mapOf("idsHash" to JobParameter(hash, String::class.java)))
   }
 }
