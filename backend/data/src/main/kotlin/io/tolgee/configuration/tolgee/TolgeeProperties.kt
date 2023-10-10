@@ -16,47 +16,47 @@ import org.springframework.boot.context.properties.ConfigurationProperties
       prefix = "server",
       displayName = "Server settings",
       description = "These properties are used to configure the server.",
-      children = [
-        DocProperty(
-          name = "port",
-          description = "Port on which Tolgee exposes itself.",
-          defaultValue = "8080"
-        )
-      ]
+//      children = [
+//        DocProperty(
+//          name = "port",
+//          description = "Port on which Tolgee exposes itself.",
+//          defaultValue = "8080"
+//        )
+//      ]
     ),
     DocProperty(
       name = "spring",
       prefix = "spring",
       displayName = "Spring settings",
       description = "These properties are used to configure Spring framework.",
-      children = [
-        DocProperty(
-          name = "datasource",
-          prefix = "spring.datasource",
-          displayName = "Data source settings",
-          description = "Since Tolgee is built on Spring framework, you have to edit following configuration props\n" +
-            "to configure its database connection. These properties can be omitted when using\n" +
-            "[Postgres autostart](#postgres-autostart), which is enabled by default.",
-          children = [
-            DocProperty(
-              name = "url",
-              description = "The url of the datasource in format `jdbc:postgresql://<host>:<port>/<dbname>`. " +
-                "e.g. `jdbc:postgresql://db:5432/postgres`",
-              defaultValue = ""
-            ),
-            DocProperty(
-              name = "username",
-              description = "Database username. e.g. `postgres`",
-              defaultValue = ""
-            ),
-            DocProperty(
-              name = "password",
-              description = "Database password. e.g. `postgres`",
-              defaultValue = ""
-            ),
-          ]
-        )
-      ]
+//      children = [
+//        DocProperty(
+//          name = "datasource",
+//          prefix = "spring.datasource",
+//          displayName = "Data source settings",
+//          description = "Since Tolgee is built on Spring framework, you have to edit following configuration props\n" +
+//            "to configure its database connection. These properties can be omitted when using\n" +
+//            "[Postgres autostart](#postgres-autostart), which is enabled by default.",
+//          children = [
+//            DocProperty(
+//              name = "url",
+//              description = "The url of the datasource in format `jdbc:postgresql://<host>:<port>/<dbname>`. " +
+//                "e.g. `jdbc:postgresql://db:5432/postgres`",
+//              defaultValue = ""
+//            ),
+//            DocProperty(
+//              name = "username",
+//              description = "Database username. e.g. `postgres`",
+//              defaultValue = ""
+//            ),
+//            DocProperty(
+//              name = "password",
+//              description = "Database password. e.g. `postgres`",
+//              defaultValue = ""
+//            ),
+//          ]
+//        )
+//      ]
     )
   ],
   global = true

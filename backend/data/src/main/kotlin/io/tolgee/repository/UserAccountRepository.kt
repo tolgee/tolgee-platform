@@ -28,8 +28,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query(
     """update UserAccount ua 
     set 
-     ua.deletedAt = now(), 
-     ua.tokensValidNotBefore = now(),
+     ua.deletedAt = :now, 
+     ua.tokensValidNotBefore = :now,
      ua.password = null, 
      ua.totpKey = null, 
      ua.mfaRecoveryCodes = null,
@@ -41,7 +41,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
      where ua = :user
      """
   )
-  fun softDeleteUser(user: UserAccount)
+  fun softDeleteUser(user: UserAccount, now: Date)
 
   @Query(
     """
@@ -83,14 +83,14 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         select ua.id as id, ua.name as name, ua.username as username, p as directPermission,
           orl.type as organizationRole, ua.avatarHash as avatarHash 
         from UserAccount ua, Project r 
-        left join fetch Permission p on ua = p.user and p.project.id = :projectId
-        left join OrganizationRole orl on orl.user = ua and r.organizationOwner = orl.organization
+        left join ua.permissions p
+        left join ua.organizationRoles orl
         where r.id = :projectId and (p is not null or orl is not null)
         and (:exceptUserId is null or ua.id <> :exceptUserId)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
-        and ua.deletedAt is null
+        and ua.deletedAt is null and p.project.id = :projectId and r.organizationOwner = orl.organization
     """
   )
   fun getAllInProject(
