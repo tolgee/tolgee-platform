@@ -11,7 +11,7 @@ import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

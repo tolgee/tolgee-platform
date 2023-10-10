@@ -1,6 +1,5 @@
 package io.tolgee.model.key
 
-import com.sun.istack.NotNull
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import jakarta.persistence.Column
@@ -8,6 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
 @Entity
 class KeyCodeReference(

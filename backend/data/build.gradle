@@ -19,7 +19,7 @@ plugins {
     id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
-    id "org.hibernate.orm" version "6.2.9.Final"
+    id "org.hibernate.orm"
 }
 
 group = 'io.tolgee'
@@ -104,8 +104,8 @@ dependencies {
      * DB
      */
     runtimeOnly 'org.postgresql:postgresql'
-//    implementation 'org.hibernate:hibernate-jpamodelgen:6.2.9.Final'
-//    kapt "org.hibernate:hibernate-jpamodelgen:6.2.9.Final"
+    implementation "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
+    kapt "org.hibernate:hibernate-jpamodelgen:$hibernateVersion"
 
     /**
      * Redisson
@@ -168,6 +168,7 @@ dependencies {
     implementation 'com.eatthepath:java-otp:0.4.0'
     implementation libs.postHog
     implementation libs.micrometerPrometheus
+    implementation 'dom4j:dom4j:1.6.1'
 
     /**
      * Google translation API

@@ -104,6 +104,7 @@ dependencies {
     implementation libs.icu4j
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
+    api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 

@@ -11,7 +11,6 @@ import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
 import jakarta.persistence.EntityManager
-import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -68,7 +67,6 @@ class KeyMetaService(
             """
     )
       .setParameter("import", import)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
@@ -80,7 +78,6 @@ class KeyMetaService(
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result
@@ -96,7 +93,6 @@ class KeyMetaService(
             """
     )
       .setParameter("project", project)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     result = entityManager.createQuery(
@@ -107,7 +103,6 @@ class KeyMetaService(
             where ikm in :metas 
         """
     ).setParameter("metas", result)
-      .setHint(PASS_DISTINCT_THROUGH, false)
       .resultList as List<KeyMeta>
 
     return result

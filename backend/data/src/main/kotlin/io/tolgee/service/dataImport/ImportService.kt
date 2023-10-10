@@ -183,7 +183,6 @@ class ImportService(
             """
     )
       .setParameter("import", import)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     result = entityManager.createQuery(
@@ -195,7 +194,6 @@ class ImportService(
             where ik in :keys
         """
     ).setParameter("keys", result)
-      .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
       .resultList as List<ImportKey>
 
     return result

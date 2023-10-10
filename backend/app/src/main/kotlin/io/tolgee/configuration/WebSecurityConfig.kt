@@ -62,7 +62,7 @@ class WebSecurityConfig(
       .cors().and()
       .headers()
       .referrerPolicy().policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN).and()
-      .xssProtection().block(true).and()
+      .xssProtection().and()
       .contentTypeOptions().and()
       .frameOptions().deny()
       .and()
@@ -73,9 +73,9 @@ class WebSecurityConfig(
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .authorizeRequests()
-      .mvcMatchers("/api/public/**", "/v2/public/**").permitAll()
-      .mvcMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
-      .mvcMatchers("/api/**", "/v2/**").authenticated()
+      .requestMatchers("/api/public/**", "/v2/public/**").permitAll()
+      .requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
+      .requestMatchers("/api/**", "/v2/**").authenticated()
       .anyRequest().permitAll()
       .and().build()
   }
@@ -85,7 +85,7 @@ class WebSecurityConfig(
   @ConditionalOnProperty(value = ["tolgee.internal.controller-enabled"], havingValue = "false", matchIfMissing = true)
   fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
     return httpSecurity
-      .antMatcher("/internal/**")
+      .securityMatcher("/internal/**")
       .authorizeRequests()
       .anyRequest()
       .denyAll()

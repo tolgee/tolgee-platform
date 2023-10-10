@@ -20,6 +20,9 @@ pluginManagement {
             if (requested.id.id == 'org.liquibase.gradle') {
                 useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.1.1')
             }
+            if (requested.id.id == 'org.hibernate.orm') {
+                useVersion(hibernateVersion)
+            }
         }
     }
 }
