@@ -30,8 +30,6 @@ repositories {
     mavenCentral()
 }
 
-ext['tomcat.version'] = '10.1.13'
-
 def unpackTarget = "${project.buildDir}/dependency"
 
 dependencies {
