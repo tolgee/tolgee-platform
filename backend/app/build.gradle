@@ -47,9 +47,9 @@ repositories {
 
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.stereotype.Service")
@@ -59,7 +59,7 @@ allOpen {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -105,10 +105,12 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
 
+    implementation "org.springframework.boot:spring-boot-properties-migrator"
+
     testApi dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+//        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
     }
-    testApi libs.redissonSpringData
+//    testApi libs.redissonSpringData
 
     /**
      * KOTLIN
@@ -238,7 +240,7 @@ task addVersionFile(type: Task) {
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

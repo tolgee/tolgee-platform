@@ -12,11 +12,11 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.hibernate.jpa.TypedParameterValue
 import org.hibernate.type.StandardBasicTypes
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class BatchJobActivityFinalizer(

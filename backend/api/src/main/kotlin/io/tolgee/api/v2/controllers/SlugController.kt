@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])

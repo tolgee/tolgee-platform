@@ -27,7 +27,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 allOpen {
@@ -53,10 +53,7 @@ dependencies {
     implementation libs.springDocOpenApiDataRest
     implementation libs.springDocOpenApiHateoas
 
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Misc

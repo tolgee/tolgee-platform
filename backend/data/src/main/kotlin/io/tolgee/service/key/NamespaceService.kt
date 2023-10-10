@@ -9,9 +9,9 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
 import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class NamespaceService(

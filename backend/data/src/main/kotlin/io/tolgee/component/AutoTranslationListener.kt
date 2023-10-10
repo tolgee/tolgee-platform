@@ -10,10 +10,10 @@ import io.tolgee.model.key.Key
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class AutoTranslationListener(

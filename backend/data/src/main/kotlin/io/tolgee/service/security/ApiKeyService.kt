@@ -19,6 +19,7 @@ import io.tolgee.security.PROJECT_API_KEY_PREFIX
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
+import jakarta.persistence.EntityManager
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
@@ -30,7 +31,6 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class ApiKeyService(

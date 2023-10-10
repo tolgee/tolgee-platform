@@ -1,8 +1,8 @@
 package io.tolgee.batch.request
 
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 
 class CopyTranslationRequest {
   @NotEmpty

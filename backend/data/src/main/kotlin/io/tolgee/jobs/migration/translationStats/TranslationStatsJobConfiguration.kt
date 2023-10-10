@@ -1,6 +1,7 @@
 package io.tolgee.jobs.migration.translationStats
 
 import io.tolgee.repository.TranslationRepository
+import jakarta.persistence.EntityManager
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.Sort
-import javax.persistence.EntityManager
 import javax.sql.DataSource
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")

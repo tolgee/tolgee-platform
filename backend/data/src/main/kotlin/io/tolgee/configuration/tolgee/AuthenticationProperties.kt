@@ -7,11 +7,9 @@ package io.tolgee.configuration.tolgee
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.exceptions.BadRequestException
+import jakarta.validation.constraints.Size
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
-import javax.validation.constraints.Size
 
-@ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
 @AdditionalDocsProperties(
   properties = [

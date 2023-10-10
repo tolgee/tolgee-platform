@@ -48,6 +48,7 @@ import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.query_builders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.PageRequest
@@ -72,7 +73,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
 import java.util.concurrent.TimeUnit
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController

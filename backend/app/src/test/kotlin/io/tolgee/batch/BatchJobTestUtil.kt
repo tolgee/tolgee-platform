@@ -27,6 +27,7 @@ import io.tolgee.util.addMinutes
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.websocket.WebsocketTestHelper
+import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
@@ -41,7 +42,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
 import java.util.*
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 class BatchJobTestUtil(

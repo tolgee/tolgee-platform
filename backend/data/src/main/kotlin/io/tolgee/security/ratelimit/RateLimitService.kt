@@ -20,11 +20,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.constants.Caches
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.time.Duration
-import javax.servlet.http.HttpServletRequest
 
 @Service
 class RateLimitService(

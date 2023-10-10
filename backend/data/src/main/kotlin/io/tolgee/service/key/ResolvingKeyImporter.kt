@@ -27,11 +27,11 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.equalNullable
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
 import org.springframework.context.ApplicationContext
 import java.io.Serializable
-import javax.persistence.EntityManager
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
 
 class ResolvingKeyImporter(
   val applicationContext: ApplicationContext,

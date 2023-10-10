@@ -1,9 +1,9 @@
 package io.tolgee.component.reporting
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import javax.servlet.http.HttpServletRequest
 
 @Component
 class SdkInfoProvider() {

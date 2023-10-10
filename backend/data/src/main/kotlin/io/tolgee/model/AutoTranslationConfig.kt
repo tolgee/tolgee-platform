@@ -1,9 +1,9 @@
 package io.tolgee.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import org.hibernate.annotations.ColumnDefault
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
 
 @Entity
 class AutoTranslationConfig : StandardAuditModel() {

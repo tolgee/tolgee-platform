@@ -38,6 +38,7 @@ import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.security.SecurityService
+import jakarta.servlet.http.HttpServletRequest
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -60,7 +61,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.servlet.http.HttpServletRequest
 
 @Suppress("MVCPathVariableInspection")
 @RestController

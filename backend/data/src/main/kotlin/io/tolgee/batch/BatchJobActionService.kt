@@ -18,6 +18,8 @@ import io.tolgee.util.Logging
 import io.tolgee.util.addSeconds
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import org.hibernate.LockOptions
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
@@ -27,8 +29,6 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
-import javax.persistence.EntityManager
-import javax.persistence.LockModeType
 
 @Service
 class BatchJobActionService(
@@ -211,7 +211,7 @@ class BatchJobActionService(
       .setParameter("id", id)
       .setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
-        "javax.persistence.lock.timeout",
+        "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList.singleOrNull()
   }

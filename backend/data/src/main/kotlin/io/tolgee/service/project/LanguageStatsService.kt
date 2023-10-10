@@ -11,11 +11,11 @@ import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.executeInNewRepeatableTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Transactional
 @Service

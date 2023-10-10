@@ -1,8 +1,8 @@
 package io.tolgee.util
 
-import javax.persistence.EntityManager
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Predicate
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Predicate
 
 abstract class KotlinCriteriaBuilder<T>(entityManager: EntityManager, result: Class<T>) {
   val cb = entityManager.criteriaBuilder

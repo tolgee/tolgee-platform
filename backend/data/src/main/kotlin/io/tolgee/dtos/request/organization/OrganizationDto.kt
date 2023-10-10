@@ -1,9 +1,9 @@
 package io.tolgee.dtos.request.organization
 
 import io.swagger.v3.oas.annotations.media.Schema
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 
 data class OrganizationDto(
   @field:NotBlank @field:Size(min = 3, max = 50)

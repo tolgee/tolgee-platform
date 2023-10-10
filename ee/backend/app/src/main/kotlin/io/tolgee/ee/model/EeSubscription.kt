@@ -4,31 +4,20 @@ import com.vladmihalcea.hibernate.type.array.EnumArrayType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.model.AuditModel
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.Id
-import javax.persistence.Table
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 @Entity
-@TypeDef(
-  name = "enum-array",
-  typeClass = EnumArrayType::class,
-  parameters = [
-    Parameter(
-      name = EnumArrayType.SQL_ARRAY_TYPE,
-      value = "varchar"
-    )
-  ]
-)
 @Table(schema = "ee")
 class EeSubscription : AuditModel() {
   @field:Id
@@ -45,7 +34,7 @@ class EeSubscription : AuditModel() {
 
   var cancelAtPeriodEnd: Boolean = false
 
-  @Type(type = "enum-array")
+  @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")] )
   @Column(name = "enabled_features", columnDefinition = "varchar[]")
   var enabledFeatures: Array<Feature> = arrayOf()
     get() {

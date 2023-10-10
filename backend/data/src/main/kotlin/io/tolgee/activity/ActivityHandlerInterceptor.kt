@@ -3,6 +3,8 @@ package io.tolgee.activity
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.component.reporting.SdkInfoProvider
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.core.annotation.AnnotationUtils
@@ -12,8 +14,6 @@ import org.springframework.web.servlet.HandlerInterceptor
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class ActivityHandlerInterceptor(

@@ -13,6 +13,8 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
+import jakarta.persistence.EntityNotFoundException
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
@@ -36,8 +38,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
-import javax.persistence.EntityNotFoundException
-import javax.servlet.http.HttpServletRequest
 
 @RestControllerAdvice
 class ExceptionHandlers {

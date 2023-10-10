@@ -10,11 +10,11 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
+import jakarta.persistence.EntityManager
 import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(

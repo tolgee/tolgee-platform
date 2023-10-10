@@ -8,6 +8,13 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType.STRING
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
@@ -22,10 +29,7 @@ import javax.persistence.OneToOne
 import javax.persistence.Table
 
 @Entity
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
-)
-@Table(name = "tolgee_batch_job", indexes = [Index(columnList = "debouncingKey")])
+@Table(name = "tolgee_batch_job")
 class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -33,7 +37,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   var author: UserAccount? = null
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var target: List<Any> = listOf()
 
   var totalItems: Int = 0
@@ -51,7 +55,7 @@ class BatchJob : StandardAuditModel(), IBatchJob {
   @OneToOne(mappedBy = "batchJob", fetch = FetchType.LAZY)
   var activityRevision: ActivityRevision? = null
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var params: Any? = null
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)

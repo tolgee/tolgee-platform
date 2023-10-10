@@ -7,12 +7,12 @@ import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.repository.BatchJobRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 class CachingBatchJobService(

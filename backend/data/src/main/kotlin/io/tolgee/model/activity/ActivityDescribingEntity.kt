@@ -3,22 +3,17 @@ package io.tolgee.model.activity
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.RevisionType
+import jakarta.persistence.Entity
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import java.io.Serializable
-import javax.persistence.Entity
-import javax.persistence.Enumerated
-import javax.persistence.Id
-import javax.persistence.IdClass
-import javax.persistence.ManyToOne
 
 @Entity
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
-)
 @IdClass(ActivityDescribingEntityId::class)
 class ActivityDescribingEntity(
   @ManyToOne
@@ -33,10 +28,10 @@ class ActivityDescribingEntity(
   val entityId: Long
 ) : Serializable {
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var data: Map<String, Any?> = mutableMapOf()
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var describingRelations: Map<String, EntityDescriptionRef>? = null
 
   @Enumerated

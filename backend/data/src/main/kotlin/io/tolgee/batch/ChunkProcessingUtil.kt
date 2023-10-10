@@ -12,11 +12,11 @@ import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import java.util.*
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
@@ -212,7 +212,7 @@ open class ChunkProcessingUtil(
       .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
-        "javax.persistence.lock.timeout",
+        "jakarta.persistence.lock.timeout",
         LockOptions.NO_WAIT
       )
       .resultList as List<BatchJobChunkExecution>

@@ -10,8 +10,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.translation.AutoTranslationService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component

@@ -3,11 +3,11 @@ package io.tolgee.service
 import io.tolgee.component.HttpClient
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.dtos.TelemetryReportRequest
+import jakarta.persistence.EntityManager
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 class TelemetryService(

@@ -1,6 +1,6 @@
 package io.tolgee.dtos.request
 
-import javax.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotEmpty
 
 class KeyDefinitionDto {
   @get:NotEmpty

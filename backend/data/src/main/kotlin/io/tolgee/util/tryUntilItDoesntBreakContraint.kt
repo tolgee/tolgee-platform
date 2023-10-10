@@ -1,8 +1,8 @@
 package io.tolgee.util
 
+import jakarta.persistence.PersistenceException
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.DataIntegrityViolationException
-import javax.persistence.PersistenceException
 
 inline fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
   var exception: Exception? = null

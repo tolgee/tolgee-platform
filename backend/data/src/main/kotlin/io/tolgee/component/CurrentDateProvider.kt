@@ -3,6 +3,7 @@ package io.tolgee.component
 import io.tolgee.development.OnDateForced
 import io.tolgee.model.ForcedServerDateTime
 import io.tolgee.util.executeInNewTransaction
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -16,7 +17,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
 import java.util.*
-import javax.persistence.EntityManager
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)

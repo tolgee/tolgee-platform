@@ -16,10 +16,10 @@ import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.machineTranslation.MtService
+import jakarta.persistence.EntityManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 
 @Service
 class AutoTranslationService(

@@ -1,6 +1,6 @@
 package io.tolgee.ee.data
 
-import javax.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotBlank
 
 class GetMySubscriptionDto(
   @field:NotBlank
