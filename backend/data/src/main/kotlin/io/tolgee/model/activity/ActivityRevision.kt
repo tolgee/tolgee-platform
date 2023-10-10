@@ -75,7 +75,6 @@ class ActivityRevision : java.io.Serializable {
   var projectId: Long? = null
 
   @OneToMany(mappedBy = "activityRevision")
-  @NotFound(action = NotFoundAction.IGNORE)
   var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 
   @OneToMany(mappedBy = "activityRevision")

@@ -162,7 +162,7 @@ class UserAccountService(
     userAccount.organizationRoles.forEach {
       entityManager.remove(it)
     }
-    userAccountRepository.softDeleteUser(userAccount)
+    userAccountRepository.softDeleteUser(userAccount, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
