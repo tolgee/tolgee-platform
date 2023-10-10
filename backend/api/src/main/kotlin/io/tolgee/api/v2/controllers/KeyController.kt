@@ -37,6 +37,7 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Pageable
@@ -58,7 +59,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection")
 @RestController

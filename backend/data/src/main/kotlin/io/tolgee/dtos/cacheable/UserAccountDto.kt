@@ -2,7 +2,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.model.UserAccount
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 data class UserAccountDto(
   val name: String,

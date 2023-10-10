@@ -2,11 +2,11 @@ package io.tolgee.postgresRunners
 
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.misc.dockerRunner.DockerContainerRunner
+import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import javax.annotation.PreDestroy
 
 @Component
 @Scope(SCOPE_SINGLETON)

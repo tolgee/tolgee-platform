@@ -4,30 +4,25 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.constants.Message
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.TypeDef
-import org.hibernate.annotations.TypeDefs
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.Table
 
 @Entity
 @Table(
   name = "tolgee_batch_job_chunk_execution",
   indexes = [
-    javax.persistence.Index(columnList = "chunkNumber"),
-    javax.persistence.Index(columnList = "status"),
+    jakarta.persistence.Index(columnList = "chunkNumber"),
+    jakarta.persistence.Index(columnList = "status"),
   ]
-)
-@TypeDefs(
-  value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
 class BatchJobChunkExecution : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -38,7 +33,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   var chunkNumber: Int = 0
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType::class)
   var successTargets: List<Any> = listOf()
 
   @Column(columnDefinition = "text")

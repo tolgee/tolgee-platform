@@ -4,10 +4,10 @@ import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
 
 class QueryTranslationFiltering(
   private val params: TranslationFilters,

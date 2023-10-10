@@ -21,9 +21,9 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.HandlerMapping
-import javax.servlet.http.HttpServletRequest
 
 @Service
 class RequestContextService(

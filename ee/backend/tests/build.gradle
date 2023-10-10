@@ -18,8 +18,8 @@ apply plugin: "kotlin-allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 
 allOpen {
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
@@ -55,7 +55,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 tasks.findByName("jar").enabled(true)

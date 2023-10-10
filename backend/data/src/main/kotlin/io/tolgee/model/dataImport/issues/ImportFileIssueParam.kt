@@ -2,10 +2,10 @@ package io.tolgee.model.dataImport.issues
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
-import javax.persistence.Entity
-import javax.persistence.Enumerated
-import javax.persistence.ManyToOne
-import javax.validation.constraints.NotBlank
+import jakarta.persistence.Entity
+import jakarta.persistence.Enumerated
+import jakarta.persistence.ManyToOne
+import jakarta.validation.constraints.NotBlank
 
 @Entity
 class ImportFileIssueParam(

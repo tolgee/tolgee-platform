@@ -3,13 +3,13 @@ package io.tolgee.model.dataImport
 import com.sun.istack.NotNull
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import org.apache.commons.codec.digest.MurmurHash3
 import java.nio.ByteBuffer
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
 
 @Entity
 class ImportTranslation(

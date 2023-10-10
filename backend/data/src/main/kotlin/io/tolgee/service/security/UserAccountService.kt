@@ -24,6 +24,7 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
+import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,7 +39,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class UserAccountService(

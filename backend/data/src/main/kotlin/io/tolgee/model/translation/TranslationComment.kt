@@ -7,14 +7,14 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType.LAZY
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType.LAZY
-import javax.persistence.Index
-import javax.persistence.ManyToOne
-import javax.persistence.Table
-import javax.validation.constraints.NotBlank
 
 @Entity
 @ActivityLoggedEntity

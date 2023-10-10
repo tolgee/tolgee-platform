@@ -8,12 +8,12 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import jakarta.persistence.EntityManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.persistence.EntityManager
 
 @RestController
 @CrossOrigin(origins = ["*"])

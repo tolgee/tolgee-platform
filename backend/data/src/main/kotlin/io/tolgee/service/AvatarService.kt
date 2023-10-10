@@ -6,12 +6,12 @@ import io.tolgee.constants.FileStoragePath
 import io.tolgee.dtos.Avatar
 import io.tolgee.model.ModelWithAvatar
 import io.tolgee.util.ImageConverter
+import jakarta.xml.bind.DatatypeConverter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.awt.Dimension
 import java.io.InputStream
 import java.security.MessageDigest
-import javax.xml.bind.DatatypeConverter
 
 @Service
 class AvatarService(

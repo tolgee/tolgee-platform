@@ -9,6 +9,7 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -17,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.PreDestroy
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 

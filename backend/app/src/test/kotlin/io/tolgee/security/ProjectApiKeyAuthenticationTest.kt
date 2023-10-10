@@ -3,7 +3,12 @@ package io.tolgee.security
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.controllers.AbstractApiKeyTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.assert

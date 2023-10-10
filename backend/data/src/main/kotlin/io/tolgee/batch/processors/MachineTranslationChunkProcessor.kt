@@ -9,8 +9,8 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Project
 import io.tolgee.model.batch.params.MachineTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component

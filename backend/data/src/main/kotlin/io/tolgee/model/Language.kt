@@ -10,14 +10,14 @@ import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.*
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)

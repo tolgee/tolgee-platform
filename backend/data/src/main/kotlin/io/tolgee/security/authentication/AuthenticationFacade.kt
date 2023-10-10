@@ -17,9 +17,13 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.*
+import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.dtos.cacheable.PatDto
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.*
+import io.tolgee.model.ApiKey
+import io.tolgee.model.Pat
+import io.tolgee.model.UserAccount
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService

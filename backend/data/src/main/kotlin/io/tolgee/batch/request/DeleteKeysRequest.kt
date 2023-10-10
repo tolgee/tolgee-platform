@@ -1,6 +1,6 @@
 package io.tolgee.batch.request
 
-import javax.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotEmpty
 
 class DeleteKeysRequest {
   @NotEmpty

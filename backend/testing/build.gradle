@@ -48,7 +48,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 idea {
@@ -58,9 +58,9 @@ idea {
 }
 
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -128,7 +128,7 @@ test {
 
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

@@ -1,6 +1,6 @@
 package io.tolgee.dtos
 
-import javax.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotBlank
 
 class TelemetryReportRequest {
   @NotBlank

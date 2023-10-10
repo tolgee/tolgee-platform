@@ -23,11 +23,11 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.util.ImageConverter
+import jakarta.persistence.EntityManager
 import org.springframework.core.io.InputStreamSource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.awt.Dimension
-import javax.persistence.EntityManager
 import kotlin.math.roundToInt
 
 @Service

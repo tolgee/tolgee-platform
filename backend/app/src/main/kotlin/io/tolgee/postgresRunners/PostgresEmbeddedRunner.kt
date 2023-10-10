@@ -3,6 +3,7 @@ package io.tolgee.postgresRunners
 import io.tolgee.configuration.tolgee.FileStorageProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.fixtures.waitFor
+import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON
 import org.springframework.context.annotation.Scope
@@ -11,7 +12,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.PreDestroy
 import kotlin.concurrent.thread
 
 @Component

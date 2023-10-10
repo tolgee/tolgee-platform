@@ -5,9 +5,9 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.model.batch.params.TagKeysParams
 import io.tolgee.service.key.TagService
+import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 @Component

@@ -26,6 +26,9 @@ import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserCredentialsService
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
@@ -37,9 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
-import javax.validation.Valid
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 @RestController
 @RequestMapping("/api/public")

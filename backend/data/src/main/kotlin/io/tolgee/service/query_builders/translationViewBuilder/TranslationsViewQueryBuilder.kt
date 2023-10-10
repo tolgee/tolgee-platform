@@ -3,9 +3,9 @@ package io.tolgee.service.query_builders.translationViewBuilder
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
+import jakarta.persistence.criteria.*
 import org.springframework.data.domain.*
 import java.util.*
-import javax.persistence.criteria.*
 
 class TranslationsViewQueryBuilder(
   private val cb: CriteriaBuilder,

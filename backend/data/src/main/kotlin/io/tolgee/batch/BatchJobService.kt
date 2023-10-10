@@ -23,7 +23,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import io.tolgee.util.logger
-import org.apache.commons.codec.digest.DigestUtils.sha256Hex
+import jakarta.persistence.EntityManager
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -35,7 +35,6 @@ import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigInteger
 import java.time.Duration
 import java.util.*
-import javax.persistence.EntityManager
 
 @Service
 class BatchJobService(
@@ -252,7 +251,7 @@ class BatchJobService(
     )
       .setParameter("jobIds", jobIds)
       .setHint(
-        "javax.persistence.lock.timeout",
+        "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED
       ).resultList
   }

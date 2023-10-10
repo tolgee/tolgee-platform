@@ -10,6 +10,8 @@ import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import org.hibernate.LockOptions
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
@@ -17,8 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
-import javax.persistence.LockModeType
 
 @Component
 class BatchJobCancellationManager(
@@ -72,7 +72,7 @@ class BatchJobCancellationManager(
       )
         .setLockMode(LockModeType.PESSIMISTIC_WRITE)
         .setHint(
-          "javax.persistence.lock.timeout",
+          "jakarta.persistence.lock.timeout",
           LockOptions.SKIP_LOCKED
         )
         .setParameter("id", jobId)

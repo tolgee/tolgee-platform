@@ -7,7 +7,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
     }
 }
 
@@ -20,6 +19,7 @@ plugins {
     id "kotlin-jpa"
     id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
+    id "org.hibernate.orm" version "6.2.9.Final"
 }
 
 group = 'io.tolgee'
@@ -61,19 +61,10 @@ idea {
     }
 }
 
-hibernate {
-    enhance {
-        enableLazyInitialization = true
-        enableDirtyTracking = true
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
-    }
-}
-
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
@@ -88,7 +79,7 @@ diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -113,16 +104,16 @@ dependencies {
      * DB
      */
     runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.hibernate:hibernate-jpamodelgen'
-    kapt "org.hibernate:hibernate-jpamodelgen"
+//    implementation 'org.hibernate:hibernate-jpamodelgen:6.2.9.Final'
+//    kapt "org.hibernate:hibernate-jpamodelgen:6.2.9.Final"
 
     /**
      * Redisson
      */
     implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
+//        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
     }
-    implementation libs.redissonSpringData
+//    implementation libs.redissonSpringData
 
     /**
      * Liquibase
@@ -210,7 +201,7 @@ test {
 
 project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

@@ -19,9 +19,10 @@ import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
+import jakarta.persistence.EntityManager
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
-import org.hibernate.collection.internal.AbstractPersistentCollection
+import org.hibernate.collection.spi.AbstractPersistentCollection
 import org.hibernate.event.spi.EventSource
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
@@ -29,7 +30,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.io.Serializable
-import javax.persistence.EntityManager
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
@@ -45,7 +45,7 @@ class InterceptedEventsManager(
   }
 
   fun onCollectionModification(collection: Any?, key: Serializable?) {
-    if (collection !is AbstractPersistentCollection || collection !is Collection<*> || key !is Long) {
+    if (collection !is AbstractPersistentCollection<*> || collection !is Collection<*> || key !is Long) {
       return
     }
 

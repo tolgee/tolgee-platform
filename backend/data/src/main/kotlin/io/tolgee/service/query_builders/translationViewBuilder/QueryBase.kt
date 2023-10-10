@@ -18,14 +18,14 @@ import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Expression
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.ListJoin
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Root
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 
 class QueryBase<T>(
   private val cb: CriteriaBuilder,

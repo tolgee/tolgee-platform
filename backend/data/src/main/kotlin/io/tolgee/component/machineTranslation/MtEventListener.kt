@@ -6,9 +6,9 @@ import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.service.machineTranslation.MtCreditBucketService
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import javax.persistence.EntityManager
 
 @Component
 class MtEventListener(
