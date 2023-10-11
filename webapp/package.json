@@ -109,7 +109,7 @@
     "@types/codemirror": "^5.60.2",
     "@types/diff": "^5.0.2",
     "@types/jest": "^26.0.24",
-    "@types/node": "^16.4.10",
+    "@types/node": "^18.18.4",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.9",
     "@types/react-list": "^0.8.6",
