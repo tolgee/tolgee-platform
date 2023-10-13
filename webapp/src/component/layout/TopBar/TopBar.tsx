@@ -41,7 +41,7 @@ const StyledVersion = styled(Typography)`
 const StyledLogoTitle = styled(Typography)`
   font-size: 20px;
   font-weight: 500;
-  font-family: Righteous, Rubik, Arial, sans-serif;
+  font-family: Righteous, Arial, sans-serif;
   transition: filter 0.2s ease-in-out;
 `;
 

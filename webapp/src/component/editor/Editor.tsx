@@ -51,9 +51,7 @@ const StyledWrapper = styled('div')<{
     .CodeMirror-line {
       padding: 0px !important;
       color: ${({ theme }) => theme.palette.editor.main} !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol' !important;
+      font-family: ${({ theme }) => theme.typography.fontFamily} !important;
     }
 
     .CodeMirror-lint-markers {
