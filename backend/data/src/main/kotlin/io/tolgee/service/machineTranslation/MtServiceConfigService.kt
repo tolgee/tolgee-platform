@@ -245,6 +245,7 @@ class MtServiceConfigService(
     }
   }
 
+  @Transactional
   fun getProjectSettings(project: Project): List<MtServiceConfig> {
     return getStoredConfigs(project.id)
       .sortedBy { it.targetLanguage?.tag }

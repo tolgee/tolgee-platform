@@ -19,7 +19,7 @@ class PostgresAutoStartConfiguration(
 
   private var _dataSource: DataSource? = null
 
-  @Bean
+  @Bean("dataSource")
   @ConfigurationProperties(prefix = "spring.datasource")
   fun getDataSource(): DataSource {
     _dataSource?.let { return it }
