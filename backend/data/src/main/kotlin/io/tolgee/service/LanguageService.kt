@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Message
+import io.tolgee.model.views.LanguageView
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -93,6 +94,16 @@ class LanguageService(
     return find(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
   }
 
+  @Transactional
+  fun getView(id: Long): LanguageView {
+    return findView(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+  }
+
+  @Transactional
+  fun findView(id: Long): LanguageView? {
+    return languageRepository.findView(id)
+  }
+
   fun find(id: Long): Language? {
     return languageRepository.findById(id).orElse(null)
   }
@@ -177,7 +188,7 @@ class LanguageService(
     return this.languageRepository.saveAll(languages)
   }
 
-  fun getPaged(projectId: Long, pageable: Pageable): Page<Language> {
+  fun getPaged(projectId: Long, pageable: Pageable): Page<LanguageView> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
   }
 
@@ -187,5 +198,10 @@ class LanguageService(
 
   fun getLanguageIdsByTags(projectId: Long, languageTags: Collection<String>): Map<String, Language> {
     return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
+  }
+
+  @Transactional
+  fun getViewsOfProjects(projectIds: List<Long>): List<LanguageView> {
+    return languageRepository.getViewsOfProjects(projectIds)
   }
 }

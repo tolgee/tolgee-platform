@@ -6,7 +6,7 @@ import io.tolgee.model.Language
 class ProjectWithStatsView(
   view: ProjectWithLanguagesView,
   val stats: ProjectStatistics,
-  val languages: List<Language>,
+  val languages: List<LanguageView>,
 ) : ProjectWithLanguagesView(
   view.id,
   view.name,

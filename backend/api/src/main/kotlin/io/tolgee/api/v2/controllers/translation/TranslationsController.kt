@@ -59,6 +59,7 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -235,10 +236,13 @@ When null, resulting file will be a flat key-value object.
   @Operation(summary = "Returns translations in project")
   @UseDefaultPermissions // Security: check done internally
   @AllowApiAccess
+  @Transactional
   fun getTranslations(
     @ParameterObject @ModelAttribute("translationFilters") params: GetTranslationsParams,
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
+    val baseLanguage = projectHolder.projectEntity.baseLanguage
+
     val languages: Set<Language> = languageService.getLanguagesForTranslationsView(
       params.languages,
       projectHolder.project.id,
@@ -257,7 +261,7 @@ When null, resulting file will be a flat key-value object.
     }
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
-    return pagedAssembler.toTranslationModel(data, languages, cursor)
+    return pagedAssembler.toTranslationModel(data, languages, cursor, baseLanguage)
   }
 
   @GetMapping(value = ["select-all"])
