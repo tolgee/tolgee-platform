@@ -9,6 +9,7 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   jpa:
+    open-in-view: false
     properties:
       hibernate:
         jdbc:
