@@ -76,7 +76,6 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   fun `uploads without metadata`() {
     val key = keyService.create(project, CreateKeyDto("test"))
 
-    val text = "I am key"
     performStoreScreenshot(
       project,
       key,

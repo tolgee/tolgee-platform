@@ -81,7 +81,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = :baseLanguage and
-        similarity(baseTranslation.text, :baseTranslationText) > 0.5 and
+        cast(similarity(baseTranslation.text, :baseTranslationText) as float)> 0.5F and
         (:key is null or key <> :key)
       order by similarity desc
       """
