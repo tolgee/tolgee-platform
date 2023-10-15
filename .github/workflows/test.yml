@@ -35,7 +35,6 @@ jobs:
 
       - name: Tar build assets
         run: |
-          tar -czf ~/backend-root.tgz ./backend/build
           tar -czf ~/backend-api.tgz ./backend/api/build
           tar -czf ~/backend-app.tgz ./backend/app/build
           tar -czf ~/backend-data.tgz ./backend/data/build
@@ -52,7 +51,6 @@ jobs:
         with:
           name: backend
           path: |
-            ~/backend-root.tgz
             ~/backend-api.tgz
             ~/backend-app.tgz
             ~/backend-data.tgz
@@ -107,7 +105,6 @@ jobs:
 
       - name: Un-tar build results
         run: |
-          tar -xzf ~/backend-root.tgz ./backend/build
           tar -xzf ~/backend-api.tgz ./backend/api/build
           tar -xzf ~/backend-app.tgz ./backend/app/build
           tar -xzf ~/backend-data.tgz ./backend/data/build
@@ -184,7 +181,6 @@ jobs:
 
       - name: Un-tar build results
         run: |
-          tar -xzf ~/backend-root.tgz ./backend/build
           tar -xzf ~/backend-api.tgz ./backend/api/build
           tar -xzf ~/backend-app.tgz ./backend/app/build
           tar -xzf ~/backend-data.tgz ./backend/data/build
