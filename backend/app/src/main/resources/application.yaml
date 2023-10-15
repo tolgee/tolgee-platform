@@ -22,7 +22,7 @@ spring:
         types:
           print:
             banner: false
-    open-in-view: false
+#    open-in-view: false
   batch:
     job:
       enabled: false
