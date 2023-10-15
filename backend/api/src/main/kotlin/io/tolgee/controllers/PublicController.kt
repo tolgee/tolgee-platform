@@ -61,7 +61,6 @@ class PublicController(
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)
-  @Transactional
   fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)

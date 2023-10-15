@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -55,7 +54,6 @@ class V2UserController(
   @Operation(summary = "Returns current user's data.")
   @GetMapping("")
   @AllowApiAccess
-  @Transactional
   fun getInfo(): PrivateUserAccountModel {
     val userAccount = authenticationFacade.authenticatedUserEntity
     return privateUserAccountModelAssembler.toModel(userAccount)

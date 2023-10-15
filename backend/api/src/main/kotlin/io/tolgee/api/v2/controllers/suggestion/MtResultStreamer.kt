@@ -20,6 +20,7 @@ import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.Logging
+import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -32,23 +33,23 @@ import java.io.OutputStreamWriter
 
 class MtResultStreamer(
   private val dto: SuggestRequestDto,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
 
   private lateinit var outputStream: OutputStream
 
   fun stream(): StreamingResponseBody {
     init()
-    return StreamingResponseBody { outputStream ->
+    return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
       writeInfo()
 
-      if (baseBlank) {
-        writer.close()
-        return@StreamingResponseBody
+      if (!baseBlank) {
+        writeServiceResultsAsync()
       }
 
-      writeServiceResultsAsync()
+      writer.close()
     }
   }
 
@@ -74,7 +75,6 @@ class MtResultStreamer(
           writeServiceResult(service)
         }
       }.awaitAll()
-      writer.close()
     }
   }
 
