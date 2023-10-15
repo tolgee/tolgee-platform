@@ -111,20 +111,6 @@ export const LanguageSettingsDialog = ({
       });
   }
 
-  function isSupported(service: ServiceType | undefined) {
-    return (
-      service &&
-      (!settings.info ||
-        settings.info.supportedServices.find((i) => i.serviceType === service))
-    );
-  }
-
-  function supportsFormality(service: ServiceType) {
-    return settings.info?.supportedServices.find(
-      (i) => i.serviceType === service
-    )?.formalitySupported;
-  }
-
   return (
     <Formik
       initialValues={{
@@ -136,9 +122,7 @@ export const LanguageSettingsDialog = ({
         autoTranslation: settings.autoSettings,
       }}
       onSubmit={async (values) => {
-        const primaryService = isSupported(values.primaryService)
-          ? values.primaryService
-          : undefined;
+        const primaryService = values.primaryService;
 
         const primaryFormality =
           primaryService &&
@@ -155,14 +139,10 @@ export const LanguageSettingsDialog = ({
           machineTranslation: {
             targetLanguageId: settings.language?.id,
             primaryServiceInfo: primaryServiceInfo,
-            enabledServicesInfo: values.enabledServices
-              .filter(isSupported)
-              .map((serviceType) => ({
-                serviceType,
-                formality: supportsFormality(serviceType)
-                  ? values.servicesFormality[serviceType]
-                  : undefined,
-              })),
+            enabledServicesInfo: values.enabledServices.map((serviceType) => ({
+              serviceType,
+              formality: values.servicesFormality[serviceType],
+            })),
           },
           autoTranslation: {
             ...values.autoTranslation!,
