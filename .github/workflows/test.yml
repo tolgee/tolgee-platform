@@ -31,7 +31,9 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build backend
-        run: ./gradlew testClasses
+        run: |
+          ./gradlew testClasses --parallel
+          ./gradlew bootJar --parallel
 
       - name: Tar build assets
         run: |
@@ -44,7 +46,6 @@ jobs:
           tar -czf ~/backend-development.tgz ./backend/development/build
           tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
           tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
-
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -120,7 +121,7 @@ jobs:
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }}
+          command: ./gradlew ${{ matrix.command }} -x classes -x testClasses -x jar
         env:
           SKIP_SERVER_BUILD: true
 
@@ -222,7 +223,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
           command: |
-            ./gradlew runE2e
+            ./gradlew runE2e -x bootJar -x buildWebapp
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
