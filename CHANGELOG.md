@@ -1,3 +1,13 @@
+## [3.32.2](https://github.com/tolgee/tolgee-platform/compare/v3.32.1...v3.32.2) (2023-10-15)
+
+
+### Bug Fixes
+
+* Disable Translation Suggestion response buffering for nginx ([#1928](https://github.com/tolgee/tolgee-platform/issues/1928)) ([d4f0e02](https://github.com/tolgee/tolgee-platform/commit/d4f0e026646b5adf1dda5e5447dcc912e8839d65))
+* hacky fix for connection leaks caused by OSIV ([#1948](https://github.com/tolgee/tolgee-platform/issues/1948)) ([073683a](https://github.com/tolgee/tolgee-platform/commit/073683a77fe69b2616f8766c0d09a4db50492008))
+* mt language settings validation ([#1932](https://github.com/tolgee/tolgee-platform/issues/1932)) ([8c8733b](https://github.com/tolgee/tolgee-platform/commit/8c8733b3053fc330bf674324d47053d552fd0ca2))
+* Remove multiple redisson versions ([#1949](https://github.com/tolgee/tolgee-platform/issues/1949)) ([d7091dd](https://github.com/tolgee/tolgee-platform/commit/d7091dd6188eb71c84f96d092292dacafcf3417a))
+
 ## [3.32.1](https://github.com/tolgee/tolgee-platform/compare/v3.32.0...v3.32.1) (2023-10-06)
 
 

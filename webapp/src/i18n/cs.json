@@ -768,7 +768,7 @@
   "project_dashboard_translations_less_then_1_percent" : "< 1%",
   "project_dashboard_translations_percent" : "{percent, number, :: %}",
   "project_deleted_message" : "Projekt byl odstraněn!",
-  "project_integrate_description" : "Použijte Tolgee SDK, abyste urychlili proces lokalizace. Javascriptové integrace umožňují upravovat překlady přímo v aplikaci. To také zvyšuje kvalitu překladů, protože shromažďujeme kontext stránky a následně jej poskytujeme vašim překladatelům nebo našemu AI strojovému překladači. <link>Více info o Tolgee integracích</link>",
+  "project_integrate_description" : "Použijte Tolgee Integrace, pro zrychlení procesu lokalizace. Javascriptové integrace umožňují upravovat překlady přímo v aplikaci. To také zvyšuje kvalitu překladů, protože shromažďujeme kontext stránky a následně jej poskytujeme vašim překladatelům nebo našemu AI strojovému překladači. <link>Více info o Tolgee integracích</link>",
   "project_integrate_title" : "Integrovat",
   "project_languages_auto_translation_enable_for_import_switch" : "Automaticky překládat importované položky",
   "project_languages_base_language" : "Základní jazyk",
