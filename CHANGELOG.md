@@ -1,3 +1,10 @@
+## [3.32.3](https://github.com/tolgee/tolgee-platform/compare/v3.32.2...v3.32.3) (2023-10-15)
+
+
+### Bug Fixes
+
+* Trying to open session when retrieving scopes from cache ([#1951](https://github.com/tolgee/tolgee-platform/issues/1951)) ([083b038](https://github.com/tolgee/tolgee-platform/commit/083b03889aabf1393894bdd7e5d39444707f3d44))
+
 ## [3.32.2](https://github.com/tolgee/tolgee-platform/compare/v3.32.1...v3.32.2) (2023-10-15)
 
 
