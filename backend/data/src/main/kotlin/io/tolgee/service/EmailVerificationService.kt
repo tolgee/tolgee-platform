@@ -62,7 +62,6 @@ class EmailVerificationService(
     return null
   }
 
-  @Transactional
   fun check(userAccount: UserAccount) {
     if (
       tolgeeProperties.authentication.needsEmailVerification &&

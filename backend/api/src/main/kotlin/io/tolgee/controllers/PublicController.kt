@@ -62,14 +62,15 @@ class PublicController(
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)
-  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<*> {
+  @Transactional
+  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token
     val jwt = jwtService.emitToken(userAccount.id, true)
-    return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
+    return JwtAuthenticationResponse(jwt)
   }
 
   @Operation(summary = "Reset password request")

@@ -102,11 +102,11 @@ class MtResultStreamer(
   ) {
     val model = translated?.get(service)
       ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
+
     writer.writeJson(
       StreamedSuggestionItem(
         service,
-        model
-
+        model,
       )
     )
   }
