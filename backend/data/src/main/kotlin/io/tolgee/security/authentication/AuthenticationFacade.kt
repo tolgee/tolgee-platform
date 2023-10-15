@@ -23,15 +23,14 @@ import io.tolgee.model.*
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
-import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade(
   private val userAccountService: UserAccountService,
-  @Lazy private val apiKeyService: ApiKeyService,
-  @Lazy private val patService: PatService,
+  private val apiKeyService: ApiKeyService,
+  private val patService: PatService,
 ) {
   // -- GENERAL AUTHENTICATION INFO
   val isAuthenticated: Boolean

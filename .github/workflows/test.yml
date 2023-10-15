@@ -31,29 +31,34 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build backend
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar --parallel
 
-      - name: Tar App build
-        run: tar -czf ~/backend-app.tgz ./backend/app/build
-
-      - name: Tar Data build
-        run: tar -czf ~/backend-data.tgz ./backend/data/build
-
-      - name: Tar Testing build
-        run: tar -czf ~/backend-testing.tgz ./backend/testing/build
-
-      - name: Tar Deployment build
-        run: tar -czf ~/backend-development.tgz ./backend/development/build
+      - name: Tar build assets
+        run: |
+          tar -czf ~/backend-api.tgz ./backend/api/build
+          tar -czf ~/backend-app.tgz ./backend/app/build
+          tar -czf ~/backend-data.tgz ./backend/data/build
+          tar -czf ~/backend-misc.tgz ./backend/misc/build
+          tar -czf ~/backend-security.tgz ./backend/security/build
+          tar -czf ~/backend-testing.tgz ./backend/testing/build
+          tar -czf ~/backend-development.tgz ./backend/development/build
+          tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
+          tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: backend
           path: |
+            ~/backend-api.tgz
             ~/backend-app.tgz
             ~/backend-data.tgz
+            ~/backend-misc.tgz
+            ~/backend-security.tgz
             ~/backend-testing.tgz
             ~/backend-development.tgz
+            ~/ee-backend-app.tgz
+            ~/ee-backend-tests.tgz
 
   backend-test:
     name: BT ‍🔎
@@ -97,19 +102,24 @@ jobs:
           name: backend
           path: ~/
 
-      - name: Untar it
+      - name: Un-tar build results
         run: |
+          tar -xzf ~/backend-api.tgz ./backend/api/build
           tar -xzf ~/backend-app.tgz ./backend/app/build
           tar -xzf ~/backend-data.tgz ./backend/data/build
+          tar -xzf ~/backend-misc.tgz ./backend/misc/build
+          tar -xzf ~/backend-security.tgz ./backend/security/build
           tar -xzf ~/backend-testing.tgz ./backend/testing/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
+          tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
+          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Run backend tests
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }}
+          command: ./gradlew ${{ matrix.command }} -x classes -x compileKotlin -x compileJava
         env:
           SKIP_SERVER_BUILD: true
 
@@ -168,8 +178,17 @@ jobs:
           name: backend
           path: ~/
 
-      - name: Untar it
-        run: tar -xzf ~/backend-app.tgz ./backend/app/build
+      - name: Un-tar build results
+        run: |
+          tar -xzf ~/backend-api.tgz ./backend/api/build
+          tar -xzf ~/backend-app.tgz ./backend/app/build
+          tar -xzf ~/backend-data.tgz ./backend/data/build
+          tar -xzf ~/backend-misc.tgz ./backend/misc/build
+          tar -xzf ~/backend-security.tgz ./backend/security/build
+          tar -xzf ~/backend-testing.tgz ./backend/testing/build
+          tar -xzf ~/backend-development.tgz ./backend/development/build
+          tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
+          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Download frontend build result
         uses: actions/download-artifact@v3
@@ -202,7 +221,7 @@ jobs:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
           command: |
-            ./gradlew runE2e
+            ./gradlew runE2e -x bootJar -x buildWebapp
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}

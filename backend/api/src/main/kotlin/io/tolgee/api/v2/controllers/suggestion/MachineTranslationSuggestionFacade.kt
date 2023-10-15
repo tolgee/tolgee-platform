@@ -17,6 +17,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.StreamingResponseBodyProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,6 +32,7 @@ class MachineTranslationSuggestionFacade(
   private val securityService: SecurityService,
   private val mtCreditBucketService: MtCreditBucketService,
   private val applicationContext: ApplicationContext,
+  private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) {
   fun suggestSync(dto: SuggestRequestDto): SuggestResultModel {
     val targetLanguage = dto.targetLanguage
@@ -56,7 +58,7 @@ class MachineTranslationSuggestionFacade(
 
   @Transactional
   fun suggestStreaming(dto: SuggestRequestDto): StreamingResponseBody {
-    val streamer = MtResultStreamer(dto, applicationContext = applicationContext)
+    val streamer = MtResultStreamer(dto, applicationContext, streamingResponseBodyProvider)
     return streamer.stream()
   }
 

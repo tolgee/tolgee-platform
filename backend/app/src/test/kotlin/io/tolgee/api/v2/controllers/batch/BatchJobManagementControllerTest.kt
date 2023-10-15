@@ -45,9 +45,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import javax.transaction.Transactional
 import kotlin.coroutines.CoroutineContext
 
 @AutoConfigureMockMvc
@@ -430,7 +430,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 }
 
 @Service
-class ThrowingService() {
+class ThrowingService {
   @Transactional
   fun throwExceptionInTransaction() {
     throw RuntimeException("test")

@@ -12,6 +12,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.LanguageService
 import io.tolgee.service.export.ExportService
+import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.http.ContentDisposition
@@ -40,6 +41,7 @@ class V2ExportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
+  private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) {
   @GetMapping(value = [""])
   @Operation(summary = "Exports data")
@@ -111,7 +113,7 @@ class V2ExportController(
     val headers = getHeaders(fileNameWithoutSlash, params.format.mediaType)
 
     return ResponseEntity.ok().headers(headers).body(
-      StreamingResponseBody { out: OutputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
         IOUtils.copy(stream, out)
         stream.close()
         out.close()
@@ -123,7 +125,7 @@ class V2ExportController(
     val httpHeaders = getZipHeaders(projectHolder.project.name)
 
     return ResponseEntity.ok().headers(httpHeaders).body(
-      StreamingResponseBody { out: OutputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
         streamZipResponse(out, exported)
       }
     )

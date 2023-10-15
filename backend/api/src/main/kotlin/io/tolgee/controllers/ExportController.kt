@@ -11,6 +11,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -36,6 +37,7 @@ class ExportController(
   private val permissionService: PermissionService,
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
+  private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @Operation(summary = "Exports data as ZIP of jsons", deprecated = true)
@@ -55,7 +57,7 @@ class ExportController(
         String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name)
       )
       .body(
-        StreamingResponseBody { out: OutputStream ->
+        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
           val zipOutputStream = ZipOutputStream(out)
           val translations = translationService.getTranslations(
             allLanguages.map { it.tag }.toSet(),

@@ -28,7 +28,6 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserCredentialsService
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -62,14 +61,14 @@ class PublicController(
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)
-  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<*> {
+  fun authenticateUser(@RequestBody @Valid loginRequest: LoginRequest): JwtAuthenticationResponse {
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     emailVerificationService.check(userAccount)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token
     val jwt = jwtService.emitToken(userAccount.id, true)
-    return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
+    return JwtAuthenticationResponse(jwt)
   }
 
   @Operation(summary = "Reset password request")

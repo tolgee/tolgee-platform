@@ -13,7 +13,7 @@ plugins {
 
 }
 
-group = 'io.tolgee'
+group = 'io.tolgee.security'
 
 apply plugin: 'java'
 apply plugin: 'idea'

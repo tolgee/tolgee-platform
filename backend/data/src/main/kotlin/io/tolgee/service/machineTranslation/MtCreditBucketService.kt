@@ -19,9 +19,8 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import javax.transaction.Transactional
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 @Service
@@ -62,8 +61,7 @@ class MtCreditBucketService(
     save(bucket)
   }
 
-  @OptIn(ExperimentalTime::class)
-  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
+  @Transactional(noRollbackFor = [OutOfCreditsException::class])
   fun checkPositiveBalance(project: Project) {
     lockingProvider.withLocking(getMtCreditBucketLockName(project)) {
       tryUntilItDoesntBreakConstraint {
