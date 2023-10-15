@@ -28,7 +28,6 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserCredentialsService
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
