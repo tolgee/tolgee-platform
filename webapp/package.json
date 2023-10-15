@@ -62,10 +62,10 @@
     "zustand": "4.1.2"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider craco start",
     "develop": "start",
     "startConcurrently": "concurrently \"craco start\"",
-    "build": "craco build",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider craco build",
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.generated.ts",
     "billing-schema": "openapi-typescript http://localhost:8080/v3/api-docs/V2%20Billing --output ./src/service/billingApiSchema.generated.ts",
@@ -109,7 +109,7 @@
     "@types/codemirror": "^5.60.2",
     "@types/diff": "^5.0.2",
     "@types/jest": "^26.0.24",
-    "@types/node": "^16.4.10",
+    "@types/node": "^18.18.4",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.9",
     "@types/react-list": "^0.8.6",
