@@ -1,3 +1,10 @@
+# [3.33.0](https://github.com/tolgee/tolgee-platform/compare/v3.32.3...v3.33.0) (2023-10-16)
+
+
+### Features
+
+* add danish locale ([#1952](https://github.com/tolgee/tolgee-platform/issues/1952)) ([359c189](https://github.com/tolgee/tolgee-platform/commit/359c189aab30cb960e124bc505ec56bd7d58939a))
+
 ## [3.32.3](https://github.com/tolgee/tolgee-platform/compare/v3.32.2...v3.32.3) (2023-10-15)
 
 
