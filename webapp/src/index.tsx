@@ -60,6 +60,7 @@ const tolgee = Tolgee()
       fr: () => import('./i18n/fr.json'),
       de: () => import('./i18n/de.json'),
       pt: () => import('./i18n/pt.json'),
+      da: () => import('./i18n/da.json'),
     },
   });
 
