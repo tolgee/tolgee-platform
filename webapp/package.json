@@ -74,7 +74,7 @@
     "tsc": "tsc",
     "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
     "tsc:prod": "tsc --project tsconfig.prod.json",
-    "load-translations": "tolgee pull ./public/i18n -o",
+    "load-translations": "tolgee pull ./src/i18n -o",
     "check-translations": "tolgee extract check './src/**/*.ts?(x)'"
   },
   "eslintConfig": {
