@@ -1,4 +1,4 @@
-import type en from './src/i18n/en.json';
+import type en from './public/i18n/en.json';
 
 declare module '@tolgee/core/lib/types' {
   type TranslationsType = typeof en;
