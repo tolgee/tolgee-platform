@@ -55,7 +55,7 @@ class AuthenticationProperties(
       "automatically, if not provided. You will be fine with 64 characters long random string.\n\n" +
       ":::warning\n" +
       "When running multiple replicas, it is required to set it, or you will be constantly logged out otherwise.\n" +
-      ":::"
+      ":::\n\n"
   )
   @Size(min = 32)
   var jwtSecret: String? = null,
@@ -96,7 +96,7 @@ class AuthenticationProperties(
     description = "Username of initial user.\n\n" +
       ":::tip\n" +
       "Tolgee will ask for an email instead of a username - don't worry, just give it the username specified here.\n" +
-      ":::"
+      ":::\n\n"
   )
   var initialUsername: String = "admin",
 
@@ -108,7 +108,7 @@ class AuthenticationProperties(
       "not stored in plaintext in config files.\n\n" +
       "If you set this field to something else, the initial user's password will be updated **unless the password " +
       "was updated once via the Tolgee web UI**.\n" +
-      ":::"
+      ":::\n\n"
   )
   var initialPassword: String? = null,
 

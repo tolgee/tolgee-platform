@@ -19,7 +19,7 @@ class RateLimitProperties(
       "This field is **deprecated** and will be removed with Tolgee 4. If set to `false`, it will take priority\n" +
       "over the more granular `global-limits`, `endpoint-limits` and `authentication-limits` and all limits\n" +
       "will be disabled.\n" +
-      ":::",
+      ":::\n\n",
   )
   @Deprecated(message = "Use `global-limits`, `endpoint-limits` and `authentication-limits` individually instead.")
   var enabled: Boolean = true,
@@ -38,7 +38,7 @@ class RateLimitProperties(
       ":::warning\n" +
       "It is **strongly** recommended to keep these limits enabled. They act as a protection layer against\n" +
       "brute-force attacks on the login (and register) prompt.\n" +
-      ":::"
+      ":::\n\n"
   )
   var authenticationLimits: Boolean = true,
 
