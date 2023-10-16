@@ -38,22 +38,23 @@ import javax.validation.constraints.Size
     ),
   ],
 )
+@DocProperty(description = "Configuration of Tolgee's authentication.", displayName = "Authentication")
 class AuthenticationProperties(
   @E2eRuntimeMutable
   @DocProperty(
-    description = "Whether authentication is enabled." +
-      "When authentication is disabled, there are no login screen and no permission control." +
-      "Users get automatically logged in as the administrator account of the Tolgee instance." +
-      "This is very useful, when you want to use Tolgee on your local machine, or you just want to test it.",
+    description = "Whether authentication is enabled. " +
+      "When authentication is disabled, there are no login screen and no permission control. " +
+      "Users get automatically logged in as the administrator account of the Tolgee instance. " +
+      "This is very useful, when you want to use Tolgee on your local machine, or you just want to test it. ",
     defaultExplanation = "when running with Java directly, `false` when running via Docker."
   )
   var enabled: Boolean = true,
 
   @DocProperty(
-    description = "Secret used to sign JWT authentication tokens with. It will be generated" +
-      " automatically, if not provided. You will be fine with 64 characters long random string.\n\n" +
+    description = "Secret used to sign JWT authentication tokens with. It will be generated " +
+      "automatically, if not provided. You will be fine with 64 characters long random string.\n\n" +
       ":::warning\n" +
-      "If running multiple replicas, it's required to set it or otherwise you will be constantly logged out.\n" +
+      "When running multiple replicas, it is required to set it, or you will be constantly logged out otherwise.\n" +
       ":::"
   )
   @Size(min = 32)
@@ -92,16 +93,22 @@ class AuthenticationProperties(
   var needsEmailVerification: Boolean = false,
 
   @DocProperty(
-    description = "Username of initial user.\n" +
-      ":::tip" +
-      "Tolgee will ask for an email instead of a username - don't worry, just give it the username specified here." +
+    description = "Username of initial user.\n\n" +
+      ":::tip\n" +
+      "Tolgee will ask for an email instead of a username - don't worry, just give it the username specified here.\n" +
       ":::"
   )
   var initialUsername: String = "admin",
 
   @DocProperty(
     description = "Password of initial user. If unspecified, a random password will be generated " +
-      "and stored in the `initial.pwd` file, located at the root of Tolgee's data path."
+      "and stored in the `initial.pwd` file, located at the root of Tolgee's data path.\n\n" +
+      ":::tip\n" +
+      "Once set, you don't need to set this property anymore, and it is recommended you unset it so the password is " +
+      "not stored in plaintext in config files.\n\n" +
+      "If you set this field to something else, the initial user's password will be updated **unless the password " +
+      "was updated once via the Tolgee web UI**.\n" +
+      ":::"
   )
   var initialPassword: String? = null,
 
