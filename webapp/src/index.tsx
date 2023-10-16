@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
-  BackendFetch,
   DevTools,
   LanguageDetector,
   Tolgee,
@@ -33,7 +32,6 @@ import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
-import { locales } from './locales';
 
 const store = configureStore();
 
@@ -49,14 +47,21 @@ const tolgee = Tolgee()
   .use(DevTools())
   .use(FormatIcu())
   .use(LanguageDetector())
-  .use(BackendFetch())
   .use(languageStorage)
   .init({
     defaultLanguage: 'en',
     fallbackLanguage: 'en',
     apiUrl: process.env.REACT_APP_TOLGEE_API_URL,
     apiKey: process.env.REACT_APP_TOLGEE_API_KEY,
-    availableLanguages: Object.keys(locales),
+    staticData: {
+      en: () => import('./i18n/en.json'),
+      es: () => import('./i18n/es.json'),
+      cs: () => import('./i18n/cs.json'),
+      fr: () => import('./i18n/fr.json'),
+      de: () => import('./i18n/de.json'),
+      pt: () => import('./i18n/pt.json'),
+      da: () => import('./i18n/da.json'),
+    },
   });
 
 const MainWrapper = () => {
