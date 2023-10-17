@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
 import { Box, Grid, styled } from '@mui/material';
-import AppBar from '@mui/material/AppBar';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
