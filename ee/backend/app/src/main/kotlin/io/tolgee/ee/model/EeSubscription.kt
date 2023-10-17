@@ -1,6 +1,6 @@
 package io.tolgee.ee.model
 
-import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.data.SubscriptionStatus
 import io.tolgee.model.AuditModel

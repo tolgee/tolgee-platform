@@ -1,6 +1,6 @@
 package io.tolgee.model
 
-import com.vladmihalcea.hibernate.type.array.EnumArrayType
+import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType

@@ -1,6 +1,6 @@
 package io.tolgee.model.activity
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
