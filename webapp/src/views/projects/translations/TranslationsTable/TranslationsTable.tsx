@@ -28,7 +28,7 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledHeaderRow = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-width: 1px 0px 1px 0px;
   position: sticky;
   background: ${({ theme }) => theme.palette.background.default};

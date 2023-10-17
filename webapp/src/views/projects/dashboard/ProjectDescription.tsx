@@ -10,7 +10,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 const StyledContainer = styled('div')`
   display: grid;
   gap: 5px;
-  border: 1px solid ${({ theme }) => theme.palette.divider1.main};
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: 10px;
   position: relative;
 `;

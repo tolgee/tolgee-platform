@@ -41,7 +41,7 @@ const StyledDivider = styled('div')`
   height: 1px;
   background: ${({ theme }) =>
     theme.palette.mode === 'light'
-      ? theme.palette.emphasis[300]
+      ? theme.palette.divider1
       : theme.palette.emphasis[400]};
 `;
 

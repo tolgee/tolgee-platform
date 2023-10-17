@@ -26,7 +26,7 @@ const StyledPopper = styled('div')`
 
 const StyledPopperContent = styled('div')`
   display: flex;
-  background: ${({ theme }) => theme.palette.cellSelected2.main};
+  background: ${({ theme }) => theme.palette.cell.selected};
   box-shadow: ${({ theme }) => theme.shadows[10]};
 `;
 

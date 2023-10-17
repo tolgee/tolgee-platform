@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -22,9 +22,13 @@ const StyledAppBar = styled(AppBar)(
       zIndex: theme.zIndex.drawer + 1,
       transition: 'transform 0.2s ease-in-out',
       ...theme.mixins.toolbar,
-      background: theme.palette.navbarBackground.main,
-      boxShadow:
-        theme.palette.mode === 'dark' ? 'none' : theme.mixins.toolbar.boxShadow,
+      background: theme.palette.navbar.background,
+      color: theme.palette.navbar.text,
+      boxShadow: 'none',
+      borderBottom:
+        theme.palette.mode === 'light'
+          ? `1px solid ${theme.palette.divider1}`
+          : 'none',
     } as any)
 );
 
@@ -82,6 +86,7 @@ export const TopBar: React.FC<Props> = ({
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
 
   const { mode, setMode } = useThemeContext();
+  const theme = useTheme();
 
   const toggleTheme = () => {
     if (mode === 'dark') {
@@ -104,7 +109,10 @@ export const TopBar: React.FC<Props> = ({
             <StyledTolgeeLink to={'/'}>
               <Box display="flex" alignItems="center">
                 <StyledLogoWrapper pr={1} display="flex" justifyItems="center">
-                  <TolgeeLogo fontSize="large" />
+                  <TolgeeLogo
+                    fontSize="large"
+                    sx={{ color: theme.palette.navbar.logo }}
+                  />
                 </StyledLogoWrapper>
                 <StyledLogoTitle variant="h5" color="inherit">
                   {config.appName}

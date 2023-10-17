@@ -8,7 +8,7 @@ const StyledContainer = styled('div')`
   position: sticky;
   top: 0px;
   height: 25px;
-  background: ${({ theme }) => theme.palette.cellSelected2.main};
+  background: ${({ theme }) => theme.palette.cell.inside};
   padding-bottom: 1px;
   padding-top: 1px;
   z-index: 1;

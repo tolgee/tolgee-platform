@@ -32,7 +32,7 @@ const StyledRow = styled('div')`
     opacity: 0.6;
   }
   &:hover > * {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
   }
 `;
 

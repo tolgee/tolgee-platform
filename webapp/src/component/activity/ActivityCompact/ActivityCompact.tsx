@@ -26,7 +26,7 @@ const StyledContainer = styled('div')`
 
   &:hover > * {
     transition: background 0.3s ease-in;
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
   }
 
   & > * {

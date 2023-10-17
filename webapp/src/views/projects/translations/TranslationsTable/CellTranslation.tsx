@@ -7,7 +7,6 @@ import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import {
   CELL_CLICKABLE,
-  CELL_HOVER,
   CELL_PLAIN,
   CELL_RAISED,
   StyledCell,
@@ -126,7 +125,6 @@ export const CellTranslation: React.FC<Props> = ({
       position={lastFocusable ? 'right' : undefined}
       className={clsx({
         [CELL_PLAIN]: true,
-        [CELL_HOVER]: !isEditing,
         [CELL_CLICKABLE]: editEnabled && !isEditing,
         [CELL_RAISED]: isEditing,
       })}

@@ -26,7 +26,7 @@ const StyledContainer = styled(Box)`
   height: 400px;
   width: 100%;
   contain: size;
-  border: 1px solid ${({ theme }) => theme.palette.divider1.main};
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: 10px;
   padding: 10px 0px;
 

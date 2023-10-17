@@ -26,7 +26,7 @@ const StyledContainer = styled('div')`
   border-radius: 8px;
 
   &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
     transition: background-color 0.1s ease-in;
   }
 

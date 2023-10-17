@@ -4,9 +4,11 @@ import { PaletteColorOptions } from '@mui/material';
 import {
   Activity,
   BillingProgress,
+  Cell,
   Editor,
   Emphasis,
   Marker,
+  Navbar,
   TopBanner,
 } from './colors';
 
@@ -17,12 +19,11 @@ declare module '*.svg' {
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
+    divider1: string;
     divider2: PaletteColor;
-    divider1: PaletteColor;
-    cellSelected1: PaletteColor;
-    cellSelected2: PaletteColor;
+    cell: Cell;
     default: PaletteColor;
-    navbarBackground: PaletteColor;
+    navbar: Navbar;
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;
@@ -34,12 +35,11 @@ declare module '@mui/material/styles/createPalette' {
   }
 
   interface PaletteOptions {
+    divider1: string;
     divider2: PaletteColorOptions;
-    divider1: PaletteColorOptions;
-    cellSelected1: PaletteColorOptions;
-    cellSelected2: PaletteColorOptions;
+    cell: Cell;
     default: PaletteColor;
-    navbarBackground: PaletteColor;
+    navbar: Navbar;
     emphasis: Emphasis;
     activity: Activity;
     editor: Editor;

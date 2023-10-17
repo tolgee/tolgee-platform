@@ -17,7 +17,7 @@ const StyledWrapper = styled('div')`
   align-items: stretch;
 
   & .listWrapper > * > * + * {
-    border-top: 1px solid ${({ theme }) => theme.palette.divider1.main};
+    border-top: 1px solid ${({ theme }) => theme.palette.divider1};
   }
 `;
 

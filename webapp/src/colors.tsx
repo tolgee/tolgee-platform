@@ -1,5 +1,22 @@
 import { grey } from '@mui/material/colors';
 
+const customGrey: Emphasis = {
+  50: '#f0f2f4',
+  100: '#e3e7ea',
+  200: '#bbc2cb',
+  300: '#9da7b4',
+  400: '#8995a5',
+  500: '#6c7b8f',
+  600: '#627082',
+  700: '#4d5766',
+  800: '#2C3C52',
+  900: '#1F2D40',
+  A100: grey.A100,
+  A200: grey.A200,
+  A400: grey.A400,
+  A700: grey.A700,
+};
+
 export type Emphasis = {
   50: string;
   100: string;
@@ -48,39 +65,58 @@ export type TopBanner = {
   linkText: string;
 };
 
+export type Cell = {
+  hover: string;
+  selected: string;
+  inside: string;
+};
+
+export type Navbar = {
+  background: string;
+  text: string;
+  logo: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
-    primary: '#822B55',
+    primary: '#EC407A',
     secondary: '#2B5582',
-    default: grey[700],
-    navbarBackground: '#822B55',
-    text: '#525252',
+    default: customGrey[700],
+    text: '#5E6C7D',
     textSecondary: '#808080',
-    divider1: '#00000014',
+    divider1: '#E1E5EB',
     divider2: '#0000001e',
-    background: '#ffffff',
-    cellSelected1: '#f5f5f5',
-    cellSelected2: '#ffffff',
+    background: '#F9F9F9',
     backgroundPaper: '#ffffff',
-    emphasis: grey as Emphasis,
+    emphasis: customGrey,
+    cell: {
+      hover: '#f6f6f6',
+      selected: '#EEEFF1',
+      inside: '#F9F9F9',
+    },
+    navbar: {
+      background: '#fff',
+      text: '#2C3C52',
+      logo: '#EC407A',
+    },
     activity: {
       removed: '#822B55',
       added: '#006900',
       addedHighlight: '#c4f0da',
-    } as Activity,
+    },
     editor: {
       function: '#007300',
       other: '#002bff',
       main: '#000000',
-    } as Editor,
+    },
     billingProgress: {
       background: '#C4C4C4',
       low: '#E80000',
       over: '#ffce00',
       sufficient: '#17AD18',
       separator: '#656565',
-    } as BillingProgress,
+    },
     billingPlan: '#F8F8F8',
     globalLoading: '#c9a2b5',
     marker: {
@@ -101,16 +137,24 @@ export const colors = {
     white: '#dddddd',
     primary: '#ff6995',
     secondary: '#aed5ff',
-    default: grey[400],
-    navbarBackground: '#182230',
+    default: customGrey[400],
     text: '#dddddd',
     textSecondary: '#acacac',
-    divider1: '#eeeeee14',
+    divider1: '#2c3c52',
     divider2: '#ffffff1e',
     background: '#1f2d40',
     backgroundPaper: '#1e2b3e',
-    cellSelected1: '#24344b',
+    cell: {
+      hover: '#233043',
+      selected: '#243245',
+      inside: '#283a53',
+    },
     cellSelected2: '#283a53',
+    navbar: {
+      background: '#182230',
+      text: '#dddddd',
+      logo: '#dddddd',
+    },
     emphasis: {
       50: '#233043',
       100: '#243245',
@@ -126,30 +170,30 @@ export const colors = {
       A200: '#bdbdbd',
       A400: '#eeeeee',
       A700: '#f5f5f5',
-    } as Emphasis,
+    },
     activity: {
       removed: '#ff7e7e',
       added: '#7fe07f',
       addedHighlight: '#006300',
-    } as Activity,
+    },
     editor: {
       function: '#9ac99a',
       other: '#99aaff',
       main: '#eeeeee',
-    } as Editor,
+    },
     billingProgress: {
       background: '#565656',
       low: '#ca0000',
       over: '#ffce00',
       sufficient: '#1e991e',
       separator: '#656565',
-    } as BillingProgress,
+    },
     billingPlan: '#233043',
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
       secondary: '#ffc0cb',
-    } as Marker,
+    },
     tooltip: {
       background: '#394556',
       text: '#efefef',

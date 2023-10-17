@@ -30,7 +30,7 @@ const StyledContainer = styled('div')`
   flex-direction: column;
   align-items: stretch;
   min-height: 300px;
-  background: ${({ theme }) => theme.palette.cellSelected2.main};
+  background: ${({ theme }) => theme.palette.cell.inside};
 `;
 
 const StyledEditorContainer = styled('div')`
@@ -49,7 +49,11 @@ const StyledEditorControls = styled('div')`
 
 const StyledTabsWrapper = styled('div')`
   display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1.main};
+  border-bottom: 1px solid
+    ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? theme.palette.emphasis[300]
+        : theme.palette.divider1};
   justify-content: space-between;
   align-items: center;
 `;
@@ -202,7 +206,7 @@ export const TranslationOpened: React.FC<Props> = ({
         <>
           <StyledEditorContainer>
             <Editor
-              background={theme.palette.cellSelected2.main}
+              background={theme.palette.cell.inside}
               value={value}
               onChange={onChange}
               onCancel={() => onCancel(true)}
