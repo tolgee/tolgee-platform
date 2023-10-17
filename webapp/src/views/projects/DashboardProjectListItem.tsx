@@ -26,12 +26,13 @@ const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3, 2.5)};
   cursor: pointer;
   overflow: hidden;
-  & .translationIconButton {
+  background-color: ${({ theme }) => theme.palette.background.default};
+  .translationIconButton {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
   }
   &:hover {
-    background-color: ${({ theme }) => theme.palette.emphasis['50']};
+    background-color: ${({ theme }) => theme.palette.cell.hover};
     & .translationIconButton {
       opacity: 1;
     }
