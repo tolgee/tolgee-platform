@@ -224,9 +224,9 @@ class BatchJobService(
       }
     val needsProgress = cachedProgresses.filter { it.value == null }.map { it.key }.toList()
     val progresses = batchJobRepository.getProgresses(needsProgress)
-      .associate { (it[0] as BigInteger).toLong() to it[1] as BigInteger }
+      .associate { it[0] as Long to it[1] as Long }
 
-    return jobs.associate { it.id to (cachedProgresses[it.id] ?: progresses[it.id]?.toLong() ?: 0).toInt() }
+    return jobs.associate { it.id to (cachedProgresses[it.id] ?: progresses[it.id] ?: 0).toInt() }
   }
 
   fun getView(jobId: Long): BatchJobView {

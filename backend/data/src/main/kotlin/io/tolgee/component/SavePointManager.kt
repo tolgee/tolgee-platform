@@ -41,7 +41,7 @@ class SavePointManager(
   }
 
   fun getSession(): SessionImpl {
-    return entityManager.unwrap(Session::class.java)
+    return entityManager.unwrap(SessionImpl::class.java)
       ?.let { it as? SessionImpl ?: throw IllegalStateException("Session is not SessionImpl") }
       ?: throw IllegalStateException("Session is null")
   }
