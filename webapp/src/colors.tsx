@@ -86,7 +86,6 @@ export const colors = {
     text: '#5E6C7D',
     textSecondary: '#808080',
     divider1: '#E1E5EB',
-    divider2: '#0000001e',
     background: '#F9F9F9',
     backgroundPaper: '#ffffff',
     emphasis: customGrey,

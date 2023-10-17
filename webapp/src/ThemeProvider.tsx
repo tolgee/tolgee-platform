@@ -132,7 +132,6 @@ const getTheme = (mode: PaletteMode) => {
         secondary: c.textSecondary,
       },
       divider1: c.divider1,
-      divider2: createColor(c.divider2),
       cell: c.cell,
       background: {
         default: c.background,

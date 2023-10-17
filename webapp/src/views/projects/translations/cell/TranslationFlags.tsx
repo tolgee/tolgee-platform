@@ -42,7 +42,7 @@ const StyledContainer = styled('div')`
     display: block;
   }
   &:hover {
-    border: 1px solid ${({ theme }) => theme.palette.divider2.main};
+    border: 1px solid ${({ theme }) => theme.palette.divider1};
     transition: all 0.1s;
   }
 `;

@@ -16,7 +16,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const TOP_BAR_HEIGHT = 52;
 
-const StyledAppBar = styled(AppBar)(
+export const StyledAppBar = styled(AppBar)(
   ({ theme }) =>
     ({
       zIndex: theme.zIndex.drawer + 1,

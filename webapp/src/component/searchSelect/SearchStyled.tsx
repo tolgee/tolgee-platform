@@ -9,7 +9,7 @@ export const StyledInput = styled(InputBase)`
 export const StyledInputWrapper = styled(Box)`
   display: flex;
   align-items: center;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
   margin-top: -1px;
   padding-right: 4px;
   position: relative;

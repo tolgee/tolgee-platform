@@ -26,7 +26,7 @@ type UserAccountWithOrganizationRoleModel =
 
 const StyledListItem = styled('div')`
   display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
   &:last-child {
     border-bottom: 0px;
   }

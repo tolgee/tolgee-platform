@@ -28,7 +28,7 @@ const StyledListItem = styled('div')`
 
   &.selected {
     background-color: ${({ theme }) => theme.palette.emphasis[50]};
-    border-color: ${({ theme }) => theme.palette.divider2.main};
+    border-color: ${({ theme }) => theme.palette.divider1};
   }
 `;
 

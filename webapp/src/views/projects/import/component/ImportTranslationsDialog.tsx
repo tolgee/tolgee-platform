@@ -17,10 +17,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-
-const StyledAppBar = styled(AppBar)`
-  position: relative;
-`;
+import { StyledAppBar } from 'tg.component/layout/TopBar/TopBar';
 
 const StyledTitle = styled(Typography)`
   margin-left: ${({ theme }) => theme.spacing(2)};
@@ -70,8 +67,9 @@ export const ImportTranslationsDialog: FunctionComponent<{
         onClose={props.onClose}
         TransitionComponent={Transition}
         data-cy="import-show-data-dialog"
+        PaperProps={{ sx: { background: theme.palette.background.default } }}
       >
-        <StyledAppBar>
+        <StyledAppBar sx={{ position: 'relative' }}>
           <Toolbar>
             <IconButton
               edge="start"

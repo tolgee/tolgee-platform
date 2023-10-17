@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from 'react';
-import AppBar from '@mui/material/AppBar';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
@@ -9,13 +8,11 @@ import { styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
+import { useTheme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportConflictsData } from './ImportConflictsData';
-
-const StyledAppBar = styled(AppBar)`
-  position: relative;
-`;
+import { StyledAppBar } from 'tg.component/layout/TopBar/TopBar';
 
 const StyledTitle = styled(Typography)`
   margin-left: ${({ theme }) => theme.spacing(2)};
@@ -33,6 +30,7 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
 }> = (props) => {
+  const theme = useTheme();
   return (
     <div>
       <Dialog
@@ -41,8 +39,9 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
         onClose={props.onClose}
         TransitionComponent={Transition}
         data-cy="import-conflict-resolution-dialog"
+        PaperProps={{ sx: { background: theme.palette.background.default } }}
       >
-        <StyledAppBar>
+        <StyledAppBar sx={{ position: 'relative' }}>
           <Toolbar>
             <IconButton
               edge="start"

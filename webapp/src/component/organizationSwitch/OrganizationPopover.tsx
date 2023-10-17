@@ -33,7 +33,7 @@ const StyledInput = styled(InputBase)`
 const StyledInputWrapper = styled(Box)`
   display: flex;
   align-items: center;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
   padding-right: 4px;
 `;
 
