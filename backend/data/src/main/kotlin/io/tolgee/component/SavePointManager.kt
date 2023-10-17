@@ -1,7 +1,6 @@
 package io.tolgee.component
 
 import jakarta.persistence.EntityManager
-import org.hibernate.Session
 import org.hibernate.internal.SessionImpl
 import org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl
 import org.springframework.stereotype.Component

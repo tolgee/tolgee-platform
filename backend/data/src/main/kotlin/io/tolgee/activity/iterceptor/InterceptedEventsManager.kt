@@ -29,7 +29,6 @@ import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import java.io.Serializable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
