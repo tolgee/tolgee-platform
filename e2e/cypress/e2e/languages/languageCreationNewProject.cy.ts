@@ -108,7 +108,7 @@ describe('Language creation in new project', () => {
 
   it('validates language repeat', () => {
     addLanguage('English');
-    cy.contains('Cannot add language more then once').should('be.visible');
+    cy.contains('Cannot add language more than once').should('be.visible');
   });
 
   it('validates no languages', () => {
