@@ -22,7 +22,10 @@ const StyledCode = styled('pre')`
 
 const StyledInlineCode = styled('span')`
   border-radius: ${({ theme }) => theme.shape.borderRadius};
-  background-color: ${({ theme }) => theme.palette.emphasis[200]};
+  background-color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[100]
+      : theme.palette.emphasis[200]};
   color: ${({ theme }) => theme.palette.emphasis[900]};
   padding: 4px 4px;
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
@@ -93,6 +96,7 @@ export const MdxProvider: FC<{
                   className={className}
                   style={{
                     ...style,
+                    background: theme.palette.emphasis[50],
                   }}
                 >
                   {tokens.map((line, i) => (

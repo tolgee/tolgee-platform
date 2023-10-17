@@ -50,7 +50,7 @@ const StyledContent = styled('div')`
   background-color: ${({ theme }) =>
     theme.palette.mode === 'dark'
       ? theme.palette.emphasis[200]
-      : theme.palette.emphasis[100]};
+      : theme.palette.emphasis[50]};
   -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
 `;

@@ -8,7 +8,7 @@ const StyledImage = styled('img')`
 `;
 
 const StyledText = styled('div')`
-  opacity: 0.3;
+  opacity: 0.8;
   padding-top: ${({ theme }) => theme.spacing(4)};
 `;
 
