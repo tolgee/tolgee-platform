@@ -1,6 +1,6 @@
 package io.tolgee.model.key.screenshotReference
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import jakarta.persistence.Column

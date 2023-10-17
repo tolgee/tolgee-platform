@@ -58,7 +58,7 @@ dependencyResolutionManagement {
             library('sentry', "io.sentry:sentry-spring-boot-starter:5.7.3")
             library('liquibaseCore', "org.liquibase:liquibase-core:4.9.1")
             library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.24.0")
-            library('hibernateTypes', "com.vladmihalcea:hibernate-types-60:2.21.1")
+            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-62:3.6.0")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.23.2")
             library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.23.2')
             library('postHog', 'com.posthog.java:posthog:1.1.0')

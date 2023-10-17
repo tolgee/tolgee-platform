@@ -22,14 +22,12 @@ class SqlController(
   @PostMapping(value = ["/list"])
   @Transactional
   fun getList(@RequestBody query: String): MutableList<Any?>? {
-    val session = entityManager.unwrap(Session::class.java)
-    return session.createNativeQuery(query).list()
+   return entityManager.createNativeQuery(query).resultList
   }
 
   @PostMapping(value = ["/execute"])
   @Transactional
   fun execute(@RequestBody query: String) {
-    val session = entityManager.unwrap(Session::class.java)
-    session.createNativeQuery(query).executeUpdate()
+    entityManager.createNativeQuery(query).executeUpdate()
   }
 }
