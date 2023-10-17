@@ -22,8 +22,6 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import org.hibernate.annotations.NotFound
-import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired

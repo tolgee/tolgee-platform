@@ -7,4 +7,4 @@ interface LanguageView {
   var base: Boolean
 }
 
-class LanguageViewImpl(override var language: Language, override var base: Boolean) : LanguageView {}
+class LanguageViewImpl(override var language: Language, override var base: Boolean) : LanguageView

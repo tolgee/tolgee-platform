@@ -1,13 +1,13 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Message
-import io.tolgee.model.views.LanguageView
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService

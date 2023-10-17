@@ -1,7 +1,6 @@
 package io.tolgee.model.views
 
 import io.tolgee.dtos.query_results.ProjectStatistics
-import io.tolgee.model.Language
 
 class ProjectWithStatsView(
   view: ProjectWithLanguagesView,

@@ -1,18 +1,18 @@
-//package io.tolgee.jobs.migration.translationStats
+// package io.tolgee.jobs.migration.translationStats
 //
-//import io.tolgee.AbstractSpringTest
-//import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-//import io.tolgee.repository.TranslationRepository
-//import io.tolgee.testing.assertions.Assertions.assertThat
-//import org.junit.jupiter.api.Test
-//import org.springframework.batch.core.BatchStatus
-//import org.springframework.beans.factory.annotation.Autowired
-//import org.springframework.boot.test.context.SpringBootTest
-//import org.springframework.test.context.transaction.TestTransaction
-//import org.springframework.transaction.annotation.Transactional
+// import io.tolgee.AbstractSpringTest
+// import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+// import io.tolgee.repository.TranslationRepository
+// import io.tolgee.testing.assertions.Assertions.assertThat
+// import org.junit.jupiter.api.Test
+// import org.springframework.batch.core.BatchStatus
+// import org.springframework.beans.factory.annotation.Autowired
+// import org.springframework.boot.test.context.SpringBootTest
+// import org.springframework.test.context.transaction.TestTransaction
+// import org.springframework.transaction.annotation.Transactional
 //
-//@SpringBootTest
-//class TranslationStatsJobTest : AbstractSpringTest() {
+// @SpringBootTest
+// class TranslationStatsJobTest : AbstractSpringTest() {
 //
 //  @Autowired
 //  lateinit var translationsStatsUpdateJobRunner: TranslationsStatsUpdateJobRunner
@@ -93,4 +93,4 @@
 //    TestTransaction.end()
 //    return testData
 //  }
-//}
+// }
