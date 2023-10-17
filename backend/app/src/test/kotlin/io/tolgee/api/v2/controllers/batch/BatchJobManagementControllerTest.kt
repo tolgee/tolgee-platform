@@ -30,7 +30,6 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
-import jakarta.transaction.Transactional
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

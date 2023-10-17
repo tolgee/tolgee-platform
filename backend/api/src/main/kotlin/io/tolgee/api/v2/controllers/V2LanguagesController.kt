@@ -11,12 +11,12 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
-import io.tolgee.model.views.LanguageView
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.views.LanguageView
 import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess

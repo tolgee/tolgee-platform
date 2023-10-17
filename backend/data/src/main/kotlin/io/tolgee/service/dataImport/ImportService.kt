@@ -32,7 +32,6 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
-import org.hibernate.annotations.QueryHints
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

@@ -34,7 +34,7 @@ class EeSubscription : AuditModel() {
 
   var cancelAtPeriodEnd: Boolean = false
 
-  @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")] )
+  @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")])
   @Column(name = "enabled_features", columnDefinition = "varchar[]")
   var enabledFeatures: Array<Feature> = arrayOf()
     get() {
