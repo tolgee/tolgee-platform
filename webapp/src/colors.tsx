@@ -107,7 +107,7 @@ export const colors = {
     editor: {
       function: '#007300',
       other: '#002bff',
-      main: '#000000',
+      main: '#2C3C52',
     },
     billingProgress: {
       background: '#C4C4C4',
@@ -140,7 +140,6 @@ export const colors = {
     text: '#dddddd',
     textSecondary: '#acacac',
     divider1: '#2c3c52',
-    divider2: '#ffffff1e',
     background: '#1f2d40',
     backgroundPaper: '#1e2b3e',
     cell: {

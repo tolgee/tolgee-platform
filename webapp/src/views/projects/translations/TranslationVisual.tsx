@@ -19,7 +19,10 @@ const StyledVariants = styled('div')`
   & .chip {
     padding: 0px 5px 0px 5px;
     box-sizing: border-box;
-    background: ${({ theme }) => theme.palette.emphasis[200]};
+    background: ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? theme.palette.emphasis[200]
+        : theme.palette.emphasis[100]};
     border-radius: 4px;
     overflow: hidden;
     white-space: nowrap;

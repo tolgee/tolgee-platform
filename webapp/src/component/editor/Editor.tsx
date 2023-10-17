@@ -29,7 +29,10 @@ const StyledWrapper = styled('div')<{
   }
 
   & .CodeMirror *::selection {
-    background: ${({ theme }) => theme.palette.emphasis[300]};
+    background: ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? theme.palette.emphasis[300]
+        : theme.palette.emphasis[200]};
   }
 
   & .CodeMirror {
