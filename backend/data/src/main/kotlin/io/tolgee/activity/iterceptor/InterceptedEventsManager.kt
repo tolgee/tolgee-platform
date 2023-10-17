@@ -44,7 +44,7 @@ class InterceptedEventsManager(
     activityHolder.transactionRollbackOnly = tx.rollbackOnly
   }
 
-  fun onCollectionModification(collection: Any?, key: Serializable?) {
+  fun onCollectionModification(collection: Any?, key: Any?) {
     if (collection !is AbstractPersistentCollection<*> || collection !is Collection<*> || key !is Long) {
       return
     }
