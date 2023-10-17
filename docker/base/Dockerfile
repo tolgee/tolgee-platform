@@ -1,6 +1,6 @@
 FROM alpine:edge
 
-RUN apk --no-cache add openjdk14
+RUN apk --no-cache add openjdk17
 
 ####################################################################################
 ### Postgres from postgres official Dockerfile                                     #
