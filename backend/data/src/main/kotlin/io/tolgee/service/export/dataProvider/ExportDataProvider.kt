@@ -151,10 +151,7 @@ class ExportDataProvider(
   ): ListJoin<Key, Translation> {
     val translation = key.join(Key_.translations, JoinType.LEFT)
     translation.on(
-      cb.and(
-        cb.equal(key, translation.get(Translation_.key)),
-        cb.equal(language, translation.get(Translation_.language))
-      )
+      cb.equal(language, translation.get(Translation_.language))
     )
     return translation
   }
