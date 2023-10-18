@@ -33,6 +33,7 @@ const StyledContainer = styled('div')`
   }
   &:hover {
     background-color: ${({ theme }) => theme.palette.cell.hover};
+    transition: background-color 0.1s ease-in;
     & .translationIconButton {
       opacity: 1;
     }

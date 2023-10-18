@@ -83,7 +83,7 @@ export const colors = {
     primary: '#EC407A',
     secondary: '#2B5582',
     default: customGrey[700],
-    text: '#5E6C7D',
+    text: '#4E5967',
     textSecondary: '#808080',
     divider1: '#E1E5EB',
     background: '#F9F9F9',
