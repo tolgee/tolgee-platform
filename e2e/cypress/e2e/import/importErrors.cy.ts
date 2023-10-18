@@ -45,7 +45,7 @@ describe('Import errors', () => {
     }
 
     gcy('import-file-input').attachFile(files);
-    assertMessage('Cannot add more then 100 languages');
+    assertMessage('Cannot add more than 100 languages');
   });
 
   describe('file error message', () => {
