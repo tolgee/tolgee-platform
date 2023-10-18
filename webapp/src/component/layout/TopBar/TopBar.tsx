@@ -23,7 +23,7 @@ export const StyledAppBar = styled(AppBar)(
       transition: 'transform 0.2s ease-in-out',
       ...theme.mixins.toolbar,
       background: theme.palette.navbar.background,
-      color: theme.palette.navbar.text,
+      color: theme.palette.text.primary,
       boxShadow: 'none',
       borderBottom:
         theme.palette.mode === 'light'
@@ -54,7 +54,7 @@ const StyledLogoWrapper = styled(Box)`
 `;
 
 const StyledTolgeeLink = styled(Link)`
-  color: inherit;
+  color: ${({ theme }) => theme.palette.navbar.text};
   text-decoration: inherit;
   outline: 0;
 
