@@ -1,7 +1,5 @@
 FROM alpine:3.18
 
-RUN apk --no-cache add openjdk17
-
 ########################################################################################
 ### Postgres from postgres official Dockerfile                                         #
 ### https://github.com/docker-library/postgres/blob/master/13/alpine3.18/Dockerfile    #
@@ -11,9 +9,6 @@ RUN apk --no-cache add openjdk17
 #
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
-
-
-FROM alpine:3.18
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
@@ -179,6 +174,8 @@ VOLUME /var/lib/postgresql/data
 
 COPY postgres-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/postgres-entrypoint.sh
+
+RUN apk --no-cache add openjdk17
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
 # calls "Fast Shutdown mode" wherein new connections are disallowed and any
