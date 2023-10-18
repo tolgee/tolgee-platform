@@ -2,7 +2,6 @@ package io.tolgee.controllers.internal
 
 import io.swagger.v3.oas.annotations.Hidden
 import jakarta.persistence.EntityManager
-import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,7 +21,7 @@ class SqlController(
   @PostMapping(value = ["/list"])
   @Transactional
   fun getList(@RequestBody query: String): MutableList<Any?>? {
-   return entityManager.createNativeQuery(query).resultList
+    return entityManager.createNativeQuery(query).resultList
   }
 
   @PostMapping(value = ["/execute"])
