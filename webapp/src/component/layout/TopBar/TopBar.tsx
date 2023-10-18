@@ -24,10 +24,9 @@ export const StyledAppBar = styled(AppBar)(
       ...theme.mixins.toolbar,
       background: theme.palette.navbar.background,
       color: theme.palette.text.primary,
-      boxShadow: 'none',
-      borderBottom:
+      boxShadow:
         theme.palette.mode === 'light'
-          ? `1px solid ${theme.palette.divider1}`
+          ? `0px 4px 6px 0px rgba(0, 0, 0, 0.02);`
           : 'none',
     } as any)
 );
