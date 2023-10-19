@@ -1,3 +1,10 @@
+# [3.34.0](https://github.com/tolgee/tolgee-platform/compare/v3.33.0...v3.34.0) (2023-10-19)
+
+
+### Features
+
+* improve out of credits error ([#1962](https://github.com/tolgee/tolgee-platform/issues/1962)) ([e47cd70](https://github.com/tolgee/tolgee-platform/commit/e47cd7062e321b824c2bd9e3a118fa5d1dd0cb0c))
+
 # [3.33.0](https://github.com/tolgee/tolgee-platform/compare/v3.32.3...v3.33.0) (2023-10-16)
 
 
