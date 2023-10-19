@@ -70,9 +70,7 @@ class Screenshot : StandardAuditModel() {
 
     other as Screenshot
 
-    if (id != other.id) return false
-
-    return true
+    return id == other.id
   }
 
   override fun hashCode(): Int {
