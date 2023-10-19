@@ -7,7 +7,7 @@ import { LINKS } from 'tg.constants/links';
 
 const StyledExitDebugButton = styled(Button)`
   color: inherit;
-  border-color: rgba(0, 0, 0, 0.38);
+  border-color: rgba(135, 135, 135, 0.38);
 `;
 
 const globalActions = container.resolve(GlobalActions);
