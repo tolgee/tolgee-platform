@@ -1,5 +1,5 @@
-import { Skeleton, styled } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { Button, Skeleton, styled } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
 
 import { TabMessage } from './TabMessage';
 import { useTranslationTools } from './useTranslationTools';
@@ -10,6 +10,7 @@ import { UseQueryResult } from 'react-query';
 import { ApiError } from 'tg.service/http/ApiError';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import clsx from 'clsx';
+import { GoToBilling } from 'tg.component/GoToBilling';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -71,10 +72,28 @@ export const MachineTranslation: React.FC<Props> = ({
   const results = data?.servicesTypes.map(
     (provider) => [provider, data.result[provider]] as const
   );
+  const outOfCredit = Object.values(data?.result || {}).every(
+    (i) => i?.errorMessage === 'OUT_OF_CREDITS'
+  );
 
   return (
     <StyledContainer>
-      {baseIsEmpty ? (
+      {outOfCredit ? (
+        <TabMessage>
+          <StyledError
+            sx={{ display: 'grid', gap: 0.5, justifyItems: 'start' }}
+          >
+            <T keyName="out_of_credits" />
+            <GoToBilling
+              render={(linkProps) => (
+                <Button size="small" variant="outlined" {...linkProps}>
+                  {t('machine_translation_buy_more_credit')}
+                </Button>
+              )}
+            />
+          </StyledError>
+        </TabMessage>
+      ) : baseIsEmpty ? (
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         !nothingFetched &&
