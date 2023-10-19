@@ -29,13 +29,6 @@ describe('namespaces in translations', { retries: 5 }, () => {
     waitForGlobalLoading();
   });
 
-<<<<<<< Updated upstream
-  afterEach(() => {
-    waitForGlobalLoading();
-  });
-
-=======
->>>>>>> Stashed changes
   it('displays keys with namespaces correctly', () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
