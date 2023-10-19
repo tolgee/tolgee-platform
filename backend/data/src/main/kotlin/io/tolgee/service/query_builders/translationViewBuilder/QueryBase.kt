@@ -26,6 +26,7 @@ import jakarta.persistence.criteria.ListJoin
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.Subquery
 
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
@@ -141,10 +142,17 @@ class QueryBase<T>(
     val screenshotRoot = screenshotSubquery.from(Screenshot::class.java)
     val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
     screenshotSubquery.select(screenshotCount)
-    val referencesJoin = screenshotRoot.join(Screenshot_.keyScreenshotReferences)
-    screenshotSubquery.where(cb.equal(this.root, referencesJoin.get(KeyScreenshotReference_.key)))
+    screenshotSubquery.where(screenshotRoot.get(Screenshot_.id).`in`(getScreenshotIdFilterSubquery()))
     screenshotCountExpression = screenshotSubquery.selection
     this.querySelection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
+  }
+
+  private fun getScreenshotIdFilterSubquery(): Subquery<Long> {
+    val subquery = this.query.subquery(Long::class.java)
+    val subQueryRoot = subquery.from(Key::class.java)
+    val keyScreenshotReference = subQueryRoot.join(Key_.keyScreenshotReferences)
+    subquery.where(cb.equal(subQueryRoot.get(Key_.id), this.root.get(Key_.id)))
+    return subquery.select(keyScreenshotReference.get(KeyScreenshotReference_.screenshot).get(Screenshot_.id))
   }
 
   private fun addNotFilteringTranslationFields(

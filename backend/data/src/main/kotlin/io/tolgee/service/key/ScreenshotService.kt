@@ -301,33 +301,13 @@ class ScreenshotService(
     return screenshotRepository.getKeysWithScreenshots(ids)
   }
 
-  fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference> {
-    return screenshotRepository.getScreenshotReferences(screenshots)
-  }
-
   fun saveAllReferences(data: List<KeyScreenshotReference>) {
     keyScreenshotReferenceRepository.saveAll(data)
   }
 
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
-    val keys = this.getKeysWithScreenshots(keyIds).toSet()
-
-    val allScreenshots = keys
-      .flatMap { key ->
-        key.keyScreenshotReferences.map { scr -> scr.screenshot }
-      }
-      .toSet() // remove dupes
-      .let {
-        screenshotRepository.getScreenshotsWithReferences(it)
-      }.toSet()
-
-    val keyIdScreenshotsMap = allScreenshots
-      .flatMap { it.keyScreenshotReferences }
-      .groupBy { it.key.id }
-
-    return keys.associate {
-      it.id to (keyIdScreenshotsMap[it.id]?.map { it.screenshot } ?: emptyList())
-    }
+    return this.getKeysWithScreenshots(keyIds)
+      .associate { it.id to it.keyScreenshotReferences.map { it.screenshot }.toSet().toList() }
   }
 
   fun getKeyScreenshotReferences(importedKeys: List<Key>, locations: List<String?>): List<KeyScreenshotReference> {
