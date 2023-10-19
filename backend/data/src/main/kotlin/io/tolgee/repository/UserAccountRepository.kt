@@ -90,7 +90,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
-        and ua.deletedAt is null and p.project.id = :projectId and r.organizationOwner = orl.organization
+        and ua.deletedAt is null and (p.project.id = :projectId or r.organizationOwner = orl.organization)
     """
   )
   fun getAllInProject(
