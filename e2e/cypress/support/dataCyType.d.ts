@@ -257,7 +257,6 @@ declare namespace DataCy {
         "mt-language-dialog-formality-select-item" |
         "mt-language-dialog-primary-radio" |
         "mt-language-dialog-save" |
-        "mt-language-dialog-service-label" |
         "namespaces-banner-content" |
         "namespaces-banner-menu" |
         "namespaces-banner-menu-button" |
@@ -456,5 +455,7 @@ declare namespace DataCy {
         "user-menu-organization-switch" |
         "user-menu-server-administration" |
         "user-menu-user-settings" |
+        "user-profile"
+}enu-user-settings" |
         "user-profile"
 }

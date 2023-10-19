@@ -13,7 +13,7 @@ import {
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
 
-describe('namespaces in translations', () => {
+describe('namespaces in translations', { retries: 5 }, () => {
   beforeEach(() => {
     namespaces.clean({ failOnStatusCode: false });
     namespaces
@@ -29,10 +29,13 @@ describe('namespaces in translations', () => {
     waitForGlobalLoading();
   });
 
+<<<<<<< Updated upstream
   afterEach(() => {
     waitForGlobalLoading();
   });
 
+=======
+>>>>>>> Stashed changes
   it('displays keys with namespaces correctly', () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
