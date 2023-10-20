@@ -88,6 +88,8 @@ class V2LanguagesController(
     @PathVariable("languageId") languageId: Long
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
+    val view = languageService.getView(languageId)
+    languageService.editLanguage(view.language, dto)
     val languageView = languageService.getView(languageId)
     return languageModelAssembler.toModel(languageView)
   }
