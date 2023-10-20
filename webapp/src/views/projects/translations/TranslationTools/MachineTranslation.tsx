@@ -72,9 +72,10 @@ export const MachineTranslation: React.FC<Props> = ({
   const results = data?.servicesTypes.map(
     (provider) => [provider, data.result[provider]] as const
   );
-  const outOfCredit = Object.values(data?.result || {}).every(
-    (i) => i?.errorMessage === 'OUT_OF_CREDITS'
-  );
+  const arrayResults = Object.values(data?.result || {});
+  const outOfCredit =
+    arrayResults.every((i) => i?.errorMessage === 'OUT_OF_CREDITS') &&
+    Boolean(arrayResults.length);
 
   return (
     <StyledContainer>
