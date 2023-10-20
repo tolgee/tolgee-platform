@@ -21,7 +21,6 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.io.File
-import java.util.stream.Collectors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
