@@ -1,3 +1,10 @@
+# [3.35.0](https://github.com/tolgee/tolgee-platform/compare/v3.34.0...v3.35.0) (2023-10-20)
+
+
+### Features
+
+* new color scheme ([#1958](https://github.com/tolgee/tolgee-platform/issues/1958)) ([c0ae3ad](https://github.com/tolgee/tolgee-platform/commit/c0ae3ad703606d8a08b79ef6866280ac763c0420))
+
 # [3.34.0](https://github.com/tolgee/tolgee-platform/compare/v3.33.0...v3.34.0) (2023-10-19)
 
 
