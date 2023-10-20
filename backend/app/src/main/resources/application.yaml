@@ -22,14 +22,15 @@ spring:
         types:
           print:
             banner: false
-#    open-in-view: false
+        enhancer:
+          enableLazyInitialization: true
+          enableDirtyTracking: true
+  #    open-in-view: false
   batch:
     job:
       enabled: false
     jdbc:
       initialize-schema: always
-#  main:
-#    lazy-initialization: true
 tolgee:
   authentication:
     enabled: false

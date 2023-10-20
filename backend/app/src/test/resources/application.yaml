@@ -14,6 +14,10 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+        generate_statistics: true
+        enhancer:
+          enableLazyInitialization: true
+          enableDirtyTracking: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -81,3 +85,4 @@ logging:
     io.tolgee.batch.BatchJobActionService: DEBUG
     io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
     io.tolgee: DEBUG
+    org.hibernate.stat: DEBUG
