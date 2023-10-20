@@ -13,7 +13,7 @@ import {
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
 
-describe('namespaces in translations', { retries: 5 }, () => {
+describe('namespaces in translations', () => {
   beforeEach(() => {
     namespaces.clean({ failOnStatusCode: false });
     namespaces
@@ -29,7 +29,7 @@ describe('namespaces in translations', { retries: 5 }, () => {
     waitForGlobalLoading();
   });
 
-  it('displays keys with namespaces correctly', () => {
+  it('displays keys with namespaces correctly', { retries: 5 }, () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
   });
