@@ -41,6 +41,7 @@ class BatchJobActivityFinalizer(
 
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
     activityHolder.afterActivityFlushed = afterFlush@{
+      entityManager.clear()
       try {
         logger.debug("Finalizing activity for job ${job.id} (after flush)")
         waitForOtherChunksToComplete(job)
