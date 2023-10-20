@@ -37,7 +37,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.NamespaceService
-import io.tolgee.service.security.SecurityService
 import jakarta.servlet.http.HttpServletRequest
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
