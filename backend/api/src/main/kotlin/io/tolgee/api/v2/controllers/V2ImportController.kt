@@ -16,6 +16,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.dataImport.ImportAddFilesResultModel
+import io.tolgee.hateoas.dataImport.ImportFileIssueModel
+import io.tolgee.hateoas.dataImport.ImportFileIssueModelAssembler
 import io.tolgee.hateoas.dataImport.ImportLanguageModel
 import io.tolgee.hateoas.dataImport.ImportLanguageModelAssembler
 import io.tolgee.hateoas.dataImport.ImportNamespaceModel
@@ -85,10 +87,11 @@ class V2ImportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val namespaceService: NamespaceService,
+  private val importFileIssueModelAssembler: ImportFileIssueModelAssembler
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun addFiles(
     @RequestPart("files") files: Array<MultipartFile>,
@@ -118,7 +121,7 @@ class V2ImportController(
   @PutMapping("/apply")
   @Operation(description = "Imports the data prepared in previous step", summary = "Apply")
   @RequestActivity(ActivityType.IMPORT)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun applyImport(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
@@ -131,7 +134,7 @@ class V2ImportController(
 
   @GetMapping("/result")
   @Operation(description = "Returns the result of preparation.", summary = "Get result")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getImportResult(
     @ParameterObject pageable: Pageable
@@ -144,7 +147,7 @@ class V2ImportController(
 
   @GetMapping("/result/languages/{languageId}")
   @Operation(description = "Returns language prepared to import.", summary = "Get import language")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
@@ -156,7 +159,7 @@ class V2ImportController(
 
   @GetMapping("/result/languages/{languageId}/translations")
   @Operation(description = "Returns translations prepared to import.", summary = "Get translations")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getImportTranslations(
     @PathVariable("projectId") projectId: Long,
@@ -182,7 +185,7 @@ class V2ImportController(
 
   @DeleteMapping("")
   @Operation(description = "Deletes prepared import data.", summary = "Delete")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun cancelImport() {
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id)
@@ -190,7 +193,7 @@ class V2ImportController(
 
   @DeleteMapping("/result/languages/{languageId}")
   @Operation(description = "Deletes language prepared to import.", summary = "Delete language")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
     val language = checkImportLanguageInProject(languageId)
@@ -202,7 +205,7 @@ class V2ImportController(
     description = "Resolves translation conflict. The old translation will be overridden.",
     summary = "Resolve conflict (override)"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long,
@@ -216,7 +219,7 @@ class V2ImportController(
     description = "Resolves translation conflict. The old translation will be kept.",
     summary = "Resolve conflict (keep existing)"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
@@ -230,7 +233,7 @@ class V2ImportController(
     description = "Resolves all translation conflicts for provided language. The old translations will be overridden.",
     summary = "Resolve all translation conflicts (override)"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long
@@ -243,7 +246,7 @@ class V2ImportController(
     description = "Resolves all translation conflicts for provided language. The old translations will be kept.",
     summary = "Resolve all translation conflicts (keep existing)"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
@@ -256,7 +259,7 @@ class V2ImportController(
     description = "Sets namespace for file to import.",
     summary = "Select namespace"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun selectNamespace(
     @PathVariable fileId: Long,
@@ -273,7 +276,7 @@ class V2ImportController(
       "Data will be imported to selected existing language when applied.",
     summary = "Pair existing language"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun selectExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
@@ -289,7 +292,7 @@ class V2ImportController(
     description = "Resets existing language paired with language to import.",
     summary = "Reset existing language pairing"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun resetExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
@@ -303,15 +306,15 @@ class V2ImportController(
     description = "Returns issues for uploaded file.",
     summary = "Get file issues"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getImportFileIssues(
     @PathVariable("importFileId") importFileId: Long,
     @ParameterObject pageable: Pageable
-  ): PagedModel<EntityModel<ImportFileIssueView>> {
+  ): PagedModel<ImportFileIssueModel> {
     checkFileFromProject(importFileId)
     val page = importService.getFileIssues(importFileId, pageable)
-    return pagedImportFileIssueResourcesAssembler.toModel(page)
+    return pagedImportFileIssueResourcesAssembler.toModel(page, importFileIssueModelAssembler)
   }
 
   @GetMapping("/all-namespaces")
@@ -319,7 +322,7 @@ class V2ImportController(
     description = "Returns all existing and imported namespaces",
     summary = "Get namespaces"
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getAllNamespaces(): CollectionModel<ImportNamespaceModel> {
     val import = importService.get(
