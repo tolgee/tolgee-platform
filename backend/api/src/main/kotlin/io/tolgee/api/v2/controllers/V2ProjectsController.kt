@@ -47,7 +47,7 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.AutoTranslationService
 import jakarta.validation.Valid
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

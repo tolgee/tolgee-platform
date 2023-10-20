@@ -32,7 +32,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel

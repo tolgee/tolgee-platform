@@ -110,10 +110,7 @@ dependencies {
     /**
      * Redisson
      */
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-//        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-//    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Liquibase
@@ -146,8 +143,7 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
-    implementation libs.springDocOpenApiKotlin
+    implementation libs.springDocOpenApiCommon
 
     /**
      * MISC
@@ -169,6 +165,7 @@ dependencies {
     implementation libs.postHog
     implementation libs.micrometerPrometheus
     implementation 'dom4j:dom4j:1.6.1'
+    implementation libs.jacksonKotlin
 
     /**
      * Google translation API

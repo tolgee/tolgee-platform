@@ -48,7 +48,7 @@ import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import jakarta.validation.Valid
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

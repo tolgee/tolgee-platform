@@ -198,6 +198,7 @@ class ScreenshotService(
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
+  @Transactional
   fun findAll(key: Key): List<Screenshot> {
     return screenshotRepository.findAllByKey(key)
   }
@@ -219,10 +220,12 @@ class ScreenshotService(
     removeScreenshotReferences(key, listOf(screenshot))
   }
 
+  @Transactional
   fun removeScreenshotReferences(key: Key, screenshots: List<Screenshot>) {
     removeScreenshotReferencesById(key, screenshots.map { it.id })
   }
 
+  @Transactional
   fun removeScreenshotReferencesById(key: Key, screenshotIds: List<Long>?) {
     screenshotIds ?: return
     val references = keyScreenshotReferenceRepository.findAll(key, screenshotIds)
@@ -237,6 +240,7 @@ class ScreenshotService(
     }
   }
 
+  @Transactional
   fun removeScreenshotReferences(references: List<KeyScreenshotReference>) {
     val screenshotIds = references.map { it.screenshot.id }.toSet()
     keyScreenshotReferenceRepository.deleteAll(references)

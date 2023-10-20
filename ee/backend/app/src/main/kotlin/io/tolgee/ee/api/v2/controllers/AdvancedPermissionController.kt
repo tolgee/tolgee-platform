@@ -15,7 +15,7 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.organization.OrganizationRoleService
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping

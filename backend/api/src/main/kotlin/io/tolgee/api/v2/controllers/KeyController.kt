@@ -38,7 +38,7 @@ import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

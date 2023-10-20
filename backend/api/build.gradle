@@ -54,15 +54,9 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiKotlin
-    implementation libs.springDocOpenApiDataRest
-    implementation libs.springDocOpenApiHateoas
-    implementation dependencies.create(libs.redissonSpringBootStarter.get()) {
-//        exclude group: 'org.redisson', module: 'redisson-spring-data-31'
-    }
-//    implementation libs.redissonSpringData
+    implementation libs.redissonSpringBootStarter
 
     /**
      * Misc
@@ -74,6 +68,8 @@ dependencies {
     implementation libs.jjwtJackson
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
     api libs.postHog
+    implementation libs.kotlinReflect
+    implementation libs.jacksonModuleKotlin
 }
 
 sourceSets {
