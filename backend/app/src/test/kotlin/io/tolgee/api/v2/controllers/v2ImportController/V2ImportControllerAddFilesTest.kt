@@ -204,7 +204,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
         null
       ).andIsBadRequest.andAssertThatJson {
         node("STANDARD_VALIDATION") {
-          node("files").isEqualTo("Required request part 'files' is not present")
+          node("files").isEqualTo("Required part 'files' is not present.")
         }
       }
     }
