@@ -49,7 +49,7 @@ import io.tolgee.service.query_builders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
-import org.springdoc.api.annotations.ParameterObject
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable

@@ -47,11 +47,9 @@ dependencies {
     /**
      * SPRING DOC
      */
-    implementation libs.springDocOpenApiWebMvcCore
+    implementation libs.springDocWebmvcApi
     implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiKotlin
-    implementation libs.springDocOpenApiDataRest
-    implementation libs.springDocOpenApiHateoas
+    implementation libs.springDocOpenApiCommon
 
     implementation libs.redissonSpringBootStarter
 

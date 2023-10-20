@@ -165,12 +165,16 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
       }.toCollection(mutableListOf())
       key to list
     }
-    val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
+    val chunked = list.chunked(10)
+    val toDelete = chunked[0]
+    val notToDelete = chunked[1]
+
+    val idsToDelete = toDelete.map { it.id.toString() }.joinToString(",")
 
     performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
     val rest = screenshotService.findAll(key)
-    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+    assertThat(rest).hasSize(10).containsExactlyInAnyOrder(*notToDelete.toTypedArray())
   }
 
   @Test
