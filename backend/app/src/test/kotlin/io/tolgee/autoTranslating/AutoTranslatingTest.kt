@@ -168,7 +168,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
     )
     waitForSpanishTranslationSet("jaj")
 
-    verify(googleTranslate, times(2)).translate(any<String>(), any())
+    verify(googleTranslate, times(2)).translate(any<String>(), any(), any(), any())
 
     val balance = mtCreditBucketService.getCreditBalances(testData.project)
     balance.creditBalance.assert.isEqualTo(0)
