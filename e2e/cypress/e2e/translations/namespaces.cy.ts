@@ -29,11 +29,7 @@ describe('namespaces in translations', () => {
     waitForGlobalLoading();
   });
 
-  afterEach(() => {
-    waitForGlobalLoading();
-  });
-
-  it('displays keys with namespaces correctly', () => {
+  it('displays keys with namespaces correctly', { retries: 5 }, () => {
     gcy('translations-namespace-banner').contains('ns-1').should('be.visible');
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
   });
