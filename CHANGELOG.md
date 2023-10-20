@@ -1,3 +1,10 @@
+## [3.35.1](https://github.com/tolgee/tolgee-platform/compare/v3.35.0...v3.35.1) (2023-10-20)
+
+
+### Bug Fixes
+
+* prevent out of credits error, before data are loaded ([#1964](https://github.com/tolgee/tolgee-platform/issues/1964)) ([e6c544c](https://github.com/tolgee/tolgee-platform/commit/e6c544c6dcd92add5f35b8d7b6bc5530e335d732))
+
 # [3.35.0](https://github.com/tolgee/tolgee-platform/compare/v3.34.0...v3.35.0) (2023-10-20)
 
 
