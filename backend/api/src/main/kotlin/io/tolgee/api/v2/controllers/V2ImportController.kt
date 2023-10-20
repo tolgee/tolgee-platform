@@ -86,7 +86,6 @@ class V2ImportController(
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
   private val namespaceService: NamespaceService,
-  private val securityService: SecurityService
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")

@@ -26,7 +26,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   }
 
   @Query(
-    """from Project r 
+    """select r, p, o, role from Project r 
         left join fetch Permission p on p.project = r and p.user.id = :userAccountId
         left join fetch Organization o on r.organizationOwner = o
         left join fetch OrganizationRole role on role.organization = o and role.user.id = :userAccountId
