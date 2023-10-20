@@ -42,10 +42,10 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     """
-    select l as language, (l.id = bl.id) as base
+    select l as language, (l.id = coalesce(bl.id, 0)) as base
     from Language l
     join l.project p
-    join p.baseLanguage bl
+    left join p.baseLanguage bl
     where l.project.id in :projectIds
   """
   )
