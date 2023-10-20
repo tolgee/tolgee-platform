@@ -23,12 +23,12 @@ const StyledListItem = styled('div')`
   transition: background-color 0.2s ease-in, border-color 0.05s ease-in;
 
   &:hover {
-    background-color: ${({ theme }) => alpha(theme.palette.emphasis[100], 0.8)};
+    background-color: ${({ theme }) => alpha(theme.palette.emphasis[50], 0.8)};
   }
 
   &.selected {
-    background-color: ${({ theme }) => theme.palette.emphasis[100]};
-    border-color: ${({ theme }) => theme.palette.divider2.main};
+    background-color: ${({ theme }) => theme.palette.emphasis[50]};
+    border-color: ${({ theme }) => theme.palette.divider1};
   }
 `;
 

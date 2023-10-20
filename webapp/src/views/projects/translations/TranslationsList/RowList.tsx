@@ -14,7 +14,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-width: 1px 0px 0px 0px;
   &.deleted {
     text-decoration: line-through;

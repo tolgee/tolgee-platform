@@ -39,7 +39,7 @@ const StyledTiles = styled(Box)`
 `;
 
 const StyledTile = styled(Box)`
-  background-color: ${({ theme }) => theme.palette.emphasis[100]};
+  background-color: ${({ theme }) => theme.palette.emphasis[50]};
   border-radius: 20px;
   height: 120px;
   display: grid;
@@ -50,15 +50,14 @@ const StyledTile = styled(Box)`
   text-align: center;
 
   align-items: stretch;
-  color: ${({ theme: { palette } }) =>
-    palette.mode === 'dark' ? palette.text.primary : palette.primary.main};
+  color: ${({ theme: { palette } }) => palette.text.primary};
 
   &.clickable {
     transition: background-color 0.1s ease-out;
     cursor: pointer;
 
     &:hover {
-      background-color: ${({ theme }) => theme.palette.emphasis[200]};
+      background-color: ${({ theme }) => theme.palette.emphasis[100]};
       transition: background-color 0.2s ease-in;
     }
   }

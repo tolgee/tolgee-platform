@@ -17,11 +17,11 @@ const StyledToggle = styled('div')`
   justify-content: center;
   grid-column: 1 / -1;
   cursor: pointer;
-  background-color: ${({ theme }) => theme.palette.emphasis[100]};
+  background-color: ${({ theme }) => theme.palette.emphasis[50]};
   transition: background-color 0.1s ease-in-out;
   &:active,
   &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[200]};
+    background: ${({ theme }) => theme.palette.emphasis[100]};
   }
 `;
 

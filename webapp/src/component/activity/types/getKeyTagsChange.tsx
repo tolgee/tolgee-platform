@@ -9,7 +9,7 @@ const StyledTag = styled('span')`
   align-items: center;
   height: 24px;
   font-size: 14px;
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  background: ${({ theme }) => theme.palette.emphasis[100]};
   position: relative;
 
   & + & {

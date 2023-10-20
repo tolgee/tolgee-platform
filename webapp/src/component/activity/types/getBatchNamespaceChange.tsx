@@ -6,11 +6,11 @@ const StyledContainer = styled('span')`
 `;
 
 const StyledNamespace = styled('span')`
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  background: ${({ theme }) => theme.palette.emphasis[100]};
   max-height: 1.5em;
   padding: 0px 4px;
   border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
 `;
 
 type Props = {

@@ -39,7 +39,7 @@ const StyledNs = styled('div')`
 `;
 
 const StyledShadow = styled('div')`
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  background: ${({ theme }) => theme.palette.divider1};
   height: 1px;
   position: sticky;
   z-index: ${({ theme }) => theme.zIndex.appBar};

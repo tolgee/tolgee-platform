@@ -25,7 +25,7 @@ const StyledNamespace = styled('div')`
   z-index: 1;
   max-width: 100%;
   &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
   }
 `;
 

@@ -9,9 +9,9 @@ const StyledContainer = styled('span')`
 
 const StyledLanguage = styled('span')`
   gap: 4px;
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  background: ${({ theme }) => theme.palette.emphasis[100]};
   border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   padding: 0px 4px;
   & + & {
     margin-left: 4px;

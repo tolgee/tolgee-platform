@@ -9,7 +9,7 @@ const StyledInputLabel = styled(InputLabel)`
 
 export const StyledError = styled(Typography)`
   display: flex;
-  min-height: 1.2rem;
+  min-height: 1.25rem;
 `;
 
 export const FieldLabel: React.FC = ({ children }) => {

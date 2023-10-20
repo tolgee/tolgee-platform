@@ -10,7 +10,6 @@ import { useEditableRow } from './useEditableRow';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import {
   CELL_CLICKABLE,
-  CELL_HOVER,
   CELL_PLAIN,
   CELL_RAISED,
   CELL_SELECTED,
@@ -192,7 +191,6 @@ export const CellKey: React.FC<Props> = ({
         className={clsx(
           {
             [CELL_PLAIN]: true,
-            [CELL_HOVER]: !isEditing,
             [CELL_CLICKABLE]: editEnabled && !displayEditor,
             [CELL_RAISED]: displayEditor,
             [CELL_SELECTED]: isEditing,
@@ -265,7 +263,7 @@ export const CellKey: React.FC<Props> = ({
               shortcuts={{
                 [`${getMeta()}-Enter`]: () => handleSave('EDIT_NEXT'),
               }}
-              background={theme.palette.cellSelected1.main}
+              background={theme.palette.cell.selected}
             />
           </StyledEditor>
         )}

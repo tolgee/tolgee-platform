@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -16,15 +16,18 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const TOP_BAR_HEIGHT = 52;
 
-const StyledAppBar = styled(AppBar)(
+export const StyledAppBar = styled(AppBar)(
   ({ theme }) =>
     ({
       zIndex: theme.zIndex.drawer + 1,
       transition: 'transform 0.2s ease-in-out',
       ...theme.mixins.toolbar,
-      background: theme.palette.navbarBackground.main,
+      background: theme.palette.navbar.background,
+      color: theme.palette.text.primary,
       boxShadow:
-        theme.palette.mode === 'dark' ? 'none' : theme.mixins.toolbar.boxShadow,
+        theme.palette.mode === 'light'
+          ? `0px 4px 6px 0px rgba(0, 0, 0, 0.02);`
+          : 'none',
     } as any)
 );
 
@@ -50,7 +53,7 @@ const StyledLogoWrapper = styled(Box)`
 `;
 
 const StyledTolgeeLink = styled(Link)`
-  color: inherit;
+  color: ${({ theme }) => theme.palette.navbar.text};
   text-decoration: inherit;
   outline: 0;
 
@@ -82,6 +85,7 @@ export const TopBar: React.FC<Props> = ({
   const topBannerSize = useGlobalContext((c) => c.topBannerHeight);
 
   const { mode, setMode } = useThemeContext();
+  const theme = useTheme();
 
   const toggleTheme = () => {
     if (mode === 'dark') {
@@ -104,7 +108,10 @@ export const TopBar: React.FC<Props> = ({
             <StyledTolgeeLink to={'/'}>
               <Box display="flex" alignItems="center">
                 <StyledLogoWrapper pr={1} display="flex" justifyItems="center">
-                  <TolgeeLogo fontSize="large" />
+                  <TolgeeLogo
+                    fontSize="large"
+                    sx={{ color: theme.palette.navbar.logo }}
+                  />
                 </StyledLogoWrapper>
                 <StyledLogoTitle variant="h5" color="inherit">
                   {config.appName}

@@ -5,6 +5,7 @@ import {
   DialogActions,
   Box,
   styled,
+  useTheme,
 } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 import { Formik } from 'formik';
@@ -68,6 +69,8 @@ export const KeyEditModal: React.FC<Props> = ({
   const project = useProject();
   const { updateKey } = useTranslationsActions();
 
+  const theme = useTheme();
+
   const updateKeyLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{id}/complex-update',
     method: 'put',
@@ -116,6 +119,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
                 <EditorWrapper>
                   <Editor
+                    background={theme.palette.background.paper}
                     autofocus
                     value={values.name}
                     onChange={(val) => setFieldValue('name', val)}

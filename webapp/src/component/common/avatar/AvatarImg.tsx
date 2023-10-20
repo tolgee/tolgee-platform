@@ -1,6 +1,6 @@
 import { AutoAvatar } from './AutoAvatar';
 import { AvatarOwner } from './ProfileAvatar';
-import { styled } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 
 const StyledContainer = styled('div')`
   overflow: hidden;
@@ -8,7 +8,9 @@ const StyledContainer = styled('div')`
 `;
 
 export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
-  const background = 'rgb(239, 239, 239)';
+  const theme = useTheme();
+  const background =
+    theme.palette.mode === 'dark' ? 'rgb(239, 239, 239)' : 'rgb(200, 200, 200)';
   const avatarPath =
     props.size <= 50
       ? props.owner.avatar?.thumbnail

@@ -117,7 +117,7 @@ const Head: FC = () => {
 
   return (
     <Helmet>
-      <meta name="theme-color" content={theme.palette.navbarBackground.main} />
+      <meta name="theme-color" content={theme.palette.navbar.background} />
     </Helmet>
   );
 };

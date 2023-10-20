@@ -30,8 +30,6 @@ const easeIn = getOpacityAnimation(0, 1);
 const highlightIn = getOpacityAnimation(0.5, 1);
 
 export const CELL_PLAIN = 'cellPlain';
-export const CELL_STATE = 'cellState';
-export const CELL_HOVER = 'cellHover';
 export const CELL_RAISED = 'cellRaised';
 export const CELL_SELECTED = 'cellSelected';
 export const CELL_SHOW_ON_HOVER = 'cellShowOnHover';
@@ -44,6 +42,15 @@ const combine = (first: string, second: string) =>
   `${first}.${second}, ${first} .${second}`;
 
 export const StyledCell = styled('div')<{ position?: PositionType }>`
+  ${combine('&', CELL_CLICKABLE)} {
+    cursor: pointer;
+    &:hover {
+      background: ${({ position, theme }) =>
+        getCellGradientBackground(position, theme.palette.cell.hover)};
+      transition: background 0.1s ease-in;
+    }
+  }
+
   ${combine('&', CELL_PLAIN)} {
     scroll-margin-top: ${TOP_BAR_HEIGHT}px;
     position: relative;
@@ -69,21 +76,7 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
     }
     &:focus-within {
       background: ${({ position, theme }) =>
-        getCellGradientBackground(position, theme.palette.emphasis[100])};
-    }
-  }
-
-  ${combine('&', CELL_CLICKABLE)} {
-    cursor: pointer;
-  }
-
-  ${combine('&', CELL_HOVER)} {
-    background: transparent;
-    transition: background 0.1s ease-out;
-    &:hover {
-      background: ${({ position, theme }) =>
-        getCellGradientBackground(position, theme.palette.emphasis[50])};
-      transition: background 0.1s ease-in;
+        getCellGradientBackground(position, theme.palette.cell.selected)};
     }
   }
 
@@ -97,11 +90,7 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   }
 
   ${combine('&', CELL_SELECTED)} {
-    background: ${({ theme }) => theme.palette.cellSelected1.main} !important;
-  }
-
-  ${combine('&', CELL_STATE)} {
-    cursor: 'col-resize';
+    background: ${({ theme }) => theme.palette.cell.selected} !important;
   }
 
   ${combine('&', CELL_SHOW_ON_HOVER)} {

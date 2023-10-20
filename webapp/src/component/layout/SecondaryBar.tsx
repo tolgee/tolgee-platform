@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { Box, styled } from '@mui/material';
 
 const StyledBox = styled(Box)`
-  border-bottom: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
 type Props = React.ComponentProps<typeof Box> & {

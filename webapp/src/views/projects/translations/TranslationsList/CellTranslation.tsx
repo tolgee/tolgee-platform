@@ -6,7 +6,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import {
   CELL_CLICKABLE,
-  CELL_HOVER,
   CELL_PLAIN,
   CELL_RAISED,
   CELL_SELECTED,
@@ -162,6 +161,8 @@ export const CellTranslation: React.FC<Props> = ({
       className={clsx({
         [CELL_PLAIN]: true,
         [CELL_RAISED]: isEditing,
+        [CELL_CLICKABLE]: editEnabled && !isEditing,
+        [CELL_SELECTED]: isEditing,
         splitContainer: true,
       })}
       tabIndex={0}
@@ -169,14 +170,7 @@ export const CellTranslation: React.FC<Props> = ({
       data-cy="translations-table-cell-translation"
     >
       <StyledContainer
-        className={clsx(
-          {
-            [CELL_HOVER]: !isEditing,
-            [CELL_CLICKABLE]: editEnabled,
-            [CELL_SELECTED]: isEditing,
-          },
-          className
-        )}
+        className={clsx(className)}
         style={{ width }}
         onClick={editEnabled ? () => toggleEdit() : undefined}
         data-cy="translations-table-cell"

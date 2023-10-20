@@ -51,7 +51,7 @@ const StyledLoadMore = styled('div')`
 const StyledBottomPanel = styled('div')`
   display: flex;
   align-items: flex-end;
-  border-top: 1px solid ${({ theme }) => theme.palette.divider1.main};
+  border-top: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
 const StyledProgressWrapper = styled('div')`
