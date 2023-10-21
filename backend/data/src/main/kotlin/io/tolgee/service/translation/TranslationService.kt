@@ -386,11 +386,7 @@ class TranslationService(
   fun clear(keyIds: List<Long>, languageIds: List<Long>) {
     val translations = getTargetTranslations(keyIds, languageIds)
     translations.forEach {
-      it.state = TranslationState.UNTRANSLATED
-      it.text = null
-      it.outdated = false
-      it.mtProvider = null
-      it.auto = false
+      it.clear()
     }
     saveAll(translations)
   }

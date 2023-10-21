@@ -17,4 +17,5 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   fun findAllByTagInAndProjectId(abbreviation: Collection<String?>?, projectId: Long?): List<Language>
   fun deleteAllByProjectId(projectId: Long?)
   fun countByIdInAndProjectId(languageIds: Set<Long>, projectId: Long): Int
+  fun findAllByProjectIdAndIdInOrderById(projectId: Long, languageIds: List<Long>): List<Language>
 }
