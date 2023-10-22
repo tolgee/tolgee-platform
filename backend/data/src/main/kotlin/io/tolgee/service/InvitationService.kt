@@ -19,6 +19,7 @@ import io.tolgee.repository.InvitationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.util.Logging
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -35,7 +36,7 @@ class InvitationService @Autowired constructor(
   private val permissionService: PermissionService,
   private val invitationEmailSender: InvitationEmailSender,
   private val businessEventPublisher: BusinessEventPublisher
-) {
+) : Logging {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
     return create(params) { invitation ->
@@ -204,7 +205,9 @@ class InvitationService @Autowired constructor(
   }
 
   fun getForOrganization(organization: Organization): List<Invitation> {
-    return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
+    return traceLogMeasureTime("get invitations for organization") {
+      invitationRepository.getAllForOrganization(organization)
+    }
   }
 
   private fun checkEmailNotAlreadyInvited(params: CreateProjectInvitationParams) {

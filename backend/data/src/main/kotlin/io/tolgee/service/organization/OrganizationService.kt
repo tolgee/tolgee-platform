@@ -20,6 +20,7 @@ import io.tolgee.service.InvitationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.Cache
@@ -51,7 +52,7 @@ class OrganizationService(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val cacheManager: CacheManager,
-) {
+) : Logging {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.ORGANIZATIONS) }
 
   @set:Autowired
@@ -214,30 +215,42 @@ class OrganizationService(
     ]
   )
   fun delete(organization: Organization) {
-    projectService.findAllInOrganization(organization.id).forEach {
-      projectService.deleteProject(it.id)
-    }
-
-    invitationService.getForOrganization(organization).forEach { invitation ->
-      invitationService.delete(invitation)
-    }
-
-    // `get` is important to help reducing the likelihood of a race-condition
-    // One may still occur, as a con of not relying on a DB-level cascade delete logic.
-    get(organization.id).preferredBy
-      .toList() // we need to clone it so hibernate doesn't change it concurrently
-      .forEach {
-        it.preferredOrganization = findOrCreatePreferred(
-          userAccount = it.userAccount,
-          exceptOrganizationId = organization.id
-        )
-        userPreferencesService.save(it)
+    traceLogMeasureTime("deleteProjects") {
+      projectService.findAllInOrganization(organization.id).forEach {
+        projectService.deleteProject(it.id)
       }
+    }
 
-    organizationRoleService.deleteAllInOrganization(organization)
+    traceLogMeasureTime("deleteInvitations") {
+      invitationService.getForOrganization(organization).forEach { invitation ->
+        invitationService.delete(invitation)
+      }
+    }
 
-    this.organizationRepository.delete(organization)
-    avatarService.unlinkAvatarFiles(organization)
+    traceLogMeasureTime("handlePreferred") {
+      // `get` is important to help reducing the likelihood of a race-condition
+      // One may still occur, as a con of not relying on a DB-level cascade delete logic.
+      get(organization.id).preferredBy
+        .toList() // we need to clone it so hibernate doesn't change it concurrently
+        .forEach {
+          it.preferredOrganization = findOrCreatePreferred(
+            userAccount = it.userAccount,
+            exceptOrganizationId = organization.id
+          )
+          userPreferencesService.save(it)
+        }
+    }
+
+    traceLogMeasureTime("deleteOrganizationRoles") {
+      organizationRoleService.deleteAllInOrganization(organization)
+    }
+
+    traceLogMeasureTime("deleteTheOrganization") {
+      this.organizationRepository.delete(organization)
+    }
+    traceLogMeasureTime("unlinkAvatarFiles") {
+      avatarService.unlinkAvatarFiles(organization)
+    }
   }
 
   @Transactional
