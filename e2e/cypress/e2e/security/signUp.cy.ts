@@ -178,7 +178,7 @@ context('Sign up', () => {
     });
   });
 
-  it.only('Works with github signup', () => {
+  it('Works with github signup', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(HOST + '/login');

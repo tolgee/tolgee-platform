@@ -7,6 +7,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.executeInNewRepeatableTransaction
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,7 +25,8 @@ class OrganizationE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
   private val dbPopulatorReal: DbPopulatorReal,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
+  private val transactionManager: PlatformTransactionManager
 ) {
   @GetMapping(value = ["/generate"])
   @Transactional
@@ -49,18 +53,19 @@ class OrganizationE2eDataController(
   }
 
   @GetMapping(value = ["/clean"])
-  @Transactional
   fun cleanupOrganizations() {
-    organizationService.find("what-a-nice-organization")?.let {
-      organizationService.delete(it)
-    }
-    data.forEach {
-      organizationService.find(it.dto.slug!!)?.let { organization ->
-        organizationService.delete(organization)
+    executeInNewRepeatableTransaction(transactionManager) {
+      organizationService.find("what-a-nice-organization")?.let {
+        organizationService.delete(it)
       }
-      userAccountService.findActive(it.owner.email)?.let { userAccount ->
-        if (userAccount.name != "admin") {
-          userAccountService.delete(userAccount)
+      data.forEach {
+        organizationService.find(it.dto.slug!!)?.let { organization ->
+          organizationService.delete(organization)
+        }
+        userAccountService.findActive(it.owner.email)?.let { userAccount ->
+          if (userAccount.name != "admin") {
+            userAccountService.delete(userAccount)
+          }
         }
       }
     }

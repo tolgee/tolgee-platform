@@ -82,6 +82,13 @@ kotlin {
     jvmToolchain(17)
 }
 
+hibernate {
+    enhancement {
+        lazyInitialization = true
+        dirtyTracking = true
+    }
+}
+
 dependencies {
     /**
      * SPRING

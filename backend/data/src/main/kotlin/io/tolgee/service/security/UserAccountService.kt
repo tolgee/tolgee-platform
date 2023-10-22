@@ -24,6 +24,7 @@ import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.time.DateUtils
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
@@ -51,7 +52,7 @@ class UserAccountService(
   private val organizationService: OrganizationService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
-) {
+) : Logging {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
@@ -138,32 +139,34 @@ class UserAccountService(
   @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
   @Transactional
   fun delete(userAccount: UserAccount) {
-    userAccount.emailVerification?.let {
-      entityManager.remove(it)
-    }
-    userAccount.apiKeys?.forEach {
-      entityManager.remove(it)
-    }
-    userAccount.pats?.forEach {
-      entityManager.remove(it)
-    }
-    userAccount.permissions.forEach {
-      entityManager.remove(it)
-    }
-    userAccount.preferences?.let {
-      entityManager.remove(it)
-    }
-    organizationService.getAllSingleOwnedByUser(userAccount).forEach {
-      it.preferredBy.removeIf { preferences ->
-        preferences.userAccount.id == userAccount.id
+    traceLogMeasureTime("deleteUser") {
+      userAccount.emailVerification?.let {
+        entityManager.remove(it)
       }
-      organizationService.delete(it)
+      userAccount.apiKeys?.forEach {
+        entityManager.remove(it)
+      }
+      userAccount.pats?.forEach {
+        entityManager.remove(it)
+      }
+      userAccount.permissions.forEach {
+        entityManager.remove(it)
+      }
+      userAccount.preferences?.let {
+        entityManager.remove(it)
+      }
+      organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+        it.preferredBy.removeIf { preferences ->
+          preferences.userAccount.id == userAccount.id
+        }
+        organizationService.delete(it)
+      }
+      userAccount.organizationRoles.forEach {
+        entityManager.remove(it)
+      }
+      userAccountRepository.softDeleteUser(userAccount, currentDateProvider.date)
+      applicationEventPublisher.publishEvent(OnUserCountChanged(this))
     }
-    userAccount.organizationRoles.forEach {
-      entityManager.remove(it)
-    }
-    userAccountRepository.softDeleteUser(userAccount, currentDateProvider.date)
-    applicationEventPublisher.publishEvent(OnUserCountChanged(this))
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
