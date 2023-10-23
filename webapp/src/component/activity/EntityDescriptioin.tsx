@@ -6,17 +6,6 @@ const StyledContainer = styled('div')`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  & .reference {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
-    padding: 0px 4px;
-    border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.palette.emphasis[300]};
-  }
-
-  & :not(.referenceLink) {
-    color: ${({ theme }) => theme.palette.text.primary};
-  }
 `;
 
 type Props = {

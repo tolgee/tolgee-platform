@@ -52,13 +52,11 @@ export const Navigation: React.FC<Props> = ({ path }) => {
         maxItems={smallScreen ? 1 : undefined}
       >
         {path.map(([name, url, icon], index) => {
+          const color =
+            index === path.length - 1 ? theme.palette.primaryText : undefined;
           if (React.isValidElement(name)) {
             return (
-              <Box
-                data-cy="navigation-item"
-                color={index === path.length - 1 ? 'primary' : 'inherit'}
-                key={index}
-              >
+              <Box data-cy="navigation-item" sx={{ color }} key={index}>
                 {name}
               </Box>
             );
@@ -67,7 +65,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
               <StyledLink
                 data-cy="navigation-item"
                 key={index}
-                color={index === path.length - 1 ? 'primary' : 'inherit'}
+                sx={{ color }}
                 // @ts-ignore
                 to={url}
                 component={RouterLink}
@@ -78,11 +76,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
             );
           } else {
             return (
-              <Typography
-                data-cy="navigation-item"
-                key={index}
-                color={index === path.length - 1 ? 'primary' : 'inherit'}
-              >
+              <Typography data-cy="navigation-item" key={index} sx={{ color }}>
                 {icon}
                 {name}
               </Typography>

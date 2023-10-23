@@ -122,6 +122,7 @@ const getTheme = (mode: PaletteMode) => {
     palette: {
       mode,
       primary: createColor(c.primary),
+      primaryText: c.primaryText,
       secondary: createColor(c.secondary),
       default: createColor(c.default),
       common: {

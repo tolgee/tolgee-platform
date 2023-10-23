@@ -19,6 +19,7 @@ declare module '*.svg' {
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
+    primaryText: string;
     divider1: string;
     cell: Cell;
     default: PaletteColor;
@@ -34,6 +35,7 @@ declare module '@mui/material/styles/createPalette' {
   }
 
   interface PaletteOptions {
+    primaryText: string;
     divider1: string;
     cell: Cell;
     default: PaletteColor;

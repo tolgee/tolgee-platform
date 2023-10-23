@@ -81,16 +81,17 @@ export const colors = {
   light: {
     white: '#fff',
     primary: '#EC407A',
+    primaryText: '#D81B5F',
     secondary: '#2B5582',
     default: customGrey[700],
     text: '#4E5967',
     textSecondary: '#808080',
     divider1: '#E1E5EB',
-    background: '#F9F9F9',
+    background: '#FDFDFF',
     backgroundPaper: '#ffffff',
     emphasis: customGrey,
     cell: {
-      hover: '#f6f6f6',
+      hover: '#f7f7f7',
       selected: '#EEEFF1',
       inside: '#F9F9F9',
     },
@@ -135,6 +136,7 @@ export const colors = {
   dark: {
     white: '#dddddd',
     primary: '#ff6995',
+    primaryText: '#ff6995',
     secondary: '#aed5ff',
     default: customGrey[400],
     text: '#dddddd',

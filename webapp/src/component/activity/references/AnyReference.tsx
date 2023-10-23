@@ -31,21 +31,29 @@ const StyledReferences = styled(Box)`
     display: inline;
     margin-right: 4px;
     padding-right: 4px;
-    border-right: 1px solid ${({ theme }) => theme.palette.emphasis[100]};
+    border-right: 1px solid
+      ${({ theme }) =>
+        theme.palette.mode === 'dark'
+          ? theme.palette.emphasis[200]
+          : theme.palette.emphasis[100]};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   & .reference {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
     max-height: 1.5em;
     padding: 0px 4px;
     border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.palette.emphasis[100]};
+    border: 1px solid
+      ${({ theme }) =>
+        theme.palette.mode === 'dark'
+          ? theme.palette.emphasis[200]
+          : theme.palette.emphasis[100]};
   }
 
   & .reference:not(.referenceLink) {
-    color: ${({ theme }) => theme.palette.text.primary};
+    color: ${({ theme }) => theme.palette.primaryText};
   }
 `;
 

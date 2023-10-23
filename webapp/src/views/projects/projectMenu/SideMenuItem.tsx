@@ -30,7 +30,7 @@ const StyledItem = styled('li')`
   }
 
   & .selected {
-    color: ${({ theme }) => theme.palette.primary.main + ' !important'};
+    color: ${({ theme }) => theme.palette.primaryText + ' !important'};
     background: ${({ theme }) => theme.palette.grey[500] + '33 !important'};
   }
 `;

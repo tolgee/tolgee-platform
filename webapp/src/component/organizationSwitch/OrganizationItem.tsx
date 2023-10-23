@@ -11,6 +11,7 @@ const StyledOrgItem = styled('div')`
   grid-auto-flow: column;
   gap: 6px;
   align-items: center;
+  text: ${({ theme }) => theme.palette.primaryText};
 `;
 
 type Props = {
