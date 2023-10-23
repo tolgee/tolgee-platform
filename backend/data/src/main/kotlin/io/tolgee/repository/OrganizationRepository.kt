@@ -50,11 +50,12 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     """
     select o
     from Organization o
+    left join fetch o.basePermission bp
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p
     left join p.permissions perm on perm.user.id = :userId
     where (perm is not null or mr is not null) and o.id <> :exceptOrganizationId
-    group by mr.id, o.id
+    group by mr.id, o.id, bp.id
     order by mr.id asc nulls last
   """
   )

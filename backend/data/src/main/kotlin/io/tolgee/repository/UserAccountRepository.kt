@@ -153,4 +153,12 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """
   )
   fun findDisabled(id: Long): UserAccount
+
+  @Query("""
+    from UserAccount ua
+    left join fetch ua.emailVerification
+    left join fetch ua.permissions
+    where ua.id = :id
+  """)
+  fun findWithFetchedEmailVerificationAndPermissions(id: Long): UserAccount?
 }

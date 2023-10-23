@@ -19,7 +19,7 @@ describe('Organization Invitations', () => {
     visit();
   });
 
-  it.only('generates invitations', () => {
+  it('generates invitations', () => {
     generateInvitation('MEMBER').should('contain', 'http://');
 
     generateInvitation('OWNER');
