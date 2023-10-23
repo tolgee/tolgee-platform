@@ -12,7 +12,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationRepository : JpaRepository<Organization, Long> {
-  fun getOneBySlug(slug: String): Organization?
+
+  @Query("""
+    from Organization o 
+    left join fetch o.basePermission as bp
+    where o.slug = :slug
+  """)
+  fun findBySlug(slug: String): Organization?
 
   @Query(
     """select distinct o as organization, r.type as currentUserRole

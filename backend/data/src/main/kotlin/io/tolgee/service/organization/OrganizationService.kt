@@ -170,11 +170,11 @@ class OrganizationService(
   }
 
   fun get(slug: String): Organization {
-    return organizationRepository.getOneBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    return organizationRepository.findBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
   fun find(slug: String): Organization? {
-    return organizationRepository.getOneBySlug(slug)
+    return organizationRepository.findBySlug(slug)
   }
 
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")

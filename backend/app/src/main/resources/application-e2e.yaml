@@ -69,3 +69,4 @@ server:
 logging:
   level:
     io.tolgee.service: TRACE
+    io.tolgee.controllers.internal.e2e_data.OrganizationE2eDataController: TRACE
