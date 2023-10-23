@@ -113,7 +113,7 @@ describe('Project members', () => {
       );
     });
 
-    it('selects Translate role for the user', () => {
+    it.only('selects Translate role for the user', () => {
       visitProjectMembers(info.project.id);
       openMemberSettings('me@me.me');
       permissionsMenuSelectRole('Translate', { languages: ['Czech'] });

@@ -82,15 +82,16 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     """
         select ua.id as id, ua.name as name, ua.username as username, p as directPermission,
           orl.type as organizationRole, ua.avatarHash as avatarHash 
-        from UserAccount ua, Project r 
-        left join ua.permissions p
-        left join ua.organizationRoles orl
+        from UserAccount ua
+        left join Project r on r.id = :projectId
+        left join ua.permissions p on p.project.id = :projectId
+        left join ua.organizationRoles orl on orl.organization = r.organizationOwner
         where r.id = :projectId and (p is not null or orl is not null)
         and (:exceptUserId is null or ua.id <> :exceptUserId)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
-        and ua.deletedAt is null and (p.project.id = :projectId or r.organizationOwner = orl.organization)
+        and ua.deletedAt is null
     """
   )
   fun getAllInProject(
