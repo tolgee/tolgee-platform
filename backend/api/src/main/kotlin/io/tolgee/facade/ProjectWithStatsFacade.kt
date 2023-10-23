@@ -69,7 +69,11 @@ class ProjectWithStatsFacade(
           TranslationState.UNTRANSLATED to untranslatedPercent
         )
       )
-      ProjectWithStatsView(projectWithLanguagesView, projectStatistics, languages[projectWithLanguagesView.id]!!)
+      ProjectWithStatsView(
+        view = projectWithLanguagesView,
+        stats = projectStatistics,
+        languages = languages[projectWithLanguagesView.id] ?: listOf()
+      )
     }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
