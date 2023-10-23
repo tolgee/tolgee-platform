@@ -254,7 +254,6 @@ class KeyService(
       screenshotService.deleteAllByKeyId(ids)
     }
 
-
     val keys = traceLogMeasureTime("delete multiple keys: fetch keys") {
       keyRepository.findAllByIdInForDelete(ids)
     }
