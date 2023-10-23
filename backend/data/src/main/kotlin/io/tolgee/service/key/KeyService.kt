@@ -21,6 +21,7 @@ import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -40,11 +41,12 @@ class KeyService(
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
   private val applicationContext: ApplicationContext,
-  private val entityManager: EntityManager,
+  private val entityManager: EntityManager
   @Lazy
   private var translationService: TranslationService,
   private val languageRepository: LanguageRepository
-) {
+) : Logging {
+  private lateinit var translationService: TranslationService
 
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -216,21 +218,62 @@ class KeyService(
   }
 
   @Transactional
-  fun deleteMultiple(ids: Collection<Long>) {
-    translationService.deleteAllByKeys(ids)
-    keyMetaService.deleteAllByKeyIdIn(ids)
-    screenshotService.deleteAllByKeyId(ids)
-    val keys = keyRepository.findAllByIdInForDelete(ids)
+  fun deleteMultiple(keys: List<Key>) {
+    traceLogMeasureTime("delete multiple keys: delete translations") {
+      translationService.deleteAllByKeys(keys.map { it.id })
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete key metas") {
+      keyMetaService.deleteAllByKeys(keys)
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete screenshots") {
+      screenshotService.deleteAllByKeyId(keys.map { it.id })
+    }
+
     val namespaces = keys.map { it.namespace }
-    keyRepository.deleteAllByIdIn(keys.map { it.id })
+
+    traceLogMeasureTime("delete multiple keys: delete the keys") {
+      keyRepository.deleteAll(keys)
+    }
+
+    namespaceService.deleteUnusedNamespaces(namespaces)
+  }
+
+  @Transactional
+  fun deleteMultiple(ids: Collection<Long>) {
+    traceLogMeasureTime("delete multiple keys: delete translations") {
+      translationService.deleteAllByKeys(ids)
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete key metas") {
+      keyMetaService.deleteAllByKeyIdIn(ids)
+    }
+
+    traceLogMeasureTime("delete multiple keys: delete screenshots") {
+      screenshotService.deleteAllByKeyId(ids)
+    }
+
+
+    val keys = traceLogMeasureTime("delete multiple keys: fetch keys") {
+      keyRepository.findAllByIdInForDelete(ids)
+    }
+
+    val namespaces = keys.map { it.namespace }
+
+    traceLogMeasureTime("delete multiple keys: delete the keys") {
+      keyRepository.deleteAll(keys)
+    }
+
     namespaceService.deleteUnusedNamespaces(namespaces)
   }
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    val ids = keyRepository.getIdsByProjectId(projectId)
-    keyMetaService.deleteAllByKeyIdIn(ids)
-    this.deleteMultiple(ids)
+    val keys = traceLogMeasureTime("delete all keys by project: fetch keys") {
+      keyRepository.getByProjectIdWithFetchedMetas(projectId)
+    }
+    this.deleteMultiple(keys.map { it.id })
   }
 
   fun checkInProject(key: Key, projectId: Long) {

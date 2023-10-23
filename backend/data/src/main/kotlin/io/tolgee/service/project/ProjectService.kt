@@ -35,6 +35,7 @@ import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -63,7 +64,7 @@ class ProjectService(
   private val projectHolder: ProjectHolder,
   @Lazy
   private val batchJobService: BatchJobService
-) {
+) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var keyService: KeyService
@@ -226,30 +227,48 @@ class ProjectService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
-    val project = get(id)
+    traceLogMeasureTime("deleteProject") {
+      val project = get(id)
 
-    try {
-      projectHolder.project
-    } catch (e: ProjectNotSelectedException) {
-      projectHolder.project = ProjectDto.fromEntity(project)
+      try {
+        projectHolder.project
+      } catch (e: ProjectNotSelectedException) {
+        projectHolder.project = ProjectDto.fromEntity(project)
+      }
+
+      importService.getAllByProject(id).forEach {
+        importService.deleteImport(it)
+      }
+
+      // otherwise we cannot delete the languages
+      project.baseLanguage = null
+      projectRepository.saveAndFlush(project)
+
+      traceLogMeasureTime("deleteProject: delete api keys") {
+        apiKeyService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete permissions") {
+        permissionService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete screenshots") {
+        screenshotService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete languages") {
+        languageService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete keys") {
+        keyService.deleteAllByProject(project.id)
+      }
+
+      avatarService.unlinkAvatarFiles(project)
+      batchJobService.deleteAllByProjectId(project.id)
+      bigMetaService.deleteAllByProjectId(project.id)
+      projectRepository.delete(project)
     }
-
-    importService.getAllByProject(id).forEach {
-      importService.deleteImport(it)
-    }
-
-    // otherwise we cannot delete the languages
-    project.baseLanguage = null
-    projectRepository.saveAndFlush(project)
-    apiKeyService.deleteAllByProject(project.id)
-    permissionService.deleteAllByProject(project.id)
-    screenshotService.deleteAllByProject(project.id)
-    languageService.deleteAllByProject(project.id)
-    keyService.deleteAllByProject(project.id)
-    avatarService.unlinkAvatarFiles(project)
-    batchJobService.deleteAllByProjectId(project.id)
-    bigMetaService.deleteAllByProjectId(project.id)
-    projectRepository.delete(project)
   }
 
   /**

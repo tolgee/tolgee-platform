@@ -31,6 +31,13 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   @Query("select p.id from Permission p where p.project.id = :projectId")
   fun getIdsByProject(projectId: Long): List<Long>
 
+  @Query("""select p from Permission p
+        left join fetch p.viewLanguages
+        left join fetch p.translateLanguages
+        left join fetch p.stateChangeLanguages
+        where p.project.id = :projectId""")
+  fun getByProjectWithFetchedLanguages(projectId: Long): List<Permission>
+
   @Query(
     """select distinct p
     from Permission p

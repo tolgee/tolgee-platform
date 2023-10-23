@@ -133,4 +133,14 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   """
   )
   fun getProjectOwner(projectId: Long): Organization
+
+  @Query(
+    """
+    from Organization o 
+    left join fetch o.basePermission
+    left join fetch o.mtCreditBucket
+    where o = :organization
+  """
+  )
+  fun fetchData(organization: Organization): Organization
 }

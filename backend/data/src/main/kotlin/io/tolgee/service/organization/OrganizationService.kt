@@ -246,6 +246,7 @@ class OrganizationService(
     }
 
     traceLogMeasureTime("deleteTheOrganization") {
+      this.organizationRepository.fetchData(organization)
       this.organizationRepository.delete(organization)
     }
     traceLogMeasureTime("unlinkAvatarFiles") {
