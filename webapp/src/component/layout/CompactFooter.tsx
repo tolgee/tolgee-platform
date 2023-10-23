@@ -26,7 +26,7 @@ const StyledSocial = styled(Box)`
 `;
 
 const StyledLink = styled(Link)`
-  display: inline-flex;
+  display: grid;
   gap: 8px;
   align-items: center;
   color: ${({ theme }) => theme.palette.text.secondary};
@@ -34,6 +34,12 @@ const StyledLink = styled(Link)`
   &:hover {
     color: ${({ theme }) => theme.palette.text.primary};
   }
+  grid-template-columns: 25px auto;
+  justify-items: center;
+`;
+
+const StyledSocialText = styled('span')`
+  justify-self: start;
 `;
 
 export const CompactFooter = () => {
@@ -47,7 +53,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <TwitterLogo />
-            <span>Twitter</span>
+            <StyledSocialText>Twitter</StyledSocialText>
           </StyledLink>
         </StyledSocial>
         <StyledSocial>
@@ -57,7 +63,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <FacebookLogo />
-            <span>Facebook</span>
+            <StyledSocialText>Facebook</StyledSocialText>
           </StyledLink>
         </StyledSocial>
         <StyledSocial>
@@ -67,7 +73,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <GitHubLogo />
-            <span>GitHub</span>
+            <StyledSocialText>GitHub</StyledSocialText>
           </StyledLink>
         </StyledSocial>
         <StyledSocial>
@@ -77,7 +83,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <LinkedInLogo />
-            <span>LinkedIn</span>
+            <StyledSocialText>LinkedIn</StyledSocialText>
           </StyledLink>
         </StyledSocial>
         <StyledSocial>
@@ -87,7 +93,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <SlackLogo />
-            <span>Slack</span>
+            <StyledSocialText>Slack</StyledSocialText>
           </StyledLink>
         </StyledSocial>
         <StyledSocial>
@@ -97,7 +103,7 @@ export const CompactFooter = () => {
             rel="noopener noreferrer"
           >
             <DiscussionsLogo />
-            <span>Discussions</span>
+            <StyledSocialText>Discussions</StyledSocialText>
           </StyledLink>
         </StyledSocial>
       </StyledContent>
