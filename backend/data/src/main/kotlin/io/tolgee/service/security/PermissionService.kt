@@ -151,8 +151,8 @@ class PermissionService(
    * No need to evict cache, since this is only used when project is deleted
    */
   fun deleteAllByProject(projectId: Long) {
-    val ids = permissionRepository.getIdsByProject(projectId)
-    permissionRepository.deleteByIdIn(ids)
+    val permissions = permissionRepository.getByProjectWithFetchedLanguages(projectId)
+    permissionRepository.deleteAll(permissions)
   }
 
   @Transactional

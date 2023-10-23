@@ -231,4 +231,8 @@ class TagService(
       }
     }
   }
+
+  fun deleteAllByKeyIn(keys: Collection<Key>) {
+    tagRepository.deleteAllByKeyIn(keys)
+  }
 }

@@ -26,7 +26,7 @@ class DeleteKeysChunkProcessor(
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       @Suppress("UNCHECKED_CAST")
-      keyService.deleteMultiple(subChunk as List<Long>)
+      keyService.deleteMultiple(subChunk)
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)

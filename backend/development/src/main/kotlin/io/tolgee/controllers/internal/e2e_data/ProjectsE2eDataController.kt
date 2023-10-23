@@ -19,6 +19,8 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,7 +43,8 @@ class ProjectsE2eDataController(
   private val permissionRepository: PermissionRepository,
   private val keyService: KeyService,
   private val languageService: LanguageService,
-) {
+  private val entityManager: EntityManager
+) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun createProjects() {
@@ -114,10 +117,13 @@ class ProjectsE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanupProjects() {
+    entityManager.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
     projectService.deleteAllByName("I am a great project")
 
     projects.forEach {
-      projectService.deleteAllByName(it.name)
+      traceLogMeasureTime("deleteAllByName: ${it.name}") {
+        projectService.deleteAllByName(it.name)
+      }
     }
 
     organizations.forEach {

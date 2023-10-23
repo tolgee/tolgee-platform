@@ -10,6 +10,7 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
+import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -21,7 +22,7 @@ class KeyMetaService(
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
   private val keyCommentRepository: KeyCommentRepository,
   private val entityManager: EntityManager,
-) {
+) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var tagService: TagService
@@ -132,6 +133,20 @@ class KeyMetaService(
     keyCommentRepository.deleteAllByKeyIds(ids)
     keyCodeReferenceRepository.deleteAllByKeyIds(ids)
     this.keyMetaRepository.deleteAllByKeyIds(ids)
+  }
+
+  fun deleteAllByKeys(keys: Collection<Key>) {
+    traceLogMeasureTime("keyMetaService: deleteAllByKeyIdIn: tags") {
+      tagService.deleteAllByKeyIn(keys)
+    }
+
+    val keyIds = keys.map { it.id }
+    keyCommentRepository.deleteAllByKeyIds(keyIds)
+    keyCodeReferenceRepository.deleteAllByKeyIds(keys)
+
+    traceLogMeasureTime("keyMetaService: delete the metas") {
+      this.keyMetaRepository.deleteAllByKeyIds(keyIds)
+    }
   }
 
   fun deleteAllByKeyId(id: Long) {

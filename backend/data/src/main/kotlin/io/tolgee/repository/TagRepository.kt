@@ -68,4 +68,13 @@ interface TagRepository : JpaRepository<Tag, Long> {
   """
   )
   fun deleteAllUnused(projectId: Long)
+
+  @Modifying(flushAutomatically = true)
+  @Query(
+    """
+    delete from Tag t 
+    where (t.id in (select tag.id from Tag tag join tag.keyMetas km where km.key.id in :keys))
+  """
+  )
+  fun deleteAllByKeyIn(keys: Collection<Key>)
 }
