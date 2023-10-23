@@ -1,3 +1,10 @@
+## [3.35.3](https://github.com/tolgee/tolgee-platform/compare/v3.35.2...v3.35.3) (2023-10-23)
+
+
+### Bug Fixes
+
+* favicon color issue ([#1967](https://github.com/tolgee/tolgee-platform/issues/1967)) ([115836b](https://github.com/tolgee/tolgee-platform/commit/115836b42a21390fa71fa5c38a8580ff1d76e2a2))
+
 ## [3.35.2](https://github.com/tolgee/tolgee-platform/compare/v3.35.1...v3.35.2) (2023-10-23)
 
 
