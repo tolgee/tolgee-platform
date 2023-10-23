@@ -17,6 +17,7 @@ interface InvitationRepository : JpaRepository<Invitation?, Long?> {
     """
     from Invitation i
     left join fetch i.organizationRole orl
+    left join fetch i.permission p
     where i.organizationRole.organization = :organization
     order by i.createdAt
   """
