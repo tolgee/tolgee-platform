@@ -1,3 +1,10 @@
+## [3.35.2](https://github.com/tolgee/tolgee-platform/compare/v3.35.1...v3.35.2) (2023-10-23)
+
+
+### Bug Fixes
+
+* color issues ([c628755](https://github.com/tolgee/tolgee-platform/commit/c62875554b12e4121f8b4d05ad9e7b66187d6bd4))
+
 ## [3.35.1](https://github.com/tolgee/tolgee-platform/compare/v3.35.0...v3.35.1) (2023-10-20)
 
 
