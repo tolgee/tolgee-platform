@@ -102,10 +102,6 @@ describe('Organization Members', () => {
       .should('be.visible');
   });
 
-  after(() => {
-    organizationTestData.clean();
-  });
-
   const visit = () => {
     cy.visit(`${HOST}/organizations/tolgee/members`);
   };

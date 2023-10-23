@@ -140,31 +140,35 @@ class UserAccountService(
   @Transactional
   fun delete(userAccount: UserAccount) {
     traceLogMeasureTime("deleteUser") {
-      userAccount.emailVerification?.let {
+      val toDelete =
+        userAccountRepository.findWithFetchedEmailVerificationAndPermissions(userAccount.id)
+          ?: throw NotFoundException()
+
+      toDelete.emailVerification?.let {
         entityManager.remove(it)
       }
-      userAccount.apiKeys?.forEach {
+      toDelete.apiKeys?.forEach {
         entityManager.remove(it)
       }
-      userAccount.pats?.forEach {
+      toDelete.pats?.forEach {
         entityManager.remove(it)
       }
-      userAccount.permissions.forEach {
+      toDelete.permissions.forEach {
         entityManager.remove(it)
       }
-      userAccount.preferences?.let {
+      toDelete.preferences?.let {
         entityManager.remove(it)
       }
-      organizationService.getAllSingleOwnedByUser(userAccount).forEach {
+      organizationService.getAllSingleOwnedByUser(toDelete).forEach {
         it.preferredBy.removeIf { preferences ->
           preferences.userAccount.id == userAccount.id
         }
         organizationService.delete(it)
       }
-      userAccount.organizationRoles.forEach {
+      toDelete.organizationRoles.forEach {
         entityManager.remove(it)
       }
-      userAccountRepository.softDeleteUser(userAccount, currentDateProvider.date)
+      userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
       applicationEventPublisher.publishEvent(OnUserCountChanged(this))
     }
   }

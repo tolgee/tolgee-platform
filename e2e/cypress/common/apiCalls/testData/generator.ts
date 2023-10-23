@@ -6,7 +6,7 @@ export const cleanTestData = (
   options?: ArgumentTypes<typeof cy.request>[0]
 ) => {
   return internalFetch(`e2e-data/${resource}/clean`, {
-    timeout: 20000,
+    timeout: 40000,
     ...options,
   });
 };
