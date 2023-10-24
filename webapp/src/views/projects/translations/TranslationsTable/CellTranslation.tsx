@@ -83,6 +83,9 @@ export const CellTranslation: React.FC<Props> = ({
     | undefined;
   const state = translation?.state || 'UNTRANSLATED';
 
+  const disabled = state === 'DISABLED';
+  const editable = editEnabled && !disabled;
+
   const {
     isEditing,
     editVal,
@@ -125,13 +128,11 @@ export const CellTranslation: React.FC<Props> = ({
       position={lastFocusable ? 'right' : undefined}
       className={clsx({
         [CELL_PLAIN]: true,
-        [CELL_CLICKABLE]: editEnabled && !isEditing,
+        [CELL_CLICKABLE]: editable && !isEditing,
         [CELL_RAISED]: isEditing,
       })}
       style={{ width }}
-      onClick={
-        editEnabled && !isEditing ? () => handleOpen('editor') : undefined
-      }
+      onClick={editable && !isEditing ? () => handleOpen('editor') : undefined}
       tabIndex={0}
       ref={cellRef}
       data-cy="translations-table-cell-translation"
@@ -152,7 +153,7 @@ export const CellTranslation: React.FC<Props> = ({
           onStateChange={handleStateChange}
           mode={editVal.mode}
           onModeChange={handleModeChange}
-          editEnabled={editEnabled}
+          editEnabled={editable}
           stateChangeEnabled={stateChangeEnabled}
           cellRef={containerRef}
           cellPosition={cellPosition}
@@ -166,6 +167,7 @@ export const CellTranslation: React.FC<Props> = ({
                 text={isEditing ? value : translation?.text}
                 locale={language.tag}
                 limitLines={!showAllLines}
+                disabled={disabled}
               />
             </div>
 
@@ -174,7 +176,7 @@ export const CellTranslation: React.FC<Props> = ({
 
           <ControlsTranslation
             onEdit={() => handleOpen('editor')}
-            editEnabled={editEnabled}
+            editEnabled={editable}
             state={state}
             stateChangeEnabled={stateChangeEnabled}
             onStateChange={handleStateChange}

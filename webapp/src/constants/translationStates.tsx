@@ -1,7 +1,7 @@
 import { T } from '@tolgee/react';
 
-export type StateType = 'UNTRANSLATED' | 'TRANSLATED' | 'REVIEWED';
-export type StateInType = Exclude<StateType, 'UNTRANSLATED'>;
+export type StateType = 'UNTRANSLATED' | 'TRANSLATED' | 'REVIEWED' | 'DISABLED';
+export type StateInType = Exclude<StateType, 'UNTRANSLATED' | 'DISABLED'>;
 
 type StateStruct = Record<
   StateType,
@@ -13,6 +13,11 @@ type StateStruct = Record<
 >;
 
 export const translationStates: StateStruct = {
+  DISABLED: {
+    translation: <T keyName="translation_state_disabled" />,
+    color: '#7e7e7e',
+    next: null,
+  },
   UNTRANSLATED: {
     translation: <T keyName="translation_state_untranslated" />,
     color: '#C4C4C4',

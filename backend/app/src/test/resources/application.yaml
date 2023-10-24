@@ -4,7 +4,7 @@ spring:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         jdbc:

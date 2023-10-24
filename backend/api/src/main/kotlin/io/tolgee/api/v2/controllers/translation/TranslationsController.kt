@@ -219,7 +219,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
-    return translationModelAssembler.toModel(translationService.setState(translation, state.translationState))
+    return translationModelAssembler.toModel(translationService.setStateBatch(translation, state.translationState))
   }
 
   @InitBinder("translationFilters")

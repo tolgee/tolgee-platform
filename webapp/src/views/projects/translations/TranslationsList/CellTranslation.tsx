@@ -155,13 +155,16 @@ export const CellTranslation: React.FC<Props> = ({
 
   const state = translation?.state || 'UNTRANSLATED';
 
+  const disabled = state === 'DISABLED';
+  const editable = editEnabled && !disabled;
+
   return (
     <StyledWrapper
       position="right"
       className={clsx({
         [CELL_PLAIN]: true,
         [CELL_RAISED]: isEditing,
-        [CELL_CLICKABLE]: editEnabled && !isEditing,
+        [CELL_CLICKABLE]: editable && !isEditing,
         [CELL_SELECTED]: isEditing,
         splitContainer: true,
       })}
@@ -172,7 +175,7 @@ export const CellTranslation: React.FC<Props> = ({
       <StyledContainer
         className={clsx(className)}
         style={{ width }}
-        onClick={editEnabled ? () => toggleEdit() : undefined}
+        onClick={editable ? () => toggleEdit() : undefined}
         data-cy="translations-table-cell"
       >
         <StyledCircledLanguageIcon flag={language.flagEmoji} />
@@ -191,6 +194,7 @@ export const CellTranslation: React.FC<Props> = ({
               text={isEditing ? value : translation?.text}
               locale={language.tag}
               limitLines={!showAllLines}
+              disabled={disabled}
             />
           </StyledTranslationContent>
           <StyledAutoTranslationIndicator keyData={data} lang={language.tag} />
@@ -205,7 +209,7 @@ export const CellTranslation: React.FC<Props> = ({
             commentsCount={translation?.commentCount}
             unresolvedCommentCount={translation?.unresolvedCommentCount}
             stateChangeEnabled={stateChangeEnabled}
-            editEnabled={editEnabled}
+            editEnabled={editable}
             state={state}
             onStateChange={handleStateChange}
             active={active}
@@ -231,7 +235,7 @@ export const CellTranslation: React.FC<Props> = ({
           stateChangeEnabled={stateChangeEnabled}
           mode={editVal.mode}
           onModeChange={handleModeChange}
-          editEnabled={editEnabled}
+          editEnabled={editable}
           cellRef={cellRef}
         />
       )}

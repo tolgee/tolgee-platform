@@ -17,6 +17,9 @@ export function useStateTranslation() {
       case 'REVIEWED':
         return t('translation_state_reviewed');
 
+      case 'DISABLED':
+        return t('translation_state_disabled');
+
       default:
         exhaustiveMatchingGuard(state);
     }

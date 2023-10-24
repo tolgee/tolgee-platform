@@ -1,9 +1,9 @@
-import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from './CircledLanguageIcon';
 import clsx from 'clsx';
+import { useTranslate } from '@tolgee/react';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -45,22 +45,22 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
   disabled?: boolean | number[];
   maxItems?: number;
+  emptyLabel?: string;
 };
 
 export const LanguagesPermittedList: React.FC<Props> = ({
   languages,
   disabled,
   maxItems = 3,
+  emptyLabel,
   ...props
 }) => {
   const selectedLanguages = languages?.slice(0, maxItems) || [];
-
   const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
+  const { t } = useTranslate();
 
   return !selectedLanguages.length ? (
-    <StyledLabel>
-      <T keyName="languages_permitted_list_all" />
-    </StyledLabel>
+    <StyledLabel>{emptyLabel ?? t('languages_permitted_list_all')}</StyledLabel>
   ) : (
     <StyledContainer {...props}>
       {selectedLanguages.map((l) => (

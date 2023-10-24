@@ -6,6 +6,7 @@ const StyledEditorWrapper = styled('div')`
   overflow: hidden;
   border-radius: 4px;
   cursor: text;
+  background: ${({ theme }) => theme.palette.background.default};
 
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.emphasis[900]};

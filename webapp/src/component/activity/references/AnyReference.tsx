@@ -37,7 +37,7 @@ const StyledReferences = styled(Box)`
     text-overflow: ellipsis;
   }
   & .reference {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
+    background: ${({ theme }) => theme.palette.emphasis[50]};
     max-height: 1.5em;
     padding: 0px 4px;
     border-radius: 4px;

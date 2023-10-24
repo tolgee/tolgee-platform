@@ -27,7 +27,7 @@ class ClearTranslationsChunkProcessor(
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       @Suppress("UNCHECKED_CAST")
-      translationService.clear(subChunk, params.languageIds)
+      translationService.clearBatch(subChunk, params.languageIds)
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)

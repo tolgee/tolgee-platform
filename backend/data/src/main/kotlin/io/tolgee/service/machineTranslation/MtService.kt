@@ -13,6 +13,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService
@@ -93,7 +94,18 @@ class MtService(
     publishBeforeEvent(project)
 
     checkTextLength(baseTranslationText)
-    val targetLanguageIds = targetLanguages.map { it.id }
+
+    // filter only translations that are not disabled
+    val targetLanguageIds = keyId?.let { kId ->
+      val key = projectService.keyService.get(kId)
+      val translations = translationService.getKeyTranslations(targetLanguages.toSet(), project, key)
+      targetLanguages.filter { lang ->
+        val translation = translations.find { it.language === lang }
+        translation === null || translation.state !== TranslationState.DISABLED
+      }.map { it.id }
+    } ?: run {
+      targetLanguages.map { it.id }
+    }
 
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguageIds, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
