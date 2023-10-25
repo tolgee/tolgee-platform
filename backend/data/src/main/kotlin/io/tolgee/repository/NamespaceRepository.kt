@@ -41,4 +41,11 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   """
   )
   fun findOneByProjectIdAndName(projectId: Long, name: String): Namespace?
+
+  @Query(
+    """
+    select n.id from Namespace n where n.project.id = :projectId
+  """
+  )
+  fun deleteAllByProjectId(projectId: Long)
 }

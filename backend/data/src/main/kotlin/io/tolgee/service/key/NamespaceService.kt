@@ -127,4 +127,8 @@ class NamespaceService(
     namespace.name = dto.name!!
     return save(namespace)
   }
+
+  fun deleteAllByProject(projectId: Long) {
+    namespaceRepository.deleteAllByProjectId(projectId)
+  }
 }

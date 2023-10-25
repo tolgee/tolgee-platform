@@ -88,4 +88,9 @@ class TranslationCommentService(
   fun deleteByTranslationIdIn(ids: Collection<Long>) {
     return translationCommentRepository.deleteByTranslationIdIn(ids)
   }
+
+  fun deleteAllByProject(projectId: Long) {
+    val comments = translationCommentRepository.getAllByProjectId(projectId)
+    translationCommentRepository.deleteAll(comments)
+  }
 }

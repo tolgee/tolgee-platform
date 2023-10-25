@@ -18,4 +18,14 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
   fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
 
   fun deleteByTranslationIdIn(ids: Collection<Long>)
+
+  @Query(
+    """
+    from TranslationComment tc
+    join tc.translation t
+    join t.key k
+    where k.project.id = :projectId
+  """
+  )
+  fun getAllByProjectId(projectId: Long): List<TranslationComment>
 }

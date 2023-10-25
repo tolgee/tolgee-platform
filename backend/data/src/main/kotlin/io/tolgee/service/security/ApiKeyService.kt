@@ -129,12 +129,13 @@ class ApiKeyService(
   }
 
   fun deleteAllByProject(projectId: Long) {
+    val apiKeys = getAllByProject(projectId)
     cache?.let {
       // Manual bulk cache eviction
-      getAllByProject(projectId).forEach { p -> it.evict(p.keyHash) }
+      apiKeys.forEach { p -> it.evict(p.keyHash) }
     }
 
-    apiKeyRepository.deleteAllByProjectId(projectId)
+    apiKeyRepository.deleteAll(apiKeys)
   }
 
   fun hashKey(key: String) = keyGenerator.hash(key)
