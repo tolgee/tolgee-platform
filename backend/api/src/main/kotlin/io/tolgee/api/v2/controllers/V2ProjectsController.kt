@@ -32,6 +32,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.IsGlobalRoute
@@ -96,7 +97,7 @@ class V2ProjectsController(
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @IsGlobalRoute
-  @AllowApiAccess
+  @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   fun getAll(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
