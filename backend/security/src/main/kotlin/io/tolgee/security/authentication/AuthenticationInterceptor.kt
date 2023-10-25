@@ -17,7 +17,6 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
@@ -53,11 +52,11 @@ class AuthenticationInterceptor(
       }
 
       if (authenticationFacade.isPersonalAccessTokenAuth && !isPatAllowed(allowApiAccess)) {
-        throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+        throw PermissionException(Message.PAT_ACCESS_NOT_ALLOWED)
       }
 
       if (authenticationFacade.isProjectApiKeyAuth && !isPakAllowed(allowApiAccess)) {
-        throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
+        throw PermissionException(Message.PAK_ACCESS_NOT_ALLOWED)
       }
     }
 

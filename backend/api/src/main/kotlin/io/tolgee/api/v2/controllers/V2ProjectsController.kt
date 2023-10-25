@@ -32,6 +32,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.IsGlobalRoute
@@ -96,6 +97,7 @@ class V2ProjectsController(
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @IsGlobalRoute
+  @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   fun getAll(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
@@ -289,6 +291,7 @@ class V2ProjectsController(
   @PutMapping("/{projectId}/per-language-auto-translation-settings")
   @Operation(summary = "Sets per-language auto translation settings for project")
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @AllowApiAccess
   fun setPerLanguageAutoTranslationSettings(
     @RequestBody dto: List<AutoTranslationSettingsDto>
   ): CollectionModel<AutoTranslationConfigModel> {
@@ -299,6 +302,7 @@ class V2ProjectsController(
   @GetMapping("/{projectId}/per-language-auto-translation-settings")
   @Operation(summary = "Returns per-language auto translation settings for project")
   @UseDefaultPermissions
+  @AllowApiAccess
   fun getPerLanguageAutoTranslationSettings(): CollectionModel<AutoTranslationConfigModel> {
     val configs = autoTranslateService.getConfigs(projectHolder.projectEntity)
     return autoTranslationSettingsModelAssembler.toCollectionModel(configs)
@@ -311,6 +315,7 @@ class V2ProjectsController(
     deprecated = true
   )
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @AllowApiAccess
   fun setAutoTranslationSettings(
     @RequestBody dto: AutoTranslationSettingsDto
   ): AutoTranslationConfigModel {
@@ -325,6 +330,7 @@ class V2ProjectsController(
     deprecated = true
   )
   @UseDefaultPermissions
+  @AllowApiAccess
   fun getAutoTranslationSettings(): AutoTranslationConfigModel {
     val config = autoTranslateService.getDefaultConfig(projectHolder.projectEntity)
     return autoTranslationSettingsModelAssembler.toModel(config)
