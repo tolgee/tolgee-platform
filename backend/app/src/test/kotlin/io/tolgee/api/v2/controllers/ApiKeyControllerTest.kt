@@ -227,10 +227,10 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `returns 400 when trying to get current key with PAT auth`() {
+  fun `returns 403 when trying to get current key with PAT auth`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
-    performGet("/v2/api-keys/current", headers).andIsBadRequest
+    performGet("/v2/api-keys/current", headers).andIsForbidden
   }
 
   @Test
