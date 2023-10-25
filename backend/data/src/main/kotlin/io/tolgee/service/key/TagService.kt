@@ -8,6 +8,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
+import io.tolgee.util.Logging
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,10 +21,10 @@ class TagService(
   private val keyMetaService: KeyMetaService,
   @Lazy
   private val keyService: KeyService
-) {
+) : Logging {
   fun tagKey(key: Key, tagName: String): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
-    val tag = find(key.project!!, tagName)?.let {
+    val tag = find(key.project, tagName)?.let {
       if (!keyMeta.tags.contains(it)) {
         it.keyMetas.add(keyMeta)
         keyMeta.tags.add(it)
@@ -31,7 +32,7 @@ class TagService(
       it
     } ?: let {
       Tag().apply {
-        project = key.project!!
+        project = key.project
         keyMetas.add(keyMeta)
         name = tagName
         keyMeta.tags.add(this)
@@ -208,14 +209,21 @@ class TagService(
   }
 
   fun deleteAllByKeyIdIn(keyIds: Collection<Long>) {
-    val keys = tagRepository.getKeysWithTags(keyIds)
+    val keys = traceLogMeasureTime("tagService: deleteAllByKeyIdIn: getKeysWithTags") {
+      tagRepository.getKeysWithTags(keyIds)
+    }
     deleteAllTagsForKeys(keys)
   }
 
   private fun deleteAllTagsForKeys(keys: Iterable<WithKeyMeta>) {
     val tagIds = keys.flatMap { it.keyMeta?.tags?.map { it.id } ?: listOf() }.toSet()
     // get tags with fetched keyMetas
-    val tagKeyMetasMap = tagRepository.getTagsWithKeyMetas(tagIds).map { it.id to it.keyMetas }.toMap()
+    val tagKeyMetasMap =
+      traceLogMeasureTime("tagService: deleteAllTagsForKeys: getTagsWithKeyMetas") {
+        tagRepository.getTagsWithKeyMetas(tagIds).associate {
+          it.id to it.keyMetas
+        }
+      }
     keys.forEach { key ->
       key.keyMeta?.let { keyMeta ->
         keyMeta.tags.forEach { tag ->
@@ -232,7 +240,7 @@ class TagService(
     }
   }
 
-  fun deleteAllByKeyIn(keys: Collection<Key>) {
-    tagRepository.deleteAllByKeyIn(keys)
+  fun deleteAllByProject(projectId: Long) {
+    tagRepository.deleteAllByProjectId(projectId)
   }
 }

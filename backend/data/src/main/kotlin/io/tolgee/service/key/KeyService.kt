@@ -218,29 +218,6 @@ class KeyService(
   }
 
   @Transactional
-  fun deleteMultiple(keys: List<Key>) {
-    traceLogMeasureTime("delete multiple keys: delete translations") {
-      translationService.deleteAllByKeys(keys.map { it.id })
-    }
-
-    traceLogMeasureTime("delete multiple keys: delete key metas") {
-      keyMetaService.deleteAllByKeys(keys)
-    }
-
-    traceLogMeasureTime("delete multiple keys: delete screenshots") {
-      screenshotService.deleteAllByKeyId(keys.map { it.id })
-    }
-
-    val namespaces = keys.map { it.namespace }
-
-    traceLogMeasureTime("delete multiple keys: delete the keys") {
-      keyRepository.deleteAll(keys)
-    }
-
-    namespaceService.deleteUnusedNamespaces(namespaces)
-  }
-
-  @Transactional
   fun deleteMultiple(ids: Collection<Long>) {
     traceLogMeasureTime("delete multiple keys: delete translations") {
       translationService.deleteAllByKeys(ids)
@@ -269,10 +246,12 @@ class KeyService(
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    val keys = traceLogMeasureTime("delete all keys by project: fetch keys") {
-      keyRepository.getByProjectIdWithFetchedMetas(projectId)
-    }
-    this.deleteMultiple(keys.map { it.id })
+    val keys = keyRepository.getAllByProjectId(projectId)
+    translationService.deleteAllByProject(projectId)
+    keyMetaService.deleteAllByProject(projectId)
+    screenshotService.deleteAllByProject(projectId)
+    namespaceService.deleteAllByProject(projectId)
+    keyRepository.deleteAll(keys)
   }
 
   fun checkInProject(key: Key, projectId: Long) {

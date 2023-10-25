@@ -135,24 +135,14 @@ class KeyMetaService(
     this.keyMetaRepository.deleteAllByKeyIds(ids)
   }
 
-  fun deleteAllByKeys(keys: Collection<Key>) {
-    traceLogMeasureTime("keyMetaService: deleteAllByKeyIdIn: tags") {
-      tagService.deleteAllByKeyIn(keys)
-    }
-
-    val keyIds = keys.map { it.id }
-    keyCommentRepository.deleteAllByKeyIds(keyIds)
-    keyCodeReferenceRepository.deleteAllByKeyIds(keys)
-
-    traceLogMeasureTime("keyMetaService: delete the metas") {
-      this.keyMetaRepository.deleteAllByKeyIds(keyIds)
-    }
+  fun deleteAllByKeyId(id: Long) {
+    deleteAllByKeyIdIn(listOf(id))
   }
 
-  fun deleteAllByKeyId(id: Long) {
-    tagService.deleteAllByKeyIdIn(listOf(id))
-    keyCommentRepository.deleteAllByKeyId(id)
-    keyCodeReferenceRepository.deleteAllByKeyId(id)
-    this.keyMetaRepository.deleteAllByKeyId(id)
+  fun deleteAllByProject(projectId: Long) {
+    tagService.deleteAllByProject(projectId)
+    keyCommentRepository.deleteAllByProject(projectId)
+    keyCodeReferenceRepository.deleteAllByProject(projectId)
+    this.keyMetaRepository.deleteAllByProject(projectId)
   }
 }
