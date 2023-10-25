@@ -119,15 +119,15 @@ class ConfigurationDocumentationProvider {
   private val String.nullIfEmpty: String? get() = this.ifEmpty { null }
 
   private fun getPropertyTree(docProperty: DocProperty): DocItem {
-//    if (docProperty.children.isNotEmpty()) {
-//      return Group(
-//        name = docProperty.name,
-//        displayName = docProperty.displayName,
-//        description = docProperty.description,
-//        children = docProperty.children.map { getPropertyTree(it) },
-//        prefix = docProperty.prefix.nullIfEmpty
-//      )
-//    }
+    if (docProperty.children.isNotEmpty()) {
+      return Group(
+        name = docProperty.name,
+        displayName = docProperty.displayName,
+        description = docProperty.description,
+        children = docProperty.children.map { getPropertyTree(it) },
+        prefix = docProperty.prefix.nullIfEmpty
+      )
+    }
     return Property(
       name = docProperty.name,
       displayName = docProperty.displayName.nullIfEmpty,

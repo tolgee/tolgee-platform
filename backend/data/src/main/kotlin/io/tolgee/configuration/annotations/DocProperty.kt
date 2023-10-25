@@ -7,7 +7,7 @@ annotation class DocProperty(
   val description: String = "",
   val defaultValue: String = "",
   val defaultExplanation: String = "",
-//  val children: Array<DocProperty> = [],
+  val children: Array<DocProperty> = [],
   val prefix: String = "",
   val removedIn: String = "",
   val removalReason: String = "",
