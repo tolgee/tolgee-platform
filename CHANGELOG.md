@@ -1,3 +1,10 @@
+## [3.35.4](https://github.com/tolgee/tolgee-platform/compare/v3.35.3...v3.35.4) (2023-10-25)
+
+
+### Bug Fixes
+
+* Allow API access to specific project management endpoints ([#1971](https://github.com/tolgee/tolgee-platform/issues/1971)) ([a9eae7f](https://github.com/tolgee/tolgee-platform/commit/a9eae7f043b3701279448454f9be57d8ee84bbcc))
+
 ## [3.35.3](https://github.com/tolgee/tolgee-platform/compare/v3.35.2...v3.35.3) (2023-10-23)
 
 
