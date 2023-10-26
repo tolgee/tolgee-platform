@@ -100,6 +100,9 @@ class BigMetaService(
       }
   }
 
+  fun getCloseKeysWithBaseTranslation(keyId: Long, projectId: Long) =
+    this.keysDistanceRepository.getCloseKeysWithBaseTranslation(keyId, projectId)
+
   @EventListener(OnProjectActivityEvent::class)
   @Async
   fun onKeyDeleted(event: OnProjectActivityEvent) {

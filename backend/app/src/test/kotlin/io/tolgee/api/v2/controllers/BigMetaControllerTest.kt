@@ -2,14 +2,15 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -34,6 +35,21 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it stores`() {
     saveTestDataAndPrepare()
+    storeBigMeta()
+    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it returns`() {
+    saveTestDataAndPrepare()
+    storeBigMeta()
+    performProjectAuthGet("/keys/${testData.noNsKey.id}/big-meta").andIsOk.andPrettyPrint.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(1)
+    }
+  }
+
+  private fun storeBigMeta() {
     performProjectAuthPost(
       "big-meta",
       mapOf(
@@ -48,11 +64,8 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         )
       )
     ).andIsOk
-
-    bigMetaService.findExistingKeysDistancesByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
   }
 
-  @OptIn(ExperimentalTime::class)
   @Test
   @ProjectJWTAuthTestMethod
   fun `it performs well`() {
