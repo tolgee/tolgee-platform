@@ -41,7 +41,7 @@ class KeyService(
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
   private val applicationContext: ApplicationContext,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
   @Lazy
   private var translationService: TranslationService,
   private val languageRepository: LanguageRepository
@@ -246,12 +246,14 @@ class KeyService(
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    val keys = keyRepository.getAllByProjectId(projectId)
-    translationService.deleteAllByProject(projectId)
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
+
+    entityManager.createNativeQuery("""delete from key where project_id = :projectId""")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+
     namespaceService.deleteAllByProject(projectId)
-    keyRepository.deleteAll(keys)
   }
 
   fun checkInProject(key: Key, projectId: Long) {

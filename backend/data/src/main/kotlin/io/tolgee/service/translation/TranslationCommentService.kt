@@ -9,6 +9,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.translation.TranslationCommentRepository
 import io.tolgee.security.authentication.AuthenticationFacade
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 class TranslationCommentService(
   private val translationCommentRepository: TranslationCommentRepository,
   private val authenticationFacade: AuthenticationFacade,
+  private val entityManager: EntityManager
 ) {
   @Transactional
   fun create(
@@ -90,7 +92,10 @@ class TranslationCommentService(
   }
 
   fun deleteAllByProject(projectId: Long) {
-    val comments = translationCommentRepository.getAllByProjectId(projectId)
-    translationCommentRepository.deleteAll(comments)
+    entityManager.createNativeQuery(
+      "DELETE FROM translation_comment WHERE translation_id IN " +
+        "(SELECT id FROM translation WHERE key_id IN " +
+        "(SELECT id FROM key WHERE project_id = :projectId))"
+    ).setParameter("projectId", projectId).executeUpdate()
   }
 }
