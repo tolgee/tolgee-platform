@@ -47,7 +47,8 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
   @Query(
     """
     delete from namespace where project_id = :projectId
-  """, nativeQuery = true
+  """,
+    nativeQuery = true
   )
   fun deleteAllByProjectId(projectId: Long)
 }

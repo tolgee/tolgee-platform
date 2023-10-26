@@ -242,7 +242,6 @@ class TagService(
     }
   }
 
-
   /**
    * We don't need to store history or handle events when deleting whole project.
    * So we can go for native query.
