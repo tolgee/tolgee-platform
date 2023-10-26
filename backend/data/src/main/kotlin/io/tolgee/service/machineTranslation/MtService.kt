@@ -96,16 +96,7 @@ class MtService(
     checkTextLength(baseTranslationText)
 
     // filter only translations that are not disabled
-    val targetLanguageIds = keyId?.let { kId ->
-      val key = projectService.keyService.get(kId)
-      val translations = translationService.getKeyTranslations(targetLanguages.toSet(), project, key)
-      targetLanguages.filter { lang ->
-        val translation = translations.find { it.language === lang }
-        translation === null || translation.state !== TranslationState.DISABLED
-      }.map { it.id }
-    } ?: run {
-      targetLanguages.map { it.id }
-    }
+    val targetLanguageIds = targetLanguages.map { it.id }
 
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguageIds, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)

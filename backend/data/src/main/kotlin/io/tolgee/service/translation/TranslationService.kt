@@ -374,7 +374,7 @@ class TranslationService(
   @Transactional
   fun setStateBatch(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
     val translations = getTargetTranslations(keyIds, languageIds)
-    translations.filter { it.state !== TranslationState.DISABLED }.forEach { it.state = state }
+    translations.filter { it.state != TranslationState.DISABLED }.forEach { it.state = state }
     saveAll(translations)
   }
 
