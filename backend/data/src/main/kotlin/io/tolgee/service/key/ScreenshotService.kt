@@ -272,10 +272,8 @@ class ScreenshotService(
 
     entityManager.createNativeQuery(
       """
-      DELETE FROM screenshot WHERE id IN (
-        SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
-          SELECT id FROM key WHERE project_id = :projectId
-        )
+      DELETE FROM key_screenshot_reference WHERE key_id IN (
+        SELECT id FROM key WHERE project_id = :projectId
       )
     """
     ).setParameter("projectId", projectId)
@@ -283,8 +281,10 @@ class ScreenshotService(
 
     entityManager.createNativeQuery(
       """
-      DELETE FROM key_screenshot_reference WHERE key_id IN (
-        SELECT id FROM key WHERE project_id = :projectId
+      DELETE FROM screenshot WHERE id IN (
+        SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
+          SELECT id FROM key WHERE project_id = :projectId
+        )
       )
     """
     ).setParameter("projectId", projectId)

@@ -176,8 +176,10 @@ class LanguageService(
 
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
-    entityManager.createNativeQuery("delete from language_stats " +
-      "where language_id in (select id from language where project_id = :projectId)")
+    entityManager.createNativeQuery(
+      "delete from language_stats " +
+        "where language_id in (select id from language where project_id = :projectId)"
+    )
       .setParameter("projectId", projectId)
       .executeUpdate()
     entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
