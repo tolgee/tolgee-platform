@@ -269,7 +269,26 @@ class ScreenshotService(
   fun deleteAllByProject(projectId: Long) {
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
-    screenshotRepository.deleteAll(all)
+
+    entityManager.createNativeQuery(
+      """
+      DELETE FROM screenshot WHERE id IN (
+        SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
+          SELECT id FROM key WHERE project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      DELETE FROM key_screenshot_reference WHERE key_id IN (
+        SELECT id FROM key WHERE project_id = :projectId
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun deleteAllByKeyId(keyId: Long) {

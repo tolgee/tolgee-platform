@@ -53,7 +53,6 @@ class Project(
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
 ) : AuditModel(), ModelWithAvatar, EntityWithId {
-
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()

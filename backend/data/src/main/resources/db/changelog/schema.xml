@@ -2885,4 +2885,41 @@
     <changeSet author="jenik (generated)" id="1695640860120-3">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="quick_start" constraintName="FK946dggx61o0jyux1oo5gby8v0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="jenik" id="1694597673945-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="false">
+                SELECT CASE
+                           WHEN EXISTS (SELECT 1
+                                        FROM information_schema.columns
+                                        WHERE table_name = 'batch_job_execution_params'
+                                          AND column_name = 'parameter_value')
+                               THEN 'true'
+                           ELSE 'false'
+                           END;
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE BATCH_STEP_EXECUTION ADD CREATE_TIME TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:00';
+
+            ALTER TABLE BATCH_STEP_EXECUTION ALTER COLUMN START_TIME DROP NOT NULL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DATE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN LONG_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS DROP COLUMN DOUBLE_VAL;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN TYPE_CD TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME TYPE_CD TO PARAMETER_TYPE;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN KEY_NAME TYPE VARCHAR(100);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME KEY_NAME TO PARAMETER_NAME;
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS ALTER COLUMN STRING_VAL TYPE VARCHAR(2500);
+
+            ALTER TABLE BATCH_JOB_EXECUTION_PARAMS RENAME STRING_VAL TO PARAMETER_VALUE;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

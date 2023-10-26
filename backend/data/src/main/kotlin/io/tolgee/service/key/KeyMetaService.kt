@@ -141,8 +141,35 @@ class KeyMetaService(
 
   fun deleteAllByProject(projectId: Long) {
     tagService.deleteAllByProject(projectId)
-    keyCommentRepository.deleteAllByProject(projectId)
-    keyCodeReferenceRepository.deleteAllByProject(projectId)
-    this.keyMetaRepository.deleteAllByProject(projectId)
+    entityManager.createNativeQuery(
+      """
+      delete from key_comment where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_code_reference where key_meta_id in (
+        select id from key_meta where key_id in (
+          select id from key where project_id = :projectId
+        )
+      )
+    """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    entityManager.createNativeQuery(
+      """
+      delete from key_meta where key_id in (
+        select id from key where project_id = :projectId
+      )
+      """
+    ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 }

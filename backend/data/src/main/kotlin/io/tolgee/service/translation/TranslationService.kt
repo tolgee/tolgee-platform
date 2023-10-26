@@ -461,7 +461,8 @@ class TranslationService(
 
   fun deleteAllByProject(projectId: Long) {
     translationCommentService.deleteAllByProject(projectId)
-    val allInProject = translationRepository.getAllByProjectId(projectId)
-    translationRepository.deleteAll(allInProject)
+    entityManager.createNativeQuery(
+      "DELETE FROM translation WHERE key_id IN (SELECT id FROM key WHERE project_id = :projectId)"
+    ).setParameter("projectId", projectId).executeUpdate()
   }
 }
