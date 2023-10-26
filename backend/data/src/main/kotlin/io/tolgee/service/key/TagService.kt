@@ -9,6 +9,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
 import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,7 +21,8 @@ class TagService(
   private val tagRepository: TagRepository,
   private val keyMetaService: KeyMetaService,
   @Lazy
-  private val keyService: KeyService
+  private val keyService: KeyService,
+  private val entityManager: EntityManager
 ) : Logging {
   fun tagKey(key: Key, tagName: String): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
@@ -240,7 +242,22 @@ class TagService(
     }
   }
 
+
+  /**
+   * We don't need to store history or handle events when deleting whole project.
+   * So we can go for native query.
+   */
   fun deleteAllByProject(projectId: Long) {
-    tagRepository.deleteAllByProjectId(projectId)
+    entityManager.createNativeQuery(
+      """
+      delete from key_meta_tags kmt 
+        where kmt.key_metas_id in 
+        (select km.id from key_meta km join key k on km.key_id = k.id where k.project_id = :projectId)"""
+    ).setParameter("projectId", projectId).executeUpdate()
+    entityManager.createNativeQuery(
+      """
+      delete from tag where project_id = :projectId
+      """
+    ).setParameter("projectId", projectId).executeUpdate()
   }
 }
