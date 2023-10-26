@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
 import org.springframework.data.domain.Page
@@ -150,4 +151,18 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """
   )
   fun getKeysWithNamespaces(keyIds: List<Long>): List<Key>
+
+  @Query(
+    """
+    from Language l
+    join l.translations t
+    where t.key.id = :keyId 
+      and l.project.id = :projectId 
+      and t.state = io.tolgee.model.enums.TranslationState.DISABLED
+   order by l.id
+  """
+  )
+  fun getDisabledLanguages(projectId: Long, keyId: Long): List<Language>
+
+  fun findByProjectIdAndId(projectId: Long, keyId: Long): Key?
 }
