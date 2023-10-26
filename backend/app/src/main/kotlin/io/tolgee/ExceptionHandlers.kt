@@ -14,12 +14,14 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import org.apache.catalina.connector.ClientAbortException
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
 import org.slf4j.LoggerFactory
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.transaction.TransactionSystemException
 import org.springframework.validation.BindException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
@@ -218,6 +220,18 @@ class ExceptionHandlers {
       ),
       HttpStatus.INTERNAL_SERVER_ERROR
     )
+  }
+
+  @ExceptionHandler
+  fun handleTransactionExceptions(exception: TransactionSystemException): ResponseEntity<ErrorResponseBody> {
+    val rootCause = ExceptionUtils.getRootCause(exception)
+    if (rootCause is NotFoundException) {
+      return handleNotFound(rootCause)
+    }
+    if (rootCause is BadRequestException) {
+      return handleServerError(rootCause)
+    }
+    throw exception
   }
 
   @ExceptionHandler(ClientAbortException::class)

@@ -11,16 +11,19 @@ import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolva
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
+import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.setSimilarityLimit
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -37,9 +40,11 @@ class KeyService(
   private val tagService: TagService,
   private val namespaceService: NamespaceService,
   private val applicationContext: ApplicationContext,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  @Lazy
+  private var translationService: TranslationService,
+  private val languageRepository: LanguageRepository
 ) {
-  private lateinit var translationService: TranslationService
 
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -222,11 +227,6 @@ class KeyService(
     this.deleteMultiple(ids)
   }
 
-  @Autowired
-  fun setTranslationService(translationService: TranslationService) {
-    this.translationService = translationService
-  }
-
   fun checkInProject(key: Key, projectId: Long) {
     if (key.project.id != projectId) {
       throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
@@ -272,5 +272,42 @@ class KeyService(
 
   fun find(id: List<Long>): List<Key> {
     return keyRepository.findAllByIdIn(id)
+  }
+
+  @Transactional
+  fun getDisabledLanguages(projectId: Long, keyId: Long): List<Language> {
+    return keyRepository.getDisabledLanguages(projectId, keyId)
+  }
+
+  @Transactional
+  fun setDisabledLanguages(projectId: Long, keyId: Long, languageIds: List<Long>): List<Language> {
+    val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
+    enableRestOdLanguages(projectId, languageIds, key)
+    return disableLanguagesToDisable(projectId, languageIds, key)
+  }
+
+  private fun enableRestOdLanguages(projectId: Long, languageIdsToDisable: List<Long>, key: Key) {
+    val currentlyDisabledLanguages = keyRepository.getDisabledLanguages(projectId, key.id)
+    val languagesToEnable = currentlyDisabledLanguages.filter { !languageIdsToDisable.contains(it.id) }
+    languagesToEnable.forEach { language ->
+      val translation = translationService.find(key, language).orElse(null) ?: return@forEach
+      translation.clear()
+      translationService.save(translation)
+    }
+  }
+
+  private fun disableLanguagesToDisable(
+    projectId: Long,
+    languageIds: List<Long>,
+    key: Key
+  ): List<Language> {
+    val languages = languageRepository.findAllByProjectIdAndIdInOrderById(projectId, languageIds)
+    languages.map { language ->
+      val translation = translationService.getOrCreate(key, language)
+      translation.clear()
+      translation.state = TranslationState.DISABLED
+      translationService.save(translation)
+    }
+    return languages
   }
 }

@@ -65,6 +65,10 @@ class ProjectBuilder(
     return addKey(keyName, ft).build { setNamespace(namespace) }
   }
 
+  fun addKey(keyName: String): KeyBuilder {
+    return addKey(keyName, null)
+  }
+
   fun addKey(keyName: String, ft: (KeyBuilder.() -> Unit)?): KeyBuilder {
     return addKey {
       name = keyName

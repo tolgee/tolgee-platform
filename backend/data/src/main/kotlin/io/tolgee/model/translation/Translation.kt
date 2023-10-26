@@ -4,7 +4,9 @@ import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
@@ -90,6 +92,19 @@ class Translation(
     this.auto = false
   }
 
+  fun clear() {
+    this.state = TranslationState.UNTRANSLATED
+    this.text = null
+    this.resetFlags()
+  }
+
+  fun isEmpty(): Boolean {
+    return this.text.isNullOrEmpty() &&
+      !this.outdated &&
+      this.mtProvider == null &&
+      !this.auto
+  }
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false
@@ -132,10 +147,16 @@ class Translation(
       @PrePersist
       @PreUpdate
       fun preSave(translation: Translation) {
+        if (!translation.isEmpty() && translation.state == TranslationState.DISABLED) {
+          throw BadRequestException(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
+        }
+
         if (!translation.text.isNullOrEmpty() && translation.state == TranslationState.UNTRANSLATED) {
           translation.state = TranslationState.TRANSLATED
         }
-        if (translation.text.isNullOrEmpty() && translation.state != TranslationState.UNTRANSLATED) {
+        if (translation.text.isNullOrEmpty() &&
+          translation.state != TranslationState.UNTRANSLATED && translation.state != TranslationState.DISABLED
+        ) {
           translation.state = TranslationState.UNTRANSLATED
         }
       }

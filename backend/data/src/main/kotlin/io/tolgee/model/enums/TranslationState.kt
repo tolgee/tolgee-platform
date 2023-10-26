@@ -4,4 +4,5 @@ enum class TranslationState {
   UNTRANSLATED,
   TRANSLATED,
   REVIEWED,
+  DISABLED
 }
