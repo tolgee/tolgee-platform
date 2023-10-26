@@ -1,6 +1,5 @@
 package io.tolgee.repository
 
-import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -41,7 +40,6 @@ interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
   @Transactional
   @Query("delete from KeyMeta km where km.key.id in :keyIds")
   fun deleteAllByKeyIds(keyIds: Collection<Long>)
-
 
   @Modifying
   @Query("delete from KeyMeta km where km.key.id in (select k.id from Key k where k.project.id = :projectId)")

@@ -78,12 +78,12 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun deleteAllByKeyIn(keys: Collection<Key>)
 
-  @Query("""
+  @Query(
+    """
     from Tag t
     join fetch t.keyMetas km
     where km.key.id in :keyIds
-  """)
+  """
+  )
   fun getAllByKeyIds(keyIds: Collection<Long>): List<Tag>
-
-  fun deleteAllByProjectId(projectId: Long)
 }
