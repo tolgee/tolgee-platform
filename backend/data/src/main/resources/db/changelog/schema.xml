@@ -2866,16 +2866,27 @@
     </changeSet>
     <changeSet author="jenik" id="1694597673945-1">
         <preConditions onFail="MARK_RAN">
+            <and>
             <sqlCheck expectedResult="false">
                 SELECT CASE
                            WHEN EXISTS (SELECT 1
                                         FROM information_schema.columns
                                         WHERE table_name = 'batch_job_execution_params'
                                           AND column_name = 'parameter_value')
-                               THEN 'true'
+                           THEN 'true'
                            ELSE 'false'
-                           END;
+                       END;
             </sqlCheck>
+            <sqlCheck expectedResult="true">
+                SELECT CASE
+                            WHEN EXISTS (SELECT 1
+                                        FROM information_schema.columns
+                                        WHERE table_name = 'batch_job_execution_params')
+                            THEN 'true'
+                            ELSE 'false'
+                       END;
+            </sqlCheck>
+            </and>
         </preConditions>
         <sql>
             ALTER TABLE BATCH_STEP_EXECUTION ADD CREATE_TIME TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:00';
