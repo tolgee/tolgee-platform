@@ -13,7 +13,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.KeyService

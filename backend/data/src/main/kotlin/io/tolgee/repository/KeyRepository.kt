@@ -3,7 +3,6 @@ package io.tolgee.repository
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
-import io.tolgee.service.key.KeyWithBaseTranslationView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
