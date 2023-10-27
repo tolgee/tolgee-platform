@@ -12,7 +12,10 @@ const StyledWrapper = styled('div')`
   align-items: center;
   height: 24px;
   font-size: 14px;
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  background: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[100]
+      : theme.palette.emphasis[200]};
   border: 1px solid transparent;
   max-width: 100%;
 
