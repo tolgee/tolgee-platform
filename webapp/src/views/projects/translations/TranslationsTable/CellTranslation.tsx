@@ -136,6 +136,7 @@ export const CellTranslation: React.FC<Props> = ({
       tabIndex={0}
       ref={cellRef}
       data-cy="translations-table-cell-translation"
+      data-cy-lang={language.tag}
     >
       {editVal ? (
         <StyledTranslationOpened

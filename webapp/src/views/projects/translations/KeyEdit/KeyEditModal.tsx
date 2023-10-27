@@ -156,15 +156,18 @@ export const KeyEditModal: React.FC<Props> = ({
             <StyledTabsWrapper>
               <StyledTabs value={tab} onChange={(_, val) => setTab(val)}>
                 <StyledTab
+                  data-cy="key-edit-tab-general"
                   value="general"
                   label={t('key_edit_modal_switch_general')}
                 />
                 <StyledTab
+                  data-cy="key-edit-tab-advanced"
                   value="advanced"
                   label={t('key_edit_modal_switch_advanced')}
                 />
                 {contextPresent && (
                   <StyledTab
+                    data-cy="key-edit-tab-context"
                     value="context"
                     label={t('key_edit_modal_switch_context')}
                   />
