@@ -21,12 +21,11 @@ export const StateTransitionButtons: React.FC<Props> = ({
 }) => {
   const translateState = useStateTranslation();
 
-  const nextState: StateInType =
-    (state && translationStates[state]?.next) || 'TRANSLATED';
+  const nextState = state && translationStates[state]?.next;
 
   return (
     <>
-      {state !== 'UNTRANSLATED' && (
+      {nextState && (
         <ControlsButton
           data-cy="translation-state-button"
           onClick={() => onStateChange?.(nextState)}

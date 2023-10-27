@@ -82,8 +82,9 @@ class AutoTranslationService(
         language = entityManager.getReference(Language::class.java, languageId)
       }
 
-    val shouldTranslate =
+    val shouldTranslate = translation.state != TranslationState.DISABLED && (
       translation.auto || translation.state == TranslationState.UNTRANSLATED || translation.text.isNullOrEmpty()
+      )
 
     if (!shouldTranslate) {
       return
@@ -136,6 +137,8 @@ class AutoTranslationService(
       }
 
       it to getUntranslatedTranslations(key, listOf(it.language)).firstOrNull()
+    }.filter {
+      it.second?.state != TranslationState.DISABLED
     }
 
     val toTmTranslate = translations.filter { it.first.usingTm }.mapNotNull { it.second }

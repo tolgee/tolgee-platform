@@ -1,12 +1,20 @@
-import React, { FC } from 'react';
+import { Box, BoxProps } from '@mui/material';
+import React from 'react';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 
-export const DirectionLocaleWrapper: FC<{ languageTag: string }> = (props) => (
-  <span
-    dir={
-      props.languageTag ? getLanguageDirection(props.languageTag) : undefined
-    }
-  >
-    {props.children}
-  </span>
+type Props = {
+  languageTag: string;
+} & BoxProps;
+
+export const DirectionLocaleWrapper = React.forwardRef(
+  function DirectionLocaleWrapper({ languageTag, ...props }: Props, ref) {
+    return (
+      <Box
+        {...props}
+        component="span"
+        dir={languageTag ? getLanguageDirection(languageTag) : undefined}
+        ref={ref}
+      />
+    );
+  }
 );

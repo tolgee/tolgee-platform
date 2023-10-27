@@ -26,7 +26,7 @@ class SetTranslationsStateChunkProcessor(
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      params.state?.let { translationService.setState(subChunk, params.languageIds, it) }
+      params.state?.let { translationService.setStateBatch(subChunk, params.languageIds, it) }
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)

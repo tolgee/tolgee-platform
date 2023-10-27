@@ -215,6 +215,9 @@ declare namespace DataCy {
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
+        "key-edit-tab-advanced" |
+        "key-edit-tab-context" |
+        "key-edit-tab-general" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-create-autocomplete-field" |

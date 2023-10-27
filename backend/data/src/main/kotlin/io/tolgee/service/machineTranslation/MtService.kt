@@ -93,6 +93,8 @@ class MtService(
     publishBeforeEvent(project)
 
     checkTextLength(baseTranslationText)
+
+    // filter only translations that are not disabled
     val targetLanguageIds = targetLanguages.map { it.id }
 
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguageIds, project)

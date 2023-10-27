@@ -1,6 +1,6 @@
 import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
 import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
-import { ArrowDropDown, CheckBox } from '@mui/icons-material';
+import { ArrowDropDown, CheckBoxOutlineBlank } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
@@ -15,6 +15,7 @@ const StyledButton = styled(Button)`
   padding: 0px;
   padding-left: 7px;
   padding-right: 5px;
+  background: ${({ theme }) => theme.palette.background.default};
 `;
 
 export const LanguagePermissionsMenu: FunctionComponent<{
@@ -24,10 +25,12 @@ export const LanguagePermissionsMenu: FunctionComponent<{
   disabled?: boolean | number[];
   allLanguages: LanguageModel[];
   selectAllButton?: boolean;
+  emptyLabel?: string;
 }> = (props) => {
   const anchorEl = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslate();
+  const emptyLabel = props.emptyLabel ?? t('languages_permitted_list_all');
 
   const handleClose = () => {
     setOpen(false);
@@ -80,7 +83,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
         title={
           props.selected?.length
             ? selectedLanguages.map((l) => l.name || l.tag).join(', ')
-            : t('languages_permitted_list_all')
+            : emptyLabel
         }
         disableInteractive
       >
@@ -102,6 +105,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
               )}
               disabled={props.disabled}
               maxItems={5}
+              emptyLabel={emptyLabel}
             />
             <ArrowDropDown fontSize="small" />
           </StyledButton>
@@ -130,8 +134,8 @@ export const LanguagePermissionsMenu: FunctionComponent<{
             value={selectedIds}
             anchorEl={anchorEl.current || undefined}
             onAction={!isAll && listIsLong ? handleSelectAll : undefined}
-            actionIcon={<CheckBox fontSize="small" />}
-            actionTooltip={t('languages_permitted_list_select_all')}
+            actionIcon={<CheckBoxOutlineBlank fontSize="small" />}
+            actionTooltip={t('languages_permitted_list_reset')}
             onSelect={handleToggle}
             maxWidth={400}
             renderOption={(renderProps, option) => (

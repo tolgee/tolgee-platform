@@ -64,7 +64,13 @@ const StyledContainer = styled('div')`
   }
 `;
 
-const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
+type RelevantState = Exclude<State, 'DISABLED'>;
+
+const STATES_ORDER = [
+  'REVIEWED',
+  'TRANSLATED',
+  'UNTRANSLATED',
+] as RelevantState[];
 
 export function TranslationStatesBar(props: {
   labels: boolean;
@@ -73,7 +79,7 @@ export function TranslationStatesBar(props: {
     keyCount: number;
     languageCount: number;
     translationStatePercentages: {
-      [state in State]: number;
+      [state in RelevantState]: number;
     };
   };
 }) {
