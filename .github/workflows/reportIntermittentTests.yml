@@ -38,9 +38,6 @@ jobs:
       - name: Tar Data build
         run: tar -czf ~/backend-data.tgz ./backend/data/build
 
-      - name: Tar Testing build
-        run: tar -czf ~/backend-testing.tgz ./backend/testing/build
-
       - name: Tar Deployment build
         run: tar -czf ~/backend-development.tgz ./backend/development/build
 
@@ -51,7 +48,6 @@ jobs:
           path: |
             ~/backend-app.tgz
             ~/backend-data.tgz 
-            ~/backend-testing.tgz
             ~/backend-development.tgz
 
   backend-test:
@@ -103,7 +99,6 @@ jobs:
         run: |
           tar -xzf ~/backend-app.tgz ./backend/app/build
           tar -xzf ~/backend-data.tgz ./backend/data/build
-          tar -xzf ~/backend-testing.tgz ./backend/testing/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
 
       - name: Run backend tests
