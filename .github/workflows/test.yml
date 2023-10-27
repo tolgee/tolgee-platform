@@ -55,6 +55,7 @@ jobs:
             ~/backend-security.tgz
             ~/backend-development.tgz
             ~/ee-backend-app.tgz
+            ~/ee-backend-tests.tgz
 
   backend-test:
     name: BT ‍🔎
