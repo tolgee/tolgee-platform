@@ -291,8 +291,8 @@ class AutoTranslationService(
   fun getConfig(project: Project, targetLanguageId: Long) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, targetLanguageId)
       ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-        it.project = project
-      }
+      it.project = project
+    }
 
   fun getDefaultConfig(project: Project) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, null) ?: AutoTranslationConfig()

@@ -46,8 +46,6 @@ class KeyService(
   private var translationService: TranslationService,
   private val languageRepository: LanguageRepository
 ) : Logging {
-  private lateinit var translationService: TranslationService
-
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
   }

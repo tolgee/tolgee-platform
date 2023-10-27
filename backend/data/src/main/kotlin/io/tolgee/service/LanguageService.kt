@@ -9,7 +9,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.LanguageView
 import io.tolgee.repository.LanguageRepository
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
