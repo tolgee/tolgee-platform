@@ -26,10 +26,12 @@ import io.tolgee.hateoas.key.KeyWithScreenshotsModelAssembler
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
+import io.tolgee.model.views.LanguageViewImpl
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -251,7 +253,7 @@ class KeyController(
   @Operation(summary = "Returns languages, in which key is disabled")
   fun getDisabledLanguages(@PathVariable id: Long): CollectionModel<LanguageModel> {
     val languages = keyService.getDisabledLanguages(projectHolder.project.id, id)
-    return languageModelAssembler.toCollectionModel(languages)
+    return languageModelAssembler.toCollectionModel(languages.toViews())
   }
 
   @PutMapping("/{id}/disabled-languages")
@@ -263,7 +265,12 @@ class KeyController(
     @RequestBody @Valid dto: SetDisabledLanguagesRequest
   ): CollectionModel<LanguageModel> {
     val languages = keyService.setDisabledLanguages(projectHolder.project.id, id, dto.languageIds)
-    return languageModelAssembler.toCollectionModel(languages)
+    return languageModelAssembler.toCollectionModel(languages.toViews())
+  }
+
+  private fun List<Language>.toViews(): List<LanguageViewImpl> {
+    val baseLanguage = projectHolder.projectEntity.baseLanguage
+    return this.map { LanguageViewImpl(it, it.id == baseLanguage?.id) }
   }
 
   private fun Key.checkInProject() {
