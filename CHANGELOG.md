@@ -1,3 +1,10 @@
+## [3.35.5](https://github.com/tolgee/tolgee-platform/compare/v3.35.4...v3.35.5) (2023-10-27)
+
+
+### Bug Fixes
+
+* **oauth2:** generate valid auth url when auth url already contains query params ([#1956](https://github.com/tolgee/tolgee-platform/issues/1956)) ([34edf0b](https://github.com/tolgee/tolgee-platform/commit/34edf0bd196ac08fd5a110339ce69bef33af8d3a))
+
 ## [3.35.4](https://github.com/tolgee/tolgee-platform/compare/v3.35.3...v3.35.4) (2023-10-25)
 
 
