@@ -267,6 +267,7 @@ class ProjectService(
       avatarService.unlinkAvatarFiles(project)
       batchJobService.deleteAllByProjectId(project.id)
       bigMetaService.deleteAllByProjectId(project.id)
+      mtServiceConfigService.deleteAllByProjectId(project.id)
       projectRepository.delete(project)
     }
   }
