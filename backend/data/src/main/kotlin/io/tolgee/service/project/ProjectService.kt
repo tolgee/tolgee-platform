@@ -220,10 +220,6 @@ class ProjectService(
     return PageImpl(newContent, projectsPage.pageable, projectsPage.totalElements)
   }
 
-  fun getProjectsWithFetchedLanguages(projectIds: Iterable<Long>): List<Project> {
-    return projectRepository.getWithLanguages(projectIds)
-  }
-
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {

@@ -9,7 +9,7 @@ buildscript {
 plugins {
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "java"
     id "kotlin-allopen"
 }
@@ -58,5 +58,8 @@ kotlin {
     jvmToolchain(17)
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}

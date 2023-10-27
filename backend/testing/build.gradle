@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
@@ -36,7 +36,6 @@ configurations {
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
@@ -135,8 +134,11 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
