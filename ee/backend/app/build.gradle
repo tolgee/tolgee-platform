@@ -9,7 +9,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
     id 'org.liquibase.gradle'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "java"
     id "kotlin-allopen"
     id "org.hibernate.orm"
@@ -94,8 +94,11 @@ hibernate {
     }
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)

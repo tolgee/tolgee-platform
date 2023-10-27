@@ -264,6 +264,14 @@ class AutoTranslationService(
     return saveConfig(config)
   }
 
+  fun deleteConfigsByProject(projectId: Long) {
+    entityManager.createNativeQuery(
+      "DELETE FROM auto_translation_config WHERE project_id = :projectId"
+    )
+      .setParameter("projectId", projectId)
+      .executeUpdate()
+  }
+
   fun saveConfig(config: AutoTranslationConfig): AutoTranslationConfig {
     return autoTranslationConfigRepository.save(config)
   }
@@ -283,8 +291,8 @@ class AutoTranslationService(
   fun getConfig(project: Project, targetLanguageId: Long) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, targetLanguageId)
       ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-      it.project = project
-    }
+        it.project = project
+      }
 
   fun getDefaultConfig(project: Project) =
     autoTranslationConfigRepository.findOneByProjectAndTargetLanguageId(project, null) ?: AutoTranslationConfig()

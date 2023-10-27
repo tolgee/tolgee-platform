@@ -12,9 +12,8 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management'
     id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot'
+    id 'org.springframework.boot' apply false
     id "kotlin-allopen"
-
 }
 
 group = 'io.tolgee'
@@ -22,7 +21,6 @@ group = 'io.tolgee'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: 'org.springframework.boot'
 apply plugin: "kotlin-allopen"
 apply plugin: 'io.spring.dependency-management'
 
@@ -77,8 +75,11 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-tasks.findByName("jar").enabled(true)
-tasks.findByName("bootJar").enabled(false)
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
