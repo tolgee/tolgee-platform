@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Compile kotlin
-        run: ./gradlew compileKotlin --parallel
+        run: ./gradlew compileTestKotlin --parallel
 
       - name: Build backend
         run: ./gradlew bootJar --parallel
