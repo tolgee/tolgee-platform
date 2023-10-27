@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { styled, Typography } from '@mui/material';
+import { styled, Tooltip, Typography } from '@mui/material';
 
 import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 import { DirectionLocaleWrapper } from './DirectionLocaleWrapper';
+import { useTranslate } from '@tolgee/react';
 
 const StyledVariants = styled('div')`
   display: grid;
@@ -36,6 +37,11 @@ const StyledVariants = styled('div')`
   }
 `;
 
+const StyledDisabled = styled(DirectionLocaleWrapper)`
+  color: ${({ theme }) => theme.palette.text.disabled};
+  cursor: default;
+`;
+
 const StyledParameter = styled(Typography)`
   display: flex;
   margin: 1px 0px 3px 0px;
@@ -50,6 +56,7 @@ type Props = {
   text: string | undefined;
   locale: string;
   width?: number | string;
+  disabled: boolean;
 };
 
 export const TranslationVisual: React.FC<Props> = ({
@@ -57,13 +64,27 @@ export const TranslationVisual: React.FC<Props> = ({
   limitLines,
   locale,
   width,
+  disabled,
 }) => {
+  const { t } = useTranslate();
   const { variants, parameters } = useMemo(
     () => icuVariants(text || '', locale),
     [text]
   );
 
-  if (!variants) {
+  if (disabled) {
+    return (
+      <Tooltip
+        title={t('translation_visual_disabled_hint')}
+        disableInteractive
+        enterDelay={1000}
+      >
+        <StyledDisabled languageTag={locale}>
+          {t('translation_visual_disabled')}
+        </StyledDisabled>
+      </Tooltip>
+    );
+  } else if (!variants) {
     return (
       <LimitedHeightText
         width={width}

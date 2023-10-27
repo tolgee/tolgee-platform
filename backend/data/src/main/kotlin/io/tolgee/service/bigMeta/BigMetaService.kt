@@ -92,13 +92,11 @@ class BigMetaService(
     return this.keysDistanceRepository.findById(id).orElse(null)
   }
 
-  fun getCloseKeyIds(keyId: Long): List<Long> {
-    return this.keysDistanceRepository.getCloseKeys(keyId)
-      .flatMap { pair ->
-        pair.toList()
-          .filter { it != keyId }
-      }
-  }
+  fun getCloseKeyIds(keyId: Long): List<Long> =
+    this.keysDistanceRepository.getCloseKeys(keyId)
+
+  fun getCloseKeysWithBaseTranslation(keyId: Long, projectId: Long) =
+    this.keysDistanceRepository.getCloseKeysWithBaseTranslation(keyId, projectId)
 
   @EventListener(OnProjectActivityEvent::class)
   @Async

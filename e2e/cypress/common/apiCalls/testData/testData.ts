@@ -74,6 +74,10 @@ export const translationsTestData = {
     ),
 };
 
+export const translationsDisabled = generateTestDataObject(
+  'translation-disabled'
+);
+
 export const translationsNsAndTagsTestData =
   generateTestDataObject('ns-and-tags');
 

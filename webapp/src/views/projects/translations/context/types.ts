@@ -87,7 +87,7 @@ export type Edit = CellPosition & {
   mode: EditMode;
 };
 
-export type EditMode = 'editor' | 'comments';
+export type EditMode = 'editor' | 'comments' | 'history' | 'context';
 
 export type KeyUpdateData = {
   keyId: number;

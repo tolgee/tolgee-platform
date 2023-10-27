@@ -203,7 +203,7 @@ export const TranslationsShortcuts = () => {
       const state = translations?.find((t) => t.keyId === keyId)?.translations[
         language
       ]?.state;
-      return (state && translationStates[state]?.next) || 'TRANSLATED';
+      return state && translationStates[state]?.next;
     }
   };
 

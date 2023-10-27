@@ -1,26 +1,26 @@
 import {
   Dialog,
   DialogTitle,
-  DialogContent,
   DialogActions,
-  Box,
+  DialogContent,
+  Tabs,
+  Tab,
   styled,
-  useTheme,
 } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 import { Formik } from 'formik';
-import { Editor } from 'tg.component/editor/Editor';
-import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
-import { FieldLabel } from 'tg.component/FormField';
-import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
-import { Tag } from '../Tags/Tag';
-import { TagInput } from '../Tags/TagInput';
-import { useTranslationsActions } from '../context/TranslationsContext';
 import { Button } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
-import { FieldError } from 'tg.component/FormField';
+
+import { useProject } from 'tg.hooks/useProject';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useTranslationsActions } from '../context/TranslationsContext';
+import { KeyGeneral } from './KeyGeneral';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useState } from 'react';
+import { KeyAdvanced } from './KeyAdvanced';
+import { KeyContext } from './KeyContext';
+
+type TabsType = 'general' | 'advanced' | 'context';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -29,25 +29,28 @@ const StyledDialogContent = styled(DialogContent)`
   justify-content: stretch;
   max-width: 100%;
   position: relative;
+  align-content: start;
+  min-height: 350px;
 `;
 
-const StyledSection = styled('div')`
-  display: grid;
-  align-items: stretch;
-  max-width: 100%;
-`;
-
-const StyledTags = styled('div')`
+const StyledTabsWrapper = styled('div')`
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  overflow: hidden;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
+  justify-content: space-between;
+  align-items: center;
+  margin: 0px 24px;
+`;
 
-  & > * {
-    margin: 0px 3px 3px 0px;
-  }
+const StyledTabs = styled(Tabs)`
+  min-height: 0px;
+  margin-bottom: -1px;
+`;
 
-  position: relative;
+const StyledTab = styled(Tab)`
+  min-height: 0px;
+  min-width: 60px;
+  margin: 0px 0px;
+  padding: 9px 12px;
 `;
 
 type Props = {
@@ -56,6 +59,8 @@ type Props = {
   namespace: string | undefined;
   tags: string[];
   onClose: () => void;
+  initialTab: TabsType;
+  contextPresent: boolean;
 };
 
 export const KeyEditModal: React.FC<Props> = ({
@@ -64,110 +69,119 @@ export const KeyEditModal: React.FC<Props> = ({
   namespace = '',
   tags,
   onClose,
+  initialTab,
+  contextPresent,
 }) => {
   const { t } = useTranslate();
   const project = useProject();
+  const [tab, setTab] = useState<TabsType>(initialTab);
   const { updateKey } = useTranslationsActions();
-
-  const theme = useTheme();
 
   const updateKeyLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{id}/complex-update',
     method: 'put',
   });
 
+  const disabledLangsLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/keys/{id}/disabled-languages',
+    method: 'get',
+    path: { projectId: project.id, id: keyId },
+  });
+
+  const disableLangsLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{id}/disabled-languages',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/keys/{id}/disabled-languages',
+  });
+
+  const disabledLangs =
+    disabledLangsLoadable.data?._embedded?.languages?.map((l) => l.id) || [];
+
+  const initialValues = { name, namespace, tags, disabledLangs };
+
   return (
     <Formik
-      initialValues={{ name, namespace, tags }}
-      onSubmit={(values, helpers) => {
-        updateKeyLoadable.mutate(
-          {
+      initialValues={initialValues}
+      enableReinitialize
+      onSubmit={async (values, helpers) => {
+        try {
+          const data = await updateKeyLoadable.mutateAsync(
+            {
+              path: { projectId: project.id, id: keyId },
+              content: {
+                'application/json': {
+                  name: values.name,
+                  namespace: values.namespace,
+                  tags: values.tags,
+                },
+              },
+            },
+            {
+              onError(e) {
+                if (e.STANDARD_VALIDATION) {
+                  helpers.setErrors(e.STANDARD_VALIDATION);
+                } else {
+                  e.handleError?.();
+                }
+              },
+            }
+          );
+
+          await disableLangsLoadable.mutateAsync({
             path: { projectId: project.id, id: keyId },
             content: {
-              'application/json': values,
+              'application/json': { languageIds: values.disabledLangs },
             },
-          },
-          {
-            onSuccess(data) {
-              onClose();
-              updateKey({
-                keyId,
-                value: {
-                  keyName: data.name,
-                  keyNamespace: data.namespace,
-                  keyTags: data.tags,
-                },
-              });
+          });
+
+          onClose();
+          updateKey({
+            keyId,
+            value: {
+              keyName: data.name,
+              keyNamespace: data.namespace,
+              keyTags: data.tags,
             },
-            onError(e) {
-              if (e.STANDARD_VALIDATION) {
-                helpers.setErrors(e.STANDARD_VALIDATION);
-              } else {
-                e.handleError?.();
-              }
-            },
-          }
-        );
+          });
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
       }}
     >
-      {({ values, errors, setFieldValue, submitForm }) => {
+      {({ submitForm }) => {
         return (
           <Dialog open={true} onClose={onClose} fullWidth>
             <DialogTitle>{t('translations_key_edit_title')}</DialogTitle>
-            <StyledDialogContent>
-              <StyledSection>
-                <FieldLabel>{t('translations_key_edit_label')}</FieldLabel>
-                <EditorWrapper>
-                  <Editor
-                    background={theme.palette.background.paper}
-                    autofocus
-                    value={values.name}
-                    onChange={(val) => setFieldValue('name', val)}
-                    onSave={submitForm}
-                    plaintext
-                    minHeight="unset"
-                  />
-                </EditorWrapper>
-                <FieldError error={errors.name} />
-              </StyledSection>
-              <StyledSection>
-                <FieldLabel>
-                  {t('translations_key_edit_label_namespace')}
-                </FieldLabel>
-                <NamespaceSelector
-                  value={values.namespace}
-                  onChange={(value) => setFieldValue('namespace', value)}
+            <StyledTabsWrapper>
+              <StyledTabs value={tab} onChange={(_, val) => setTab(val)}>
+                <StyledTab
+                  data-cy="key-edit-tab-general"
+                  value="general"
+                  label={t('key_edit_modal_switch_general')}
                 />
-                <FieldError error={errors.namespace} />
-              </StyledSection>
-              <StyledSection>
-                <FieldLabel>{t('translations_key_edit_label_tags')}</FieldLabel>
-                <StyledTags>
-                  {values.tags.map((tag, index) => {
-                    return (
-                      <Tag
-                        key={tag}
-                        name={tag}
-                        onDelete={() =>
-                          setFieldValue(
-                            'tags',
-                            values.tags.filter((val) => val !== tag)
-                          )
-                        }
-                      />
-                    );
-                  })}
-                  <TagInput
-                    existing={values.tags}
-                    onAdd={(name) =>
-                      !values.tags.includes(name) &&
-                      setFieldValue('tags', [...values.tags, name])
-                    }
-                    placeholder={t('translations_key_edit_placeholder')}
+                <StyledTab
+                  data-cy="key-edit-tab-advanced"
+                  value="advanced"
+                  label={t('key_edit_modal_switch_advanced')}
+                />
+                {contextPresent && (
+                  <StyledTab
+                    data-cy="key-edit-tab-context"
+                    value="context"
+                    label={t('key_edit_modal_switch_context')}
                   />
-                </StyledTags>
-                <FieldError error={errors.tags} />
-              </StyledSection>
+                )}
+              </StyledTabs>
+            </StyledTabsWrapper>
+            <StyledDialogContent>
+              {tab === 'general' ? (
+                <KeyGeneral />
+              ) : tab === 'advanced' ? (
+                <KeyAdvanced />
+              ) : (
+                <KeyContext keyId={keyId} />
+              )}
             </StyledDialogContent>
             <DialogActions>
               <Button
@@ -176,18 +190,16 @@ export const KeyEditModal: React.FC<Props> = ({
               >
                 <T keyName="global_cancel_button" />
               </Button>
-              <Box ml={1}>
-                <LoadingButton
-                  data-cy="translations-cell-save-button"
-                  loading={updateKeyLoadable.isLoading}
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  onClick={() => submitForm()}
-                >
-                  <T keyName="global_form_save" />
-                </LoadingButton>
-              </Box>
+              <LoadingButton
+                data-cy="translations-cell-save-button"
+                loading={updateKeyLoadable.isLoading}
+                color="primary"
+                variant="contained"
+                type="submit"
+                onClick={() => submitForm()}
+              >
+                <T keyName="global_form_save" />
+              </LoadingButton>
             </DialogActions>
           </Dialog>
         );

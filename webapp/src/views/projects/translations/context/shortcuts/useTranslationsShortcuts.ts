@@ -56,6 +56,14 @@ export const useTranslationsShortcuts = () => {
     return allLanguages?.find((l) => l.tag === langTag)?.id;
   };
 
+  const getCurrentTranslation = () => {
+    const focused = getCurrentlyFocused(elementsRef.current);
+    if (focused?.language && focused.keyId) {
+      return fixedTranslations?.find((t) => t.keyId === focused.keyId)
+        ?.translations[focused.language];
+    }
+  };
+
   const getMoveHandler = () => {
     return (e: KeyboardEvent) => {
       e.preventDefault();
@@ -92,6 +100,10 @@ export const useTranslationsShortcuts = () => {
         (isTranslation(focused) && canTranslate) ||
         (!isTranslation(focused) && canEditKey)
       ) {
+        const translation = getCurrentTranslation();
+        if (translation?.state === 'DISABLED') {
+          return;
+        }
         return (e: KeyboardEvent) => {
           e.preventDefault();
           setEdit({
@@ -125,8 +137,7 @@ export const useTranslationsShortcuts = () => {
       )?.translations[focused.language];
 
       const newState =
-        (translation?.state && translationStates[translation.state]?.next) ||
-        'TRANSLATED';
+        translation?.state && translationStates[translation.state]?.next;
 
       if (translation && newState) {
         return (e: KeyboardEvent) => {

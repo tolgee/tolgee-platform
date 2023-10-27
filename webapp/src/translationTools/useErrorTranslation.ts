@@ -85,6 +85,8 @@ export function useErrorTranslation() {
         return t('language_not_supported_by_service');
       case 'formality_not_supported_by_service':
         return t('formality_not_supported_by_service');
+      case 'cannot_modify_disabled_translation':
+        return t('cannot_modify_disabled_translation');
 
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':

@@ -237,7 +237,7 @@ class TranslationService(
     entities.map { save(it) }
   }
 
-  fun setState(translation: Translation, state: TranslationState): Translation {
+  fun setStateBatch(translation: Translation, state: TranslationState): Translation {
     translation.state = state
     translation.resetFlags()
     return this.save(translation)
@@ -372,9 +372,9 @@ class TranslationService(
   }
 
   @Transactional
-  fun setState(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
+  fun setStateBatch(keyIds: List<Long>, languageIds: List<Long>, state: TranslationState) {
     val translations = getTargetTranslations(keyIds, languageIds)
-    translations.forEach { it.state = state }
+    translations.filter { it.state != TranslationState.DISABLED }.forEach { it.state = state }
     saveAll(translations)
   }
 
@@ -383,7 +383,7 @@ class TranslationService(
     languageIds: List<Long>
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
-  fun clear(keyIds: List<Long>, languageIds: List<Long>) {
+  fun clearBatch(keyIds: List<Long>, languageIds: List<Long>) {
     val translations = getTargetTranslations(keyIds, languageIds)
     translations.forEach {
       it.clear()
@@ -391,7 +391,7 @@ class TranslationService(
     saveAll(translations)
   }
 
-  fun copy(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
+  fun copyBatch(keyIds: List<Long>, sourceLanguageId: Long, targetLanguageIds: List<Long>) {
     val sourceTranslations = getTargetTranslations(keyIds, listOf(sourceLanguageId)).associateBy { it.key.id }
     val targetTranslations = getTargetTranslations(keyIds, targetLanguageIds).onEach {
       it.text = sourceTranslations[it.key.id]?.text
@@ -421,7 +421,7 @@ class TranslationService(
           entityManager.getReference(Key::class.java, keyId),
           entityManager.getReference(Language::class.java, languageId)
         )
-      }
+      }.filter { it.state !== TranslationState.DISABLED }
     }
   }
 }

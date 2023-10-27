@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Checkbox, styled, useTheme, Tooltip } from '@mui/material';
+import { Checkbox, styled, useTheme, Tooltip, Box } from '@mui/material';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -173,6 +173,7 @@ export const CellKey: React.FC<Props> = ({
     handleClose,
     handleSave,
     autofocus,
+    editVal,
   } = useEditableRow({
     keyId: data.keyId,
     keyName: data.keyName,
@@ -246,9 +247,11 @@ export const CellKey: React.FC<Props> = ({
               </StyledTags>
             )}
             {data.contextPresent && (
-              <Tooltip title={t('key-context-present-hint')}>
-                <StyledBolt />
-              </Tooltip>
+              <Box role="button" onClick={() => handleOpen('context')}>
+                <Tooltip title={t('key-context-present-hint')}>
+                  <StyledBolt />
+                </Tooltip>
+              </Box>
             )}
           </>
         ) : (
@@ -323,6 +326,8 @@ export const CellKey: React.FC<Props> = ({
           tags={data.keyTags.map((k) => k.name)}
           namespace={data.keyNamespace}
           onClose={() => handleClose(true)}
+          initialTab={editVal?.mode === 'context' ? 'context' : 'general'}
+          contextPresent={data.contextPresent}
         />
       )}
     </>

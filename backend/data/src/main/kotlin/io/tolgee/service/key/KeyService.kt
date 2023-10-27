@@ -282,11 +282,11 @@ class KeyService(
   @Transactional
   fun setDisabledLanguages(projectId: Long, keyId: Long, languageIds: List<Long>): List<Language> {
     val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
-    enableRestOdLanguages(projectId, languageIds, key)
-    return disableLanguagesToDisable(projectId, languageIds, key)
+    enableRestOfLanguages(projectId, languageIds, key)
+    return disableLanguages(projectId, languageIds, key)
   }
 
-  private fun enableRestOdLanguages(projectId: Long, languageIdsToDisable: List<Long>, key: Key) {
+  private fun enableRestOfLanguages(projectId: Long, languageIdsToDisable: List<Long>, key: Key) {
     val currentlyDisabledLanguages = keyRepository.getDisabledLanguages(projectId, key.id)
     val languagesToEnable = currentlyDisabledLanguages.filter { !languageIdsToDisable.contains(it.id) }
     languagesToEnable.forEach { language ->
@@ -296,7 +296,7 @@ class KeyService(
     }
   }
 
-  private fun disableLanguagesToDisable(
+  private fun disableLanguages(
     projectId: Long,
     languageIds: List<Long>,
     key: Key

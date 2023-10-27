@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -75,5 +76,16 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     time.inWholeSeconds.assert.isLessThan(10)
     bigMetaService.findExistingKeysDistancesByIds(keys.map { it.id }).assert.hasSize(20790)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it returns correct data`() {
+    val keys = testData.addLotOfData()
+    saveTestDataAndPrepare()
+
+    performProjectAuthGet("keys/${keys.first().id}/big-meta").andIsOk.andAssertThatJson {
+      node("_embedded").node("keys").isArray().hasSize(10)
+    }
   }
 }

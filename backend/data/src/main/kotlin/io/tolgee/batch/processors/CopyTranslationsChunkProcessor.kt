@@ -26,7 +26,7 @@ class CopyTranslationsChunkProcessor(
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      translationService.copy(subChunk, params.sourceLanguageId, params.targetLanguageIds)
+      translationService.copyBatch(subChunk, params.sourceLanguageId, params.targetLanguageIds)
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)
