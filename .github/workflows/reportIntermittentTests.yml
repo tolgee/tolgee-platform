@@ -29,8 +29,11 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
+      - name: Compile kotlin
+        run: ./gradlew compileKotlin --parallel
+
       - name: Build backend
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar --parallel
 
       - name: Tar App build
         run: tar -czf ~/backend-app.tgz ./backend/app/build
