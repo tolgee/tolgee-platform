@@ -1,3 +1,15 @@
+# [3.36.0](https://github.com/tolgee/tolgee-platform/compare/v3.35.5...v3.36.0) (2023-10-27)
+
+
+### Bug Fixes
+
+* tag background lighter ([#1977](https://github.com/tolgee/tolgee-platform/issues/1977)) ([434c0fb](https://github.com/tolgee/tolgee-platform/commit/434c0fb17a8a6531cb748496095e18b0a1ac40b1))
+
+
+### Features
+
+* disabled translations ([#1976](https://github.com/tolgee/tolgee-platform/issues/1976)) ([3388a6b](https://github.com/tolgee/tolgee-platform/commit/3388a6bd828f1ceb47e4ba59948c56c76a0c3935))
+
 ## [3.35.5](https://github.com/tolgee/tolgee-platform/compare/v3.35.4...v3.35.5) (2023-10-27)
 
 
