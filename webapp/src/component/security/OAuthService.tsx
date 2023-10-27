@@ -58,13 +58,15 @@ export const oauth2Service = (
   const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
     [PARAMS.SERVICE_TYPE]: 'oauth2',
   });
+  const authUrl = new URL(authorizationUrl);
+  authUrl.searchParams.set('client_id', clientId);
+  authUrl.searchParams.set('redirect_uri', redirectUri);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('scope', scopes.join(' '));
+  authUrl.searchParams.set('state', state);
   return {
     id: 'oauth2',
-    authenticationUrl: encodeURI(
-      `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes
-        .map((scope) => `${scope}`)
-        .join('+')}&state=${state}`
-    ),
+    authenticationUrl: authUrl.toString(),
     buttonIcon: <LoginIcon />,
     loginButtonTitle: <T keyName="login_oauth2_login_button" />,
     signUpButtonTitle: <T keyName="login_oauth2_signup_button" />,
