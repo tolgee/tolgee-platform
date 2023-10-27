@@ -31,7 +31,7 @@ class AutoTranslationListener(
     /**
      * Low volume activities start hidden batch job
      */
-    private val LOW_VOLUME_ACTIVITIES = listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY)
+    private val LOW_VOLUME_ACTIVITIES = listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY, ActivityType.COMPLEX_EDIT)
   }
 
   @Order(2)
