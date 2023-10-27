@@ -42,7 +42,6 @@ jobs:
           tar -czf ~/backend-security.tgz ./backend/security/build
           tar -czf ~/backend-development.tgz ./backend/development/build
           tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -109,7 +108,6 @@ jobs:
           tar -xzf ~/backend-security.tgz ./backend/security/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
           tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Run backend tests
         uses: nick-fields/retry@v2
@@ -184,7 +182,6 @@ jobs:
           tar -xzf ~/backend-security.tgz ./backend/security/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
           tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Download frontend build result
         uses: actions/download-artifact@v3
