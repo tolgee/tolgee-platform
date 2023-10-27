@@ -1,3 +1,10 @@
+## [3.36.1](https://github.com/tolgee/tolgee-platform/compare/v3.36.0...v3.36.1) (2023-10-27)
+
+
+### Bug Fixes
+
+* trigger auto-translate from in-context ([#1978](https://github.com/tolgee/tolgee-platform/issues/1978)) ([43b7eb4](https://github.com/tolgee/tolgee-platform/commit/43b7eb44932e8223bf415fcb3188741ec8ac76bb))
+
 # [3.36.0](https://github.com/tolgee/tolgee-platform/compare/v3.35.5...v3.36.0) (2023-10-27)
 
 
