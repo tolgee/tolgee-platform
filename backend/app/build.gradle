@@ -13,9 +13,9 @@ plugins {
     id 'org.springframework.boot'
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
-    id "kotlin-jpa"
+    id "org.jetbrains.kotlin.plugin.jpa"
     id "org.jetbrains.kotlin.kapt"
-    id "kotlin-allopen"
+    id 'org.jetbrains.kotlin.plugin.allopen'
 }
 
 group = 'io.tolgee'
@@ -38,7 +38,7 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
-apply plugin: "kotlin-allopen"
+apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 
 repositories {
@@ -66,8 +66,8 @@ dependencies {
     /**
      * SPRING
      */
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -89,8 +89,8 @@ dependencies {
     implementation libs.springmockk
     implementation libs.jsonUnitAssert
     testImplementation libs.mockito
-    testImplementation("io.findify:s3mock_2.13:0.2.6")
-    testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
+    testImplementation libs.amazonS3Mock
+    testImplementation 'org.springframework.batch:spring-batch-test'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
 
@@ -169,6 +169,10 @@ dependencies {
      * API module
      */
     implementation(project(':security'))
+}
+
+configurations {
+    all*.exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 test {

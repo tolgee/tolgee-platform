@@ -13,10 +13,10 @@ plugins {
     id 'org.liquibase.gradle'
     id 'org.springframework.boot'
     id "java"
-    id "kotlin-allopen"
+    id 'org.jetbrains.kotlin.plugin.allopen'
 }
 
-apply plugin: "kotlin-allopen"
+apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: 'org.hibernate.orm'
 
@@ -72,7 +72,7 @@ dependencies {
     implementation libs.liquibaseCore
     liquibaseRuntime libs.liquibaseCore
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
+    liquibaseRuntime libs.liquibaseGroovyDsl
     liquibaseRuntime libs.liquibaseHibernate
     liquibaseRuntime libs.kotlinReflect
     liquibaseRuntime(project(":data"))

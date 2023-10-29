@@ -13,9 +13,9 @@ plugins {
     id 'org.springframework.boot'
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
-    id "kotlin-jpa"
+    id "org.jetbrains.kotlin.plugin.jpa"
     id "org.jetbrains.kotlin.kapt"
-    id "kotlin-allopen"
+    id 'org.jetbrains.kotlin.plugin.allopen'
 }
 
 group = 'io.tolgee'
@@ -39,13 +39,13 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
-apply plugin: "kotlin-allopen"
-apply plugin: "kotlin-kapt"
 
 repositories {
     mavenCentral()
     jcenter()
 }
+apply plugin: "org.jetbrains.kotlin.plugin.allopen"
+apply plugin: "org.jetbrains.kotlin.kapt"
 
 kotlin {
     jvmToolchain(11)
@@ -71,14 +71,13 @@ dependencies {
     /**
      * SPRING
      */
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation('org.springframework.boot:spring-boot-starter-test') {
-    }
+    implementation('org.springframework.boot:spring-boot-starter-test')
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     api "org.springframework.boot:spring-boot-starter-actuator"
@@ -119,6 +118,10 @@ dependencies {
      */
     implementation(project(':misc'))
     implementation 'org.postgresql:postgresql'
+}
+
+configurations {
+    all*.exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 test {

@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath libs.kotlin
+        classpath buildLibs.kotlin
     }
 }
 
@@ -146,7 +146,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     jvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
 }
 
-subprojects {
-    task allDeps(type: DependencyReportTask) {}
-}
+allprojects {
+    apply plugin: 'project-report'
 
+    // report is generated using ./gradlew dependencyReport
+    dependencyReport {
+        outputFile = new File("${rootProject.buildDir}/reports/dependencies/${project.name}.txt")
+    }
+}

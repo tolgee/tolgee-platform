@@ -11,10 +11,10 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'org.springframework.boot'
     id "java"
-    id "kotlin-allopen"
+    id 'org.jetbrains.kotlin.plugin.allopen'
 }
 
-apply plugin: "kotlin-allopen"
+apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 
 allOpen {
@@ -52,6 +52,10 @@ dependencies {
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
+}
+
+configurations {
+    all*.exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 kotlin {

@@ -9,16 +9,16 @@ pluginManagement {
                 useModule("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
             }
 
-            if (requested.id.id == 'kotlin-allopen') {
+            if (requested.id.id == 'org.jetbrains.kotlin.plugin.allopen') {
                 useModule("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
             }
 
-            if (requested.id.id == 'kotlin-jpa') {
+            if (requested.id.id == 'org.jetbrains.kotlin.plugin.jpa') {
                 useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
             }
 
             if (requested.id.id == 'org.liquibase.gradle') {
-                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.1.1')
+                useModule("org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:$liquibaseVersion")
             }
         }
     }
@@ -27,38 +27,55 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
-            library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
-            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
-            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4')
-            library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
-            library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
-            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.6.1')
-            library('springDocOpenApiWebMvcCore', 'org.springdoc', 'springdoc-openapi-webmvc-core').version(springDocVersion)
-            library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-ui').version(springDocVersion)
-            library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
-            library('springDocOpenApiDataRest', 'org.springdoc', 'springdoc-openapi-data-rest').version(springDocVersion)
-            library('springDocOpenApiHateoas', 'org.springdoc', 'springdoc-openapi-hateoas').version(springDocVersion)
-            library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
-            library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
-            library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
-            library('assertJCore', 'org.assertj:assertj-core:3.19.0')
-            library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
-            library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.0.0')
-            library('commonsCodec', 'commons-codec:commons-codec:1.15')
-            library('icu4j', 'com.ibm.icu:icu4j:69.1')
-            library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')
-            library('amazonS3', "software.amazon.awssdk:s3:$amazonAwsSdkVersion")
-            library('amazonSTS', "software.amazon.awssdk:sts:$amazonAwsSdkVersion")
-            library('amazonTranslate', "software.amazon.awssdk:translate:$amazonAwsSdkVersion")
-            library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
-            library('sentry', "io.sentry:sentry-spring-boot-starter:5.7.3")
-            library('liquibaseCore', "org.liquibase:liquibase-core:4.9.1")
-            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate5:4.9.1")
-            library('hibernateTypes', "com.vladmihalcea:hibernate-types-55:2.14.1")
-            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.23.2")
-            library('redissonSpringData', 'org.redisson:redisson-spring-data-27:3.23.2')
-            library('postHog', 'com.posthog.java:posthog:1.1.0')
-            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
+            version('kotlin', String.valueOf(kotlinVersion));
+            version('springDoc', '1.7.0');
+            version('jjwt', '0.11.2');
+            version('amazonAwsSdk', '2.20.8');
+
+            library('stripe', 'com.stripe', 'stripe-java').version('22.11.0');
+            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0');
+            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4');
+            library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').versionRef('kotlin');
+            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.6.1');
+            library('springDocOpenApiWebMvcCore', 'org.springdoc', 'springdoc-openapi-webmvc-core').versionRef('springDoc');
+            library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-ui').versionRef('springDoc');
+            library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').versionRef('springDoc');
+            library('springDocOpenApiDataRest', 'org.springdoc', 'springdoc-openapi-data-rest').versionRef('springDoc');
+            library('springDocOpenApiHateoas', 'org.springdoc', 'springdoc-openapi-hateoas').versionRef('springDoc');
+            library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').versionRef('jjwt');
+            library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').versionRef('jjwt');
+            library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').versionRef('jjwt');
+            library('assertJCore', 'org.assertj', 'assertj-core').version('3.19.0');
+            library('springmockk', 'com.ninja-squad', 'springmockk').version('3.0.1');
+            library('mockito', 'org.mockito.kotlin', 'mockito-kotlin').version('5.0.0');
+            library('commonsCodec', 'commons-codec', 'commons-codec').version('1.15');
+            library('commonsText', 'org.apache.commons', 'commons-text').version('1.9');
+            library('datafaker', 'net.datafaker', 'datafaker').version('1.5.0');
+            library('jaxen', 'jaxen', 'jaxen').version('1.2.0');
+            library('icu4j', 'com.ibm.icu', 'icu4j').version('69.1');
+            library('jsonUnitAssert', 'net.javacrumbs.json-unit', 'json-unit-assertj').version('2.28.0');
+            library('otp', 'com.eatthepath', 'java-otp').version('0.4.0');
+            library('amazonS3', 'software.amazon.awssdk', 's3').versionRef('amazonAwsSdk');
+            library('amazonSTS', 'software.amazon.awssdk', 'sts').versionRef('amazonAwsSdk');
+            library('amazonTranslate', 'software.amazon.awssdk', 'translate').versionRef('amazonAwsSdk');
+            library('googleCloud', 'com.google.cloud', 'libraries-bom').version('24.0.0');
+            library('amazonS3Mock', 'io.findify', 's3mock_2.13').version('0.2.6');
+            library('socketIoClient', 'io.socket', 'socket.io-client').version('1.0.1');
+            library('sentry', 'io.sentry', 'sentry-spring-boot-starter').version('5.7.3');
+            library('liquibaseCore', 'org.liquibase', 'liquibase-core').version('4.9.1');
+            library('liquibaseGroovyDsl', 'org.liquibase', 'liquibase-groovy-dsl').version('3.0.2');
+            library('liquibaseHibernate', 'org.liquibase.ext', 'liquibase-hibernate5').version('4.9.1');
+            library('hibernateTypes', 'com.vladmihalcea', 'hibernate-types-55').version('2.14.1');
+            library('redissonSpringBootStarter', 'org.redisson', 'redisson-spring-boot-starter').version('3.23.2');
+            library('redissonSpringData', 'org.redisson', 'redisson-spring-data-27').version('3.23.2');
+            library('postHog', 'com.posthog.java', 'posthog').version('1.1.0');
+            library('micrometerPrometheus', 'io.micrometer', 'micrometer-registry-prometheus').version('1.9.12');
+            library('caffeineCaching', 'com.github.ben-manes.caffeine', 'caffeine').version('3.0.5');
+        }
+        buildLibs {
+            version('kotlin', String.valueOf(kotlinVersion));
+
+            library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').versionRef('kotlin')
         }
     }
 }
