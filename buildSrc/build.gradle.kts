@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    implementation(platform(buildLibs.kotlinBom))
+
     implementation(buildLibs.kotlin)
     implementation(buildLibs.kotlinAllOpen)
     implementation(buildLibs.kotlinLint)

@@ -10,8 +10,6 @@ project.ext {
     dbSchemaContainerName = 'tolgee_postgres_dbschema'
 }
 
-apply plugin: 'idea'
-
 def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
@@ -47,12 +45,12 @@ project(':server-app').afterEvaluate {
         entryCompression ZipEntryCompression.STORED
     }
 
-    task build {
+    project.tasks.named('build').configure {
         dependsOn project(':server-app').tasks.findByName("build")
         dependsOn runE2e
     }
 
-    task check {
+    project.tasks.named('check').configure {
         dependsOn project(':server-app').tasks.findByName("check")
         dependsOn ktlintCheckAll
     }

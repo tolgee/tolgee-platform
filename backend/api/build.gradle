@@ -10,17 +10,6 @@ plugins {
 
 group = 'io.tolgee'
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'org.jetbrains.kotlin.plugin.spring'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'org.jetbrains.kotlin.plugin.allopen'
-apply plugin: 'io.spring.dependency-management'
-
-kotlin {
-    jvmToolchain(11)
-}
-
 allOpen {
     annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.boot.test.context.SpringBootTest")

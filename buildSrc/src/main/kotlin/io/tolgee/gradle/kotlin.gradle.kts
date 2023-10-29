@@ -10,6 +10,10 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
 }
 
+apply(plugin = "kotlin")
+apply(plugin = "org.jetbrains.kotlin.kapt")
+apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
+
 kotlin {
     jvmToolchain(11)
 }
@@ -29,19 +33,4 @@ ktlint {
 //    attributes {
 //        attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
 //    }
-//}
-
-//task ktlint(type: JavaExec, group: "verification") {
-//    description = "Check Kotlin code style."
-//    classpath = buildLibs.kotlinLint
-//    mainClass = "com.pinterest.ktlint.Main"
-//    args "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
-//}
-//
-//task ktlintFormat(type: JavaExec, group: "formatting") {
-//    description = "Fix Kotlin code style deviations."
-//    classpath = buildLibs.kotlinLint
-//    mainClass = "com.pinterest.ktlint.Main"
-//    args "-F", "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
-//    jvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
 //}

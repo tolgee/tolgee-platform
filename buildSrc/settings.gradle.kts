@@ -1,16 +1,26 @@
+import java.util.Properties
+
 rootProject.name = "buildSrc"
+
+val properties = Properties().apply {
+    load(File("${rootProject.projectDir}/../gradle.properties").reader())
+}
+val kotlinVersion = properties["kotlinVersion"] as String
+val springBootVersion = properties["springBootVersion"] as String
+val springDependencyManagementVersion = properties["springDependencyManagementVersion"] as String
+val liquibaseVersion = properties["liquibaseVersion"] as String
 
 dependencyResolutionManagement {
     versionCatalogs {
         create("buildLibs") {
-            // version("kotlin", String.valueOf(kotlinVersion));
-            version("kotlin", "1.9.10");
+            version("kotlin", kotlinVersion);
+            version("springBoot", springBootVersion);
+            version("springDependencyManagement", springDependencyManagementVersion);
+            version("liquibase", liquibaseVersion);
             version("ktlint", "11.6.1");
-            version("springBoot", "2.7.13");
-            version("springDependencyManagement", "1.0.11.RELEASE");
-            version("liquibase", "2.1.1");
 
             library("kotlin", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin");
+            library("kotlinBom", "org.jetbrains.kotlin", "kotlin-bom").versionRef("kotlin");
             library("kotlinAllOpen", "org.jetbrains.kotlin", "kotlin-allopen").versionRef("kotlin");
             library("kotlinJpa", "org.jetbrains.kotlin", "kotlin-noarg").versionRef("kotlin");
             library("kotlinLint", "org.jlleitschuh.gradle", "ktlint-gradle").versionRef("ktlint");

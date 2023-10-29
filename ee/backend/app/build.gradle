@@ -7,10 +7,6 @@ plugins {
     id 'io.tolgee.gradle.liquibase'
 }
 
-apply plugin: "org.jetbrains.kotlin.plugin.allopen"
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: 'org.hibernate.orm'
-
 allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.MappedSuperclass")
@@ -65,10 +61,6 @@ dependencies {
 
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-}
-
-kotlin {
-    jvmToolchain(11)
 }
 
 tasks.findByName("jar").enabled(true)

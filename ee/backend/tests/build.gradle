@@ -6,9 +6,6 @@ plugins {
     id 'io.tolgee.gradle.hibernate'
 }
 
-apply plugin: "org.jetbrains.kotlin.plugin.allopen"
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-
 allOpen {
     annotation("javax.persistence.MappedSuperclass")
     annotation("javax.persistence.Embeddable")
@@ -44,10 +41,6 @@ dependencies {
 
 configurations {
     all*.exclude group: 'com.vaadin.external.google', module: 'android-json'
-}
-
-kotlin {
-    jvmToolchain(11)
 }
 
 tasks.findByName("jar").enabled(true)

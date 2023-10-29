@@ -20,18 +20,6 @@ configurations {
     ktlint
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: "org.jetbrains.kotlin.plugin.jpa"
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: "org.jetbrains.kotlin.plugin.allopen"
-apply plugin: "org.jetbrains.kotlin.kapt"
-apply plugin: 'kotlin'
-apply plugin: 'org.hibernate.orm'
-
 idea {
     module {
         generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
@@ -61,10 +49,6 @@ allOpen {
 
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
-
-kotlin {
-    jvmToolchain(11)
-}
 
 dependencies {
     /**

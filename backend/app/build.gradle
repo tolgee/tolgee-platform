@@ -18,14 +18,6 @@ configurations {
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: "org.jetbrains.kotlin.plugin.jpa"
-apply plugin: "org.jetbrains.kotlin.plugin.allopen"
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-
 allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.MappedSuperclass")
@@ -36,10 +28,6 @@ allOpen {
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.beans.factory.annotation.Configurable")
     annotation("org.springframework.boot.test.context.SpringBootTest")
-}
-
-kotlin {
-    jvmToolchain(11)
 }
 
 dependencies {

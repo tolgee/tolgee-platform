@@ -9,13 +9,6 @@ plugins {
 
 group = 'io.tolgee'
 
-apply plugin: 'java'
-apply plugin: 'idea'
-
-kotlin {
-    jvmToolchain(11)
-}
-
 dependencies {
     implementation libs.kotlinCoroutines
 }
