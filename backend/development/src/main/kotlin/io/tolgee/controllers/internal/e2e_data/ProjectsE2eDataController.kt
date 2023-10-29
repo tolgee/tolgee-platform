@@ -20,7 +20,9 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
+import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -43,7 +45,8 @@ class ProjectsE2eDataController(
   private val permissionRepository: PermissionRepository,
   private val keyService: KeyService,
   private val languageService: LanguageService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val transactionManager: PlatformTransactionManager
 ) : Logging {
   @GetMapping(value = ["/generate"])
   @Transactional
@@ -115,26 +118,27 @@ class ProjectsE2eDataController(
   }
 
   @GetMapping(value = ["/clean"])
-  @Transactional
   fun cleanupProjects() {
-    entityManager.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
-    projectService.deleteAllByName("I am a great project")
+    executeInNewRepeatableTransaction(transactionManager = transactionManager) {
+      entityManager.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
+      projectService.deleteAllByName("I am a great project")
 
-    projects.forEach {
-      traceLogMeasureTime("deleteAllByName: ${it.name}") {
-        projectService.deleteAllByName(it.name)
+      projects.forEach {
+        traceLogMeasureTime("deleteAllByName: ${it.name}") {
+          projectService.deleteAllByName(it.name)
+        }
       }
-    }
 
-    organizations.forEach {
-      organizationService.findAllByName(it.name).forEach { org ->
-        organizationService.delete(org)
+      organizations.forEach {
+        organizationService.findAllByName(it.name).forEach { org ->
+          organizationService.delete(org)
+        }
       }
-    }
 
-    users.forEach {
-      userAccountService.findActive(username = it.email)?.let {
-        userAccountRepository.delete(it)
+      users.forEach {
+        userAccountService.findActive(username = it.email)?.let {
+          userAccountRepository.delete(it)
+        }
       }
     }
   }
