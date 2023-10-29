@@ -1,17 +1,9 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-    }
-}
 
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot'
-    id "java"
-    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
+    id 'io.tolgee.gradle.spring'
+    id 'io.tolgee.gradle.hibernate'
 }
 
 apply plugin: "org.jetbrains.kotlin.plugin.allopen"
@@ -25,10 +17,6 @@ allOpen {
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.beans.factory.annotation.Configurable")
     annotation("org.springframework.boot.test.context.SpringBootTest")
-}
-
-repositories {
-    mavenCentral()
 }
 
 test {

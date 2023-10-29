@@ -2,29 +2,14 @@
  * Copyright (c) 2020. Tolgee
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.kotlin.plugin.jpa"
-    id "org.jetbrains.kotlin.kapt"
-    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
+    id 'io.tolgee.gradle.spring'
+    id 'io.tolgee.gradle.hibernate'
 }
 
 group = 'io.tolgee'
-
-if (System.getenv().containsKey("VERSION")) {
-    project.version = System.getenv().get("VERSION")
-} else {
-    project.version = 'local'
-}
 
 configurations {
     developmentOnly
@@ -40,11 +25,6 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
-
-repositories {
-    mavenCentral()
-}
-
 
 allOpen {
     annotation("javax.persistence.Entity")
@@ -90,6 +70,7 @@ dependencies {
     implementation libs.jsonUnitAssert
     testImplementation libs.mockito
     testImplementation libs.amazonS3Mock
+    testImplementation libs.socketIoClient
     testImplementation 'org.springframework.batch:spring-batch-test'
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"

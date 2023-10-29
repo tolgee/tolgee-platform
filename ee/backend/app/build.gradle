@@ -1,19 +1,10 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
-    }
-}
 
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'org.liquibase.gradle'
-    id 'org.springframework.boot'
-    id "java"
-    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
+    id 'io.tolgee.gradle.spring'
+    id 'io.tolgee.gradle.hibernate'
+    id 'io.tolgee.gradle.liquibase'
 }
 
 apply plugin: "org.jetbrains.kotlin.plugin.allopen"
@@ -31,17 +22,12 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-repositories {
-    mavenCentral()
-}
-
 test {
     useJUnitPlatform()
     maxHeapSize = "2048m"
 }
 
-apply from: "$rootDir/gradle/liquibase.gradle"
-configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resources/db/changelog/ee-schema.xml')
+//configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resources/db/changelog/ee-schema.xml')
 
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin

@@ -2,33 +2,15 @@
  * Copyright (c) 2020. Tolgee
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.hibernate:hibernate-gradle-plugin:5.6.10.Final"
-    }
-}
-
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
-    id 'java'
-    id 'org.liquibase.gradle'
-    id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.kotlin.plugin.jpa"
-    id "org.jetbrains.kotlin.kapt"
-    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
+    id 'io.tolgee.gradle.spring'
+    id 'io.tolgee.gradle.hibernate'
+    id 'io.tolgee.gradle.liquibase'
 }
 
 group = 'io.tolgee'
-
-if (System.getenv().containsKey("VERSION")) {
-    project.version = System.getenv().get("VERSION")
-} else {
-    project.version = 'local'
-}
 
 configurations {
     developmentOnly
@@ -49,11 +31,6 @@ apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.kapt"
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
 
 idea {
     module {
@@ -80,9 +57,7 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
-apply from: "$rootDir/gradle/liquibase.gradle"
-
-configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
+//configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
 
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin

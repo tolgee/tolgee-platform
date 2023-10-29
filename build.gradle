@@ -1,44 +1,18 @@
 /*
  * Copyright (c) 2020. Tolgee
  */
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath buildLibs.kotlin
-    }
+
+plugins {
+    id 'io.tolgee.gradle.base'
 }
 
 project.ext {
     dbSchemaContainerName = 'tolgee_postgres_dbschema'
 }
 
-if (System.getenv().containsKey("VERSION")) {
-    project.version = System.getenv().get("VERSION")
-} else {
-    project.version = 'local'
-}
-
-configurations {
-    ktlint
-}
-
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
 def unpackTarget = "${project.buildDir}/dependency"
-
-dependencies {
-    ktlint("com.pinterest:ktlint:0.43.2") {
-        attributes {
-            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
-        }
-    }
-}
 
 project(':server-app').afterEvaluate {
     task unpack(type: Copy) {
@@ -80,7 +54,7 @@ project(':server-app').afterEvaluate {
 
     task check {
         dependsOn project(':server-app').tasks.findByName("check")
-        dependsOn ktlint
+        dependsOn ktlintCheckAll
     }
 
     task bootJar {
@@ -124,26 +98,18 @@ project(':server-app').afterEvaluate {
 
         finalizedBy.add(stopDbChangelogContainer)
 
-
         doFirst {
             project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
         }
     }
 }
 
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
+task ktlintCheckAll(group: "Verification", description: "Runs the ktlint on all projects") {
+    dependsOn getTasksByName("ktlintCheck", true)
 }
 
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "-F", "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
-    jvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
+task ktlintFormatAll(group: "Formatting", description: "Runs the ktlint formatter on all projects") {
+    dependsOn getTasksByName("ktlintFormat", true)
 }
 
 allprojects {
@@ -154,3 +120,5 @@ allprojects {
         outputFile = new File("${rootProject.buildDir}/reports/dependencies/${project.name}.txt")
     }
 }
+
+gradle.addListener new io.tolgee.gradle.TimingsListener()

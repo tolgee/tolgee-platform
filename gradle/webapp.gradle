@@ -1,10 +1,8 @@
-apply from: './gradle/utils.gradle'
-
-def webappPath = "${project.projectDir}/webapp"
+def webappPath = "${project.rootDir}/webapp"
 
 task copyDist(type: Copy) {
     def fromDir = "${webappPath}/build"
-    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
+    def toDir = "${project.rootDir}/build/dependency/BOOT-INF/classes/static/."
     from fromDir
     into toDir
     inputs.dir(fromDir)
@@ -17,17 +15,17 @@ task installWebappDeps(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "ci"
     workingDir = webappPath
-    inputs.file("${project.projectDir}/webapp/package.json")
-    inputs.file("${project.projectDir}/webapp/package-lock.json")
-    outputs.dir("${project.projectDir}/webapp/node_modules")
+    inputs.file("${webappPath}/package.json")
+    inputs.file("${webappPath}/package-lock.json")
+    outputs.dir("${webappPath}/node_modules")
 }
 
 task buildWebapp(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "run", "build"
     workingDir = webappPath
-    inputs.dir("${project.projectDir}/webapp/")
-    outputs.dir("${project.projectDir}/webapp/build/")
+    inputs.dir("${webappPath}/")
+    outputs.dir("${webappPath}/build/")
     dependsOn "installWebappDeps", "updateStaticTranslations"
 }
 

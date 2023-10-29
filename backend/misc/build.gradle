@@ -2,25 +2,15 @@
  * Copyright (c) 2020. Tolgee
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
 }
 
 group = 'io.tolgee'
 
 apply plugin: 'java'
 apply plugin: 'idea'
-
-repositories {
-    mavenCentral()
-}
 
 kotlin {
     jvmToolchain(11)

@@ -1,29 +1,3 @@
-pluginManagement {
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == 'io.spring.dependency-management') {
-                useModule("io.spring.gradle:dependency-management-plugin:$springDependencyManagementVersion")
-            }
-
-            if (requested.id.id == 'org.springframework.boot') {
-                useModule("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
-            }
-
-            if (requested.id.id == 'org.jetbrains.kotlin.plugin.allopen') {
-                useModule("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
-            }
-
-            if (requested.id.id == 'org.jetbrains.kotlin.plugin.jpa') {
-                useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
-            }
-
-            if (requested.id.id == 'org.liquibase.gradle') {
-                useModule("org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:$liquibaseVersion")
-            }
-        }
-    }
-}
-
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
@@ -71,11 +45,6 @@ dependencyResolutionManagement {
             library('postHog', 'com.posthog.java', 'posthog').version('1.1.0');
             library('micrometerPrometheus', 'io.micrometer', 'micrometer-registry-prometheus').version('1.9.12');
             library('caffeineCaching', 'com.github.ben-manes.caffeine', 'caffeine').version('3.0.5');
-        }
-        buildLibs {
-            version('kotlin', String.valueOf(kotlinVersion));
-
-            library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').versionRef('kotlin')
         }
     }
 }

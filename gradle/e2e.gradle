@@ -1,14 +1,12 @@
-apply from: './gradle/utils.gradle'
 import groovy.io.FileType
 
 import java.time.Duration
 
 ext {
-    E2E_DIR = "${project.projectDir}/e2e"
-    BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
-    WEBAPP_DIR = "${project.projectDir}/webapp"
+    E2E_DIR = "${project.rootDir}/e2e"
+    BILLING_E2E_DIR = "${project.rootDir}/../billing/e2e"
+    WEBAPP_DIR = "${project.rootDir}/webapp"
 }
-
 
 def getE2eTestsToRun() {
     def totalJobs = System.getenv("E2E_TOTAL_JOBS")

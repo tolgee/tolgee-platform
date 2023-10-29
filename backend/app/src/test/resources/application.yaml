@@ -1,3 +1,5 @@
+#debug: true
+
 spring:
   autoconfigure:
     exclude:

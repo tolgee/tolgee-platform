@@ -2,20 +2,11 @@
  * Copyright (c) 2020. Tolgee
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.springframework.boot'
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.kotlin.plugin.jpa"
-    id "org.jetbrains.kotlin.kapt"
-    id 'org.jetbrains.kotlin.plugin.allopen'
+    id 'io.tolgee.gradle.base'
+    id 'io.tolgee.gradle.kotlin'
+    id 'io.tolgee.gradle.spring'
+    id 'io.tolgee.gradle.hibernate'
 }
 
 group = 'io.tolgee'
@@ -35,10 +26,6 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "org.jetbrains.kotlin.plugin.allopen"
 apply plugin: "org.jetbrains.kotlin.kapt"
-
-repositories {
-    mavenCentral()
-}
 
 kotlin {
     jvmToolchain(11)
