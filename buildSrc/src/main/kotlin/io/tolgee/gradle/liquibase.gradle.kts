@@ -1,6 +1,7 @@
 package io.tolgee.gradle
 
 plugins {
+    id("base")
     id("org.liquibase.gradle")
 }
 

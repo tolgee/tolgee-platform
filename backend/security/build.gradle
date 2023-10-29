@@ -3,17 +3,11 @@
  */
 
 plugins {
-    id 'io.tolgee.gradle.base'
     id 'io.tolgee.gradle.kotlin'
     id 'io.tolgee.gradle.spring'
 }
 
 group = 'io.tolgee.security'
-
-allOpen {
-    annotation("org.springframework.stereotype.Component")
-    annotation("org.springframework.boot.test.context.SpringBootTest")
-}
 
 dependencies {
     implementation libs.kotlinCoroutines

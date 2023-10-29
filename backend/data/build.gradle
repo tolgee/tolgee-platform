@@ -3,7 +3,6 @@
  */
 
 plugins {
-    id 'io.tolgee.gradle.base'
     id 'io.tolgee.gradle.kotlin'
     id 'io.tolgee.gradle.spring'
     id 'io.tolgee.gradle.hibernate'
@@ -20,12 +19,6 @@ configurations {
     ktlint
 }
 
-idea {
-    module {
-        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
-    }
-}
-
 hibernate {
     enhance {
         enableLazyInitialization = true
@@ -33,16 +26,6 @@ hibernate {
         enableAssociationManagement = false
         enableExtendedEnhancement = false
     }
-}
-
-allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
-    annotation("org.springframework.stereotype.Component")
-    annotation("org.springframework.transaction.annotation.Transactional")
-    annotation("org.springframework.stereotype.Service")
-    annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
 //configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')

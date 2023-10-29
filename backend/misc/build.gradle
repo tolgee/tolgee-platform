@@ -3,7 +3,6 @@
  */
 
 plugins {
-    id 'io.tolgee.gradle.base'
     id 'io.tolgee.gradle.kotlin'
 }
 

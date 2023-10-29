@@ -1,19 +1,8 @@
 
 plugins {
-    id 'io.tolgee.gradle.base'
     id 'io.tolgee.gradle.kotlin'
     id 'io.tolgee.gradle.spring'
     id 'io.tolgee.gradle.hibernate'
-}
-
-allOpen {
-    annotation("javax.persistence.MappedSuperclass")
-    annotation("javax.persistence.Embeddable")
-    annotation("org.springframework.stereotype.Service")
-    annotation("org.springframework.stereotype.Component")
-    annotation("org.springframework.transaction.annotation.Transactional")
-    annotation("org.springframework.beans.factory.annotation.Configurable")
-    annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
 test {

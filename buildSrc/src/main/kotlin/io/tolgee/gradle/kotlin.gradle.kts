@@ -1,8 +1,10 @@
 package io.tolgee.gradle
 
+import gradle.kotlin.dsl.plugins._1bc66e29931c9cc95ac26dbbe0d9f615.org
 import org.gradle.kotlin.dsl.kotlin
 
 plugins {
+    id("base")
     java
     kotlin("jvm")
     id("org.jetbrains.kotlin.kapt")
@@ -10,9 +12,9 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
 }
 
-apply(plugin = "kotlin")
-apply(plugin = "org.jetbrains.kotlin.kapt")
-apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
+//apply(plugin = "kotlin")
+//apply(plugin = "org.jetbrains.kotlin.kapt")
+//apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
 kotlin {
     jvmToolchain(11)
@@ -34,3 +36,9 @@ ktlint {
 //        attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
 //    }
 //}
+
+idea {
+    module {
+        generatedSourceDirs += files("${project.buildDir}/generated/source/kapt/main", "${project.buildDir}/generated/source/kaptKotlin/main")
+    }
+}

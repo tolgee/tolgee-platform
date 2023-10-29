@@ -12,9 +12,9 @@ repositories {
     maven(url = "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
 }
 
-apply(plugin = "java")
-apply(plugin = "idea")
-apply(plugin = "eclipse")
+//apply(plugin = "java")
+//apply(plugin = "idea")
+//apply(plugin = "eclipse")
 
 if (System.getenv().containsKey("VERSION")) {
     project.version = System.getenv().get("VERSION") as String
